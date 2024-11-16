@@ -1,47 +1,120 @@
-#backgroundText {
-  font-family: "Suwannaphum", serif;
-  font-weight: 500;
-  font-size: 40px;
-  color: #333;
-  opacity: 0.8;
-  position: absolute;
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Ensure perfect centering */
-  z-index: 0; /* Text stays behind */
-  pointer-events: none; /* Prevent interaction */
+@import url('https://fonts.googleapis.com/css?family=Sacramento');
+*, *:before, *:after {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-#textEmojiContainer {
-  position: absolute; /* Position the entire container absolutely */
-  top: 50%; /* Center on the page */
-  left: 50%;
-  transform: translate(-50%, -50%); /* Center the entire container */
-  width: max-content; /* Adjust container size dynamically */
-  z-index: 1; /* Ensure the container elements stay above other content */
+
+
+.throwable {
+  cursor: pointer; /* Makes the element draggable */
+  z-index: 10; /* Ensures the element is above others while dragging */
 }
 
-#backgroundText {
-  z-index: 0; /* Keep text behind */
-  pointer-events: none; /* Maintain no interaction */
-}
 
-svg {
-  position: relative; /* Position relative to the container */
-  z-index: 1; /* Keep above text */
+html, body {
+  height: 100%;
   width: 100%;
-  height: auto; /* Responsive height */
+  overflow: hidden;
+  position: fixed;
+  
+}
+body {
+  display: none;
+  height: 100%;
+  margin: 0;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-/* Emoji styling */
-#emoji {
-  font-size: 50px; /* Adjust as needed */
-  text-anchor: middle;
-  user-select: none;
+.container {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden; 
+  position: fixed;
+  margin-top: -15em;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-#additionalText {
-  font-size: 20px;
-  color: #333;
+h4 {
+  font-family: 'PT Mono', sans-serif;
+  color: black;
+  font-size: calc(10px + (50 - 40) * (100vw - 400px) / (1000 - 400));
   text-align: center;
+  margin-top: 40vh;  /* Adjusts the space between the top of the page and the headline */
+}
+
+a {
+  font-family: 'PT Mono', sans-serif;
+  color: #000;
+  text-decoration: none;
+  font-size: calc(10x + (25 - 20) * (100vw - 400px) / (1000 - 400));  /* Adjust size responsively */
+  display: block;  /* Make the link take the full width of the container */
+  text-align: center;
+  margin-top: 20px;  /* Space between the headline and the link */
+  background-color: #ffff00;  /* Yellow highlight color */
+  padding: 0 2px;           /* Adds slight padding for better highlight visibility */
+  font-weight: bold;        /* Makes the text bold for emphasis */
+  z-index: 10;              /* Ensure the link is above other elements */
+  width: fit-content;       /* Ensures the link's width is only as wide as its content */
+  margin-left: auto;        /* Centers the link horizontally */
+  margin-right: auto;       /* Centers the link horizontally */
+}
+
+a:hover {
+  color: #007bff;  /* Change color on hover */
+}
+
+
+
+
+.big-reason {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: calc(52% - 75px);
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.big-reason img {
+  width: 100%;  /* Ensure the SVG fills the container */
+  height: 100%;  /* Maintain SVG aspect ratio */
+}
+
+
+body {
+  position: relative;
+}
+
+a {
+  position: relative; /* Ensures the link is positioned normally */
+  z-index: 1000;      /* Give the link a high z-index to ensure it stays on top */
+}
+
+
+p {
+  font-family: 'PT Mono', sans-serif;
+  color: #000;
+  text-decoration: none;
+  font-size: calc(10x + (25 - 20) * (100vw - 400px) / (1000 - 400));  /* Adjust size responsively */
+  display: block;  /* Make the link take the full width of the container */
+  text-align: center;
+  margin-top: 10px;  /* Space between the headline and the link */
+  padding: 10px 2px;           /* Adds slight padding for better highlight visibility */
+  font-weight: bold;        /* Makes the text bold for emphasis */
+  z-index: 10;              /* Ensure the link is above other elements */
+  width: fit-content;       /* Ensures the link's width is only as wide as its content */
+  margin-left: auto;        /* Centers the link horizontally */
+  margin-right: auto;       /* Centers the link horizontally */
 }

@@ -20,7 +20,7 @@ $(document).ready(function () {
   $('body').fadeIn();
 
   $(".throwable").throwable({
-    gravity: { x: 0, y: 0.2 },
+    gravity: { x: 0, y: 0.6 },
     autostart: true,
     shape: "circle",  // Set the shape as a circle
     bounce: 0.5,

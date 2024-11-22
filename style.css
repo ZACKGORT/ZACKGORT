@@ -1,85 +1,140 @@
-@import url('https://fonts.googleapis.com/css?family=Sacramento');
+@charset "UTF-8";
+@import url("https://fonts.googleapis.com/css?family=Sacramento");
 *, *:before, *:after {
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-
-
 .throwable {
-  cursor: pointer; /* Makes the element draggable */
-  z-index: 10; /* Ensures the element is above others while dragging */
+  cursor: pointer;
+  /* Makes the element draggable */
+  z-index: 10;
+  /* Ensures the element is above others while dragging */
 }
-
 
 html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  /* Prevents scrolling */
   position: fixed;
-  
-}
-body {
-  display: none;
-  height: 100%;
-  margin: 0;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  /* Fixes the positioning of body and html */
+  display: flex;
+  /* Enables flexbox layout on body */
+  justify-content: center;
+  /* Centers all child elements horizontally */
+  align-items: center;
+  /* Centers all child elements vertically */
+  flex-direction: column;
+  /* Keeps elements stacked vertically */
 }
 
 .container {
+  position: relative;
+  /* Makes sure the container is positioned correctly */
+  display: flex;
+  /* Ensures its children are centered */
+  justify-content: center;
+  /* Centers children horizontally */
+  align-items: center;
+  /* Centers children vertically */
+  flex-direction: column;
+  /* Stacks children vertically */
   width: 100%;
+  /* Ensure container takes up full width */
   height: 100%;
-  display: block;
-  overflow: hidden; 
-  position: fixed;
-  margin-top: -15em;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  /* Ensure container takes up full height */
+  overflow: hidden;
+  /* Prevents scrolling */
+  margin: 0;
+  /* No margin, container is already centered */
 }
 
 h4 {
-  font-family: 'PT Mono', sans-serif;
+  font-family: "PT Mono", sans-serif;
   color: black;
   font-size: calc(10px + (50 - 40) * (100vw - 400px) / (1000 - 400));
   text-align: center;
-  margin-top: 40vh;  /* Adjusts the space between the top of the page and the headline */
+  margin-top: 40vh;
+  /* Adjusts the space between the top of the page and the headline */
+}
+
+h3 {
+  font-family: "PT Mono", sans-serif;
+  color: #000;
+  text-decoration: none;
+  font-size: calc(10x + (25 - 20) * (100vw - 400px) / (1000 - 400));
+  /* Adjust size responsively */
+  display: block;
+  /* Make the link take the full width of the container */
+  text-align: center;
+  margin-top: 20px;
+  /* Space between the headline and the link */
+  background-color: #ffff00;
+  /* Yellow highlight color */
+  margin-bottom: 2em;
+  /* Adds slight padding for better highlight visibility */
+  font-weight: bold;
+  /* Makes the text bold for emphasis */
+  z-index: 10;
+  /* Ensure the link is above other elements */
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  /* Ensures the link's width is only as wide as its content */
+  margin-left: auto;
+  /* Centers the link horizontally */
+  margin-right: auto;
+  /* Centers the link horizontally */
+}
+
+p {
+  font-family: "PT Mono", sans-serif;
+  color: #000;
+  text-decoration: none;
+  font-size: calc(10x + (25 - 20) * (100vw - 400px) / (1000 - 400));
+  /* Adjust size responsively */
+  display: block;
+  /* Make the link take the full width of the container */
+  text-align: center;
+  margin-top: 1em;
+  /* Space between the headline and the link */
+  padding: 5px;
+  /* Adds slight padding for better highlight visibility */
+  z-index: 10;
+  /* Ensure the link is above other elements */
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  /* Ensures the link's width is only as wide as its content */
+  margin-left: auto;
+  /* Centers the link horizontally */
+  margin-right: auto;
+  /* Centers the link horizontally */
 }
 
 a {
-  font-family: 'PT Mono', sans-serif;
-  color: #000;
-  text-decoration: none;
-  font-size: calc(10x + (25 - 20) * (100vw - 400px) / (1000 - 400));  /* Adjust size responsively */
-  display: block;  /* Make the link take the full width of the container */
-  text-align: center;
-  margin-top: 20px;  /* Space between the headline and the link */
-  background-color: #ffff00;  /* Yellow highlight color */
-  padding: 0 2px;           /* Adds slight padding for better highlight visibility */
-  font-weight: bold;        /* Makes the text bold for emphasis */
-  z-index: 10;              /* Ensure the link is above other elements */
-  width: fit-content;       /* Ensures the link's width is only as wide as its content */
-  margin-left: auto;        /* Centers the link horizontally */
-  margin-right: auto;       /* Centers the link horizontally */
+  position: relative;
+  /* Ensure it can move */
+  transition: transform 0.3s ease;
+  /* Smooth transition */
 }
 
-a:hover {
-  color: #007bff;  /* Change color on hover */
+a:hover,
+a:focus {
+  background-color: #ffff00;
+  color: #262626;
+  transform: translateY(-5px);
+  /* Moves the link up by 5px */
 }
-
-
-
 
 .big-reason {
   width: 75px;
   height: 75px;
   border-radius: 50%;
   position: absolute;
-  top: 50%;
+  top: -50%;
   left: calc(52% - 75px);
   background: transparent;
   display: flex;
@@ -88,33 +143,42 @@ a:hover {
 }
 
 .big-reason img {
-  width: 100%;  /* Ensure the SVG fills the container */
-  height: 100%;  /* Maintain SVG aspect ratio */
+  width: 100%;
+  /* Ensure the SVG fills the container */
+  height: 100%;
+  /* Maintain SVG aspect ratio */
 }
-
 
 body {
   position: relative;
 }
 
 a {
-  position: relative; /* Ensures the link is positioned normally */
-  z-index: 1000;      /* Give the link a high z-index to ensure it stays on top */
+  position: relative;
+  /* Ensures the link is positioned normally */
 }
 
+.collidable {
+  transition: background-color 0.2s ease-in-out;
+}
 
-p {
-  font-family: 'PT Mono', sans-serif;
-  color: #000;
-  text-decoration: none;
-  font-size: calc(10x + (25 - 20) * (100vw - 400px) / (1000 - 400));  /* Adjust size responsively */
-  display: block;  /* Make the link take the full width of the container */
-  text-align: center;
-  margin-top: 10px;  /* Space between the headline and the link */
-  padding: 10px 2px;           /* Adds slight padding for better highlight visibility */
-  font-weight: bold;        /* Makes the text bold for emphasis */
-  z-index: 10;              /* Ensure the link is above other elements */
-  width: fit-content;       /* Ensures the link's width is only as wide as its content */
-  margin-left: auto;        /* Centers the link horizontally */
-  margin-right: auto;       /* Centers the link horizontally */
+.collision {
+  background-color: rgba(255, 0, 0, 0.2);
+  /* Highlight color on collision */
+}
+
+p.collidable {
+  display: inline-block;
+  /* Keeps inline content within the paragraph */
+  margin: 0;
+  /* Adjust as needed for spacing */
+}
+
+a.collidable {
+  display: inline;
+  /* Ensures the link doesn’t break the line */
+  margin-left: 4px;
+  /* Adds spacing between "@" and the link */
+  text-decoration: underline;
+  /* Optional for styling */
 }

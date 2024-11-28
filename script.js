@@ -81,7 +81,7 @@ for (let i = 0; i < numberofpeas; i++) {
   var posy = gsap.utils.random(radius2, h - radius2, radius2, true);
 
   // Adjust scale factor for rendering the sprite image
-  var scaleFactor = radius / 500;
+  var scaleFactor = radius / 600;
 
   // Create a circular physics body for each pea
   let body = Bodies.circle(posx(), posy(), radius, {

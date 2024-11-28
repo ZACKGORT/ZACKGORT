@@ -36,7 +36,7 @@ const wallOptions = {
     fillStyle: "#000000", // Black fill for walls
   },
   friction: 0, // No friction
-  restitution: 1.1, // Walls will bounce objects slightly
+  restitution: 2.1, // Walls will bounce objects slightly
 };
 
 // Create four walls around the simulation area
@@ -74,7 +74,7 @@ var numberofpeas = 80;
 for (let i = 0; i < numberofpeas; i++) {
   // Set a random radius for each pea
   var radius = gsap.utils.random(40, 80); // Random radius between 40 and 80
-  var radius2 = (radius * 2.5); // Adjust for boundary padding
+  var radius2 = (radius * 1.5); // Adjust for boundary padding
 
   // Generate random positions for the peas, ensuring they stay within bounds
   var posx = gsap.utils.random(radius2, w - radius2, radius2, true);
@@ -86,9 +86,9 @@ for (let i = 0; i < numberofpeas; i++) {
   // Create a circular physics body for each pea
   let body = Bodies.circle(posx(), posy(), radius, {
     frictionAir: 0.05, // Add air resistance for slower motion
-    frictionStatic: 0.1, // Add static friction for gentler interactions
-    friction: 0.1, // General friction between peas
-    restitution: 0.3, // Reduce bounciness for calmer collisions
+    frictionStatic: 0.01, // Add static friction for gentler interactions
+    friction: 0.01, // General friction between peas
+    restitution: 0.6, // Reduce bounciness for calmer collisions
     mass: 1, // Default mass
     slop: 0, // Reduce overlap for better collision accuracy
     angle: Math.random() * Math.PI * 2, // Set a random initial rotation

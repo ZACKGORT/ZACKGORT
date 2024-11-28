@@ -68,7 +68,7 @@ World.add(engine.world, [
 var color = "#9bc459";
 
 // Set the number of peas to add
-var numberofpeas = 60;
+var numberofpeas = 80;
 
 // Loop to create and add peas to the world
 for (let i = 0; i < numberofpeas; i++) {

@@ -3,10 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Zack Gort, UX Design</title>
-    <meta
-      name="viewport"
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
       rel="stylesheet"
@@ -372,41 +369,7 @@ html {
   z-index: -2;
 }
 
-.glass-buttons {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  display: flex;
-  gap: var(--spacing-md);
-}
 
-.glass-button {
-  background: white;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  color: #000;
-  font-size: var(--font-size-base);
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  backdrop-filter: blur(var(--blur-amount));
-  -webkit-backdrop-filter: blur(var(--blur-amount));
-  transition: background var(--transition-medium);
-}
-
-.glass-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.glass-buttons a.glass-button {
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.glassy-button-container {
-  display: none;
-}
 
 
 
@@ -771,8 +734,7 @@ html {
                   /* Ensure the “Save as PDF” button is visible in dark mode */
                   [data-theme="dark"] .glass-button,
                   [data-theme="dark"] .glass-buttons a.glass-button {
-                    color: #ffffff !important;
-                    background: rgba(255, 255, 255, 0.2);
+                    background: rgba(255, 255, 255, 0.0);
                   }
 
                   /* All other (non-nav) links in dark mode remain white */
@@ -964,17 +926,6 @@ html {
       <a href="#section-5">Contact</a>
       <!-- Background Toggle Button, Top Right -->
       <div class="nav-bg-toggle">
-        <button id="bg-toggle-btn" aria-label="Toggle animated background">
-    <!-- Pause Icon: show when background is ON -->
-    <svg id="bg-toggle-play" viewBox="0 0 24 24" fill="currentColor">
-      <rect x="6" y="5" width="4" height="14" rx="1"/>
-      <rect x="14" y="5" width="4" height="14" rx="1"/>
-    </svg>
-    <!-- Play Icon: show when background is OFF -->
-    <svg id="bg-toggle-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-      <polygon points="8,5 21,12 8,19"/>
-    </svg>
-  </button>
       </div>
     </nav>
     <div class="noise-overlay"></div>
@@ -998,9 +949,7 @@ html {
 
       <!-- Glass Button Container: use <button> instead of href="javascript:" -->
       <div class="glass-buttons">
-        <button id="print-btn" class="glass-button" type="button">
-          Save as PDF
-        </button>
+
       </div>
     </div>
 
@@ -1573,58 +1522,7 @@ html {
 </audio>
 
     <script src="customScrollbar.js"></script>
-    <!-- Resume related JavaScript -->
     <script>
-      //--- Background toggle logic ---
-      const bgToggleBtn = document.getElementById('bg-toggle-btn');
-      const bgPlayIcon = document.getElementById('bg-toggle-play');
-      const bgPauseIcon = document.getElementById('bg-toggle-pause');
-      let bgOn = true;
-      bgToggleBtn.addEventListener('click', function() {
-        bgOn = !bgOn;
-        document.body.classList.toggle('bg-off', !bgOn);
-        bgPlayIcon.style.display = bgOn ? '' : 'none';
-        bgPauseIcon.style.display = bgOn ? 'none' : '';
-      });
-      // Set correct icon on load
-      (function(){
-        if(document.body.classList.contains('bg-off')){
-          bgPlayIcon.style.display = 'none';
-          bgPauseIcon.style.display = '';
-          bgOn = false;
-        }
-      })();
-
-      // ... your existing JavaScript below ...
-      // PRINT FUNCTIONALITY: Print raw HTML without any CSS/styles.
-      const printBtn = document.getElementById('print-btn');
-      if (printBtn) {
-        printBtn.addEventListener('click', () => {
-          const printWindow = window.open('', '_blank');
-          if (!printWindow) return;
-          const clone = document.body.cloneNode(true);
-          const tables = clone.querySelectorAll('table');
-          tables.forEach(table => table.remove());
-          const controlContainer = clone.querySelector('.control');
-          if (controlContainer) controlContainer.remove();
-          const rawBody = clone.innerHTML;
-          printWindow.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Print View</title>
-</head>
-<body style="background-color: white;">
-  ${rawBody}
-</body>
-</html>`);
-          printWindow.document.close();
-          printWindow.focus();
-          printWindow.print();
-          printWindow.close();
-        });
-      }
-
       // SCROLL TRACKING & BACK-TO-TOP BUTTON
       let maxScrollPosition = 0;
       const SCROLL_THRESHOLD = 300;
@@ -1645,7 +1543,6 @@ html {
         }
       });
 
-      // NAVIGATION LINKS & SMOOTH SCROLLING
       const navLinks = document.querySelectorAll('.nav-links a');
       navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -1681,7 +1578,6 @@ html {
         }
       });
 
-      // THEME TOGGLING: LIGHT / DARK MODE
       const lightRadio = document.getElementById('solo');
       const darkRadio = document.getElementById('team');
       function applyTheme(theme) {
@@ -1723,8 +1619,7 @@ html {
         }, 1000);
       });
 
-      // GOOEY CURSOR SETUP & ANIMATION
-      console.clear();
+      // Gooey Cursor Setup & Animation
       const TAIL_LENGTH = 20;
       const cursor = document.getElementById('cursor');
       let mouseX = 0;
@@ -1770,7 +1665,7 @@ html {
       initCursor();
       updateCursor();
 
-      // LAYOUT CONTAINER HOVER EFFECT: Rotation & GLOW
+      // Layout Container Hover Effect: Rotation & Glow
       function rotateToMouse(e) {
         const container = e.currentTarget;
         const mouseX = e.clientX;
@@ -1811,7 +1706,6 @@ html {
           }
           container.addEventListener('mousemove', rotateToMouse);
         });
-
         container.addEventListener('mouseleave', () => {
           container.removeEventListener('mousemove', rotateToMouse);
           container.style.transitionDuration = "0.3s";
@@ -1825,132 +1719,46 @@ html {
         });
       });
 
-      // Attach active state to nav links based on scroll position
-      document.addEventListener('scroll', () => {
-        const navLinks = document.querySelectorAll('.nav-links a');
-        const sections = Array.from(document.querySelectorAll('.introduction, .layout-container'));
-        let currentSectionId = '';
-        sections.forEach(section => {
-          const sectionTop = section.offsetTop - 80;
-          const sectionHeight = section.offsetHeight;
-          if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-            currentSectionId = section.getAttribute('id');
-          }
-        });
-        if (!currentSectionId) {
-          currentSectionId = 'section-1';
-        }
-        navLinks.forEach(link => {
-          link.classList.remove('active');
-          const targetId = link.getAttribute('href').substring(1);
-          if (targetId === currentSectionId) {
-            link.classList.add('active');
-          }
-        });
+      // Custom Scrollbar Logic
+      const scrollbar = document.createElement('div');
+      scrollbar.id = 'custom-scrollbar';
+      document.body.appendChild(scrollbar);
+      const navHeader = document.querySelector('.nav-links');
+      const extraTopSpacing = 10;
+      const bottomMargin = 20;
+      Object.assign(scrollbar.style, {
+        position: 'fixed',
+        right: '10px',
+        width: '8px',
+        backgroundColor: 'black',
+        borderRadius: '4px',
+        transition: 'background-color 0.3s ease, height 0.3s ease, top 0.3s ease',
+        zIndex: 20000
       });
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const hoverSound = new Audio("https://github.com/ZACKGORT/reasonably/raw/refs/heads/main/mixkit-cool-interface-click-tone-2568.mp3");
-        const clickSound = new Audio("https://github.com/ZACKGORT/reasonably/raw/refs/heads/main/mixkit-page-turn-single-1104.mp3");
-        function playHoverSound() {
-          hoverSound.currentTime = 0;
-          hoverSound.volume = 0.4;
-          hoverSound.play().catch(error => {
-            console.error("Error playing hover sound:", error);
-          });
-        }
-        function playClickSound() {
-          clickSound.currentTime = 0;
-          clickSound.volume = 0.4;
-          clickSound.play().catch(error => {
-            console.error("Error playing click sound:", error);
-          });
-        }
-        const navLinks = document.querySelectorAll("nav a");
-        navLinks.forEach(link => {
-          link.addEventListener("mouseenter", playHoverSound);
-          link.addEventListener("click", playClickSound);
-        });
-        const controlToggles = document.querySelectorAll(".control label");
-        controlToggles.forEach(toggle => {
-          toggle.addEventListener("mouseenter", playHoverSound);
-          toggle.addEventListener("click", playClickSound);
-        });
-        const buttons = document.querySelectorAll("button");
-        buttons.forEach(btn => {
-          btn.addEventListener("click", playClickSound);
-        });
-      });
-
-
-
-// Create the custom scrollbar element and add it to the document body
-const scrollbar = document.createElement('div');
-scrollbar.id = 'custom-scrollbar';
-document.body.appendChild(scrollbar);
-
-// Get the nav header element to compute the top offset
-const navHeader = document.querySelector('.nav-links');
-
-// Define extra spacing values
-const extraTopSpacing = 10; // additional space below nav header
-const bottomMargin = 20;    // margin before the bottom of the page
-
-// Apply basic styling to the scrollbar using JavaScript
-Object.assign(scrollbar.style, {
-  position: 'fixed',
-  right: '10px',
-  width: '8px',
-  backgroundColor: 'black', // default for light mode
-  borderRadius: '4px',
-  transition: 'background-color 0.3s ease, height 0.3s ease, top 0.3s ease',
-  zIndex: 20000
-});
-
-// Function to update the scrollbar's height and position based on scroll position
-function updateScrollbar() {
-  const scrollTop = window.scrollY;
-  const docHeight = document.documentElement.scrollHeight;
-  const winHeight = window.innerHeight;
-  
-  // Calculate the top margin from nav header plus extra spacing
-  const navHeight = navHeader ? navHeader.offsetHeight : 0;
-  const marginTop = navHeight + extraTopSpacing;
-  
-  // Determine the available height between the header and the bottom margin
-  const availableHeight = winHeight - marginTop - bottomMargin;
-  
-  // Compute scrollbar height proportionally based on available height
-  const scrollbarHeight = Math.max((availableHeight / docHeight) * availableHeight, 30); // minimum height is 30px
-  
-  // Calculate the scroll fraction and compute top offset for scrollbar in available area
-  const maxScroll = docHeight - winHeight;
-  const scrollFraction = scrollTop / maxScroll;
-  const topOffset = marginTop + scrollFraction * (availableHeight - scrollbarHeight);
-  
-  scrollbar.style.height = `${scrollbarHeight}px`;
-  scrollbar.style.top = `${topOffset}px`;
-}
-
-window.addEventListener('scroll', updateScrollbar);
-window.addEventListener('resize', updateScrollbar);
-updateScrollbar();
-
-// Function to update the scrollbar color based on the current theme
-function updateScrollbarTheme() {
-  const theme = document.documentElement.dataset.theme || 'light';
-  scrollbar.style.backgroundColor = theme === 'dark' ? 'white' : 'black';
-}
-
-// Observe changes to the data-theme attribute on the document element
-const observer = new MutationObserver(updateScrollbarTheme);
-observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-updateScrollbarTheme();
-
-
-
-
-
+      function updateScrollbar() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight;
+        const winHeight = window.innerHeight;
+        const navHeight = navHeader ? navHeader.offsetHeight : 0;
+        const marginTop = navHeight + extraTopSpacing;
+        const availableHeight = winHeight - marginTop - bottomMargin;
+        const scrollbarHeight = Math.max((availableHeight / docHeight) * availableHeight, 30);
+        const maxScroll = docHeight - winHeight;
+        const scrollFraction = scrollTop / maxScroll;
+        const topOffset = marginTop + scrollFraction * (availableHeight - scrollbarHeight);
+        scrollbar.style.height = `${scrollbarHeight}px`;
+        scrollbar.style.top = `${topOffset}px`;
+      }
+      window.addEventListener('scroll', updateScrollbar);
+      window.addEventListener('resize', updateScrollbar);
+      updateScrollbar();
+      function updateScrollbarTheme() {
+        const theme = document.documentElement.dataset.theme || 'light';
+        scrollbar.style.backgroundColor = theme === 'dark' ? 'white' : 'black';
+      }
+      const observer = new MutationObserver(updateScrollbarTheme);
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      updateScrollbarTheme();
     </script>
   </body>
 </html>

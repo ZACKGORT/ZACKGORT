@@ -3,901 +3,1046 @@
   <head>
     <meta charset="UTF-8" />
     <title>Zack Gort, UX Design</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="viewport"
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <style>
- @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap");
+
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap");
 
 :root {
-  --spacing-base: 1rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-  --color-text: #ffffff;
-  --color-text-dim: 0.6;
-  --transition-medium: 0.3s ease;
-  --font-size-base: 12px;
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-shadow: rgba(0, 0, 0, 0.1);
-  --blur-amount: 6px;
-  /* Gooey cursor variables */
-  --cursor-size: 28px;
-  --bg: #FFFFFF;
+	--spacing-base: 1rem;
+	--spacing-md: 1.5rem;
+	--spacing-lg: 2rem;
+	--color-text: #ffffff;
+	--color-text-dim: 0.6;
+	--transition-medium: 0.3s ease;
+	--font-size-base: 12px;
+	--glass-bg: rgba(255, 255, 255, 0.1);
+	--glass-border: rgba(255, 255, 255, 0.2);
+	--glass-shadow: rgba(0, 0, 0, 0.1);
+	--blur-amount: 6px;
+	/* Gooey cursor variables */
+	--cursor-size: 28px;
+	--bg: #FFFFFF;
 }
 
 html,
 body {
-  overflow-x: hidden;
+	overflow-x: hidden;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  user-select: none;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	user-select: none;
 }
 
 body {
-  font-family: "Poppins", sans-serif;
-  background-color: #ffffff;
-  color: #000000;
-  margin: 0;
-  padding: 10px;
-  position: relative;
-  touch-action: pan-y;
+	font-family: "Poppins", sans-serif;
+	background-color: #ffffff;
+	color: #000000;
+	margin: 0;
+	padding: 10px;
+	position: relative;
+	touch-action: pan-y;
 }
 
 
 body.bg-off {
-  background-image: none !important;
-  background-color: #fff !important;
+	background-image: none !important;
+	background-color: #fff !important;
 }
+
 [data-theme="dark"] body.bg-off {
-  background-color: #111 !important;
+	background-color: #111 !important;
 }
 
-:root {
-  --bg-image: url('https://i.gifer.com/74w1.gif');
-}
-
-[data-theme="dark"] {
-  --bg-image: url('https://i.gifer.com/7ZMW.gif');
-}
 
 body {
-  background-image: var(--bg-image);
-  background-size: calc(55em);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-position: center center;
-  
+	background-image: var(--bg-image);
+	background-size: calc(55em);
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: center center;
+
 }
-
-
-
-
-
 
 
 /* Prevent dragging of images */
 img {
-  -webkit-user-drag: none;
+	-webkit-user-drag: none;
 }
 
+/* --- Introduction Section: Canonical Layout Container Styles --- */
 .introduction {
-  max-width: 900px;
-  width: 100%;
-  margin: 100px auto 0;
-  padding: 20px;
-  text-align: left;
-  background-color: transparent;
-  position: relative;
-  z-index: 5;
-}
-
-.introduction h1 {
-  font-size: 1.5rem;
-  margin-bottom: 20px;
-}
-
-.introduction p {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.scroll-spacer {
-  height: 150px;
-  width: 100%;
-  display: block;
-}
-
-.nav-links {
-  padding: var(--spacing-base);
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-md);
-  background-color: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(10px);
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10001;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  will-change: transform;
-  transform: translateX(0);
-}
-
-.nav-links a {
-  position: relative;
-  cursor: pointer;
-  color: #000000;
-  text-decoration: none;
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  opacity: 1;
-  transition: color var(--transition-medium);
-  flex: 0 0 auto;
-}
-
-.nav-links a::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 100%;
-  background-color: #000000;
-  z-index: -1;
-  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.nav-links a:hover {
-  color: #ffffff;
-}
-
-.nav-links a:hover::after {
-  width: 100%;
-  background-color: #000000;
-}
-
-.nav-links a:active,
-.nav-links a.active {
-  color: #ffffff;
-}
-
-.nav-links a:active::after,
-.nav-links a.active::after {
-  width: 100%;
-  background-color: #000000;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-/* Layout Containers (Glassmorphism) */
-.layout-container {
+  /* Match .layout-container styles */
   scroll-margin-top: 80px;
   width: 80%;
   max-width: 900px;
   margin: 4em auto 0;
   padding: 20px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 10px;
-  backdrop-filter: blur(var(--blur-amount));
-  -webkit-backdrop-filter: blur(var(--blur-amount));
-  box-shadow: 0 4px 30px var(--glass-shadow);
-  position: relative;
   z-index: 5;
-  /* For smooth transition on hover */
-  
-}
-
-/* FROSTIER HOVER for both light and dark mode */
-.layout-container:hover {
-  background: rgba(255,255,255,0.35) !important;
-  border-color: rgba(255,255,255,0.3) !important;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 1.5px 6px rgba(255,255,255,0.06) !important;
-  backdrop-filter: blur(24px) saturate(1.4) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(1.4) !important;
-  transition:
-    background 1.9s cubic-bezier(0.4,0,0.2,1),
-    box-shadow 1.9s cubic-bezier(0.4,0,0.2,1),
-    backdrop-filter 1.9s cubic-bezier(0.4,0,0.2,1),
-    -webkit-backdrop-filter 1.9s cubic-bezier(0.4,0,0.2,1),
-    border-color 1.9s cubic-bezier(0.4,0,0.2,1);
-}
-
-[data-theme="dark"] .layout-container:hover {
-  background: rgba(20, 20, 30, 0.55) !important;
-  border-color: rgba(255,255,255,0.2) !important;
-  box-shadow: 0 8px 44px rgba(0,0,0,0.30), 0 1.5px 6px rgba(255,255,255,0.06) !important;
-  /* The rest is inherited from .layout-container:hover */
-}
-
-/* Glow variables remain unchanged */
-:root {
-  --glow-light-default: #FFFFFF;
-  --glow-light-hover: #FAFAFA;
-  --glow-dark-default: #fff2;
-  --glow-dark-hover: #fff6;
-}
-
-/* Default glow for light mode */
-.layout-container .glow {
-  background-image: radial-gradient(circle at 50% -20%, var(--glow-light-default), #0000000f);
-}
-/* Default glow for dark mode */
-[data-theme="dark"] .layout-container .glow {
-  background-image: radial-gradient(circle at 50% -20%, var(--glow-dark-default), #0000000f);
-}
-
-/* --- New Hover Effect for layout containers --- */
-.layout-container {
-  position: relative;
   transition-duration: 300ms;
   transition-property: transform, box-shadow;
   transition-timing-function: ease-out;
   transform: rotate3d(0, 0, 0, 0deg);
 }
-.layout-container:hover {
-  transition-duration: 150ms;
+
+
+
+.introduction h1 {
+  font-size: 2.2em;
+  font-weight: bold;
+  margin: 0 0 20px 0;
 }
+
+.introduction h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #222;
+  margin: 28px 0 16px 0;
+  letter-spacing: 0.01em;
+}
+
+.introduction p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.introduction ul {
+  margin: 0 0 0 20px;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.introduction li {
+  font-size: 1rem;
+  color: #222;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.introduction .shortcut-info {
+  margin-top: 22px;
+  font-size: .7em;
+  color: #888;
+  opacity: 0.85;
+  font-style: italic;
+}
+
+/* Responsive adjustments to match .layout-container */
+@media (max-width: 960px) {
+  .introduction {
+    width: 100%;
+    padding: 20px;
+  }
+  .introduction h1 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+  .introduction h2 {
+    font-size: 1.15rem;
+    margin: 16px 0 12px 0;
+  }
+  .introduction p,
+  .introduction li {
+    font-size: 0.99rem;
+  }
+}
+
+
+
+
+
+
+.scroll-spacer {
+	height: 150px;
+	width: 100%;
+	display: block;
+}
+
+.nav-links {
+	padding: var(--spacing-base);
+	display: flex;
+	justify-content: center;
+	gap: var(--spacing-md);
+	background-color: rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(5px);
+	-webkit-backdrop-filter: blur(10px);
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 10001;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	will-change: transform;
+	transform: translateX(0);
+}
+
+.nav-links a {
+	position: relative;
+	cursor: pointer;
+	color: #000000;
+	text-decoration: none;
+	font-size: var(--font-size-base);
+	font-weight: 700;
+	opacity: 1;
+	transition: color var(--transition-medium);
+	flex: 0 0 auto;
+}
+
+.nav-links a::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 100%;
+	background-color: #000000;
+	z-index: -1;
+	transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-links a:hover {
+	color: #ffffff;
+}
+
+.nav-links a:hover::after {
+	width: 100%;
+	background-color: #000000;
+}
+
+.nav-links a:active,
+.nav-links a.active {
+	color: #ffffff;
+}
+
+.nav-links a:active::after,
+.nav-links a.active::after {
+	width: 100%;
+	background-color: #000000;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+/* Layout Containers (Glassmorphism) */
+.layout-container {
+	scroll-margin-top: 80px;
+	width: 80%;
+	max-width: 900px;
+	margin: 4em auto 0;
+	padding: 20px;
+	background: var(--glass-bg);
+	border: 1px solid var(--glass-border);
+	border-radius: 10px;
+	backdrop-filter: blur(var(--blur-amount));
+	-webkit-backdrop-filter: blur(var(--blur-amount));
+	box-shadow: 0 4px 30px var(--glass-shadow);
+	position: relative;
+	z-index: 5;
+	/* For smooth transition on hover */
+
+}
+
+/* FROSTIER HOVER for both light and dark mode */
+.layout-container:hover {
+	background: rgba(255, 255, 255, 0.35) !important;
+	border-color: rgba(255, 255, 255, 0.3) !important;
+	box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18), 0 1.5px 6px rgba(255, 255, 255, 0.06) !important;
+	backdrop-filter: blur(24px) saturate(1.4) !important;
+	-webkit-backdrop-filter: blur(12px) saturate(1.4) !important;
+	transition:
+		background 1.9s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 1.9s cubic-bezier(0.4, 0, 0.2, 1),
+		backdrop-filter 1.9s cubic-bezier(0.4, 0, 0.2, 1),
+		-webkit-backdrop-filter 1.9s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 1.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] .layout-container:hover {
+	background: rgba(20, 20, 30, 0.55) !important;
+	border-color: rgba(255, 255, 255, 0.2) !important;
+	box-shadow: 0 8px 44px rgba(0, 0, 0, 0.30), 0 1.5px 6px rgba(255, 255, 255, 0.06) !important;
+	/* The rest is inherited from .layout-container:hover */
+}
+
+/* Glow variables remain unchanged */
+:root {
+	--glow-light-default: #FFFFFF;
+	--glow-light-hover: #FAFAFA;
+	--glow-dark-default: #fff2;
+	--glow-dark-hover: #fff6;
+}
+
+/* Default glow for light mode */
 .layout-container .glow {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  color: white;
-  pointer-events: none;
+	background-image: radial-gradient(circle at 50% -20%, var(--glow-light-default), #0000000f);
+}
+
+/* Default glow for dark mode */
+[data-theme="dark"] .layout-container .glow {
+	background-image: radial-gradient(circle at 50% -20%, var(--glow-dark-default), #0000000f);
+}
+
+/* --- New Hover Effect for layout containers --- */
+.layout-container {
+	position: relative;
+	transition-duration: 300ms;
+	transition-property: transform, box-shadow;
+	transition-timing-function: ease-out;
+	transform: rotate3d(0, 0, 0, 0deg);
+}
+
+.layout-container:hover {
+	transition-duration: 150ms;
+}
+
+.layout-container .glow {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	color: white;
+	pointer-events: none;
 }
 
 .layout-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 10px;
-  border-bottom: 1px solid var(--glass-border);
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 10px;
+	border-bottom: 1px solid var(--glass-border);
 }
 
 .layout-header h1 {
-  font-size: 2.2em;
-  font-weight: bold;
-  margin: 0;
+	font-size: 2.2em;
+	font-weight: bold;
+	margin: 0;
 }
 
 .layout-progress {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid var(--glass-border);
-  font-size: 0.9em;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+	border-bottom: 1px solid var(--glass-border);
+	font-size: 0.9em;
 }
 
 .shortcut-info {
-  font-size: 1em;
-  opacity: 0.7;
+	font-size: 1em;
+	opacity: 0.7;
 }
 
 .layout-services {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 10px 0;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	padding: 10px 0;
 }
 
 .service-item {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 15px;
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  box-shadow: inset 0 0 5px var(--glass-shadow);
+	background: rgba(255, 255, 255, 0.05);
+	padding: 15px;
+	border: 1px solid var(--glass-border);
+	border-radius: 8px;
+	box-shadow: inset 0 0 5px var(--glass-shadow);
 }
 
 .service-item h3 {
-  margin: 0 0 10px;
-  font-size: .70em;
-  font-weight: 600;  
-  text-transform: uppercase;
-  opacity: 35%;
+	margin: 0 0 10px;
+	font-size: .70em;
+	font-weight: 600;
+	text-transform: uppercase;
+	opacity: 35%;
 }
 
 .service-item p {
-  font-size: 0.85em;
-  line-height: 1.4;
-  margin: 0;
-  opacity: 0.75;  
+	font-size: 0.85em;
+	line-height: 1.4;
+	margin: 0;
+	opacity: 0.75;
 }
 
 
 .service-item code {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-size: 12px;
+	background: rgba(255, 255, 255, 0.1);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-size: 12px;
 }
 
 
-
 .tweakpane-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  transition: opacity 0.3s ease;
-  z-index: 100;
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	transition: opacity 0.3s ease;
+	z-index: 100;
 }
 
 /* Adjust layout for smaller screens */
 @media (max-width: 960px) {
-  .nav-links {
-    position: fixed;
-    top: 0;
-    justify-content: flex-start;
-  }
-  .layout-services {
-    grid-template-columns: 1fr;
-  }
-  .layout-container {
-    width: 100%;
-    padding: 20px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 2rem;
-  }
-  table th,
-  table td {
-    padding: 12px;
-  }
+	.nav-links {
+		position: fixed;
+		top: 0;
+		justify-content: flex-start;
+	}
+
+	.layout-services {
+		grid-template-columns: 1fr;
+	}
+
+	.layout-container {
+		width: 100%;
+		padding: 20px;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 0 2rem;
+	}
+
+	table th,
+	table td {
+		padding: 12px;
+	}
 }
 
 .background-svg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: -2;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: -2;
+}
+
+.glass-buttons {
+	position: absolute;
+	top: 20px;
+	right: 20px;
+	display: flex;
+	gap: var(--spacing-md);
+}
+
+.glass-button {
+	background: white;
+	border: 1px solid var(--glass-border);
+	border-radius: 8px;
+	color: #000;
+	font-size: var(--font-size-base);
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	backdrop-filter: blur(var(--blur-amount));
+	-webkit-backdrop-filter: blur(var(--blur-amount));
+	transition: background var(--transition-medium);
+}
+
+.glass-button:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.glass-buttons a.glass-button {
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.glassy-button-container {
+	display: none;
 }
 
 
+/* New Multi-functional Control Styles */
+@import url('https://unpkg.com/normalize.css') layer(normalize);
+@layer normalize,
+base,
+demo,
+flip,
+debug;
 
+@layer debug {
+	[data-debug='true'] input.sr-only {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		padding: 0;
+		margin: unset;
+		overflow: visible;
+		clip: unset;
+		white-space: nowrap;
+		border-width: unset;
+		accent-color: red;
+		outline: none;
+		cursor: pointer;
+		animation: reveal calc(var(--duration) * 1s) ease-out;
+	}
 
+	@keyframes reveal {
+		0% {
+			opacity: 0;
+		}
+	}
 
+	[data-debug='true'] .control__track>input {
+		left: 25%;
+		bottom: 200%;
+		translate: -50% 0;
+	}
 
-                  /* New Multi-functional Control Styles */
-                  @import url('https://unpkg.com/normalize.css') layer(normalize);
-                  @layer normalize, base, demo, flip, debug;
+	[data-debug='true'] .premium>input:nth-of-type(1) {
+		left: 25%;
+		bottom: calc(200% + 2px);
+		translate: -50% 0;
+	}
 
-                  @layer debug {
-                    [data-debug='true'] input.sr-only {
-                      position: absolute;
-                      width: 20px;
-                      height: 20px;
-                      padding: 0;
-                      margin: unset;
-                      overflow: visible;
-                      clip: unset;
-                      white-space: nowrap;
-                      border-width: unset;
-                      accent-color: red;
-                      outline: none;
-                      cursor: pointer;
-                      animation: reveal calc(var(--duration) * 1s) ease-out;
-                    }
+	[data-debug='true'] .premium>input:nth-of-type(2) {
+		left: 75%;
+		bottom: calc(200% + 2px);
+		translate: -50% 0;
+	}
+}
 
-                    @keyframes reveal {
-                      0% {
-                        opacity: 0;
-                      }
-                    }
+@layer flip {
+	:root {
+		--shadow-color: 0deg 0% 63%;
+		--primary: light-dark(hsl(0 0% 10%), #fff);
+		--secondary: canvas;
+		--inactive: light-dark(hsl(0 0% 60%), hsl(0 0% 50%));
+		--duration: 0.22;
+		--drop-off: 0.4;
+		--ease: ease-out;
+		--ease: linear(0 0%, 0.2342 12.49%, 0.4374 24.99%,
+				0.6093 37.49%, 0.6835 43.74%,
+				0.7499 49.99%, 0.8086 56.25%,
+				0.8593 62.5%, 0.9023 68.75%, 0.9375 75%,
+				0.9648 81.25%, 0.9844 87.5%,
+				0.9961 93.75%, 1 100%);
+		--border: light-dark(hsl(0 0% 80%), hsl(0 0% 60%));
 
-                    [data-debug='true'] .control__track > input {
-                      left: 25%;
-                      bottom: 200%;
-                      translate: -50% 0;
-                    }
-                    [data-debug='true'] .premium > input:nth-of-type(1) {
-                      left: 25%;
-                      bottom: calc(200% + 2px);
-                      translate: -50% 0;
-                    }
-                    [data-debug='true'] .premium > input:nth-of-type(2) {
-                      left: 75%;
-                      bottom: calc(200% + 2px);
-                      translate: -50% 0;
-                    }
-                  }
+		@media (prefers-color-scheme: dark) {
+			--shadow-color: 0deg 0% 0%;
+		}
+	}
 
-                  @layer flip {
-                    :root {
-                      --shadow-color: 0deg 0% 63%;
-                      --primary: light-dark(hsl(0 0% 10%), #fff);
-                      --secondary: canvas;
-                      --inactive: light-dark(hsl(0 0% 60%), hsl(0 0% 50%));
-                      --duration: 0.22;
-                      --drop-off: 0.4;
-                      --ease: ease-out;
-                      --ease: linear(
-                        0 0%, 0.2342 12.49%, 0.4374 24.99%,
-                        0.6093 37.49%, 0.6835 43.74%,
-                        0.7499 49.99%, 0.8086 56.25%,
-                        0.8593 62.5%, 0.9023 68.75%, 0.9375 75%,
-                        0.9648 81.25%, 0.9844 87.5%,
-                        0.9961 93.75%, 1 100%
-                      );
-                      --border: light-dark(hsl(0 0% 80%), hsl(0 0% 60%));
-                      @media (prefers-color-scheme: dark) {
-                        --shadow-color: 0deg 0% 0%;
-                      }
-                    }
-                    [data-theme='dark'] {
-                      --shadow-color: 0deg 0% 0%;
-                    }
-                    [data-theme='light'] {
-                      --shadow-color: 0deg 0% 63%;
-                    }
-                    .premium:has(:checked)::before {
-                      translate: -50% -250%;
-                      scale: 0.85;
-                    }
-                    .premium:has(:checked) label span {
-                      scale: 1;
-                    }
-                    .premium:has(:checked) .indicator {
-                      background: var(--secondary);
-                      clip-path: inset(0 0 0 0 round 100px);
-                    }
-                    .premium:has(:checked) label {
-                      color: var(--inactive);
-                      opacity: 0.75;
-                    }
-                    .premium:has(:nth-of-type(1):checked) label:nth-of-type(1),
-                    .premium:has(:nth-of-type(2):checked) label:nth-of-type(2) {
-                      color: var(--primary);
-                      opacity: 1;
-                    }
-                    .premium:has(:nth-of-type(1):checked) .indicator {
-                      translate: -100% 0;
-                    }
-                    .premium:has(:nth-of-type(2):checked) .indicator {
-                      translate: 0 0;
-                    }
+	[data-theme='dark'] {
+		--shadow-color: 0deg 0% 0%;
+	}
 
-                    .control label {
-                      transition-property: color, opacity;
-                      transition-duration: calc(var(--duration) * 1s);
-                      transition-timing-function: var(--ease);
-                    }
+	[data-theme='light'] {
+		--shadow-color: 0deg 0% 63%;
+	}
 
-                    .control__track:not(:has(> :checked)) > label {
-                      color: var(--primary);
-                      opacity: var(--drop-off);
-                    }
-                    .control__track:not(:has(> :checked)) > .indicator {
-                      translate: 100% 0;
-                    }
-                    .indicator {
-                      transition: translate calc(var(--duration) * 1s) var(--ease);
-                    }
-                    .premium .indicator {
-                      transition-property: translate, clip-path, background;
-                      transition-duration: calc(var(--duration) * 1s);
-                      transition-timing-function: var(--ease);
-                      clip-path: inset(
-                        73cqh calc(50% + 1px) calc(27cqh - 2px) calc(50% - 3px) round 100px
-                      );
-                    }
-                    .premium::before {
-                      transition-property: scale, translate;
-                      transition-duration: calc(var(--duration) * 1s);
-                      transition-timing-function: var(--ease);
-                    }
-                    .control__track:has(> :checked) .premium .indicator {
-                      background: var(--inactive);
-                    }
-                    .control__track:has(> :checked) .premium label {
-                      color: var(--inactive);
-                    }
-                  }
+	.premium:has(:checked)::before {
+		translate: -50% -250%;
+		scale: 0.85;
+	}
 
-                  @layer demo {
-                    .indicator {
-                      position: absolute;
-                      width: 50%;
-                      left: 0;
-                      top: 0;
-                      bottom: 0;
-                      background: var(--primary);
-                      border-radius: 100px;
-                    }
+	.premium:has(:checked) label span {
+		scale: 1;
+	}
 
-                    .premium .indicator {
-                      background: var(--primary);
-                      left: 50%;
-                      top: 0;
-                      translate: -50% 0;
-                    }
+	.premium:has(:checked) .indicator {
+		background: var(--secondary);
+		clip-path: inset(0 0 0 0 round 100px);
+	}
 
-                    .control {
-                      scale: 1.2;
-                      letter-spacing: 0.5px;
-                      position: relative;
-                      width: 260px;
-                      height: 38px;
-                      aspect-ratio: 300 / 38;
-                      background: var(--secondary);
-                      border-radius: 100px;
-                      border: 1px solid var(--border);
-                      padding: 2px;
-                      backdrop-filter: blur(0px);
-                      background: rgba(255,255,255,0.6);  
-                      box-shadow: -0.1px 1px 1px hsl(var(--shadow-color) / 0.22),
-                        -0.2px 3.2px 3.1px -0.4px hsl(var(--shadow-color) / 0.26),
-                        -0.3px 5.7px 5.5px -0.8px hsl(var(--shadow-color) / 0.24),
-                        -0.5px 9.3px 8.9px -1.2px hsl(var(--shadow-color) / 0.22),
-                        -0.8px 14.8px 14.2px -1.6px hsl(var(--shadow-color) / 0.19),
-                        -1.3px 23.1px 22.2px -2px hsl(var(--shadow-color) / 0.17),
-                        -2px 35px 33.7px -2.4px hsl(var(--shadow-color) / 0.14),
-                        -2.9px 51.2px 49.2px -2.8px hsl(var(--shadow-color) / 0.12),
-                        -4.1px 72.6px 69.8px -3.2px hsl(var(--shadow-color) / 0.2),
-                        -5.6px 100px 96.2px -3.6px hsl(var(--shadow-color) / 0.07);
+	.premium:has(:checked) label {
+		color: var(--inactive);
+		opacity: 0.75;
+	}
 
-                      .control__track {
-                        display: grid;
-                        place-items: center;
-                        grid-template-columns: repeat(4, 1fr);
-                        width: 100%;
-                        height: 100%;
-                        position: relative;
-                      }
+	.premium:has(:nth-of-type(1):checked) label:nth-of-type(1),
+	.premium:has(:nth-of-type(2):checked) label:nth-of-type(2) {
+		color: var(--primary);
+		opacity: 1;
+	}
 
-                      .premium::before {
-                        content: 'Preference';
-                        position: absolute;
-                        left: 50%;
-                        top: 50%;
-                        translate: -50% -80%;
-                        color: var(--primary);
-                        font-size: 0.75rem;
-                        z-index: 2;
-                      }
+	.premium:has(:nth-of-type(1):checked) .indicator {
+		translate: -100% 0;
+	}
 
-                      label {
-                        display: inline-block;
-                        height: 100%;
-                        width: 100%;
-                        display: grid;
-                        place-items: center;
-                        cursor: pointer;
-                        font-size: 0.75rem;
-                        color: var(--primary);
-                        z-index: 2;
-                      }
+	.premium:has(:nth-of-type(2):checked) .indicator {
+		translate: 0 0;
+	}
 
-                      .control__track > label {
-                        color: var(--secondary);
-                      }
+	.control label {
+		transition-property: color, opacity;
+		transition-duration: calc(var(--duration) * 1s);
+		transition-timing-function: var(--ease);
+	}
 
-                      .premium {
-                        width: 100%;
-                        height: 100%;
-                        display: grid;
-                        position: relative;
-                        grid-template-columns: 1fr 1fr;
-                        border: 1px solid transparent;
-                        container-type: size;
-                      }
+	.control__track:not(:has(> :checked))>label {
+		color: var(--primary);
+		opacity: var(--drop-off);
+	}
 
-                      .premium,
-                      .control__track > label:nth-of-type(1) {
-                        grid-column: span 2;
-                      }
+	.control__track:not(:has(> :checked))>.indicator {
+		translate: 100% 0;
+	}
 
-                      label span {
-                        display: grid;
-                        place-items: center;
-                        height: 100%;
-                        width: 100%;
-                        transition: scale calc(var(--duration) * 1s) var(--ease);
-                      }
+	.indicator {
+		transition: translate calc(var(--duration) * 1s) var(--ease);
+	}
 
-                      .premium label:nth-of-type(1) span {
-                        scale: 0.75;
-                        transform-origin: 150% 150%;
-                        border-radius: 100px;
-                      }
-                      .premium label:nth-of-type(2) span {
-                        scale: 0.75;
-                        transform-origin: -65% 150%;
-                        border-radius: 100px;
-                      }
-                    }
-                  }
+	.premium .indicator {
+		transition-property: translate, clip-path, background;
+		transition-duration: calc(var(--duration) * 1s);
+		transition-timing-function: var(--ease);
+		clip-path: inset(73cqh calc(50% + 1px) calc(27cqh - 2px) calc(50% - 3px) round 100px);
+	}
 
-                  @layer base {
-                    :root {
-                      --font-size-min: 16;
-                      --font-size-max: 20;
-                      --font-ratio-min: 1.2;
-                      --font-ratio-max: 1.33;
-                      --font-width-min: 375;
-                      --font-width-max: 1500;
-                    }
+	.premium::before {
+		transition-property: scale, translate;
+		transition-duration: calc(var(--duration) * 1s);
+		transition-timing-function: var(--ease);
+	}
 
-                    html {
-                      color-scheme: light dark;
-                    }
+	.control__track:has(> :checked) .premium .indicator {
+		background: var(--inactive);
+	}
 
-                    [data-theme='light'] {
-                      color-scheme: light only;
-                    }
+	.control__track:has(> :checked) .premium label {
+		color: var(--inactive);
+	}
+}
 
-                    [data-theme='dark'] {
-                      color-scheme: dark only;
-                    }
+@layer demo {
+	.indicator {
+		position: absolute;
+		width: 50%;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		background: var(--primary);
+		border-radius: 100px;
+	}
 
-                    :where(.fluid) {
-                      --fluid-min: calc(
-                        var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0))
-                      );
-                      --fluid-max: calc(
-                        var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0))
-                      );
-                      --fluid-preferred: calc(
-                        (var(--fluid-max) - var(--fluid-min)) / (var(--font-width-max) - var(--font-width-min))
-                      );
-                      --fluid-type: clamp(
-                        (var(--fluid-min) / 16) * 1rem,
-                        ((var(--fluid-min) / 16) * 1rem) -
-                          (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) +
-                          (var(--fluid-preferred) * var(--variable-unit, 100vi)),
-                        (var(--fluid-max) / 16) * 1rem
-                      );
-                      font-size: var(--fluid-type);
-                    }
+	.premium .indicator {
+		background: var(--primary);
+		left: 50%;
+		top: 0;
+		translate: -50% 0;
+	}
 
-                    *,
-                    *:after,
-                    *:before {
-                      box-sizing: border-box;
-                    }
+	.control {
+		scale: 1.2;
+		letter-spacing: 0.5px;
+		position: relative;
+		width: 260px;
+		height: 38px;
+		aspect-ratio: 300 / 38;
+		background: var(--secondary);
+		border-radius: 100px;
+		border: 1px solid var(--border);
+		padding: 2px;
+		backdrop-filter: blur(0px);
+		background: rgba(255, 255, 255, 0.6);
+		box-shadow: -0.1px 1px 1px hsl(var(--shadow-color) / 0.22),
+			-0.2px 3.2px 3.1px -0.4px hsl(var(--shadow-color) / 0.26),
+			-0.3px 5.7px 5.5px -0.8px hsl(var(--shadow-color) / 0.24),
+			-0.5px 9.3px 8.9px -1.2px hsl(var(--shadow-color) / 0.22),
+			-0.8px 14.8px 14.2px -1.6px hsl(var(--shadow-color) / 0.19),
+			-1.3px 23.1px 22.2px -2px hsl(var(--shadow-color) / 0.17),
+			-2px 35px 33.7px -2.4px hsl(var(--shadow-color) / 0.14),
+			-2.9px 51.2px 49.2px -2.8px hsl(var(--shadow-color) / 0.12),
+			-4.1px 72.6px 69.8px -3.2px hsl(var(--shadow-color) / 0.2),
+			-5.6px 100px 96.2px -3.6px hsl(var(--shadow-color) / 0.07);
 
-                    body {
-                      display: grid;
-                      place-items: center;
-                      min-height: 100vh;
-                      font-family: 'SF Pro Text', 'SF Pro Icons', 'AOS Icons', 'Helvetica Neue',
-                        Helvetica, Arial, sans-serif, system-ui;
-                    }
+		.control__track {
+			display: grid;
+			place-items: center;
+			grid-template-columns: repeat(4, 1fr);
+			width: 100%;
+			height: 100%;
+			position: relative;
+		}
 
-                    /* Utilities */
-                    .sr-only {
-                      position: absolute;
-                      width: 1px;
-                      height: 1px;
-                      padding: 0;
-                      margin: -1px;
-                      overflow: hidden;
-                      clip: rect(0, 0, 0, 0);
-                      white-space: nowrap;
-                      border-width: 0;
-                    }
-                  }
+		.premium::before {
+			content: 'Preference';
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			translate: -50% -80%;
+			color: var(--primary);
+			font-size: 0.75rem;
+			z-index: 2;
+		}
 
-                  /* Override multi-functional control positioning and add blur */
-                  .control {
-                    position: fixed;
-                    bottom: calc(2.6em + env(safe-area-inset-bottom));
-                    left: 52.5%;
-                    transform: translateX(-50%);
-                    z-index: 1200;
-                    backdrop-filter: blur(10px);
-                  }
+		label {
+			display: inline-block;
+			height: 100%;
+			width: 100%;
+			display: grid;
+			place-items: center;
+			cursor: pointer;
+			font-size: 0.75rem;
+			color: var(--primary);
+			z-index: 2;
+		}
 
-                  /* fade-in effect */
-                  .control {
-                    opacity: 0;
-                    transition: opacity 0.5s ease;
-                  }
-                  .control.visible {
-                    opacity: 1;
-                  }
+		.control__track>label {
+			color: var(--secondary);
+		}
 
-                  /* Dark-mode overrides for nav & links */
-                  [data-theme="dark"] .nav-links {
-                    background-color: rgba(0, 0, 0, 0.5);
-                  }
-                  [data-theme="dark"] .nav-links a {
-                    color: #ffffff;
-                  }
-                  [data-theme="dark"] .nav-links a:hover,
-                  [data-theme="dark"] .nav-links a:active,
-                  [data-theme="dark"] .nav-links a.active {
-                    color: #000000 !important;
-                  }
-                  [data-theme="dark"] .nav-links a:hover::after,
-                  [data-theme="dark"] .nav-links a:active::after,
-                  [data-theme="dark"] .nav-links a.active::after {
-                    background-color: #ffffff;
-                  }
+		.premium {
+			width: 100%;
+			height: 100%;
+			display: grid;
+			position: relative;
+			grid-template-columns: 1fr 1fr;
+			border: 1px solid transparent;
+			container-type: size;
+		}
 
-                  /* Ensure the “Save as PDF” button is visible in dark mode */
-                  [data-theme="dark"] .glass-button,
-                  [data-theme="dark"] .glass-buttons a.glass-button {
-                    background: rgba(255, 255, 255, 0.0);
-                  }
+		.premium,
+		.control__track>label:nth-of-type(1) {
+			grid-column: span 2;
+		}
 
-                  /* All other (non-nav) links in dark mode remain white */
-                  [data-theme="dark"] body :not(.nav-links) a {
-                    color: #ffffff;
-                  }
+		label span {
+			display: grid;
+			place-items: center;
+			height: 100%;
+			width: 100%;
+			transition: scale calc(var(--duration) * 1s) var(--ease);
+		}
 
-                  /* Container for layered blur effect */
-                  .blur {
-                    position: fixed;
-                    inset: 0;
-                    z-index: 1100;
-                    pointer-events: none;
-                    overflow: hidden;
-                  }
+		.premium label:nth-of-type(1) span {
+			scale: 0.75;
+			transform-origin: 150% 150%;
+			border-radius: 100px;
+		}
 
-                  /* Each child div becomes one blur layer */
-                  .blur > div {
-                    --y-offset: calc(var(--i) * 15px);
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    transform: translateY(var(--y-offset));
-                    filter: blur(calc(var(--i) * var(--blur-amount)));
-                    opacity: calc(1 - (var(--i) - 1) * 0.15);
-                    background: inherit;
-                  }
+		.premium label:nth-of-type(2) span {
+			scale: 0.75;
+			transform-origin: -65% 150%;
+			border-radius: 100px;
+		}
+	}
+}
 
-                  /* 1) Hide scroll bars globally */
-                  ::-webkit-scrollbar {
-                    display: none;
-                  }
-                  html {
-                    scrollbar-width: none;
-                    -ms-overflow-style: none;
-                  }
+@layer base {
+	:root {
+		--font-size-min: 16;
+		--font-size-max: 20;
+		--font-ratio-min: 1.2;
+		--font-ratio-max: 1.33;
+		--font-width-min: 375;
+		--font-width-max: 1500;
+	}
 
-                  /* ------ Gooey Cursor CSS ------ */
-                  /* The cursor element that uses the goo filter */
-                  #cursor {
-                    position: fixed;
-                    top: calc(var(--cursor-size) * -0.5);
-                    left: calc(var(--cursor-size) * -0.5);
-                    pointer-events: none;
-                    touch-action: none;
-                    mix-blend-mode: difference;
-                    filter: url(#goo);
-                    z-index: 20000;
-                  }
-                  /* Each circle in the cursor tail */
-                  .cursor-circle {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: var(--cursor-size);
-                    height: var(--cursor-size);
-                    border-radius: 50%;
-                    background: var(--bg);
-                    transform-origin: center center;
-                  }
-                  /* Hide the svg element (the goo filter) */
-                  .goo {
-                    display: none;
-                  }
+	html {
+		color-scheme: light dark;
+	}
 
-                  /* Added background canvas style */
-                  canvas {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    z-index: -10;
-                  }
+	[data-theme='light'] {
+		color-scheme: light only;
+	}
 
-            .noise-overlay {
-              position: fixed;
-              top: -50%;
-              left: -50%;
-              width: 200%;
-              height: 200%;
-              background: url("https://assets.iceable.com/img/noise-transparent.png") 0 0/300px 300px repeat;
-              animation: noise-anim 0.3s steps(5) infinite;
-              opacity: .9;
-              pointer-events: none;
-              z-index: 50;
-            }
+	[data-theme='dark'] {
+		color-scheme: dark only;
+	}
 
-            @keyframes noise-anim {
-              0% { transform: translate(0, 0); }
-              10% { transform: translate(-2%, -3%); }
-              20% { transform: translate(-4%, 2%); }
-              30% { transform: translate(2%, -4%); }
-              40% { transform: translate(-2%, 5%); }
-              50% { transform: translate(-4%, 2%); }
-              60% { transform: translate(3%, 0); }
-              70% { transform: translate(0, 3%); }
-              80% { transform: translate(-3%, 0); }
-              90% { transform: translate(2%, 2%); }
-              100% { transform: translate(1%, 0); }
-            }
+	:where(.fluid) {
+		--fluid-min: calc(var(--font-size-min) * pow(var(--font-ratio-min), var(--font-level, 0)));
+		--fluid-max: calc(var(--font-size-max) * pow(var(--font-ratio-max), var(--font-level, 0)));
+		--fluid-preferred: calc((var(--fluid-max) - var(--fluid-min)) / (var(--font-width-max) - var(--font-width-min)));
+		--fluid-type: clamp((var(--fluid-min) / 16) * 1rem,
+				((var(--fluid-min) / 16) * 1rem) - (((var(--fluid-preferred) * var(--font-width-min)) / 16) * 1rem) + (var(--fluid-preferred) * var(--variable-unit, 100vi)),
+				(var(--fluid-max) / 16) * 1rem);
+		font-size: var(--fluid-type);
+	}
 
+	*,
+	*:after,
+	*:before {
+		box-sizing: border-box;
+	}
 
-      [data-theme="light"] .layout-container .glow {
-        display: none !important;
-      }
+	body {
+		display: grid;
+		place-items: center;
+		min-height: 100vh;
+		font-family: 'SF Pro Text', 'SF Pro Icons', 'AOS Icons', 'Helvetica Neue',
+			Helvetica, Arial, sans-serif, system-ui;
+	}
 
+	/* Utilities */
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border-width: 0;
+	}
+}
 
-      @media (min-width: 960px) {
-  .control {
-    bottom: calc(3.4em); /* adjust 20px as needed */
-  }
+/* Override multi-functional control positioning and add blur */
+.control {
+	position: fixed;
+	bottom: calc(2.6em + env(safe-area-inset-bottom));
+	left: 52.5%;
+	transform: translateX(-50%);
+	z-index: 1200;
+	backdrop-filter: blur(10px);
+}
+
+/* fade-in effect */
+.control {
+	opacity: 0;
+	transition: opacity 0.5s ease;
+}
+
+.control.visible {
+	opacity: 1;
+}
+
+/* Dark-mode overrides for nav & links */
+[data-theme="dark"] .nav-links {
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .nav-links a {
+	color: #ffffff;
+}
+
+[data-theme="dark"] .nav-links a:hover,
+[data-theme="dark"] .nav-links a:active,
+[data-theme="dark"] .nav-links a.active {
+	color: #000000 !important;
+}
+
+[data-theme="dark"] .nav-links a:hover::after,
+[data-theme="dark"] .nav-links a:active::after,
+[data-theme="dark"] .nav-links a.active::after {
+	background-color: #ffffff;
+}
+
+/* Ensure the “Save as PDF” button is visible in dark mode */
+[data-theme="dark"] .glass-button,
+[data-theme="dark"] .glass-buttons a.glass-button {
+	color: #ffffff !important;
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* All other (non-nav) links in dark mode remain white */
+[data-theme="dark"] body :not(.nav-links) a {
+	color: #ffffff;
+}
+
+/* Container for layered blur effect */
+.blur {
+	position: fixed;
+	inset: 0;
+	z-index: 1100;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+/* Each child div becomes one blur layer */
+.blur>div {
+	--y-offset: calc(var(--i) * 15px);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	transform: translateY(var(--y-offset));
+	filter: blur(calc(var(--i) * var(--blur-amount)));
+	opacity: calc(1 - (var(--i) - 1) * 0.15);
+	background: inherit;
+}
+
+/* 1) Hide scroll bars globally */
+::-webkit-scrollbar {
+	display: none;
+}
+
+html {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+/* ------ Gooey Cursor CSS ------ */
+/* The cursor element that uses the goo filter */
+#cursor {
+	position: fixed;
+	top: calc(var(--cursor-size) * -0.5);
+	left: calc(var(--cursor-size) * -0.5);
+	pointer-events: none;
+	touch-action: none;
+	mix-blend-mode: difference;
+	filter: url(#goo);
+	z-index: 20000;
+}
+
+/* Each circle in the cursor tail */
+.cursor-circle {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--cursor-size);
+	height: var(--cursor-size);
+	border-radius: 50%;
+	background: var(--bg);
+	transform-origin: center center;
+}
+
+/* Hide the svg element (the goo filter) */
+.goo {
+	display: none;
+}
+
+/* Added background canvas style */
+canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -10;
+}
+
+.noise-overlay {
+	position: fixed;
+	top: -50%;
+	left: -50%;
+	width: 200%;
+	height: 200%;
+	background: url("https://assets.iceable.com/img/noise-transparent.png") 0 0/300px 300px repeat;
+	animation: noise-anim 0.3s steps(5) infinite;
+	opacity: .9;
+	pointer-events: none;
+	z-index: 50;
+}
+
+@keyframes noise-anim {
+	0% {
+		transform: translate(0, 0);
+	}
+
+	10% {
+		transform: translate(-2%, -3%);
+	}
+
+	20% {
+		transform: translate(-4%, 2%);
+	}
+
+	30% {
+		transform: translate(2%, -4%);
+	}
+
+	40% {
+		transform: translate(-2%, 5%);
+	}
+
+	50% {
+		transform: translate(-4%, 2%);
+	}
+
+	60% {
+		transform: translate(3%, 0);
+	}
+
+	70% {
+		transform: translate(0, 3%);
+	}
+
+	80% {
+		transform: translate(-3%, 0);
+	}
+
+	90% {
+		transform: translate(2%, 2%);
+	}
+
+	100% {
+		transform: translate(1%, 0);
+	}
 }
 
 
+[data-theme="light"] .layout-container .glow {
+	display: none !important;
+}
 
 
+@media (min-width: 960px) {
+	.control {
+		bottom: calc(3.4em);
+		/* adjust 20px as needed */
+	}
+}
 
 
-      /* TOP-RIGHT NAV ACTION BUTTON */
-      .nav-bg-toggle {
-        position: absolute;
-        top: 0;
-        right: 2rem;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        z-index: 20000;
-      }
-      .nav-bg-toggle button {
-        background: rgba(255,255,255,0.7);
-        border: none;
-        border-radius: 999px;
-        padding: 0.4em 0.7em;
-        font-size: 1.35em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        margin-left: 1.2em;
-        transition: background 0.2s;
-        outline: none;
-      }
-      .nav-bg-toggle button:hover,
-      .nav-bg-toggle button:focus {
-        background: rgba(0,0,0,0.08);
-      }
-      .nav-bg-toggle svg {
-        display: block;
-        width: .75em;
-        height: .75em;
-      }
-      /* Hide background if .bg-off is toggled */
-      body.bg-off {
-        background-image: none !important;
-        background-color: #fff !important;
-      }
-      [data-theme="dark"] body.bg-off {
-        background-color: #111 !important;
-      }
-    </style>
+/* TOP-RIGHT NAV ACTION BUTTON */
+.nav-bg-toggle {
+	position: absolute;
+	top: 0;
+	right: 2rem;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	z-index: 20000;
+}
+
+.nav-bg-toggle button {
+	background: rgba(255, 255, 255, 0.7);
+	border: none;
+	border-radius: 999px;
+	padding: 0.4em 0.7em;
+	font-size: 1.35em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	margin-left: 1.2em;
+	transition: background 0.2s;
+	outline: none;
+}
+
+.nav-bg-toggle button:hover,
+.nav-bg-toggle button:focus {
+	background: rgba(0, 0, 0, 0.08);
+}
+
+.nav-bg-toggle svg {
+	display: block;
+	width: .75em;
+	height: .75em;
+}
+
+/* Hide background if .bg-off is toggled */
+body.bg-off {
+	background-image: none !important;
+	background-color: #fff !important;
+}
+
+[data-theme="dark"] body.bg-off {
+	background-color: #111 !important;
+}
+
+</style>
+
   </head>
   <body>
     <!-- Removed the WebGL canvas and associated shader scripts to eliminate the gradient background -->
@@ -919,44 +1064,40 @@ html {
     -->
     <!-- Navigation Links -->
     <nav class="nav-links">
-      <a href="#section-1">Introduction</a>
+      <a href="#section-1">Profile</a>
       <a href="#section-2">Work</a>
-      <a href="#section-3">Education</a>      
-      <a href="#section-4">Testimonials</a>
-      <a href="#section-5">Contact</a>
+      <a href="#section-3">Specializations</a>
+      <a href="#section-4">Education</a>      
+      <a href="#section-5">Testimonials</a>
+      <a href="#section-6">Contact</a>
       <!-- Background Toggle Button, Top Right -->
-      <div class="nav-bg-toggle">
+
       </div>
     </nav>
     <div class="noise-overlay"></div>
 
 
-    <!-- Introduction Section -->
-    <div class="introduction" id="section-1">
-      <h1>Zachary Gort</h1>
-      <p>
-        <strong>Senior UX Designer</strong><br>
-        <a href="https://zackgort" target="_blank" rel="noopener">
-          zackgort.com</a><br />
-        <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a><br />
-        <a
-          href="https://linkedin.com/in/zackgort"
-          target="_blank"
-          rel="noopener"
-        >
-          linkedin.com/in/zackgort
-        </a>
+<!-- Introduction Section with Profile Details and Specializations -->
+<div class="introduction" id="section-1">
+  <h1>Zachary Gort</h1>
+  <p>
+    <strong>Senior UX Designer</strong><br>
+    <a href="https://zackgort.com" target="_blank" rel="noopener">zackgort.com</a><br />
+    <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a><br />
+    <a href="https://linkedin.com/in/zackgort" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>
+  </p>
+<br>
+  <p>
+    Creative designer, facilitator, and visual storyteller with over a decade of experience leading end-to-end user experience {UX} initiatives. Autodidactic expertise in digital prototyping for e-commerce and enterprise products; leveraging mainstream design stack practices with an intrinsic drive to learn, grow and adapt in the age of AI.<br>
+  </p>
 
-      <!-- Glass Button Container: use <button> instead of href="javascript:" -->
-      <div class="glass-buttons">
-
-      </div>
-    </div>
+  <div class="shortcut-info">References available upon request</div>
+</div>
 
     <!-- Section 2: Phenom -->
     <div class="layout-container" id="section-2">
       <div class="layout-header">
-        <h1 class="layout-title">Phenom</h1>
+        <h2 class="layout-title">Phenom</h1>
       </div>
       <div class="layout-progress">
         <div>User Experience Strategist</div>
@@ -1005,7 +1146,7 @@ html {
     <!-- Section 3: Publicis Sapient -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">Publicis Sapient</h1>
+        <h2 class="layout-title">Publicis Sapient</h1>
       </div>
       <div class="layout-progress">
         <div>Senior User Experience Designer</div>
@@ -1054,7 +1195,7 @@ html {
     <!-- Section 4: Code &amp; Theory -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">Code &amp; Theory</h1>
+        <h2 class="layout-title">Code &amp; Theory</h1>
       </div>
       <div class="layout-progress">
         <div>Senior Interaction Designer</div>
@@ -1103,7 +1244,7 @@ html {
     <!-- Section 5: Elva Design Group -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">Elva Design Group</h1>
+        <h2 class="layout-title">Elva Design Group</h1>
       </div>
       <div class="layout-progress">
         <div>Senior User Experience Designer</div>
@@ -1153,7 +1294,7 @@ html {
     <!-- Section 6: HUGE Inc. -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">HUGE Inc.</h1>
+        <h2 class="layout-title">HUGE Inc.</h1>
       </div>
       <div class="layout-progress">
         <div>Senior User Experience Designer</div>
@@ -1203,7 +1344,7 @@ html {
     <!-- Section 7: PFSWeb Livearea -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">PFSWeb Livearea</h1>
+        <h2 class="layout-title">PFSWeb Livearea</h1>
       </div>
       <div class="layout-progress">
         <div>Manager, UX</div>
@@ -1252,7 +1393,7 @@ html {
     <!-- Section 8: Workarea (WebLinc Workarea) -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">Workarea</h1>
+        <h2 class="layout-title">Workarea</h1>
       </div>
       <div class="layout-progress">
         <div>Senior User Experience Designer</div>
@@ -1301,7 +1442,7 @@ html {
     <!-- Section 9: O3 World -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">O3 World</h1>
+        <h2 class="layout-title">O3 World</h1>
       </div>
       <div class="layout-progress">
         <div>User Experience Designer</div>
@@ -1351,7 +1492,7 @@ html {
     <!-- Section 10: ONE SIXTY OVER NINETY -->
     <div class="layout-container" id=" ">
       <div class="layout-header">
-        <h1 class="layout-title">ONE SIXTY OVER NINETY</h1>
+        <h2 class="layout-title">ONE SIXTY OVER NINETY</h1>
       </div>
       <div class="layout-progress">
         <div>Interaction Designer</div>
@@ -1397,10 +1538,64 @@ html {
       </div>
     </div>
 
-    <!-- EDUCATION -->
+
+
+
+    <!-- Specializations -->
     <div class="layout-container" id="section-3">
       <div class="layout-header">
-        <h1 class="layout-title">Pratt Institute of Art</h1>
+        <h2 class="layout-title">Specializations</h1>
+      </div>
+      <div class="layout-progress">
+        <div> </div>
+        <div class="shortcut-info"> </div>
+      </div>
+      <div class="layout-services">
+        <div class="service-item">
+          <h3>Design Leadership</h3>
+          <p>Master facilitator, leading client-facing workshops, inspiring teams, and presenting design rationale with executive presence.</p>
+        </div>
+
+        <div class="service-item">
+          <h3>Strategic UX & Service Design</h3>
+          <p>Expert in conceptualizing experience maps, user journeys, service blueprints, and interaction models that address user and business goals.</p>
+        </div>
+
+        <div class="service-item">
+          <h3>Digital Design & Prototyping</h3>
+          <p>Advanced proficiency in Figma, Adobe Creative Suite, Jira, MS Office, Excel; semi-adept in HTML/JS/CSS and rapid prototyping.</p>
+        </div>
+
+        <div class="service-item">
+          <h3>Design Systems & Visual Standards</h3>
+          <p>Extensive experience creating and evolving design systems, frameworks, and style guides for scalable, user-centric products.</p>
+        </div>
+
+        <div class="service-item">
+          <h3>Collaboration</h3>
+          <p>Partner closely with product owners, front-end developers, and multi-disciplinary teams to deliver high-impact solutions.</p>
+        </div>
+
+        <div class="service-item">
+          <h3>Communication & Storytelling</h3>
+          <p>Strong written and verbal communication, and storytelling skills; excels in empathizing with audience towards addressing their business objectives.</p>
+        </div>                                        
+
+        <div class="service-item">
+          <h3>Project Management</h3>
+          <p>Deliver results on time, within budget, with attention to detail and organizational excellence.</p>
+        </div>                                        
+                                   
+
+      </div>
+    </div>
+
+
+
+    <!-- EDUCATION -->
+    <div class="layout-container" id="section-4">
+      <div class="layout-header">
+        <h2 class="layout-title">Pratt Institute of Art</h1>
       </div>
       <div class="layout-progress">
         <div>Brooklyn</div>
@@ -1408,25 +1603,27 @@ html {
       </div>
       <div class="layout-services">
         <div class="service-item">
-          <h3>Summary</h3>
-          <p>Major: 3D Animation & Motion Graphics
+          <h3>Major</h3>
+          <p>BFA, 3D Animation & Motion Graphics
           </p>
         </div>
         <div class="service-item">
-          <h3>Innovations</h3>
+          <h3>Status</h3>
           <p>{Incomplete Degree}</p>
         </div>
         <div class="service-item">
-          <h3>Takeaway</h3>
+          <h3>Summary</h3>
           <p>Foundation in digital media arts, technical prototyping, and most importantly, learning the craft of meaningful storytelling.</p>
         </div>
       </div>
     </div>
 
+
+
     <!-- TESTIMONIALS -->
-    <div class="layout-container" id="section-4">
+    <div class="layout-container" id="section-5">
       <div class="layout-header">
-        <h1 class="layout-title">Testimonials</h1>
+        <h2 class="layout-title">Testimonials</h1>
       </div>
       <div class="layout-progress">
         <div>Feedback from Industry Leaders & Peers</div>
@@ -1452,9 +1649,9 @@ html {
     </div>
 
     <!-- CONTACT -->
-    <div class="layout-container" id="section-5">
+    <div class="layout-container" id="section-6">
       <div class="layout-header">
-        <h1 class="layout-title">Contact</h1>
+        <h2 class="layout-title">Contact</h1>
       </div>
       <div class="layout-progress">
         <div>I thrive in design-led, data-driven, curiously creative environments.</div>
@@ -1474,7 +1671,7 @@ html {
           </p>
         </div>
         <div class="service-item">
-          <h3>LinkedIn</h3>
+          <h3>Success</h3>
           <p>
             <a href="https://linkedin.com/in/zackgort" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>
           </p>
@@ -1484,33 +1681,13 @@ html {
 
 
 
+    <script src="customScrollbar.js"></script>
 <body class="bg-off">
 
 
     <!-- Scroll Spacer -->
     <div class="scroll-spacer"></div>
 
-    <!-- Multi-functional control including our updated back-to-top button -->
-    <div class="control">
-      <div class="control__track">
-        <div class="indicator"></div>
-        <!-- Back-to-Top Button with updated behavior -->
-        <label for="free" id="back-to-top">Get Started</label>
-        <input class="sr-only" type="radio" name="tier" id="free" checked />
-        <!-- Light / Dark toggles -->
-        <div class="premium">
-          <div class="indicator"></div>
-          <label for="solo"
-            ><span>Light</span><span class="sr-only">Light/Dark</span></label
-          >
-          <input class="sr-only" type="radio" name="tier" id="solo" />
-          <label for="team"
-            ><span>Dark</span><span class="sr-only">Light/Dark</span></label
-          >
-          <input class="sr-only" type="radio" name="tier" id="team" />
-        </div>
-      </div>
-    </div>
 
     <!-- The gooey cursor element -->
     <div id="cursor"></div>
@@ -1522,7 +1699,58 @@ html {
 </audio>
 
     <script src="customScrollbar.js"></script>
+    <!-- Resume related JavaScript -->
     <script>
+      //--- Background toggle logic ---
+      const bgToggleBtn = document.getElementById('bg-toggle-btn');
+      const bgPlayIcon = document.getElementById('bg-toggle-play');
+      const bgPauseIcon = document.getElementById('bg-toggle-pause');
+      let bgOn = true;
+      bgToggleBtn.addEventListener('click', function() {
+        bgOn = !bgOn;
+        document.body.classList.toggle('bg-off', !bgOn);
+        bgPlayIcon.style.display = bgOn ? '' : 'none';
+        bgPauseIcon.style.display = bgOn ? 'none' : '';
+      });
+      // Set correct icon on load
+      (function(){
+        if(document.body.classList.contains('bg-off')){
+          bgPlayIcon.style.display = 'none';
+          bgPauseIcon.style.display = '';
+          bgOn = false;
+        }
+      })();
+
+      // ... your existing JavaScript below ...
+      // PRINT FUNCTIONALITY: Print raw HTML without any CSS/styles.
+      const printBtn = document.getElementById('print-btn');
+      if (printBtn) {
+        printBtn.addEventListener('click', () => {
+          const printWindow = window.open('', '_blank');
+          if (!printWindow) return;
+          const clone = document.body.cloneNode(true);
+          const tables = clone.querySelectorAll('table');
+          tables.forEach(table => table.remove());
+          const controlContainer = clone.querySelector('.control');
+          if (controlContainer) controlContainer.remove();
+          const rawBody = clone.innerHTML;
+          printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Print View</title>
+</head>
+<body style="background-color: white;">
+  ${rawBody}
+</body>
+</html>`);
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        });
+      }
+
       // SCROLL TRACKING & BACK-TO-TOP BUTTON
       let maxScrollPosition = 0;
       const SCROLL_THRESHOLD = 300;
@@ -1543,6 +1771,7 @@ html {
         }
       });
 
+      // NAVIGATION LINKS & SMOOTH SCROLLING
       const navLinks = document.querySelectorAll('.nav-links a');
       navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -1559,67 +1788,10 @@ html {
         });
       });
 
-      backLabel.addEventListener('click', (e) => {
-        e.preventDefault();
-        const btnText = backLabel.innerText;
-        if (btnText === "Get Started") {
-          const firstContent = document.getElementById('section-2');
-          if (firstContent) {
-            firstContent.scrollIntoView({ behavior: 'smooth' });
-          }
-        } else if (btnText === "Back to Top") {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          maxScrollPosition = 0;
-          backRadio.checked = true;
-          controlEl.classList.add('collapsed');
-          controlEl.classList.add('default');
-        } else if (btnText === "Take Me Back") {
-          window.scrollTo({ top: maxScrollPosition, behavior: 'smooth' });
-        }
-      });
 
-      const lightRadio = document.getElementById('solo');
-      const darkRadio = document.getElementById('team');
-      function applyTheme(theme) {
-        document.documentElement.dataset.theme = theme;
-        if (theme === 'dark') {
-          document.body.style.backgroundColor = '#000000';
-          document.body.style.color = '#ffffff';
-          controlEl.classList.add('collapsed');
-        } else {
-          document.body.style.backgroundColor = '#ffffff';
-          document.body.style.color = '#000000';
-        }
-      }
-      if (lightRadio) {
-        lightRadio.addEventListener('change', () => {
-          if (lightRadio.checked) applyTheme('light');
-        });
-      }
-      if (darkRadio) {
-        darkRadio.addEventListener('change', () => {
-          if (darkRadio.checked) applyTheme('dark');
-        });
-      }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        document.documentElement.dataset.theme = 'light';
-        if (lightRadio) lightRadio.checked = true;
-        applyTheme('light');
-        if (!backRadio.checked) {
-          backRadio.checked = true;
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        navLinks.forEach(a => a.classList.remove('active'));
-        const introLink = document.querySelector('.nav-links a[href="#section-1"]');
-        if (introLink) introLink.classList.add('active');
-        controlEl.classList.add('collapsed');
-        setTimeout(() => {
-          controlEl.classList.add('visible');
-        }, 1000);
-      });
-
-      // Gooey Cursor Setup & Animation
+      // GOOEY CURSOR SETUP & ANIMATION
+      console.clear();
       const TAIL_LENGTH = 20;
       const cursor = document.getElementById('cursor');
       let mouseX = 0;
@@ -1665,7 +1837,7 @@ html {
       initCursor();
       updateCursor();
 
-      // Layout Container Hover Effect: Rotation & Glow
+      // LAYOUT CONTAINER HOVER EFFECT: Rotation & GLOW
       function rotateToMouse(e) {
         const container = e.currentTarget;
         const mouseX = e.clientX;
@@ -1706,6 +1878,7 @@ html {
           }
           container.addEventListener('mousemove', rotateToMouse);
         });
+
         container.addEventListener('mouseleave', () => {
           container.removeEventListener('mousemove', rotateToMouse);
           container.style.transitionDuration = "0.3s";
@@ -1719,46 +1892,193 @@ html {
         });
       });
 
-      // Custom Scrollbar Logic
-      const scrollbar = document.createElement('div');
-      scrollbar.id = 'custom-scrollbar';
-      document.body.appendChild(scrollbar);
-      const navHeader = document.querySelector('.nav-links');
-      const extraTopSpacing = 10;
-      const bottomMargin = 20;
-      Object.assign(scrollbar.style, {
-        position: 'fixed',
-        right: '10px',
-        width: '8px',
-        backgroundColor: 'black',
-        borderRadius: '4px',
-        transition: 'background-color 0.3s ease, height 0.3s ease, top 0.3s ease',
-        zIndex: 20000
+      // Attach active state to nav links based on scroll position
+      document.addEventListener('scroll', () => {
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const sections = Array.from(document.querySelectorAll('.introduction, .layout-container'));
+        let currentSectionId = '';
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 80;
+          const sectionHeight = section.offsetHeight;
+          if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
+            currentSectionId = section.getAttribute('id');
+          }
+        });
+        if (!currentSectionId) {
+          currentSectionId = 'section-1';
+        }
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          const targetId = link.getAttribute('href').substring(1);
+          if (targetId === currentSectionId) {
+            link.classList.add('active');
+          }
+        });
       });
-      function updateScrollbar() {
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight;
-        const winHeight = window.innerHeight;
-        const navHeight = navHeader ? navHeader.offsetHeight : 0;
-        const marginTop = navHeight + extraTopSpacing;
-        const availableHeight = winHeight - marginTop - bottomMargin;
-        const scrollbarHeight = Math.max((availableHeight / docHeight) * availableHeight, 30);
-        const maxScroll = docHeight - winHeight;
-        const scrollFraction = scrollTop / maxScroll;
-        const topOffset = marginTop + scrollFraction * (availableHeight - scrollbarHeight);
-        scrollbar.style.height = `${scrollbarHeight}px`;
-        scrollbar.style.top = `${topOffset}px`;
-      }
-      window.addEventListener('scroll', updateScrollbar);
-      window.addEventListener('resize', updateScrollbar);
-      updateScrollbar();
-      function updateScrollbarTheme() {
-        const theme = document.documentElement.dataset.theme || 'light';
-        scrollbar.style.backgroundColor = theme === 'dark' ? 'white' : 'black';
-      }
-      const observer = new MutationObserver(updateScrollbarTheme);
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-      updateScrollbarTheme();
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const hoverSound = new Audio("https://github.com/ZACKGORT/reasonably/raw/refs/heads/main/mixkit-cool-interface-click-tone-2568.mp3");
+        const clickSound = new Audio("https://github.com/ZACKGORT/reasonably/raw/refs/heads/main/mixkit-page-turn-single-1104.mp3");
+        function playHoverSound() {
+          hoverSound.currentTime = 0;
+          hoverSound.volume = 0.4;
+          hoverSound.play().catch(error => {
+            console.error("Error playing hover sound:", error);
+          });
+        }
+        function playClickSound() {
+          clickSound.currentTime = 0;
+          clickSound.volume = 0.4;
+          clickSound.play().catch(error => {
+            console.error("Error playing click sound:", error);
+          });
+        }
+        const navLinks = document.querySelectorAll("nav a");
+        navLinks.forEach(link => {
+          link.addEventListener("mouseenter", playHoverSound);
+          link.addEventListener("click", playClickSound);
+        });
+        const controlToggles = document.querySelectorAll(".control label");
+        controlToggles.forEach(toggle => {
+          toggle.addEventListener("mouseenter", playHoverSound);
+          toggle.addEventListener("click", playClickSound);
+        });
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach(btn => {
+          btn.addEventListener("click", playClickSound);
+        });
+      });
+
+
+
+// Create the custom scrollbar element and add it to the document body
+const scrollbar = document.createElement('div');
+scrollbar.id = 'custom-scrollbar';
+document.body.appendChild(scrollbar);
+
+// Get the nav header element to compute the top offset
+const navHeader = document.querySelector('.nav-links');
+
+// Define extra spacing values
+const extraTopSpacing = 10; // additional space below nav header
+const bottomMargin = 20;    // margin before the bottom of the page
+
+// Apply basic styling to the scrollbar using JavaScript
+Object.assign(scrollbar.style, {
+  position: 'fixed',
+  right: '10px',
+  width: '8px',
+  backgroundColor: 'black', // default for light mode
+  borderRadius: '4px',
+  transition: 'background-color 0.3s ease, height 0.3s ease, top 0.3s ease',
+  zIndex: 20000
+});
+
+// Function to update the scrollbar's height and position based on scroll position
+function updateScrollbar() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight;
+  const winHeight = window.innerHeight;
+  
+  // Calculate the top margin from nav header plus extra spacing
+  const navHeight = navHeader ? navHeader.offsetHeight : 0;
+  const marginTop = navHeight + extraTopSpacing;
+  
+  // Determine the available height between the header and the bottom margin
+  const availableHeight = winHeight - marginTop - bottomMargin;
+  
+  // Compute scrollbar height proportionally based on available height
+  const scrollbarHeight = Math.max((availableHeight / docHeight) * availableHeight, 30); // minimum height is 30px
+  
+  // Calculate the scroll fraction and compute top offset for scrollbar in available area
+  const maxScroll = docHeight - winHeight;
+  const scrollFraction = scrollTop / maxScroll;
+  const topOffset = marginTop + scrollFraction * (availableHeight - scrollbarHeight);
+  
+  scrollbar.style.height = `${scrollbarHeight}px`;
+  scrollbar.style.top = `${topOffset}px`;
+}
+
+window.addEventListener('scroll', updateScrollbar);
+window.addEventListener('resize', updateScrollbar);
+updateScrollbar();
+
+// Function to update the scrollbar color based on the current theme
+function updateScrollbarTheme() {
+  const theme = document.documentElement.dataset.theme || 'light';
+  scrollbar.style.backgroundColor = theme === 'dark' ? 'white' : 'black';
+}
+
+// Observe changes to the data-theme attribute on the document element
+const observer = new MutationObserver(updateScrollbarTheme);
+observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+updateScrollbarTheme();
+
+
+
+// Create the custom scrollbar element and add it to the document body
+const scrollbar = document.createElement('div');
+scrollbar.id = 'custom-scrollbar';
+document.body.appendChild(scrollbar);
+
+// Get the nav header element to compute the top offset (if you have one)
+const navHeader = document.querySelector('.nav-links');
+
+// Define extra spacing values (modify these if needed)
+const extraTopSpacing = 10; // additional space below the nav header
+const bottomMargin = 20;    // margin before the bottom of the page
+
+// Apply basic styling to the scrollbar using JavaScript
+Object.assign(scrollbar.style, {
+  position: 'fixed',
+  right: '10px',
+  width: '8px',
+  backgroundColor: 'black', // default color for light mode
+  borderRadius: '4px',
+  transition: 'background-color 0.3s ease, height 0.3s ease, top 0.3s ease',
+  zIndex: 20000
+});
+
+// Function to update the scrollbar's height and position based on scroll percent
+function updateScrollbar() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight;
+  const winHeight = window.innerHeight;
+  
+  // Calculate top margin from nav header if available
+  const navHeight = navHeader ? navHeader.offsetHeight : 0;
+  const marginTop = navHeight + extraTopSpacing;
+  
+  // Determine the available height in the viewport
+  const availableHeight = winHeight - marginTop - bottomMargin;
+  
+  // Calculate scrollbar height proportionally - set a minimum height of 30px
+  const scrollbarHeight = Math.max((availableHeight / docHeight) * availableHeight, 30);
+  
+  // Calculate scroll fraction and compute top offset for scrollbar position
+  const maxScroll = docHeight - winHeight;
+  const scrollFraction = scrollTop / maxScroll;
+  const topOffset = marginTop + scrollFraction * (availableHeight - scrollbarHeight);
+  
+  scrollbar.style.height = `${scrollbarHeight}px`;
+  scrollbar.style.top = `${topOffset}px`;
+}
+
+window.addEventListener('scroll', updateScrollbar);
+window.addEventListener('resize', updateScrollbar);
+updateScrollbar();
+
+// Function to update the scrollbar color based on a theme attribute
+function updateScrollbarTheme() {
+  const theme = document.documentElement.dataset.theme || 'light';
+  scrollbar.style.backgroundColor = theme === 'dark' ? 'white' : 'black';
+}
+
+// Observe changes to the data-theme attribute on the document element
+const observer = new MutationObserver(updateScrollbarTheme);
+observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+updateScrollbarTheme();
+
     </script>
   </body>
 </html>

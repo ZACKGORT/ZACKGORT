@@ -944,8 +944,8 @@ html {
       <a href="#section-1">Profile</a>
       <a href="#section-2">Work</a>
       <a href="#section-3">Specializations</a>
-      <a href="#section-4">Education</a>      
-      <a href="#section-5">Testimonials</a>
+      <a href="#section-4">Testimonials</a>      
+      <a href="#section-5">Education</a>
       <a href="#section-6">Contact</a>
       <!-- Background Toggle Button, Top Right -->
       <div class="nav-bg-toggle">
@@ -1479,36 +1479,8 @@ html {
 
 
 
-    <!-- EDUCATION -->
-    <div class="layout-container" id="section-4">
-      <div class="layout-header">
-        <h2 class="layout-title">Pratt Institute of Art</h1>
-      </div>
-      <div class="layout-progress">
-        <div>Brooklyn</div>
-        <div class="shortcut-info">09/2002-05/2005</div>
-      </div>
-      <div class="layout-services">
-        <div class="service-item">
-          <h3>Major</h3>
-          <p>BFA, 3D Animation & Motion Graphics
-          </p>
-        </div>
-        <div class="service-item">
-          <h3>Status</h3>
-          <p>{Incomplete Degree}</p>
-        </div>
-        <div class="service-item">
-          <h3>Summary</h3>
-          <p>Foundation in digital media arts, technical prototyping, and most importantly, learning the craft of meaningful storytelling.</p>
-        </div>
-      </div>
-    </div>
-
-
-
     <!-- TESTIMONIALS -->
-    <div class="layout-container" id="section-5">
+    <div class="layout-container" id="section-4">
       <div class="layout-header">
         <h2 class="layout-title">Testimonials</h1>
       </div>
@@ -1534,6 +1506,34 @@ html {
         </div>
       </div>
     </div>
+
+
+    <!-- EDUCATION -->
+    <div class="layout-container" id="section-5">
+      <div class="layout-header">
+        <h2 class="layout-title">Pratt Institute of Art</h1>
+      </div>
+      <div class="layout-progress">
+        <div>Brooklyn</div>
+        <div class="shortcut-info">09/2002-05/2005</div>
+      </div>
+      <div class="layout-services">
+        <div class="service-item">
+          <h3>Major</h3>
+          <p>BFA, 3D Animation & Motion Graphics
+          </p>
+        </div>
+        <div class="service-item">
+          <h3>Status</h3>
+          <p>{Incomplete Degree}</p>
+        </div>
+        <div class="service-item">
+          <h3>Summary</h3>
+          <p>Foundation in digital media arts, technical prototyping, and most importantly, learning the craft of meaningful storytelling.</p>
+        </div>
+      </div>
+    </div>
+
 
     <!-- CONTACT -->
     <div class="layout-container" id="section-6">
@@ -1571,7 +1571,7 @@ html {
 
     <!-- Scroll Spacer -->
     <div class="scroll-spacer"></div>
-    <div class="scroll-spacer"></div>
+
     <div class="scroll-spacer"></div>
     <!-- Multi-functional control with percentage -->
     <div class="control">
@@ -1732,6 +1732,48 @@ navLinks.forEach(link => {
     history.replaceState(null, '', window.location.pathname + window.location.search);
   });
 });
+
+// --- IMPROVED ACTIVE NAVIGATION BASED ON SCROLL POSITION ---
+function updateActiveNavLink() {
+  // Select all sections (including introduction)
+  const sections = Array.from(document.querySelectorAll('.introduction, .layout-container'));
+  // Get nav links
+  const navLinks = Array.from(document.querySelectorAll('.nav-links a'));
+  // Get scroll position, offset to middle of viewport for better proximity
+  const scrollY = window.scrollY;
+  const viewportHeight = window.innerHeight;
+  const midpoint = scrollY + viewportHeight / 2;
+
+  // Find section closest to the midpoint
+  let closestSection = sections[0];
+  let minDistance = Math.abs(midpoint - (closestSection.offsetTop + closestSection.offsetHeight / 2));
+  sections.forEach(section => {
+    const sectionMiddle = section.offsetTop + section.offsetHeight / 2;
+    const distance = Math.abs(midpoint - sectionMiddle);
+    if (distance < minDistance) {
+      closestSection = section;
+      minDistance = distance;
+    }
+  });
+
+  // Determine corresponding nav link (by href matching section id)
+  let activeId = closestSection.getAttribute('id');
+  if (!activeId || activeId.trim() === '') activeId = 'section-1'; // fallback for missing id
+
+  navLinks.forEach(link => {
+    const targetId = link.getAttribute('href').substring(1);
+    if (targetId === activeId) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+}
+
+// Attach scroll and resize events for nav update
+window.addEventListener('scroll', updateActiveNavLink);
+window.addEventListener('resize', updateActiveNavLink);
+document.addEventListener('DOMContentLoaded', updateActiveNavLink);
 
 // --- CLICK LOGIC FOR CONTROL BUTTON ---
 backLabel.addEventListener('click', (e) => {

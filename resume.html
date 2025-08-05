@@ -980,6 +980,7 @@ html {
     <div class="noise-overlay"></div>
 
 
+
 <!-- Introduction Section with Profile Details and Specializations -->
 <div class="introduction" id="section-1">
   <h1>Zachary Gort</h1>
@@ -1008,6 +1009,7 @@ html {
 
 </code>
 </div>
+
 
     <!-- Section 2: Phenom -->
     <div class="layout-container" id="section-2">
@@ -1622,50 +1624,50 @@ html {
     </audio>
 
     <script>
-    <script>
-    // Disable grab/drag functionality on mobile
-    if (window.matchMedia("(max-width: 960px)").matches) {
-      // Do not enable custom grab/drag scroll on mobile
-    } else {
-      // Desktop/Tablet only: enable custom grab/drag scroll
-      (function() {
-        let isDragging = false;
-        let startY, scrollStartY;
-        window.addEventListener('mousedown', function(e) {
-          if (e.target.tagName.match(/^(INPUT|TEXTAREA|SELECT|BUTTON)$/)) return;
-          isDragging = true;
-          document.body.style.cursor = 'grabbing';
-          startY = e.clientY;
-          scrollStartY = window.scrollY;
-          e.preventDefault();
-        });
-        window.addEventListener('mousemove', function(e) {
-          if (!isDragging) return;
-          const dy = (startY - e.clientY);
-          window.scrollTo({ top: scrollStartY + dy });
-        });
-        window.addEventListener('mouseup', function(e) {
-          isDragging = false;
-          document.body.style.cursor = '';
-        });
-        let touchStartY, touchScrollStartY;
-        window.addEventListener('touchstart', function(e) {
-          if (e.touches.length !== 1) return;
-          isDragging = true;
-          touchStartY = e.touches[0].clientY;
-          touchScrollStartY = window.scrollY;
-        }, {passive: false});
-        window.addEventListener('touchmove', function(e) {
-          if (!isDragging || e.touches.length !== 1) return;
-          const dy = (touchStartY - e.touches[0].clientY);
-          window.scrollTo({ top: touchScrollStartY + dy });
-          e.preventDefault();
-        }, {passive: false});
-        window.addEventListener('touchend', function(e) {
-          isDragging = false;
-        });
-      })();
-    }
+// Add this at the start of your grab/drag functionality script:
+if (window.matchMedia("(max-width: 960px)").matches) {
+  // Disable grab/drag functionality on mobile
+} else {
+  // Existing grab/drag code here...
+  (function() {
+    let isDragging = false;
+    let startY, scrollStartY;
+    window.addEventListener('mousedown', function(e) {
+      if (e.target.tagName.match(/^(INPUT|TEXTAREA|SELECT|BUTTON)$/)) return;
+      isDragging = true;
+      document.body.style.cursor = 'grabbing';
+      startY = e.clientY;
+      scrollStartY = window.scrollY;
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      const dy = (startY - e.clientY);
+      window.scrollTo({ top: scrollStartY + dy });
+    });
+    window.addEventListener('mouseup', function(e) {
+      isDragging = false;
+      document.body.style.cursor = '';
+    });
+    let touchStartY, touchScrollStartY;
+    window.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      isDragging = true;
+      touchStartY = e.touches[0].clientY;
+      touchScrollStartY = window.scrollY;
+    }, {passive: false});
+    window.addEventListener('touchmove', function(e) {
+      if (!isDragging || e.touches.length !== 1) return;
+      const dy = (touchStartY - e.touches[0].clientY);
+      window.scrollTo({ top: touchScrollStartY + dy });
+      e.preventDefault();
+    }, {passive: false});
+    window.addEventListener('touchend', function(e) {
+      isDragging = false;
+    });
+  })();
+}
+
 
 // --- BG Toggle Logic ---
 const bgToggleBtn = document.getElementById('bg-toggle-btn');

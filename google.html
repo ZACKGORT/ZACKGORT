@@ -983,7 +983,7 @@ html {
 <code>Dear Google,<br><br>
 In response to <a href="zackgort.com/resume/google">job listing</a>. 
 This could be used to provide any critical asides, unironically {think: cover letter, USP, etc}. 
-What is a USP, you ask? Oh, well a USP is something I picked up on while working at <a href="#section-3" class="jump-link">160over90</a>, working with world-class creative leadership.
+What is a USP, you ask? Oh, well a Unique Sales Perspective / Selling Proposition / etc is something I picked up on while working at <a href="#section-3" class="jump-link">160over90</a>, working with world-class creative leadership.
 The type of leaders who were more mentors who respected why they hired you, and less-so the type who simply saw you as a metric.
 </code>
 </div>
@@ -2046,6 +2046,28 @@ function updateScrollbarTheme() {
 const observer = new MutationObserver(updateScrollbarTheme);
 observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 updateScrollbarTheme();
+
+
+window.addEventListener('DOMContentLoaded', function() {
+  // Always start at the top and clear hash
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  // Intercept all hash links for smooth scroll and fresh jump
+  document.querySelectorAll('a[href^="#"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      const targetId = link.getAttribute('href').substring(1);
+      const target = document.getElementById(targetId);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    });
+  });
+});
     </script>
   </body>
 </html>

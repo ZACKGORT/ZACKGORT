@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <!-- Base so that all relative URLs resolve to your repo’s raw content -->
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Layout Formation on Scroll | Codrops</title>
 
   <!-- GSAP core + plugins -->
@@ -26,11 +25,13 @@
       --color-bg: #0e0d0e;
       --color-link: #ffffff;
       --color-link-hover: #ffffff;
-      --page-padding: 0.25rem;
+      --page-padding: 0.75rem;
       --grid-gap: var(--page-padding);
       --color-bg-content: #0e0d0e;
       --color-bg-frame: #FF8DA1;
       --color-border: #46443e;
+      --color-text-alt: #d7d4cd;
+      --color-label: #a7a39b;   
 
       --cursor-size: 28px;
       --bg: #000;
@@ -211,7 +212,7 @@
       pointer-events: none;
       will-change: transform;
     }
-    .grid__item { display: flex; flex-direction: column; justify-content: center; padding: 1.5rem; }
+    .grid__item { display: flex; flex-direction: column; justify-content: center; padding: 0.5rem; }
 
     .ar-wide { aspect-ratio: 4/3; }
     .ar-narrow { aspect-ratio: 2/3; }
@@ -363,9 +364,10 @@
 	grid-area: p1;
 }
 
-.project__mission p:child {
-	grid-area: p2;
+.project__mission p:nth-child(2) { /* or :last-child */
+  grid-area: p2;
 }
+
 
 .project__mission p {
 	color: var(--color-text-alt);
@@ -387,36 +389,49 @@
 }
 
 
-.intro {
-	height: calc(100vh - 3rem);
-    text-align: center;
-    place-items: center;
-    display: grid;
-    margin-bottom: 30vh;
-    background: linear-gradient(0deg, transparent, var(--color-bg-alt));
+/* Bottom-centered helper note */
+.intro__info{
+  position: fixed;
+  left: 50%;
+  bottom: clamp(12px, 4vh, 32px);
+  transform: translateX(-50%);
+  z-index: 1000;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .75;
+  pointer-events: none; /* so it never blocks clicks/scroll */
 }
 
-.intro__title {
-    place-items: center;
-    margin: 0;
-    line-height: .9;
-    display: grid;
-    margin-top: 15vh;
-    font-weight: 400;
+/* Make sure the intro section is visible and centered */
+.intro{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--page-padding);
+  background: linear-gradient(0deg, transparent, var(--color-bg-content));
 }
 
-.intro__title-pre {
-	font-weight: 300;
-    font-size: clamp(2rem,8vw,5rem);
-    color: var(--color-title);
-    text-transform: uppercase;
+.intro__title{
+  margin: 0;
+  line-height: .9;
+  text-align: center;
+  font-weight: 400;
 }
 
-.intro__title-sub {
-    font-size: clamp(1.5rem,20vw,8rem);
-    max-width: 15ch;
-    margin: 0 auto;
+.intro__title-pre{
+  font-weight: 300;
+  font-size: clamp(2rem, 8vw, 5rem);
+  color: var(--color-text);
+  text-transform: uppercase;
 }
+
+.intro__title-sub{
+  font-size: clamp(1.5rem, 20vw, 8rem);
+  max-width: 15ch;
+  margin: 0 auto;
+}
+
 
 /* Ensure inner background is visible and clipped */
 .grid__img {
@@ -433,6 +448,119 @@
   background-position: 50% 50%;
   will-change: transform;
 }
+
+
+
+/* Reduce top spacing globally when a padded section follows a full grid */
+.content--full + .content--padded {
+  margin-top: 1rem;   /* tighten the gap */
+  padding-top: 0.5rem;
+}
+
+/* Also trim the bottom of the grids so they don't push extra space */
+.content--full {
+  padding-bottom: 0.5rem;
+}
+
+
+/* ===== Case Study PROCESS → 2-column layout ===== */
+[id$="-process"] {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem 3rem;
+  align-items: start;
+}
+
+/* Let the intro (title + mission) span both columns on wide screens */
+[id$="-process"] > .project.project--intro {
+  margin: 0;          /* override default 20vh auto spacing */
+  padding: 0;
+}
+
+/* Details cards become neat column items */
+[id$="-process"] > .project.project--details {
+  margin: 0;          /* override default spacing inside the grid */
+  padding: 0;
+  display: block;     /* neutralize internal grids for cleaner columns */
+}
+
+/* Remove the narrow 400px cap so columns breathe */
+[id$="-process"] .project--details p {
+  max-width: none;
+}
+
+/* Wide screens: 2 columns, intro spans both */
+@media (min-width: 53em) {
+  [id$="-process"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  [id$="-process"] > .project.project--intro {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Optional: slightly tighter labels in process columns */
+[id$="-process"] .project__label {
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+/* --- Reference-inspired: small text & paragraphs only --- */
+
+/* Micro labels / nav tags / helper text */
+.type-tiny,
+.project__label,
+.cdawrap,
+.page-footer {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 400;
+  color: var(--color-label);
+}
+
+/* Primary paragraphs (About, Skills, etc.) */
+.content__text {
+  font-size: clamp(1.1rem, 2.8vw, 1.7rem);
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-text);
+  margin: .6rem 0;
+}
+
+/* Case study body copy */
+.project p,
+.grid__item p {
+  font-size: 1rem;          /* based on :root 16–18px */
+  line-height: 1.4;
+  margin: 0;
+  color: var(--color-text-alt);
+}
+
+/* Case study label color (kept explicit) */
+.project__label { color: var(--color-label); }
+
+/* Optional: tiny caption under section titles */
+.content__title-main + p {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--color-label);
+}
+
+
+
+
+/* Make only the H4 title links in #work clickable */
+#work .grid__item { pointer-events: none; }
+#work .grid__item .title-link {
+  pointer-events: auto;
+  text-decoration: none;
+}
+#work .grid__item .title-link:hover { text-decoration: underline; }
+
+
 
   </style>
 
@@ -453,20 +581,16 @@
 
 
     <!-- Jump-to nav -->
-    <nav class="frame__tags flex-line type-tiny">
-      <a href="#about">#About</a>
-      <a href="#work">#Work</a>
-      <a href="#brands">#Brands</a>
-      <a href="#agencylife">#AgencyLife</a>
-      <a href="#inspiration">#Skills</a>
-      <a href="#explorations">#FinTech </a>
-      <a href="#process">#SocialMedia</a>
-      <a href="#style-grid">#E-commerce</a>
-      <a href="#style">#UX</a>
-      <a href="#future">#Future</a>
-      <a href="#gallery">#Gallery</a>
-      <a href="#contact">#Contact</a>
-    </nav>
+<!-- nav: add data-panel so we open the overlay instead of scrolling -->
+<nav class="frame__tags flex-line type-tiny">
+  <a href="#about">#About</a>
+  <a href="#skills">#XP</a>
+  <a href="#work">#Work</a>
+  <a href="#fintech">#CaseStudy</a>
+  <a href="#contact">#Contact</a>
+</nav>
+
+
 
     <span class="frame__logo">ZACKGORT</span>
   </header>
@@ -474,42 +598,44 @@
 	<span class="intro__info">Scroll moderately to fully experience the animations</span> 
 
 
-   <!-- First Grid -->
-  <section class="content content--full content--padded" id="first-grid">
-    <div class="grid grid--spaced" data-grid-first>
-      <div class="grid__img pos-1" style="background-image:url(img/39.webp)"></div>
-      <div class="grid__img pos-2" style="background-image:url(img/38.webp)"></div>
-      <div class="grid__img pos-3" style="background-image:url(img/37.webp)"></div>
-      <div class="grid__img pos-4" style="background-image:url(img/36.webp)"></div>
-      <div class="grid__img pos-5" style="background-image:url(img/35.webp)"></div>
-      <div class="grid__img pos-6" style="background-image:url(img/6.webp)"></div>
-      <div class="grid__img pos-7" style="background-image:url(img/7.webp)"></div>
-      <div class="grid__img pos-8" style="background-image:url(img/8.webp)"></div>
-      <div class="grid__img pos-9" style="background-image:url(img/9.webp)"></div>
-      <div class="grid__img pos-10" style="background-image:url(img/1.webp)"></div>
-      <div class="grid__img pos-11" style="background-image:url(img/2.webp)"></div>
-      <div class="grid__img pos-12" style="background-image:url(img/3.webp)"></div>
-      <div class="grid__img pos-13" style="background-image:url(img/4.webp)"></div>
-      <div class="grid__img pos-14" style="background-image:url(img/5.webp)"></div>
-      <div class="grid__img pos-15" style="background-image:url(img/34.webp)"></div>
-      <div class="grid__img pos-16" style="background-image:url(img/16.webp)"></div>
-      <div class="grid__img pos-17" style="background-image:url(img/17.webp)"></div>
-    </div>
-    <div class="content__title">
-      <h2 class="content__title-main">   </h2>
-      <p class="type-tiny right end">   </p>
-    </div>
-  </section>
-
       
   <!-- About -->
   <section class="content content--padded" id="about">
     <h4 class="type-tiny">About</h4>
-    <p class="content__text">Zack Gort is a designer, <br>an observer, a thinker & a maker.</p>
+    <p class="content__text">Zack Gort, Senior Experience Designer<br></p>
     <p class="content__text"></p>
-    <p class="content__text">Also, he is left-handed.</p>
-    <p class="type-tiny right end">{Information Architecture, Design Systems, Brand Strategy}</p>
+    <p class="type-tiny right end">UX may indeed be dead, but we live for the experience</p>
   </section>
+
+
+
+
+<!-- Inspiration / Skills -->
+<section class="content content--padded" id="skills">
+  <div class="trio-grid">
+    <div class="trio-col">
+      <h4 class="type-tiny">#experience</h4>
+      <p class="content__text">User Experience Design</p>
+      <p class="content__text">Content & Brand Strategy {B2B+C}</p>
+      <p class="content__text">Visual Interface Design</p>
+      <p class="content__text">Accessibility Compliance</p>
+    </div>
+    <div class="trio-col">
+      <h4 class="type-tiny">#software</h4>
+      <p class="content__text">Figma</p>
+      <p class="content__text">HTML/CSS/JS</p>
+      <p class="content__text">Pen & Paper</p>
+      <p class="content__text">Adobe CS</p>
+      <p class="content__text">+</p>      
+    </div>
+    <div class="trio-col">
+      <h4 class="type-tiny">#evolution</h4>
+      <p class="content__text">AI + Creative Coding</p>
+      <p class="content__text">Design Systems + Workflows</p>
+      <p class="content__text">+</p>
+    </div>
+  </div>
+</section>
 
   			<section class="content content--full content--padded">
 				<div class="grid grid--column" data-grid-seventh>
@@ -564,295 +690,315 @@
 				</div>
 			</section>
 
+<!-- Work (grid second) -->
+<section class="content content--padded" id="work">
+  <h2 class="content__title-main">select works</h2>
 
-<!-- Inspiration / Skills -->
-<section class="content content--padded" id="inspiration">
-  <div class="trio-grid">
-    <div class="trio-col">
-      <h4 class="type-tiny">#skills</h4>
-      <p class="content__text">User Experience Design</p>
-      <p class="content__text">Content & Brand Strategy {B2B+C}</p>
-      <p class="content__text">Visual Interface Design</p>
-      <p class="content__text">Accessibility Compliance</p>
+  <div class="grid grid--columns grid--spaced" data-grid-second>
+    <!-- image tiles -->
+    <div class="grid__img" style="background-image:url(img/23.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/40.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/10.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/17.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/22.webp)"></div>
+
+    <!-- BNY → jump to full case study section -->
+    <div class="grid__item pos-6 work-card">
+      <h4 class="type-tiny">
+        <a class="title-link" href="#fintech" aria-label="Go to BNY Mellon — Pershing X case study">
+          BNY Mellon — Pershing X
+        </a>
+      </h4>
+      <p>+</p>
     </div>
-    <div class="trio-col">
-      <h4 class="type-tiny">#software</h4>
-      <p class="content__text">Figma</p>
-      <p class="content__text">After Effects</p>
-      <p class="content__text">Three.js</p>
-      <p class="content__text">GSAP</p>
+
+    <!-- TikTok → open overlay panel -->
+    <div class="grid__item pos-7 work-card">
+      <h4 class="type-tiny">
+        <a
+          class="title-link"
+          href="#social"
+          data-panel="social"
+          data-panel-title="TikTok For Business"
+          data-panel-sub="SMB Growth · Creative Templates"
+          role="button"
+          aria-haspopup="dialog"
+          aria-label="Open TikTok For Business panel"
+        >TikTok For Business</a>
+      </h4>
+      <p>+</p>
     </div>
-    <div class="trio-col">
-      <h4 class="type-tiny">#learning</h4>
-      <p class="content__text">AI + Creative Coding</p>
-      <p class="content__text">Motion Design Systems</p>
-      <p class="content__text">WebGL Shaders</p>
+
+    <!-- GNC → open overlay panel -->
+    <div class="grid__item pos-18 work-card">
+      <h4 class="type-tiny">
+        <a
+          class="title-link"
+          href="#ecommerce"
+          data-panel="ecommerce"
+          data-panel-title="GNC — E-Commerce Revamp"
+          data-panel-sub="DTC Growth · Lead UX"
+          role="button"
+          aria-haspopup="dialog"
+          aria-label="Open GNC — E-Commerce Revamp panel"
+        >General Nutrition Centers {GNC}</a>
+      </h4>
+      <p>+</p>
     </div>
   </div>
 </section>
 
-  <!-- Work (grid second) -->
-  <section class="content content--padded" id="work">
-    <h2 class="content__title-main">select works</h2>      
-    <div class="grid grid--columns grid--spaced" data-grid-second>
 
-      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/17.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-      <div class="grid__item pos-6">
-        <h4 class="type-tiny">BNY Melon - Pershing X</h4>
-        <p>+</p>
-      </div>
-      <div class="grid__item pos-7">
-        <h4 class="type-tiny">TikTok For Business</h4>
-        <p>+</p>
-      </div>
-      <div class="grid__item pos-18">
-        <h4 class="type-tiny">General Nutrition Centers {GNC}</h4>
-        <p>+</p>
-      </div>
+
+
+<!-- Brands (ninth grid) -->
+<section class="content content--padded content--full" id="brands-grid">
+  <div class="grid grid--columns grid--spaced" data-grid-ninth>
+    <div class="grid__img" style="background-image:url(img/28.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/29.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/30.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/31.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/32.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/33.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/34.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/35.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/36.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/37.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/38.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/39.webp)"></div>
+  </div>
+
+  <!-- Caption -->
+  <div class="content__title">
+    <h2 class="content__title-main">Brands</h2>
+    <p class="type-tiny right end">Selected partners & collabs</p>
+  </div>
+</section>
+
+
+<!-- Agency (ninth grid) -->
+<section class="content content--full" id="brands-grid-2">
+  <div class="grid grid--columns grid--spaced" data-grid-ninth>
+    <div class="grid__img" style="background-image:url(img/15.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/16.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/21.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/22.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/23.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/24.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/25.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/26.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/27.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/40.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/41.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/42.webp)"></div>
+  </div>
+
+  <!-- Caption -->
+  <div class="content__title">
+    <h2 class="content__title-main">Agency</h2>
+    <p class="type-tiny right end">Studios, networks & teams</p>
+  </div>
+</section>
+
+
+
+
+<!-- ======================= CASE STUDY 1 — BNY Mellon (Comprehensive) ======================= -->
+
+<!-- ======================= CASE STUDY 1 — BNY Mellon (Updated) ======================= -->
+
+<!-- HERO (wide fan-up) -->
+<section class="content content--padded content--full" id="fintech">
+  <div class="grid grid--spaced grid--wide" data-grid-fifth>
+    <!-- Swap to your BNY images -->
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>
+    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png)"></div>
+    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:4800/format:webp/1*q-zgZhKnCs6abK8CIpE00Q.png)"></div>
+    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:4800/format:webp/1*-sJ-pN8tBwwsHq1XcDSLLw.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/wZY2bhKF/bny4.png)"></div>
+    <!-- repeat a few to fill the wide grid nicely -->
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
+    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
+  </div>
+
+  <div class="content__title">
+    <h2 class="content__title-main">BNY Mellon — Pershing X</h2>
+    <p class="type-tiny right end">Financial Product Design · Publicis Sapient</p>
+  </div>
+</section>
+
+<!-- PROCESS (in-depth) -->
+<section class="content content--padded" id="fintech-process">
+  <section class="project project--intro">
+    <span class="project__label project__label--name">Domain</span>
+    <span class="project__name">Financial Product · Portfolio & CRM</span>
+
+    <span class="project__label project__label--date">Timeline</span>
+    <span class="project__date">2023 — 2024</span>
+
+    <h2 class="project__title">
+      <span class="project__title-line">Design systems and data refactorization</span>
+    </h2>
+
+    <span class="project__label project__label--mission">Mission</span>
+    <div class="project__mission">
+      <p>Create a modern, composable workspace for registered investment advisors that merges client context (CRM), portfolio actions (trades, rebalancing), and compliance guardrails without toggling between tools.</p>
+      <p>Design an IA that scales from sole practitioners to multi-office firms, while ensuring accessibility, auditability, and performance across complex data views.</p>
     </div>
   </section>
-
-  <!-- Brands intro -->
-  <section class="content content--padded" id="brands">
-    <h4 class="type-tiny">...</h4>
-    <p class="content__text">Some notable brands I've worked with through the years.</p>
-  </section>
-
-  <!-- Brands grid (fourth) -->
-  <section class="content content--padded content--full" id="brands-grid">
-    <div class="grid grid--spaced grid--small" data-grid-fourth>
-      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/1.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/2.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/3.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/4.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/5.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/6.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/7.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/8.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/9.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/11.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/12.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/13.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/14.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/15.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/16.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/17.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/18.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/19.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/20.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/21.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/24.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/25.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/26.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/27.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/31.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/32.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/33.webp)"></div>
-    </div>
-  </section>
-
-  <!-- Agency life -->
-  <section class="content content--padded" id="agencylife">
-    <h4 class="type-tiny">#agencylife</h4>
-<p class="content__text">ONE SIXTY OVER NINETY + O3 WORLD + WORKAREA + LIVEAREA + HUGE + ELVA DESIGN GROUP + CODE & THEORY + PUBLICIS SAPIENT</p>
-
-  </section>
-
-  <!-- Fourth-v2 grid -->
-  <section class="content content--full" id="brands-grid-2">
-    <div class="grid grid--small" data-grid-fourth-v2>
-      <div class="grid__img" style="background-image:url(img/15.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/32.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/9.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/41.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/6.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/21.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/13.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/2.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/27.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/37.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/14.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/1.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/19.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/38.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/5.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/25.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/11.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/3.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/18.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/33.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/4.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/36.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/35.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/16.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/31.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/7.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/26.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/9.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/42.webp)"></div>
-    </div>
-  </section>
-
-
-  <!-- Fifth grid (Explorations) -->
-  <section class="content content--padded content--full" id="explorations">
-    <div class="grid grid--spaced grid--wide" data-grid-fifth>
-      <div class="grid__img" style="background-image:url(img/20.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/19.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/18.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/17.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/16.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/15.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/14.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/13.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/12.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/11.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/9.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/8.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/7.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/6.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/5.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/4.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/3.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/2.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/1.webp)"></div>
-    </div>
-    <div class="content__title">
-      <h2 class="content__title-main">BNY Melon</h2>
-      <p class="type-tiny right end">Pershing X</p>
-    </div>
-  </section>
-
-  <!-- Process -->
-  <section class="content content--padded" id="process">
-			<section class="project project--intro">
-				<span class="project__label project__label--name">Financial Product</span>
-				<span class="project__date">2023-2024</span>
-				<h2 class="project__title">
-					<span class="project__title-line">BNY Melon - Pershing X</span>
-
-				</h2>
-				<span class="project__label project__label--mission">Mission</span>
-				<div class="project__mission">
-					<p>The AI-Art Project is a transformative initiative dedicated to exploring the immense impact of AI-generated art on the art world and artists. We aim to discover and promote exceptional AI-generated artworks that push the boundaries of creativity, redefine traditional practices, and provoke thought. </p>
-					<p>Through collaborations with artists, workshops, and educational programs, we empower artists to leverage AI as a tool for exploration, expanding their artistic horizons and embracing new forms of expression.</p>
-				</div>
-			</section>
-  </section>
-
-
-
-  <!-- Sixth grid (Unspoken) -->
-  <section class="content content--full content--cutoff" id="unspoken">
-    <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-      <div class="grid__img" style="background-image:url(img/42.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/19.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/1.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/12.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/38.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/13.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/36.webp)"></div>
-    </div>
-    <div class="content__title">
-      <h2 class="content__title-main">TikTok</h2>
-      <p class="type-tiny right end"> for Business</p>
-    </div>
-  </section>
-
-  <!-- Style -->
-  <section class="content content--padded" id="style">
-    <h4 class="type-tiny">Style</h4>
-    <p class="content__text">His style is rooted in subtlety and restraint, capturing the delicate balance between light and shadow, presence and absence. He gravitates toward muted, natural tones that evoke a sense of quiet intimacy, favoring soft textures and a timeless, understated aesthetic. There’s a rawness in his work, yet it never feels harsh—rather, it reveals the fragility and beauty found in life’s simplest moments.</p>
-  </section>
-
-  <!-- Eighth grid -->
   
-  <section class="content content--full" id="style-grid">
-    <div class="grid grid--tiny" data-grid-eighth>
-      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/1.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/2.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/3.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/4.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/5.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/6.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/7.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/8.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/9.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/11.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/12.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/13.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/14.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/15.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/16.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/17.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/18.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/19.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/20.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/21.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/24.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/25.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/26.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/27.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/31.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/32.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/33.webp)"></div>
-    </div>
 
-        <div class="content__title">
-      <h2 class="content__title-main">GNC</h2>
-      <p class="type-tiny right end"> General Nutrition Centers</p>
-    </div>
+  <section class="project project--details project--left">
+    <span class="project__label project__label--default">Problem</span>
+    <p>Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights.</p>
   </section>
 
-
-  <!-- Future -->
-  <section class="content content--padded" id="future">
-    <h4 class="type-tiny">Future</h4>
-    <p class="content__text">Looking ahead, Lennox envisions his work diving deeper into the exploration of intimacy and impermanence. He’s drawn to the idea of capturing moments that feel almost invisible—those fleeting seconds between stillness and motion, light and shadow. In the future, he hopes to experiment more with multimedia projects, blending photography with film and sound to create immersive, sensory experiences that evoke emotion beyond the frame.</p>
+  <section class="project project--details project--right">
+    <span class="project__label project__label--default">Constraints</span>
+    <p>Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices.</p>
   </section>
 
-  <!-- Ninth grid (Gallery) -->
-  <section class="content content--full" id="gallery">
-    <div class="grid grid--columns" data-grid-ninth>
-      <div class="grid__img" style="background-image:url(img/35.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/31.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/20.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/34.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/38.webp)"></div>
-    </div>
+  <section class="project project--details project--left">
+    <span class="project__label project__label--default">Role & Team</span>
+    <p>Lead Product Designer (IA/flows). Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, & 2 additional designers. Weekly research cadence with advisors and operations staff.</p>
   </section>
+
+  <section class="project project--details project--right">
+    <span class="project__label project__label--default">Research</span>
+    <p>Shadowed 12 advisors across firms; mapped task graphs for onboarding → account maintenance → rebalance → review. Ran tree tests to validate navigation and quick actions.</p>
+  </section>
+
+  <section class="project project--details project--left">
+    <span class="project__label project__label--default">Architecture</span>
+    <p>Designed a 3-level IA: <em>Firm → Book of Business → Client</em> with cross-cutting pivots for <em>Tasks</em> and <em>Alerts</em>. Introduced a universal command palette for quick portfolio ops.</p>
+  </section>
+
+  <section class="project project--details project--right">
+    <span class="project__label project__label--default">Design System</span>
+    <p>Built tokens for density modes and market color semantics; composed data cards with progressive disclosure and “safe-edit” states to avoid accidental orders.</p>
+  </section>
+
+  <section class="project project--details project--left">
+    <span class="project__label project__label--default">Accessibility</span>
+    <p>WCAG AA: focus rings, table keyboard nav, high-contrast modes, live region announcements for streaming price changes, and reduced-motion preferences respected in charts.</p>
+  </section>
+
+  <section class="project project--details project--right">
+    <span class="project__label project__label--default">Outcomes</span>
+    <p>• −29% time-to-rebalance across pilots<br>
+       • +18% advisor satisfaction (SUS + verbatims)<br>
+       • 0 critical accessibility issues in audit<br>
+       • Ops team reduced escalations by 22%</p>
+  </section>
+
+  <section class="project project--details project--left">
+    <span class="project__label project__label--default">Next</span>
+    <p>Multi-entity households, scenario backtesting, and AI-assisted review narratives that summarize drift, cash needs, and compliance notes per meeting.</p>
+  </section>
+</section>
+
+<!-- DISCOVERY (zoomed tiles) -->
+<section class="content content--full content--cutoff" id="fintech-discovery">
+  <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+    <div class="grid__img" style="background-image:url(img/42.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/10.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/40.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/19.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/1.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/12.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/38.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/13.webp)"></div>
+    <div class="grid__img" style="background-image:url(img/36.webp)"></div>
+  </div>
+  <div class="content__title">
+    <h2 class="content__title-main">Research Synthesis & Prototyping</h2>
+    <p class="type-tiny right end">Task graphs · Data cards · Safe-edit flows</p>
+  </div>
+</section>
+
+<!-- INSIGHT -->
+<section class="content content--padded" id="fintech-insight">
+  <h4 class="type-tiny">Insight</h4>
+  <p class="content__text">For advisors, speed = trust. The winning pattern: show high-signal client context beside actions, not behind modal steps.</p>
+  <h4 class="type-tiny" style="margin-top:1.25rem">Next</h4>
+  <p class="content__text">Narrative meeting briefs and deeper household modeling unlock the next step-change in advisor productivity.</p>
+</section>
+
+
+
+
+
+
+<!-- ===== Reusable full-page panel (hidden) ===== -->
+<div class="panel" aria-hidden="true" hidden>
+  <button class="panel__close type-tiny" aria-label="Close panel">Close ✕</button>
+  <div class="panel__progress-bar"></div>
+  <div class="panel__counter"><h1>0</h1></div>
+
+  <div class="panel__scroller">
+    <!-- 1 -->
+    <section class="intro">
+      <h1>Zack Gort, Designer</h1>
+      <h2>{Digital Product, E-commerce, Consumer}</h2>
+    </section>
+
+    <!-- 2 -->
+    <section class="hero-img">
+      <img src="https://images.unsplash.com/photo-1504890001746-a9a68eda46e2?q=80&w=1687&auto=format&fit=crop&ixlib=rb-4.1.0" alt="DJI Spark drone" />
+    </section>
+
+    <!-- 3 -->
+    <section class="header">
+      <h1>It's Not Just About What You See — It's About How You Choose to See It</h1>
+    </section>
+
+    <!-- 4 -->
+    <section class="about">
+      <div class="row">
+        <div class="copy">
+          <p>Innovation doesn't follow rules — it rewrites them. Creativity lives in contrast: logic meets spontaneity, design meets disruption.</p>
+          <p>We craft digital experiences that challenge norms, stir curiosity, and spark movement. This is where structure dances with spontaneity.</p>
+        </div>
+        <div class="img">
+          <img src="https://images.unsplash.com/photo-1742753103280-52d5efc0709b?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Classic and modern tech gadgets side by side" />
+        </div>
+      </div>
+      <h1>Creativity in Motion</h1>
+    </section>
+
+    <!-- 5 -->
+    <section class="banner-img">
+      <img src="https://images.unsplash.com/photo-1702471897038-3d3c88379fb0?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Table with fruit and VR headset" />
+    </section>
+
+    <!-- 6 -->
+    <section class="story">
+      <h1>Lead the Experience</h1>
+      <h1>Live the Detail</h1>
+      <h1>Break Every Boundary</h1>
+    </section>
+
+    <!-- 7 -->
+    <section class="concept-img">
+      <img src="https://images.unsplash.com/photo-1696258686454-60082b2c33e2?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Spot robot side view" />
+    </section>
+
+    <!-- 8 -->
+    <section class="outro">
+      <h1>Tomorrow is Already Here</h1>
+    </section>
+  </div>
+</div>
+<!-- ===== /panel ===== -->
+
+
+
+
 
   <!-- Contact -->
   <section class="content content--padded" id="contact">
@@ -867,31 +1013,79 @@
   </footer>
 </main>
 
-<!-- ===== Cursor Script (single, deduped) ===== -->
 
+
+<script>document.documentElement.classList.add('js');</script>
+<script>
+// --- Your case-study content for the overlay ---
+const CASE_STUDIES = {
+  social: { // TikTok
+    title: "TikTok for Business",
+    sub: "Brand Activation (Contentful) · Code & Theory",
+    slides: {
+      hero: "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
+      header: "“Razzle Dazzle”",
+      aboutCopy: [
+        "2021 was the year TikTok exploded. Goal: expand B2B via a marketing portal into their marketplace ecosystem.",
+        "I led discovery & research, competitive analysis, and content audits while guiding taxonomy & content strategy for a Contentful migration and B2B resource hub."
+      ],
+      aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
+      banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
+      storyLines: [
+        "Lead discovery & research",
+        "Map taxonomy & content strategy",
+        "Deliver B2B portal on Contentful"
+      ],
+      concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
+      outro: "To flow, you should know"
+    }
+  },
+
+  ecommerce: { // GNC
+    title: "General Nutrition Centers (GNC)",
+    sub: "{Shopify E-commerce} · Elva Design Group",
+    slides: {
+      hero: "https://i.ibb.co/7xd84m10/ZAX02375.jpg",
+      header: "“If the bar ain’t bending, you’re just pretending”",
+      aboutCopy: [
+        "GNC asked us to redesign and replatform on Shopify after exiting bankruptcy; as of 2024 they exceeded $500M revenue.",
+        "As principal UX, I owned discovery, IA & taxonomy, wireframing + feature prototyping, and consumer re-engagement."
+      ],
+      aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
+      banner: "https://i.ibb.co/spHgPH6N/1.webp",
+      storyLines: [
+        "Discovery → IA & taxonomy",
+        "Wireframes & prototyping",
+        "Consumer re-engagement"
+      ],
+      concept: "https://i.ibb.co/ynjWYqv8/2.webp",
+      outro: "Mobile-minded. Outcome-driven."
+    }
+  }
+};
+</script>
 
 <!-- ===== Core Demo JS (deduped) ===== -->
 <script>
-  // utils
-  const preloadImages = (selector = 'img') =>
-    new Promise(resolve => imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve));
+  // ---------- Utils ----------
+  const preloadImages = (selector = '.grid__img, .grid__img-inner') =>
+    new Promise((resolve) =>
+      imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve)
+    );
 
-  // smooth scroll (expose lenis globally)
   const initSmoothScrolling = () => {
     window.lenis = new Lenis({ lerp: 0.15 });
     window.lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add(time => window.lenis.raf(time * 1000));
+    gsap.ticker.add((time) => window.lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
   };
 
-  // Intercept in-page hash links so <base> doesn't hijack them
+  // In-page anchors should scroll with Lenis (the <base> tag would otherwise hijack)
   function enableHashScrollWithLenis() {
     document.addEventListener('click', (e) => {
       const link = e.target.closest('a[href^="#"]');
       if (!link) return;
-
-      const selector = link.getAttribute('href'); // e.g. "#work"
-      const target = document.querySelector(selector);
+      const target = document.querySelector(link.getAttribute('href'));
       if (!target) return;
 
       e.preventDefault();
@@ -903,185 +1097,180 @@
     });
   }
 
-  gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.normalizeScroll(true);         // tame momentum overshoot
+ScrollTrigger.defaults({ anticipatePin: 1 }); // start pinning a touch early
 
-// helper at top of your JS (after gsap.registerPlugin)
-const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) document.body.classList.add('no-anim');
 
+  const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
 
-  // Shared helper for the 3D “fan-in” calcs
-  function calculateInitialTransform(el, offset = 250, maxRot = 300, maxZ = 2000) {
-    const vc = { w: innerWidth / 2, h: innerHeight / 2 };
-    const rect = el.getBoundingClientRect();
-    const ec = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    const angle = Math.atan2(Math.abs(vc.h - ec.y), Math.abs(vc.w - ec.x));
-    const tx = Math.abs(Math.cos(angle) * offset);
-    const ty = Math.abs(Math.sin(angle) * offset);
-    const maxD = Math.hypot(vc.w, vc.h);
-    const curD = Math.hypot(vc.w - ec.x, vc.h - ec.y);
-    const factor = curD / maxD;
-    const rx = ((ec.y < vc.h ? -1 : 1) * (ty / offset) * maxRot * factor);
-    const ry = ((ec.x < vc.w ? 1 : -1) * (tx / offset) * maxRot * factor);
-    const tz = maxZ * factor;
-    return { x: ec.x < vc.w ? -tx : tx, y: ec.y < vc.h ? -ty : ty, z: tz, rotateX: rx, rotateY: ry };
-  }
-
-  // Every function below loops all matching sections ===========================
+  // ---------- Animations ----------
   function animateFrame() {
-    const frames = document.querySelectorAll('.frame');
-    frames.forEach((frame) => {
-      const title = frame.querySelector('.frame__title');
-      if (!title) return;
-      gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: { trigger: frame, start: 'clamp(top bottom)', end: 'bottom top', scrub: true }
-      })
-      .to(frame, { yPercent: 35, scale: 0.95, startAt: { filter: 'brightness(100%)' }, filter: 'brightness(30%)' })
-      .to(title, { xPercent: -80 }, 0);
-    });
-  }
+    const frame = document.querySelector('.frame');
+    if (!frame) return;
+    const title = frame.querySelector('.frame__title');
+    if (!title) return;
 
-function animateFirstGrid() {
-  document.querySelectorAll('[data-grid-first]').forEach((grid) => {
-    const imgs = grid.querySelectorAll('.grid__img');
-    if (!imgs.length) return;
-    const section = getPinTarget(grid);
+    if (prefersReducedMotion) {
+      // Subtle fade only
+      gsap.from(frame, {
+        autoAlpha: 0,
+        duration: 0.6,
+        ease: 'power1.out',
+        scrollTrigger: { trigger: frame, start: 'top 95%', toggleActions: 'play none none none' }
+      });
+      return;
+    }
+
     gsap.timeline({
-      defaults: { ease: 'sine' },
+      defaults: { ease: 'none' },
       scrollTrigger: {
-        trigger: grid,
-        start: 'center center',
+        trigger: frame,
+        start: 'clamp(top bottom)',
+        end: 'bottom top',
+        scrub: true
+      }
+    })
+    .to(frame, {
+      yPercent: 35,
+      scale: 0.95,
+      startAt: { filter: 'brightness(100%)' },
+      filter: 'brightness(30%)'
+    })
+    .to(title, { xPercent: -80 }, 0);
+  }
+function animateSecondGrid() {
+  document.querySelectorAll('[data-grid-second]').forEach((grid) => {
+    const imgs = grid.querySelectorAll('.grid__img');
+    const items = grid.querySelectorAll('.grid__item');
+    if (!imgs.length) return;
+
+    if (prefersReducedMotion) {
+      gsap.from([...imgs, ...items], {
+        autoAlpha: 0, y: 20, stagger: 0.05, duration: 0.4, ease: 'power1.out',
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      return;
+    }
+
+    const mid = Math.floor(imgs.length / 2);
+    const section = getPinTarget(grid);
+
+    gsap.timeline({
+      defaults: { ease: 'power3' },
+      scrollTrigger: {
+        trigger: section,      // section = pin target
+        start: 'top top',      // unified start
         end: '+=250%',
         pin: section,
+        pinSpacing: true,
         scrub: 0.5
       }
     })
-    .from(imgs, { stagger: 0.07, y: () => gsap.utils.random(innerHeight, innerHeight * 1.8) })
-    .from(section.querySelector('.content__title'), { duration: 1.2, ease: 'power4', yPercent: 180, autoAlpha: 0 }, 0.8);
+    .from(imgs, {
+      stagger: { amount: 0.3, from: 'center' },
+      y: () => innerHeight,
+      transformOrigin: '50% 0%',
+      rotation: (i) => {
+        const dist = Math.abs(i - mid);
+        return i < mid ? dist * 3 : dist * -3;
+      }
+    })
+    .from(items, { stagger: { amount: 0.3, from: 'center' }, yPercent: 100, autoAlpha: 0 }, 0);
+  });
+}
+function animateFifthGrid() {
+  document.querySelectorAll('[data-grid-fifth]').forEach((grid) => {
+    const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
+
+    if (prefersReducedMotion) {
+      gsap.from(imgs, {
+        autoAlpha: 0, y: 20, stagger: 0.05, duration: 0.4, ease: 'power1.out',
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      return;
+    }
+
+    const section = getPinTarget(grid);
+
+    gsap.timeline({
+      defaults: { ease: 'sine' },
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',     // unified start
+        end: '+=250%',
+        pin: section,
+        pinSpacing: true,
+        scrub: 0.3
+      }
+    })
+    .set(grid, { perspective: 1000 })
+    .from(imgs, {
+      stagger: { amount: 0.4, from: 'random', grid: [4, 9] },
+      y: () => innerHeight,
+      rotationX: -70,
+      transformOrigin: '50% 0%',
+      z: -900,
+      autoAlpha: 0
+    });
+  });
+}
+function animateSixthGrid() {
+  document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
+    const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
+
+    if (prefersReducedMotion) {
+      gsap.from(imgs, {
+        autoAlpha: 0, y: 16, scale: 0.98, stagger: 0.04, duration: 0.35,
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      return;
+    }
+
+    const section = getPinTarget(grid);
+
+    gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: '+=180%',
+        pin: section,
+        pinSpacing: true,
+        scrub: 0.6
+      }
+    })
+    .from(imgs, {
+      stagger: { amount: 0.25, from: 'edges', grid: [3, 3] },
+      scale: 0.7,
+      autoAlpha: 0
+    })
+    .from(grid, { scale: 0.85, skewY: 3 }, 0);
   });
 }
 
-
-
-  function animateSecondGrid() {
-    document.querySelectorAll('[data-grid-second]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
-      const mid = Math.floor(imgs.length / 2);
-      gsap.timeline({
-        defaults: { ease: 'power3' },
-        scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: getPinTarget(grid), scrub: 0.5 }
-      })
-      .from(imgs, {
-        stagger: { amount: 0.3, from: 'center' },
-        y: innerHeight,
-        transformOrigin: '50% 0%',
-        rotation: pos => {
-          const dist = Math.abs(pos - mid);
-          return pos < mid ? dist * 3 : dist * -3;
-        }
-      })
-      .from(grid.querySelectorAll('.grid__item'), { stagger: { amount: 0.3, from: 'center' }, yPercent: 100, autoAlpha: 0 }, 0);
-    });
-  }
-
-  function animateFourthGrid() {
-    document.querySelectorAll('[data-grid-fourth]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
-      gsap.timeline({
-        defaults: { ease: 'expo' },
-        scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: getPinTarget(grid), scrub: 0.2 }
-      })
-      .set(grid, { perspective: 1000 })
-      .fromTo(imgs, {
-        x: (_, el) => calculateInitialTransform(el).x,
-        y: (_, el) => calculateInitialTransform(el).y,
-        z: (_, el) => calculateInitialTransform(el).z,
-        rotateX: (_, el) => calculateInitialTransform(el).rotateX * 0.5,
-        rotateY: (_, el) => calculateInitialTransform(el).rotateY,
-        autoAlpha: 0,
-        scale: 0.7
-      }, {
-        x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0,
-        autoAlpha: 1, scale: 1,
-        stagger: { amount: 0.2, from: 'center', grid: [4,9] }
-      });
-    });
-  }
-
-  function animateFourthV2Grid() {
-    document.querySelectorAll('[data-grid-fourth-v2]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
-      gsap.timeline({
-        defaults: { ease: 'power4' },
-        scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: getPinTarget(grid), scrub: 0.2 }
-      })
-      .set(grid, { perspective: 1200 })
-      .fromTo(imgs, {
-        x: (_, el) => calculateInitialTransform(el, 900).x,
-        y: (_, el) => calculateInitialTransform(el, 600).y,
-        z: (_, el) => calculateInitialTransform(el, 250, -160, -3000).z,
-        rotateX: (_, el) => calculateInitialTransform(el, 250, -160, -3000).rotateX,
-        rotateY: (_, el) => calculateInitialTransform(el, 250, -160, -3000).rotateY,
-        autoAlpha: 0,
-        scale: 0.4
-      }, {
-        x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0,
-        autoAlpha: 1, scale: 1,
-        stagger: { amount: 0.15, from: 'center', grid: [4,9] }
-      });
-    });
-  }
-
-  function animateFifthGrid() {
-    document.querySelectorAll('[data-grid-fifth]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
-      gsap.timeline({
-        defaults: { ease: 'sine' },
-        scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: getPinTarget(grid), scrub: 0.3 }
-      })
-      .set(grid, { perspective: 1000 })
-      .from(imgs, {
-        stagger: { amount: 0.4, from: 'random', grid: [4,9] },
-        y: innerHeight,
-        rotationX: -70,
-        transformOrigin: '50% 0%',
-        z: -900,
-        autoAlpha: 0
-      });
-    });
-  }
-
-  function animateSixthGrid() {
-    document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
-      gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: grid,
-          start: 'center center',
-          end: '+=200%',
-          pin: getPinTarget(grid),
-          scrub: 0.5
-        }
-      })
-      .from(imgs, {
-        stagger: { amount: 0.03, from: 'edges', grid: [3,3] },
-        scale: 0.7,
-        autoAlpha: 0
-      })
-      .from(grid, { scale: 0.7, skewY: 5 }, 0);
-    });
-  }
 
   function animateSeventhGrid() {
     document.querySelectorAll('[data-grid-seventh]').forEach((grid) => {
       const imgs = grid.querySelectorAll('.grid__img');
       if (!imgs.length) return;
+
+      if (prefersReducedMotion) {
+        gsap.from(imgs, {
+          autoAlpha: 0, y: 20, stagger: 0.06, duration: 0.35, ease: 'power1.out',
+          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+        });
+        gsap.from(grid.querySelectorAll('.grid__item'), {
+          autoAlpha: 0, y: 14, duration: 0.35,
+          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+        });
+        return;
+      }
+
       gsap.timeline({
         defaults: { ease: 'power1' },
         scrollTrigger: {
@@ -1089,19 +1278,21 @@ function animateFirstGrid() {
           start: 'center center',
           end: '+=150%',
           pin: getPinTarget(grid),
+          pinSpacing: true,
           scrub: 0.5
         }
       })
       .fromTo(imgs, { yPercent: -102 }, { stagger: 0.08, yPercent: 0 })
-      .from([...imgs].map(img => img.querySelector('.grid__img-inner')), {
-        stagger: 0.08,
-        yPercent: 102
-      }, 0)
-      .from(grid.querySelectorAll('.grid__item'), {
-        yPercent: 20,
-        stagger: imgs.length / 2 * 0.08,
-        autoAlpha: 0
-      }, 0);
+      .from(
+        [...imgs].map((img) => img.querySelector('.grid__img-inner')),
+        { stagger: 0.08, yPercent: 102 },
+        0
+      )
+      .from(
+        grid.querySelectorAll('.grid__item'),
+        { yPercent: 20, stagger: (imgs.length / 2) * 0.08, autoAlpha: 0 },
+        0
+      );
     });
   }
 
@@ -1109,9 +1300,25 @@ function animateFirstGrid() {
     document.querySelectorAll('[data-grid-eighth]').forEach((grid) => {
       const imgs = grid.querySelectorAll('.grid__img');
       if (!imgs.length) return;
+
+      if (prefersReducedMotion) {
+        gsap.from(imgs, {
+          autoAlpha: 0, y: 16, stagger: 0.05, duration: 0.35,
+          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+        });
+        return;
+      }
+
       gsap.timeline({
         defaults: { ease: 'expo' },
-        scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: getPinTarget(grid), scrub: true }
+        scrollTrigger: {
+          trigger: grid,
+          start: 'center center',
+          end: '+=250%',
+          pin: getPinTarget(grid),
+          pinSpacing: true,
+          scrub: true
+        }
       })
       .set(grid, { perspective: 2000 })
       .from(imgs, {
@@ -1121,57 +1328,554 @@ function animateFirstGrid() {
         z: -200,
         yPercent: 10
       })
-      .from(imgs, {
-        stagger: { amount: 0.8, from: 'start' },
-        duration: 0.2,
-        autoAlpha: 0
-      }, 0);
+      .from(imgs, { stagger: { amount: 0.8, from: 'start' }, duration: 0.2, autoAlpha: 0 }, 0);
     });
   }
 
-  function animateNinthGrid() {
-    document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
-      gsap.timeline({
-        defaults: { ease: 'power3' },
-        scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: getPinTarget(grid), scrub: true }
-      })
-      .from(imgs, {
-        transformOrigin: '100% -450%',
-        stagger: 0.07,
-        scaleX: 1.05,
-        skewX: 15,
-        xPercent: 50,
-        rotation: -10,
-        autoAlpha: 0
+function animateNinthGrid() {
+  document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
+    const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
+
+    if (prefersReducedMotion) {
+      gsap.from(imgs, {
+        autoAlpha: 0, y: 18, stagger: 0.05, duration: 0.35,
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
       });
+      const caption = getPinTarget(grid).querySelector('.content__title');
+      if (caption) {
+        gsap.from(caption, {
+          autoAlpha: 0, y: 16, duration: 0.35,
+          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+        });
+      }
+      return;
+    }
+
+    const section = getPinTarget(grid);
+    const caption = section.querySelector('.content__title');
+
+    const tl = gsap.timeline({
+      defaults: { ease: 'power3' },
+      scrollTrigger: {
+        trigger: section,     // unified trigger
+        start: 'top top',
+        end: '+=200%',
+        pin: section,
+        pinSpacing: true,
+        scrub: true
+      }
+    });
+
+    tl.from(imgs, {
+      transformOrigin: '100% -450%',
+      stagger: 0.07,
+      scaleX: 1.05,
+      skewX: 15,
+      xPercent: 50,
+      rotation: -10,
+      autoAlpha: 0
+    });
+
+    if (caption) tl.from(caption, { autoAlpha: 0, yPercent: 40 }, 0.35);
+  });
+}
+
+  // PROCESS (your new two-column sections)
+  function animateProcessSections() {
+    document.querySelectorAll('[id$="-process"]').forEach((process) => {
+      // Intro block
+      const intro = process.querySelector('.project--intro');
+      const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
+
+      if (prefersReducedMotion) {
+        if (intro) {
+          gsap.from(intro, {
+            autoAlpha: 0, y: 16, duration: 0.35,
+            scrollTrigger: { trigger: intro, start: 'top 90%', toggleActions: 'play none none none' }
+          });
+        }
+        if (details.length) {
+          gsap.from(details, {
+            autoAlpha: 0, y: 14, duration: 0.3, stagger: 0.08,
+            scrollTrigger: { trigger: process, start: 'top 85%', toggleActions: 'play none none none' }
+          });
+        }
+        return;
+      }
+
+      if (intro) {
+        gsap.from(intro, {
+          autoAlpha: 0, y: 24, duration: 0.6, ease: 'power2.out',
+          scrollTrigger: { trigger: intro, start: 'top 80%', toggleActions: 'play none none reverse' }
+        });
+      }
+
+      if (details.length) {
+        gsap.from(details, {
+          autoAlpha: 0, y: 30, duration: 0.5, ease: 'power2.out',
+          stagger: 0.12,
+          scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%', toggleActions: 'play none none reverse' }
+        });
+      }
     });
   }
 
 function initAnimations() {
-  animateFrame();
-  animateFirstGrid();      // #first-grid
-  animateSeventhGrid();    // UX/UI (data-grid-seventh)
-  animateSecondGrid();     // #work
-  animateFourthGrid();     // #brands-grid
-  animateFourthV2Grid();   // #brands-grid-2
-  animateFifthGrid();      // #explorations
-  animateSixthGrid();      // #unspoken (TikTok)
-  animateEighthGrid();     // #style-grid (GNC)
-  animateNinthGrid();      // #gallery
+  animateFrame();       // header
+  animateSeventhGrid(); // UX/UI (after About)
+  animateSecondGrid();  // Work
+  animateNinthGrid();   // Brands + Agency
+  animateFifthGrid();   // HERO (case studies)
+  animateSixthGrid();   // DISCOVERY (case studies)
+  if (document.querySelector('[data-grid-eighth]')) {
+    animateEighthGrid(); // only if you add one later
+  }
+  animateProcessSections(); // PROCESS (columns)
 }
 
-
-  // Boot
+  // ---------- Boot ----------
   initSmoothScrolling();
   enableHashScrollWithLenis();
 
-preloadImages('.grid__img, .grid__img-inner').then(() => {
+  preloadImages().then(() => {
     document.body.classList.remove('loading');
     initAnimations();
+    ScrollTrigger.refresh(true);
     window.scrollTo(0, 0);
   });
+
+
+  // Keep triggers healthy on resize/orientation changes
+  window.addEventListener('resize', () => ScrollTrigger.refresh());
+
+
+
+  function a11yifyGridImages() {
+  document.querySelectorAll('.grid__img').forEach((el) => {
+    el.setAttribute('role', 'img');
+    if (!el.hasAttribute('aria-label')) {
+      const url = (el.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+      const file = url.split('/').pop()?.split('.')[0] || '';
+      el.setAttribute('aria-label', el.dataset.alt || file.replace(/[-_]/g, ' ').trim() || 'Gallery image');
+    }
+  });
+}
+
+// after initAnimations():
+a11yifyGridImages();
+
+
+
+
+
+/* =========================================================
+   Overlay routing for Work/Tags:
+   - BNY (#fintech): scrolls in-page (handled by your existing hash→Lenis code)
+   - TikTok + GNC: open fullscreen panel with horizontal scroller
+   Paste this AFTER your current scripts.
+========================================================= */
+(() => {
+  const panel = document.querySelector('.panel');
+  if (!panel) return;
+
+  // Elements inside panel
+  const closeBtn  = panel.querySelector('.panel__close');
+  const scroller  = panel.querySelector('.panel__scroller');
+  const counterEl = panel.querySelector('.panel__counter h1');
+  const barEl     = panel.querySelector('.panel__progress-bar');
+
+  // ---------- Scoped panel CSS (injected once) ----------
+  if (!document.getElementById('panel-inline-styles')) {
+    const style = document.createElement('style');
+    style.id = 'panel-inline-styles';
+    style.textContent = `
+      .panel[hidden]{display:none!important;}
+      .panel{position:fixed; inset:0; z-index:10000; overflow:hidden; background:#000; color:#fff;}
+      .panel__close{
+        position:fixed; top:.75rem; right:.75rem; z-index:10003;
+        border:1px solid var(--color-border,#444); background:rgba(20,20,20,.6); color:#fff;
+        border-radius:999px; padding:.5rem .75rem; font-size:12px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
+        backdrop-filter: blur(6px);
+      }
+      .panel__close:focus{outline:2px solid #fff4; outline-offset:2px;}
+      .panel__progress-bar{position:fixed; top:0; left:0; width:100vw; height:8px; transform:scaleX(0); transform-origin:left; background:#fff; z-index:10002;}
+      .panel__counter{position:fixed; bottom:1rem; right:2.5rem; z-index:10002; text-shadow:5px 5px 15px rgb(0 0 0 / 15%);}
+      .panel__scroller{position:relative; height:100vh; display:flex; transform:translateX(0); will-change:transform;}
+      .panel section{position:relative; height:100vh; display:flex; justify-content:center; align-items:center;}
+      .panel img{width:100%; height:100%; object-fit:cover;}
+
+      /* Section widths matching your reference */
+      .panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:90vw;}
+      .panel .header,.panel .concept-img{width:100vw;}
+
+      /* Simple type (inherits site fonts) */
+      .panel h1{font-weight:400; text-transform:uppercase; line-height:1; letter-spacing:-.02em; font-size:10vw; padding-top:.25rem; margin:0;}
+      .panel h2{font-weight:700; font-size:2rem; margin:0;}
+      .panel p{font-weight:500; font-size:1rem; margin:0;}
+
+      /* Colors/spacing like prototype */
+      .panel .intro{padding:2rem; background:#000; color:#f6f6f6;}
+      .panel .header{padding:2rem; background:#f4d35e; color:#421c06;}
+      .panel .about{padding:4rem 3rem 1rem 2rem; background:#f95738; color:#481107;}
+      .panel .story{padding:4rem 2rem 2rem 2rem; background:#ee964b; color:#3f170b;}
+      .panel .outro{padding:2rem; background:#ebebd3; color:#302418;}
+      .panel .about,.panel .intro,.panel .header,.panel .story{display:flex; justify-content:space-between; align-items:flex-start;}
+      .panel .intro,.panel .about,.panel .story{flex-direction:column;}
+      .panel .about .row{display:flex; gap:2rem; justify-content:space-between;}
+      .panel .about .row p{width:50%; margin-bottom:1rem;}
+      .panel .about .row .copy{flex:3;}
+      .panel .about .row .img{flex:3; aspect-ratio:7/5;}
+    `;
+    document.head.appendChild(style);
+  }
+
+  // ---------- Intercept clicks for overlay panels ----------
+  // Use capture + stopImmediatePropagation so we beat the global hash→Lenis handler.
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[data-panel]');
+    if (!link) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    // Pull custom text if provided, otherwise fallback to link text
+    const title = link.dataset.panelTitle || link.textContent.trim() || 'Case Study';
+    const sub   = link.dataset.panelSub || '{Digital Product, E-commerce, Consumer}';
+    const hero  = link.dataset.panelHero || ''; // optional override image
+
+    openPanel({ title, sub, hero, trigger: link });
+  }, true);
+
+  // ---------- Open / Close ----------
+  let prevActive = null;
+  let destroyScroller = null;
+
+function openPanel({ title, sub, hero, trigger }) {
+  if (!panel.hasAttribute('hidden')) return;
+
+  const key = trigger?.dataset.panel || "";   // "social" | "ecommerce"
+  const data = CASE_STUDIES[key];
+
+  prevActive = trigger || document.activeElement;
+
+  // Cache nodes
+  const intro = panel.querySelector('.intro');
+  const heroImg = panel.querySelector('.hero-img img');
+  const header = panel.querySelector('.header h1');
+  const about  = panel.querySelector('.about');
+  const aboutCopyEls = about ? about.querySelectorAll('.copy p') : [];
+  const aboutImg = about ? about.querySelector('.about .img img') : null;
+  const banner = panel.querySelector('.banner-img img');
+  const story  = panel.querySelector('.story');
+  const storyLines = story ? story.querySelectorAll('h1') : [];
+  const concept = panel.querySelector('.concept-img img');
+  const outro  = panel.querySelector('.outro h1');
+
+  // Populate
+  if (data) {
+    if (intro) {
+      const h1 = intro.querySelector('h1');
+      const h2 = intro.querySelector('h2');
+      if (h1) h1.textContent = data.title;
+      if (h2) h2.textContent = data.sub;
+    }
+    if (heroImg) heroImg.src = data.slides.hero;
+    if (header) header.textContent = data.slides.header;
+
+    if (about) {
+      if (aboutCopyEls[0]) aboutCopyEls[0].textContent = data.slides.aboutCopy[0] || "";
+      if (aboutCopyEls[1]) aboutCopyEls[1].textContent = data.slides.aboutCopy[1] || "";
+      if (aboutImg) aboutImg.src = data.slides.aboutImg;
+    }
+
+    if (banner) banner.src = data.slides.banner;
+
+    if (story && storyLines.length >= 3) {
+      storyLines[0].textContent = data.slides.storyLines[0] || "";
+      storyLines[1].textContent = data.slides.storyLines[1] || "";
+      storyLines[2].textContent = data.slides.storyLines[2] || "";
+    }
+
+    if (concept) concept.src = data.slides.concept;
+    if (outro)  outro.textContent = data.slides.outro;
+  } else {
+    // Fallback to whatever was on the link
+    if (intro) {
+      const h1 = intro.querySelector('h1');
+      const h2 = intro.querySelector('h2');
+      if (h1) h1.textContent = title || 'Case Study';
+      if (h2) h2.textContent = sub   || '{Digital Product, E-commerce, Consumer}';
+    }
+    if (hero && heroImg) heroImg.src = hero;
+  }
+
+  // Show panel + lock page
+  panel.removeAttribute('hidden');
+  panel.setAttribute('aria-hidden', 'false');
+
+  const htmlOverflow = document.documentElement.style.overflow;
+  const bodyOverflow = document.body.style.overflow;
+  document.documentElement.dataset._panelHtmlOverflow = htmlOverflow || '';
+  document.body.dataset._panelBodyOverflow = bodyOverflow || '';
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+
+  try { window.lenis && window.lenis.stop && window.lenis.stop(); } catch {}
+  try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.disable(false, true)); } } catch {}
+
+  destroyScroller = initInfiniteScroller({ scroller, counterEl, barEl });
+  closeBtn?.focus();
+
+  const onCloseClick = () => closePanel();
+  const onEsc = (ev) => { if (ev.key === 'Escape') closePanel(); };
+
+  closeBtn?.addEventListener('click', onCloseClick);
+  document.addEventListener('keydown', onEsc);
+  panel._unbind = () => {
+    closeBtn?.removeEventListener('click', onCloseClick);
+    document.removeEventListener('keydown', onEsc);
+  };
+}
+
+
+  function closePanel() {
+    if (panel.hasAttribute('hidden')) return;
+
+    // Teardown local scroller
+    destroyScroller && destroyScroller();
+    destroyScroller = null;
+
+    // Resume page motion
+    try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.enable()); ScrollTrigger.refresh(); } } catch {}
+    try { window.lenis && window.lenis.start && window.lenis.start(); } catch {}
+
+    // Unlock page scroll
+    document.documentElement.style.overflow = document.documentElement.dataset._panelHtmlOverflow || '';
+    document.body.style.overflow = document.body.dataset._panelBodyOverflow || '';
+
+    panel._unbind && panel._unbind();
+    panel.setAttribute('aria-hidden', 'true');
+    panel.setAttribute('hidden', '');
+
+    // Reset progress UI
+    if (barEl) barEl.style.transform = 'scaleX(0)';
+    if (counterEl) counterEl.textContent = '0';
+
+    // Restore focus
+    if (prevActive && prevActive.focus) prevActive.focus();
+  }
+
+  // ---------- Infinite horizontal scroller inside the panel ----------
+  function initInfiniteScroller({ scroller, counterEl, barEl }) {
+    const bufferSize = 2;
+    const smooth = 0.05;
+    const touchSensitivity = 2.5;
+
+    let targetX = 0;
+    let currentX = 0;
+    let isAnimating = false;
+
+    let currentScale = 0;
+    let targetScale = 0;
+    let lastPct = 0;
+
+    let isDown = false;
+    let lastX = 0;
+    let v = 0;
+    let lastT = 0;
+
+    let seqWidth = 0;
+    let raf = null;
+
+    const lerp = (a,b,t) => a + (b-a)*t;
+
+    const originals = () =>
+      Array.from(scroller.querySelectorAll(':scope > section:not(.clone-section)'));
+
+    function measureSequenceWidth() {
+      let total = 0;
+      originals().forEach(sec => total += sec.getBoundingClientRect().width);
+      return total || window.innerWidth;
+    }
+
+    function clearClones() {
+      scroller.querySelectorAll('.clone-section').forEach(n => n.remove());
+    }
+
+    function buildClones() {
+      const base = originals();
+      // before
+      for (let i = -bufferSize; i < 0; i++) {
+        base.forEach((sec, idx) => {
+          const c = sec.cloneNode(true);
+          c.classList.add('clone-section');
+          c.setAttribute('data-clone-index', `${i}-${idx}`);
+          scroller.appendChild(c);
+        });
+      }
+      // after
+      for (let i = 1; i <= bufferSize; i++) {
+        base.forEach((sec, idx) => {
+          const c = sec.cloneNode(true);
+          c.classList.add('clone-section');
+          c.setAttribute('data-clone-index', `${i}-${idx}`);
+          scroller.appendChild(c);
+        });
+      }
+    }
+
+    function setup() {
+      cancel();
+      clearClones();
+      seqWidth = measureSequenceWidth();
+      buildClones();
+
+      scroller.style.width = `${seqWidth * (1 + bufferSize * 2)}px`;
+      targetX = seqWidth * bufferSize;
+      currentX = targetX;
+      scroller.style.transform = `translateX(-${currentX}px)`;
+
+      updateProgress(true);
+      if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
+    }
+
+    function cancel() {
+      if (raf) cancelAnimationFrame(raf);
+      raf = null;
+      isAnimating = false;
+    }
+
+    function boundaryReset() {
+      let did = false;
+      if (currentX > seqWidth * (bufferSize + 0.5)) {
+        targetX -= seqWidth;
+        currentX -= seqWidth;
+        did = true;
+      } else if (currentX < seqWidth * (bufferSize - 0.5)) {
+        targetX += seqWidth;
+        currentX += seqWidth;
+        did = true;
+      }
+      if (did) scroller.style.transform = `translateX(-${currentX}px)`;
+      return did;
+    }
+
+    function updateProgress(force = false) {
+      const base = seqWidth * bufferSize;
+      const pos = (currentX - base) % seqWidth;
+      let pct = (pos / seqWidth) * 100;
+      if (pct < 0) pct = 100 + pct;
+
+      const wrapping =
+        (lastPct > 80 && pct < 20) ||
+        (lastPct < 20 && pct > 80) ||
+        force;
+
+      if (counterEl) counterEl.textContent = `${Math.round(pct)}`;
+      targetScale = pct / 100;
+
+      if (wrapping) {
+        currentScale = targetScale;
+        if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
+      }
+
+      lastPct = pct;
+    }
+
+    function animate(forceReset = false) {
+      currentX = lerp(currentX, targetX, smooth);
+      scroller.style.transform = `translateX(-${currentX}px)`;
+      updateProgress(forceReset);
+
+      if (!forceReset) currentScale = lerp(currentScale, targetScale, smooth);
+      if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
+
+      if (Math.abs(targetX - currentX) > 0.01) {
+        raf = requestAnimationFrame(() => animate());
+      } else {
+        isAnimating = false;
+        raf = null;
+      }
+    }
+
+    // Events (on the panel so page remains locked)
+    const onWheel = (e) => {
+      e.preventDefault();
+      targetX += e.deltaY;
+      const reset = boundaryReset();
+      if (!isAnimating) {
+        isAnimating = true;
+        raf = requestAnimationFrame(() => animate(reset));
+      }
+    };
+    const onTouchStart = (e) => {
+      isDown = true;
+      lastX = e.touches[0].clientX;
+      lastT = Date.now();
+      targetX = currentX;
+    };
+    const onTouchMove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.touches[0].clientX;
+      const dx = lastX - x;
+      targetX += dx * 2.5;
+
+      const now = Date.now();
+      const dt = now - lastT;
+      if (dt > 0) v = (dx / dt) * 15;
+      lastX = x; lastT = now;
+
+      const reset = boundaryReset();
+      if (!isAnimating) {
+        isAnimating = true;
+        raf = requestAnimationFrame(() => animate(reset));
+      }
+    };
+    const onTouchEnd = () => {
+      isDown = false;
+      if (Math.abs(v) > 0.1) {
+        targetX += v * 20;
+        const decay = () => {
+          v *= 0.95;
+          if (Math.abs(v) > 0.1) {
+            targetX += v;
+            const reset = boundaryReset();
+            if (reset) updateProgress(true);
+            raf = requestAnimationFrame(decay);
+          }
+        };
+        raf = requestAnimationFrame(decay);
+      }
+    };
+    const onResize = () => setup();
+
+    panel.addEventListener('wheel', onWheel, { passive: false });
+    panel.addEventListener('touchstart', onTouchStart, { passive: true });
+    panel.addEventListener('touchmove', onTouchMove, { passive: false });
+    panel.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('resize', onResize);
+
+    // Initial layout (panel is visible now, so measurements are valid)
+    setup();
+
+    // Cleanup API
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+      panel.removeEventListener('wheel', onWheel);
+      panel.removeEventListener('touchstart', onTouchStart);
+      panel.removeEventListener('touchmove', onTouchMove);
+      panel.removeEventListener('touchend', onTouchEnd);
+      scroller.querySelectorAll('.clone-section').forEach(n => n.remove());
+      scroller.style.transform = 'translateX(0)';
+    };
+  }
+})();
 </script>
+
+
 </body>
 </html>

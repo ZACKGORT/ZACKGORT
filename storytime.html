@@ -260,9 +260,181 @@
     }
     /* ===== end css/base.css ===== */
 
-    
+    .trio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem; /* spacing between columns */
+  align-items: start;
+}
+
+.trio-col h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .trio-grid {
+    grid-template-columns: 1fr; /* stack on smaller screens */
+    gap: 1.5rem;
+  }
+}
+
+
+
+.project {
+	padding: 1rem;
+	max-width: 1000px;
+	margin: 20vh auto;
+	display: grid;
+	grid-column-gap: 7vw;
+	grid-row-gap: 0.5rem;
+}
+
+.project--intro {
+	grid-template-columns: 1fr;
+	grid-template-areas: 'label-name' 
+						 'name' 
+						 'label-date' 
+						 'date'
+						 'title'
+						 'label-mission' 
+						 'mission';
+	
+}
+
+.project--details {
+	grid-template-areas: 'label-default' 'paragraph';
+	grid-template-columns: 1fr;
+}
+
+.project--left {
+	justify-content: start;
+}
+
+.project--right {
+	justify-content: end;
+}
+
+.project--details p {
+	grid-area: paragraph;
+	max-width: 400px;
+}
+
+.project__label--default {
+	grid-area: label-default;
+}
+
+.project p {
+	line-height: 1.4;
+	margin: 0;
+	color: var(--color-text-alt);
+}
+
+.project__label {
+	color: var(--color-label);
+}
+
+.project__label--name {
+	grid-area: label-name;
+}
+
+.project__label--date {
+	grid-area: label-date;
+}
+
+.project__label--mission {
+	grid-area: label-mission;
+}
+
+.project__name {
+	grid-area: name;
+}
+
+.project__date {
+	grid-area: date;
+}
+
+.project__mission {
+	grid-area: mission;
+	line-height: 1.4;
+}
+
+.project__mission p:first-child {
+	grid-area: p1;
+}
+
+.project__mission p:child {
+	grid-area: p2;
+}
+
+.project__mission p {
+	color: var(--color-text-alt);
+}
+
+.project__title {
+	grid-area: title;
+	font-size: clamp(2rem, 13vw, 8rem);
+	font-weight: 400;
+	margin: 10vh 0;
+	line-height: 1;
+}
+
+.project__heading {
+	color: var(--color-label);
+	font-weight: inherit;
+	font-size: inherit;
+	margin: 0;
+}
+
+
+.intro {
+	height: calc(100vh - 3rem);
+    text-align: center;
+    place-items: center;
+    display: grid;
+    margin-bottom: 30vh;
+    background: linear-gradient(0deg, transparent, var(--color-bg-alt));
+}
+
+.intro__title {
+    place-items: center;
+    margin: 0;
+    line-height: .9;
+    display: grid;
+    margin-top: 15vh;
+    font-weight: 400;
+}
+
+.intro__title-pre {
+	font-weight: 300;
+    font-size: clamp(2rem,8vw,5rem);
+    color: var(--color-title);
+    text-transform: uppercase;
+}
+
+.intro__title-sub {
+    font-size: clamp(1.5rem,20vw,8rem);
+    max-width: 15ch;
+    margin: 0 auto;
+}
+
+/* Ensure inner background is visible and clipped */
+.grid__img {
+  position: relative;
+  overflow: hidden;
+}
+
+.grid__img-inner {
+  position: absolute;
+  inset: 0;             /* top/right/bottom/left: 0 */
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: 50% 50%;
+  will-change: transform;
+}
+
   </style>
-</head>
 
 
 <body class="loading">
@@ -279,9 +451,9 @@
       </nav>
     </div>
 
+
     <!-- Jump-to nav -->
     <nav class="frame__tags flex-line type-tiny">
-      <a href="#intro">#Intro</a>
       <a href="#about">#About</a>
       <a href="#work">#Work</a>
       <a href="#brands">#Brands</a>
@@ -299,23 +471,10 @@
     <span class="frame__logo">ZACKGORT</span>
   </header>
 
-  <!-- Intro -->
-  <section class="content content--padded" id="intro">
-    <h4 class="type-tiny">A haiku for you</h4>
-    <p class="content__text">Whelp, UX is dead.</p>
-    <p class="content__text">& to that end, I bid ye</p>
-    <p class="content__text">"XU" to us, fools.</p>
-    <p class="type-tiny right end">Just kidding.</p>
-    <p class="type-tiny right end">Look, I could give you the whole "Pepridge Farm remembers spiel", </p>
-    <p class="type-tiny right end">or attempt to impress you with unprovable and impropable platitudes.</p>
-    <p class="type-tiny right end">After all, I gotta make you look good to your boss</p>
-    <p class="type-tiny right end">and frankly, we're all here to make some money.</p>
-    <p class="type-tiny right end"> </p>
-    <p class="type-tiny right end"> </p>
-    <p class="type-tiny right end">Scroll, please :)</p>
-  </section>
+	<span class="intro__info">Scroll moderately to fully experience the animations</span> 
 
-  <!-- First Grid -->
+
+   <!-- First Grid -->
   <section class="content content--full content--padded" id="first-grid">
     <div class="grid grid--spaced" data-grid-first>
       <div class="grid__img pos-1" style="background-image:url(img/39.webp)"></div>
@@ -337,24 +496,106 @@
       <div class="grid__img pos-17" style="background-image:url(img/17.webp)"></div>
     </div>
     <div class="content__title">
-      <h2 class="content__title-main">But if you can see</h2>
-      <p class="type-tiny right end">with your own eyeballs, and your own brain</p>
+      <h2 class="content__title-main">   </h2>
+      <p class="type-tiny right end">   </p>
     </div>
   </section>
 
+      
   <!-- About -->
   <section class="content content--padded" id="about">
     <h4 class="type-tiny">About</h4>
-    <p class="content__text">Zack Gort is a designer.</p>
+    <p class="content__text">Zack Gort is a designer, <br>an observer, a thinker & a maker.</p>
     <p class="content__text"></p>
     <p class="content__text">Also, he is left-handed.</p>
     <p class="type-tiny right end">{Information Architecture, Design Systems, Brand Strategy}</p>
   </section>
 
+  			<section class="content content--full content--padded">
+				<div class="grid grid--column" data-grid-seventh>
+					<div class="grid__item span-3">
+				        <h4 class="type-tiny">UX Design & Data</h4>
+				        <p>Their hearts glow softly, bound by a love so pure.</p>
+				    </div>
+					<div class="grid__img ar-rect span-2">
+					  <div class="grid__img-inner" style="background-image:url(img/2.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide">
+					  <div class="grid__img-inner" style="background-image:url(img/4.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide span-2">
+					  <div class="grid__img-inner" style="background-image:url(img/6.webp)"></div>
+					</div>
+					<div class="grid__img span-2 ar-narrow">
+					  <div class="grid__img-inner" style="background-image:url(img/8.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide">
+					  <div class="grid__img-inner" style="background-image:url(img/10.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide span-2">
+					  <div class="grid__img-inner" style="background-image:url(img/12.webp)"></div>
+					</div>
+					<div class="grid__img span-2 ar-narrow">
+					  <div class="grid__img-inner" style="background-image:url(img/14.webp)"></div>
+					</div>
+
+          <div class="grid__item span-3">
+            <h4 class="type-tiny">UI Design & Branding</h4>
+            <p>Blissful serenity embraces their world in gentle tones.</p>
+				  </div>
+					<div class="grid__img span-2 ar-narrow">
+					  <div class="grid__img-inner" style="background-image:url(img/16.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide span-2">
+					  <div class="grid__img-inner" style="background-image:url(img/18.webp)"></div>
+					</div>
+					<div class="grid__img ar-rect">
+					  <div class="grid__img-inner" style="background-image:url(img/20.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide span-2">
+					  <div class="grid__img-inner" style="background-image:url(img/22.webp)"></div>
+					</div>
+					<div class="grid__img ar-narrow span-2">
+					  <div class="grid__img-inner" style="background-image:url(img/24.webp)"></div>
+					</div>
+					<div class="grid__img ar-wide span-3">
+					  <div class="grid__img-inner" style="background-image:url(img/26.webp)"></div>
+					</div>
+				</div>
+			</section>
+
+
+<!-- Inspiration / Skills -->
+<section class="content content--padded" id="inspiration">
+  <div class="trio-grid">
+    <div class="trio-col">
+      <h4 class="type-tiny">#skills</h4>
+      <p class="content__text">User Experience Design</p>
+      <p class="content__text">Content & Brand Strategy {B2B+C}</p>
+      <p class="content__text">Visual Interface Design</p>
+      <p class="content__text">Accessibility Compliance</p>
+    </div>
+    <div class="trio-col">
+      <h4 class="type-tiny">#software</h4>
+      <p class="content__text">Figma</p>
+      <p class="content__text">After Effects</p>
+      <p class="content__text">Three.js</p>
+      <p class="content__text">GSAP</p>
+    </div>
+    <div class="trio-col">
+      <h4 class="type-tiny">#learning</h4>
+      <p class="content__text">AI + Creative Coding</p>
+      <p class="content__text">Motion Design Systems</p>
+      <p class="content__text">WebGL Shaders</p>
+    </div>
+  </div>
+</section>
+
   <!-- Work (grid second) -->
   <section class="content content--padded" id="work">
-      <h2 class="content__title-main">recent works</h2>          
+    <h2 class="content__title-main">select works</h2>      
     <div class="grid grid--columns grid--spaced" data-grid-second>
+
       <div class="grid__img" style="background-image:url(img/23.webp)"></div>
       <div class="grid__img" style="background-image:url(img/40.webp)"></div>
       <div class="grid__img" style="background-image:url(img/10.webp)"></div>
@@ -426,7 +667,8 @@
   <!-- Agency life -->
   <section class="content content--padded" id="agencylife">
     <h4 class="type-tiny">#agencylife</h4>
-    <p class="content__text">Work to eat. Eat to live. Live to skate. Skate to work.</p>
+<p class="content__text">ONE SIXTY OVER NINETY + O3 WORLD + WORKAREA + LIVEAREA + HUGE + ELVA DESIGN GROUP + CODE & THEORY + PUBLICIS SAPIENT</p>
+
   </section>
 
   <!-- Fourth-v2 grid -->
@@ -471,14 +713,6 @@
     </div>
   </section>
 
-  <!-- Inspiration -->
-  <section class="content content--padded" id="inspiration">
-    <h4 class="type-tiny">#skills</h4>
-    <p class="content__text">User Experience Design</p>
-    <p class="content__text">Content & Brand Strategy {B2B+C}</p>
-    <p class="content__text">Visual Interface Design</p>
-    <p class="content__text">Accessibility Compliance</p>        
-  </section>
 
   <!-- Fifth grid (Explorations) -->
   <section class="content content--padded content--full" id="explorations">
@@ -512,9 +746,22 @@
 
   <!-- Process -->
   <section class="content content--padded" id="process">
-    <h4 class="type-tiny">Process</h4>
-    <p class="content__text">The creative process begins with stillness and observation, letting the moment speak before any action is taken. It’s about immersing in the environment, feeling the quiet shifts in light, texture, and mood. Rather than forcing a scene, there’s a deep patience—waiting for the right interplay of shadow or the soft touch of light on a surface. </p>
+			<section class="project project--intro">
+				<span class="project__label project__label--name">Financial Product</span>
+				<span class="project__date">2023-2024</span>
+				<h2 class="project__title">
+					<span class="project__title-line">BNY Melon - Pershing X</span>
+
+				</h2>
+				<span class="project__label project__label--mission">Mission</span>
+				<div class="project__mission">
+					<p>The AI-Art Project is a transformative initiative dedicated to exploring the immense impact of AI-generated art on the art world and artists. We aim to discover and promote exceptional AI-generated artworks that push the boundaries of creativity, redefine traditional practices, and provoke thought. </p>
+					<p>Through collaborations with artists, workshops, and educational programs, we empower artists to leverage AI as a tool for exploration, expanding their artistic horizons and embracing new forms of expression.</p>
+				</div>
+			</section>
   </section>
+
+
 
   <!-- Sixth grid (Unspoken) -->
   <section class="content content--full content--cutoff" id="unspoken">
@@ -625,8 +872,6 @@
 
 <!-- ===== Core Demo JS (deduped) ===== -->
 <script>
-
-  
   // utils
   const preloadImages = (selector = 'img') =>
     new Promise(resolve => imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve));
@@ -660,51 +905,15 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
-  function animateFrame() {
-    const frame = document.querySelector('.frame');
-    const title = frame.querySelector('.frame__title');
-    gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: { trigger: frame, start: 'clamp(top bottom)', end: 'bottom top', scrub: true }
-    })
-    .to(frame, { yPercent: 35, scale: 0.95, startAt: { filter: 'brightness(100%)' }, filter: 'brightness(30%)' })
-    .to(title, { xPercent: -80 }, 0);
-  }
+// helper at top of your JS (after gsap.registerPlugin)
+const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
 
-  function animateFirstGrid() {
-    const grid = document.querySelector('[data-grid-first]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    gsap.timeline({
-      defaults: { ease: 'sine' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: grid.parentNode, scrub: 0.5 }
-    })
-    .from(imgs, { stagger: 0.07, y: () => gsap.utils.random(innerHeight, innerHeight * 1.8) })
-    .from(grid.parentNode.querySelector('.content__title'), { duration: 1.2, ease: 'power4', yPercent: 180, autoAlpha: 0 }, 0.8);
-  }
 
-  function animateSecondGrid() {
-    const grid = document.querySelector('[data-grid-second]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    const mid = Math.floor(imgs.length / 2);
-    gsap.timeline({
-      defaults: { ease: 'power3' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: grid.parentNode, scrub: 0.5 }
-    })
-    .from(imgs, {
-      stagger: { amount: 0.3, from: 'center' },
-      y: innerHeight,
-      transformOrigin: '50% 0%',
-      rotation: pos => {
-        const dist = Math.abs(pos - mid);
-        return pos < mid ? dist * 3 : dist * -3;
-      }
-    })
-    .from(grid.querySelectorAll('.grid__item'), { stagger: { amount: 0.3, from: 'center' }, yPercent: 100, autoAlpha: 0 }, 0);
-  }
-
+  // Shared helper for the 3D “fan-in” calcs
   function calculateInitialTransform(el, offset = 250, maxRot = 300, maxZ = 2000) {
     const vc = { w: innerWidth / 2, h: innerHeight / 2 };
-    const ec = { x: el.offsetLeft + el.offsetWidth / 2, y: el.offsetTop + el.offsetHeight / 2 };
+    const rect = el.getBoundingClientRect();
+    const ec = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     const angle = Math.atan2(Math.abs(vc.h - ec.y), Math.abs(vc.w - ec.x));
     const tx = Math.abs(Math.cos(angle) * offset);
     const ty = Math.abs(Math.sin(angle) * offset);
@@ -717,144 +926,248 @@
     return { x: ec.x < vc.w ? -tx : tx, y: ec.y < vc.h ? -ty : ty, z: tz, rotateX: rx, rotateY: ry };
   }
 
-  function animateFourthGrid() {
-    const grid = document.querySelector('[data-grid-fourth]');
+  // Every function below loops all matching sections ===========================
+  function animateFrame() {
+    const frames = document.querySelectorAll('.frame');
+    frames.forEach((frame) => {
+      const title = frame.querySelector('.frame__title');
+      if (!title) return;
+      gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: frame, start: 'clamp(top bottom)', end: 'bottom top', scrub: true }
+      })
+      .to(frame, { yPercent: 35, scale: 0.95, startAt: { filter: 'brightness(100%)' }, filter: 'brightness(30%)' })
+      .to(title, { xPercent: -80 }, 0);
+    });
+  }
+
+function animateFirstGrid() {
+  document.querySelectorAll('[data-grid-first]').forEach((grid) => {
     const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
+    const section = getPinTarget(grid);
     gsap.timeline({
-      defaults: { ease: 'expo' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: grid.parentNode, scrub: 0.2 }
+      defaults: { ease: 'sine' },
+      scrollTrigger: {
+        trigger: grid,
+        start: 'center center',
+        end: '+=250%',
+        pin: section,
+        scrub: 0.5
+      }
     })
-    .set(grid, { perspective: 1000 })
-    .fromTo(imgs, {
-      x: (_, el) => calculateInitialTransform(el).x,
-      y: (_, el) => calculateInitialTransform(el).y,
-      z: (_, el) => calculateInitialTransform(el).z,
-      rotateX: (_, el) => calculateInitialTransform(el).rotateX * 0.5,
-      rotateY: (_, el) => calculateInitialTransform(el).rotateY,
-      autoAlpha: 0,
-      scale: 0.7
-    }, {
-      x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0,
-      autoAlpha: 1, scale: 1,
-      stagger: { amount: 0.2, from: 'center', grid: [4,9] }
+    .from(imgs, { stagger: 0.07, y: () => gsap.utils.random(innerHeight, innerHeight * 1.8) })
+    .from(section.querySelector('.content__title'), { duration: 1.2, ease: 'power4', yPercent: 180, autoAlpha: 0 }, 0.8);
+  });
+}
+
+
+
+  function animateSecondGrid() {
+    document.querySelectorAll('[data-grid-second]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      const mid = Math.floor(imgs.length / 2);
+      gsap.timeline({
+        defaults: { ease: 'power3' },
+        scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: getPinTarget(grid), scrub: 0.5 }
+      })
+      .from(imgs, {
+        stagger: { amount: 0.3, from: 'center' },
+        y: innerHeight,
+        transformOrigin: '50% 0%',
+        rotation: pos => {
+          const dist = Math.abs(pos - mid);
+          return pos < mid ? dist * 3 : dist * -3;
+        }
+      })
+      .from(grid.querySelectorAll('.grid__item'), { stagger: { amount: 0.3, from: 'center' }, yPercent: 100, autoAlpha: 0 }, 0);
+    });
+  }
+
+  function animateFourthGrid() {
+    document.querySelectorAll('[data-grid-fourth]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'expo' },
+        scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: getPinTarget(grid), scrub: 0.2 }
+      })
+      .set(grid, { perspective: 1000 })
+      .fromTo(imgs, {
+        x: (_, el) => calculateInitialTransform(el).x,
+        y: (_, el) => calculateInitialTransform(el).y,
+        z: (_, el) => calculateInitialTransform(el).z,
+        rotateX: (_, el) => calculateInitialTransform(el).rotateX * 0.5,
+        rotateY: (_, el) => calculateInitialTransform(el).rotateY,
+        autoAlpha: 0,
+        scale: 0.7
+      }, {
+        x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0,
+        autoAlpha: 1, scale: 1,
+        stagger: { amount: 0.2, from: 'center', grid: [4,9] }
+      });
     });
   }
 
   function animateFourthV2Grid() {
-    const grid = document.querySelector('[data-grid-fourth-v2]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    gsap.timeline({
-      defaults: { ease: 'power4' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: grid.parentNode, scrub: 0.2 }
-    })
-    .set(grid, { perspective: 1200 })
-    .fromTo(imgs, {
-      x: (_, el) => calculateInitialTransform(el, 900).x,
-      y: (_, el) => calculateInitialTransform(el, 600).y,
-      z: (_, el) => calculateInitialTransform(el, 250, -160, -3000).z,
-      rotateX: (_, el) => calculateInitialTransform(el, 250, -160, -3000).rotateX,
-      rotateY: (_, el) => calculateInitialTransform(el, 250, -160, -3000).rotateY,
-      autoAlpha: 0,
-      scale: 0.4
-    }, {
-      x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0,
-      autoAlpha: 1, scale: 1,
-      stagger: { amount: 0.15, from: 'center', grid: [4,9] }
+    document.querySelectorAll('[data-grid-fourth-v2]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'power4' },
+        scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: getPinTarget(grid), scrub: 0.2 }
+      })
+      .set(grid, { perspective: 1200 })
+      .fromTo(imgs, {
+        x: (_, el) => calculateInitialTransform(el, 900).x,
+        y: (_, el) => calculateInitialTransform(el, 600).y,
+        z: (_, el) => calculateInitialTransform(el, 250, -160, -3000).z,
+        rotateX: (_, el) => calculateInitialTransform(el, 250, -160, -3000).rotateX,
+        rotateY: (_, el) => calculateInitialTransform(el, 250, -160, -3000).rotateY,
+        autoAlpha: 0,
+        scale: 0.4
+      }, {
+        x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0,
+        autoAlpha: 1, scale: 1,
+        stagger: { amount: 0.15, from: 'center', grid: [4,9] }
+      });
     });
   }
 
   function animateFifthGrid() {
-    const grid = document.querySelector('[data-grid-fifth]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    gsap.timeline({
-      defaults: { ease: 'sine' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: grid.parentNode, scrub: 0.3 }
-    })
-    .set(grid, { perspective: 1000 })
-    .from(imgs, {
-      stagger: { amount: 0.4, from: 'random', grid: [4,9] },
-      y: innerHeight,
-      rotationX: -70,
-      transformOrigin: '50% 0%',
-      z: -900,
-      autoAlpha: 0
+    document.querySelectorAll('[data-grid-fifth]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'sine' },
+        scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: getPinTarget(grid), scrub: 0.3 }
+      })
+      .set(grid, { perspective: 1000 })
+      .from(imgs, {
+        stagger: { amount: 0.4, from: 'random', grid: [4,9] },
+        y: innerHeight,
+        rotationX: -70,
+        transformOrigin: '50% 0%',
+        z: -900,
+        autoAlpha: 0
+      });
     });
   }
 
   function animateSixthGrid() {
-    const grid = document.querySelector('[data-grid-sixth]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: grid.parentNode, scrub: 0.5 }
-    })
-    .from(imgs, {
-      stagger: { amount: 0.03, from: 'edges', grid: [3,3] },
-      scale: 0.7,
-      autoAlpha: 0
-    })
-    .from(grid, { scale: 0.7, skewY: 5 }, 0);
-  }
-
-  function animateEighthGrid() {
-    const grid = document.querySelector('[data-grid-eighth]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    gsap.timeline({
-      defaults: { ease: 'expo' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: grid.parentNode, scrub: true }
-    })
-    .set(grid, { perspective: 2000 })
-    .from(imgs, {
-      stagger: { amount: 0.8, from: 'start' },
-      rotationY: 65,
-      transformOrigin: '0% 50%',
-      z: -200,
-      yPercent: 10
-    })
-    .from(imgs, {
-      stagger: { amount: 0.8, from: 'start' },
-      duration: 0.2,
-      autoAlpha: 0
-    }, 0);
-  }
-
-  function animateNinthGrid() {
-    const grid = document.querySelector('[data-grid-ninth]');
-    const imgs = grid.querySelectorAll('.grid__img');
-    gsap.timeline({
-      defaults: { ease: 'power3' },
-      scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: grid.parentNode, scrub: true }
-    })
-    .from(imgs, {
-      transformOrigin: '100% -450%',
-      stagger: 0.07,
-      scaleX: 1.05,
-      skewX: 15,
-      xPercent: 50,
-      rotation: -10,
-      autoAlpha: 0
+    document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: grid,
+          start: 'center center',
+          end: '+=200%',
+          pin: getPinTarget(grid),
+          scrub: 0.5
+        }
+      })
+      .from(imgs, {
+        stagger: { amount: 0.03, from: 'edges', grid: [3,3] },
+        scale: 0.7,
+        autoAlpha: 0
+      })
+      .from(grid, { scale: 0.7, skewY: 5 }, 0);
     });
   }
 
-  function initAnimations() {
-    animateFrame();
-    animateFirstGrid();
-    animateSecondGrid();
-    // animateThirdGrid(); // intentionally disabled like your original
-    animateFourthGrid();
-    animateFourthV2Grid();
-    animateFifthGrid();
-    animateSixthGrid();
-    // animateSeventhGrid(); // intentionally disabled
-    animateEighthGrid();
-    animateNinthGrid();
+  function animateSeventhGrid() {
+    document.querySelectorAll('[data-grid-seventh]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'power1' },
+        scrollTrigger: {
+          trigger: grid,
+          start: 'center center',
+          end: '+=150%',
+          pin: getPinTarget(grid),
+          scrub: 0.5
+        }
+      })
+      .fromTo(imgs, { yPercent: -102 }, { stagger: 0.08, yPercent: 0 })
+      .from([...imgs].map(img => img.querySelector('.grid__img-inner')), {
+        stagger: 0.08,
+        yPercent: 102
+      }, 0)
+      .from(grid.querySelectorAll('.grid__item'), {
+        yPercent: 20,
+        stagger: imgs.length / 2 * 0.08,
+        autoAlpha: 0
+      }, 0);
+    });
   }
+
+  function animateEighthGrid() {
+    document.querySelectorAll('[data-grid-eighth]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'expo' },
+        scrollTrigger: { trigger: grid, start: 'center center', end: '+=250%', pin: getPinTarget(grid), scrub: true }
+      })
+      .set(grid, { perspective: 2000 })
+      .from(imgs, {
+        stagger: { amount: 0.8, from: 'start' },
+        rotationY: 65,
+        transformOrigin: '0% 50%',
+        z: -200,
+        yPercent: 10
+      })
+      .from(imgs, {
+        stagger: { amount: 0.8, from: 'start' },
+        duration: 0.2,
+        autoAlpha: 0
+      }, 0);
+    });
+  }
+
+  function animateNinthGrid() {
+    document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
+      const imgs = grid.querySelectorAll('.grid__img');
+      if (!imgs.length) return;
+      gsap.timeline({
+        defaults: { ease: 'power3' },
+        scrollTrigger: { trigger: grid, start: 'center center', end: '+=200%', pin: getPinTarget(grid), scrub: true }
+      })
+      .from(imgs, {
+        transformOrigin: '100% -450%',
+        stagger: 0.07,
+        scaleX: 1.05,
+        skewX: 15,
+        xPercent: 50,
+        rotation: -10,
+        autoAlpha: 0
+      });
+    });
+  }
+
+function initAnimations() {
+  animateFrame();
+  animateFirstGrid();      // #first-grid
+  animateSeventhGrid();    // UX/UI (data-grid-seventh)
+  animateSecondGrid();     // #work
+  animateFourthGrid();     // #brands-grid
+  animateFourthV2Grid();   // #brands-grid-2
+  animateFifthGrid();      // #explorations
+  animateSixthGrid();      // #unspoken (TikTok)
+  animateEighthGrid();     // #style-grid (GNC)
+  animateNinthGrid();      // #gallery
+}
+
 
   // Boot
   initSmoothScrolling();
   enableHashScrollWithLenis();
 
-  preloadImages('.grid__img').then(() => {
+preloadImages('.grid__img, .grid__img-inner').then(() => {
     document.body.classList.remove('loading');
     initAnimations();
     window.scrollTo(0, 0);

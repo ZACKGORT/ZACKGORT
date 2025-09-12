@@ -979,6 +979,42 @@ a + a { margin-inline-start: .6rem; }
   text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
 }
 
+/* =========================================
+   MOBILE BLUR DIAL-DOWN (performance-first)
+   ========================================= */
+@media (max-width: 768px){
+  /* Smaller kernel, shorter mask, lower saturation */
+  :root{
+    --blur-max: 8;      /* was 40 */
+    --mask-stop: 18;    /* was 35 — shorter blurred band */
+    --saturate: .06;    /* was .1  */
+  }
+
+  /* Show less intensity overall */
+  .blur{ opacity: .75; }
+
+  /* Process fewer layers: keep first 3, hide the rest */
+  .blur > div:nth-child(n+4){ display: none; }
+
+  /* Shrink the filtered spill area to reduce GPU cost */
+  .blur > div::after{ inset: 0 -60%; }  /* was 0 -250% */
+
+  /* Optional: tighten the solid band at the very bottom */
+  .blur > div::before{ height: calc((var(--stop) * .8) * 1%); }
+}
+
+/* Coarse pointers (many phones/tablets) — dial down further */
+@media (pointer: coarse){
+  :root{
+    --blur-max: 6;
+    --saturate: .05;
+  }
+}
+
+/* Respect accessibility (motion often correlates with effects aversion) */
+@media (prefers-reduced-motion: reduce){
+  .blur{ display: none !important; }
+}
 
 </style>
 </head>

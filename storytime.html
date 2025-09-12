@@ -407,10 +407,6 @@
     will-change: transform;
   }
 
-  /* Reduce top spacing globally when a padded section follows a full grid */
-  .content--full + .content--padded { margin-top: 1rem; padding-top: 0.5rem; }
-  .content--full { padding-bottom: 0.5rem; }
-
   /* ===== Case Study PROCESS → 2-column layout ===== */
   [id$="-process"] {
     display: grid;
@@ -580,7 +576,7 @@
     #work .content__title-main { margin-bottom: 3rem; }
 
     #work .grid {
-      gap: clamp(1.25rem, 3vw, 2.5rem);
+      gap: clamp(1.25rem, 9vw, 2.5rem);
       padding-top: 1.5rem;
       padding-bottom: 1.5rem;
     }
@@ -1232,7 +1228,7 @@
 
 <script>
 /* =========================
-   FULL JS (with stacked-gallery leak fix)
+   FULL JS (with stacked-gallery leak fix + pin reset fix)
    ========================= */
 document.documentElement.classList.add('js');
 
@@ -1446,7 +1442,6 @@ function animateFifthGrid() {
   });
 }
 
-// Ninth (skip BNY hero here; we animate it with sixth below)
 function animateNinthGrid() {
   document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
     if (grid.closest('#fintech')) return;
@@ -1497,7 +1492,6 @@ function animateNinthGrid() {
   });
 }
 
-// Sixth (skip BNY discovery here; it gets ninth)
 function animateSixthGrid() {
   document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
     if (grid.closest('#fintech-discovery')) return;
@@ -1557,7 +1551,7 @@ function animateSeventhGrid() {
       scrollTrigger: {
         trigger: grid,
         start: 'center center',
-        end: isMobile ? '+=110%' : '+=150%',
+        end: isMobile ? '+=110%'' : '+=150%',
         pin: getPinTarget(grid),
         pinSpacing: true,
         scrub: isMobile ? 0.35 : 0.5
@@ -1692,7 +1686,7 @@ function animateProcessSections() {
   });
 }
 
-/* ----- NEW: Full-width stacked gallery (one-at-a-time reveal + parallax) ----- */
+/* ----- Full-width stacked gallery (one-at-a-time reveal + parallax) ----- */
 function animateStackedGallery() {
   const section = document.querySelector('#fintech-stack [data-stack]');
   if (!section) return;
@@ -1881,6 +1875,7 @@ function a11yifyGridImages() {
     panel.removeAttribute('hidden');
     panel.setAttribute('aria-hidden', 'false');
 
+    // Lock page scroll
     const htmlOverflow = document.documentElement.style.overflow;
     const bodyOverflow = document.body.style.overflow;
     document.documentElement.dataset._panelHtmlOverflow = htmlOverflow || '';
@@ -1888,8 +1883,16 @@ function a11yifyGridImages() {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
+    // Stop Lenis + fully reset all ScrollTriggers so pins don't collapse content
     try { window.lenis && window.lenis.stop && window.lenis.stop(); } catch {}
-    try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.disable(false, true)); } } catch {}
+    try {
+      if (window.ScrollTrigger) {
+        ScrollTrigger.getAll().forEach(st => {
+          if (st.animation) st.animation.pause(0);
+          st.disable(true); // <-- reset = true (critical)
+        });
+      }
+    } catch {}
 
     destroyScroller = initInfiniteScroller({ scroller, counterEl, barEl });
     closeBtn?.focus();
@@ -1911,9 +1914,16 @@ function a11yifyGridImages() {
     destroyScroller && destroyScroller();
     destroyScroller = null;
 
-    try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.enable()); ScrollTrigger.refresh(); } } catch {}
+    // Re-enable triggers and refresh after DOM settles so pinned spacers are recalculated
+    try {
+      if (window.ScrollTrigger) {
+        ScrollTrigger.getAll().forEach(st => st.enable());
+        setTimeout(() => ScrollTrigger.refresh(true), 0);
+      }
+    } catch {}
     try { window.lenis && window.lenis.start && window.lenis.start(); } catch {}
 
+    // Restore page scroll styles
     document.documentElement.style.overflow = document.documentElement.dataset._panelHtmlOverflow || '';
     document.body.style.overflow = document.body.dataset._panelBodyOverflow || '';
 
@@ -1924,8 +1934,6 @@ function a11yifyGridImages() {
     if (barEl) barEl.style.transform = 'scaleX(0)';
     if (counterEl) counterEl.textContent = '0';
 
-    // restore focus
-    // eslint-disable-next-line no-undef
     if (document.activeElement === document.body && prevActive && prevActive.focus) prevActive.focus();
   }
 
@@ -2091,7 +2099,7 @@ function initAnimations() {
   animateBNYDiscoveryAsNinth();
   animateSixthGrid();    // other sixths
   if (document.querySelector('[data-grid-eighth]')) { /* optional */ }
-  animateStackedGallery();// NEW: full-width stack after INSIGHT
+  animateStackedGallery();// full-width stack after INSIGHT
 }
 
 /* ---------- Boot ---------- */

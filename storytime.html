@@ -839,6 +839,40 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   }
 }
 
+
+
+/* === Inline link spacing, anywhere consecutive links appear === */
+a + a { margin-inline-start: .6rem; }
+
+/* === Clustered/nav links (frame header or any link row) === */
+.frame__links{
+  display: flex;
+  flex-wrap: wrap;
+  /* row-gap | column-gap */
+  gap: .35rem clamp(.5rem, 1.2vw, 1rem);
+}
+.frame__links a{
+  display: inline-flex;
+  align-items: center;
+  padding: .25rem .55rem;   /* <-- horizontal padding */
+  border-radius: .35rem;    /* nicer focus ring */
+}
+
+/* Mobile tweaks */
+@media (max-width:768px){
+  .frame__links{ gap: .25rem .6rem; }
+  .frame__links a{ padding: .2rem .45rem; }
+}
+
+/* === Utility: apply to any container that should lay out links with spacing === */
+.links--spaced{
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: clamp(.5rem, 1.2vw, 1rem);
+  row-gap: .35rem;
+}
+.links--spaced > a{ padding-inline: .5rem; }
+
 /* ===============================
    TINY DEVICES
    =============================== */

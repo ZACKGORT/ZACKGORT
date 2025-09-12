@@ -262,306 +262,298 @@
     /* ===== end css/base.css ===== */
 
     .trio-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem; /* spacing between columns */
-  align-items: start;
-}
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem; /* spacing between columns */
+      align-items: start;
+    }
 
-.trio-col h4 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
+    .trio-col h4 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
 
-@media (max-width: 768px) {
-  .trio-grid {
-    grid-template-columns: 1fr; /* stack on smaller screens */
-    gap: 1.5rem;
-  }
-}
+    @media (max-width: 768px) {
+      .trio-grid {
+        grid-template-columns: 1fr; /* stack on smaller screens */
+        gap: 1.5rem;
+      }
+    }
 
+    .project {
+      padding: 1rem;
+      max-width: 1000px;
+      margin: 20vh auto;
+      display: grid;
+      grid-column-gap: 7vw;
+      grid-row-gap: 0.5rem;
+    }
 
+    .project--intro {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'label-name' 
+               'name' 
+               'label-date' 
+               'date'
+               'title'
+               'label-mission' 
+               'mission';
+    }
 
-.project {
-	padding: 1rem;
-	max-width: 1000px;
-	margin: 20vh auto;
-	display: grid;
-	grid-column-gap: 7vw;
-	grid-row-gap: 0.5rem;
-}
+    .project--details {
+      grid-template-areas: 'label-default' 'paragraph';
+      grid-template-columns: 1fr;
+    }
 
-.project--intro {
-	grid-template-columns: 1fr;
-	grid-template-areas: 'label-name' 
-						 'name' 
-						 'label-date' 
-						 'date'
-						 'title'
-						 'label-mission' 
-						 'mission';
-	
-}
+    .project--left { justify-content: start; }
+    .project--right { justify-content: end; }
 
-.project--details {
-	grid-template-areas: 'label-default' 'paragraph';
-	grid-template-columns: 1fr;
-}
+    .project--details p {
+      grid-area: paragraph;
+      max-width: 400px;
+    }
 
-.project--left {
-	justify-content: start;
-}
+    .project__label--default { grid-area: label-default; }
 
-.project--right {
-	justify-content: end;
-}
+    .project p {
+      line-height: 1.4;
+      margin: 0;
+      color: var(--color-text-alt);
+    }
 
-.project--details p {
-	grid-area: paragraph;
-	max-width: 400px;
-}
+    .project__label { color: var(--color-label); }
 
-.project__label--default {
-	grid-area: label-default;
-}
+    .project__label--name { grid-area: label-name; }
+    .project__label--date { grid-area: label-date; }
+    .project__label--mission { grid-area: label-mission; }
 
-.project p {
-	line-height: 1.4;
-	margin: 0;
-	color: var(--color-text-alt);
-}
+    .project__name { grid-area: name; }
+    .project__date { grid-area: date; }
 
-.project__label {
-	color: var(--color-label);
-}
+    .project__mission { grid-area: mission; line-height: 1.4; }
+    .project__mission p:first-child { grid-area: p1; }
+    .project__mission p:nth-child(2) { grid-area: p2; }
 
-.project__label--name {
-	grid-area: label-name;
-}
+    .project__mission p { color: var(--color-text-alt); }
 
-.project__label--date {
-	grid-area: label-date;
-}
+    .project__title {
+      grid-area: title;
+      font-size: clamp(2rem, 13vw, 8rem);
+      font-weight: 400;
+      margin: 10vh 0;
+      line-height: 1;
+    }
 
-.project__label--mission {
-	grid-area: label-mission;
-}
+    .project__heading {
+      color: var(--color-label);
+      font-weight: inherit;
+      font-size: inherit;
+      margin: 0;
+    }
 
-.project__name {
-	grid-area: name;
-}
+    /* Bottom-centered helper note */
+    .intro__info{
+      position: fixed;
+      left: 50%;
+      bottom: clamp(12px, 4vh, 32px);
+      transform: translateX(-50%);
+      z-index: 1000;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      opacity: .75;
+      pointer-events: none; /* so it never blocks clicks/scroll */
+    }
 
-.project__date {
-	grid-area: date;
-}
+    /* Make sure the intro section is visible and centered */
+    .intro{
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: var(--page-padding);
+      background: linear-gradient(0deg, transparent, var(--color-bg-content));
+    }
 
-.project__mission {
-	grid-area: mission;
-	line-height: 1.4;
-}
+    .intro__title{ margin: 0; line-height: .9; text-align: center; font-weight: 400; }
 
-.project__mission p:first-child {
-	grid-area: p1;
-}
+    .intro__title-pre{
+      font-weight: 300;
+      font-size: clamp(2rem, 8vw, 5rem);
+      color: var(--color-text);
+      text-transform: uppercase;
+    }
 
-.project__mission p:nth-child(2) { /* or :last-child */
-  grid-area: p2;
-}
+    .intro__title-sub{
+      font-size: clamp(1.5rem, 20vw, 8rem);
+      max-width: 15ch;
+      margin: 0 auto;
+    }
 
+    /* Ensure inner background is visible and clipped */
+    .grid__img { position: relative; overflow: hidden; }
+    .grid__img-inner {
+      position: absolute;
+      inset: 0;             /* top/right/bottom/left: 0 */
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: 50% 50%;
+      will-change: transform;
+    }
 
-.project__mission p {
-	color: var(--color-text-alt);
-}
+    /* Reduce top spacing globally when a padded section follows a full grid */
+    .content--full + .content--padded { margin-top: 1rem; padding-top: 0.5rem; }
+    /* Also trim the bottom of the grids so they don't push extra space */
+    .content--full { padding-bottom: 0.5rem; }
 
-.project__title {
-	grid-area: title;
-	font-size: clamp(2rem, 13vw, 8rem);
-	font-weight: 400;
-	margin: 10vh 0;
-	line-height: 1;
-}
+    /* ===== Case Study PROCESS → 2-column layout ===== */
+    [id$="-process"] {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem 3rem;
+      align-items: start;
+    }
+    /* Let the intro (title + mission) span both columns on wide screens */
+    [id$="-process"] > .project.project--intro { margin: 0; padding: 0; }
+    /* Details cards become neat column items */
+    [id$="-process"] > .project.project--details { margin: 0; padding: 0; display: block; }
+    /* Remove the narrow 400px cap so columns breathe */
+    [id$="-process"] .project--details p { max-width: none; }
+    /* Wide screens: 2 columns, intro spans both */
+    @media (min-width: 53em) {
+      [id$="-process"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      [id$="-process"] > .project.project--intro { grid-column: 1 / -1; }
+    }
+    /* Optional: slightly tighter labels in process columns */
+    [id$="-process"] .project__label { letter-spacing: .04em; text-transform: uppercase; opacity: .85; }
 
-.project__heading {
-	color: var(--color-label);
-	font-weight: inherit;
-	font-size: inherit;
-	margin: 0;
-}
+    /* --- Reference-inspired: small text & paragraphs only --- */
+    .type-tiny,
+    .project__label,
+    .cdawrap,
+    .page-footer { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 400; color: var(--color-label); }
 
+    /* Primary paragraphs (About, Skills, etc.) */
+    .content__text {
+      font-size: clamp(1.1rem, 2.8vw, 1.7rem);
+      line-height: 1.4;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: var(--color-text);
+      margin: .6rem 0;
+    }
 
-/* Bottom-centered helper note */
-.intro__info{
-  position: fixed;
-  left: 50%;
-  bottom: clamp(12px, 4vh, 32px);
-  transform: translateX(-50%);
-  z-index: 1000;
-  font-size: 12px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  opacity: .75;
-  pointer-events: none; /* so it never blocks clicks/scroll */
-}
+    /* Case study body copy */
+    .project p,
+    .grid__item p { font-size: 1rem; line-height: 1.4; margin: 0; color: var(--color-text-alt); }
 
-/* Make sure the intro section is visible and centered */
-.intro{
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: var(--page-padding);
-  background: linear-gradient(0deg, transparent, var(--color-bg-content));
-}
+    /* Case study label color (kept explicit) */
+    .project__label { color: var(--color-label); }
 
-.intro__title{
-  margin: 0;
-  line-height: .9;
-  text-align: center;
-  font-weight: 400;
-}
+    /* Optional: tiny caption under section titles */
+    .content__title-main + p {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--color-label);
+    }
 
-.intro__title-pre{
-  font-weight: 300;
-  font-size: clamp(2rem, 8vw, 5rem);
-  color: var(--color-text);
-  text-transform: uppercase;
-}
+    /* Make only the H4 title links in #work clickable */
+    #work .grid__item { pointer-events: none; }
+    #work .grid__item .title-link { pointer-events: auto; text-decoration: none; }
+    #work .grid__item .title-link:hover { text-decoration: underline; }
 
-.intro__title-sub{
-  font-size: clamp(1.5rem, 20vw, 8rem);
-  max-width: 15ch;
-  margin: 0 auto;
-}
+    /* === Case Study (overlay) — master-style refinement === */
+    :root{
+      --cs-accent: #f4d35e;
+      --cs-deep:   #000;
+      --cs-warm:   #f95738;
+      --cs-soft:   #ebebd3;
+      --cs-ink:    #2c241a;
+    }
 
+    .panel{ font-feature-settings: "liga","kern"; letter-spacing: 0; }
 
-/* Ensure inner background is visible and clipped */
-.grid__img {
-  position: relative;
-  overflow: hidden;
-}
+    /* Micro “chapter” / label */
+    .panel .chapter{
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: .85;
+      color: #cfcac0;
+      margin-bottom: .5rem;
+    }
 
-.grid__img-inner {
-  position: absolute;
-  inset: 0;             /* top/right/bottom/left: 0 */
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: 50% 50%;
-  will-change: transform;
-}
+    /* Big editorial titles */
+    .panel .title{
+      font-weight: 400;
+      line-height: .95;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      font-size: clamp(2rem, 6.5vw, 5rem);
+      margin: .2rem 0 .6rem;
+    }
 
+    /* Body copy */
+    .panel .text{ font-size: 1.05rem; line-height: 1.5; color: #ddd7cd; }
+    .panel .text p{ margin: 0 0 .85rem; }
 
+    /* Split-text reveal scaffolding */
+    .split-text .word{ display:inline-block; overflow:hidden; }
+    .split-text .word > span{ display:inline-block; transform: translateY(110%); opacity: 0; }
 
-/* Reduce top spacing globally when a padded section follows a full grid */
-.content--full + .content--padded {
-  margin-top: 1rem;   /* tighten the gap */
-  padding-top: 0.5rem;
-}
+    /* Frosted glass card */
+    .frosted-glass{
+      --bg: rgba(18,18,18,.42);
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 1.1rem 1.25rem;
+      backdrop-filter: saturate(135%) blur(12px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
+    }
 
-/* Also trim the bottom of the grids so they don't push extra space */
-.content--full {
-  padding-bottom: 0.5rem;
-}
+    /* “Blurred edges” container like your master */
+    .panel-content-blur-edges{
+      -webkit-mask-image: radial-gradient(120% 100% at 50% 50%, #000 60%, transparent 100%);
+              mask-image: radial-gradient(120% 100% at 50% 50%, #000 60%, transparent 100%);
+    }
 
+    /* Full-bleed image sections get a hint of vignette */
+    .panel .panel-full,
+    .panel .hero-img,
+    .panel .banner-img,
+    .panel .concept-img{ position: relative; }
+    .panel .panel-full::after,
+    .panel .hero-img::after,
+    .panel .banner-img::after,
+    .panel .concept-img::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(140% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.35) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,.18), transparent 25%, transparent 75%, rgba(0,0,0,.18));
+      pointer-events:none;
+    }
 
-/* ===== Case Study PROCESS → 2-column layout ===== */
-[id$="-process"] {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem 3rem;
-  align-items: start;
-}
+    /* Section palettes to echo the master */
+    .panel .intro{ background: var(--cs-deep); color: #f6f6f6; }
+    .panel .header{ background: var(--cs-accent); color: #421c06; }
+    .panel .about{ background: var(--cs-warm); color: #2f0e08; }
+    .panel .story{ background: #ee964b; color:#3f170b; }
+    .panel .outro{ background: var(--cs-soft); color: var(--cs-ink); }
 
-/* Let the intro (title + mission) span both columns on wide screens */
-[id$="-process"] > .project.project--intro {
-  margin: 0;          /* override default 20vh auto spacing */
-  padding: 0;
-}
+    /* About: two-column editorial balance */
+    .panel .about .row{ display:flex; gap: 2rem; align-items:flex-start; width: 100%; }
+    .panel .about .row .copy{ flex: 3; }
+    .panel .about .row .img{  flex: 3; }
+    .panel .about .row .img img{ border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
 
-/* Details cards become neat column items */
-[id$="-process"] > .project.project--details {
-  margin: 0;          /* override default spacing inside the grid */
-  padding: 0;
-  display: block;     /* neutralize internal grids for cleaner columns */
-}
+    /* Progress bar: thinner + subtle */
+    .panel__progress-bar{ height: 6px; background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.8) 100%); opacity: .85; }
 
-/* Remove the narrow 400px cap so columns breathe */
-[id$="-process"] .project--details p {
-  max-width: none;
-}
-
-/* Wide screens: 2 columns, intro spans both */
-@media (min-width: 53em) {
-  [id$="-process"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  [id$="-process"] > .project.project--intro {
-    grid-column: 1 / -1;
-  }
-}
-
-/* Optional: slightly tighter labels in process columns */
-[id$="-process"] .project__label {
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  opacity: .85;
-}
-/* --- Reference-inspired: small text & paragraphs only --- */
-
-/* Micro labels / nav tags / helper text */
-.type-tiny,
-.project__label,
-.cdawrap,
-.page-footer {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  font-weight: 400;
-  color: var(--color-label);
-}
-
-/* Primary paragraphs (About, Skills, etc.) */
-.content__text {
-  font-size: clamp(1.1rem, 2.8vw, 1.7rem);
-  line-height: 1.4;
-  font-weight: 400;
-  letter-spacing: 0;
-  color: var(--color-text);
-  margin: .6rem 0;
-}
-
-/* Case study body copy */
-.project p,
-.grid__item p {
-  font-size: 1rem;          /* based on :root 16–18px */
-  line-height: 1.4;
-  margin: 0;
-  color: var(--color-text-alt);
-}
-
-/* Case study label color (kept explicit) */
-.project__label { color: var(--color-label); }
-
-/* Optional: tiny caption under section titles */
-.content__title-main + p {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--color-label);
-}
-
-
-
-
-/* Make only the H4 title links in #work clickable */
-#work .grid__item { pointer-events: none; }
-#work .grid__item .title-link {
-  pointer-events: auto;
-  text-decoration: none;
-}
-#work .grid__item .title-link:hover { text-decoration: underline; }
-
-
-
+    /* Counter: reduced size, crisp */
+    .panel__counter h1{ font-size: clamp(18px, 2.2vw, 28px); letter-spacing: .06em; font-weight: 500; color: #fff; opacity: .9; }
   </style>
 
 
@@ -581,24 +573,20 @@
 
 
     <!-- Jump-to nav -->
-<!-- nav: add data-panel so we open the overlay instead of scrolling -->
-<nav class="frame__tags flex-line type-tiny">
-  <a href="#about">#About</a>
-  <a href="#skills">#XP</a>
-  <a href="#work">#Work</a>
-  <a href="#fintech">#CaseStudy</a>
-  <a href="#contact">#Contact</a>
-</nav>
-
-
+    <!-- nav: add data-panel so we open the overlay instead of scrolling -->
+    <nav class="frame__tags flex-line type-tiny">
+      <a href="#about">#About</a>
+      <a href="#skills">#XP</a>
+      <a href="#work">#Work</a>
+      <a href="#fintech">#CaseStudy</a>
+      <a href="#contact">#Contact</a>
+    </nav>
 
     <span class="frame__logo">ZACKGORT</span>
   </header>
 
-	<span class="intro__info">Scroll moderately to fully experience the animations</span> 
+  <span class="intro__info">Scroll moderately to fully experience the animations</span> 
 
-
-      
   <!-- About -->
   <section class="content content--padded" id="about">
     <h4 class="type-tiny">About</h4>
@@ -607,398 +595,376 @@
     <p class="type-tiny right end">UX may indeed be dead, but we live for the experience</p>
   </section>
 
-
-  			<section class="content content--full content--padded">
-				<div class="grid grid--column" data-grid-seventh>
-					<div class="grid__item span-3">
-				        <h4 class="type-tiny">UX Design & Data</h4>
-				        <p>Their hearts glow softly, bound by a love so pure.</p>
-				    </div>
-					<div class="grid__img ar-rect span-2">
-					  <div class="grid__img-inner" style="background-image:url(img/2.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide">
-					  <div class="grid__img-inner" style="background-image:url(img/4.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide span-2">
-					  <div class="grid__img-inner" style="background-image:url(img/6.webp)"></div>
-					</div>
-					<div class="grid__img span-2 ar-narrow">
-					  <div class="grid__img-inner" style="background-image:url(img/8.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide">
-					  <div class="grid__img-inner" style="background-image:url(img/10.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide span-2">
-					  <div class="grid__img-inner" style="background-image:url(img/12.webp)"></div>
-					</div>
-					<div class="grid__img span-2 ar-narrow">
-					  <div class="grid__img-inner" style="background-image:url(img/14.webp)"></div>
-					</div>
-
-          <div class="grid__item span-3">
-            <h4 class="type-tiny">UI Design & Branding</h4>
-            <p>Blissful serenity embraces their world in gentle tones.</p>
-				  </div>
-					<div class="grid__img span-2 ar-narrow">
-					  <div class="grid__img-inner" style="background-image:url(img/16.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide span-2">
-					  <div class="grid__img-inner" style="background-image:url(img/18.webp)"></div>
-					</div>
-					<div class="grid__img ar-rect">
-					  <div class="grid__img-inner" style="background-image:url(img/20.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide span-2">
-					  <div class="grid__img-inner" style="background-image:url(img/22.webp)"></div>
-					</div>
-					<div class="grid__img ar-narrow span-2">
-					  <div class="grid__img-inner" style="background-image:url(img/24.webp)"></div>
-					</div>
-					<div class="grid__img ar-wide span-3">
-					  <div class="grid__img-inner" style="background-image:url(img/26.webp)"></div>
-					</div>
-				</div>
-			</section>
-
-<!-- Inspiration / Skills -->
-<section class="content content--padded" id="skills">
-  <div class="trio-grid">
-    <div class="trio-col">
-      <h4 class="type-tiny">#experience</h4>
-      <p class="content__text">User Experience Design</p>
-      <p class="content__text">Content & Brand Strategy {B2B+C}</p>
-      <p class="content__text">Visual Interface Design</p>
-      <p class="content__text">Accessibility Compliance</p>
-    </div>
-    <div class="trio-col">
-      <h4 class="type-tiny">#software</h4>
-      <p class="content__text">Figma</p>
-      <p class="content__text">HTML/CSS/JS</p>
-      <p class="content__text">Pen & Paper</p>
-      <p class="content__text">Adobe CS</p>
-      <p class="content__text">+</p>      
-    </div>
-    <div class="trio-col">
-      <h4 class="type-tiny">#evolution</h4>
-      <p class="content__text">AI + Creative Coding</p>
-      <p class="content__text">Design Systems + Workflows</p>
-      <p class="content__text">+</p>
-    </div>
-  </div>
-</section>
-
-
-
-<!-- Work (grid second) -->
-<section class="content content--padded" id="work">
-  <h2 class="content__title-main">select works</h2>
-
-  <div class="grid grid--columns grid--spaced" data-grid-second>
-    <!-- image tiles -->
-    <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/17.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-
-    <!-- BNY → jump to full case study section -->
-    <div class="grid__item pos-6 work-card">
-      <h4 class="type-tiny">
-        <a class="title-link" href="#fintech" aria-label="Go to BNY Mellon — Pershing X case study">
-          BNY Mellon — Pershing X
-        </a>
-      </h4>
-      <p>+</p>
-    </div>
-
-    <!-- TikTok → open overlay panel -->
-    <div class="grid__item pos-7 work-card">
-      <h4 class="type-tiny">
-        <a
-          class="title-link"
-          href="#social"
-          data-panel="social"
-          data-panel-title="TikTok For Business"
-          data-panel-sub="SMB Growth · Creative Templates"
-          role="button"
-          aria-haspopup="dialog"
-          aria-label="Open TikTok For Business panel"
-        >TikTok For Business</a>
-      </h4>
-      <p>+</p>
-    </div>
-
-    <!-- GNC → open overlay panel -->
-    <div class="grid__item pos-18 work-card">
-      <h4 class="type-tiny">
-        <a
-          class="title-link"
-          href="#ecommerce"
-          data-panel="ecommerce"
-          data-panel-title="GNC — E-Commerce Revamp"
-          data-panel-sub="DTC Growth · Lead UX"
-          role="button"
-          aria-haspopup="dialog"
-          aria-label="Open GNC — E-Commerce Revamp panel"
-        >General Nutrition Centers {GNC}</a>
-      </h4>
-      <p>+</p>
-    </div>
-  </div>
-</section>
-
-
-
-
-<!-- Brands (ninth grid) -->
-<section class="content content--padded content--full" id="brands-grid">
-  <div class="grid grid--columns grid--spaced" data-grid-ninth>
-    <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/31.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/32.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/33.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/34.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/35.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/36.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/37.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/38.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/39.webp)"></div>
-  </div>
-
-  <!-- Caption -->
-  <div class="content__title">
-    <h2 class="content__title-main">Brands</h2>
-    <p class="type-tiny right end">Selected partners & collabs</p>
-  </div>
-</section>
-
-
-<!-- Agency (ninth grid) -->
-<section class="content content--full" id="brands-grid-2">
-  <div class="grid grid--columns grid--spaced" data-grid-ninth>
-    <div class="grid__img" style="background-image:url(img/15.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/16.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/21.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/24.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/25.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/26.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/27.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/41.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/42.webp)"></div>
-  </div>
-
-  <!-- Caption -->
-  <div class="content__title">
-    <h2 class="content__title-main">Agency</h2>
-    <p class="type-tiny right end">Studios, networks & teams</p>
-  </div>
-</section>
-
-
-
-
-<!-- ======================= CASE STUDY 1 — BNY Mellon (Comprehensive) ======================= -->
-
-<!-- ======================= CASE STUDY 1 — BNY Mellon (Updated) ======================= -->
-
-<!-- HERO (wide fan-up) -->
-<section class="content content--padded content--full" id="fintech">
-  <div class="grid grid--spaced grid--wide" data-grid-fifth>
-    <!-- Swap to your BNY images -->
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>
-    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png)"></div>
-    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:4800/format:webp/1*q-zgZhKnCs6abK8CIpE00Q.png)"></div>
-    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:4800/format:webp/1*-sJ-pN8tBwwsHq1XcDSLLw.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/wZY2bhKF/bny4.png)"></div>
-    <!-- repeat a few to fill the wide grid nicely -->
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
-    <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
-  </div>
-
-  <div class="content__title">
-    <h2 class="content__title-main">BNY Mellon — Pershing X</h2>
-    <p class="type-tiny right end">Financial Product Design · Publicis Sapient</p>
-  </div>
-</section>
-
-<!-- PROCESS (in-depth) -->
-<section class="content content--padded" id="fintech-process">
-  <section class="project project--intro">
-    <span class="project__label project__label--name">Domain</span>
-    <span class="project__name">Financial Product · Portfolio & CRM</span>
-
-    <span class="project__label project__label--date">Timeline</span>
-    <span class="project__date">2023 — 2024</span>
-
-    <h2 class="project__title">
-      <span class="project__title-line">Design systems and data refactorization</span>
-    </h2>
-
-    <span class="project__label project__label--mission">Mission</span>
-    <div class="project__mission">
-      <p>Create a modern, composable workspace for registered investment advisors that merges client context (CRM), portfolio actions (trades, rebalancing), and compliance guardrails without toggling between tools.</p>
-      <p>Design an IA that scales from sole practitioners to multi-office firms, while ensuring accessibility, auditability, and performance across complex data views.</p>
-    </div>
-  </section>
-  
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Problem</span>
-    <p>Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights.</p>
-  </section>
-
-  <section class="project project--details project--right">
-    <span class="project__label project__label--default">Constraints</span>
-    <p>Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices.</p>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Role & Team</span>
-    <p>Lead Product Designer (IA/flows). Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, & 2 additional designers. Weekly research cadence with advisors and operations staff.</p>
-  </section>
-
-  <section class="project project--details project--right">
-    <span class="project__label project__label--default">Research</span>
-    <p>Shadowed 12 advisors across firms; mapped task graphs for onboarding → account maintenance → rebalance → review. Ran tree tests to validate navigation and quick actions.</p>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Architecture</span>
-    <p>Designed a 3-level IA: <em>Firm → Book of Business → Client</em> with cross-cutting pivots for <em>Tasks</em> and <em>Alerts</em>. Introduced a universal command palette for quick portfolio ops.</p>
-  </section>
-
-  <section class="project project--details project--right">
-    <span class="project__label project__label--default">Design System</span>
-    <p>Built tokens for density modes and market color semantics; composed data cards with progressive disclosure and “safe-edit” states to avoid accidental orders.</p>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Accessibility</span>
-    <p>WCAG AA: focus rings, table keyboard nav, high-contrast modes, live region announcements for streaming price changes, and reduced-motion preferences respected in charts.</p>
-  </section>
-
-  <section class="project project--details project--right">
-    <span class="project__label project__label--default">Outcomes</span>
-    <p>• −29% time-to-rebalance across pilots<br>
-       • +18% advisor satisfaction (SUS + verbatims)<br>
-       • 0 critical accessibility issues in audit<br>
-       • Ops team reduced escalations by 22%</p>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Next</span>
-    <p>Multi-entity households, scenario backtesting, and AI-assisted review narratives that summarize drift, cash needs, and compliance notes per meeting.</p>
-  </section>
-</section>
-
-<!-- DISCOVERY (zoomed tiles) -->
-<section class="content content--full content--cutoff" id="fintech-discovery">
-  <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-    <div class="grid__img" style="background-image:url(img/42.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/19.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/1.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/12.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/38.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/13.webp)"></div>
-    <div class="grid__img" style="background-image:url(img/36.webp)"></div>
-  </div>
-  <div class="content__title">
-    <h2 class="content__title-main">Research Synthesis & Prototyping</h2>
-    <p class="type-tiny right end">Task graphs · Data cards · Safe-edit flows</p>
-  </div>
-</section>
-
-<!-- INSIGHT -->
-<section class="content content--padded" id="fintech-insight">
-  <h4 class="type-tiny">Insight</h4>
-  <p class="content__text">For advisors, speed = trust. The winning pattern: show high-signal client context beside actions, not behind modal steps.</p>
-  <h4 class="type-tiny" style="margin-top:1.25rem">Next</h4>
-  <p class="content__text">Narrative meeting briefs and deeper household modeling unlock the next step-change in advisor productivity.</p>
-</section>
-
-
-
-
-
-
-<!-- ===== Reusable full-page panel (hidden) ===== -->
-<div class="panel" aria-hidden="true" hidden>
-  <button class="panel__close type-tiny" aria-label="Close panel">Close ✕</button>
-  <div class="panel__progress-bar"></div>
-  <div class="panel__counter"><h1>0</h1></div>
-
-  <div class="panel__scroller">
-    <!-- 1 -->
-    <section class="intro">
-      <h1>Zack Gort, Designer</h1>
-      <h2>{Digital Product, E-commerce, Consumer}</h2>
-    </section>
-
-    <!-- 2 -->
-    <section class="hero-img">
-      <img src="https://images.unsplash.com/photo-1504890001746-a9a68eda46e2?q=80&w=1687&auto=format&fit=crop&ixlib=rb-4.1.0" alt="DJI Spark drone" />
-    </section>
-
-    <!-- 3 -->
-    <section class="header">
-      <h1>It's Not Just About What You See — It's About How You Choose to See It</h1>
-    </section>
-
-    <!-- 4 -->
-    <section class="about">
-      <div class="row">
-        <div class="copy">
-          <p>Innovation doesn't follow rules — it rewrites them. Creativity lives in contrast: logic meets spontaneity, design meets disruption.</p>
-          <p>We craft digital experiences that challenge norms, stir curiosity, and spark movement. This is where structure dances with spontaneity.</p>
-        </div>
-        <div class="img">
-          <img src="https://images.unsplash.com/photo-1742753103280-52d5efc0709b?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Classic and modern tech gadgets side by side" />
-        </div>
+  <section class="content content--full content--padded">
+    <div class="grid grid--column" data-grid-seventh>
+      <div class="grid__item span-3">
+        <h4 class="type-tiny">UX Design & Data</h4>
+        <p>Their hearts glow softly, bound by a love so pure.</p>
       </div>
-      <h1>Creativity in Motion</h1>
+    <div class="grid__img ar-rect span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/ynjWYqv8/2.webp)"></div>
+    </div>
+    <div class="grid__img ar-wide">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/8gQs8LDX/huge3.webp)"></div>
+    </div>
+    <div class="grid__img ar-wide span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/NdkkYsZb/huge1.webp)"></div>
+    </div>
+    <div class="grid__img span-2 ar-narrow">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/23T984XS/huge2.webp)"></div>
+    </div>
+    <div class="grid__img ar-wide">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/HTRJDL9w/tiktok2.webp)"></div>
+    </div>
+    <div class="grid__img ar-wide span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/gZb2Zqfv/tiktok1.webp)"></div>
+    </div>
+    <div class="grid__img span-2 ar-narrow">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/spHgPH6N/1.webp)"></div>
+    </div>
+
+      <div class="grid__item span-3">
+        <h4 class="type-tiny">UI Design & Branding</h4>
+        <p>Blissful serenity embraces their world in gentle tones.</p>
+      </div>
+    <div class="grid__img span-2 ar-narrow">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/VYS1xRzh/work2.webp)"></div>
+    </div>
+    <div class="grid__img ar-wide span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/yB4RwkTf/7.webp)"></div>
+    </div>
+    <div class="grid__img ar-wide span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/cXg5Phdc/3.webp)"></div>
+    </div>
+    <div class="grid__img ar-narrow span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png)"></div>
+    </div>
+    <div class="grid__img ar-wide span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/fxjgcYD/18.png)"></div>
+    </div>
+    <div class="grid__img ar-wide span-2">
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/gtQLYJQ/17.jpg)"></div>
+    </div>
+    </div>
+    
+  </section>
+
+  <!-- Inspiration / Skills -->
+  <section class="content content--padded" id="skills">
+    <div class="trio-grid">
+      <div class="trio-col">
+        <h4 class="type-tiny">#experience</h4>
+        <p class="content__text">User Experience Design</p>
+        <p class="content__text">Content & Brand Strategy {B2B+C}</p>
+        <p class="content__text">Visual Interface Design</p>
+        <p class="content__text">Accessibility Compliance</p>
+      </div>
+      <div class="trio-col">
+        <h4 class="type-tiny">#software</h4>
+        <p class="content__text">Figma</p>
+        <p class="content__text">HTML/CSS/JS</p>
+        <p class="content__text">Pen & Paper</p>
+        <p class="content__text">Adobe CS</p>
+        <p class="content__text">+</p>      
+      </div>
+      <div class="trio-col">
+        <h4 class="type-tiny">#evolution</h4>
+        <p class="content__text">AI + Creative Coding</p>
+        <p class="content__text">Design Systems + Workflows</p>
+        <p class="content__text">+</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Work (grid second) -->
+  <section class="content content--padded" id="work">
+    <h2 class="content__title-main">select works</h2>
+
+    <div class="grid grid--columns grid--spaced" data-grid-second>
+      <!-- image tiles -->
+      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/17.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
+
+      <!-- BNY → jump to full case study section -->
+      <div class="grid__item pos-6 work-card">
+        <h4 class="type-tiny">
+          <a class="title-link" href="#fintech" aria-label="Go to BNY Mellon — Pershing X case study">
+            BNY Mellon — Pershing X
+          </a>
+        </h4>
+        <p>+</p>
+      </div>
+
+      <!-- TikTok → open overlay panel -->
+      <div class="grid__item pos-7 work-card">
+        <h4 class="type-tiny">
+          <a
+            class="title-link"
+            href="#social"
+            data-panel="social"
+            data-panel-title="TikTok For Business"
+            data-panel-sub="SMB Growth · Creative Templates"
+            role="button"
+            aria-haspopup="dialog"
+            aria-label="Open TikTok For Business panel"
+          >TikTok For Business</a>
+        </h4>
+        <p>+</p>
+      </div>
+
+      <!-- GNC → open overlay panel -->
+      <div class="grid__item pos-18 work-card">
+        <h4 class="type-tiny">
+          <a
+            class="title-link"
+            href="#ecommerce"
+            data-panel="ecommerce"
+            data-panel-title="GNC — E-Commerce Revamp"
+            data-panel-sub="DTC Growth · Lead UX"
+            role="button"
+            aria-haspopup="dialog"
+            aria-label="Open GNC — E-Commerce Revamp panel"
+          >General Nutrition Centers {GNC}</a>
+        </h4>
+        <p>+</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brands (ninth grid) -->
+  <section class="content content--padded content--full" id="brands-grid">
+    <div class="grid grid--columns grid--spaced" data-grid-ninth>
+      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/31.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/32.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/33.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/34.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/35.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/36.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/37.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/38.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/39.webp)"></div>
+    </div>
+
+    <!-- Caption -->
+    <div class="content__title">
+      <h2 class="content__title-main">Brands</h2>
+      <p class="type-tiny right end">Selected partners & collabs</p>
+    </div>
+  </section>
+
+  <!-- Agency (ninth grid) -->
+  <section class="content content--full" id="brands-grid-2">
+    <div class="grid grid--columns grid--spaced" data-grid-ninth>
+      <div class="grid__img" style="background-image:url(img/15.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/16.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/21.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/24.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/25.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/26.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/27.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/41.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/42.webp)"></div>
+    </div>
+
+    <!-- Caption -->
+    <div class="content__title">
+      <h2 class="content__title-main">Agency</h2>
+      <p class="type-tiny right end">Studios, networks & teams</p>
+    </div>
+  </section>
+
+  <!-- ======================= CASE STUDY 1 — BNY Mellon (Updated) ======================= -->
+  <!-- HERO (wide fan-up) -->
+  <section class="content content--padded content--full" id="fintech">
+    <div class="grid grid--spaced grid--wide" data-grid-fifth>
+      <!-- Swap to your BNY images -->
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>
+      <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png)"></div>
+      <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:4800/format:webp/1*q-zgZhKnCs6abK8CIpE00Q.png)"></div>
+      <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:4800/format:webp/1*-sJ-pN8tBwwsHq1XcDSLLw.png)"></div>
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/wZY2bhKF/bny4.png)"></div>
+      <!-- repeat a few to fill the wide grid nicely -->
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
+      <div class="grid__img" style="background-image:url(https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png)"></div>
+      <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
+    </div>
+
+    <div class="content__title">
+      <h2 class="content__title-main">BNY Mellon — Pershing X</h2>
+      <p class="type-tiny right end">Financial Product Design · Publicis Sapient</p>
+    </div>
+  </section>
+
+  <!-- PROCESS (in-depth) -->
+  <section class="content content--padded" id="fintech-process">
+    <section class="project project--intro">
+      <span class="project__label project__label--name">Domain</span>
+      <span class="project__name">Financial Product · Portfolio & CRM</span>
+
+      <span class="project__label project__label--date">Timeline</span>
+      <span class="project__date">2023 — 2024</span>
+
+      <h2 class="project__title">
+        <span class="project__title-line">Design systems and data refactorization</span>
+      </h2>
+
+      <span class="project__label project__label--mission">Mission</span>
+      <div class="project__mission">
+        <p>Create a modern, composable workspace for registered investment advisors that merges client context (CRM), portfolio actions (trades, rebalancing), and compliance guardrails without toggling between tools.</p>
+        <p>Design an IA that scales from sole practitioners to multi-office firms, while ensuring accessibility, auditability, and performance across complex data views.</p>
+      </div>
+    </section>
+    
+    <section class="project project--details project--left">
+      <span class="project__label project__label--default">Problem</span>
+      <p>Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights.</p>
     </section>
 
-    <!-- 5 -->
-    <section class="banner-img">
-      <img src="https://images.unsplash.com/photo-1702471897038-3d3c88379fb0?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Table with fruit and VR headset" />
+    <section class="project project--details project--right">
+      <span class="project__label project__label--default">Constraints</span>
+      <p>Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices.</p>
     </section>
 
-    <!-- 6 -->
-    <section class="story">
-      <h1>Lead the Experience</h1>
-      <h1>Live the Detail</h1>
-      <h1>Break Every Boundary</h1>
+    <section class="project project--details project--left">
+      <span class="project__label project__label--default">Role & Team</span>
+      <p>Lead Product Designer (IA/flows). Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, & 2 additional designers. Weekly research cadence with advisors and operations staff.</p>
     </section>
 
-    <!-- 7 -->
-    <section class="concept-img">
-      <img src="https://images.unsplash.com/photo-1696258686454-60082b2c33e2?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Spot robot side view" />
+    <section class="project project--details project--right">
+      <span class="project__label project__label--default">Research</span>
+      <p>Shadowed 12 advisors across firms; mapped task graphs for onboarding → account maintenance → rebalance → review. Ran tree tests to validate navigation and quick actions.</p>
     </section>
 
-    <!-- 8 -->
-    <section class="outro">
-      <h1>Tomorrow is Already Here</h1>
+    <section class="project project--details project--left">
+      <span class="project__label project__label--default">Architecture</span>
+      <p>Designed a 3-level IA: <em>Firm → Book of Business → Client</em> with cross-cutting pivots for <em>Tasks</em> and <em>Alerts</em>. Introduced a universal command palette for quick portfolio ops.</p>
     </section>
+
+    <section class="project project--details project--right">
+      <span class="project__label project__label--default">Design System</span>
+      <p>Built tokens for density modes and market color semantics; composed data cards with progressive disclosure and “safe-edit” states to avoid accidental orders.</p>
+    </section>
+
+    <section class="project project--details project--left">
+      <span class="project__label project__label--default">Accessibility</span>
+      <p>WCAG AA: focus rings, table keyboard nav, high-contrast modes, live region announcements for streaming price changes, and reduced-motion preferences respected in charts.</p>
+    </section>
+
+    <section class="project project--details project--right">
+      <span class="project__label project__label--default">Outcomes</span>
+      <p>• −29% time-to-rebalance across pilots<br>
+         • +18% advisor satisfaction (SUS + verbatims)<br>
+         • 0 critical accessibility issues in audit<br>
+         • Ops team reduced escalations by 22%</p>
+    </section>
+
+    <section class="project project--details project--left">
+      <span class="project__label project__label--default">Next</span>
+      <p>Multi-entity households, scenario backtesting, and AI-assisted review narratives that summarize drift, cash needs, and compliance notes per meeting.</p>
+    </section>
+  </section>
+
+  <!-- DISCOVERY (zoomed tiles) -->
+  <section class="content content--full content--cutoff" id="fintech-discovery">
+    <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+      <div class="grid__img" style="background-image:url(img/42.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/19.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/1.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/12.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/38.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/13.webp)"></div>
+      <div class="grid__img" style="background-image:url(img/36.webp)"></div>
+    </div>
+    <div class="content__title">
+      <h2 class="content__title-main">Research Synthesis & Prototyping</h2>
+      <p class="type-tiny right end">Task graphs · Data cards · Safe-edit flows</p>
+    </div>
+  </section>
+
+  <!-- INSIGHT -->
+  <section class="content content--padded" id="fintech-insight">
+    <h4 class="type-tiny">Insight</h4>
+    <p class="content__text">For advisors, speed = trust. The winning pattern: show high-signal client context beside actions, not behind modal steps.</p>
+    <h4 class="type-tiny" style="margin-top:1.25rem">Next</h4>
+    <p class="content__text">Narrative meeting briefs and deeper household modeling unlock the next step-change in advisor productivity.</p>
+  </section>
+
+  <!-- ===== Reusable full-page panel (hidden) ===== -->
+  <div class="panel" aria-hidden="true" hidden>
+    <button class="panel__close type-tiny" aria-label="Close panel">Close ✕</button>
+    <div class="panel__progress-bar"></div>
+    <div class="panel__counter"><h1>0</h1></div>
+
+    <div class="panel__scroller">
+      <!-- 1 -->
+      <section class="intro">
+        <h1>Zack Gort, Designer</h1>
+        <h2>{Digital Product, E-commerce, Consumer}</h2>
+      </section>
+
+      <!-- 2 -->
+      <section class="hero-img">
+        <img src="https://images.unsplash.com/photo-1504890001746-a9a68eda46e2?q=80&w=1687&auto=format&fit=crop&ixlib=rb-4.1.0" alt="DJI Spark drone" />
+      </section>
+
+      <!-- 3 -->
+      <section class="header">
+        <h1>It's Not Just About What You See — It's About How You Choose to See It</h1>
+      </section>
+
+      <!-- 4 -->
+      <section class="about">
+        <div class="row">
+          <div class="copy">
+            <p>Innovation doesn't follow rules — it rewrites them. Creativity lives in contrast: logic meets spontaneity, design meets disruption.</p>
+            <p>We craft digital experiences that challenge norms, stir curiosity, and spark movement. This is where structure dances with spontaneity.</p>
+          </div>
+          <div class="img">
+            <img src="https://images.unsplash.com/photo-1742753103280-52d5efc0709b?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Classic and modern tech gadgets side by side" />
+          </div>
+        </div>
+        <h1>Creativity in Motion</h1>
+      </section>
+
+      <!-- 5 -->
+      <section class="banner-img">
+        <img src="https://images.unsplash.com/photo-1702471897038-3d3c88379fb0?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Table with fruit and VR headset" />
+      </section>
+
+      <!-- 6 -->
+      <section class="story">
+        <h1>Lead the Experience</h1>
+        <h1>Live the Detail</h1>
+        <h1>Break Every Boundary</h1>
+      </section>
+
+      <!-- 7 -->
+      <section class="concept-img">
+        <img src="https://images.unsplash.com/photo-1696258686454-60082b2c33e2?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Spot robot side view" />
+      </section>
+
+      <!-- 8 -->
+      <section class="outro">
+        <h1>Tomorrow is Already Here</h1>
+      </section>
+    </div>
   </div>
-</div>
-<!-- ===== /panel ===== -->
-
-
-
-
+  <!-- ===== /panel ===== -->
 
   <!-- Contact -->
   <section class="content content--padded" id="contact">
@@ -1015,53 +981,55 @@
 
 
 
+
 <script>document.documentElement.classList.add('js');</script>
 <script>
 // --- Your case-study content for the overlay ---
 const CASE_STUDIES = {
-  social: { // TikTok
-    title: "TikTok for Business",
-    sub: "Brand Activation (Contentful) · Code & Theory",
-    slides: {
-      hero: "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
-      header: "“Razzle Dazzle”",
-      aboutCopy: [
-        "2021 was the year TikTok exploded. Goal: expand B2B via a marketing portal into their marketplace ecosystem.",
-        "I led discovery & research, competitive analysis, and content audits while guiding taxonomy & content strategy for a Contentful migration and B2B resource hub."
-      ],
-      aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
-      banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
-      storyLines: [
-        "Lead discovery & research",
-        "Map taxonomy & content strategy",
-        "Deliver B2B portal on Contentful"
-      ],
-      concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
-      outro: "To flow, you should know"
-    }
-  },
+social: { // TikTok
+title: "TikTok for Business",
+sub: "Brand Activation (Contentful) · Code & Theory",
+slides: {
+hero: "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
+header: "“Razzle Dazzle”",
+aboutCopy: [
+"2021 was the year TikTok exploded. Goal: expand B2B via a marketing portal into their marketplace ecosystem.",
+"I led discovery & research, competitive analysis, and content audits while guiding taxonomy & content strategy for a Contentful migration and B2B resource hub."
+],
+aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
+banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
+storyLines: [
+"Lead discovery & research",
+"Map taxonomy & content strategy",
+"Deliver B2B portal on Contentful"
+],
+concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
+outro: "To flow, you should know"
+}
+},
 
-  ecommerce: { // GNC
-    title: "General Nutrition Centers (GNC)",
-    sub: "{Shopify E-commerce} · Elva Design Group",
-    slides: {
-      hero: "https://i.ibb.co/7xd84m10/ZAX02375.jpg",
-      header: "“If the bar ain’t bending, you’re just pretending”",
-      aboutCopy: [
-        "GNC asked us to redesign and replatform on Shopify after exiting bankruptcy; as of 2024 they exceeded $500M revenue.",
-        "As principal UX, I owned discovery, IA & taxonomy, wireframing + feature prototyping, and consumer re-engagement."
-      ],
-      aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
-      banner: "https://i.ibb.co/spHgPH6N/1.webp",
-      storyLines: [
-        "Discovery → IA & taxonomy",
-        "Wireframes & prototyping",
-        "Consumer re-engagement"
-      ],
-      concept: "https://i.ibb.co/ynjWYqv8/2.webp",
-      outro: "Mobile-minded. Outcome-driven."
-    }
-  }
+
+ecommerce: { // GNC
+title: "General Nutrition Centers (GNC)",
+sub: "{Shopify E-commerce} · Elva Design Group",
+slides: {
+hero: "https://i.ibb.co/7xd84m10/ZAX02375.jpg",
+header: "“If the bar ain’t bending, you’re just pretending”",
+aboutCopy: [
+"GNC asked us to redesign and replatform on Shopify after exiting bankruptcy; as of 2024 they exceeded $500M revenue.",
+"As principal UX, I owned discovery, IA & taxonomy, wireframing + feature prototyping, and consumer re-engagement."
+],
+aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
+banner: "https://i.ibb.co/spHgPH6N/1.webp",
+storyLines: [
+"Discovery → IA & taxonomy",
+"Wireframes & prototyping",
+"Consumer re-engagement"
+],
+concept: "https://i.ibb.co/ynjWYqv8/2.webp",
+outro: "Mobile-minded. Outcome-driven."
+}
+}
 };
 </script>
 

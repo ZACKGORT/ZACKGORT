@@ -995,11 +995,12 @@
 <nav class="frame__tags flex-line type-tiny">
   <a href="#about">#About</a>
   <a href="#skills">#XP</a>
-  <a href="#work">#Work</a>
+  <a href="#work" data-settle="end">#Work</a>
   <a href="#fintech">#Product</a>
   <a href="#ecommerce">#E-commerce</a>
   <a href="#contact">#Connect</a>
 </nav>
+
 
 
   <span class="frame__logo">ZACKGORT</span>
@@ -1554,31 +1555,45 @@ function enableHashScrollWithLenis() {
     const link = e.target.closest('a[href^="#"]');
     if (!link) return;
 
-    const hash = link.getAttribute('href');
+    const hash   = link.getAttribute('href');
     const target = document.querySelector(hash);
     if (!target) return;
 
     e.preventDefault();
 
-    // default overshoot ~20vh desktop, ~12vh mobile
-    const defaultOvershootPx = Math.round((isMobile ? 0.12 : 0.35) * window.innerHeight);
+    // “Final layout” jump for Work (or any link with data-settle="end")
+    const wantsFinal = hash === '#work' || link.hasAttribute('data-settle');
+    if (wantsFinal && window.ScrollTrigger) {
+      const st = ScrollTrigger.getAll().find(st =>
+        (st.pin === target) || (st.trigger === target)
+      );
 
-    // allow per-link and per-target tuning
-    const override =
-      parseFloat(link.dataset.offset ?? target.dataset.navOffset ?? '') ;
-    const overshoot = Number.isFinite(override) ? override : defaultOvershootPx;
+      if (st && isFinite(st.end)) {
+        const epsilon = 2; // nudge past end so the pin fully releases
+        const y = st.end + epsilon;
 
-    if (window.lenis) {
-      window.lenis.scrollTo(target, { offset: overshoot });
-    } else {
-      const y = target.getBoundingClientRect().top + window.pageYOffset + overshoot;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+        if (window.lenis) {
+          window.lenis.scrollTo(y, { duration: 1.1 });
+        } else {
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+        history.pushState(null, '', hash);
+        return;
+      }
     }
 
-    // update the hash without the native instant jump
+    // Fallback
+    const extra = parseFloat(link.dataset.offset || 0) || 0;
+    const y = target.getBoundingClientRect().top + window.pageYOffset + extra;
+    if (window.lenis) {
+      window.lenis.scrollTo(y, { duration: 1.0 });
+    } else {
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
     history.pushState(null, '', hash);
   });
 }
+
 
 
 /* ---------------- Assets + helpers ---------------- */
@@ -2295,6 +2310,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const header = document.querySelector('.frame');
 
+
+    // Fallback: normal anchor scroll (keeps any legacy data-offset working)
+    const extra = parseFloat(link.dataset.offset || 0) || 0;
+    const y = target.getBoundingClientRect().top + window.pageYOffset + extra;
+    if (window.lenis) {
+      window.lenis.scrollTo(y, { duration: 1.0 });
+    } else {
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  });
+}
+
+
+
   if (window.ScrollTrigger && header) {
     ScrollTrigger.create({
       trigger: header,
@@ -2314,6 +2343,8 @@ document.addEventListener('DOMContentLoaded', () => {
     el.classList.add('is-visible');
   }
 });
+
+
 
 </script>
 

@@ -1225,15 +1225,14 @@
 </footer>
 
 
-
 <script>
 /* =========================
-   FULL JS (with stacked-gallery leak fix + pin reset fix)
+   FULL JS (stacked-gallery z-fix + overlay pin-reset + fixed seventh grid)
    ========================= */
 document.documentElement.classList.add('js');
 
 gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.normalizeScroll(true); // tame momentum overshoot
+ScrollTrigger.normalizeScroll(true); // smooth out momentum overshoot
 
 /* ---------------- FIX: stop full-width stacked images from showing through pinned sections ---------------- */
 (() => {
@@ -1257,7 +1256,11 @@ ScrollTrigger.defaults({
 /* -------------- /FIX -------------- */
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+// mobile flag that updates on resize/orientation change
+const mq = window.matchMedia('(max-width: 768px)');
+let isMobile = mq.matches;
+mq.addEventListener?.('change', (e) => { isMobile = e.matches; ScrollTrigger.refresh(); });
 
 /* ---------- Case-study content for the overlay ---------- */
 const CASE_STUDIES = {
@@ -1388,7 +1391,8 @@ function animateSecondGrid() {
         end: isMobile ? '+=140%' : '+=250%',
         pin: section,
         pinSpacing: true,
-        scrub: isMobile ? 0.25 : 0.5
+        scrub: isMobile ? 0.25 : 0.5,
+        invalidateOnRefresh: true
       }
     })
     .from(imgs, {
@@ -1427,7 +1431,8 @@ function animateFifthGrid() {
         end: isMobile ? '+=150%' : '+=250%',
         pin: section,
         pinSpacing: true,
-        scrub: isMobile ? 0.2 : 0.3
+        scrub: isMobile ? 0.2 : 0.3,
+        invalidateOnRefresh: true
       }
     })
     .set(grid, { perspective: 1000 })
@@ -1442,6 +1447,7 @@ function animateFifthGrid() {
   });
 }
 
+// Ninth (skip BNY hero here; we animate it with sixth below)
 function animateNinthGrid() {
   document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
     if (grid.closest('#fintech')) return;
@@ -1474,7 +1480,8 @@ function animateNinthGrid() {
         end: isMobile ? '+=120%' : '+=200%',
         pin: section,
         pinSpacing: true,
-        scrub: true
+        scrub: true,
+        invalidateOnRefresh: true
       }
     });
 
@@ -1492,6 +1499,7 @@ function animateNinthGrid() {
   });
 }
 
+// Sixth (skip BNY discovery here; it gets ninth)
 function animateSixthGrid() {
   document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
     if (grid.closest('#fintech-discovery')) return;
@@ -1517,7 +1525,8 @@ function animateSixthGrid() {
         end: isMobile ? '+=120%' : '+=180%',
         pin: section,
         pinSpacing: true,
-        scrub: isMobile ? 0.4 : 0.6
+        scrub: isMobile ? 0.4 : 0.6,
+        invalidateOnRefresh: true
       }
     })
     .from(imgs, {
@@ -1567,7 +1576,6 @@ function animateSeventhGrid() {
   });
 }
 
-
 /* ----- BNY special swaps ----- */
 function animateBNYHeroAsSixth() {
   document.querySelectorAll('#fintech [data-grid-ninth]').forEach((grid) => {
@@ -1592,7 +1600,8 @@ function animateBNYHeroAsSixth() {
         end: isMobile ? '+=120%' : '+=180%',
         pin: section,
         pinSpacing: true,
-        scrub: isMobile ? 0.4 : 0.6
+        scrub: isMobile ? 0.4 : 0.6,
+        invalidateOnRefresh: true
       }
     })
     .from(imgs, {
@@ -1628,7 +1637,8 @@ function animateBNYDiscoveryAsNinth() {
         end: isMobile ? '+=120%' : '+=200%',
         pin: section,
         pinSpacing: true,
-        scrub: true
+        scrub: true,
+        invalidateOnRefresh: true
       }
     })
     .from(imgs, {
@@ -1886,7 +1896,7 @@ function a11yifyGridImages() {
       if (window.ScrollTrigger) {
         ScrollTrigger.getAll().forEach(st => {
           if (st.animation) st.animation.pause(0);
-          st.disable(true); // <-- reset = true (critical)
+          st.disable(true); // reset = true (critical)
         });
       }
     } catch {}

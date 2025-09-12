@@ -17,7 +17,7 @@
 
 <style>
   /* ===== inlined css/base.css ===== */
-  *,
+  * ,
   *::after,
   *::before { box-sizing: border-box; }
   :root {
@@ -153,7 +153,6 @@
 
   .content--full { height: 100svh; }
   .frame { min-height: 100svh; }
-
 
   .content__text {
     font-size: 1.7rem;
@@ -695,25 +694,25 @@
     contain: paint;
   }
 
-  /* NEW: center each figure horizontally */
+  /* Center each figure horizontally */
   #fintech-stack .stacked-gallery {
     display: grid;
     justify-items: center;
   }
 
-  /* NEW: centered, responsive frame width */
+  /* Centered, responsive frame width */
   #fintech-stack .stacked-img {
     width: min(1400px, 90vw);
     margin-inline: auto;
   }
 
-  /* Keep your cinematic height but ensure solid compositing */
+  /* Cinematic height + solid compositing */
   #fintech-stack .stacked-img img {
     display: block;
     width: 100%;
     height: min(88vh, 900px);
     object-fit: cover;
-    object-position: center center; /* NEW: center crop horizontally */
+    object-position: center center;
     backface-visibility: hidden;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
@@ -754,16 +753,47 @@
     }
   }
 
-@media (max-width: 768px) {
-  #fintech-stack .stacked-img img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
+  /* ===== MOBILE image behavior for stacked gallery ===== */
+  @media (max-width: 768px) {
+    #fintech-stack .stacked-img img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
   }
+
+  /* === DISCOVERY: keep the zoomed grid within the viewport width === */
+  #fintech-discovery .grid.grid--zoomed {
+    width: 100vw;
+    max-width: 100vw;
+    margin-inline: auto;
+    gap: var(--grid-gap);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    aspect-ratio: auto; /* let height be natural */
+  }
+  @media (max-width: 768px) {
+    #fintech-discovery .grid.grid--zoomed {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: auto;
+    }
+  }
+
+
+
+
+  [data-grid-seventh] .grid__item.span-3 {
+  padding-block: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .grid__item.span-3 { padding-block: 1.1rem; }
 }
 
 
+
 </style>
+
 
 </head>
 <body class="loading">
@@ -810,40 +840,13 @@
     <!-- === First Set === -->
     <div class="grid__item span-3">
       <h4 class="type-tiny">UX Design & Data</h4>
-      <p>Requirements gathering</p>
-    </div>
-    <div class="grid__img ar-rect span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/ynjWYqv8/2.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/8gQs8LDX/huge3.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/NdkkYsZb/huge1.webp)"></div>
-    </div>
-    <div class="grid__img span-2 ar-narrow">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/23T984XS/huge2.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/HTRJDL9w/tiktok2.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/gZb2Zqfv/tiktok1.webp)"></div>
-    </div>
-    <div class="grid__img span-2 ar-narrow">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/spHgPH6N/1.webp)"></div>
-    </div>
-
-    <!-- === Second Set === -->
-    <div class="grid__item span-3">
-      <h4 class="type-tiny">UX+UI Prototyping</h4> 
-      <p>Distillation & Socialiation of Knowledge</p>
+      <p>What 98% of my work looks like...</p>
     </div>
     <div class="grid__img span-2 ar-narrow">
       <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/VYS1xRzh/work2.webp)"></div>
     </div>
     <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/yB4RwkTf/7.webp)"></div>
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/ynjWYqv8/2.webp)"></div>
     </div>
     <div class="grid__img ar-wide span-2">
       <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/cXg5Phdc/3.webp)"></div>
@@ -852,15 +855,15 @@
       <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png)"></div>
     </div>
     <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/fxjgcYD/18.png)"></div>
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/23T984XS/huge2.webp)"></div>
     </div>
     <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/gtQLYJQ/17.jpg)"></div>
+      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/HTRJDL9w/tiktok2.webp)"></div>
     </div>
 
 <div class="grid__item span-3">
   <h4 class="type-tiny">UI Design & Brand Systems</h4>
-  <p>Shipped. What's next?!</p>
+  <p>...the other 2%</p>
 </div>
 <div class="grid__img ar-rect">
   <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/MrFyzRt/work3.webp)"></div>
@@ -895,17 +898,17 @@
         <p class="content__text">Accessibility Compliance</p>
       </div>
       <div class="trio-col">
-        <h4 class="type-tiny">#software</h4>
+        <h4 class="type-tiny">#savvy</h4>
         <p class="content__text">Figma, Adobe CS</p>
-        <p class="content__text">HTML/CSS/JS</p>
+        <p class="content__text">HTML/CSS/Js</p>
         <p class="content__text">Pen & Paper</p>
-        <p class="content__text">Office, etc</p>
+        <p class="content__text">Whiteboard</p>
         <p class="content__text">+</p>      
       </div>
       <div class="trio-col">
         <h4 class="type-tiny">#evolution</h4>
         <p class="content__text">AI + Creative Coding</p>
-        <p class="content__text">Design Systems + Workflows</p>
+        <p class="content__text">Design Systems & Workflows</p>
         <p class="content__text">+</p>
       </div>
     </div>

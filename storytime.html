@@ -868,14 +868,117 @@
   /* or: height:auto; object-fit:contain; if you prefer contained on small screens */
 }
 
+/* Viewport overlay: centered horizontally, lower third vertically */
+.scroll-downs{
+  position: fixed;              /* anchor to the viewport */
+  left: 50%;
+  transform: translateX(-50%) scale(.5); /* was: translateX(-50%) */
+  transform-origin: 50% 100%;
+  bottom: clamp(20px, 10vh, 40px); /* “lower third” feel + mobile-safe */
+  width: 34px;
+  height: 55px;
+  z-index: 9999;                /* above page content & pinned sections */
+  pointer-events: none;         /* don’t block clicks/scroll */
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.35));
+}
+
+.mousey{
+  width: 3px;
+  padding: 10px 15px;
+  height: 35px;
+  border: 2px solid #fff;
+  border-radius: 25px;
+  opacity: 0.75;
+  box-sizing: content-box;
+}
+
+.scroller{
+  width: 3px;
+  height: 10px;
+  border-radius: 25%;
+  background-color: #fff;
+  animation: scroll 2.2s cubic-bezier(.15,.41,.69,.94) infinite;
+}
+
+@keyframes scroll{
+  0%   { opacity: 0; }
+  10%  { transform: translateY(0);   opacity: 1; }
+  100% { transform: translateY(15px); opacity: 0; }
+}
+
+/* Optional: hide the indicator when the full-screen panel is open */
+.panel[aria-hidden="false"] ~ .scroll-downs{
+  opacity: 0;
+  visibility: hidden;
+}
+
+
+
+/* ==== Bottom blur overlay ==== */
+:root{
+  /* tweak these */
+  --layers: 5;        /* number of stacked blur slices */
+  --blur-max: 40;     /* strongest blur in px */
+  --mask-stop: 35;    /* how tall the blurred band is (% of viewport) */
+  --saturate: 0.1;    /* optional extra pop */
+}
+
+/* keep it above the page, under your .panel (which is z:10000) */
+.blur{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  isolation: isolate;
+  contain: paint;
+}
+
+/* each layer computes its own blur + height stop */
+.blur > div{
+  --blur: calc( sin(((var(--layers) - var(--i)) / var(--layers)) * 90deg) * var(--blur-max) );
+  --stop: calc( sin((var(--i) / var(--layers)) * 90deg) * var(--mask-stop) );
+  position: absolute;
+  inset: 0;
+}
+
+/* the blurred band — masked so it only covers the lower portion */
+.blur > div::after{
+  content: "";
+  position: absolute;
+  inset: 0 -250%;
+  -webkit-backdrop-filter: blur(calc(var(--blur) * 1px)) saturate(var(--saturate));
+  backdrop-filter: blur(calc(var(--blur) * 1px)) saturate(var(--saturate));
+  mask: linear-gradient(180deg, transparent 0 calc((100 - var(--stop)) * 1%), #000 100%);
+  -webkit-mask: linear-gradient(180deg, transparent 0 calc((100 - var(--stop)) * 1%), #000 100%);
+}
+
+/* optional: a solid floor at the very bottom to avoid band edge showing */
+.blur > div::before{
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: calc(var(--stop) * 1%);
+  z-index: 1;
+  /* transparent by default; set a color if you want a subtle tint */
+  /* background: rgba(0,0,0,.02); */
+}
+
+/* blur hidden by default; fades in once header is gone */
+.blur{ opacity: 0; transition: opacity .35s ease; }
+.blur.is-visible{ opacity: 1; }
+
+
+/* turn off cleanly if backdrop-filter isn't supported */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .blur{ display: none; }
+}
+
 </style>
-
-
 </head>
 <body class="loading">
 <main>
   <header class="frame">
-    <h2 class="frame__title">Hello!</h2>
+    <h2 class="frame__title">UX is dead.</h2>
 
     <div class="frame__subline type-tiny">
       <span>Digital Designer ***Thinker & Maker***</span>
@@ -899,10 +1002,10 @@
 </nav>
 
 
-    <span class="frame__logo">ZACKGORT</span>
+  <span class="frame__logo">ZACKGORT</span>
   </header>
 
-  <span class="intro__info">Scroll moderately to fully experience the animations</span> 
+
 
   <!-- About -->
   <section class="content content--padded" id="about">
@@ -1399,6 +1502,11 @@
   <a href="https://www.linkedin.com/in/zackgort/" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>
 </footer>
 
+<div class="scroll-downs" aria-hidden="true">
+  <div class="mousey"><div class="scroller"></div></div>
+</div>
+
+<div class="blur"></div>
 
 <script>
 /* ============================================================
@@ -2149,6 +2257,45 @@ window.addEventListener('resize', () => ScrollTrigger.refresh());
 a11yifyGridImages();
 
 </script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const layers = parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--layers')) || 5;
+
+  const el = document.createElement('div');
+  el.className = 'blur';
+  el.innerHTML = Array.from({ length: layers }, (_, i) =>
+    `<div style="--i:${i+1}"></div>`).join('');
+  document.body.appendChild(el);
+
+  const header = document.querySelector('.frame');
+
+  // If GSAP ScrollTrigger is available, use it
+  if (window.ScrollTrigger && header) {
+    ScrollTrigger.create({
+      trigger: header,
+      start: 'bottom top',          // when header bottom hits top of viewport
+      onEnter:    () => el.classList.add('is-visible'),
+      onEnterBack:() => el.classList.remove('is-visible'),
+      onLeaveBack:() => el.classList.remove('is-visible')
+    });
+  } else if (header) {
+    // Fallback: IntersectionObserver
+    const io = new IntersectionObserver(([entry]) => {
+      el.classList.toggle('is-visible', !entry.isIntersecting);
+    }, { threshold: 0 });
+    io.observe(header);
+  }
+
+  // Ensure correct state on hard-refresh mid-page
+  if (header && header.getBoundingClientRect().bottom <= 0) {
+    el.classList.add('is-visible');
+  }
+});
+</script>
+
 
 
 </body>

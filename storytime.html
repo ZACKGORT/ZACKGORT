@@ -863,10 +863,16 @@
   transform: translateZ(0);
 }
 
+/* Mobile: make ecommerce stack images fit like fintech */
 @media (max-width: 768px) {
-  #ecommerce-stack .stacked-img img { height: 70vh; }
-  /* or: height:auto; object-fit:contain; if you prefer contained on small screens */
+  #ecommerce-stack .stacked-img img {
+    width: 100%;
+    height: auto !important;     /* override earlier 70vh */
+    object-fit: contain !important;
+    object-position: center;
+  }
 }
+
 
 /* Viewport overlay: centered horizontally, lower third vertically */
 .scroll-downs{
@@ -912,7 +918,43 @@
   visibility: hidden;
 }
 
+/* --- make the scroller interactive + add hover label --- */
+.scroll-downs{
+  pointer-events: auto;     /* was none */
+  cursor: pointer;
+}
 
+/* tooltip */
+.scroll-downs::after{
+  content: "Back to top";
+  position: absolute;
+  left: 50%;
+  bottom: 100%;             /* show ABOVE the icon (safer near viewport edge) */
+  transform: translate(-50%, -8px);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0,0,0,.65);
+  padding: .35rem .5rem;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity .2s ease, transform .2s ease;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.35));
+}
+
+.scroll-downs:hover::after{
+  opacity: .95;
+  transform: translate(-50%, -12px);
+}
+
+/* focus ring for a11y */
+.scroll-downs:focus-visible{
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
 
 /* ==== Bottom blur overlay ==== */
 :root{
@@ -2663,6 +2705,37 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+<script>
+/* click/keyboard → scroll to top (Lenis-aware) */
+(() => {
+  const el = document.querySelector('.scroll-downs');
+  if (!el) return;
+
+  // a11y attributes
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('aria-label', 'Back to top');
+  el.setAttribute('title', 'Back to top');
+
+  const toTop = (evt) => {
+    evt.preventDefault();
+    try {
+      if (window.lenis && typeof window.lenis.scrollTo === 'function') {
+        window.lenis.scrollTo(0, { duration: 1.0 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch {
+      window.scrollTo(0, 0);
+    }
+  };
+
+  el.addEventListener('click', toTop);
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') toTop(e);
+  });
+})();
+</script>
 
 </body>
 </html>

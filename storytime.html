@@ -927,7 +927,7 @@
 .blur{
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 1000;
   pointer-events: none;
   isolation: isolate;
   contain: paint;
@@ -2264,36 +2264,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const layers = parseInt(getComputedStyle(document.documentElement)
     .getPropertyValue('--layers')) || 5;
 
-  const el = document.createElement('div');
+  // Reuse existing .blur if it’s in the HTML, otherwise create it
+  const existing = document.querySelector('.blur');
+  const el = existing || document.createElement('div');
   el.className = 'blur';
   el.innerHTML = Array.from({ length: layers }, (_, i) =>
     `<div style="--i:${i+1}"></div>`).join('');
-  document.body.appendChild(el);
+  if (!existing) document.body.appendChild(el);
 
   const header = document.querySelector('.frame');
 
-  // If GSAP ScrollTrigger is available, use it
   if (window.ScrollTrigger && header) {
     ScrollTrigger.create({
       trigger: header,
-      start: 'bottom top',          // when header bottom hits top of viewport
-      onEnter:    () => el.classList.add('is-visible'),
-      onEnterBack:() => el.classList.remove('is-visible'),
-      onLeaveBack:() => el.classList.remove('is-visible')
+      start: 'bottom top',
+      onEnter:     () => el.classList.add('is-visible'),
+      onEnterBack: () => el.classList.remove('is-visible'),
+      onLeaveBack: () => el.classList.remove('is-visible')
     });
   } else if (header) {
-    // Fallback: IntersectionObserver
     const io = new IntersectionObserver(([entry]) => {
       el.classList.toggle('is-visible', !entry.isIntersecting);
     }, { threshold: 0 });
     io.observe(header);
   }
 
-  // Ensure correct state on hard-refresh mid-page
   if (header && header.getBoundingClientRect().bottom <= 0) {
     el.classList.add('is-visible');
   }
 });
+
 </script>
 
 

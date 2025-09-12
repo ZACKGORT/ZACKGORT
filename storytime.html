@@ -1114,28 +1114,11 @@
             BNY Mellon — Pershing X
           </a>
         </h4>
-        <p>🡇</p>
+        <p>↓</p>
       </div>
 
-      <!-- TikTok → open overlay panel -->
+      <!-- GNC → jump to full case study section -->
       <div class="grid__item pos-7 work-card">
-        <h4 class="type-tiny">
-<a
-  class="title-link"
-  href="https://www.tiktok.com/about?lang=en"
-  target="_blank"
-  rel="noopener noreferrer"
-  aria-label="Open TikTok For Business (opens in a new tab)"
-  title="TikTok For Business"
->
-  TikTok For Business
-</a>
-        </h4>
-        <p>🔗</p>
-      </div>
-
-      <!-- GNC → open overlay panel -->
-      <div class="grid__item pos-18 work-card">
   <h4 class="type-tiny">
     <a
       class="title-link"
@@ -1143,7 +1126,24 @@
       aria-label="Go to GNC case study"
     >General Nutrition Centers {GNC}</a>
   </h4>
-        <p>🡆</p>
+        <p>↓</p>
+      </div>
+
+      <!-- TikTok external link -->
+      <div class="grid__item pos-18 work-card">
+        <h4 class="type-tiny">
+          <a
+            class="title-link"
+            href="https://www.tiktok.com/about?lang=en"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open TikTok For Business (opens in a new tab)"
+            title="TikTok For Business">
+          TikTok For Business
+          </a>
+        </h4>
+        <p>↗</p>
+
       </div>
     </div>
   </section>
@@ -1553,12 +1553,33 @@ function enableHashScrollWithLenis() {
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href^="#"]');
     if (!link) return;
-    const target = document.querySelector(link.getAttribute('href'));
+
+    const hash = link.getAttribute('href');
+    const target = document.querySelector(hash);
     if (!target) return;
+
     e.preventDefault();
-    window.lenis ? window.lenis.scrollTo(target) : target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // default overshoot ~20vh desktop, ~12vh mobile
+    const defaultOvershootPx = Math.round((isMobile ? 0.12 : 0.35) * window.innerHeight);
+
+    // allow per-link and per-target tuning
+    const override =
+      parseFloat(link.dataset.offset ?? target.dataset.navOffset ?? '') ;
+    const overshoot = Number.isFinite(override) ? override : defaultOvershootPx;
+
+    if (window.lenis) {
+      window.lenis.scrollTo(target, { offset: overshoot });
+    } else {
+      const y = target.getBoundingClientRect().top + window.pageYOffset + overshoot;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+
+    // update the hash without the native instant jump
+    history.pushState(null, '', hash);
   });
 }
+
 
 /* ---------------- Assets + helpers ---------------- */
 const preloadImages = (selector = '.grid__img, .grid__img-inner') =>

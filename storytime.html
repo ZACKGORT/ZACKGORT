@@ -591,14 +591,61 @@
   .frame__tags { gap: .6rem; }
   .frame__links a { display: inline-block; padding: .25rem 0; }
 
-  /* Generic content spacing */
-  .content--padded { padding: var(--page-padding); }
-  .content--full { height: auto; min-height: 80dvh; }
+/* =========================
+   Generic content (already in your CSS)
+   ========================= */
+.content--padded { 
+  padding: var(--page-padding); 
+}
+.content--full { 
+  height: auto; 
+  min-height: 100dvh; 
+}
 
-  .content__title { margin: 2.5rem 0 1rem; }
-  .content__title-main { font-size: clamp(1.6rem, 7.5vw, 3rem); }
+.content__title { 
+  margin: 2.5rem 0 1rem; 
+}
+.content__title-main { 
+  font-size: clamp(1.6rem, 7.5vw, 3rem); 
+}
+.content__text { 
+  font-size: clamp(1.05rem, 4.3vw, 1.25rem); 
+}
 
-  .content__text { font-size: clamp(1.05rem, 4.3vw, 1.25rem); }
+/* =========================
+   Work Section Spacing
+   ========================= */
+#work {
+  /* extra space below the section before the next block */
+  margin-bottom: clamp(4rem, 12vh, 8rem);
+}
+
+#work .content__title-main {
+  /* push the title up a bit from the grid */
+  margin-bottom: 3rem;
+}
+
+#work .grid {
+  /* increase gap between tiles */
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  padding-top: 1.5rem;   /* breathing room above */
+  padding-bottom: 1.5rem;/* breathing room below */
+}
+
+#work .grid__item {
+  /* extra padding inside text cards */
+  padding: 1.25rem;
+}
+
+#work .grid__item h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+#work .grid__item p {
+  margin: 0;
+}
+
 
   /* Grids: denser & taller tiles on mobile */
   .grid {
@@ -708,13 +755,89 @@
 /* Even tighter for very small devices */
 @media (max-width: 390px) {
   :root { font-size: 14px; }
-  .grid__img, .grid__item { min-height: 120px; }
+  .grid__img, .grid__item { min-height: 100px; padding-bottom: 0.5rem;}
+}
+
+/* Let the stacked section size to its content (not 100vh grid) */
+#fintech-stack.content--full {
+  display: block;     /* don’t use the grid from .content--full */
+  height: auto;
+  min-height: 0;
+}
+
+/* Create its own paint/stacking island so it can't bleed or be bled into */
+#fintech-stack.stacked-section {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  contain: paint;     /* new: extra safety for compositing */
+}
+
+/* Avoid 100vw (scrollbar seam/“split”); use normal flow width */
+#fintech-stack .stacked-img {
+  width: 100%;
+}
+
+/* Keep your cinematic height but ensure solid compositing */
+#fintech-stack .stacked-img img {
+  display: block;
+  width: 100%;
+  height: min(88vh, 900px);
+  object-fit: cover;
+
+  /* prevent tearing/seams on some GPUs/browsers */
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Pinned sections float above only while active */
+.is-pinned { position: relative; z-index: 5; }
+
+@media (max-width: 768px) {
+  #fintech-stack .stacked-img img { height: 70vh; }
+}
+
+
+/* ===== BNY: Insight → 2-up columns ===== */
+#fintech-insight {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 3rem;           /* row / column gap */
+  align-items: start;
+  padding: var(--page-padding);
+}
+
+/* Tighten the inner cards so they behave like columns, not full "project" blocks */
+#fintech-insight .project.project--details {
+  margin: 0;
+  padding: 0;
+  display: block;           /* ensure they don't bring their own grid */
+}
+
+/* Let copy fill the column width (remove the 400px cap used elsewhere) */
+#fintech-insight .project--details p {
+  max-width: none;
+}
+
+/* Optional: lighter label styling inside this section only */
+#fintech-insight .project__label { 
+  letter-spacing: .04em; 
+  text-transform: uppercase; 
+  opacity: .85; 
+}
+
+/* Mobile: stack */
+@media (max-width: 768px) {
+  #fintech-insight {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 }
 
 
   </style>
-
-
+</head>
 <body class="loading">
 <main>
   <header class="frame">
@@ -919,25 +1042,50 @@
 
   <!-- Brands (ninth grid) -->
   <section class="content content--padded content--full" id="brands-grid">
-    <div class="grid grid--columns grid--spaced" data-grid-ninth>
-      <div class="grid__img" style="background-image:url(img/28.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/29.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/30.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/31.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/32.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/33.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/34.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/35.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/36.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/37.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/38.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/39.webp)"></div>
-    </div>
+<div class="grid grid--spaced grid--small" data-grid-fifth>
+					<div class="grid__img" style="background-image:url(img/28.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/29.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/30.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/1.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/2.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/3.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/4.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/5.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/6.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/7.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/8.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/9.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/10.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/11.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/12.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/13.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/14.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/15.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/16.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/17.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/18.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/19.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/20.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/21.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/22.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/23.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/24.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/25.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/26.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/27.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/28.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/29.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/30.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/31.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/32.webp)"></div>
+					<div class="grid__img" style="background-image:url(img/33.webp)"></div>
+				</div>
+
 
     <!-- Caption -->
     <div class="content__title">
-      <h2 class="content__title-main">my influence, so far</h2>
-      <p class="type-tiny right end">brands that I have actually helped</p>
+      <h2 class="content__title-main">things I've made</h2>
+      <p class="type-tiny right end">for brands people love/need</p>
     </div>
   </section>
 
@@ -960,7 +1108,7 @@
 
     <!-- Caption -->
     <div class="content__title">
-      <h2 class="content__title-main">places i have grown in</h2>
+      <h2 class="content__title-main">places I've been</h2>
       <p class="type-tiny right end">startups, shops, and agencies</p>
     </div>
   </section>
@@ -968,19 +1116,17 @@
   <!-- ======================= CASE STUDY 1 — BNY Mellon (Updated) ======================= -->
   <!-- HERO (wide fan-up) -->
   <section class="content content--padded content--full" id="fintech">
-    <div class="grid grid--spaced grid--wide" data-grid-fifth>
-      <!-- Swap to your BNY images -->
-
+<!-- was: data-grid-fourth -->
+    <div class="grid grid--columns grid--spaced" data-grid-ninth>
       <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
       <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
       <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
       <div class="grid__img" style="background-image:url(https://i.ibb.co/wZY2bhKF/bny4.png)"></div>
-      <!-- repeat a few to fill the wide grid nicely -->
       <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
     </div>
 
     <div class="content__title">
-      <h2 class="content__title-main">my latest and greatest</h2>
+      <h2 class="content__title-main">BNY Melon</h2>
       <p class="type-tiny right end">Financial Product Design · Publicis Sapient</p>
     </div>
   </section>
@@ -1039,24 +1185,40 @@
     <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/hRnRByb/wove-advisory-landing-main.png)"></div>
+    <div class="grid__img" style="background-image:url(https://i.ibb.co/FJNG1jC/14.jpg)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/fxjgcYD/18.png)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/gtQLYJQ/17.jpg)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/Fgxcqj0/16.jpg)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/dcXH5fn/13.jpg)"></div>
     <div class="grid__img" style="background-image:url(https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png)"></div>    
+  </div>
+</section>
 
+  <!-- Details -->
+  <section class="content content--padded" id="fintech-insight">
+    <section class="project project--details project--left">
+      <span class="project__label project__label--default">Problem</span>
+      <p>Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights.</p>
+    </section>
+
+    <section class="project project--details project--right">
+      <span class="project__label project__label--default">Constraints</span>
+      <p>Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices.</p>
+    </section>
+  </section>
+
+  <!-- FULL-WIDTH STACKED GALLERY -->
+<section class="content content--full stacked-section" id="fintech-stack">
+  <div class="stacked-gallery" data-stack>
+    <figure class="stacked-img"><img src="https://i.ibb.co/XkM2hn8n/bny1.png" alt="BNY 1"/></figure>
+    <figure class="stacked-img"><img src="https://i.ibb.co/vvMZmq94/bny2.png" alt="BNY 2"/></figure>
+    <figure class="stacked-img"><img src="https://i.ibb.co/xS49C07B/bny3.png" alt="BNY 3"/></figure>
+    <figure class="stacked-img"><img src="https://i.ibb.co/wZY2bhKF/bny4.png" alt="BNY 4"/></figure>
+    <figure class="stacked-img"><img src="https://i.ibb.co/HGv7ymj/4.jpg" alt="Account Opening"/></figure>
 
   </div>
 </section>
 
-  <!-- INSIGHT -->
-  <section class="content content--padded" id="fintech-insight">
-    <h4 class="type-tiny">Insight</h4>
-    <p class="content__text">For advisors, speed = trust. The winning pattern: show high-signal client context beside actions, not behind modal steps.</p>
-    <h4 class="type-tiny" style="margin-top:1.25rem">Next</h4>
-    <p class="content__text">Narrative meeting briefs and deeper household modeling unlock the next step-change in advisor productivity.</p>
-  </section>
 
   <!-- ===== Reusable full-page panel (hidden) ===== -->
   <div class="panel" aria-hidden="true" hidden>
@@ -1121,31 +1283,56 @@
   <!-- ===== /panel ===== -->
 
   <!-- Contact -->
-  <section class="content content--padded" id="contact">
-    <h4 class="type-tiny">Contact</h4>
-    <p class="content__text">Interested in collaborating or just want to say hello? Reach out to Lennox. He’s always open to new projects and conversations.</p>
-  </section>
-
-  <footer class="page-footer type-tiny">
-    <span>Hey, nice to see you down here!</span>
-    <span><a href="https://tympanus.net/codrops/demos/">zack@reasonably.cc</a></span>
-    <a href="https://tympanus.net/codrops/collective/">linkedin.com/zackgort</a>
-  </footer>
-</main>
+<section class="content content--padded" id="contact">
+  <h4 class="type-tiny">Contact</h4>
+  <p class="content__text">Interested in collaborating or just want to say hello? Reach out to Zack. Always open to projects and good problems.</p>
+</section>
 
 
+<footer class="page-footer type-tiny">
+  <span>Hey, nice to see you down here!</span>
+  <span><a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a></span>
+  <a href="https://www.linkedin.com/in/zackgort/" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>
+</footer>
 
 
-<script>document.documentElement.classList.add('js');</script>
+
 <script>
 /* =========================
-   FULL JS (desktop + mobile tuned)
+   FULL JS (with stacked-gallery leak fix)
    ========================= */
 document.documentElement.classList.add('js');
 
-// ---------- Case-study content for the overlay ----------
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.normalizeScroll(true); // tame momentum overshoot
+
+/* ---------------- FIX: stop full-width stacked images from showing through pinned sections ---------------- */
+(() => {
+  const style = document.createElement('style');
+  style.id = 'pin-zfix-styles';
+  style.textContent = `
+    /* raise pinned sections only while active */
+    .is-pinned { position: relative; z-index: 5; }
+
+    /* isolate the stacked gallery's stacking/context so upstream 3D transforms can't bleed into it */
+    #fintech-stack.stacked-section { position: relative; z-index: 0; isolation: isolate; }
+  `;
+  document.head.appendChild(style);
+})();
+
+ScrollTrigger.defaults({
+  anticipatePin: 1,
+  pinReparent: true,     // move pins into a fresh stacking context while pinned
+  toggleClass: 'is-pinned'
+});
+/* -------------- /FIX -------------- */
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+/* ---------- Case-study content for the overlay ---------- */
 const CASE_STUDIES = {
-  social: { // TikTok
+  social: {
     title: "TikTok for Business",
     sub: "Brand Activation (Contentful) · Code & Theory",
     slides: {
@@ -1157,17 +1344,12 @@ const CASE_STUDIES = {
       ],
       aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
       banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
-      storyLines: [
-        "Lead discovery & research",
-        "Map taxonomy & content strategy",
-        "Deliver B2B portal on Contentful"
-      ],
+      storyLines: ["Lead discovery & research","Map taxonomy & content strategy","Deliver B2B portal on Contentful"],
       concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
       outro: "To flow, you should know"
     }
   },
-
-  ecommerce: { // GNC
+  ecommerce: {
     title: "General Nutrition Centers (GNC)",
     sub: "{Shopify E-commerce} · Elva Design Group",
     slides: {
@@ -1179,19 +1361,14 @@ const CASE_STUDIES = {
       ],
       aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
       banner: "https://i.ibb.co/spHgPH6N/1.webp",
-      storyLines: [
-        "Discovery → IA & taxonomy",
-        "Wireframes & prototyping",
-        "Consumer re-engagement"
-      ],
+      storyLines: ["Discovery → IA & taxonomy","Wireframes & prototyping","Consumer re-engagement"],
       concept: "https://i.ibb.co/ynjWYqv8/2.webp",
       outro: "Mobile-minded. Outcome-driven."
     }
   }
 };
 
-
-// ---------- Utils ----------
+/* ---------- Utils ---------- */
 const preloadImages = (selector = '.grid__img, .grid__img-inner') =>
   new Promise((resolve) =>
     imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve)
@@ -1204,7 +1381,6 @@ const initSmoothScrolling = () => {
   gsap.ticker.lagSmoothing(0);
 };
 
-// In-page anchors should scroll with Lenis (the <base> tag would otherwise hijack)
 function enableHashScrollWithLenis() {
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href^="#"]');
@@ -1221,17 +1397,9 @@ function enableHashScrollWithLenis() {
   });
 }
 
-gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.normalizeScroll(true);          // tame momentum overshoot
-ScrollTrigger.defaults({ anticipatePin: 1 }); // start pinning a touch early
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
 const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
 
-
-// ---------- Animations ----------
+/* ---------- Animations ---------- */
 function animateFrame() {
   const frame = document.querySelector('.frame');
   if (!frame) return;
@@ -1345,8 +1513,62 @@ function animateFifthGrid() {
   });
 }
 
+// Ninth (skip BNY hero here; we animate it with sixth below)
+function animateNinthGrid() {
+  document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
+    if (grid.closest('#fintech')) return;
+    const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
+
+    if (prefersReducedMotion) {
+      gsap.from(imgs, {
+        autoAlpha: 0, y: 18, stagger: 0.05, duration: 0.35,
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      const caption = getPinTarget(grid).querySelector('.content__title');
+      if (caption) {
+        gsap.from(caption, {
+          autoAlpha: 0, y: 16, duration: 0.35,
+          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+        });
+      }
+      return;
+    }
+
+    const section = getPinTarget(grid);
+    const caption = section.querySelector('.content__title');
+
+    const tl = gsap.timeline({
+      defaults: { ease: 'power3' },
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: isMobile ? '+=120%' : '+=200%',
+        pin: section,
+        pinSpacing: true,
+        scrub: true
+      }
+    });
+
+    tl.from(imgs, {
+      transformOrigin: '100% -450%',
+      stagger: 0.07,
+      scaleX: 1.02,
+      skewX: isMobile ? 7 : 15,
+      xPercent: isMobile ? 18 : 50,
+      rotation: isMobile ? -5 : -10,
+      autoAlpha: 0
+    });
+
+    if (caption) tl.from(caption, { autoAlpha: 0, yPercent: 40 }, 0.35);
+  });
+}
+
+// Sixth (skip BNY discovery here; it gets ninth)
 function animateSixthGrid() {
   document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
+    if (grid.closest('#fintech-discovery')) return;
+
     const imgs = grid.querySelectorAll('.grid__img');
     if (!imgs.length) return;
 
@@ -1422,44 +1644,44 @@ function animateSeventhGrid() {
   });
 }
 
-function animateEighthGrid() {
-  document.querySelectorAll('[data-grid-eighth]').forEach((grid) => {
+/* ----- BNY special swaps ----- */
+function animateBNYHeroAsSixth() {
+  document.querySelectorAll('#fintech [data-grid-ninth]').forEach((grid) => {
     const imgs = grid.querySelectorAll('.grid__img');
     if (!imgs.length) return;
 
     if (prefersReducedMotion) {
       gsap.from(imgs, {
-        autoAlpha: 0, y: 16, stagger: 0.05, duration: 0.35,
+        autoAlpha: 0, y: 16, scale: 0.98, stagger: 0.04, duration: 0.35,
         scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
       });
       return;
     }
 
+    const section = getPinTarget(grid);
+
     gsap.timeline({
-      defaults: { ease: 'expo' },
+      defaults: { ease: 'none' },
       scrollTrigger: {
-        trigger: grid,
-        start: 'center center',
-        end: isMobile ? '+=160%' : '+=250%',
-        pin: getPinTarget(grid),
+        trigger: section,
+        start: 'top top',
+        end: isMobile ? '+=120%' : '+=180%',
+        pin: section,
         pinSpacing: true,
-        scrub: true
+        scrub: isMobile ? 0.4 : 0.6
       }
     })
-    .set(grid, { perspective: 2000 })
     .from(imgs, {
-      stagger: { amount: 0.8, from: 'start' },
-      rotationY: 65,
-      transformOrigin: '0% 50%',
-      z: -200,
-      yPercent: 10
+      stagger: { amount: 0.25, from: 'edges', grid: [3, 3] },
+      scale: isMobile ? 0.82 : 0.7,
+      autoAlpha: 0
     })
-    .from(imgs, { stagger: { amount: 0.8, from: 'start' }, duration: 0.2, autoAlpha: 0 }, 0);
+    .from(grid, { scale: isMobile ? 0.92 : 0.85, skewY: isMobile ? 1.5 : 3 }, 0);
   });
 }
 
-function animateNinthGrid() {
-  document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
+function animateBNYDiscoveryAsNinth() {
+  document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach((grid) => {
     const imgs = grid.querySelectorAll('.grid__img');
     if (!imgs.length) return;
 
@@ -1468,20 +1690,13 @@ function animateNinthGrid() {
         autoAlpha: 0, y: 18, stagger: 0.05, duration: 0.35,
         scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
       });
-      const caption = getPinTarget(grid).querySelector('.content__title');
-      if (caption) {
-        gsap.from(caption, {
-          autoAlpha: 0, y: 16, duration: 0.35,
-          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
-        });
-      }
       return;
     }
 
     const section = getPinTarget(grid);
-    const caption = section.querySelector('.content__title');
+    const caption = section.querySelector('.content__title'); // maybe none
 
-    const tl = gsap.timeline({
+    gsap.timeline({
       defaults: { ease: 'power3' },
       scrollTrigger: {
         trigger: section,
@@ -1491,9 +1706,8 @@ function animateNinthGrid() {
         pinSpacing: true,
         scrub: true
       }
-    });
-
-    tl.from(imgs, {
+    })
+    .from(imgs, {
       transformOrigin: '100% -450%',
       stagger: 0.07,
       scaleX: 1.02,
@@ -1501,13 +1715,12 @@ function animateNinthGrid() {
       xPercent: isMobile ? 18 : 50,
       rotation: isMobile ? -5 : -10,
       autoAlpha: 0
-    });
-
-    if (caption) tl.from(caption, { autoAlpha: 0, yPercent: 40 }, 0.35);
+    })
+    .from(caption, { autoAlpha: 0, yPercent: 40 }, 0.35);
   });
 }
 
-// PROCESS (two-column sections)
+/* ----- Process columns ----- */
 function animateProcessSections() {
   document.querySelectorAll('[id$="-process"]').forEach((process) => {
     const intro = process.querySelector('.project--intro');
@@ -1546,36 +1759,55 @@ function animateProcessSections() {
   });
 }
 
-function initAnimations() {
-  animateFrame();       // header
-  animateSeventhGrid(); // UX/UI (after About)
-  animateSecondGrid();  // Work
-  animateNinthGrid();   // Brands + Agency
-  animateFifthGrid();   // HERO (case studies)
-  animateSixthGrid();   // DISCOVERY (case studies)
-  if (document.querySelector('[data-grid-eighth]')) {
-    animateEighthGrid(); // only if used
+/* ----- NEW: Full-width stacked gallery (one-at-a-time reveal + parallax) ----- */
+function animateStackedGallery() {
+  const section = document.querySelector('#fintech-stack [data-stack]');
+  if (!section) return;
+
+  const frames = section.querySelectorAll('.stacked-img');
+
+  if (prefersReducedMotion) {
+    gsap.from(frames, {
+      autoAlpha: 0,
+      y: 20,
+      duration: 0.4,
+      stagger: 0.08,
+      ease: 'power1.out',
+      scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none none' }
+    });
+    return;
   }
-  animateProcessSections(); // PROCESS (columns)
+
+  frames.forEach((el) => {
+    gsap.from(el, {
+      autoAlpha: 0,
+      y: 36,
+      duration: 0.7,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 85%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+
+    const img = el.querySelector('img');
+    if (img) {
+      gsap.to(img, {
+        yPercent: -8,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+    }
+  });
 }
 
-
-// ---------- Boot ----------
-initSmoothScrolling();
-enableHashScrollWithLenis();
-
-preloadImages().then(() => {
-  document.body.classList.remove('loading');
-  initAnimations();
-  ScrollTrigger.refresh(true);
-  window.scrollTo(0, 0);
-});
-
-// Keep triggers healthy on resize/orientation changes
-window.addEventListener('resize', () => ScrollTrigger.refresh());
-
-
-// ---------- A11Y for background-image tiles ----------
+/* ---------- A11Y for background-image tiles ---------- */
 function a11yifyGridImages() {
   document.querySelectorAll('.grid__img').forEach((el) => {
     el.setAttribute('role', 'img');
@@ -1586,25 +1818,17 @@ function a11yifyGridImages() {
     }
   });
 }
-a11yifyGridImages();
 
-
-// =========================================================
-// Overlay routing for Work/Tags:
-// - BNY (#fintech): scrolls in-page (hash→Lenis)
-// - TikTok + GNC: open fullscreen panel with horizontal scroller
-// =========================================================
+/* ---------- Overlay panel (TikTok / GNC) ---------- */
 (() => {
   const panel = document.querySelector('.panel');
   if (!panel) return;
 
-  // Elements inside panel
   const closeBtn  = panel.querySelector('.panel__close');
   const scroller  = panel.querySelector('.panel__scroller');
   const counterEl = panel.querySelector('.panel__counter h1');
   const barEl     = panel.querySelector('.panel__progress-bar');
 
-  // ---------- Scoped panel CSS (inject once) ----------
   if (!document.getElementById('panel-inline-styles')) {
     const style = document.createElement('style');
     style.id = 'panel-inline-styles';
@@ -1617,9 +1841,8 @@ a11yifyGridImages();
         border-radius:999px; padding:.5rem .75rem; font-size:12px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
         backdrop-filter: blur(6px);
       }
-      .panel__close:focus{outline:2px solid #fff4; outline-offset:2px;}
       .panel__progress-bar{position:fixed; top:0; left:0; width:100vw; height:8px; transform:scaleX(0); transform-origin:left; background:#fff; z-index:10002;}
-      .panel__counter{position:fixed; bottom:1rem; right:2.5rem; z-index:10002; text-shadow:5px 5px 15px rgb(0 0 0 / 15%);}
+      .panel__counter{position:fixed; bottom:1rem; right:2.5rem; z-index:10002;}
       .panel__scroller{position:relative; height:100vh; display:flex; transform:translateX(0); will-change:transform;}
       .panel section{position:relative; height:100vh; display:flex; justify-content:center; align-items:center;}
       .panel img{width:100%; height:100%; object-fit:cover;}
@@ -1633,8 +1856,6 @@ a11yifyGridImages();
       .panel .about{padding:4rem 3rem 1rem 2rem; background:#f95738; color:#481107;}
       .panel .story{padding:4rem 2rem 2rem 2rem; background:#ee964b; color:#3f170b;}
       .panel .outro{padding:2rem; background:#ebebd3; color:#302418;}
-      .panel .about,.panel .intro,.panel .header,.panel .story{display:flex; justify-content:space-between; align-items:flex-start;}
-      .panel .intro,.panel .about,.panel .story{flex-direction:column;}
       .panel .about .row{display:flex; gap:2rem; justify-content:space-between;}
       .panel .about .row p{width:50%; margin-bottom:1rem;}
       .panel .about .row .copy{flex:3;}
@@ -1643,7 +1864,6 @@ a11yifyGridImages();
         .panel h1{font-size:clamp(1.6rem,9vw,2.2rem);}
         .panel h2{font-size:1.1rem;}
         .panel p{font-size:.95rem;}
-        .panel__counter h1{font-size:.95rem;}
         .panel__progress-bar{height:5px;}
         .panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:94vw; padding:1rem;}
         .panel .about .row{flex-direction:column; gap:1rem;}
@@ -1655,7 +1875,6 @@ a11yifyGridImages();
     document.head.appendChild(style);
   }
 
-  // ---------- Intercept clicks for overlay panels ----------
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[data-panel]');
     if (!link) return;
@@ -1671,7 +1890,6 @@ a11yifyGridImages();
     openPanel({ title, sub, hero, trigger: link });
   }, true);
 
-  // ---------- Open / Close ----------
   let prevActive = null;
   let destroyScroller = null;
 
@@ -1683,20 +1901,18 @@ a11yifyGridImages();
 
     prevActive = trigger || document.activeElement;
 
-    // Cache nodes
-    const intro = panel.querySelector('.intro');
+    const intro   = panel.querySelector('.intro');
     const heroImg = panel.querySelector('.hero-img img');
-    const header = panel.querySelector('.header h1');
-    const about  = panel.querySelector('.about');
+    const header  = panel.querySelector('.header h1');
+    const about   = panel.querySelector('.about');
     const aboutCopyEls = about ? about.querySelectorAll('.copy p') : [];
-    const aboutImg = about ? about.querySelector('.about .img img') : null;
-    const banner = panel.querySelector('.banner-img img');
-    const story  = panel.querySelector('.story');
+    const aboutImg= about ? about.querySelector('.about .img img') : null;
+    const banner  = panel.querySelector('.banner-img img');
+    const story   = panel.querySelector('.story');
     const storyLines = story ? story.querySelectorAll('h1') : [];
     const concept = panel.querySelector('.concept-img img');
-    const outro  = panel.querySelector('.outro h1');
+    const outro   = panel.querySelector('.outro h1');
 
-    // Populate
     if (data) {
       if (intro) {
         const h1 = intro.querySelector('h1');
@@ -1705,24 +1921,20 @@ a11yifyGridImages();
         if (h2) h2.textContent = data.sub;
       }
       if (heroImg) heroImg.src = data.slides.hero;
-      if (header) header.textContent = data.slides.header;
-
+      if (header)  header.textContent = data.slides.header;
       if (about) {
         if (aboutCopyEls[0]) aboutCopyEls[0].textContent = data.slides.aboutCopy[0] || "";
         if (aboutCopyEls[1]) aboutCopyEls[1].textContent = data.slides.aboutCopy[1] || "";
         if (aboutImg) aboutImg.src = data.slides.aboutImg;
       }
-
-      if (banner) banner.src = data.slides.banner;
-
+      if (banner)  banner.src = data.slides.banner;
       if (story && storyLines.length >= 3) {
         storyLines[0].textContent = data.slides.storyLines[0] || "";
         storyLines[1].textContent = data.slides.storyLines[1] || "";
         storyLines[2].textContent = data.slides.storyLines[2] || "";
       }
-
       if (concept) concept.src = data.slides.concept;
-      if (outro)  outro.textContent = data.slides.outro;
+      if (outro)   outro.textContent = data.slides.outro;
     } else {
       if (intro) {
         const h1 = intro.querySelector('h1');
@@ -1733,7 +1945,6 @@ a11yifyGridImages();
       if (hero && heroImg) heroImg.src = hero;
     }
 
-    // Show panel + lock page
     panel.removeAttribute('hidden');
     panel.setAttribute('aria-hidden', 'false');
 
@@ -1764,15 +1975,12 @@ a11yifyGridImages();
   function closePanel() {
     if (panel.hasAttribute('hidden')) return;
 
-    // Teardown local scroller
     destroyScroller && destroyScroller();
     destroyScroller = null;
 
-    // Resume page motion
     try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.enable()); ScrollTrigger.refresh(); } } catch {}
     try { window.lenis && window.lenis.start && window.lenis.start(); } catch {}
 
-    // Unlock page scroll
     document.documentElement.style.overflow = document.documentElement.dataset._panelHtmlOverflow || '';
     document.body.style.overflow = document.body.dataset._panelBodyOverflow || '';
 
@@ -1780,73 +1988,48 @@ a11yifyGridImages();
     panel.setAttribute('aria-hidden', 'true');
     panel.setAttribute('hidden', '');
 
-    // Reset progress UI
     if (barEl) barEl.style.transform = 'scaleX(0)';
     if (counterEl) counterEl.textContent = '0';
 
-    // Restore focus
-    if (prevActive && prevActive.focus) prevActive.focus();
+    // restore focus
+    // eslint-disable-next-line no-undef
+    if (document.activeElement === document.body && prevActive && prevActive.focus) prevActive.focus();
   }
 
-  // ---------- Infinite horizontal scroller inside the panel ----------
   function initInfiniteScroller({ scroller, counterEl, barEl }) {
     const bufferSize = 2;
     const smooth = 0.05;
     const touchSensitivity = 2.5;
 
-    let targetX = 0;
-    let currentX = 0;
-    let isAnimating = false;
-
-    let currentScale = 0;
-    let targetScale = 0;
-    let lastPct = 0;
-
-    let isDown = false;
-    let lastX = 0;
-    let v = 0;
-    let lastT = 0;
-
-    let seqWidth = 0;
-    let raf = null;
+    let targetX = 0, currentX = 0, isAnimating = false;
+    let currentScale = 0, targetScale = 0, lastPct = 0;
+    let isDown = false, lastX = 0, v = 0, lastT = 0;
+    let seqWidth = 0, raf = null;
 
     const lerp = (a,b,t) => a + (b-a)*t;
-
-    const originals = () =>
-      Array.from(scroller.querySelectorAll(':scope > section:not(.clone-section)'));
+    const originals = () => Array.from(scroller.querySelectorAll(':scope > section:not(.clone-section)'));
 
     function measureSequenceWidth() {
       let total = 0;
       originals().forEach(sec => total += sec.getBoundingClientRect().width);
       return total || window.innerWidth;
     }
-
-    function clearClones() {
-      scroller.querySelectorAll('.clone-section').forEach(n => n.remove());
-    }
-
+    function clearClones() { scroller.querySelectorAll('.clone-section').forEach(n => n.remove()); }
     function buildClones() {
       const base = originals();
-      // before
-      for (let i = -bufferSize; i < 0; i++) {
-        base.forEach((sec, idx) => {
-          const c = sec.cloneNode(true);
-          c.classList.add('clone-section');
-          c.setAttribute('data-clone-index', `${i}-${idx}`);
-          scroller.appendChild(c);
-        });
-      }
-      // after
-      for (let i = 1; i <= bufferSize; i++) {
-        base.forEach((sec, idx) => {
-          const c = sec.cloneNode(true);
-          c.classList.add('clone-section');
-          c.setAttribute('data-clone-index', `${i}-${idx}`);
-          scroller.appendChild(c);
-        });
-      }
+      for (let i = -bufferSize; i < 0; i++) base.forEach((sec, idx) => {
+        const c = sec.cloneNode(true);
+        c.classList.add('clone-section');
+        c.setAttribute('data-clone-index', `${i}-${idx}`);
+        scroller.appendChild(c);
+      });
+      for (let i = 1; i <= bufferSize; i++) base.forEach((sec, idx) => {
+        const c = sec.cloneNode(true);
+        c.classList.add('clone-section');
+        c.setAttribute('data-clone-index', `${i}-${idx}`);
+        scroller.appendChild(c);
+      });
     }
-
     function setup() {
       cancel();
       clearClones();
@@ -1861,38 +2044,24 @@ a11yifyGridImages();
       updateProgress(true);
       if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
     }
-
-    function cancel() {
-      if (raf) cancelAnimationFrame(raf);
-      raf = null;
-      isAnimating = false;
-    }
-
+    function cancel() { if (raf) cancelAnimationFrame(raf); raf = null; isAnimating = false; }
     function boundaryReset() {
       let did = false;
       if (currentX > seqWidth * (bufferSize + 0.5)) {
-        targetX -= seqWidth;
-        currentX -= seqWidth;
-        did = true;
+        targetX -= seqWidth; currentX -= seqWidth; did = true;
       } else if (currentX < seqWidth * (bufferSize - 0.5)) {
-        targetX += seqWidth;
-        currentX += seqWidth;
-        did = true;
+        targetX += seqWidth; currentX += seqWidth; did = true;
       }
       if (did) scroller.style.transform = `translateX(-${currentX}px)`;
       return did;
     }
-
     function updateProgress(force = false) {
       const base = seqWidth * bufferSize;
       const pos = (currentX - base) % seqWidth;
       let pct = (pos / seqWidth) * 100;
       if (pct < 0) pct = 100 + pct;
 
-      const wrapping =
-        (lastPct > 80 && pct < 20) ||
-        (lastPct < 20 && pct > 80) ||
-        force;
+      const wrapping = (lastPct > 80 && pct < 20) || (lastPct < 20 && pct > 80) || force;
 
       if (counterEl) counterEl.textContent = `${Math.round(pct)}`;
       targetScale = pct / 100;
@@ -1901,10 +2070,8 @@ a11yifyGridImages();
         currentScale = targetScale;
         if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
       }
-
       lastPct = pct;
     }
-
     function animate(forceReset = false) {
       currentX = lerp(currentX, targetX, smooth);
       scroller.style.transform = `translateX(-${currentX}px)`;
@@ -1916,27 +2083,17 @@ a11yifyGridImages();
       if (Math.abs(targetX - currentX) > 0.01) {
         raf = requestAnimationFrame(() => animate());
       } else {
-        isAnimating = false;
-        raf = null;
+        isAnimating = false; raf = null;
       }
     }
 
-    // Events (on the panel so page remains locked)
     const onWheel = (e) => {
       e.preventDefault();
       targetX += e.deltaY;
       const reset = boundaryReset();
-      if (!isAnimating) {
-        isAnimating = true;
-        raf = requestAnimationFrame(() => animate(reset));
-      }
+      if (!isAnimating) { isAnimating = true; raf = requestAnimationFrame(() => animate(reset)); }
     };
-    const onTouchStart = (e) => {
-      isDown = true;
-      lastX = e.touches[0].clientX;
-      lastT = Date.now();
-      targetX = currentX;
-    };
+    const onTouchStart = (e) => { isDown = true; lastX = e.touches[0].clientX; lastT = Date.now(); targetX = currentX; };
     const onTouchMove = (e) => {
       if (!isDown) return;
       e.preventDefault();
@@ -1944,16 +2101,12 @@ a11yifyGridImages();
       const dx = lastX - x;
       targetX += dx * touchSensitivity;
 
-      const now = Date.now();
-      const dt = now - lastT;
+      const now = Date.now(); const dt = now - lastT;
       if (dt > 0) v = (dx / dt) * 15;
       lastX = x; lastT = now;
 
       const reset = boundaryReset();
-      if (!isAnimating) {
-        isAnimating = true;
-        raf = requestAnimationFrame(() => animate(reset));
-      }
+      if (!isAnimating) { isAnimating = true; raf = requestAnimationFrame(() => animate(reset)); }
     };
     const onTouchEnd = () => {
       isDown = false;
@@ -1979,10 +2132,7 @@ a11yifyGridImages();
     panel.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('resize', onResize);
 
-    // Initial layout (panel is visible now, so measurements are valid)
     setup();
-
-    // Cleanup API
     return () => {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
@@ -1995,8 +2145,39 @@ a11yifyGridImages();
     };
   }
 })();
-</script>
 
+/* ---------- Init orchestration ---------- */
+function initAnimations() {
+  animateFrame();        // header
+  animateSeventhGrid();  // UX/UI (after About)
+  animateSecondGrid();   // Work
+  animateFifthGrid();    // Brands grid
+  animateNinthGrid();    // Generic ninths (skip BNY hero)
+  animateBNYHeroAsSixth();
+  animateProcessSections();
+  animateBNYDiscoveryAsNinth();
+  animateSixthGrid();    // other sixths
+  if (document.querySelector('[data-grid-eighth]')) { /* optional */ }
+  animateStackedGallery();// NEW: full-width stack after INSIGHT
+}
+
+/* ---------- Boot ---------- */
+initSmoothScrolling();
+enableHashScrollWithLenis();
+
+preloadImages().then(() => {
+  document.body.classList.remove('loading');
+  initAnimations();
+  ScrollTrigger.refresh(true);
+  window.scrollTo(0, 0);
+});
+
+// Keep triggers healthy on resize/orientation changes
+window.addEventListener('resize', () => ScrollTrigger.refresh());
+
+// A11Y roles for bg images
+a11yifyGridImages();
+</script>
 
 
 </body>

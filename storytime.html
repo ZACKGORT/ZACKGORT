@@ -1138,131 +1138,134 @@
 
 <script>document.documentElement.classList.add('js');</script>
 <script>
-// --- Your case-study content for the overlay ---
+/* =========================
+   FULL JS (desktop + mobile tuned)
+   ========================= */
+document.documentElement.classList.add('js');
+
+// ---------- Case-study content for the overlay ----------
 const CASE_STUDIES = {
-social: { // TikTok
-title: "TikTok for Business",
-sub: "Brand Activation (Contentful) · Code & Theory",
-slides: {
-hero: "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
-header: "“Razzle Dazzle”",
-aboutCopy: [
-"2021 was the year TikTok exploded. Goal: expand B2B via a marketing portal into their marketplace ecosystem.",
-"I led discovery & research, competitive analysis, and content audits while guiding taxonomy & content strategy for a Contentful migration and B2B resource hub."
-],
-aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
-banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
-storyLines: [
-"Lead discovery & research",
-"Map taxonomy & content strategy",
-"Deliver B2B portal on Contentful"
-],
-concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
-outro: "To flow, you should know"
-}
-},
+  social: { // TikTok
+    title: "TikTok for Business",
+    sub: "Brand Activation (Contentful) · Code & Theory",
+    slides: {
+      hero: "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
+      header: "“Razzle Dazzle”",
+      aboutCopy: [
+        "2021 was the year TikTok exploded. Goal: expand B2B via a marketing portal into their marketplace ecosystem.",
+        "I led discovery & research, competitive analysis, and content audits while guiding taxonomy & content strategy for a Contentful migration and B2B resource hub."
+      ],
+      aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
+      banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
+      storyLines: [
+        "Lead discovery & research",
+        "Map taxonomy & content strategy",
+        "Deliver B2B portal on Contentful"
+      ],
+      concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
+      outro: "To flow, you should know"
+    }
+  },
 
-
-ecommerce: { // GNC
-title: "General Nutrition Centers (GNC)",
-sub: "{Shopify E-commerce} · Elva Design Group",
-slides: {
-hero: "https://i.ibb.co/7xd84m10/ZAX02375.jpg",
-header: "“If the bar ain’t bending, you’re just pretending”",
-aboutCopy: [
-"GNC asked us to redesign and replatform on Shopify after exiting bankruptcy; as of 2024 they exceeded $500M revenue.",
-"As principal UX, I owned discovery, IA & taxonomy, wireframing + feature prototyping, and consumer re-engagement."
-],
-aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
-banner: "https://i.ibb.co/spHgPH6N/1.webp",
-storyLines: [
-"Discovery → IA & taxonomy",
-"Wireframes & prototyping",
-"Consumer re-engagement"
-],
-concept: "https://i.ibb.co/ynjWYqv8/2.webp",
-outro: "Mobile-minded. Outcome-driven."
-}
-}
-};
-</script>
-
-<!-- ===== Core Demo JS (deduped) ===== -->
-<script>
-  // ---------- Utils ----------
-  const preloadImages = (selector = '.grid__img, .grid__img-inner') =>
-    new Promise((resolve) =>
-      imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve)
-    );
-
-  const initSmoothScrolling = () => {
-    window.lenis = new Lenis({ lerp: 0.15 });
-    window.lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => window.lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
-  };
-
-  // In-page anchors should scroll with Lenis (the <base> tag would otherwise hijack)
-  function enableHashScrollWithLenis() {
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[href^="#"]');
-      if (!link) return;
-      const target = document.querySelector(link.getAttribute('href'));
-      if (!target) return;
-
-      e.preventDefault();
-      if (window.lenis) {
-        window.lenis.scrollTo(target);
-      } else {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
+  ecommerce: { // GNC
+    title: "General Nutrition Centers (GNC)",
+    sub: "{Shopify E-commerce} · Elva Design Group",
+    slides: {
+      hero: "https://i.ibb.co/7xd84m10/ZAX02375.jpg",
+      header: "“If the bar ain’t bending, you’re just pretending”",
+      aboutCopy: [
+        "GNC asked us to redesign and replatform on Shopify after exiting bankruptcy; as of 2024 they exceeded $500M revenue.",
+        "As principal UX, I owned discovery, IA & taxonomy, wireframing + feature prototyping, and consumer re-engagement."
+      ],
+      aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
+      banner: "https://i.ibb.co/spHgPH6N/1.webp",
+      storyLines: [
+        "Discovery → IA & taxonomy",
+        "Wireframes & prototyping",
+        "Consumer re-engagement"
+      ],
+      concept: "https://i.ibb.co/ynjWYqv8/2.webp",
+      outro: "Mobile-minded. Outcome-driven."
+    }
   }
+};
+
+
+// ---------- Utils ----------
+const preloadImages = (selector = '.grid__img, .grid__img-inner') =>
+  new Promise((resolve) =>
+    imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve)
+  );
+
+const initSmoothScrolling = () => {
+  window.lenis = new Lenis({ lerp: 0.15 });
+  window.lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time) => window.lenis.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
+};
+
+// In-page anchors should scroll with Lenis (the <base> tag would otherwise hijack)
+function enableHashScrollWithLenis() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    const target = document.querySelector(link.getAttribute('href'));
+    if (!target) return;
+
+    e.preventDefault();
+    if (window.lenis) {
+      window.lenis.scrollTo(target);
+    } else {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
 
 gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.normalizeScroll(true);         // tame momentum overshoot
+ScrollTrigger.normalizeScroll(true);          // tame momentum overshoot
 ScrollTrigger.defaults({ anticipatePin: 1 }); // start pinning a touch early
 
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReducedMotion) document.body.classList.add('no-anim');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-  const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
+const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
 
-  // ---------- Animations ----------
-  function animateFrame() {
-    const frame = document.querySelector('.frame');
-    if (!frame) return;
-    const title = frame.querySelector('.frame__title');
-    if (!title) return;
 
-    if (prefersReducedMotion) {
-      // Subtle fade only
-      gsap.from(frame, {
-        autoAlpha: 0,
-        duration: 0.6,
-        ease: 'power1.out',
-        scrollTrigger: { trigger: frame, start: 'top 95%', toggleActions: 'play none none none' }
-      });
-      return;
-    }
+// ---------- Animations ----------
+function animateFrame() {
+  const frame = document.querySelector('.frame');
+  if (!frame) return;
+  const title = frame.querySelector('.frame__title');
+  if (!title) return;
 
-    gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: frame,
-        start: 'clamp(top bottom)',
-        end: 'bottom top',
-        scrub: true
-      }
-    })
-    .to(frame, {
-      yPercent: 35,
-      scale: 0.95,
-      startAt: { filter: 'brightness(100%)' },
-      filter: 'brightness(30%)'
-    })
-    .to(title, { xPercent: -80 }, 0);
+  if (prefersReducedMotion) {
+    gsap.from(frame, {
+      autoAlpha: 0,
+      duration: 0.6,
+      ease: 'power1.out',
+      scrollTrigger: { trigger: frame, start: 'top 95%', toggleActions: 'play none none none' }
+    });
+    return;
   }
+
+  gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: frame,
+      start: 'clamp(top bottom)',
+      end: 'bottom top',
+      scrub: true
+    }
+  })
+  .to(frame, {
+    yPercent: isMobile ? 18 : 35,
+    scale: isMobile ? 0.985 : 0.95,
+    startAt: { filter: 'brightness(100%)' },
+    filter: isMobile ? 'brightness(55%)' : 'brightness(30%)'
+  })
+  .to(title, { xPercent: isMobile ? -25 : -80 }, 0);
+}
+
 function animateSecondGrid() {
   document.querySelectorAll('[data-grid-second]').forEach((grid) => {
     const imgs = grid.querySelectorAll('.grid__img');
@@ -1283,12 +1286,12 @@ function animateSecondGrid() {
     gsap.timeline({
       defaults: { ease: 'power3' },
       scrollTrigger: {
-        trigger: section,      // section = pin target
-        start: 'top top',      // unified start
-        end: '+=250%',
+        trigger: section,
+        start: 'top top',
+        end: isMobile ? '+=140%' : '+=250%',
         pin: section,
         pinSpacing: true,
-        scrub: 0.5
+        scrub: isMobile ? 0.25 : 0.5
       }
     })
     .from(imgs, {
@@ -1297,12 +1300,13 @@ function animateSecondGrid() {
       transformOrigin: '50% 0%',
       rotation: (i) => {
         const dist = Math.abs(i - mid);
-        return i < mid ? dist * 3 : dist * -3;
+        return i < mid ? dist * (isMobile ? 1.5 : 3) : dist * (isMobile ? -1.5 : -3);
       }
     })
     .from(items, { stagger: { amount: 0.3, from: 'center' }, yPercent: 100, autoAlpha: 0 }, 0);
   });
 }
+
 function animateFifthGrid() {
   document.querySelectorAll('[data-grid-fifth]').forEach((grid) => {
     const imgs = grid.querySelectorAll('.grid__img');
@@ -1322,24 +1326,25 @@ function animateFifthGrid() {
       defaults: { ease: 'sine' },
       scrollTrigger: {
         trigger: section,
-        start: 'top top',     // unified start
-        end: '+=250%',
+        start: 'top top',
+        end: isMobile ? '+=150%' : '+=250%',
         pin: section,
         pinSpacing: true,
-        scrub: 0.3
+        scrub: isMobile ? 0.2 : 0.3
       }
     })
     .set(grid, { perspective: 1000 })
     .from(imgs, {
       stagger: { amount: 0.4, from: 'random', grid: [4, 9] },
       y: () => innerHeight,
-      rotationX: -70,
+      rotationX: isMobile ? -40 : -70,
       transformOrigin: '50% 0%',
-      z: -900,
+      z: isMobile ? -450 : -900,
       autoAlpha: 0
     });
   });
 }
+
 function animateSixthGrid() {
   document.querySelectorAll('[data-grid-sixth]').forEach((grid) => {
     const imgs = grid.querySelectorAll('.grid__img');
@@ -1360,99 +1365,98 @@ function animateSixthGrid() {
       scrollTrigger: {
         trigger: section,
         start: 'top top',
-        end: '+=180%',
+        end: isMobile ? '+=120%' : '+=180%',
         pin: section,
         pinSpacing: true,
-        scrub: 0.6
+        scrub: isMobile ? 0.4 : 0.6
       }
     })
     .from(imgs, {
       stagger: { amount: 0.25, from: 'edges', grid: [3, 3] },
-      scale: 0.7,
+      scale: isMobile ? 0.82 : 0.7,
       autoAlpha: 0
     })
-    .from(grid, { scale: 0.85, skewY: 3 }, 0);
+    .from(grid, { scale: isMobile ? 0.92 : 0.85, skewY: isMobile ? 1.5 : 3 }, 0);
   });
 }
 
+function animateSeventhGrid() {
+  document.querySelectorAll('[data-grid-seventh]').forEach((grid) => {
+    const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
 
-  function animateSeventhGrid() {
-    document.querySelectorAll('[data-grid-seventh]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
+    if (prefersReducedMotion) {
+      gsap.from(imgs, {
+        autoAlpha: 0, y: 20, stagger: 0.06, duration: 0.35, ease: 'power1.out',
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      gsap.from(grid.querySelectorAll('.grid__item'), {
+        autoAlpha: 0, y: 14, duration: 0.35,
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      return;
+    }
 
-      if (prefersReducedMotion) {
-        gsap.from(imgs, {
-          autoAlpha: 0, y: 20, stagger: 0.06, duration: 0.35, ease: 'power1.out',
-          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
-        });
-        gsap.from(grid.querySelectorAll('.grid__item'), {
-          autoAlpha: 0, y: 14, duration: 0.35,
-          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
-        });
-        return;
+    gsap.timeline({
+      defaults: { ease: 'power1' },
+      scrollTrigger: {
+        trigger: grid,
+        start: 'center center',
+        end: isMobile ? '+=110%' : '+=150%',
+        pin: getPinTarget(grid),
+        pinSpacing: true,
+        scrub: isMobile ? 0.35 : 0.5
       }
+    })
+    .fromTo(imgs, { yPercent: -102 }, { stagger: 0.08, yPercent: 0 })
+    .from(
+      [...imgs].map((img) => img.querySelector('.grid__img-inner')),
+      { stagger: 0.08, yPercent: 102 },
+      0
+    )
+    .from(
+      grid.querySelectorAll('.grid__item'),
+      { yPercent: 20, stagger: (imgs.length / 2) * 0.08, autoAlpha: 0 },
+      0
+    );
+  });
+}
 
-      gsap.timeline({
-        defaults: { ease: 'power1' },
-        scrollTrigger: {
-          trigger: grid,
-          start: 'center center',
-          end: '+=150%',
-          pin: getPinTarget(grid),
-          pinSpacing: true,
-          scrub: 0.5
-        }
-      })
-      .fromTo(imgs, { yPercent: -102 }, { stagger: 0.08, yPercent: 0 })
-      .from(
-        [...imgs].map((img) => img.querySelector('.grid__img-inner')),
-        { stagger: 0.08, yPercent: 102 },
-        0
-      )
-      .from(
-        grid.querySelectorAll('.grid__item'),
-        { yPercent: 20, stagger: (imgs.length / 2) * 0.08, autoAlpha: 0 },
-        0
-      );
-    });
-  }
+function animateEighthGrid() {
+  document.querySelectorAll('[data-grid-eighth]').forEach((grid) => {
+    const imgs = grid.querySelectorAll('.grid__img');
+    if (!imgs.length) return;
 
-  function animateEighthGrid() {
-    document.querySelectorAll('[data-grid-eighth]').forEach((grid) => {
-      const imgs = grid.querySelectorAll('.grid__img');
-      if (!imgs.length) return;
+    if (prefersReducedMotion) {
+      gsap.from(imgs, {
+        autoAlpha: 0, y: 16, stagger: 0.05, duration: 0.35,
+        scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
+      });
+      return;
+    }
 
-      if (prefersReducedMotion) {
-        gsap.from(imgs, {
-          autoAlpha: 0, y: 16, stagger: 0.05, duration: 0.35,
-          scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
-        });
-        return;
+    gsap.timeline({
+      defaults: { ease: 'expo' },
+      scrollTrigger: {
+        trigger: grid,
+        start: 'center center',
+        end: isMobile ? '+=160%' : '+=250%',
+        pin: getPinTarget(grid),
+        pinSpacing: true,
+        scrub: true
       }
-
-      gsap.timeline({
-        defaults: { ease: 'expo' },
-        scrollTrigger: {
-          trigger: grid,
-          start: 'center center',
-          end: '+=250%',
-          pin: getPinTarget(grid),
-          pinSpacing: true,
-          scrub: true
-        }
-      })
-      .set(grid, { perspective: 2000 })
-      .from(imgs, {
-        stagger: { amount: 0.8, from: 'start' },
-        rotationY: 65,
-        transformOrigin: '0% 50%',
-        z: -200,
-        yPercent: 10
-      })
-      .from(imgs, { stagger: { amount: 0.8, from: 'start' }, duration: 0.2, autoAlpha: 0 }, 0);
-    });
-  }
+    })
+    .set(grid, { perspective: 2000 })
+    .from(imgs, {
+      stagger: { amount: 0.8, from: 'start' },
+      rotationY: 65,
+      transformOrigin: '0% 50%',
+      z: -200,
+      yPercent: 10
+    })
+    .from(imgs, { stagger: { amount: 0.8, from: 'start' }, duration: 0.2, autoAlpha: 0 }, 0);
+  });
+}
 
 function animateNinthGrid() {
   document.querySelectorAll('[data-grid-ninth]').forEach((grid) => {
@@ -1480,9 +1484,9 @@ function animateNinthGrid() {
     const tl = gsap.timeline({
       defaults: { ease: 'power3' },
       scrollTrigger: {
-        trigger: section,     // unified trigger
+        trigger: section,
         start: 'top top',
-        end: '+=200%',
+        end: isMobile ? '+=120%' : '+=200%',
         pin: section,
         pinSpacing: true,
         scrub: true
@@ -1492,10 +1496,10 @@ function animateNinthGrid() {
     tl.from(imgs, {
       transformOrigin: '100% -450%',
       stagger: 0.07,
-      scaleX: 1.05,
-      skewX: 15,
-      xPercent: 50,
-      rotation: -10,
+      scaleX: 1.02,
+      skewX: isMobile ? 7 : 15,
+      xPercent: isMobile ? 18 : 50,
+      rotation: isMobile ? -5 : -10,
       autoAlpha: 0
     });
 
@@ -1503,45 +1507,44 @@ function animateNinthGrid() {
   });
 }
 
-  // PROCESS (your new two-column sections)
-  function animateProcessSections() {
-    document.querySelectorAll('[id$="-process"]').forEach((process) => {
-      // Intro block
-      const intro = process.querySelector('.project--intro');
-      const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
+// PROCESS (two-column sections)
+function animateProcessSections() {
+  document.querySelectorAll('[id$="-process"]').forEach((process) => {
+    const intro = process.querySelector('.project--intro');
+    const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
 
-      if (prefersReducedMotion) {
-        if (intro) {
-          gsap.from(intro, {
-            autoAlpha: 0, y: 16, duration: 0.35,
-            scrollTrigger: { trigger: intro, start: 'top 90%', toggleActions: 'play none none none' }
-          });
-        }
-        if (details.length) {
-          gsap.from(details, {
-            autoAlpha: 0, y: 14, duration: 0.3, stagger: 0.08,
-            scrollTrigger: { trigger: process, start: 'top 85%', toggleActions: 'play none none none' }
-          });
-        }
-        return;
-      }
-
+    if (prefersReducedMotion) {
       if (intro) {
         gsap.from(intro, {
-          autoAlpha: 0, y: 24, duration: 0.6, ease: 'power2.out',
-          scrollTrigger: { trigger: intro, start: 'top 80%', toggleActions: 'play none none reverse' }
+          autoAlpha: 0, y: 16, duration: 0.35,
+          scrollTrigger: { trigger: intro, start: 'top 90%', toggleActions: 'play none none none' }
         });
       }
-
       if (details.length) {
         gsap.from(details, {
-          autoAlpha: 0, y: 30, duration: 0.5, ease: 'power2.out',
-          stagger: 0.12,
-          scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%', toggleActions: 'play none none reverse' }
+          autoAlpha: 0, y: 14, duration: 0.3, stagger: 0.08,
+          scrollTrigger: { trigger: process, start: 'top 85%', toggleActions: 'play none none none' }
         });
       }
-    });
-  }
+      return;
+    }
+
+    if (intro) {
+      gsap.from(intro, {
+        autoAlpha: 0, y: 24, duration: 0.6, ease: 'power2.out',
+        scrollTrigger: { trigger: intro, start: 'top 80%', toggleActions: 'play none none reverse' }
+      });
+    }
+
+    if (details.length) {
+      gsap.from(details, {
+        autoAlpha: 0, y: 30, duration: 0.5, ease: 'power2.out',
+        stagger: 0.12,
+        scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%', toggleActions: 'play none none reverse' }
+      });
+    }
+  });
+}
 
 function initAnimations() {
   animateFrame();       // header
@@ -1551,29 +1554,29 @@ function initAnimations() {
   animateFifthGrid();   // HERO (case studies)
   animateSixthGrid();   // DISCOVERY (case studies)
   if (document.querySelector('[data-grid-eighth]')) {
-    animateEighthGrid(); // only if you add one later
+    animateEighthGrid(); // only if used
   }
   animateProcessSections(); // PROCESS (columns)
 }
 
-  // ---------- Boot ----------
-  initSmoothScrolling();
-  enableHashScrollWithLenis();
 
-  preloadImages().then(() => {
-    document.body.classList.remove('loading');
-    initAnimations();
-    ScrollTrigger.refresh(true);
-    window.scrollTo(0, 0);
-  });
+// ---------- Boot ----------
+initSmoothScrolling();
+enableHashScrollWithLenis();
+
+preloadImages().then(() => {
+  document.body.classList.remove('loading');
+  initAnimations();
+  ScrollTrigger.refresh(true);
+  window.scrollTo(0, 0);
+});
+
+// Keep triggers healthy on resize/orientation changes
+window.addEventListener('resize', () => ScrollTrigger.refresh());
 
 
-  // Keep triggers healthy on resize/orientation changes
-  window.addEventListener('resize', () => ScrollTrigger.refresh());
-
-
-
-  function a11yifyGridImages() {
+// ---------- A11Y for background-image tiles ----------
+function a11yifyGridImages() {
   document.querySelectorAll('.grid__img').forEach((el) => {
     el.setAttribute('role', 'img');
     if (!el.hasAttribute('aria-label')) {
@@ -1583,20 +1586,14 @@ function initAnimations() {
     }
   });
 }
-
-// after initAnimations():
 a11yifyGridImages();
 
 
-
-
-
-/* =========================================================
-   Overlay routing for Work/Tags:
-   - BNY (#fintech): scrolls in-page (handled by your existing hash→Lenis code)
-   - TikTok + GNC: open fullscreen panel with horizontal scroller
-   Paste this AFTER your current scripts.
-========================================================= */
+// =========================================================
+// Overlay routing for Work/Tags:
+// - BNY (#fintech): scrolls in-page (hash→Lenis)
+// - TikTok + GNC: open fullscreen panel with horizontal scroller
+// =========================================================
 (() => {
   const panel = document.querySelector('.panel');
   if (!panel) return;
@@ -1607,7 +1604,7 @@ a11yifyGridImages();
   const counterEl = panel.querySelector('.panel__counter h1');
   const barEl     = panel.querySelector('.panel__progress-bar');
 
-  // ---------- Scoped panel CSS (injected once) ----------
+  // ---------- Scoped panel CSS (inject once) ----------
   if (!document.getElementById('panel-inline-styles')) {
     const style = document.createElement('style');
     style.id = 'panel-inline-styles';
@@ -1626,17 +1623,11 @@ a11yifyGridImages();
       .panel__scroller{position:relative; height:100vh; display:flex; transform:translateX(0); will-change:transform;}
       .panel section{position:relative; height:100vh; display:flex; justify-content:center; align-items:center;}
       .panel img{width:100%; height:100%; object-fit:cover;}
-
-      /* Section widths matching your reference */
       .panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:90vw;}
       .panel .header,.panel .concept-img{width:100vw;}
-
-      /* Simple type (inherits site fonts) */
       .panel h1{font-weight:400; text-transform:uppercase; line-height:1; letter-spacing:-.02em; font-size:10vw; padding-top:.25rem; margin:0;}
       .panel h2{font-weight:700; font-size:2rem; margin:0;}
       .panel p{font-weight:500; font-size:1rem; margin:0;}
-
-      /* Colors/spacing like prototype */
       .panel .intro{padding:2rem; background:#000; color:#f6f6f6;}
       .panel .header{padding:2rem; background:#f4d35e; color:#421c06;}
       .panel .about{padding:4rem 3rem 1rem 2rem; background:#f95738; color:#481107;}
@@ -1648,12 +1639,23 @@ a11yifyGridImages();
       .panel .about .row p{width:50%; margin-bottom:1rem;}
       .panel .about .row .copy{flex:3;}
       .panel .about .row .img{flex:3; aspect-ratio:7/5;}
+      @media (max-width:768px){
+        .panel h1{font-size:clamp(1.6rem,9vw,2.2rem);}
+        .panel h2{font-size:1.1rem;}
+        .panel p{font-size:.95rem;}
+        .panel__counter h1{font-size:.95rem;}
+        .panel__progress-bar{height:5px;}
+        .panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:94vw; padding:1rem;}
+        .panel .about .row{flex-direction:column; gap:1rem;}
+        .panel .about .row p{width:100%;}
+        .panel .about .row .img{aspect-ratio:16/10;}
+        .panel__close{top:.5rem; right:.5rem; padding:.4rem .6rem;}
+      }
     `;
     document.head.appendChild(style);
   }
 
   // ---------- Intercept clicks for overlay panels ----------
-  // Use capture + stopImmediatePropagation so we beat the global hash→Lenis handler.
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[data-panel]');
     if (!link) return;
@@ -1662,10 +1664,9 @@ a11yifyGridImages();
     e.stopPropagation();
     e.stopImmediatePropagation();
 
-    // Pull custom text if provided, otherwise fallback to link text
     const title = link.dataset.panelTitle || link.textContent.trim() || 'Case Study';
     const sub   = link.dataset.panelSub || '{Digital Product, E-commerce, Consumer}';
-    const hero  = link.dataset.panelHero || ''; // optional override image
+    const hero  = link.dataset.panelHero || '';
 
     openPanel({ title, sub, hero, trigger: link });
   }, true);
@@ -1674,93 +1675,91 @@ a11yifyGridImages();
   let prevActive = null;
   let destroyScroller = null;
 
-function openPanel({ title, sub, hero, trigger }) {
-  if (!panel.hasAttribute('hidden')) return;
+  function openPanel({ title, sub, hero, trigger }) {
+    if (!panel.hasAttribute('hidden')) return;
 
-  const key = trigger?.dataset.panel || "";   // "social" | "ecommerce"
-  const data = CASE_STUDIES[key];
+    const key = trigger?.dataset.panel || "";
+    const data = CASE_STUDIES[key];
 
-  prevActive = trigger || document.activeElement;
+    prevActive = trigger || document.activeElement;
 
-  // Cache nodes
-  const intro = panel.querySelector('.intro');
-  const heroImg = panel.querySelector('.hero-img img');
-  const header = panel.querySelector('.header h1');
-  const about  = panel.querySelector('.about');
-  const aboutCopyEls = about ? about.querySelectorAll('.copy p') : [];
-  const aboutImg = about ? about.querySelector('.about .img img') : null;
-  const banner = panel.querySelector('.banner-img img');
-  const story  = panel.querySelector('.story');
-  const storyLines = story ? story.querySelectorAll('h1') : [];
-  const concept = panel.querySelector('.concept-img img');
-  const outro  = panel.querySelector('.outro h1');
+    // Cache nodes
+    const intro = panel.querySelector('.intro');
+    const heroImg = panel.querySelector('.hero-img img');
+    const header = panel.querySelector('.header h1');
+    const about  = panel.querySelector('.about');
+    const aboutCopyEls = about ? about.querySelectorAll('.copy p') : [];
+    const aboutImg = about ? about.querySelector('.about .img img') : null;
+    const banner = panel.querySelector('.banner-img img');
+    const story  = panel.querySelector('.story');
+    const storyLines = story ? story.querySelectorAll('h1') : [];
+    const concept = panel.querySelector('.concept-img img');
+    const outro  = panel.querySelector('.outro h1');
 
-  // Populate
-  if (data) {
-    if (intro) {
-      const h1 = intro.querySelector('h1');
-      const h2 = intro.querySelector('h2');
-      if (h1) h1.textContent = data.title;
-      if (h2) h2.textContent = data.sub;
+    // Populate
+    if (data) {
+      if (intro) {
+        const h1 = intro.querySelector('h1');
+        const h2 = intro.querySelector('h2');
+        if (h1) h1.textContent = data.title;
+        if (h2) h2.textContent = data.sub;
+      }
+      if (heroImg) heroImg.src = data.slides.hero;
+      if (header) header.textContent = data.slides.header;
+
+      if (about) {
+        if (aboutCopyEls[0]) aboutCopyEls[0].textContent = data.slides.aboutCopy[0] || "";
+        if (aboutCopyEls[1]) aboutCopyEls[1].textContent = data.slides.aboutCopy[1] || "";
+        if (aboutImg) aboutImg.src = data.slides.aboutImg;
+      }
+
+      if (banner) banner.src = data.slides.banner;
+
+      if (story && storyLines.length >= 3) {
+        storyLines[0].textContent = data.slides.storyLines[0] || "";
+        storyLines[1].textContent = data.slides.storyLines[1] || "";
+        storyLines[2].textContent = data.slides.storyLines[2] || "";
+      }
+
+      if (concept) concept.src = data.slides.concept;
+      if (outro)  outro.textContent = data.slides.outro;
+    } else {
+      if (intro) {
+        const h1 = intro.querySelector('h1');
+        const h2 = intro.querySelector('h2');
+        if (h1) h1.textContent = title || 'Case Study';
+        if (h2) h2.textContent = sub   || '{Digital Product, E-commerce, Consumer}';
+      }
+      if (hero && heroImg) heroImg.src = hero;
     }
-    if (heroImg) heroImg.src = data.slides.hero;
-    if (header) header.textContent = data.slides.header;
 
-    if (about) {
-      if (aboutCopyEls[0]) aboutCopyEls[0].textContent = data.slides.aboutCopy[0] || "";
-      if (aboutCopyEls[1]) aboutCopyEls[1].textContent = data.slides.aboutCopy[1] || "";
-      if (aboutImg) aboutImg.src = data.slides.aboutImg;
-    }
+    // Show panel + lock page
+    panel.removeAttribute('hidden');
+    panel.setAttribute('aria-hidden', 'false');
 
-    if (banner) banner.src = data.slides.banner;
+    const htmlOverflow = document.documentElement.style.overflow;
+    const bodyOverflow = document.body.style.overflow;
+    document.documentElement.dataset._panelHtmlOverflow = htmlOverflow || '';
+    document.body.dataset._panelBodyOverflow = bodyOverflow || '';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
 
-    if (story && storyLines.length >= 3) {
-      storyLines[0].textContent = data.slides.storyLines[0] || "";
-      storyLines[1].textContent = data.slides.storyLines[1] || "";
-      storyLines[2].textContent = data.slides.storyLines[2] || "";
-    }
+    try { window.lenis && window.lenis.stop && window.lenis.stop(); } catch {}
+    try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.disable(false, true)); } } catch {}
 
-    if (concept) concept.src = data.slides.concept;
-    if (outro)  outro.textContent = data.slides.outro;
-  } else {
-    // Fallback to whatever was on the link
-    if (intro) {
-      const h1 = intro.querySelector('h1');
-      const h2 = intro.querySelector('h2');
-      if (h1) h1.textContent = title || 'Case Study';
-      if (h2) h2.textContent = sub   || '{Digital Product, E-commerce, Consumer}';
-    }
-    if (hero && heroImg) heroImg.src = hero;
+    destroyScroller = initInfiniteScroller({ scroller, counterEl, barEl });
+    closeBtn?.focus();
+
+    const onCloseClick = () => closePanel();
+    const onEsc = (ev) => { if (ev.key === 'Escape') closePanel(); };
+
+    closeBtn?.addEventListener('click', onCloseClick);
+    document.addEventListener('keydown', onEsc);
+    panel._unbind = () => {
+      closeBtn?.removeEventListener('click', onCloseClick);
+      document.removeEventListener('keydown', onEsc);
+    };
   }
-
-  // Show panel + lock page
-  panel.removeAttribute('hidden');
-  panel.setAttribute('aria-hidden', 'false');
-
-  const htmlOverflow = document.documentElement.style.overflow;
-  const bodyOverflow = document.body.style.overflow;
-  document.documentElement.dataset._panelHtmlOverflow = htmlOverflow || '';
-  document.body.dataset._panelBodyOverflow = bodyOverflow || '';
-  document.documentElement.style.overflow = 'hidden';
-  document.body.style.overflow = 'hidden';
-
-  try { window.lenis && window.lenis.stop && window.lenis.stop(); } catch {}
-  try { if (window.ScrollTrigger) { ScrollTrigger.getAll().forEach(t => t.disable(false, true)); } } catch {}
-
-  destroyScroller = initInfiniteScroller({ scroller, counterEl, barEl });
-  closeBtn?.focus();
-
-  const onCloseClick = () => closePanel();
-  const onEsc = (ev) => { if (ev.key === 'Escape') closePanel(); };
-
-  closeBtn?.addEventListener('click', onCloseClick);
-  document.addEventListener('keydown', onEsc);
-  panel._unbind = () => {
-    closeBtn?.removeEventListener('click', onCloseClick);
-    document.removeEventListener('keydown', onEsc);
-  };
-}
-
 
   function closePanel() {
     if (panel.hasAttribute('hidden')) return;
@@ -1943,7 +1942,7 @@ function openPanel({ title, sub, hero, trigger }) {
       e.preventDefault();
       const x = e.touches[0].clientX;
       const dx = lastX - x;
-      targetX += dx * 2.5;
+      targetX += dx * touchSensitivity;
 
       const now = Date.now();
       const dt = now - lastT;
@@ -1997,6 +1996,7 @@ function openPanel({ title, sub, hero, trigger }) {
   }
 })();
 </script>
+
 
 
 </body>

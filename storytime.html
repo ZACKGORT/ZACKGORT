@@ -881,6 +881,18 @@ a + a { margin-inline-start: .6rem; }
   .grid__img, .grid__item{ min-height:100px; padding-bottom:.5rem; }
 }
 
+
+/* Superscript baseline + spacing (global) */
+:where(sup, .sup){
+  font-size: .62em;           /* small but readable */
+  line-height: 0;             /* remove extra leading bump */
+  vertical-align: super;      /* raise it properly */
+  margin-left: .25em;         /* breathing room from preceding text */
+  letter-spacing: .04em;      /* matches microtype vibe */
+  color: var(--color-text-alt);
+  font-weight: 400;
+}
+
 </style>
 </head>
 <body class="loading">
@@ -918,9 +930,9 @@ a + a { margin-inline-start: .6rem; }
 
   <!-- About -->
   <section class="content content--padded" id="about">
-    <h4 class="type-tiny"> </h4>
-    <p class="content__text">¡Viva la XP!<br></p>
-    <p class="content__text"></p>
+    <h4 class="type-tiny"><br><br></h4>
+    <p class="content__text">¡Viva la XP!<sup>experience</sup></p>
+
     <p class="type-tiny right end">— Zack Gort, Senior <span style="color: #fff; background-color: #fff;">User</span> Experience Designer</p>
   </section>
 

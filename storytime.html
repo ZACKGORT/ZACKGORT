@@ -2520,6 +2520,148 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+<script>
+/* ===============================
+   Content sync (structure-safe)
+   Source: zackgort.com
+   =============================== */
+(function () {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $all = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const setText = (sel, txt, root) => { const el = $(sel, root); if (el && txt != null) el.textContent = txt; };
+  const setHTML = (sel, html, root) => { const el = $(sel, root); if (el && html != null) el.innerHTML = html; };
+  const setHref = (sel, href, root) => { const el = $(sel, root); if (el && href) { el.setAttribute('href', href); el.setAttribute('rel', 'noopener noreferrer'); el.setAttribute('target', '_blank'); } };
+
+  // ───────────────── Header
+  setText('.frame__title', 'Career Case Studies');
+  setText('.frame__subline .type-tiny, .frame__subline span', 'Zack Gort — UX Designer');
+
+  // Top links (keep 3, repoint text + hrefs)
+  const topLinks = $all('.frame__links a');
+  if (topLinks.length >= 3) {
+    topLinks[0].textContent = 'Short-form';
+    topLinks[0].href = 'https://ifimaybefrank.com';
+
+    topLinks[1].textContent = 'Résumé';
+    topLinks[1].href = 'https://zackgort.com/resume';
+
+    topLinks[2].textContent = 'LinkedIn';
+    topLinks[2].href = 'https://linkedin.com/in/zackgort';
+  }
+
+
+
+
+  // ───────────────── Case Study: BNY (Pershing X)
+  // HERO caption already OK (“Featured / Financial Product Design”).
+  // PROCESS block
+  const bnyProc = $('#fintech-process');
+  if (bnyProc) {
+    setText('.project__name', 'BNY Mellon — Pershing X', bnyProc);
+    setText('.project__date', '2023 — 2024', bnyProc);
+
+    // Mission (2 short, direct lines)
+    const mission = $('.project__mission', bnyProc);
+    if (mission) {
+      const ps = $all('p', mission);
+      if (ps[0]) ps[0].textContent = 'Total data + design overhaul to unify the product ecosystem and modernize experience.';
+      if (ps[1]) ps[1].textContent = 'Led discovery, UX & data-architecture workshops, and design-system integration in React + Tailwind.';
+    }
+
+    // Details
+    const blocks = $all('.project.project--details', bnyProc);
+    // Order in your HTML: Problem, Constraints, Role & Team, Research, Next
+    if (blocks[0]) setText('p',
+      'The ask wasn’t “sexy.” It was to deliver smart, actionable work that moved a complex platform forward.',
+      blocks[0]
+    );
+    if (blocks[1]) setText('p',
+      'Understand function before form: map capabilities and gaps, socialize findings, and align the ecosystem.',
+      blocks[1]
+    );
+    if (blocks[2]) setText('p',
+      'Lead Product Designer: discovery facilitation, IA/flows, data architecture workshops, and design-system adoption.',
+      blocks[2]
+    );
+    if (blocks[3]) setText('p',
+      'Partnered across product/engineering to document patterns and operationalize them via a modernized system.',
+      blocks[3]
+    );
+    if (blocks[4]) setText('p',
+      'Next: richer household modeling, scenario planning, and assisted review narratives across compliance contexts.',
+      blocks[4]
+    );
+  }
+
+  // “Insight” pair under BNY
+  const bnyInsight = $('#fintech-insight');
+  if (bnyInsight) {
+    const cols = $all('.project.project--details', bnyInsight);
+    if (cols[0]) { setText('.project__label--default', 'Principles', cols[0]); setText('p', 'Smart over spectacle. Clear docs. Durable systems.', cols[0]); }
+    if (cols[1]) { setText('.project__label--default', 'Approach', cols[1]); setText('p', 'Make the machine legible: functions, flows, guardrails.', cols[1]); }
+  }
+
+  // ───────────────── Case Study: TikTok (card only is in Work; overlay handled separately)
+  // The grid card already says “TikTok For Business”. No structural changes needed.
+
+  // ───────────────── Case Study: GNC (Shopify)
+  const gncProc = $('#ecommerce-process');
+  if (gncProc) {
+    setText('.project__name', 'General Nutrition Centers (GNC)', gncProc);
+    setText('.project__date', '2021', gncProc);
+
+    // Title lines already have the quote; leave as-is.
+
+    const blocks = $all('.project.project--details', gncProc);
+    // Order in your HTML: Problem, Constraints, Role & Team, Research, Next
+    if (blocks[0]) setText('p',
+      'Replatform to Shopify while improving taxonomy, content structure, and performance for conversion and SEO.',
+      blocks[0]
+    );
+    if (blocks[1]) setText('p',
+      'Preserve SEO, integrate loyalty/ERP, manage bundles & subscriptions, and keep mobile performance tight.',
+      blocks[1]
+    );
+    if (blocks[2]) setText('p',
+      'Principal UX: discovery, IA & taxonomy, wireframes/prototypes, content strategy, and consumer re-engagement.',
+      blocks[2]
+    );
+    if (blocks[3]) setText('p',
+      'Heuristic + competitive review, on-site search analysis, and iterative prototype testing on mobile flows.',
+      blocks[3]
+    );
+    if (blocks[4]) setText('p',
+      'Next: personalized bundles, subscription tuning, and loyalty-led landing frameworks to lift AOV + repeat.',
+      blocks[4]
+    );
+  }
+
+  // ───────────────── Agency life (caption tweaks)
+  const brands1 = $('#brands-grid .content__title');
+  if (brands1) {
+    setText('.content__title-main', 'things I’ve made', brands1);
+    setText('.type-tiny.right.end', 'for brands people love/need', brands1);
+  }
+  const brands2 = $('#brands-grid-2 .content__title');
+  if (brands2) {
+    setText('.content__title-main', '#agencylife', brands2);
+    setText('.type-tiny.right.end', 'HUGE • 160over90 • WorkArea • LiveArea • O3 World', brands2);
+  }
+
+  // ───────────────── Contact
+  const contact = $('#contact');
+  if (contact) {
+    setText('.content__text',
+      'Interested in collaborating or just want to say hello? Reach out—always open to good problems.',
+      contact
+    );
+  }
+
+  // ───────────────── Footer (keep your email + LinkedIn, nothing structural)
+  // no changes needed beyond what you already have.
+
+})();
+</script>
 
 
 </body>

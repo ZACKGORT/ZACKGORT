@@ -973,6 +973,11 @@
   .blur{ display: none; }
 }
 
+@media (max-width: 768px){
+  .blur{ display:none !important; }
+}
+
+
 </style>
 </head>
 <body class="loading">
@@ -1555,23 +1560,28 @@ function enableHashScrollWithLenis() {
     const link = e.target.closest('a[href^="#"]');
     if (!link) return;
 
-    const hash   = link.getAttribute('href');
+    const hash = link.getAttribute('href');
+    if (!hash || hash === '#' || hash.length < 2) return;
+
     const target = document.querySelector(hash);
     if (!target) return;
 
     e.preventDefault();
 
-    // “Final layout” jump for Work (or any link with data-settle="end")
-    const wantsFinal = hash === '#work' || link.hasAttribute('data-settle');
-    if (wantsFinal && window.ScrollTrigger) {
+    // If this section is controlled by a ScrollTrigger pin,
+    // jump to its end so the layout is fully settled.
+    if (window.ScrollTrigger) {
       const st = ScrollTrigger.getAll().find(st =>
-        (st.pin === target) || (st.trigger === target)
+        st && isFinite(st.end) && (
+          st.pin === target ||
+          st.trigger === target ||
+          target.contains(st.pin) ||
+          target.contains(st.trigger)
+        )
       );
 
-      if (st && isFinite(st.end)) {
-        const epsilon = 2; // nudge past end so the pin fully releases
-        const y = st.end + epsilon;
-
+      if (st) {
+        const y = st.end + 2; // tiny nudge past end so pin fully releases
         if (window.lenis) {
           window.lenis.scrollTo(y, { duration: 1.1 });
         } else {
@@ -1582,7 +1592,7 @@ function enableHashScrollWithLenis() {
       }
     }
 
-    // Fallback
+    // Fallback: normal anchor scroll (respects optional data-offset)
     const extra = parseFloat(link.dataset.offset || 0) || 0;
     const y = target.getBoundingClientRect().top + window.pageYOffset + extra;
     if (window.lenis) {
@@ -1593,6 +1603,7 @@ function enableHashScrollWithLenis() {
     history.pushState(null, '', hash);
   });
 }
+
 
 
 

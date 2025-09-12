@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
   <!-- Base so that all relative URLs resolve to your repo’s raw content -->
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
   <title>Layout Formation on Scroll | Codrops</title>
@@ -555,6 +556,162 @@
 
     /* Counter: reduced size, crisp */
     .panel__counter h1{ font-size: clamp(18px, 2.2vw, 28px); letter-spacing: .06em; font-weight: 500; color: #fff; opacity: .9; }
+
+
+
+
+
+/* =========================
+   MOBILE BREAKPOINTS
+   ========================= */
+@media (max-width: 768px) {
+  :root {
+    font-size: 15px;
+    --page-padding: 1rem;
+    --grid-gap: 0.75rem;
+  }
+
+  html, body { width: 100%; overflow-x: hidden; }
+
+  /* Frame (hero header) */
+  .frame {
+    min-height: 100dvh;
+    height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto 1fr;
+    grid-row-gap: 1rem;
+    align-content: start;
+    padding: var(--page-padding);
+  }
+  .frame__title {
+    font-size: clamp(2.25rem, 16vw, 7rem);
+    line-height: 0.8;
+  }
+  .frame__subline { order: 3; }
+  .frame__tags { gap: .6rem; }
+  .frame__links a { display: inline-block; padding: .25rem 0; }
+
+  /* Generic content spacing */
+  .content--padded { padding: var(--page-padding); }
+  .content--full { height: auto; min-height: 80dvh; }
+
+  .content__title { margin: 2.5rem 0 1rem; }
+  .content__title-main { font-size: clamp(1.6rem, 7.5vw, 3rem); }
+
+  .content__text { font-size: clamp(1.05rem, 4.3vw, 1.25rem); }
+
+  /* Grids: denser & taller tiles on mobile */
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(140px, auto);
+    gap: var(--grid-gap);
+    height: auto;
+    width: 100%;
+  }
+  .grid__img, .grid__item {
+    min-height: 140px;
+  }
+
+  /* Column-style mosaic section */
+  .grid--column {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: minmax(140px, auto);
+    gap: var(--grid-gap);
+  }
+
+  /* Zoomed tiles: keep punchy but simpler */
+  .grid--zoomed {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+    aspect-ratio: auto;
+    gap: var(--grid-gap);
+  }
+
+  /* Wide fan-up (case study hero) */
+  .grid--wide {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+  }
+
+  /* Brand grids: 2-up for impact */
+  [data-grid-ninth] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Work (grid second) – make cards tap-friendly */
+  #work .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  #work .grid__item {
+    padding: 0.75rem;
+  }
+  #work .grid__item h4 { font-size: 0.85rem; }
+
+  /* Aspect helpers → allow natural height on mobile */
+  .ar-wide, .ar-narrow, .ar-rect { aspect-ratio: auto; }
+
+  /* Projects / case study intro */
+  .project { 
+    margin: 12vh auto;
+    grid-column-gap: 1.25rem;
+  }
+  .project__title {
+    font-size: clamp(1.8rem, 11vw, 3.2rem);
+    margin: 6vh 0 4vh;
+  }
+  .project--details p { max-width: none; }
+
+  /* Two-column process becomes single column (already mostly) */
+  [id$="-process"] {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  /* Bottom helper note: keep small & unobtrusive */
+  .intro__info {
+    bottom: 16px;
+    font-size: 10px;
+    opacity: .65;
+  }
+
+  /* Overlay panel: typography + widths tuned for phone */
+  .panel h1 { font-size: clamp(1.6rem, 9vw, 2.2rem); }
+  .panel h2 { font-size: 1.1rem; }
+  .panel p  { font-size: 0.95rem; }
+  .panel__counter h1 { font-size: 0.95rem; }
+  .panel__progress-bar { height: 5px; }
+
+  .panel .intro,
+  .panel .hero-img,
+  .panel .about,
+  .panel .banner-img,
+  .panel .story,
+  .panel .outro { width: 94vw; padding: 1rem; }
+
+  .panel .header,
+  .panel .concept-img { width: 100vw; }
+
+  .panel .about .row { flex-direction: column; gap: 1rem; }
+  .panel .about .row p { width: 100%; }
+  .panel .about .row .img { aspect-ratio: 16/10; }
+
+  .panel__close { top: .5rem; right: .5rem; padding: .4rem .6rem; }
+
+  /* Footer spacing */
+  .page-footer {
+    grid-template-columns: 1fr;
+    gap: .5rem;
+    margin-top: 20vh;
+  }
+}
+
+/* Even tighter for very small devices */
+@media (max-width: 390px) {
+  :root { font-size: 14px; }
+  .grid__img, .grid__item { min-height: 120px; }
+}
+
+
   </style>
 
 

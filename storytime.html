@@ -256,6 +256,7 @@ document.documentElement.classList.add('js');
       ]
     },
 
+
     skills: {
       cols: [
         {
@@ -492,29 +493,7 @@ document.documentElement.classList.add('js');
     `;
     app.appendChild(about);
 
-    // HERO MOSAIC
-    const hero = el('section','content content--full content--padded');
-    hero.innerHTML = `
-      <div class="grid grid--column" data-grid-seventh>
-        <div class="grid__item span-3">
-          <h4 class="type-tiny">${CONTENT.heroMosaic.leadCopyA.title}</h4>
-          <p>${CONTENT.heroMosaic.leadCopyA.text}</p>
-        </div>
-        ${CONTENT.heroMosaic.imagesA.map(([src, cls]) => `
-          <div class="grid__img ${cls||''}">
-            <div class="grid__img-inner" style="background-image:url(${src})"></div>
-          </div>`).join('')}
-        <div class="grid__item span-3">
-          <h4 class="type-tiny">${CONTENT.heroMosaic.leadCopyB.title}</h4>
-          <p>${CONTENT.heroMosaic.leadCopyB.text}</p>
-        </div>
-        ${CONTENT.heroMosaic.imagesB.map(([src, cls]) => `
-          <div class="grid__img ${cls||''}">
-            <div class="grid__img-inner" style="background-image:url(${src})"></div>
-          </div>`).join('')}
-      </div>
-    `;
-    app.appendChild(hero);
+
 
     // SKILLS
     const skills = el('section','content content--padded'); skills.id = 'skills';

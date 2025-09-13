@@ -174,15 +174,16 @@
   <main id="app"></main>
   <div class="blur"></div>
   <div id="panel-root"></div>
-  <script>
-/* app.js — single file build (CONTENT + RENDER + ANIMATIONS + TIMING FIX) */
 
-/* -----------------------------
-   Setup
------------------------------ */
+<script>
+/* app.js — complete, fixed */
+
 document.documentElement.classList.add('js');
 
 (function () {
+  /* -----------------------------
+     Setup / helpers
+  ----------------------------- */
   const has = (k) => typeof window[k] !== 'undefined';
   if (has('ScrollTrigger')) {
     if (has('Physics2DPlugin')) {
@@ -263,22 +264,14 @@ document.documentElement.classList.add('js');
             "Accessibility Compliance"
           ]
         },
-        {
-          heading: "#savvy",
-          items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"]
-        },
-        {
-          heading: "#evolution",
-          items: ["AI + Creative Coding", "Design Systems & Workflows", "+"]
-        }
+        { heading: "#savvy", items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"] },
+        { heading: "#evolution", items: ["AI + Creative Coding", "Design Systems & Workflows", "+"] }
       ]
     },
 
     workSelect: {
       captionTitle: "select works",
-      tiles: [
-        "img/23.webp","img/40.webp","img/10.webp","img/17.webp","img/22.webp"
-      ],
+      tiles: ["img/23.webp","img/40.webp","img/10.webp","img/17.webp","img/22.webp"],
       cards: [
         { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓" },
         { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓" },
@@ -381,13 +374,12 @@ document.documentElement.classList.add('js');
         "https://i.ibb.co/Fgxcqj0/16.jpg",
         "https://i.ibb.co/dcXH5fn/13.jpg"
       ],
-insight: [
-  ["Platform & IA",
-   "Composable workspace that unifies CRM context with portfolio actions; permissions & auditability shape component boundaries."],
-  ["Outcome",
-   "Fewer tool switches, clearer states, and faster rebalance/review cycles across dense data views."]
-],
-
+      insight: [
+        ["Platform & IA",
+         "Composable workspace unifies CRM context with portfolio actions; permissions & auditability shape component boundaries."],
+        ["Outcome",
+         "Fewer tool switches, clearer states, and faster rebalance/review cycles across dense data views."]
+      ],
       stack: [
         ["https://i.ibb.co/XkM2hn8n/bny1.png","BNY 1"],
         ["https://i.ibb.co/vvMZmq94/bny2.png","BNY 2"],
@@ -431,7 +423,8 @@ insight: [
         "https://i.ibb.co/vx76zjgf/10.webp"
       ],
       insight: [
-        ["Navigation & IA","Rebuilt taxonomy (goals, ingredients, formats) and aligned PLP filters to search intent; simplified top-nav to three shopping entries plus Programs & Guidance."]
+        ["Navigation & IA",
+         "Rebuilt taxonomy (goals, ingredients, formats) and aligned PLP filters to search intent; simplified top-nav to three shopping entries plus Programs & Guidance."]
       ],
       stack: [
         ["https://i.ibb.co/cSQCgNQY/work1.webp","Homepage concept"],
@@ -518,8 +511,7 @@ insight: [
     app.appendChild(hero);
 
     // SKILLS
-    const skills = el('section','content content--padded');
-    skills.id = 'skills';
+    const skills = el('section','content content--padded'); skills.id = 'skills';
     skills.innerHTML = `
       <div class="trio-grid">
         ${CONTENT.skills.cols.map(col => `
@@ -607,29 +599,32 @@ insight: [
     finProc.innerHTML = finIntro + finDetails;
     app.appendChild(finProc);
 
-// FINTECH — DISCOVERY (grid with sweep animation)
-const finDisc = el('section','content content--full content--cutoff'); 
-finDisc.id = 'fintech-discovery';
-finDisc.innerHTML = `
-  <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-    ${CONTENT.fintech.discoveryImages.map(src => `
-      <div class="grid__img" style="background-image:url(${src})"></div>
-    `).join('')}
-  </div>`;
-app.appendChild(finDisc);
+    // FINTECH — DISCOVERY
+    const finDisc = el('section','content content--full content--cutoff'); finDisc.id='fintech-discovery';
+    finDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>`;
+    app.appendChild(finDisc);
 
-// FINTECH — INSIGHT (two-up text pair)
-const finInsight = el('section','content content--padded'); 
-finInsight.id = 'fintech-insight';
-finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
-  <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-    <span class="project__label project__label--default">${label}</span>
-    <p>${text}</p>
-  </section>`).join('');
-app.appendChild(finInsight);
+    // FINTECH — INSIGHT
+    const finInsight = el('section','content content--padded'); finInsight.id='fintech-insight';
+    finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    app.appendChild(finInsight);
 
+    // FINTECH — STACK
+    const finStack = el('section','content content--full stacked-section'); finStack.id='fintech-stack';
+    finStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(finStack);
 
-    // ECOM HERO
+    // ECOM — HERO
     const ecoHero = el('section','content content--padded content--full'); ecoHero.id='ecommerce';
     ecoHero.innerHTML = `
       <div class="grid grid--columns grid--spaced" data-grid-ninth>
@@ -641,7 +636,7 @@ app.appendChild(finInsight);
       </div>`;
     app.appendChild(ecoHero);
 
-    // ECOM PROCESS
+    // ECOM — PROCESS
     const ecoProc = el('section','content content--padded'); ecoProc.id='ecommerce-process';
     const ecoIntro = `
       <section class="project project--intro">
@@ -661,7 +656,7 @@ app.appendChild(finInsight);
     ecoProc.innerHTML = ecoIntro + ecoDetails;
     app.appendChild(ecoProc);
 
-    // ECOM DISCOVERY
+    // ECOM — DISCOVERY
     const ecoDisc = el('section','content content--full content--cutoff'); ecoDisc.id='ecommerce-discovery';
     ecoDisc.innerHTML = `
       <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
@@ -669,7 +664,7 @@ app.appendChild(finInsight);
       </div>`;
     app.appendChild(ecoDisc);
 
-    // ECOM INSIGHT
+    // ECOM — INSIGHT
     const ecoInsight = el('section','content content--padded'); ecoInsight.id='ecommerce-insight';
     ecoInsight.innerHTML = CONTENT.ecommerce.insight.map(([label,text])=>`
       <section class="project project--details project--left">
@@ -678,7 +673,7 @@ app.appendChild(finInsight);
       </section>`).join('');
     app.appendChild(ecoInsight);
 
-    // ECOM STACK
+    // ECOM — STACK
     const ecoStack = el('section','content content--full stacked-section'); ecoStack.id='ecommerce-stack';
     ecoStack.innerHTML = `
       <div class="stacked-gallery" data-stack>
@@ -746,121 +741,116 @@ app.appendChild(finInsight);
   const preloadImages = (sel='.grid__img, .grid__img-inner') =>
     new Promise(res => imagesLoaded(document.querySelectorAll(sel), { background:true }, res));
 
-  /* ------- TIMELINE ENGINE (reads data-* overrides) ------- */
-function animateGrids(){
-  const mq = matchMedia('(max-width:768px)');
-  const isMobile = () => mq.matches;
+  /* ------- TIMELINE ENGINE ------- */
+  function animateGrids(){
+    const mq = matchMedia('(max-width:768px)');
+    const isMobile = () => mq.matches;
 
-  const modes = {
-    second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
-    fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
-    sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
-    ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
-  };
+    const modes = {
+      second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
+      fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
+      sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
+      ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
+    };
 
-  function defaultEndPx(mode, grid){
-    const count = grid.querySelectorAll('.grid__img').length || 6;
-    const section = grid.closest('section') || grid.parentNode;
-    const hasCaption = !!section.querySelector('.content__title');
-    const cfg = ({
-      second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
-      fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
-      sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
-      ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
-    })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
+    function defaultEndPx(mode, grid){
+      const count = grid.querySelectorAll('.grid__img').length || 6;
+      const section = grid.closest('section') || grid.parentNode;
+      const hasCaption = !!section.querySelector('.content__title');
+      const cfg = ({
+        second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+        fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
+        sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
+        ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
+      })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
 
-    const tilesOverMin = Math.max(0, count - 4);
-    const vh = (isMobile()?cfg.base.m:cfg.base.d)
-             + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
-             + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
-    return `+=${Math.round(window.innerHeight * (vh/100))}`;
-  }
-  const parseScrub = (v, fb) => {
-    if(v==null || v==='') return fb;
-    if(v==='true') return true;
-    if(v==='false') return false;
-    const n = parseFloat(v); return isNaN(n) ? fb : n;
-  };
+      const tilesOverMin = Math.max(0, count - 4);
+      const vh = (isMobile()?cfg.base.m:cfg.base.d)
+               + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
+               + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
+      return `+=${Math.round(window.innerHeight * (vh/100))}`;
+    }
+    const parseScrub = (v, fb) => {
+      if(v==null || v==='') return fb;
+      if(v==='true') return true;
+      if(v==='false') return false;
+      const n = parseFloat(v); return isNaN(n) ? fb : n;
+    };
 
-  // ✅ DOM order
-  const grids = [...document.querySelectorAll(
-    '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
-  )];
+    const grids = [...document.querySelectorAll(
+      '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+    )];
 
-  grids.forEach(grid=>{
-    const imgs  = grid.querySelectorAll('.grid__img');
-    const items = grid.querySelectorAll('.grid__item');
-    if(!imgs.length && !items.length) return;
+    grids.forEach(grid=>{
+      const imgs  = grid.querySelectorAll('.grid__img');
+      const items = grid.querySelectorAll('.grid__item');
+      if(!imgs.length && !items.length) return;
 
-    const section = grid.closest('section') || grid.parentNode;
+      const section = grid.closest('section') || grid.parentNode;
+      let defaultMode = grid.hasAttribute('data-grid-second') ? 'second' :
+                        grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+                        grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
 
-    // infer default mode from the data-* present
-    let defaultMode = grid.hasAttribute('data-grid-second') ? 'second' :
-                      grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
-                      grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+      const d = grid.dataset;
+      const mode = d.mode || defaultMode;
 
-    const d = grid.dataset;
-    const mode = d.mode || defaultMode;
+      const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
 
-    const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+      const base = modes[mode] || modes.ninth;
+      const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+      const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
 
-    const base = modes[mode] || modes.ninth;
-    const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
-    const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+      const anticipatePin = (d.anticipatePin != null)
+        ? +d.anticipatePin
+        : (mode==='second' || mode==='fifth' ? 1 : 0);
 
-    // ↓ default: no early pin for “gallery sweep” styles to avoid overlap
-    const anticipatePin = (d.anticipatePin != null)
-      ? +d.anticipatePin
-      : (mode==='second' || mode==='fifth' ? 1 : 0);
+      const tl = gsap.timeline({
+        defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end,
+          pin: section,
+          scrub,
+          pinSpacing: true,
+          anticipatePin,
+          invalidateOnRefresh: true
+        }
+      });
 
-    const tl = gsap.timeline({
-      defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end,
-        pin: section,
-        scrub,
-        pinSpacing: true,
-        anticipatePin,
-        invalidateOnRefresh: true
+      if(mode==='second'){
+        const mid = Math.floor(imgs.length/2);
+        tl.from(imgs,{
+          stagger:{amount:.3,from:'center'},
+          y:()=>innerHeight,
+          transformOrigin:'50% 0%',
+          rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(matchMedia('(max-width:768px)').matches?1.5:3)
+        }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
+      }
+      if(mode==='fifth'){
+        tl.set(grid,{perspective:1000}).from(imgs,{
+          stagger:{amount:.4,from:'random',grid:[4,9]},
+          y:()=>innerHeight, rotationX:matchMedia('(max-width:768px)').matches?-40:-70,
+          transformOrigin:'50% 0%', z:matchMedia('(max-width:768px)').matches?-450:-900, autoAlpha:0
+        });
+      }
+      if(mode==='sixth'){
+        tl.from(imgs,{
+          stagger:{amount:.25,from:'edges',grid:[3,3]},
+          scale:matchMedia('(max-width:768px)').matches?.82:.7, autoAlpha:0
+        }).from(grid,{scale:matchMedia('(max-width:768px)').matches?.92:.85,skewY:matchMedia('(max-width:768px)').matches?1.5:3},0);
+      }
+      if(mode==='ninth'){
+        const caption = section.querySelector('.content__title');
+        tl.from(imgs,{
+          transformOrigin:'100% -450%',
+          stagger:.07, scaleX:1.02, skewX:matchMedia('(max-width:768px)').matches?7:15,
+          xPercent:matchMedia('(max-width:768px)').matches?18:50, rotation:matchMedia('(max-width:768px)').matches?-5:-10, autoAlpha:0
+        });
+        if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
       }
     });
-
-    if(mode==='second'){
-      const mid = Math.floor(imgs.length/2);
-      tl.from(imgs,{
-        stagger:{amount:.3,from:'center'},
-        y:()=>innerHeight,
-        transformOrigin:'50% 0%',
-        rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(isMobile()?1.5:3)
-      }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
-    }
-    if(mode==='fifth'){
-      tl.set(grid,{perspective:1000}).from(imgs,{
-        stagger:{amount:.4,from:'random',grid:[4,9]},
-        y:()=>innerHeight, rotationX:isMobile()?-40:-70,
-        transformOrigin:'50% 0%', z:isMobile()?-450:-900, autoAlpha:0
-      });
-    }
-    if(mode==='sixth'){
-      tl.from(imgs,{
-        stagger:{amount:.25,from:'edges',grid:[3,3]},
-        scale:isMobile()?.82:.7, autoAlpha:0
-      }).from(grid,{scale:isMobile()?.92:.85,skewY:isMobile()?1.5:3},0);
-    }
-    if(mode==='ninth'){
-      const caption = section.querySelector('.content__title');
-      tl.from(imgs,{
-        transformOrigin:'100% -450%',
-        stagger:.07, scaleX:1.02, skewX:isMobile()?7:15,
-        xPercent:isMobile()?18:50, rotation:isMobile()?-5:-10, autoAlpha:0
-      });
-      if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
-    }
-  });
-}
-
+  }
 
   function animateHeader(){
     const frame = document.querySelector('.frame');
@@ -1019,7 +1009,7 @@ function animateGrids(){
 
   /* -----------------------------
      CASE STUDY TIMING OVERRIDES
-     (applied BEFORE creating ScrollTriggers)
+     (before creating ScrollTriggers)
   ----------------------------- */
   function tuneCaseStudyTiming() {
     const mq = window.matchMedia('(max-width: 768px)');
@@ -1037,22 +1027,33 @@ function animateGrids(){
       const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
       const vh = isMobile() ? baseVH.mobile : baseVH.desktop;
       const per = isMobile() ? perTileVH.mobile : perTileVH.desktop;
-      const boost = captionBoostVH && grid.closest('section')?.querySelector('.content__title') ?
-        (isMobile() ? captionBoostVH.mobile : captionBoostVH.desktop) : 0;
+      const boost = captionBoostVH && grid.closest('section')?.querySelector('.content__title')
+        ? (isMobile() ? captionBoostVH.mobile : captionBoostVH.desktop)
+        : 0;
       const tilesOverMin = Math.max(0, tiles - minTiles);
       const totalVH = vh + tilesOverMin * per + boost;
       const px = Math.round(window.innerHeight * (totalVH / 100));
       return `+=${px}`;
     }
 
-// BNY — DISCOVERY (inside tuneCaseStudyTiming) ✅ keep this one
-document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
-  const end = calcEndPx(grid, {
-    baseVH: { desktop: 150, mobile: 110 },
-    perTileVH: { desktop: 6, mobile: 4 }
-  });
-  setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
-});
+    // BNY — HERO (steadier scrubs, sixth-like feel)
+    document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 120, mobile: 90 },
+        perTileVH: { desktop: 10, mobile: 7 },
+        captionBoostVH: { desktop: 12, mobile: 8 }
+      });
+      setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
+    });
+
+    // BNY — DISCOVERY (lateral sweep)
+    document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 150, mobile: 110 },
+        perTileVH: { desktop: 6, mobile: 4 }
+      });
+      setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
+    });
 
     // GNC — HERO
     document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
@@ -1077,7 +1078,7 @@ document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid =
   /* -----------------------------
      BOOT
   ----------------------------- */
-  // minimal shell if needed
+  // Ensure minimal shell in case the HTML is bare.
   if (!document.querySelector('#app')) {
     const main = document.createElement('main'); main.id = 'app';
     document.body.appendChild(main);
@@ -1112,7 +1113,7 @@ document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid =
     window.scrollTo(0,0);
   });
 
-  // Keep timings in sync on resize / breakpoint changes
+  // Keep timings fresh on breakpoint changes
   const mq = window.matchMedia('(max-width: 768px)');
   const onBPChange = () => { tuneCaseStudyTiming(); ScrollTrigger.refresh(); };
   if (mq.addEventListener) mq.addEventListener('change', onBPChange);
@@ -1120,7 +1121,6 @@ document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid =
 
   addEventListener('resize', ()=>ScrollTrigger.refresh());
 })();
-
-  </script>
+</script>
 </body>
 </html>

@@ -51,7 +51,7 @@
   --layers:5;
   --blur-max:40;
   --mask-stop:35;
-  --saturate:.1;
+  --saturate:0;
 
   /* Panel palette */
   --cs-accent:#f4d35e;
@@ -304,6 +304,10 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 #work .grid__item{ pointer-events:none; }
 #work .grid__item .title-link{ pointer-events:auto; text-decoration:none; }
 #work .grid__item .title-link:hover{ text-decoration:underline; }
+
+
+
+
 
 /* ===============================
    PROJECT BLOCKS
@@ -645,8 +649,8 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   content:"";
   position:absolute; inset:0 -250%;
   /* values come from inline --blur / --maskStart set by JS */
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .1));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .1));
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
 }
@@ -981,7 +985,7 @@ a + a { margin-inline-start: .6rem; }
   :root{
     --blur-max: 8;      /* was 40 */
     --mask-stop: 18;    /* was 35 — shorter blurred band */
-    --saturate: .06;    /* was .1  */
+    --saturate: .0;    /* was .1  */
   }
 
   /* Show less intensity overall */
@@ -1016,6 +1020,8 @@ a + a { margin-inline-start: .6rem; }
 .blur > div::after{
   background: rgba(0,0,0,.001); /* invisible, just forces a paint */
 }
+
+
 
 
 
@@ -1119,15 +1125,22 @@ document.documentElement.classList.add('js');
       ]
     },
 
-    workSelect: {
-      captionTitle: "select works",
-      tiles: ["img/23.webp","img/40.webp","img/10.webp","img/17.webp","img/22.webp"],
-      cards: [
-        { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓" },
-        { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓" },
-        { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
-      ]
-    },
+workSelect: {
+  captionTitle: "select works",
+  tiles: [
+    "https://i.ibb.co/c3vLP47/image-445-min.png",
+    "https://i.ibb.co/jJD2YPJ/image-438-min.png",
+    "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+    "https://i.ibb.co/jMfm8Kx/image-439-min.png",
+    "https://i.ibb.co/RymyPtP/image-443-min.png"
+  ],
+  cards: [
+    { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓" },
+    { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓" },
+    { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
+  ]
+},
+
 
     brandsGrid: {
       title: "Portfolio",
@@ -1343,22 +1356,23 @@ document.documentElement.classList.add('js');
     `;
     app.appendChild(skills);
 
-    // WORK SELECT
-    const work = el('section','content content--padded'); work.id='work';
-    work.innerHTML = `
-      <h2 class="content__title-main">select works</h2>
-      <div class="grid grid--columns grid--spaced" data-grid-second>
-        ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-        ${CONTENT.workSelect.cards.map(c => `
-          <div class="grid__item work-card">
-            <h4 class="type-tiny">
-              <a class="title-link" href="${c.href}" ${c.ext?'target="_blank" rel="noopener noreferrer"':''}>${c.title}</a>
-            </h4>
-            <p>${c.glyph||''}</p>
-          </div>`).join('')}
-      </div>
-    `;
-    app.appendChild(work);
+// WORK SELECT
+const work = el('section','content content--padded'); work.id='work';
+work.innerHTML = `
+  <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
+  <div class="grid grid--columns grid--spaced" data-grid-second>
+    ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+    ${CONTENT.workSelect.cards.map(c => `
+      <div class="grid__item work-card">
+        <h4 class="type-tiny">
+          <a class="title-link" href="${c.href}" ${c.ext?'target="_blank" rel="noopener noreferrer"':''}>${c.title}</a>
+        </h4>
+        <p>${c.glyph||''}</p>
+      </div>`).join('')}
+  </div>
+`;
+app.appendChild(work);
+
 
     // BRANDS GRID
     const brands = el('section','content content--padded content--full'); brands.id='brands-grid';

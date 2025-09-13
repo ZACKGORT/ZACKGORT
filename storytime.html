@@ -7,14 +7,16 @@
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
   <title>Layout Formation on Scroll | Codrops</title>
 
-  <!-- GSAP core + plugins -->
-  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
-  <!-- ImagesLoaded -->
-  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-  <!-- Lenis smooth scroll -->
-  <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
+<!-- GSAP core + plugins -->
+<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
 
+<!-- ImagesLoaded -->
+<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+
+<!-- Lenis smooth scroll -->
+<script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
 <style>
 /* ===============================
    CORE TOKENS & RESET
@@ -629,35 +631,37 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 /* ===============================
    BOTTOM BLUR OVERLAY
    =============================== */
+/* ===== Bottom blur overlay (robust) ===== */
 .blur{
-  position:fixed; inset:0;
-  z-index:1000;
+  position:fixed; inset:0; z-index:1000;
   pointer-events:none;
-  isolation:isolate;
-  contain:paint;
-  opacity:0;
-  transition:opacity .35s ease;
+  opacity:0; transition:opacity .35s ease;
+  /* intentionally no isolation/contain to avoid backdrop bugs */
 }
 .blur.is-visible{ opacity:1; }
-.blur > div{
-  --blur: calc( sin(((var(--layers) - var(--i)) / var(--layers)) * 90deg) * var(--blur-max) );
-  --stop: calc( sin((var(--i) / var(--layers)) * 90deg) * var(--mask-stop) );
-  position:absolute; inset:0;
-}
+
+.blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:"";
   position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter:blur(calc(var(--blur) * 1px)) saturate(var(--saturate));
-          backdrop-filter:blur(calc(var(--blur) * 1px)) saturate(var(--saturate));
-  mask:linear-gradient(180deg, transparent 0 calc((100 - var(--stop)) * 1%), #000 100%);
-  -webkit-mask:linear-gradient(180deg, transparent 0 calc((100 - var(--stop)) * 1%), #000 100%);
+  /* values come from inline --blur / --maskStart set by JS */
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .1));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .1));
+  -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
+          mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
 }
-.blur > div::before{
-  content:""; position:absolute; left:0; right:0; bottom:0; height:calc(var(--stop) * 1%);
+
+/* Fallback when backdrop-filter isn't supported */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+  .blur{ opacity:1; } /* show a soft shade instead of hiding it */
+  .blur > div::after{
+    -webkit-backdrop-filter:none; backdrop-filter:none;
+    background:linear-gradient(180deg, rgba(0,0,0,0) 0, rgba(0,0,0,.35) 100%);
+    -webkit-mask:none; mask:none;
+  }
 }
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  .blur{ display:none; }
-}
+
+
 
 /* ===============================
    GOOEY CURSOR
@@ -882,16 +886,7 @@ a + a { margin-inline-start: .6rem; }
 }
 
 
-/* Superscript baseline + spacing (global) */
-:where(sup, .sup){
-  font-size: .62em;           /* small but readable */
-  line-height: 0;             /* remove extra leading bump */
-  vertical-align: super;      /* raise it properly */
-  margin-left: .25em;         /* breathing room from preceding text */
-  letter-spacing: .04em;      /* matches microtype vibe */
-  color: var(--color-text-alt);
-  font-weight: 400;
-}
+
 
 
 
@@ -907,7 +902,7 @@ a + a { margin-inline-start: .6rem; }
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: .95;
-  font-size: clamp(2.6rem, 4vw, 2.6rem);
+  font-size: clamp(3.6rem, 4vw, 3.6rem);
   color: var(--color-text);
 
   /* subtle underline vibe */
@@ -927,6 +922,102 @@ a + a { margin-inline-start: .6rem; }
   vertical-align: baseline;        /* ignore default */
   transform: translateY(-.6em);    /* precise lift */
 }
+
+
+
+
+/* Clickable superscript w/ emitter */
+.heading-chant .confetti-sup{
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  cursor: pointer;
+  user-select: none;
+  margin-left: .3ch;                 /* small gap from “XP!” */
+  padding: 0 .2ch;                   /* clickable target */
+  border-radius: .25rem;
+  outline: none;
+}
+.heading-chant .confetti-sup:focus-visible{
+  box-shadow: 0 0 0 2px rgba(255,255,255,.5);
+}
+.heading-chant .confetti-sup .emitter{
+  position: absolute;
+  top: 0; left: 50%;
+  width: 0; height: 0;
+  transform: translate(-50%, -60%);
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+/* confetti dots */
+.heading-chant .confetti-sup .emitter > div{
+  position: absolute;
+  width: 8px; height: 8px;
+  background: var(--b, #fff);
+  border-radius: 2px;                /* soft squares */
+  will-change: transform, opacity;
+  mix-blend-mode: normal;
+}
+
+/* optional: colorful theme consistent w/ your palette */
+:root{
+  --confetti-colors: #FFFF04, #EA4C89, #892AB8, #4AF2FD;
+}
+
+.heading-chant .confetti-sup:hover{
+  text-decoration: underline;
+  text-decoration-thickness: .08em;
+  text-underline-offset: .12em;
+  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
+}
+
+/* =========================================
+   MOBILE BLUR DIAL-DOWN (performance-first)
+   ========================================= */
+@media (max-width: 768px){
+  /* Smaller kernel, shorter mask, lower saturation */
+  :root{
+    --blur-max: 8;      /* was 40 */
+    --mask-stop: 18;    /* was 35 — shorter blurred band */
+    --saturate: .06;    /* was .1  */
+  }
+
+  /* Show less intensity overall */
+  .blur{ opacity: .75; }
+
+  /* Process fewer layers: keep first 3, hide the rest */
+  .blur > div:nth-child(n+4){ display: none; }
+
+  /* Shrink the filtered spill area to reduce GPU cost */
+  .blur > div::after{ inset: 0 -60%; }  /* was 0 -250% */
+
+  /* Optional: tighten the solid band at the very bottom */
+  .blur > div::before{ height: calc((var(--stop) * .8) * 1%); }
+}
+
+/* Coarse pointers (many phones/tablets) — dial down further */
+@media (pointer: coarse){
+  :root{
+    --blur-max: 6;
+    --saturate: .05;
+  }
+}
+
+/* Respect accessibility (motion often correlates with effects aversion) */
+@media (prefers-reduced-motion: reduce){
+  .blur{ display: none !important; }
+}
+
+
+
+/* Ensure the compositor commits the backdrop blur box */
+.blur > div::after{
+  background: rgba(0,0,0,.001); /* invisible, just forces a paint */
+}
+
+
 
 </style>
 <body class="loading">
@@ -978,8 +1069,8 @@ document.documentElement.classList.add('js');
       tags: [
         { label: "#About", href: "#about" },
         { label: "#Work", href: "#work", settle: "end" },
-        { label: "#Product", href: "#fintech", settle: "end"  },
-        { label: "#E-commerce", href: "#ecommerce", settle: "end"  },
+        { label: "#Product", href: "#fintech" },
+        { label: "#E-commerce", href: "#ecommerce" },
         { label: "#Connect", href: "#contact" }
       ]
     },
@@ -1642,40 +1733,6 @@ function animateHeader(){
     });
   }
 
-function initBlur(){
-  const layers = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--layers'))||5;
-  let b = document.querySelector('.blur'); 
-  if(!b){
-    b = document.createElement('div'); 
-    b.className='blur'; 
-    document.body.appendChild(b);
-  }
-  if(!b.children.length){
-    b.innerHTML = Array.from({length:layers},(_,i)=>`<div style="--i:${i+1}"></div>`).join('');
-  }
-
-  // Be sure scrubbing isn't smoothed by CSS transitions
-  b.style.transition = 'none';
-
-  const header = document.querySelector('.frame');
-  if(!window.ScrollTrigger || !header) return;
-
-  // Instead of toggling a class later, scrub the blur from 0→1 as the header scrolls out
-  gsap.fromTo(b, 
-    { opacity: 0 }, 
-    {
-      opacity: 1,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: header,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-        invalidateOnRefresh: true
-      }
-    }
-  );
-}
 
 
 function initCursor(){
@@ -1741,34 +1798,86 @@ function initCursor(){
 }
 
 
-  function initConfetti(){
-    if(prefersReducedMotion || !has('Physics2DPlugin')) return;
-    const sup = document.querySelector('.heading-chant .confetti-sup'); if(!sup) return;
-    const emitter = sup.querySelector('.emitter');
-    function particles(parent, qty, x, y, minA, maxA){
-      const colors = ['#FFFF04','#EA4C89','#892AB8','#4AF2FD'];
-      for(let i=0;i<qty;i++){
-        const angle = gsap.utils.random(minA,maxA);
-        const velocity = gsap.utils.random(70,140);
-        const dot = document.createElement('div'); dot.style.setProperty('--b', colors[(Math.random()*colors.length)|0]); parent.appendChild(dot);
-        gsap.set(dot,{opacity:0,x,y,scale:gsap.utils.random(.4,.8),rotation:gsap.utils.random(0,360)});
-        gsap.timeline({onComplete:()=>dot.remove()})
-          .to(dot,{opacity:1,duration:.06},0)
-          .to(dot,{duration:1.8,rotationX:`-=${gsap.utils.random(720,1440)}`,rotationZ:`+=${gsap.utils.random(720,1440)}`,physics2D:{angle,velocity,gravity:120}},0)
-          .to(dot,{opacity:0,duration:1},.8);
-      }
-    }
-    function burst(q=80,minA=-95,maxA=-35){
-      particles(emitter,q,0,0,minA,maxA);
-      gsap.fromTo(sup,{scale:.96},{scale:1,duration:.25,ease:'elastic.out(1,.6)'});
-    }
-    sup.addEventListener('click',()=>burst());
-    sup.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();burst();}});
-    if(matchMedia('(pointer:fine)').matches){
-      let last=0; const CD=700;
-      sup.addEventListener('mouseenter',()=>{const now=performance.now(); if(now-last<CD) return; last=now; burst(28,-100,-60);});
+function initConfetti(){
+  // Clickable superscript inside the About heading
+  const sup = document.querySelector('.heading-chant .confetti-sup'); 
+  if(!sup) return;
+
+  const emitter = sup.querySelector('.emitter');
+
+  // Require GSAP Physics2D (your script tag already includes it)
+  const physicsAvailable =
+    !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
+  if (!physicsAvailable) return;
+
+  // --- helpers ---
+  function particles(parent, qty, x, y, minA, maxA){
+    const colors = ['#FFFF04','#EA4C89','#892AB8','#4AF2FD'];
+    for(let i=0;i<qty;i++){
+      const angle = gsap.utils.random(minA,maxA);
+      const velocity = gsap.utils.random(70,140);
+      const dot = document.createElement('div');
+      dot.style.setProperty('--b', colors[(Math.random()*colors.length)|0]);
+      parent.appendChild(dot);
+
+      gsap.set(dot,{opacity:0,x,y,scale:gsap.utils.random(.4,.8),rotation:gsap.utils.random(0,360)});
+      gsap.timeline({onComplete:()=>dot.remove()})
+        .to(dot,{opacity:1,duration:.06},0)
+        .to(dot,{
+          duration:1.8,
+          rotationX:`-=${gsap.utils.random(720,1440)}`,
+          rotationZ:`+=${gsap.utils.random(720,1440)}`,
+          physics2D:{angle,velocity,gravity:120}
+        },0)
+        .to(dot,{opacity:0,duration:1},.8);
     }
   }
+  function burst(q=80,minA=-95,maxA=-35){
+    particles(emitter,q,0,0,minA,maxA);
+    gsap.fromTo(sup,{scale:.96},{scale:1,duration:.25,ease:'elastic.out(1,.6)'});
+  }
+
+  // --- manual triggers (always on) ---
+  sup.addEventListener('click',()=>burst());
+  sup.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();burst();}});
+
+  // Hover flair only when motion is OK + fine pointer
+  if(!prefersReducedMotion && matchMedia('(pointer:fine)').matches){
+    let last=0; const CD=700;
+    sup.addEventListener('mouseenter',()=>{
+      const now=performance.now(); if(now-last<CD) return; last=now; burst(28,-100,-60);
+    });
+  }
+
+  // --- auto trigger on arrival (first time only) ---
+  // respect reduced motion
+  if (prefersReducedMotion) return;
+
+  let firedAuto = false;
+  const auto = () => { if (firedAuto) return; firedAuto = true; burst(54, -100, -35); };
+
+  // 1) When scrolling down into the About section (once)
+  if (typeof ScrollTrigger !== 'undefined') {
+    const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
+    ScrollTrigger.create({
+      trigger: triggerEl,
+      start: 'top 65%',   // "arrive" point
+      once: true,         // fire one time
+      onEnter: auto
+    });
+  }
+
+  // 2) If the page loads already at #about (deep link) or it's already in view
+  //    wait a beat so layout settles and ScrollTrigger (if present) refreshes.
+  const isSupInView = () => {
+    const r = sup.getBoundingClientRect();
+    return r.top < innerHeight * 0.65 && r.bottom > 0;
+  };
+  if (location.hash === '#about' || isSupInView()) {
+    setTimeout(auto, 400);
+  }
+}
+
 
   function initDeadJump(){
     const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
@@ -1892,21 +2001,21 @@ function initCursor(){
   // Apply case-study timing BEFORE building ScrollTriggers
   tuneCaseStudyTiming();
 
-  preloadImages().then(()=>{
-    document.body.classList.remove('loading');
-    animateHeader();
-    animateGrids();
-    animateProcess();
-    animateStacks();
-    initBlur();
-    initCursor();
-    initConfetti();
-    initDeadJump();
-    initBackToTop();
-    a11yifyGridImages();
-    ScrollTrigger.refresh(true);
-    window.scrollTo(0,0);
-  });
+preloadImages().then(()=>{
+  document.body.classList.remove('loading');
+  animateHeader();
+  animateGrids();
+  animateProcess();
+  animateStacks();
+  initCursor();
+  initConfetti();        // never reached once the error above throws
+  initDeadJump();
+  initBackToTop();
+  a11yifyGridImages();
+  ScrollTrigger.refresh(true);
+  window.scrollTo(0,0);
+});
+
 
   // Keep timings fresh on breakpoint changes
   const mq = window.matchMedia('(max-width: 768px)');
@@ -1935,5 +2044,59 @@ function initDeadJump(){
 }
 
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Read tokens (with safe fallbacks)
+  const cs = getComputedStyle(document.documentElement);
+  const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
+  const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
+  const maskStop = +cs.getPropertyValue('--mask-stop')?.trim() || 35;
+
+  // Ensure .blur exists
+  let blur = document.querySelector('.blur');
+  if (!blur) {
+    blur = document.createElement('div');
+    blur.className = 'blur';
+    document.body.appendChild(blur);
+  }
+
+  // Build slices if missing; compute values in JS (no CSS trig)
+  if (!blur.children.length) {
+    let html = '';
+    for (let i = 1; i <= layers; i++) {
+      const t     = i / layers;
+      const blurV = Math.sin((1 - t) * Math.PI / 2) * blurMax; // px
+      const stop  = Math.sin(t * Math.PI / 2) * maskStop;      // %
+      const start = (100 - stop).toFixed(4) + '%';             // gradient start
+      html += `<div style="--i:${i}; --blur:${blurV.toFixed(3)}px; --maskStart:${start}"></div>`;
+    }
+    blur.innerHTML = html;
+  }
+
+  const header = document.querySelector('.frame');
+  const show = () => blur.classList.add('is-visible');
+  const hide = () => blur.classList.remove('is-visible');
+
+  // Toggle visibility when header scrolls away
+  if (window.ScrollTrigger && header) {
+    ScrollTrigger.create({
+      trigger: header,
+      start: 'bottom top',
+      onEnter: show,
+      onEnterBack: hide,
+      onLeaveBack: hide
+    });
+  } else if (header) {
+    const io = new IntersectionObserver(([entry]) => entry.isIntersecting ? hide() : show(), { threshold: 0 });
+    io.observe(header);
+  }
+
+  // If we landed below the header already, show immediately
+  if (header && header.getBoundingClientRect().bottom <= 0) show();
+});
+</script>
+
+
+
 </body>
 </html>

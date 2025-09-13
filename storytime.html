@@ -179,9 +179,36 @@
 
 </main> 
   <script>
-  // ============================================================
-  // CONTENT MODEL — all copy, links, and media live here
-  // ============================================================
+/* app.js — single file build (CONTENT + RENDER + ANIMATIONS + TIMING FIX) */
+
+/* -----------------------------
+   Setup
+----------------------------- */
+document.documentElement.classList.add('js');
+
+(function () {
+  const has = (k) => typeof window[k] !== 'undefined';
+  if (has('ScrollTrigger')) {
+    if (has('Physics2DPlugin')) {
+      gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
+    } else {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+    ScrollTrigger.normalizeScroll(true);
+  }
+
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  /* -----------------------------
+     CONTENT MODEL
+  ----------------------------- */
   const CONTENT = {
     header: {
       title: "UX is dead↓",
@@ -425,24 +452,13 @@
       linkedin: "https://www.linkedin.com/in/zackgort/"
     }
   };
-  </script>
 
-  <script>
-  // ============================================================
-  // RENDERER — builds DOM from CONTENT (simple placeholders only)
-  // ============================================================
-  document.documentElement.classList.add('js');
-
-  const $ = (s, r=document) => r.querySelector(s);
-  const el = (tag, cls, html) => {
-    const n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (html != null) n.innerHTML = html;
-    return n;
-  };
-
+  /* -----------------------------
+     RENDERER
+  ----------------------------- */
   function renderApp() {
     const app = $('#app');
+    if (!app) return;
 
     // HEADER / FRAME
     const header = el('header','frame');
@@ -450,9 +466,11 @@
       <h2 class="frame__title ux-dead-jump">${CONTENT.header.title}</h2>
       <div class="frame__subline type-tiny">
         <span>${CONTENT.header.subline}</span>
-        <nav class="frame__links flex-line">${CONTENT.header.links.map(l =>
-          `<a href="${l.href}" ${l.href.startsWith('#')?'':`target="_blank" rel="noopener"`}>${l.label}</a>`
-        ).join('')}</nav>
+        <nav class="frame__links flex-line">
+          ${CONTENT.header.links.map(l =>
+            `<a href="${l.href}" ${l.href.startsWith('#')?'':`target="_blank" rel="noopener"`}>${l.label}</a>`
+          ).join('')}
+        </nav>
       </div>
       <nav class="frame__tags flex-line type-tiny">
         ${CONTENT.header.tags.map(t => `<a href="${t.href}" ${t.settle?`data-settle="${t.settle}"`:''}>${t.label}</a>`).join('')}
@@ -476,7 +494,7 @@
     `;
     app.appendChild(about);
 
-    // HERO MOSAIC (data-grid-seventh for spacing that follows)
+    // HERO MOSAIC
     const hero = el('section','content content--full content--padded');
     hero.innerHTML = `
       <div class="grid grid--column" data-grid-seventh>
@@ -500,7 +518,7 @@
     `;
     app.appendChild(hero);
 
-    // SKILLS (3-up)
+    // SKILLS
     const skills = el('section','content content--padded');
     skills.id = 'skills';
     skills.innerHTML = `
@@ -570,7 +588,7 @@
     `;
     app.appendChild(finHero);
 
-    // FINTECH — PROCESS (intro + details 2-up)
+    // FINTECH — PROCESS
     const finProc = el('section','content content--padded'); finProc.id='fintech-process';
     const finIntro = `
       <section class="project project--intro">
@@ -590,15 +608,23 @@
     finProc.innerHTML = finIntro + finDetails;
     app.appendChild(finProc);
 
-    // FINTECH — DISCOVERY
-    const finDisc = el('section','content content--full content--cutoff'); finDisc.id='fintech-discovery';
-    finDisc.innerHTML = `
-      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-        ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-      </div>`;
-    app.appendChild(finDisc);
+// FINTECH — DISCOVERY
+document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
+  const end = calcEndPx(grid, {
+    baseVH: { desktop: 150, mobile: 110 },
+    perTileVH: { desktop: 6, mobile: 4 }
+  });
+  setTiming(grid, {
+    mode: 'ninth',
+    endDesk: end,
+    endMob: end,
+    scrubDesk: 0.45,
+    scrubMob: 0.32
+  });
+  grid.dataset.anticipatePin = '0';   // 👈 prevent early pin overlap
+});
 
-    // FINTECH — INSIGHT (pair)
+    // FINTECH — INSIGHT
     const finInsight = el('section','content content--padded'); finInsight.id='fintech-insight';
     finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
       <section class="project project--details ${i%2===0?'project--left':'project--right'}">
@@ -694,27 +720,17 @@
     app.appendChild(s);
   }
 
-  renderApp();
-  </script>
-
-  <script>
-  // ============================================================
-  // BEHAVIOR — smooth scroll, animations, confetti, blur, cursor
-  // (ported from your working JS; now runs against dynamic DOM)
-  // ============================================================
-  gsap.registerPlugin(ScrollTrigger);
-  ScrollTrigger.normalizeScroll(true);
-  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // Lenis
+  /* -----------------------------
+     BEHAVIOR
+  ----------------------------- */
   function initSmooth() {
+    if (!has('Lenis')) return;
     window.lenis = new Lenis({ lerp: 0.15 });
-    window.lenis.on('scroll', ScrollTrigger.update);
+    window.lenis.on('scroll', () => ScrollTrigger.update());
     gsap.ticker.add((t)=>window.lenis.raf(t*1000));
     gsap.ticker.lagSmoothing(0);
   }
 
-  // Hash scrolling (Lenis-aware) + settle support
   function enableHashScroll() {
     document.addEventListener('click',(e)=>{
       const a = e.target.closest('a[href^="#"]'); if(!a) return;
@@ -723,11 +739,12 @@
       const target = document.querySelector(id); if(!target) return;
       e.preventDefault();
 
-      // If settle=end, try to scroll to end of pinned sequence
       const settle = a.dataset.settle;
-      if(settle==='end'){
-        const st = ScrollTrigger.getAll().find(st => st && (st.pin===target || st.trigger===target || target.contains(st.pin) || target.contains(st.trigger)));
-        if(st && isFinite(st.end)){
+      if (settle === 'end') {
+        const st = ScrollTrigger.getAll().find(st =>
+          st && (st.pin===target || st.trigger===target || target.contains(st.pin) || target.contains(st.trigger))
+        );
+        if (st && isFinite(st.end)) {
           const y = st.end + 2;
           return window.lenis ? window.lenis.scrollTo(y,{duration:1.1}) : window.scrollTo({top:y,behavior:'smooth'});
         }
@@ -738,81 +755,125 @@
     });
   }
 
-  // Preload backgrounds
   const preloadImages = (sel='.grid__img, .grid__img-inner') =>
     new Promise(res => imagesLoaded(document.querySelectorAll(sel), { background:true }, res));
 
-  // Grid animator (same engine, simplified call)
-  function animateGrids(){
-    const modes = {
-      second: { endDesk:'+=250%',endMob:'+=140%',scrubDesk:.5,scrubMob:.25 },
-      fifth:  { endDesk:'+=250%',endMob:'+=150%',scrubDesk:.3,scrubMob:.2  },
-      sixth:  { endDesk:'+=180%',endMob:'+=120%',scrubDesk:.6,scrubMob:.4  },
-      ninth:  { endDesk:'+=200%',endMob:'+=120%',scrubDesk:true,scrubMob:true }
-    };
-    const isMobile = matchMedia('(max-width:768px)').matches;
+  /* ------- TIMELINE ENGINE (reads data-* overrides) ------- */
+function animateGrids(){
+  const mq = matchMedia('(max-width:768px)');
+  const isMobile = () => mq.matches;
 
-    const pairs = [
-      ['[data-grid-second]','second'],
-      ['[data-grid-fifth]','fifth'],
-      ['[data-grid-sixth]','sixth'],
-      ['[data-grid-ninth]','ninth']
-    ];
+  const modes = {
+    second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
+    fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
+    sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
+    ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
+  };
 
-    pairs.forEach(([sel,mode])=>{
-      document.querySelectorAll(sel).forEach(grid=>{
-        const imgs = grid.querySelectorAll('.grid__img');
-        const items = grid.querySelectorAll('.grid__item');
-        if(!imgs.length) return;
+  function defaultEndPx(mode, grid){
+    const count = grid.querySelectorAll('.grid__img').length || 6;
+    const section = grid.closest('section') || grid.parentNode;
+    const hasCaption = !!section.querySelector('.content__title');
+    const cfg = ({
+      second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+      fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
+      sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
+      ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
+    })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
 
-        if(prefersReducedMotion){
-          gsap.from([...imgs,...items],{
-            autoAlpha:0,y:20,stagger:.05,duration:.4,ease:'power1.out',
-            scrollTrigger:{trigger:grid,start:'top 85%'}
-          });
-          return;
-        }
-
-        const section = grid.closest('section') || grid.parentNode;
-        const cfg = modes[mode];
-        const end = isMobile ? cfg.endMob : cfg.endDesk;
-        const scrub = isMobile ? cfg.scrubMob : cfg.scrubDesk;
-
-        const tl = gsap.timeline({
-          defaults: { ease: (mode==='sixth'?'none':'power3') },
-          scrollTrigger: { trigger: section, start:'top top', end, pin: section, scrub, pinSpacing:true, invalidateOnRefresh:true }
-        });
-
-        if(mode==='second'){
-          const mid = Math.floor(imgs.length/2);
-          tl.from(imgs,{
-            stagger:{amount:.3,from:'center'},
-            y:()=>innerHeight,
-            transformOrigin:'50% 0%',
-            rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(isMobile?1.5:3)
-          }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
-        }
-        if(mode==='fifth'){
-          tl.set(grid,{perspective:1000})
-            .from(imgs,{
-              stagger:{amount:.4,from:'random',grid:[4,9]},
-              y:()=>innerHeight,rotationX:isMobile?-40:-70,transformOrigin:'50% 0%',z:isMobile?-450:-900,autoAlpha:0
-            });
-        }
-        if(mode==='sixth'){
-          tl.from(imgs,{stagger:{amount:.25,from:'edges',grid:[3,3]},scale:isMobile?.82:.7,autoAlpha:0})
-            .from(grid,{scale:isMobile?.92:.85,skewY:isMobile?1.5:3},0);
-        }
-        if(mode==='ninth'){
-          const caption = section.querySelector('.content__title');
-          tl.from(imgs,{transformOrigin:'100% -450%',stagger:.07,scaleX:1.02,skewX:isMobile?7:15,xPercent:isMobile?18:50,rotation:isMobile?-5:-10,autoAlpha:0});
-          if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
-        }
-      });
-    });
+    const tilesOverMin = Math.max(0, count - 4);
+    const vh = (isMobile()?cfg.base.m:cfg.base.d)
+             + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
+             + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
+    return `+=${Math.round(window.innerHeight * (vh/100))}`;
   }
+  const parseScrub = (v, fb) => {
+    if(v==null || v==='') return fb;
+    if(v==='true') return true;
+    if(v==='false') return false;
+    const n = parseFloat(v); return isNaN(n) ? fb : n;
+  };
 
-  // Header motion
+  // ✅ DOM order
+  const grids = [...document.querySelectorAll(
+    '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+  )];
+
+  grids.forEach(grid=>{
+    const imgs  = grid.querySelectorAll('.grid__img');
+    const items = grid.querySelectorAll('.grid__item');
+    if(!imgs.length && !items.length) return;
+
+    const section = grid.closest('section') || grid.parentNode;
+
+    // infer default mode from the data-* present
+    let defaultMode = grid.hasAttribute('data-grid-second') ? 'second' :
+                      grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+                      grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+
+    const d = grid.dataset;
+    const mode = d.mode || defaultMode;
+
+    const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+
+    const base = modes[mode] || modes.ninth;
+    const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+    const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+
+    // ↓ default: no early pin for “gallery sweep” styles to avoid overlap
+    const anticipatePin = (d.anticipatePin != null)
+      ? +d.anticipatePin
+      : (mode==='second' || mode==='fifth' ? 1 : 0);
+
+    const tl = gsap.timeline({
+      defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end,
+        pin: section,
+        scrub,
+        pinSpacing: true,
+        anticipatePin,
+        invalidateOnRefresh: true
+      }
+    });
+
+    if(mode==='second'){
+      const mid = Math.floor(imgs.length/2);
+      tl.from(imgs,{
+        stagger:{amount:.3,from:'center'},
+        y:()=>innerHeight,
+        transformOrigin:'50% 0%',
+        rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(isMobile()?1.5:3)
+      }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
+    }
+    if(mode==='fifth'){
+      tl.set(grid,{perspective:1000}).from(imgs,{
+        stagger:{amount:.4,from:'random',grid:[4,9]},
+        y:()=>innerHeight, rotationX:isMobile()?-40:-70,
+        transformOrigin:'50% 0%', z:isMobile()?-450:-900, autoAlpha:0
+      });
+    }
+    if(mode==='sixth'){
+      tl.from(imgs,{
+        stagger:{amount:.25,from:'edges',grid:[3,3]},
+        scale:isMobile()?.82:.7, autoAlpha:0
+      }).from(grid,{scale:isMobile()?.92:.85,skewY:isMobile()?1.5:3},0);
+    }
+    if(mode==='ninth'){
+      const caption = section.querySelector('.content__title');
+      tl.from(imgs,{
+        transformOrigin:'100% -450%',
+        stagger:.07, scaleX:1.02, skewX:isMobile()?7:15,
+        xPercent:isMobile()?18:50, rotation:isMobile()?-5:-10, autoAlpha:0
+      });
+      if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
+    }
+  });
+}
+
+
   function animateHeader(){
     const frame = document.querySelector('.frame');
     const title = frame?.querySelector('.frame__title');
@@ -827,7 +888,6 @@
        .to(title,{xPercent:-80},0);
   }
 
-  // Process sections reveal
   function animateProcess(){
     document.querySelectorAll('[id$="-process"]').forEach(process=>{
       const intro = process.querySelector('.project--intro');
@@ -842,7 +902,6 @@
     });
   }
 
-  // Stacked galleries
   function animateStacks(){
     document.querySelectorAll('.stacked-section [data-stack]').forEach(section=>{
       const frames = section.querySelectorAll('.stacked-img');
@@ -858,7 +917,6 @@
     });
   }
 
-  // Blur overlay layers
   function initBlur(){
     const layers = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--layers'))||5;
     let b = document.querySelector('.blur'); if(!b){ b = document.createElement('div'); b.className='blur'; document.body.appendChild(b); }
@@ -877,7 +935,6 @@
     }
   }
 
-  // Gooey cursor
   function initCursor(){
     if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
     document.documentElement.classList.add('has-cursor');
@@ -911,10 +968,8 @@
     requestAnimationFrame(tick);
   }
 
-  // Confetti on superscript
   function initConfetti(){
-    if(prefersReducedMotion) return;
-    gsap.registerPlugin(Physics2DPlugin);
+    if(prefersReducedMotion || !has('Physics2DPlugin')) return;
     const sup = document.querySelector('.heading-chant .confetti-sup'); if(!sup) return;
     const emitter = sup.querySelector('.emitter');
     function particles(parent, qty, x, y, minA, maxA){
@@ -942,7 +997,6 @@
     }
   }
 
-  // "UX is dead" → jump to next section
   function initDeadJump(){
     const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
     const sections = Array.from(document.querySelectorAll('main > section'));
@@ -959,7 +1013,6 @@
     });
   }
 
-  // Scroll-to-top button behavior
   function initBackToTop(){
     const el = document.querySelector('.scroll-downs'); if(!el) return;
     const toTop = (e)=>{e.preventDefault(); window.lenis ? window.lenis.scrollTo(0,{duration:1}) : window.scrollTo({top:0,behavior:'smooth'})};
@@ -976,9 +1029,94 @@
     });
   }
 
-  // Boot
+  /* -----------------------------
+     CASE STUDY TIMING OVERRIDES
+     (applied BEFORE creating ScrollTriggers)
+  ----------------------------- */
+  function tuneCaseStudyTiming() {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const isMobile = () => mq.matches;
+
+    function setTiming(grid, { endDesk, endMob, scrubDesk, scrubMob, mode }) {
+      if (mode) grid.dataset.mode = mode;
+      if (endDesk) grid.dataset.endDesktop = endDesk;
+      if (endMob)  grid.dataset.endMobile  = endMob;
+      if (scrubDesk != null) grid.dataset.scrubDesktop = scrubDesk;
+      if (scrubMob  != null) grid.dataset.scrubMobile  = scrubMob;
+    }
+
+    function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
+      const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
+      const vh = isMobile() ? baseVH.mobile : baseVH.desktop;
+      const per = isMobile() ? perTileVH.mobile : perTileVH.desktop;
+      const boost = captionBoostVH && grid.closest('section')?.querySelector('.content__title') ?
+        (isMobile() ? captionBoostVH.mobile : captionBoostVH.desktop) : 0;
+      const tilesOverMin = Math.max(0, tiles - minTiles);
+      const totalVH = vh + tilesOverMin * per + boost;
+      const px = Math.round(window.innerHeight * (totalVH / 100));
+      return `+=${px}`;
+    }
+
+    // BNY — HERO (use "sixth" feel, steadier scrubs)
+    document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 120, mobile: 90 },
+        perTileVH: { desktop: 10, mobile: 7 },
+        captionBoostVH: { desktop: 12, mobile: 8 }
+      });
+      setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
+    });
+
+    // BNY — DISCOVERY (lateral sweep, numeric scrub)
+    document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 150, mobile: 110 },
+        perTileVH: { desktop: 6, mobile: 4 }
+      });
+      setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
+    });
+
+    // GNC — HERO
+    document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 135, mobile: 95 },
+        perTileVH: { desktop: 8, mobile: 6 },
+        captionBoostVH: { desktop: 10, mobile: 6 }
+      });
+      setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.40, scrubMob: 0.28 });
+    });
+
+    // GNC — DISCOVERY
+    document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 160, mobile: 110 },
+        perTileVH: { desktop: 5.5, mobile: 4.5 }
+      });
+      setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.50, scrubMob: 0.35 });
+    });
+  }
+
+  /* -----------------------------
+     BOOT
+  ----------------------------- */
+  // minimal shell if needed
+  if (!document.querySelector('#app')) {
+    const main = document.createElement('main'); main.id = 'app';
+    document.body.appendChild(main);
+  }
+  if (!document.querySelector('.blur')) {
+    const b = document.createElement('div'); b.className = 'blur'; document.body.appendChild(b);
+  }
+  if (!document.querySelector('#panel-root')) {
+    const p = document.createElement('div'); p.id = 'panel-root'; document.body.appendChild(p);
+  }
+
+  renderApp();
   initSmooth();
   enableHashScroll();
+
+  // Apply case-study timing BEFORE building ScrollTriggers
+  tuneCaseStudyTiming();
 
   preloadImages().then(()=>{
     document.body.classList.remove('loading');
@@ -996,7 +1134,16 @@
     window.scrollTo(0,0);
   });
 
+  // Keep timings in sync on resize / breakpoint changes
+  const mq = window.matchMedia('(max-width: 768px)');
+  const onBPChange = () => { tuneCaseStudyTiming(); ScrollTrigger.refresh(); };
+  if (mq.addEventListener) mq.addEventListener('change', onBPChange);
+  else if (mq.addListener) mq.addListener(onBPChange);
+
   addEventListener('resize', ()=>ScrollTrigger.refresh());
-  </script>
+})();
+
+</script>
+
 </body>
 </html>

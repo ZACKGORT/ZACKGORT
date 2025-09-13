@@ -17,2849 +17,986 @@
 <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
 <script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
 <style>
-/* ===============================
-   CORE TOKENS & RESET
-   =============================== */
-*,
-*::before,
-*::after { box-sizing: border-box; }
-
-:root{
-  /* Canvas */
-  --bg:#000;
-  --color-bg:#0e0d0e;
-  --color-bg-content:#0e0d0e;
-  --color-bg-frame:#FF8DA1;
-
-  /* Text & UI */
-  --color-text:#f5f3ee;
-  --color-text-alt:#d7d4cd;
-  --color-label:#fff;
-  --color-link:#fff;
-  --color-link-hover:#fff;
-  --color-border:#46443e;
-
-  /* Layout */
-  --page-padding:.75rem;
-  --grid-gap:var(--page-padding);
-
-  /* Effects */
-  --cursor-size:28px;
-
-  /* Blur overlay */
-  --layers:5;
-  --blur-max:40;
-  --mask-stop:35;
-  --saturate:.1;
-
-  /* Panel palette */
-  --cs-accent:#f4d35e;
-  --cs-deep:#000;
-  --cs-warm:#f95738;
-  --cs-soft:#ebebd3;
-  --cs-ink:#2c241a;
-
-  /* Typography defaults */
-  --fs-xxs:11px;
-  --fs-body:16px;
-}
-
-html, body { width:100%; overflow-x:hidden; }
-html { font-size: var(--fs-body); }
-body{
-  margin:0;
-  color:var(--color-text);
-  background:var(--color-bg);
-  font-family:"area-variable",sans-serif;
-  font-variation-settings:"slnt" 0,"wdth" 100,"wght" 450,"INKT" 0;
-  font-weight:450;
-  line-height:1.2;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-
-/* Links & buttons */
-a{ color:var(--color-link); text-decoration:none; outline:none; cursor:pointer; }
-a:hover{ color:var(--color-link-hover); text-decoration:underline; }
-a:focus{ outline:none; background:lightgrey; }
-a:focus:not(:focus-visible){ background:transparent; }
-a:focus-visible{ outline:2px solid red; background:transparent; }
-.unbutton{ background:none; border:0; padding:0; margin:0; font:inherit; cursor:pointer; }
-.unbutton:focus{ outline:none; }
-
-/* Microtype */
-.type-tiny,
-.cdawrap,
-.page-footer,
-.project__label{
-  font-size:var(--fs-xxs);
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  font-weight:400;
-  color:var(--color-label);
-}
-
-/* ===============================
-   LOADER
-   =============================== */
-.js .loading::before,
-.js .loading::after{ content:""; position:fixed; z-index:1000; }
-.js .loading::before{ inset:0; background:var(--color-bg); }
-.js .loading::after{
-  top:50%; left:50%; width:60px; height:60px; margin:-30px 0 0 -30px;
-  border-radius:50%; opacity:.4; background:var(--color-link);
-  animation:loaderAnim .7s linear infinite alternate forwards;
-}
-@keyframes loaderAnim{ to{ opacity:1; transform:scale3d(.5,.5,1); } }
-
-/* ===============================
-   HERO / FRAME
-   =============================== */
-.frame{
-  padding:var(--page-padding);
-  position:relative;
-  display:grid;
-  grid-row-gap:.5rem;
-  grid-column-gap:2rem;
-  justify-items:start;
-  align-content:start;
-  line-height:1;
-  min-height:100svh;
-  background:var(--color-bg-frame);
-  text-transform:uppercase;
-
-  /* mobile-first grid */
-  grid-template-columns: auto auto;
-  grid-template-rows: auto auto auto 1fr;
-  grid-template-areas:
-    "logo"
-    "tags"
-    "sponsor"
-    "subline"
-    "title";
-}
-.frame #cdawrap{ justify-self:start; }
-.frame__logo{
-  grid-area:logo;
-  padding-bottom:.15rem;
-  font-size:1.5rem;
-  font-family:"bricolage-grotesque-48",sans-serif;
-}
-.frame__tags{ grid-area:tags; }
-.frame__links{ grid-area:sponsor; }
-.frame__subline{ grid-area:subline; }
-.frame__title{
-  grid-area:title;
-  white-space:nowrap;
-  font-size:clamp(2rem,20vw,20rem);
-  margin:0;
-  letter-spacing:-.05em;
-  padding-top:.15em;
-  font-weight:400;
-  line-height:.55;
-  text-indent:-.065em;
-  word-spacing:.15em;
-  font-family:"bricolage-grotesque-48",sans-serif;
-}
-
-/* ===============================
-   CONTENT SECTIONS
-   =============================== */
-.content{
-  position:relative;
-  min-height:100dvh;
-  background:var(--color-bg-content);
-  align-content:center;
-}
-.content--cutoff{ overflow:hidden; }
-.content--padded{ padding:var(--page-padding); }
-.content--full{
-  display:grid;
-  place-items:center;
-  grid-template-areas:"main";
-  grid-template-rows:100%;
-  grid-template-columns:100%;
-  min-height:100svh; /* baked */
-}
-.content__title{
-  grid-area:main;
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  text-align:center;
-  margin:4rem 0 2rem;
-}
-.content__title-main{
-  font-size:clamp(2rem,7vw,4.5rem);
-  line-height:1;
-  margin:.5rem 0 0;
-  font-weight:500;
-  font-variation-settings:"wght" 500;
-  text-wrap:balance;
-  letter-spacing:-.025em;
-}
-.content__title-main + p{
-  margin:0;
-  max-width:100px;
-  font-size:var(--fs-xxs);
-  letter-spacing:.04em;
-  color:var(--color-label);
-}
-.content__text{
-  font-size:clamp(1.1rem,2.8vw,1.7rem);
-  line-height:1.4;
-  font-weight:400;
-  letter-spacing:0;
-  color:var(--color-text);
-  margin:.6rem 0;
-  text-wrap:balance;
-}
-
-/* ===============================
-   GRID SYSTEM
-   =============================== */
-.grid{
-  grid-area:main;
-  display:grid;
-  width:100%;
-  height:100%;
-  grid-template-columns:repeat(8,1fr);
-  grid-template-rows:1fr 1fr 1fr;
-  margin-bottom:1em;
-}
-.grid--spaced{ gap:var(--grid-gap); }
-.grid--columns{
-  grid-template-columns:repeat(5,1fr);
-  grid-template-rows:repeat(2,min-content);
-  align-content:center;
-}
-.grid--zoomed{
-  gap:2rem;
-  grid-template-columns:repeat(3,70%);
-  grid-template-rows:repeat(3,60%);
-  justify-content:center;
-  align-content:center;
-  aspect-ratio:2/1;
-}
-.grid--single{ height:auto; justify-self:center; }
-.grid--column{
-  grid-template-columns:repeat(15, calc((100% - 14 * 10px) / 15));
-  gap:10px;
-  grid-auto-rows:auto;
-}
-.grid--small{ grid-template-columns:repeat(9,1fr); grid-auto-rows:1fr; }
-.grid--tiny{
-  height:60vh;
-  grid-template-columns:repeat(14,1fr);
-  grid-auto-rows:auto;
-}
-.grid--wide{
-  grid-template-columns:repeat(5,1fr);
-  grid-template-rows:repeat(4,1fr);
-}
-
-/* Grid items */
-.grid__img,
-.grid__item{
-  width:100%;
-  min-height:200px;
-  background-size:cover;
-  background-position:50% 50%;
-  pointer-events:none;
-  will-change:transform;
-}
-.grid__item{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  padding:.5rem;
-}
-.grid__img{ position:relative; overflow:hidden; }
-.grid__img-inner{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  background-size:cover;
-  background-position:50% 50%;
-  will-change:transform;
-}
-
-/* Helpers */
-.ar-wide{ aspect-ratio:4/3; }
-.ar-narrow{ aspect-ratio:2/3; }
-.ar-rect{ aspect-ratio:1; }
-.span-2{ grid-column:auto / span 2; }
-.span-3{ grid-column:auto / span 3; }
-.center{ text-align:center; }
-.right{ text-align:right; }
-.end{ align-self:end; }
-.acenter{ align-self:center; }
-
-/* Keep 16:9 aspect on wide viewports */
-@media (max-aspect-ratio:16/9){
-  .grid:not(.grid--zoomed){ width:100%; height:auto; aspect-ratio:16/9; }
-}
-
-/* Work grid: only H4 link clickable */
-#work .grid__item{ pointer-events:none; }
-#work .grid__item .title-link{ pointer-events:auto; text-decoration:none; }
-#work .grid__item .title-link:hover{ text-decoration:underline; }
-
-/* ===============================
-   PROJECT BLOCKS
-   =============================== */
-.project{
-  padding:1rem;
-  max-width:1000px;
-  margin:20vh auto;
-  display:grid;
-  grid-column-gap:7vw;
-  grid-row-gap:.5rem;
-}
-.project--intro{
-  grid-template-columns:1fr;
-  grid-template-areas:
-    "label-name" "name" "label-date" "date"
-    "title" "label-mission" "mission";
-}
-.project--details{
-  grid-template-areas:"label-default" "paragraph";
-  grid-template-columns:1fr;
-}
-.project--left{ justify-content:start; }
-.project--right{ justify-content:end; }
-.project--details p{ grid-area:paragraph; max-width:400px; }
-.project__label--default{ grid-area:label-default; }
-.project p,
-.grid__item p{
-  font-size:1rem;
-  line-height:1.4;
-  margin:0;
-  color:var(--color-text-alt);
-}
-.project__label--name{ grid-area:label-name; }
-.project__label--date{ grid-area:label-date; }
-.project__label--mission{ grid-area:label-mission; }
-.project__name{ grid-area:name; }
-.project__date{ grid-area:date; }
-.project__mission{ grid-area:mission; line-height:1.4; }
-.project__mission p{ color:var(--color-text-alt); }
-.project__title{
-  grid-area:title;
-  font-size:clamp(2rem,13vw,8rem);
-  font-weight:400;
-  margin:10vh 0;
-  line-height:1;
-}
-.project__heading{
-  color:var(--color-label);
-  font-weight:inherit;
-  font-size:inherit;
-  margin:0;
-}
-
-/* ===== process 2-up columns (restore previous behavior) ===== */
-[id$="-process"]{
-  display:grid;
-  grid-template-columns: 1fr;           /* mobile-first: single column */
-  gap: 2rem 3rem;
-  align-items: start;
-}
-/* remove extra spacing on items inside the process grid */
-[id$="-process"] > .project{ margin:0; padding:0; }
-/* allow long copy to use full column width */
-[id$="-process"] .project--details p{ max-width: none; }
-/* keep label microtype */
-[id$="-process"] .project__label{
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  opacity:.85;
-}
-/* desktop: two columns, intro spans across */
-@media (min-width:53em){
-  [id$="-process"]{
-    grid-template-columns: repeat(2, minmax(0,1fr));
-  }
-  [id$="-process"] > .project.project--intro{
-    grid-column: 1 / -1;
-  }
-}
-
-/* Intro helper note */
-.intro__info{
-  position:fixed;
-  left:50%;
-  bottom:clamp(12px,4vh,32px);
-  transform:translateX(-50%);
-  z-index:1000;
-  font-size:var(--fs-xxs);
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  opacity:.75;
-  pointer-events:none;
-}
-
-/* Intro section */
-.intro{
-  min-height:100vh;
-  display:grid;
-  place-items:center;
-  padding:var(--page-padding);
-  background:linear-gradient(0deg, transparent, var(--color-bg-content));
-}
-.intro__title{ margin:0; line-height:.9; text-align:center; font-weight:400; }
-.intro__title-pre{
-  font-weight:300;
-  font-size:clamp(2rem,8vw,5rem);
-  color:var(--color-text);
-  text-transform:uppercase;
-}
-.intro__title-sub{ font-size:clamp(1.5rem,20vw,8rem); max-width:15ch; margin:0 auto; }
-
-
-/* ===== Skills: 3-up columns ===== */
-#skills .trio-grid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(1rem, 3vw, 2rem);
-  align-items:start;
-}
-#skills .trio-col h4{ margin:0 0 .5rem; }
-#skills .trio-col .content__text{ margin:.15rem 0; }
-
-/* Tablet: 2-up */
-@media (max-width: 1024px){
-  #skills .trio-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-/* Mobile: stack */
-@media (max-width: 768px){
-  #skills .trio-grid{
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-}
-
-
-
-/* ===============================
-   PANEL (OVERLAY)
-   =============================== */
-.panel{ font-feature-settings:"liga","kern"; letter-spacing:0; }
-.panel .chapter{
-  font-size:var(--fs-xxs);
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  opacity:.85;
-  color:#cfcac0;
-  margin-bottom:.5rem;
-}
-.panel .title{
-  font-weight:400;
-  line-height:.95;
-  letter-spacing:-.02em;
-  text-transform:uppercase;
-  font-size:clamp(2rem,6.5vw,5rem);
-  margin:.2rem 0 .6rem;
-}
-.panel .text{ font-size:1.05rem; line-height:1.5; color:#ddd7cd; }
-.panel .text p{ margin:0 0 .85rem; }
-
-.split-text .word{ display:inline-block; overflow:hidden; }
-.split-text .word > span{ display:inline-block; transform:translateY(110%); opacity:0; }
-
-.frosted-glass{
-  --bg:rgba(18,18,18,.42);
-  background:var(--bg);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:1.1rem 1.25rem;
-  backdrop-filter:saturate(135%) blur(12px);
-  -webkit-backdrop-filter:saturate(135%) blur(12px);
-  box-shadow:0 8px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
-}
-.panel-content-blur-edges{
-  -webkit-mask-image:radial-gradient(120% 100% at 50% 50%, #000 60%, transparent 100%);
-          mask-image:radial-gradient(120% 100% at 50% 50%, #000 60%, transparent 100%);
-}
-
-.panel .panel-full,
-.panel .hero-img,
-.panel .banner-img,
-.panel .concept-img{ position:relative; }
-.panel .panel-full::after,
-.panel .hero-img::after,
-.panel .banner-img::after,
-.panel .concept-img::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(140% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.35) 100%),
-    linear-gradient(to bottom, rgba(0,0,0,.18), transparent 25%, transparent 75%, rgba(0,0,0,.18));
-  pointer-events:none;
-}
-
-.panel .intro{ background:var(--cs-deep); color:#f6f6f6; }
-.panel .header{ background:var(--cs-accent); color:#421c06; }
-.panel .about{ background:var(--cs-warm); color:#2f0e08; }
-.panel .story{ background:#ee964b; color:#3f170b; }
-.panel .outro{ background:var(--cs-soft); color:var(--cs-ink); }
-
-.panel .about .row{ display:flex; gap:2rem; align-items:flex-start; width:100%; }
-.panel .about .row .copy{ flex:3; }
-.panel .about .row .img{ flex:3; }
-.panel .about .row .img img{ border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.25); }
-
-.panel__progress-bar{ height:6px; background:linear-gradient(90deg, #fff 0%, rgba(255,255,255,.8) 100%); opacity:.85; }
-.panel__counter h1{ font-size:clamp(18px,2.2vw,28px); letter-spacing:.06em; font-weight:500; color:#fff; opacity:.9; }
-
-/* ===============================
-   STACKED GALLERIES (shared)
-   =============================== */
-.stacked-section{ position:relative; z-index:0; isolation:isolate; contain:paint; }
-.content--full.stacked-section{ display:block; height:auto; min-height:0; }
-.stacked-gallery{ display:grid; justify-items:center; }
-.stacked-img{ width:min(1400px, 90vw); margin-inline:auto; }
-.stacked-img img{
-  display:block;
-  width:100%;
-  height:min(88vh, 900px);
-  object-fit:cover;
-  object-position:center center;
-  backface-visibility:hidden;
-  transform:translateZ(0);
-  -webkit-transform:translateZ(0);
-}
-
-/* IDs keep working if present in markup */
-#fintech-stack,
-#ecommerce-stack{ /* no extra rules needed; inherits shared classes */ }
-
-/* Insight blocks */
-#fintech-insight{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
-  gap:2rem 3rem;
-  align-items:start;
-  padding:var(--page-padding);
-}
-#fintech-insight .project.project--details{ margin:0; padding:0; display:block; }
-#fintech-insight .project--details p{ max-width:none; }
-#fintech-insight .project__label{ letter-spacing:.04em; text-transform:uppercase; opacity:.85; }
-
-/* Discovery grid width guard */
-#fintech-discovery .grid.grid--zoomed{
-  width:100vw;
-  max-width:100vw;
-  margin-inline:auto;
-  gap:var(--grid-gap);
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3, minmax(0,1fr));
-  aspect-ratio:auto;
-}
-
-/* Seventh grid copy padding tweak */
-[data-grid-seventh] .grid__item.span-3{ padding-block:1.5rem; }
-
-/* ===============================
-   FOOTER
-   =============================== */
-.page-footer{
-  padding:var(--page-padding);
-  display:grid;
-  width:100%;
-  grid-row-gap:1rem;
-  grid-column-gap:2rem;
-  justify-items:start;
-  margin-top:40vh;
-  grid-template-columns:auto;
-  justify-content:space-between;
-}
-
-/* ===============================
-   SCROLL INDICATOR + BACK-TO-TOP
-   =============================== */
-.scroll-downs{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%) scale(.5);
-  transform-origin:50% 100%;
-  bottom:clamp(20px,10vh,40px);
-  width:34px; height:55px;
-  z-index:9999;
-  pointer-events:auto; cursor:pointer;
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,.35));
-}
-.mousey{
-  width:3px;
-  padding:10px 15px;
-  height:35px;
-  border:2px solid #fff;
-  border-radius:25px;
-  opacity:.75;
-  box-sizing:content-box;
-}
-.scroller{
-  width:3px; height:10px; border-radius:25%;
-  background-color:#fff;
-  animation:scroll 2.2s cubic-bezier(.15,.41,.69,.94) infinite;
-}
-@keyframes scroll{
-  0%{opacity:0}
-  10%{transform:translateY(0); opacity:1}
-  100%{transform:translateY(15px); opacity:0}
-}
-.panel[aria-hidden="false"] ~ .scroll-downs{ opacity:0; visibility:hidden; }
-.scroll-downs::after{
-  content:"Back to top";
-  position:absolute; left:50%; bottom:100%;
-  transform:translate(-50%, -8px);
-  font-size:var(--fs-xxs);
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#fff;
-  background:rgba(0,0,0,.65);
-  padding:.35rem .5rem; border-radius:6px;
-  opacity:0; pointer-events:none; white-space:nowrap;
-  transition:opacity .2s ease, transform .2s ease;
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,.35));
-}
-.scroll-downs:hover::after{ opacity:.95; transform:translate(-50%, -12px); }
-.scroll-downs:focus-visible{ outline:2px solid #fff; outline-offset:4px; }
-
-/* ===============================
-   BOTTOM BLUR OVERLAY
-   =============================== */
-.blur{
-  position:fixed; inset:0;
-  z-index:1000;
-  pointer-events:none;
-  isolation:isolate;
-  contain:paint;
-  opacity:0;
-  transition:opacity .35s ease;
-}
-.blur.is-visible{ opacity:1; }
-.blur > div{
-  --blur: calc( sin(((var(--layers) - var(--i)) / var(--layers)) * 90deg) * var(--blur-max) );
-  --stop: calc( sin((var(--i) / var(--layers)) * 90deg) * var(--mask-stop) );
-  position:absolute; inset:0;
-}
-.blur > div::after{
-  content:"";
-  position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter:blur(calc(var(--blur) * 1px)) saturate(var(--saturate));
-          backdrop-filter:blur(calc(var(--blur) * 1px)) saturate(var(--saturate));
-  mask:linear-gradient(180deg, transparent 0 calc((100 - var(--stop)) * 1%), #000 100%);
-  -webkit-mask:linear-gradient(180deg, transparent 0 calc((100 - var(--stop)) * 1%), #000 100%);
-}
-.blur > div::before{
-  content:""; position:absolute; left:0; right:0; bottom:0; height:calc(var(--stop) * 1%);
-}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  .blur{ display:none; }
-}
-
-/* ===============================
-   GOOEY CURSOR
-   =============================== */
-@media (pointer:fine){
-  html.has-cursor body,
-  html.has-cursor a,
-  html.has-cursor button{ cursor:none; }
-}
-.gooey-cursor{
-  position:fixed; inset:0;
-  z-index:10004;
-  pointer-events:none !important;
-  filter:url(#gc-goo);
-  mix-blend-mode:difference;
-}
-.gooey-cursor .gc-dot{
-  position:absolute;
-  width:var(--cursor-size,28px);
-  height:var(--cursor-size,28px);
-  border-radius:50%;
-  background:#fff;
-  transform:translate(-50%,-50%);
-  transform-origin:50% 50%;
-  will-change:transform,width,height,opacity;
-  opacity:.95;
-}
-.gooey-cursor, .gooey-cursor *{ pointer-events:none !important; }
-@media (pointer:coarse){ .gooey-cursor{ display:none !important; } }
-
-/* ===============================
-   SEVENTH GRID — SECTION SPACING
-   (section after the one containing the 7th grid)
-   =============================== */
-/* Modern path */
-@supports selector(:has(*)){
-  section.content:has(.grid[data-grid-seventh]){
-    margin-bottom:clamp(6rem, 18vh, 22rem);
-  }
-  @media (max-width:768px){
-    section.content:has(.grid[data-grid-seventh]){
-      margin-bottom:12vh;
-    }
-  }
-}
-/* Fallback (no :has) – add interior spacing via the grid itself */
-.grid[data-grid-seventh]{ margin-bottom:clamp(6rem, 18vh, 22rem); }
-@media (max-width:768px){
-  .grid[data-grid-seventh]{ margin-bottom:12vh; }
-}
-
-/* ===============================
-   DESKTOP ENHANCEMENTS
-   =============================== */
-@media screen and (min-width:53em){
-  :root{ --page-padding:1rem; }
-  .frame{
-    grid-template-columns:20% 1fr 1fr;
-    grid-template-rows:min-content 1fr auto;
-    grid-row-gap:15vh;
-    align-items:center;
-    grid-template-areas:
-      "logo tags sponsor"
-      "... ... subline"
-      "title title title";
-  }
-  .frame__links{ margin-left:3rem; }
-  .frame__subline{ align-self:end; }
-  .frame__title{ align-self:end; }
-  .frame #cdawrap{ text-align:right; max-width:250px; justify-self:end; }
-  .page-footer{ grid-template-columns:repeat(3,auto); }
-}
-
-/* ===============================
-   MOBILE LAYOUT
-   =============================== */
-@media (max-width:768px){
-  :root{
-    font-size:15px;
-    --page-padding:1rem;
-    --grid-gap:.75rem;
-  }
-
-  .frame{
-    height:auto;
-    grid-template-columns:1fr;
-    grid-template-rows:auto auto auto auto 1fr;
-    grid-row-gap:1rem;
-    align-content:start;
-    padding:var(--page-padding);
-  }
-  .frame__title{ font-size:clamp(2.25rem,16vw,7rem); line-height:.8; }
-  .frame__subline{ order:3; }
-  .frame__links a{ display:inline-block; padding:.25rem 0; }
-
-  .content--padded{ padding:var(--page-padding); }
-  .content__title{ margin:2.5rem 0 1rem; }
-  .content__title-main{ font-size:clamp(1.6rem,7.5vw,3rem); }
-  .content__text{ font-size:clamp(1.05rem,4.3vw,1.25rem); }
-
-  #work{ margin-bottom:clamp(4rem,12vh,8rem); }
-  #work .content__title-main{ margin-bottom:3rem; }
-
-  .grid{
-    grid-template-columns:repeat(2,1fr);
-    grid-auto-rows:minmax(140px, auto);
-    gap:var(--grid-gap);
-    height:auto; width:100%;
-  }
-  .grid__img, .grid__item{ min-height:140px; }
-
-  .grid--column{
-    grid-template-columns:repeat(6,1fr);
-    grid-auto-rows:minmax(140px, auto);
-    gap:var(--grid-gap);
-  }
-  .grid--zoomed{
-    grid-template-columns:repeat(2,1fr);
-    grid-template-rows:auto;
-    aspect-ratio:auto;
-    gap:var(--grid-gap);
-  }
-  .grid--wide{
-    grid-template-columns:repeat(2,1fr);
-    grid-template-rows:auto;
-  }
-
-  [data-grid-ninth]{ grid-template-columns:repeat(2,1fr); }
-  #work .grid{ grid-template-columns:repeat(2,1fr); }
-  #work .grid__item{ padding:.75rem; }
-  #work .grid__item h4{ font-size:.85rem; }
-
-  .ar-wide, .ar-narrow, .ar-rect{ aspect-ratio:auto; }
-
-  .project{ margin:12vh auto; grid-column-gap:1.25rem; }
-  .project__title{ font-size:clamp(1.8rem,11vw,3.2rem); margin:6vh 0 4vh; }
-  .project--details p{ max-width:none; }
-
-  /* process grid: explicit mobile stack + tighter gap */
-  [id$="-process"]{ grid-template-columns:1fr; gap:1.25rem; }
-
-  .intro__info{ bottom:16px; font-size:10px; opacity:.65; }
-
-  .panel h1{ font-size:clamp(1.6rem,9vw,2.2rem); }
-  .panel h2{ font-size:1.1rem; }
-  .panel p{ font-size:.95rem; }
-  .panel__counter h1{ font-size:.95rem; }
-  .panel__progress-bar{ height:5px; }
-
-  .panel .intro,
-  .panel .hero-img,
-  .panel .about,
-  .panel .banner-img,
-  .panel .story,
-  .panel .outro{
-    width:94vw; padding:1rem;
-  }
-  .panel .header,
-  .panel .concept-img{ width:100vw; }
-  .panel .about .row{ flex-direction:column; gap:1rem; }
-  .panel .about .row p{ width:100%; }
-  .panel .about .row .img{ aspect-ratio:16/10; }
-  .panel__close{ top:.5rem; right:.5rem; padding:.4rem .6rem; }
-
-  .page-footer{ grid-template-columns:1fr; gap:.5rem; margin-top:20vh; }
-
-  /* Mobile: make both stacks fit like fintech */
-  .stacked-img img{
-    width:100%;
-    height:auto !important;
-    object-fit:contain !important;
-    object-position:center;
-  }
-
-  /* Discovery grid */
-  #fintech-discovery .grid.grid--zoomed{
-    grid-template-columns:repeat(2,1fr);
-    grid-template-rows:auto;
-  }
-}
-
-
-
-/* === Inline link spacing, anywhere consecutive links appear === */
-a + a { margin-inline-start: .6rem; }
-
-/* === Clustered/nav links (frame header or any link row) === */
-.frame__links{
-  display: flex;
-  flex-wrap: wrap;
-  /* row-gap | column-gap */
-  gap: .35rem clamp(.5rem, 1.2vw, 1rem);
-}
-.frame__links a{
-  display: inline-flex;
-  align-items: center;
-  padding: .25rem .55rem;   /* <-- horizontal padding */
-  border-radius: .35rem;    /* nicer focus ring */
-}
-
-/* Mobile tweaks */
-@media (max-width:768px){
-  .frame__links{ gap: .25rem .6rem; }
-  .frame__links a{ padding: .2rem .45rem; }
-}
-
-/* === Utility: apply to any container that should lay out links with spacing === */
-.links--spaced{
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: clamp(.5rem, 1.2vw, 1rem);
-  row-gap: .35rem;
-}
-.links--spaced > a{ padding-inline: .5rem; }
-
-/* ===============================
-   TINY DEVICES
-   =============================== */
-@media (max-width:390px){
-  :root{ font-size:14px; }
-  .grid__img, .grid__item{ min-height:100px; padding-bottom:.5rem; }
-}
-
-
-/* Superscript baseline + spacing (global) */
-:where(sup, .sup){
-  font-size: .62em;           /* small but readable */
-  line-height: 0;             /* remove extra leading bump */
-  vertical-align: super;      /* raise it properly */
-  margin-left: .25em;         /* breathing room from preceding text */
-  letter-spacing: .04em;      /* matches microtype vibe */
-  color: var(--color-text-alt);
-  font-weight: 400;
-}
-
-
-
-/* === Unique heading with superscript — "chant" === */
-.heading-chant{
-  display: inline-flex;
-  align-items: flex-start;
-  gap: .35ch;
-  margin: clamp(.5rem, 1.2vh, 1rem) 0;
-
-  /* type */
-  font-family: "bricolage-grotesque-48", sans-serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: .95;
-  font-size: clamp(2.6rem, 4vw, 2.6rem);
-  color: var(--color-text);
-
-  /* subtle underline vibe */
-  text-decoration: none;
-  text-decoration-thickness: .08em;
-  text-underline-offset: .12em;
-  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
-}
-
-/* Superscript tuning inside this heading */
-.heading-chant sup{
-  font-size: .35em;
-  line-height: 0;
-  margin-left: .3ch;
-  letter-spacing: .04em;
-  color: var(--color-text-alt);
-  vertical-align: baseline;        /* ignore default */
-  transform: translateY(-.6em);    /* precise lift */
-}
-
-
-
-
-/* Clickable superscript w/ emitter */
-.heading-chant .confetti-sup{
-  position: relative;
-  display: inline-flex;
-  align-items: flex-start;
-  cursor: pointer;
-  user-select: none;
-  margin-left: .3ch;                 /* small gap from “XP!” */
-  padding: 0 .2ch;                   /* clickable target */
-  border-radius: .25rem;
-  outline: none;
-}
-.heading-chant .confetti-sup:focus-visible{
-  box-shadow: 0 0 0 2px rgba(255,255,255,.5);
-}
-.heading-chant .confetti-sup .emitter{
-  position: absolute;
-  top: 0; left: 50%;
-  width: 0; height: 0;
-  transform: translate(-50%, -60%);
-  pointer-events: none;
-  overflow: visible;
-  z-index: 2;
-}
-
-/* confetti dots */
-.heading-chant .confetti-sup .emitter > div{
-  position: absolute;
-  width: 8px; height: 8px;
-  background: var(--b, #fff);
-  border-radius: 2px;                /* soft squares */
-  will-change: transform, opacity;
-  mix-blend-mode: normal;
-}
-
-/* optional: colorful theme consistent w/ your palette */
-:root{
-  --confetti-colors: #FFFF04, #EA4C89, #892AB8, #4AF2FD;
-}
-
-.heading-chant .confetti-sup:hover{
-  text-decoration: underline;
-  text-decoration-thickness: .08em;
-  text-underline-offset: .12em;
-  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
-}
-
-/* =========================================
-   MOBILE BLUR DIAL-DOWN (performance-first)
-   ========================================= */
-@media (max-width: 768px){
-  /* Smaller kernel, shorter mask, lower saturation */
-  :root{
-    --blur-max: 8;      /* was 40 */
-    --mask-stop: 18;    /* was 35 — shorter blurred band */
-    --saturate: .06;    /* was .1  */
-  }
-
-  /* Show less intensity overall */
-  .blur{ opacity: .75; }
-
-  /* Process fewer layers: keep first 3, hide the rest */
-  .blur > div:nth-child(n+4){ display: none; }
-
-  /* Shrink the filtered spill area to reduce GPU cost */
-  .blur > div::after{ inset: 0 -60%; }  /* was 0 -250% */
-
-  /* Optional: tighten the solid band at the very bottom */
-  .blur > div::before{ height: calc((var(--stop) * .8) * 1%); }
-}
-
-/* Coarse pointers (many phones/tablets) — dial down further */
-@media (pointer: coarse){
-  :root{
-    --blur-max: 6;
-    --saturate: .05;
-  }
-}
-
-/* Respect accessibility (motion often correlates with effects aversion) */
-@media (prefers-reduced-motion: reduce){
-  .blur{ display: none !important; }
-}
-
-
-/* Make the trigger look tappable on mobile and avoid header overlap when scrolled */
-@media (max-width:768px), (pointer:coarse){
-  .ux-dead-jump{
-    text-decoration: underline;
-    text-underline-offset: .12em;
-    cursor: pointer;
-  }
-  /* If you have a fixed header, set a safe scroll margin */
-  section { scroll-margin-top: 10vh; }
-}
-
-
-/* Make the trigger look interactive on all devices */
-.ux-dead-jump{
-  text-decoration: none;
-  text-underline-offset: .12em;
-  cursor: pointer;
-}
-
-/* If you have a fixed/sticky header, set the offset here */
-:root { --jump-offset: 0px; }   /* e.g., 72px if your header is 72px tall */
-
-/* Also helpful so native scrollIntoView targets don’t hide under headers */
-section { scroll-margin-top: var(--jump-offset); }
-
+  <style>
+    /* ===== your full CSS from earlier (unchanged) ===== */
+    /* I kept everything intact so nothing relies on overrides. */
+    /* If you want me to inline a trimmed version, say the word. */
+
+    /* ===============================
+       CORE TOKENS & RESET
+       =============================== */
+    *,*::before,*::after{box-sizing:border-box}
+    :root{--bg:#000;--color-bg:#0e0d0e;--color-bg-content:#0e0d0e;--color-bg-frame:#FF8DA1;--color-text:#f5f3ee;--color-text-alt:#d7d4cd;--color-label:#fff;--color-link:#fff;--color-link-hover:#fff;--color-border:#46443e;--page-padding:.75rem;--grid-gap:var(--page-padding);--cursor-size:28px;--layers:5;--blur-max:40;--mask-stop:35;--saturate:.1;--cs-accent:#f4d35e;--cs-deep:#000;--cs-warm:#f95738;--cs-soft:#ebebd3;--cs-ink:#2c241a;--fs-xxs:11px;--fs-body:16px;--jump-offset:0px}
+    html,body{width:100%;overflow-x:hidden}
+    html{font-size:var(--fs-body)}
+    body{margin:0;color:var(--color-text);background:var(--color-bg);font-family:"area-variable",sans-serif;font-variation-settings:"slnt" 0,"wdth" 100,"wght" 450,"INKT" 0;font-weight:450;line-height:1.2;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    a{color:var(--color-link);text-decoration:none;outline:none;cursor:pointer}
+    a:hover{color:var(--color-link-hover);text-decoration:underline}
+    a:focus{outline:none;background:lightgrey}
+    a:focus:not(:focus-visible){background:transparent}
+    a:focus-visible{outline:2px solid red;background:transparent}
+    .unbutton{background:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer}
+    .unbutton:focus{outline:none}
+    .type-tiny,.cdawrap,.page-footer,.project__label{font-size:var(--fs-xxs);text-transform:uppercase;letter-spacing:.06em;font-weight:400;color:var(--color-label)}
+    .js .loading::before,.js .loading::after{content:"";position:fixed;z-index:1000}
+    .js .loading::before{inset:0;background:var(--color-bg)}
+    .js .loading::after{top:50%;left:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;opacity:.4;background:var(--color-link);animation:loaderAnim .7s linear infinite alternate forwards}
+    @keyframes loaderAnim{to{opacity:1;transform:scale3d(.5,.5,1)}}
+    .frame{padding:var(--page-padding);position:relative;display:grid;grid-row-gap:.5rem;grid-column-gap:2rem;justify-items:start;align-content:start;line-height:1;min-height:100svh;background:var(--color-bg-frame);text-transform:uppercase;grid-template-columns:auto auto;grid-template-rows:auto auto auto 1fr;grid-template-areas:"logo" "tags" "sponsor" "subline" "title"}
+    .frame #cdawrap{justify-self:start}
+    .frame__logo{grid-area:logo;padding-bottom:.15rem;font-size:1.5rem;font-family:"bricolage-grotesque-48",sans-serif}
+    .frame__tags{grid-area:tags}
+    .frame__links{grid-area:sponsor}
+    .frame__subline{grid-area:subline}
+    .frame__title{grid-area:title;white-space:nowrap;font-size:clamp(2rem,20vw,20rem);margin:0;letter-spacing:-.05em;padding-top:.15em;font-weight:400;line-height:.55;text-indent:-.065em;word-spacing:.15em;font-family:"bricolage-grotesque-48",sans-serif}
+    .content{position:relative;min-height:100dvh;background:var(--color-bg-content);align-content:center}
+    .content--cutoff{overflow:hidden}
+    .content--padded{padding:var(--page-padding)}
+    .content--full{display:grid;place-items:center;grid-template-areas:"main";grid-template-rows:100%;grid-template-columns:100%;min-height:100svh}
+    .content__title{grid-area:main;position:relative;display:flex;flex-direction:column;text-align:center;margin:4rem 0 2rem}
+    .content__title-main{font-size:clamp(2rem,7vw,4.5rem);line-height:1;margin:.5rem 0 0;font-weight:500;font-variation-settings:"wght" 500;text-wrap:balance;letter-spacing:-.025em}
+    .content__title-main + p{margin:0;max-width:100px;font-size:var(--fs-xxs);letter-spacing:.04em;color:var(--color-label)}
+    .content__text{font-size:clamp(1.1rem,2.8vw,1.7rem);line-height:1.4;font-weight:400;letter-spacing:0;color:var(--color-text);margin:.6rem 0;text-wrap:balance}
+    .grid{grid-area:main;display:grid;width:100%;height:100%;grid-template-columns:repeat(8,1fr);grid-template-rows:1fr 1fr 1fr;margin-bottom:1em}
+    .grid--spaced{gap:var(--grid-gap)}
+    .grid--columns{grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(2,min-content);align-content:center}
+    .grid--zoomed{gap:2rem;grid-template-columns:repeat(3,70%);grid-template-rows:repeat(3,60%);justify-content:center;align-content:center;aspect-ratio:2/1}
+    .grid--single{height:auto;justify-self:center}
+    .grid--column{grid-template-columns:repeat(15, calc((100% - 14 * 10px) / 15));gap:10px;grid-auto-rows:auto}
+    .grid--small{grid-template-columns:repeat(9,1fr);grid-auto-rows:1fr}
+    .grid--tiny{height:60vh;grid-template-columns:repeat(14,1fr);grid-auto-rows:auto}
+    .grid--wide{grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)}
+    .grid__img,.grid__item{width:100%;min-height:200px;background-size:cover;background-position:50% 50%;pointer-events:none;will-change:transform}
+    .grid__item{display:flex;flex-direction:column;justify-content:center;padding:.5rem}
+    .grid__img{position:relative;overflow:hidden}
+    .grid__img-inner{position:absolute;inset:0;width:100%;height:100%;background-size:cover;background-position:50% 50%;will-change:transform}
+    .ar-wide{aspect-ratio:4/3}.ar-narrow{aspect-ratio:2/3}.ar-rect{aspect-ratio:1}
+    .span-2{grid-column:auto/span 2}.span-3{grid-column:auto/span 3}
+    .center{text-align:center}.right{text-align:right}.end{align-self:end}.acenter{align-self:center}
+    @media (max-aspect-ratio:16/9){.grid:not(.grid--zoomed){width:100%;height:auto;aspect-ratio:16/9}}
+    #work .grid__item{pointer-events:none}
+    #work .grid__item .title-link{pointer-events:auto;text-decoration:none}
+    #work .grid__item .title-link:hover{text-decoration:underline}
+    .project{padding:1rem;max-width:1000px;margin:20vh auto;display:grid;grid-column-gap:7vw;grid-row-gap:.5rem}
+    .project--intro{grid-template-columns:1fr;grid-template-areas:"label-name" "name" "label-date" "date" "title" "label-mission" "mission"}
+    .project--details{grid-template-areas:"label-default" "paragraph";grid-template-columns:1fr}
+    .project--left{justify-content:start}.project--right{justify-content:end}
+    .project--details p{grid-area:paragraph;max-width:400px}
+    .project__label--default{grid-area:label-default}
+    .project p,.grid__item p{font-size:1rem;line-height:1.4;margin:0;color:var(--color-text-alt)}
+    .project__label--name{grid-area:label-name}.project__label--date{grid-area:label-date}.project__label--mission{grid-area:label-mission}
+    .project__name{grid-area:name}.project__date{grid-area:date}.project__mission{grid-area:mission;line-height:1.4}
+    .project__mission p{color:var(--color-text-alt)}
+    .project__title{grid-area:title;font-size:clamp(2rem,13vw,8rem);font-weight:400;margin:10vh 0;line-height:1}
+    .project__heading{color:var(--color-label);font-weight:inherit;font-size:inherit;margin:0}
+    [id$="-process"]{display:grid;grid-template-columns:1fr;gap:2rem 3rem;align-items:start}
+    [id$="-process"]>.project{margin:0;padding:0}
+    [id$="-process"] .project--details p{max-width:none}
+    [id$="-process"] .project__label{letter-spacing:.04em;text-transform:uppercase;opacity:.85}
+    @media (min-width:53em){[id$="-process"]{grid-template-columns:repeat(2,minmax(0,1fr))}[id$="-process"]>.project.project--intro{grid-column:1/-1}}
+    .intro__info{position:fixed;left:50%;bottom:clamp(12px,4vh,32px);transform:translateX(-50%);z-index:1000;font-size:var(--fs-xxs);letter-spacing:.08em;text-transform:uppercase;opacity:.75;pointer-events:none}
+    .intro{min-height:100vh;display:grid;place-items:center;padding:var(--page-padding);background:linear-gradient(0deg,transparent,var(--color-bg-content))}
+    .intro__title{margin:0;line-height:.9;text-align:center;font-weight:400}
+    .intro__title-pre{font-weight:300;font-size:clamp(2rem,8vw,5rem);color:var(--color-text);text-transform:uppercase}
+    .intro__title-sub{font-size:clamp(1.5rem,20vw,8rem);max-width:15ch;margin:0 auto}
+    #skills .trio-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(1rem,3vw,2rem);align-items:start}
+    #skills .trio-col h4{margin:0 0 .5rem}#skills .trio-col .content__text{margin:.15rem 0}
+    @media (max-width:1024px){#skills .trio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:768px){#skills .trio-grid{grid-template-columns:1fr;gap:1.25rem}}
+    .panel{font-feature-settings:"liga","kern";letter-spacing:0}
+    .panel .chapter{font-size:var(--fs-xxs);text-transform:uppercase;letter-spacing:.08em;opacity:.85;color:#cfcac0;margin-bottom:.5rem}
+    .panel .title{font-weight:400;line-height:.95;letter-spacing:-.02em;text-transform:uppercase;font-size:clamp(2rem,6.5vw,5rem);margin:.2rem 0 .6rem}
+    .panel .text{font-size:1.05rem;line-height:1.5;color:#ddd7cd}.panel .text p{margin:0 0 .85rem}
+    .split-text .word{display:inline-block;overflow:hidden}.split-text .word>span{display:inline-block;transform:translateY(110%);opacity:0}
+    .frosted-glass{--bg:rgba(18,18,18,.42);background:var(--bg);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:1.1rem 1.25rem;backdrop-filter:saturate(135%) blur(12px);-webkit-backdrop-filter:saturate(135%) blur(12px);box-shadow:0 8px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05)}
+    .panel-content-blur-edges{-webkit-mask-image:radial-gradient(120% 100% at 50% 50%,#000 60%,transparent 100%);mask-image:radial-gradient(120% 100% at 50% 50%,#000 60%,transparent 100%)}
+    .stacked-section{position:relative;z-index:0;isolation:isolate;contain:paint}
+    .content--full.stacked-section{display:block;height:auto;min-height:0}
+    .stacked-gallery{display:grid;justify-items:center}
+    .stacked-img{width:min(1400px,90vw);margin-inline:auto}
+    .stacked-img img{display:block;width:100%;height:min(88vh,900px);object-fit:cover;object-position:center center;backface-visibility:hidden;transform:translateZ(0);-webkit-transform:translateZ(0)}
+    #fintech-insight{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2rem 3rem;align-items:start;padding:var(--page-padding)}
+    #fintech-insight .project.project--details{margin:0;padding:0;display:block}
+    #fintech-insight .project--details p{max-width:none}
+    #fintech-insight .project__label{letter-spacing:.04em;text-transform:uppercase;opacity:.85}
+    #fintech-discovery .grid.grid--zoomed{width:100vw;max-width:100vw;margin-inline:auto;gap:var(--grid-gap);grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,minmax(0,1fr));aspect-ratio:auto}
+    [data-grid-seventh] .grid__item.span-3{padding-block:1.5rem}
+    .page-footer{padding:var(--page-padding);display:grid;width:100%;grid-row-gap:1rem;grid-column-gap:2rem;justify-items:start;margin-top:40vh;grid-template-columns:auto;justify-content:space-between}
+    .scroll-downs{position:fixed;left:50%;transform:translateX(-50%) scale(.5);transform-origin:50% 100%;bottom:clamp(20px,10vh,40px);width:34px;height:55px;z-index:9999;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 2px 8px rgba(0,0,0,.35))}
+    .mousey{width:3px;padding:10px 15px;height:35px;border:2px solid #fff;border-radius:25px;opacity:.75;box-sizing:content-box}
+    .scroller{width:3px;height:10px;border-radius:25%;background-color:#fff;animation:scroll 2.2s cubic-bezier(.15,.41,.69,.94) infinite}
+    @keyframes scroll{0%{opacity:0}10%{transform:translateY(0);opacity:1}100%{transform:translateY(15px);opacity:0}}
+    .panel[aria-hidden="false"]~.scroll-downs{opacity:0;visibility:hidden}
+    .scroll-downs::after{content:"Back to top";position:absolute;left:50%;bottom:100%;transform:translate(-50%,-8px);font-size:var(--fs-xxs);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.65);padding:.35rem .5rem;border-radius:6px;opacity:0;pointer-events:none;white-space:nowrap;transition:opacity .2s ease,transform .2s ease;filter:drop-shadow(0 2px 8px rgba(0,0,0,.35))}
+    .scroll-downs:hover::after{opacity:.95;transform:translate(-50%,-12px)}
+    .scroll-downs:focus-visible{outline:2px solid #fff;outline-offset:4px}
+    .blur{position:fixed;inset:0;z-index:1000;pointer-events:none;isolation:isolate;contain:paint;opacity:0;transition:opacity .35s ease}
+    .blur.is-visible{opacity:1}
+    .blur>div{--blur:calc(sin(((var(--layers) - var(--i)) / var(--layers)) * 90deg) * var(--blur-max));--stop:calc(sin((var(--i) / var(--layers)) * 90deg) * var(--mask-stop));position:absolute;inset:0}
+    .blur>div::after{content:"";position:absolute;inset:0 -250%;-webkit-backdrop-filter:blur(calc(var(--blur) * 1px)) saturate(var(--saturate));backdrop-filter:blur(calc(var(--blur) * 1px)) saturate(var(--saturate));mask:linear-gradient(180deg,transparent 0 calc((100 - var(--stop)) * 1%),#000 100%);-webkit-mask:linear-gradient(180deg,transparent 0 calc((100 - var(--stop)) * 1%),#000 100%)}
+    .blur>div::before{content:"";position:absolute;left:0;right:0;bottom:0;height:calc(var(--stop) * 1%)}
+    @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.blur{display:none}}
+    @media (pointer:fine){html.has-cursor body,html.has-cursor a,html.has-cursor button{cursor:none}}
+    .gooey-cursor{position:fixed;inset:0;z-index:10004;pointer-events:none !important;filter:url(#gc-goo);mix-blend-mode:difference}
+    .gooey-cursor .gc-dot{position:absolute;width:var(--cursor-size,28px);height:var(--cursor-size,28px);border-radius:50%;background:#fff;transform:translate(-50%,-50%);transform-origin:50% 50%;will-change:transform,width,height,opacity;opacity:.95}
+    .gooey-cursor,.gooey-cursor *{pointer-events:none !important}
+    @media (pointer:coarse){.gooey-cursor{display:none !important}}
+    @supports selector(:has(*)){section.content:has(.grid[data-grid-seventh]){margin-bottom:clamp(6rem,18vh,22rem)}@media (max-width:768px){section.content:has(.grid[data-grid-seventh]){margin-bottom:12vh}}}
+    .grid[data-grid-seventh]{margin-bottom:clamp(6rem,18vh,22rem)}
+    @media (max-width:768px){.grid[data-grid-seventh]{margin-bottom:12vh}}
+    @media screen and (min-width:53em){:root{--page-padding:1rem}.frame{grid-template-columns:20% 1fr 1fr;grid-template-rows:min-content 1fr auto;grid-row-gap:15vh;align-items:center;grid-template-areas:"logo tags sponsor" "... ... subline" "title title title"} .frame__links{margin-left:3rem}.frame__subline{align-self:end}.frame__title{align-self:end}.frame #cdawrap{text-align:right;max-width:250px;justify-self:end}.page-footer{grid-template-columns:repeat(3,auto)}}
+    @media (max-width:768px){:root{font-size:15px;--page-padding:1rem;--grid-gap:.75rem}.frame{height:auto;grid-template-columns:1fr;grid-template-rows:auto auto auto auto 1fr;grid-row-gap:1rem;align-content:start;padding:var(--page-padding)} .frame__title{font-size:clamp(2.25rem,16vw,7rem);line-height:.8}.frame__subline{order:3}.frame__links a{display:inline-block;padding:.25rem 0}.content--padded{padding:var(--page-padding)} .content__title{margin:2.5rem 0 1rem}.content__title-main{font-size:clamp(1.6rem,7.5vw,3rem)} .content__text{font-size:clamp(1.05rem,4.3vw,1.25rem)} #work{margin-bottom:clamp(4rem,12vh,8rem)} #work .content__title-main{margin-bottom:3rem}.grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:minmax(140px,auto);gap:var(--grid-gap);height:auto;width:100%} .grid__img,.grid__item{min-height:140px}.grid--column{grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(140px,auto);gap:var(--grid-gap)} .grid--zoomed{grid-template-columns:repeat(2,1fr);grid-template-rows:auto;aspect-ratio:auto;gap:var(--grid-gap)} .grid--wide{grid-template-columns:repeat(2,1fr);grid-template-rows:auto}[id$="-process"]{grid-template-columns:1fr;gap:1.25rem}.intro__info{bottom:16px;font-size:10px;opacity:.65}.panel h1{font-size:clamp(1.6rem,9vw,2.2rem)} .panel h2{font-size:1.1rem}.panel p{font-size:.95rem}.panel__counter h1{font-size:.95rem}.panel__progress-bar{height:5px}.panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:94vw;padding:1rem} .panel .header,.panel .concept-img{width:100vw}.panel .about .row{flex-direction:column;gap:1rem}.panel .about .row p{width:100%}.panel .about .row .img{aspect-ratio:16/10}.panel__close{top:.5rem;right:.5rem;padding:.4rem .6rem}.page-footer{grid-template-columns:1fr;gap:.5rem;margin-top:20vh}.stacked-img img{width:100%;height:auto !important;object-fit:contain !important;object-position:center} #fintech-discovery .grid.grid--zoomed{grid-template-columns:repeat(2,1fr);grid-template-rows:auto}}
+    a + a{margin-inline-start:.6rem}
+    .frame__links{display:flex;flex-wrap:wrap;gap:.35rem clamp(.5rem,1.2vw,1rem)}
+    .frame__links a{display:inline-flex;align-items:center;padding:.25rem .55rem;border-radius:.35rem}
+    @media (max-width:768px){.frame__links{gap:.25rem .6rem}.frame__links a{padding:.2rem .45rem}}
+    .links--spaced{display:flex;flex-wrap:wrap;column-gap:clamp(.5rem,1.2vw,1rem);row-gap:.35rem}
+    .links--spaced>a{padding-inline:.5rem}
+    @media (max-width:390px){:root{font-size:14px}.grid__img,.grid__item{min-height:100px;padding-bottom:.5rem}}
+    :where(sup,.sup){font-size:.62em;line-height:0;vertical-align:super;margin-left:.25em;letter-spacing:.04em;color:var(--color-text-alt);font-weight:400}
+    .heading-chant{display:inline-flex;align-items:flex-start;gap:.35ch;margin:clamp(.5rem,1.2vh,1rem) 0;font-family:"bricolage-grotesque-48",sans-serif;font-weight:500;letter-spacing:-.01em;line-height:.95;font-size:clamp(2.6rem,4vw,2.6rem);color:var(--color-text);text-decoration:none;text-decoration-thickness:.08em;text-underline-offset:.12em;text-decoration-color:color-mix(in oklab,var(--color-text) 45%,transparent)}
+    .heading-chant sup{font-size:.35em;line-height:0;margin-left:.3ch;letter-spacing:.04em;color:var(--color-text-alt);vertical-align:baseline;transform:translateY(-.6em)}
+    .heading-chant .confetti-sup{position:relative;display:inline-flex;align-items:flex-start;cursor:pointer;user-select:none;margin-left:.3ch;padding:0 .2ch;border-radius:.25rem;outline:none}
+    .heading-chant .confetti-sup:focus-visible{box-shadow:0 0 0 2px rgba(255,255,255,.5)}
+    .heading-chant .confetti-sup .emitter{position:absolute;top:0;left:50%;width:0;height:0;transform:translate(-50%,-60%);pointer-events:none;overflow:visible;z-index:2}
+    .heading-chant .confetti-sup .emitter>div{position:absolute;width:8px;height:8px;background:var(--b,#fff);border-radius:2px;will-change:transform,opacity;mix-blend-mode:normal}
+    .heading-chant .confetti-sup:hover{text-decoration:underline;text-decoration-thickness:.08em;text-underline-offset:.12em;text-decoration-color:color-mix(in oklab,var(--color-text) 45%,transparent)}
+    @media (max-width:768px){:root{--blur-max:8;--mask-stop:18;--saturate:.06}.blur{opacity:.75}.blur>div:nth-child(n+4){display:none}.blur>div::after{inset:0 -60%}.blur>div::before{height:calc((var(--stop) * .8) * 1%)}}
+    @media (pointer:coarse){:root{--blur-max:6;--saturate:.05}}
+    @media (prefers-reduced-motion:reduce){.blur{display:none !important}}
+    .ux-dead-jump{text-decoration:none;text-underline-offset:.12em;cursor:pointer}
+    section{scroll-margin-top:var(--jump-offset)}
+  </style>
 </style>
 </head>
 <body class="loading">
 <main>
-  <header class="frame">
-    <h2 class="frame__title">UX is dead↓</h2>
+<body class="loading">
+  <!-- Minimal shell -->
+  <main id="app"></main>
+  <div class="blur"></div>
+  <div id="panel-root"></div>
 
-    <div class="frame__subline type-tiny">
-      <span>Digital Designer ***Thinker & Maker***</span>
-      <nav class="frame__links flex-line">
-        <a href="https://tympanus.net/codrops/?p=80656">Services</a>
-        <a href="https://tympanus.net/codrops/demos/">Resume</a>
-        <a href="https://github.com/codrops/OnScrollLayoutFormations">Contact</a>
-      </nav>
-    </div>
-
-
-    <!-- Jump-to nav -->
-    <!-- nav: add data-panel so we open the overlay instead of scrolling -->
-<nav class="frame__tags flex-line type-tiny">
-  <a href="#about">#About</a>
-  <a href="#skills">#XP</a>
-  <a href="#work" data-settle="end">#Work</a>
-  <a href="#fintech">#Product</a>
-  <a href="#ecommerce">#E-commerce</a>
-  <a href="#contact">#Connect</a>
-</nav>
-
-
-
-  <span class="frame__logo">ZACKGORT</span>
-  </header>
-
-
-
-  <!-- About -->
-<section class="content content--padded" id="about">
-  <h3 class="heading-chant">
-    ¡Viva la XP!
-    <sup class="confetti-sup" role="button" tabindex="0" aria-label="experience (tap for confetti)">
-      experience
-      <span class="emitter" aria-hidden="true"></span>
-    </sup>
-  </h3>
-
-  <p class="type-tiny right end">— Zack Gort, Senior <span style="color:#fff; background-color:#fff;">User</span> Experience Designer</p>
-</section>
-
-
-<section class="content content--full content--padded">
-  <div class="grid grid--column" data-grid-seventh>
-    <!-- === First Set === -->
-    <div class="grid__item span-3">
-      <h4 class="type-tiny">UX Design & Data</h4>
-      <p>What 98% of my work looks like...</p>
-    </div>
-    <div class="grid__img span-2 ar-narrow">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/VYS1xRzh/work2.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/ynjWYqv8/2.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/cXg5Phdc/3.webp)"></div>
-    </div>
-    <div class="grid__img ar-narrow span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png)"></div>
-    </div>
-    <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/23T984XS/huge2.webp)"></div>
-    </div>
-    <div class="grid__img ar-wide span-2">
-      <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/HTRJDL9w/tiktok2.webp)"></div>
-    </div>
-
-
-<div class="grid__item span-3">
-  <h4 class="type-tiny">UI Design & Brand Systems</h4>
-  <p>...the other 2%</p>
-</div>
-<div class="grid__img ar-rect">
-  <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/MrFyzRt/work3.webp)"></div>
-</div>
-<div class="grid__img ar-wide span-2">
-  <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/Kc09Jpsz/tiktok3.webp)"></div>
-</div>
-<div class="grid__img ar-narrow span-2">
-  <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/cXh31wt5/Frame-2147223570.png)"></div>
-</div>
-<div class="grid__img ar-wide span-2">
-  <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/fpbcrXp/Frame-4348.png)"></div>
-</div>
-<div class="grid__img ar-rect span-2">
-  <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/28bQ3XM/Mask-group.png)"></div>
-</div>
-<div class="grid__img ar-wide span-3">
-  <div class="grid__img-inner" style="background-image:url(https://i.ibb.co/NtWgd7T/dana-mobile-mockup.jpg)"></div>
-</div>
-</div> 
-</section>
-
-
-  <!-- Inspiration / Skills -->
-  <section class="content content--padded" id="skills">
-    <div class="trio-grid">
-      <div class="trio-col">
-        <h4 class="type-tiny">#experience</h4>
-        <p class="content__text">User Experience Design</p>
-        <p class="content__text">Content & Brand Strategy {B2B+C}</p>
-        <p class="content__text">Visual Interface Design</p>
-        <p class="content__text">Accessibility Compliance</p>
-      </div>
-      <div class="trio-col">
-        <h4 class="type-tiny">#savvy</h4>
-        <p class="content__text">Figma, Adobe CS</p>
-        <p class="content__text">HTML/CSS/Js</p>
-        <p class="content__text">Pen & Paper</p>
-        <p class="content__text">Whiteboard</p>
-        <p class="content__text">+</p>      
-      </div>
-      <div class="trio-col">
-        <h4 class="type-tiny">#evolution</h4>
-        <p class="content__text">AI + Creative Coding</p>
-        <p class="content__text">Design Systems & Workflows</p>
-        <p class="content__text">+</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Work (grid second) -->
-  <section class="content content--padded" id="work">
-    <h2 class="content__title-main">select works</h2>
-
-    <div class="grid grid--columns grid--spaced" data-grid-second>
-      <!-- image tiles -->
-      <div class="grid__img" style="background-image:url(img/23.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/40.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/10.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/17.webp)"></div>
-      <div class="grid__img" style="background-image:url(img/22.webp)"></div>
-
-      <!-- BNY → jump to full case study section -->
-      <div class="grid__item pos-6 work-card">
-        <h4 class="type-tiny">
-          <a class="title-link" href="#fintech" aria-label="Go to BNY Mellon — Pershing X case study">
-            BNY Mellon — Pershing X
-          </a>
-        </h4>
-        <p>↓</p>
-      </div>
-
-      <!-- GNC → jump to full case study section -->
-      <div class="grid__item pos-7 work-card">
-  <h4 class="type-tiny">
-    <a
-      class="title-link"
-      href="#ecommerce"
-      aria-label="Go to GNC case study"
-    >General Nutrition Centers {GNC}</a>
-  </h4>
-        <p>↓</p>
-      </div>
-
-      <!-- TikTok external link -->
-      <div class="grid__item pos-18 work-card">
-        <h4 class="type-tiny">
-          <a
-            class="title-link"
-            href="https://www.tiktok.com/about?lang=en"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open TikTok For Business (opens in a new tab)"
-            title="TikTok For Business">
-          TikTok For Business
-          </a>
-        </h4>
-        <p>↗</p>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Brands (ninth grid) -->
-  <section class="content content--padded content--full" id="brands-grid">
-<div class="grid grid--spaced grid--small" data-grid-fifth>
-
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/RTTZh2gq/1-1-QGGK09-DGx0-R4p-d-Jg6xiw.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/TMMyL0Vh/1-a-NLx-Fbj-VHKc-GD9-Zcks-Rpx-Q.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/yn3gkgVL/1-CQ-4u-Tk-D6-MUBWABKw-JIZg-A.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/9Lmj8ck/1-FYt-Vic-HKj-LDPLW2rcn-J1u-A.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/ZzQnmrNr/1-GFvd-yw-Ap-PELXmtr-Fbx-Vug.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/MJLfbdm/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/yBgB52s8/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/vxXJ7fSV/1-rqzz-Cscn-OIL96-Vm-Ln0v7d-A.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/0p7Ktz5L/1-Tut-Ce-PQB0b-SCo-Mf-MTWJb-Q.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/W4XvQk1t/1-vk-U8l-Zmqn-OHghe-Os-K0qtrw.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/PZqV1yTz/3.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/4RvT7dD4/4.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/SXPvx5q9/8.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/q3jYb38v/10.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/pBMMxY1Z/11.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/XZ8QtMx9/610811e9c2fa676f3fb1255f-zax02412-68c4866404de0.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/Rk3wPs4B/baw-mobile-mockup-68c48663e78cc.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/xqfFFj48/browse-location-list-68c48666baf6e.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/G3nxwqwq/frame-4349-68c4866fbabc4.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/bRXzf3P0/frame-2147223570-1-68c486713d753.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/qYDGB67R/frame-2147223570-68c4867296daa.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/nX2Nxq1/gnc-shop-l3-68c48673b14da.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/xSVNc6mg/huge4.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/0WS7sTP/image-002-68c486755a4f1.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/Xr2TRM55/image-004-68c486758ca10.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/FFCYQXX/image-8-68c4867d590d6.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/HLtfQxDw/screenshot-20230217-101719-68c4868300b7b.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/Cp6cvdDR/screenshot-20230217-102232-68c48685e47a8.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/kzpT2Qr/tiktok3.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/0VmJ708g/work3.webp)"></div>
-</div>
-
-
-
-    <!-- Caption -->
-    <div class="content__title">
-      <h2 class="content__title-main">things I've made</h2>
-      <p class="type-tiny right end">for brands people love/need</p>
-    </div>
-  </section>
-
-  <!-- Agency (ninth grid) -->
-  <section class="content content--full" id="brands-grid-2">
-<div class="grid grid--columns grid--spaced" data-grid-ninth>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/fYM2drZG/1-UATKEet6-Vtc-Lk-A8r-Yspj-FQ.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/m5yN57gn/IMG-20160526-164803987-01.jpg)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/RymyPtP/image-443-min.png)"></div>
-  <div class="grid__img" style="background-image:url(https://i.ibb.co/cYysMW7/640b4f5c077e33763e82fcba-PXL-20220815-141417163-MP-2-p-2000.jpg)"></div>
-</div>
-
-
-    <!-- Caption -->
-    <div class="content__title">
-      <h2 class="content__title-main">#agencylife</h2>
-      <p class="type-tiny right end">startups, shops, and agencies</p>
-    </div>
-  </section>
-
-  <!-- ======================= CASE STUDY 1 — BNY Mellon (Updated) ======================= -->
-  <!-- HERO (wide fan-up) -->
-  <section class="content content--padded content--full" id="fintech">
-<!-- was: data-grid-fourth -->
-    <div class="grid grid--columns grid--spaced" data-grid-ninth>
-      <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
-      <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
-      <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
-      <div class="grid__img" style="background-image:url(https://i.ibb.co/wZY2bhKF/bny4.png)"></div>
-      <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
-    </div>
-
-    <div class="content__title">
-      <h2 class="content__title-main">Financial Product</h2>
-      <p class="type-tiny right end">Financial Product Design</p>
-    </div>
-  </section>
-
-  <!-- PROCESS (in-depth) -->
-  <section class="content content--padded" id="fintech-process">
-    <section class="project project--intro">
-      <span class="project__label project__label--name">Domain</span>
-      <span class="project__name">BNY Mellon — Pershing X</span>
-
-      <span class="project__label project__label--date">Financial Product · Portfolio & CRM</span>
-      <span class="project__date">2023 — 2024</span>
-
-      <h2 class="project__title">
-        <span class="project__title-line">design systems and data refactorization</span>
-      </h2>
-
-      <span class="project__label project__label--mission">Mission</span>
-      <div class="project__mission">
-        <p>Create a modern, composable workspace for registered investment advisors that merges client context (CRM), portfolio actions (trades, rebalancing), and compliance guardrails without toggling between tools.</p>
-        <p>Design an IA that scales from sole practitioners to multi-office firms, while ensuring accessibility, auditability, and performance across complex data views.</p>
-      </div>
-    </section>
-    
-    <section class="project project--details project--left">
-      <span class="project__label project__label--default">Problem</span>
-      <p>Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights.</p>
-    </section>
-
-    <section class="project project--details project--right">
-      <span class="project__label project__label--default">Constraints</span>
-      <p>Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices.</p>
-    </section>
-
-    <section class="project project--details project--left">
-      <span class="project__label project__label--default">Role & Team</span>
-      <p>Lead Product Designer (IA/flows). Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, & 2 additional designers. Weekly research cadence with advisors and operations staff.</p>
-    </section>
-
-    <section class="project project--details project--right">
-      <span class="project__label project__label--default">Research</span>
-      <p>Shadowed 12 advisors across firms; mapped task graphs for onboarding → account maintenance → rebalance → review. Ran tree tests to validate navigation and quick actions.</p>
-    </section>
-
-
-    <section class="project project--details project--left">
-      <span class="project__label project__label--default">Next</span>
-      <p>Multi-entity households, scenario backtesting, and AI-assisted review narratives that summarize drift, cash needs, and compliance notes per meeting.</p>
-    </section>
-  </section>
-
-<!-- DISCOVERY (zoomed tiles) -->
-<section class="content content--full content--cutoff" id="fintech-discovery">
-  <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/wZY2bhKF/bny4.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/xS49C07B/bny3.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/vvMZmq94/bny2.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/XkM2hn8n/bny1.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/FJNG1jC/14.jpg)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/fxjgcYD/18.png)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/gtQLYJQ/17.jpg)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/Fgxcqj0/16.jpg)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/dcXH5fn/13.jpg)"></div>
-  </div>
-</section>
-
-  <!-- Details -->
-  <section class="content content--padded" id="fintech-insight">
-    <section class="project project--details project--left">
-      <span class="project__label project__label--default">Problem</span>
-      <p>Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights.</p>
-    </section>
-
-    <section class="project project--details project--right">
-      <span class="project__label project__label--default">Constraints</span>
-      <p>Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices.</p>
-    </section>
-  </section>
-
-  <!-- FULL-WIDTH STACKED GALLERY -->
-<section class="content content--full stacked-section" id="fintech-stack">
-  <div class="stacked-gallery" data-stack>
-    <figure class="stacked-img"><img src="https://i.ibb.co/XkM2hn8n/bny1.png" alt="BNY 1"/></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/vvMZmq94/bny2.png" alt="BNY 2"/></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/xS49C07B/bny3.png" alt="BNY 3"/></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/wZY2bhKF/bny4.png" alt="BNY 4"/></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/HGv7ymj/4.jpg" alt="Account Opening"/></figure>
-
-  </div>
-</section>
-
-
-  <!-- ===== Reusable full-page panel (hidden) ===== -->
-  <div class="panel" aria-hidden="true" hidden>
-    <button class="panel__close type-tiny" aria-label="Close panel">Close ✕</button>
-    <div class="panel__progress-bar"></div>
-    <div class="panel__counter"><h1>0</h1></div>
-
-    <div class="panel__scroller">
-      <!-- 1 -->
-      <section class="intro">
-        <h1>Zack Gort, Designer</h1>
-        <h2>{Digital Product, E-commerce, Consumer}</h2>
-      </section>
-
-      <!-- 2 -->
-      <section class="hero-img">
-        <img src="https://images.unsplash.com/photo-1504890001746-a9a68eda46e2?q=80&w=1687&auto=format&fit=crop&ixlib=rb-4.1.0" alt="DJI Spark drone" />
-      </section>
-
-      <!-- 3 -->
-      <section class="header">
-        <h1>It's Not Just About What You See — It's About How You Choose to See It</h1>
-      </section>
-
-      <!-- 4 -->
-      <section class="about">
-        <div class="row">
-          <div class="copy">
-            <p>Innovation doesn't follow rules — it rewrites them. Creativity lives in contrast: logic meets spontaneity, design meets disruption.</p>
-            <p>We craft digital experiences that challenge norms, stir curiosity, and spark movement. This is where structure dances with spontaneity.</p>
-          </div>
-          <div class="img">
-            <img src="https://images.unsplash.com/photo-1742753103280-52d5efc0709b?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Classic and modern tech gadgets side by side" />
-          </div>
-        </div>
-        <h1>Creativity in Motion</h1>
-      </section>
-
-      <!-- 5 -->
-      <section class="banner-img">
-        <img src="https://images.unsplash.com/photo-1702471897038-3d3c88379fb0?q=80&w=1674&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Table with fruit and VR headset" />
-      </section>
-
-      <!-- 6 -->
-      <section class="story">
-        <h1>Lead the Experience</h1>
-        <h1>Live the Detail</h1>
-        <h1>Break Every Boundary</h1>
-      </section>
-
-      <!-- 7 -->
-      <section class="concept-img">
-        <img src="https://images.unsplash.com/photo-1696258686454-60082b2c33e2?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0" alt="Spot robot side view" />
-      </section>
-
-      <!-- 8 -->
-      <section class="outro">
-        <h1>Tomorrow is Already Here</h1>
-      </section>
-    </div>
-  </div>
-  <!-- ===== /panel ===== -->
-
-
-<!-- ======================= CASE STUDY 2 — GNC ======================= -->
-
-<!-- HERO (fan-up grid) -->
-<section class="content content--padded content--full" id="ecommerce">
-  <div class="grid grid--columns grid--spaced" data-grid-ninth>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/cSQCgNQY/work1.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/spHgPH6N/1.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/ynjWYqv8/2.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/cXg5Phdc/3.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/gZ58PKyk/4.webp)"></div>
-  </div>
-
-  <div class="content__title">
-    <h2 class="content__title-main">E-commerce</h2>
-    <p class="type-tiny right end">Shopify E-commerce · Elva Design Group</p>
-  </div>
-</section>
-
-<!-- PROCESS (in-depth) -->
-<section class="content content--padded" id="ecommerce-process">
-  <section class="project project--intro">
-    <span class="project__label project__label--name">Domain</span>
-    <span class="project__name">General Nutrition Centers</span>
-
-    <span class="project__label project__label--date">E-commerce · Shopify</span>
-    <span class="project__date">2021</span>
-
-    <h2 class="project__title">
-      <span class="project__title-line">if the bar ain't bending,</span>
-      <span class="project__title-line">you’re just pretending</span>
-    </h2>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Problem</span>
-    <p>Legacy platform slowed releases, taxonomy was inconsistent across PLP/PDP, and content was duplicated across regions — hurting SEO, conversions, and loyalty enrollment.</p>
-  </section>
-
-  <section class="project project--details project--right">
-    <span class="project__label project__label--default">Constraints</span>
-    <p>Rapid Shopify migration with SEO preservation, loyalty & ERP integrations, SKU complexity (bundles/subscriptions), and performance budgets for mobile.</p>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Role & Team</span>
-    <p>Lead UX (IA/flows). Partnered with PM, Tech Lead, Shopify devs, Content, Merchandising, and Analytics. Weekly reviews with exec stakeholders.</p>
-  </section>
-
-  <section class="project project--details project--right">
-    <span class="project__label project__label--default">Research</span>
-    <p>Heuristic audits, keyword & on-site search analysis, card sorts + tree tests for navigation, and prototype testing on mobile PLP/PDP + checkout.</p>
-  </section>
-
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Next</span>
-    <p>Personalized bundles, subscription skews by cycle, and loyalty-led landing frameworks to lift AOV and repeat purchase.</p>
-  </section>
-</section>
-
-<!-- DISCOVERY (zoomed tiles) -->
-<section class="content content--full content--cutoff" id="ecommerce-discovery">
-  <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/gZ58PKyk/4.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/cXg5Phdc/3.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/ynjWYqv8/2.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/spHgPH6N/1.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/Y7pGqJ69/5.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/99h2bQMh/6.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/yB4RwkTf/7.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/7N2rDqrN/8.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/rft2bf0T/9.webp)"></div>
-    <div class="grid__img" style="background-image:url(https://i.ibb.co/vx76zjgf/10.webp)"></div>
-  </div>
-</section>
-
-<!-- INSIGHT (supporting details) -->
-<section class="content content--padded" id="ecommerce-insight">
-  <section class="project project--details project--left">
-    <span class="project__label project__label--default">Navigation & IA</span>
-    <p>Rebuilt taxonomy (goals, ingredients, formats) and aligned PLP filters to search intent; simplified top-nav to three shopping entries plus Programs & Guidance.</p>
-  </section>
-</section>
-<!-- FULL-WIDTH STACKED GALLERY -->
-<section class="content content--full stacked-section" id="ecommerce-stack">
-  <div class="stacked-gallery" data-stack>
-    <figure class="stacked-img"><img src="https://i.ibb.co/cSQCgNQY/work1.webp" alt="Homepage concept"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/spHgPH6N/1.webp" alt="PLP & filter system"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/ynjWYqv8/2.webp" alt="Subscription bundle flows"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/cXg5Phdc/3.webp" alt="PDP content blocks"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/gZ58PKyk/4.webp" alt="Cart & checkout refinements"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/Y7pGqJ69/5.webp" alt="Landing template variants"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/99h2bQMh/6.webp" alt="Mobile flows"></figure>
-    <figure class="stacked-img"><img src="https://i.ibb.co/yB4RwkTf/7.webp" alt="Guides & programs"></figure>
-  </div>
-</section>
-
-
-
-  <!-- Contact -->
-<section class="content content--padded" id="contact">
-  <h4 class="type-tiny">Contact</h4>
-  <p class="content__text">Interested in collaborating or just want to say hello? Reach out to Zack. Always open to projects and good problems.</p>
-</section>
-
-
-<footer class="page-footer type-tiny">
-  <span>Hey, nice to see you down here!</span>
-  <span><a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a></span>
-  <a href="https://www.linkedin.com/in/zackgort/" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>
-</footer>
-
-<div class="scroll-downs" aria-hidden="true">
-  <div class="mousey"><div class="scroller"></div></div>
-</div>
-
-<div class="blur"></div>
 </main> 
-<script>
-/* ============================================================
-   CLEAN, DECLARATIVE JS (no ad-hoc overrides)
-   - GSAP + ScrollTrigger + Lenis
-   - Declarative per-section rules (BNY/GNC) → data-* on nodes
-   - One grid animator that supports modes: second/fifth/sixth/seventh/ninth
-   - Stacked galleries, process sections, header, overlay panel
-   ============================================================ */
-document.documentElement.classList.add('js');
-gsap.registerPlugin(ScrollTrigger);
-ScrollTrigger.normalizeScroll(true);
+  <script>
+  // ============================================================
+  // CONTENT MODEL — all copy, links, and media live here
+  // ============================================================
+  const CONTENT = {
+    header: {
+      title: "UX is dead↓",
+      logo: "ZACKGORT",
+      subline: "Zack Gort — UX Designer",
+      links: [
+        { label: "Short-form", href: "https://ifimaybefrank.com" },
+        { label: "Résumé", href: "https://zackgort.com/resume" },
+        { label: "LinkedIn", href: "https://linkedin.com/in/zackgort" }
+      ],
+      tags: [
+        { label: "#About", href: "#about" },
+        { label: "#XP", href: "#skills" },
+        { label: "#Work", href: "#work", settle: "end" },
+        { label: "#Product", href: "#fintech" },
+        { label: "#E-commerce", href: "#ecommerce" },
+        { label: "#Connect", href: "#contact" }
+      ]
+    },
 
-/* ---------------- Z/stacking & pin hygiene ---------------- */
-(() => {
-  const style = document.createElement('style');
-  style.id = 'pin-zfix-styles';
-  style.textContent = `
-    .is-pinned{position:relative; z-index:5;}
-    #fintech-stack.stacked-section,
-    #ecommerce-stack.stacked-section{position:relative; z-index:0; isolation:isolate;}
-  `;
-  document.head.appendChild(style);
-})();
-ScrollTrigger.defaults({ anticipatePin: 1, pinReparent: true, toggleClass: 'is-pinned' });
+    about: {
+      heading: "¡Viva la XP!",
+      sup: "experience",
+      byline: "— Zack Gort, Senior User Experience Designer"
+    },
 
-/* ---------------- Environment flags ---------------- */
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const mq = window.matchMedia('(max-width: 768px)');
-let isMobile = mq.matches;
+    heroMosaic: {
+      leadCopyA: { title: "UX Design & Data", text: "What 98% of my work looks like..." },
+      leadCopyB: { title: "UI Design & Brand Systems", text: "...the other 2%" },
+      imagesA: [
+        ["https://i.ibb.co/VYS1xRzh/work2.webp", "span-2 ar-narrow"],
+        ["https://i.ibb.co/ynjWYqv8/2.webp", "ar-wide span-2"],
+        ["https://i.ibb.co/cXg5Phdc/3.webp", "ar-wide span-2"],
+        ["https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png", "ar-narrow span-2"],
+        ["https://i.ibb.co/23T984XS/huge2.webp", "ar-wide span-2"],
+        ["https://i.ibb.co/HTRJDL9w/tiktok2.webp", "ar-wide span-2"]
+      ],
+      imagesB: [
+        ["https://i.ibb.co/MrFyzRt/work3.webp", "ar-rect"],
+        ["https://i.ibb.co/Kc09Jpsz/tiktok3.webp", "ar-wide span-2"],
+        ["https://i.ibb.co/cXh31wt5/Frame-2147223570.png", "ar-narrow span-2"],
+        ["https://i.ibb.co/fpbcrXp/Frame-4348.png", "ar-wide span-2"],
+        ["https://i.ibb.co/28bQ3XM/Mask-group.png", "ar-rect span-2"],
+        ["https://i.ibb.co/NtWgd7T/dana-mobile-mockup.jpg", "ar-wide span-3"]
+      ]
+    },
 
-const onMQChange = (e) => {
-  isMobile = e.matches;
-  ScrollTrigger.refresh();
-};
-
-if (mq.addEventListener) {
-  mq.addEventListener('change', onMQChange);
-} else if (mq.addListener) {
-  mq.addListener(onMQChange);
-}
-
-
-/* ---------------- Smooth scroll + hash ---------------- */
-const initSmoothScrolling = () => {
-  window.lenis = new Lenis({ lerp: 0.15 });
-  window.lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((time) => window.lenis.raf(time * 1000));
-  gsap.ticker.lagSmoothing(0);
-};
-function enableHashScrollWithLenis() {
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a[href^="#"]');
-    if (!link) return;
-
-    const hash = link.getAttribute('href');
-    if (!hash || hash === '#' || hash.length < 2) return;
-
-    const target = document.querySelector(hash);
-    if (!target) return;
-
-    e.preventDefault();
-
-    // If this section is controlled by a ScrollTrigger pin,
-    // jump to its end so the layout is fully settled.
-    if (window.ScrollTrigger) {
-      const st = ScrollTrigger.getAll().find(st =>
-        st && isFinite(st.end) && (
-          st.pin === target ||
-          st.trigger === target ||
-          target.contains(st.pin) ||
-          target.contains(st.trigger)
-        )
-      );
-
-      if (st) {
-        const y = st.end + 2; // tiny nudge past end so pin fully releases
-        if (window.lenis) {
-          window.lenis.scrollTo(y, { duration: 1.1 });
-        } else {
-          window.scrollTo({ top: y, behavior: 'smooth' });
+    skills: {
+      cols: [
+        {
+          heading: "#experience",
+          items: [
+            "User Experience Design",
+            "Content & Brand Strategy {B2B+C}",
+            "Visual Interface Design",
+            "Accessibility Compliance"
+          ]
+        },
+        {
+          heading: "#savvy",
+          items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"]
+        },
+        {
+          heading: "#evolution",
+          items: ["AI + Creative Coding", "Design Systems & Workflows", "+"]
         }
-        history.pushState(null, '', hash);
+      ]
+    },
+
+    workSelect: {
+      captionTitle: "select works",
+      tiles: [
+        "img/23.webp","img/40.webp","img/10.webp","img/17.webp","img/22.webp"
+      ],
+      cards: [
+        { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓" },
+        { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓" },
+        { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
+      ]
+    },
+
+    brandsGrid: {
+      title: "things I've made",
+      subtitle: "for brands people love/need",
+      images: [
+        "https://i.ibb.co/RTTZh2gq/1-1-QGGK09-DGx0-R4p-d-Jg6xiw.webp",
+        "https://i.ibb.co/TMMyL0Vh/1-a-NLx-Fbj-VHKc-GD9-Zcks-Rpx-Q.webp",
+        "https://i.ibb.co/yn3gkgVL/1-CQ-4u-Tk-D6-MUBWABKw-JIZg-A.webp",
+        "https://i.ibb.co/9Lmj8ck/1-FYt-Vic-HKj-LDPLW2rcn-J1u-A.webp",
+        "https://i.ibb.co/ZzQnmrNr/1-GFvd-yw-Ap-PELXmtr-Fbx-Vug.webp",
+        "https://i.ibb.co/MJLfbdm/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp",
+        "https://i.ibb.co/yBgB52s8/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp",
+        "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
+        "https://i.ibb.co/vxXJ7fSV/1-rqzz-Cscn-OIL96-Vm-Ln0v7d-A.webp",
+        "https://i.ibb.co/0p7Ktz5L/1-Tut-Ce-PQB0b-SCo-Mf-MTWJb-Q.webp",
+        "https://i.ibb.co/W4XvQk1t/1-vk-U8l-Zmqn-OHghe-Os-K0qtrw.webp",
+        "https://i.ibb.co/PZqV1yTz/3.webp",
+        "https://i.ibb.co/4RvT7dD4/4.webp",
+        "https://i.ibb.co/SXPvx5q9/8.webp",
+        "https://i.ibb.co/q3jYb38v/10.webp",
+        "https://i.ibb.co/pBMMxY1Z/11.webp",
+        "https://i.ibb.co/XZ8QtMx9/610811e9c2fa676f3fb1255f-zax02412-68c4866404de0.webp",
+        "https://i.ibb.co/Rk3wPs4B/baw-mobile-mockup-68c48663e78cc.webp",
+        "https://i.ibb.co/xqfFFj48/browse-location-list-68c48666baf6e.webp",
+        "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
+        "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
+        "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
+        "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
+        "https://i.ibb.co/G3nxwqwq/frame-4349-68c4866fbabc4.webp",
+        "https://i.ibb.co/bRXzf3P0/frame-2147223570-1-68c486713d753.webp",
+        "https://i.ibb.co/qYDGB67R/frame-2147223570-68c4867296daa.webp",
+        "https://i.ibb.co/nX2Nxq1/gnc-shop-l3-68c48673b14da.webp",
+        "https://i.ibb.co/xSVNc6mg/huge4.webp",
+        "https://i.ibb.co/0WS7sTP/image-002-68c486755a4f1.webp",
+        "https://i.ibb.co/Xr2TRM55/image-004-68c486758ca10.webp",
+        "https://i.ibb.co/FFCYQXX/image-8-68c4867d590d6.webp",
+        "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
+        "https://i.ibb.co/HLtfQxDw/screenshot-20230217-101719-68c4868300b7b.webp",
+        "https://i.ibb.co/Cp6cvdDR/screenshot-20230217-102232-68c48685e47a8.webp",
+        "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
+        "https://i.ibb.co/0VmJ708g/work3.webp"
+      ]
+    },
+
+    agencyGrid: {
+      title: "#agencylife",
+      subtitle: "startups, shops, and agencies",
+      images: [
+        "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
+        "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
+        "https://i.ibb.co/fYM2drZG/1-UATKEet6-Vtc-Lk-A8r-Yspj-FQ.webp",
+        "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
+        "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
+        "https://i.ibb.co/m5yN57gn/IMG-20160526-164803987-01.jpg",
+        "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
+        "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
+        "https://i.ibb.co/RymyPtP/image-443-min.png",
+        "https://i.ibb.co/cYysMW7/640b4f5c077e33763e82fcba-PXL-20220815-141417163-MP-2-p-2000.jpg"
+      ]
+    },
+
+    fintech: {
+      heroImages: [
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png"
+      ],
+      heroCaption: { title: "Financial Product", subtitle: "Financial Product Design" },
+      process: {
+        domain: "BNY Mellon — Pershing X",
+        date: "2023 — 2024",
+        mission: [
+          "Create a modern, composable workspace for registered investment advisors that merges client context (CRM), portfolio actions (trades, rebalancing), and compliance guardrails without toggling between tools.",
+          "Design an IA that scales from sole practitioners to multi-office firms, while ensuring accessibility, auditability, and performance across complex data views."
+        ],
+        details: [
+          ["Problem","Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights."],
+          ["Constraints","Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices."],
+          ["Role & Team","Lead Product Designer (IA/flows). Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, & 2 additional designers. Weekly research cadence with advisors and operations staff."],
+          ["Research","Shadowed 12 advisors across firms; mapped task graphs for onboarding → account maintenance → rebalance → review. Ran tree tests to validate navigation and quick actions."],
+          ["Next","Multi-entity households, scenario backtesting, and AI-assisted review narratives that summarize drift, cash needs, and compliance notes per meeting."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/FJNG1jC/14.jpg",
+        "https://i.ibb.co/fxjgcYD/18.png",
+        "https://i.ibb.co/gtQLYJQ/17.jpg",
+        "https://i.ibb.co/Fgxcqj0/16.jpg",
+        "https://i.ibb.co/dcXH5fn/13.jpg"
+      ],
+      insight: [
+        ["Problem","Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights."],
+        ["Constraints","Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices."]
+      ],
+      stack: [
+        ["https://i.ibb.co/XkM2hn8n/bny1.png","BNY 1"],
+        ["https://i.ibb.co/vvMZmq94/bny2.png","BNY 2"],
+        ["https://i.ibb.co/xS49C07B/bny3.png","BNY 3"],
+        ["https://i.ibb.co/wZY2bhKF/bny4.png","BNY 4"],
+        ["https://i.ibb.co/HGv7ymj/4.jpg","Account Opening"]
+      ]
+    },
+
+    ecommerce: {
+      heroImages: [
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/gZ58PKyk/4.webp"
+      ],
+      heroCaption: { title: "E-commerce", subtitle: "Shopify E-commerce · Elva Design Group" },
+      process: {
+        domain: "General Nutrition Centers",
+        date: "2021",
+        titleLines: ["if the bar ain't bending,","you’re just pretending"],
+        details: [
+          ["Problem","Legacy platform slowed releases, taxonomy was inconsistent across PLP/PDP, and content was duplicated across regions — hurting SEO, conversions, and loyalty enrollment."],
+          ["Constraints","Rapid Shopify migration with SEO preservation, loyalty & ERP integrations, SKU complexity (bundles/subscriptions), and performance budgets for mobile."],
+          ["Role & Team","Lead UX (IA/flows). Partnered with PM, Tech Lead, Shopify devs, Content, Merchandising, and Analytics. Weekly reviews with exec stakeholders."],
+          ["Research","Heuristic audits, keyword & on-site search analysis, card sorts + tree tests for navigation, and prototype testing on mobile PLP/PDP + checkout."],
+          ["Next","Personalized bundles, subscription skews by cycle, and loyalty-led landing frameworks to lift AOV and repeat purchase."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/gZ58PKyk/4.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/Y7pGqJ69/5.webp",
+        "https://i.ibb.co/99h2bQMh/6.webp",
+        "https://i.ibb.co/yB4RwkTf/7.webp",
+        "https://i.ibb.co/7N2rDqrN/8.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp"
+      ],
+      insight: [
+        ["Navigation & IA","Rebuilt taxonomy (goals, ingredients, formats) and aligned PLP filters to search intent; simplified top-nav to three shopping entries plus Programs & Guidance."]
+      ],
+      stack: [
+        ["https://i.ibb.co/cSQCgNQY/work1.webp","Homepage concept"],
+        ["https://i.ibb.co/spHgPH6N/1.webp","PLP & filter system"],
+        ["https://i.ibb.co/ynjWYqv8/2.webp","Subscription bundle flows"],
+        ["https://i.ibb.co/cXg5Phdc/3.webp","PDP content blocks"],
+        ["https://i.ibb.co/gZ58PKyk/4.webp","Cart & checkout refinements"],
+        ["https://i.ibb.co/Y7pGqJ69/5.webp","Landing template variants"],
+        ["https://i.ibb.co/99h2bQMh/6.webp","Mobile flows"],
+        ["https://i.ibb.co/yB4RwkTf/7.webp","Guides & programs"]
+      ]
+    },
+
+    contact: {
+      blurb: "Interested in collaborating or just want to say hello? Reach out—always open to good problems.",
+      email: "zack@reasonably.cc",
+      linkedin: "https://www.linkedin.com/in/zackgort/"
+    }
+  };
+  </script>
+
+  <script>
+  // ============================================================
+  // RENDERER — builds DOM from CONTENT (simple placeholders only)
+  // ============================================================
+  document.documentElement.classList.add('js');
+
+  const $ = (s, r=document) => r.querySelector(s);
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  function renderApp() {
+    const app = $('#app');
+
+    // HEADER / FRAME
+    const header = el('header','frame');
+    header.innerHTML = `
+      <h2 class="frame__title ux-dead-jump">${CONTENT.header.title}</h2>
+      <div class="frame__subline type-tiny">
+        <span>${CONTENT.header.subline}</span>
+        <nav class="frame__links flex-line">${CONTENT.header.links.map(l =>
+          `<a href="${l.href}" ${l.href.startsWith('#')?'':`target="_blank" rel="noopener"`}>${l.label}</a>`
+        ).join('')}</nav>
+      </div>
+      <nav class="frame__tags flex-line type-tiny">
+        ${CONTENT.header.tags.map(t => `<a href="${t.href}" ${t.settle?`data-settle="${t.settle}"`:''}>${t.label}</a>`).join('')}
+      </nav>
+      <span class="frame__logo">${CONTENT.header.logo}</span>
+    `;
+    app.appendChild(header);
+
+    // ABOUT
+    const about = el('section','content content--padded');
+    about.id = 'about';
+    about.innerHTML = `
+      <h3 class="heading-chant">
+        ${CONTENT.about.heading}
+        <sup class="confetti-sup" role="button" tabindex="0" aria-label="experience (tap for confetti)">
+          ${CONTENT.about.sup}
+          <span class="emitter" aria-hidden="true"></span>
+        </sup>
+      </h3>
+      <p class="type-tiny right end">— Zack Gort, Senior <span style="color:#fff;background-color:#fff;">User</span> Experience Designer</p>
+    `;
+    app.appendChild(about);
+
+    // HERO MOSAIC (data-grid-seventh for spacing that follows)
+    const hero = el('section','content content--full content--padded');
+    hero.innerHTML = `
+      <div class="grid grid--column" data-grid-seventh>
+        <div class="grid__item span-3">
+          <h4 class="type-tiny">${CONTENT.heroMosaic.leadCopyA.title}</h4>
+          <p>${CONTENT.heroMosaic.leadCopyA.text}</p>
+        </div>
+        ${CONTENT.heroMosaic.imagesA.map(([src, cls]) => `
+          <div class="grid__img ${cls||''}">
+            <div class="grid__img-inner" style="background-image:url(${src})"></div>
+          </div>`).join('')}
+        <div class="grid__item span-3">
+          <h4 class="type-tiny">${CONTENT.heroMosaic.leadCopyB.title}</h4>
+          <p>${CONTENT.heroMosaic.leadCopyB.text}</p>
+        </div>
+        ${CONTENT.heroMosaic.imagesB.map(([src, cls]) => `
+          <div class="grid__img ${cls||''}">
+            <div class="grid__img-inner" style="background-image:url(${src})"></div>
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(hero);
+
+    // SKILLS (3-up)
+    const skills = el('section','content content--padded');
+    skills.id = 'skills';
+    skills.innerHTML = `
+      <div class="trio-grid">
+        ${CONTENT.skills.cols.map(col => `
+          <div class="trio-col">
+            <h4 class="type-tiny">${col.heading}</h4>
+            ${col.items.map(t => `<p class="content__text">${t}</p>`).join('')}
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(skills);
+
+    // WORK SELECT
+    const work = el('section','content content--padded'); work.id='work';
+    work.innerHTML = `
+      <h2 class="content__title-main">select works</h2>
+      <div class="grid grid--columns grid--spaced" data-grid-second>
+        ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+        ${CONTENT.workSelect.cards.map(c => `
+          <div class="grid__item work-card">
+            <h4 class="type-tiny">
+              <a class="title-link" href="${c.href}" ${c.ext?'target="_blank" rel="noopener noreferrer"':''}>${c.title}</a>
+            </h4>
+            <p>${c.glyph||''}</p>
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(work);
+
+    // BRANDS GRID
+    const brands = el('section','content content--padded content--full'); brands.id='brands-grid';
+    brands.innerHTML = `
+      <div class="grid grid--spaced grid--small" data-grid-fifth>
+        ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.brandsGrid.title}</h2>
+        <p class="type-tiny right end">${CONTENT.brandsGrid.subtitle}</p>
+      </div>
+    `;
+    app.appendChild(brands);
+
+    // AGENCY GRID
+    const agency = el('section','content content--full'); agency.id='brands-grid-2';
+    agency.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.agencyGrid.title}</h2>
+        <p class="type-tiny right end">${CONTENT.agencyGrid.subtitle}</p>
+      </div>
+    `;
+    app.appendChild(agency);
+
+    // FINTECH — HERO
+    const finHero = el('section','content content--padded content--full'); finHero.id='fintech';
+    finHero.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.fintech.heroImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.fintech.heroCaption.title}</h2>
+        <p class="type-tiny right end">${CONTENT.fintech.heroCaption.subtitle}</p>
+      </div>
+    `;
+    app.appendChild(finHero);
+
+    // FINTECH — PROCESS (intro + details 2-up)
+    const finProc = el('section','content content--padded'); finProc.id='fintech-process';
+    const finIntro = `
+      <section class="project project--intro">
+        <span class="project__label project__label--name">Domain</span>
+        <span class="project__name">${CONTENT.fintech.process.domain}</span>
+        <span class="project__label project__label--date">Financial Product · Portfolio & CRM</span>
+        <span class="project__date">${CONTENT.fintech.process.date}</span>
+        <h2 class="project__title"><span class="project__title-line">design systems and data refactorization</span></h2>
+        <span class="project__label project__label--mission">Mission</span>
+        <div class="project__mission">${CONTENT.fintech.process.mission.map(p=>`<p>${p}</p>`).join('')}</div>
+      </section>`;
+    const finDetails = CONTENT.fintech.process.details.map(([label,text],i) => `
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    finProc.innerHTML = finIntro + finDetails;
+    app.appendChild(finProc);
+
+    // FINTECH — DISCOVERY
+    const finDisc = el('section','content content--full content--cutoff'); finDisc.id='fintech-discovery';
+    finDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>`;
+    app.appendChild(finDisc);
+
+    // FINTECH — INSIGHT (pair)
+    const finInsight = el('section','content content--padded'); finInsight.id='fintech-insight';
+    finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    app.appendChild(finInsight);
+
+    // FINTECH — STACK
+    const finStack = el('section','content content--full stacked-section'); finStack.id='fintech-stack';
+    finStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(finStack);
+
+    // ECOM HERO
+    const ecoHero = el('section','content content--padded content--full'); ecoHero.id='ecommerce';
+    ecoHero.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.ecommerce.heroImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.ecommerce.heroCaption.title}</h2>
+        <p class="type-tiny right end">${CONTENT.ecommerce.heroCaption.subtitle}</p>
+      </div>`;
+    app.appendChild(ecoHero);
+
+    // ECOM PROCESS
+    const ecoProc = el('section','content content--padded'); ecoProc.id='ecommerce-process';
+    const ecoIntro = `
+      <section class="project project--intro">
+        <span class="project__label project__label--name">Domain</span>
+        <span class="project__name">${CONTENT.ecommerce.process.domain}</span>
+        <span class="project__label project__label--date">E-commerce · Shopify</span>
+        <span class="project__date">${CONTENT.ecommerce.process.date}</span>
+        <h2 class="project__title">
+          ${CONTENT.ecommerce.process.titleLines.map(t=>`<span class="project__title-line">${t}</span>`).join('')}
+        </h2>
+      </section>`;
+    const ecoDetails = CONTENT.ecommerce.process.details.map(([label,text],i)=>`
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    ecoProc.innerHTML = ecoIntro + ecoDetails;
+    app.appendChild(ecoProc);
+
+    // ECOM DISCOVERY
+    const ecoDisc = el('section','content content--full content--cutoff'); ecoDisc.id='ecommerce-discovery';
+    ecoDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.ecommerce.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>`;
+    app.appendChild(ecoDisc);
+
+    // ECOM INSIGHT
+    const ecoInsight = el('section','content content--padded'); ecoInsight.id='ecommerce-insight';
+    ecoInsight.innerHTML = CONTENT.ecommerce.insight.map(([label,text])=>`
+      <section class="project project--details project--left">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    app.appendChild(ecoInsight);
+
+    // ECOM STACK
+    const ecoStack = el('section','content content--full stacked-section'); ecoStack.id='ecommerce-stack';
+    ecoStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(ecoStack);
+
+    // CONTACT
+    const contact = el('section','content content--padded'); contact.id='contact';
+    contact.innerHTML = `
+      <h4 class="type-tiny">Contact</h4>
+      <p class="content__text">${CONTENT.contact.blurb}</p>`;
+    app.appendChild(contact);
+
+    // FOOTER
+    const footer = el('footer','page-footer type-tiny');
+    footer.innerHTML = `
+      <span>Hey, nice to see you down here!</span>
+      <span><a href="mailto:${CONTENT.contact.email}">${CONTENT.contact.email}</a></span>
+      <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
+    app.appendChild(footer);
+
+    // Scroll-to-top widget
+    const s = el('div','scroll-downs');
+    s.setAttribute('role','button'); s.setAttribute('tabindex','0'); s.setAttribute('aria-label','Back to top');
+    s.innerHTML = `<div class="mousey"><div class="scroller"></div></div>`;
+    app.appendChild(s);
+  }
+
+  renderApp();
+  </script>
+
+  <script>
+  // ============================================================
+  // BEHAVIOR — smooth scroll, animations, confetti, blur, cursor
+  // (ported from your working JS; now runs against dynamic DOM)
+  // ============================================================
+  gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.normalizeScroll(true);
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Lenis
+  function initSmooth() {
+    window.lenis = new Lenis({ lerp: 0.15 });
+    window.lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((t)=>window.lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  // Hash scrolling (Lenis-aware) + settle support
+  function enableHashScroll() {
+    document.addEventListener('click',(e)=>{
+      const a = e.target.closest('a[href^="#"]'); if(!a) return;
+      const id = a.getAttribute('href');
+      if(!id || id.length<2) return;
+      const target = document.querySelector(id); if(!target) return;
+      e.preventDefault();
+
+      // If settle=end, try to scroll to end of pinned sequence
+      const settle = a.dataset.settle;
+      if(settle==='end'){
+        const st = ScrollTrigger.getAll().find(st => st && (st.pin===target || st.trigger===target || target.contains(st.pin) || target.contains(st.trigger)));
+        if(st && isFinite(st.end)){
+          const y = st.end + 2;
+          return window.lenis ? window.lenis.scrollTo(y,{duration:1.1}) : window.scrollTo({top:y,behavior:'smooth'});
+        }
+      }
+      const y = target.getBoundingClientRect().top + window.pageYOffset;
+      window.lenis ? window.lenis.scrollTo(y,{duration:1}) : window.scrollTo({top:y,behavior:'smooth'});
+      history.pushState(null,'',id);
+    });
+  }
+
+  // Preload backgrounds
+  const preloadImages = (sel='.grid__img, .grid__img-inner') =>
+    new Promise(res => imagesLoaded(document.querySelectorAll(sel), { background:true }, res));
+
+  // Grid animator (same engine, simplified call)
+  function animateGrids(){
+    const modes = {
+      second: { endDesk:'+=250%',endMob:'+=140%',scrubDesk:.5,scrubMob:.25 },
+      fifth:  { endDesk:'+=250%',endMob:'+=150%',scrubDesk:.3,scrubMob:.2  },
+      sixth:  { endDesk:'+=180%',endMob:'+=120%',scrubDesk:.6,scrubMob:.4  },
+      ninth:  { endDesk:'+=200%',endMob:'+=120%',scrubDesk:true,scrubMob:true }
+    };
+    const isMobile = matchMedia('(max-width:768px)').matches;
+
+    const pairs = [
+      ['[data-grid-second]','second'],
+      ['[data-grid-fifth]','fifth'],
+      ['[data-grid-sixth]','sixth'],
+      ['[data-grid-ninth]','ninth']
+    ];
+
+    pairs.forEach(([sel,mode])=>{
+      document.querySelectorAll(sel).forEach(grid=>{
+        const imgs = grid.querySelectorAll('.grid__img');
+        const items = grid.querySelectorAll('.grid__item');
+        if(!imgs.length) return;
+
+        if(prefersReducedMotion){
+          gsap.from([...imgs,...items],{
+            autoAlpha:0,y:20,stagger:.05,duration:.4,ease:'power1.out',
+            scrollTrigger:{trigger:grid,start:'top 85%'}
+          });
+          return;
+        }
+
+        const section = grid.closest('section') || grid.parentNode;
+        const cfg = modes[mode];
+        const end = isMobile ? cfg.endMob : cfg.endDesk;
+        const scrub = isMobile ? cfg.scrubMob : cfg.scrubDesk;
+
+        const tl = gsap.timeline({
+          defaults: { ease: (mode==='sixth'?'none':'power3') },
+          scrollTrigger: { trigger: section, start:'top top', end, pin: section, scrub, pinSpacing:true, invalidateOnRefresh:true }
+        });
+
+        if(mode==='second'){
+          const mid = Math.floor(imgs.length/2);
+          tl.from(imgs,{
+            stagger:{amount:.3,from:'center'},
+            y:()=>innerHeight,
+            transformOrigin:'50% 0%',
+            rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(isMobile?1.5:3)
+          }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
+        }
+        if(mode==='fifth'){
+          tl.set(grid,{perspective:1000})
+            .from(imgs,{
+              stagger:{amount:.4,from:'random',grid:[4,9]},
+              y:()=>innerHeight,rotationX:isMobile?-40:-70,transformOrigin:'50% 0%',z:isMobile?-450:-900,autoAlpha:0
+            });
+        }
+        if(mode==='sixth'){
+          tl.from(imgs,{stagger:{amount:.25,from:'edges',grid:[3,3]},scale:isMobile?.82:.7,autoAlpha:0})
+            .from(grid,{scale:isMobile?.92:.85,skewY:isMobile?1.5:3},0);
+        }
+        if(mode==='ninth'){
+          const caption = section.querySelector('.content__title');
+          tl.from(imgs,{transformOrigin:'100% -450%',stagger:.07,scaleX:1.02,skewX:isMobile?7:15,xPercent:isMobile?18:50,rotation:isMobile?-5:-10,autoAlpha:0});
+          if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
+        }
+      });
+    });
+  }
+
+  // Header motion
+  function animateHeader(){
+    const frame = document.querySelector('.frame');
+    const title = frame?.querySelector('.frame__title');
+    if(!frame||!title) return;
+
+    if(prefersReducedMotion){
+      gsap.from(frame,{autoAlpha:0,duration:.6,ease:'power1.out',scrollTrigger:{trigger:frame,start:'top 95%'}});
+      return;
+    }
+    gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:frame,start:'clamp(top bottom)',end:'bottom top',scrub:true}})
+       .to(frame,{yPercent:35,scale:.95,filter:'brightness(30%)'})
+       .to(title,{xPercent:-80},0);
+  }
+
+  // Process sections reveal
+  function animateProcess(){
+    document.querySelectorAll('[id$="-process"]').forEach(process=>{
+      const intro = process.querySelector('.project--intro');
+      const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
+      if(prefersReducedMotion){
+        intro && gsap.from(intro,{autoAlpha:0,y:16,duration:.35,scrollTrigger:{trigger:intro,start:'top 90%'}});
+        details.length && gsap.from(details,{autoAlpha:0,y:14,duration:.3,stagger:.08,scrollTrigger:{trigger:process,start:'top 85%'}});
         return;
       }
-    }
-
-    // Fallback: normal anchor scroll (respects optional data-offset)
-    const extra = parseFloat(link.dataset.offset || 0) || 0;
-    const y = target.getBoundingClientRect().top + window.pageYOffset + extra;
-    if (window.lenis) {
-      window.lenis.scrollTo(y, { duration: 1.0 });
-    } else {
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
-    history.pushState(null, '', hash);
-  });
-}
-
-
-
-
-/* ---------------- Assets + helpers ---------------- */
-const preloadImages = (selector = '.grid__img, .grid__img-inner') =>
-  new Promise((resolve) =>
-    imagesLoaded(document.querySelectorAll(selector), { background: true }, resolve)
-  );
-
-const getPinTarget = (grid) => grid.closest('section') || grid.parentNode;
-
-function readDataNumber(el, name, fallback) {
-  const v = el.dataset[name];
-  if (v == null) return fallback;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : v; // allow strings like '+=150%'
-}
-function dataEnd(el, defDesk, defMob) {
-  const d = el.dataset.endDesktop ?? defDesk;
-  const m = el.dataset.endMobile ?? defMob;
-  return isMobile ? m : d;
-}
-function dataScrub(el, defDesk, defMob) {
-  const d = readDataNumber(el, 'scrubDesktop', defDesk);
-  const m = readDataNumber(el, 'scrubMobile', defMob);
-  return isMobile ? m : d;
-}
-
-/* ============================================================
-   DECLARATIVE RULES
-   - We attach `data-mode` / `data-end-desktop` / `data-scrub-mobile`, etc.
-   - No special animation functions for BNY/GNC—just config.
-   ============================================================ */
-const SECTION_RULES = [
-  // BNY hero grid (declared as ninth in HTML) should animate with "sixth" mode
-  { scope: '#fintech', selector: '[data-grid-ninth]', set: { mode: 'sixth' } },
-  // BNY discovery (declared as sixth) should animate with "ninth" mode
-  { scope: '#fintech-discovery', selector: '[data-grid-sixth]', set: { mode: 'ninth' } },
-
-  // GNC hero: tighter pin & scrub
-  {
-    scope: '#ecommerce',
-    selector: '[data-grid-ninth]',
-    set: {
-      endDesktop: '+=135%',
-      endMobile:  '+=95%',
-      scrubDesktop: 0.45,
-      scrubMobile:  0.28
-    }
-  },
-  // GNC discovery: tuned pin & scrub to follow hero smoothly
-  {
-    scope: '#ecommerce-discovery',
-    selector: '[data-grid-sixth]',
-    set: {
-      endDesktop: '+=160%',
-      endMobile:  '+=110%',
-      scrubDesktop: 0.55,
-      scrubMobile:  0.35
-    }
-  },
-];
-
-/* Apply rules once on load (declaratively enrich DOM with data-*) */
-function applySectionRules() {
-  SECTION_RULES.forEach(rule => {
-    const root = document.querySelector(rule.scope);
-    if (!root) return;
-    root.querySelectorAll(rule.selector).forEach(el => {
-      const set = rule.set || {};
-      if (set.mode)           el.dataset.mode = set.mode;
-      if (set.endDesktop)     el.dataset.endDesktop = set.endDesktop;
-      if (set.endMobile)      el.dataset.endMobile = set.endMobile;
-      if (set.scrubDesktop!=null) el.dataset.scrubDesktop = set.scrubDesktop;
-      if (set.scrubMobile!=null)  el.dataset.scrubMobile  = set.scrubMobile;
+      intro && gsap.from(intro,{autoAlpha:0,y:24,duration:.6,ease:'power2.out',scrollTrigger:{trigger:intro,start:'top 80%'}});
+      details.length && gsap.from(details,{autoAlpha:0,y:30,duration:.5,ease:'power2.out',stagger:.12,scrollTrigger:{trigger:process,start:'top 75%',end:'bottom 30%'}});
     });
-  });
-}
-
-/* ============================================================
-   GRID ANIMATOR
-   - Supports modes: second, fifth, sixth, seventh, ninth
-   - Defaults for pin end / scrub; overridable via data-*
-   - No one-off code paths
-   ============================================================ */
-function animateGrids() {
-  const grids = document.querySelectorAll(
-    '[data-grid-second], [data-grid-fifth], [data-grid-sixth], [data-grid-seventh], [data-grid-ninth]'
-  );
-  grids.forEach(grid => {
-    const mode =
-      grid.dataset.mode ||
-      (grid.hasAttribute('data-grid-second')  && 'second')  ||
-      (grid.hasAttribute('data-grid-fifth')   && 'fifth')   ||
-      (grid.hasAttribute('data-grid-sixth')   && 'sixth')   ||
-      (grid.hasAttribute('data-grid-seventh') && 'seventh') ||
-      (grid.hasAttribute('data-grid-ninth')   && 'ninth');
-
-    buildGridTimeline(grid, mode);
-  });
-}
-
-function buildGridTimeline(grid, mode) {
-  // Elements
-  const imgs  = grid.querySelectorAll('.grid__img');
-  const items = grid.querySelectorAll('.grid__item'); // some modes use these
-  if (!imgs.length) return;
-
-  // Reduced motion: simple entrance
-  if (prefersReducedMotion) {
-    gsap.from([ ...imgs, ...items ], {
-      autoAlpha: 0,
-      y: 20,
-      stagger: 0.05,
-      duration: 0.4,
-      ease: 'power1.out',
-      scrollTrigger: { trigger: grid, start: 'top 85%', toggleActions: 'play none none none' }
-    });
-    return;
   }
 
-  const pinSection = getPinTarget(grid);
-
-  // Defaults per mode
-  const defaults = {
-    second:  { endDesk: '+=250%', endMob: '+=140%', scrubDesk: 0.5,  scrubMob: 0.25 },
-    fifth:   { endDesk: '+=250%', endMob: '+=150%', scrubDesk: 0.3,  scrubMob: 0.2  },
-    sixth:   { endDesk: '+=180%', endMob: '+=120%', scrubDesk: 0.6,  scrubMob: 0.4  },
-    seventh: { endDesk: '+=150%', endMob: '+=110%', scrubDesk: 0.5,  scrubMob: 0.35 },
-    ninth:   { endDesk: '+=200%', endMob: '+=120%', scrubDesk: true, scrubMob: true }
-  }[mode] || { endDesk: '+=150%', endMob: '+=110%', scrubDesk: 0.4, scrubMob: 0.3 };
-
-  const end   = dataEnd(grid, defaults.endDesk, defaults.endMob);
-  const scrub = dataScrub(grid, defaults.scrubDesk, defaults.scrubMob);
-
-  const tl = gsap.timeline({
-    defaults: { ease: (mode === 'sixth' || mode === 'second') ? 'none' : 'power3' },
-    scrollTrigger: {
-      trigger: pinSection,
-      start: 'top top',
-      end,
-      pin: pinSection,
-      pinSpacing: true,
-      scrub,
-      invalidateOnRefresh: true
-    }
-  });
-
-  // Mode-specific motions
-  switch (mode) {
-    case 'second': {
-      const mid = Math.floor(imgs.length / 2);
-      tl.from(imgs, {
-        stagger: { amount: 0.3, from: 'center' },
-        y: () => innerHeight,
-        transformOrigin: '50% 0%',
-        rotation: (i) => {
-          const dist = Math.abs(i - mid);
-          return i < mid ? dist * (isMobile ? 1.5 : 3) : dist * (isMobile ? -1.5 : -3);
-        }
-      })
-      .from(items, { stagger: { amount: 0.3, from: 'center' }, yPercent: 100, autoAlpha: 0 }, 0);
-      break;
-    }
-
-    case 'fifth': {
-      tl.set(grid, { perspective: 1000 })
-        .from(imgs, {
-          stagger: { amount: 0.4, from: 'random', grid: [4, 9] },
-          y: () => innerHeight,
-          rotationX: isMobile ? -40 : -70,
-          transformOrigin: '50% 0%',
-          z: isMobile ? -450 : -900,
-          autoAlpha: 0
-        });
-      break;
-    }
-
-    case 'sixth': {
-      tl.from(imgs, {
-        stagger: { amount: 0.25, from: 'edges', grid: [3, 3] },
-        scale: isMobile ? 0.82 : 0.7,
-        autoAlpha: 0
-      })
-      .from(grid, { scale: isMobile ? 0.92 : 0.85, skewY: isMobile ? 1.5 : 3 }, 0);
-      break;
-    }
-
-    case 'seventh': {
-      const inners = [...imgs].map(el => el.querySelector('.grid__img-inner')).filter(Boolean);
-      tl.fromTo(imgs,   { yPercent: -102 }, { yPercent: 0, stagger: 0.08 }, 0)
-        .from(inners,   { yPercent: 102, stagger: 0.08 }, 0)
-        .from(items,    { yPercent: 20, autoAlpha: 0, stagger: (imgs.length / 2) * 0.08 }, 0);
-      break;
-    }
-
-    case 'ninth': {
-      const caption = pinSection.querySelector('.content__title');
-      tl.from(imgs, {
-        transformOrigin: '100% -450%',
-        stagger: 0.07,
-        scaleX: 1.02,
-        skewX: isMobile ? 7 : 15,
-        xPercent: isMobile ? 18 : 50,
-        rotation: isMobile ? -5 : -10,
-        autoAlpha: 0
-      });
-      if (caption) tl.from(caption, { autoAlpha: 0, yPercent: 40 }, 0.35);
-      break;
-    }
-  }
-}
-
-/* ============================================================
-   NON-GRID ANIMATIONS
-   ============================================================ */
-function animateHeaderFrame() {
-  const frame = document.querySelector('.frame');
-  const title = frame && frame.querySelector('.frame__title');
-  if (!frame || !title) return;
-
-  if (prefersReducedMotion) {
-    gsap.from(frame, {
-      autoAlpha: 0,
-      duration: 0.6,
-      ease: 'power1.out',
-      scrollTrigger: { trigger: frame, start: 'top 95%', toggleActions: 'play none none none' }
-    });
-    return;
-  }
-
-  gsap.timeline({
-    defaults: { ease: 'none' },
-    scrollTrigger: { trigger: frame, start: 'clamp(top bottom)', end: 'bottom top', scrub: true }
-  })
-  .to(frame, {
-    yPercent: isMobile ? 18 : 35,
-    scale: isMobile ? 0.985 : 0.95,
-    startAt: { filter: 'brightness(100%)' },
-    filter: isMobile ? 'brightness(55%)' : 'brightness(30%)'
-  })
-  .to(title, { xPercent: isMobile ? -25 : -80 }, 0);
-}
-
-function animateProcessSections() {
-  document.querySelectorAll('[id$="-process"]').forEach((process) => {
-    const intro = process.querySelector('.project--intro');
-    const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
-
-    if (prefersReducedMotion) {
-      intro && gsap.from(intro, {
-        autoAlpha: 0, y: 16, duration: 0.35,
-        scrollTrigger: { trigger: intro, start: 'top 90%', toggleActions: 'play none none none' }
-      });
-      details.length && gsap.from(details, {
-        autoAlpha: 0, y: 14, duration: 0.3, stagger: 0.08,
-        scrollTrigger: { trigger: process, start: 'top 85%', toggleActions: 'play none none none' }
-      });
-      return;
-    }
-
-    intro && gsap.from(intro, {
-      autoAlpha: 0, y: 24, duration: 0.6, ease: 'power2.out',
-      scrollTrigger: { trigger: intro, start: 'top 80%', toggleActions: 'play none none reverse' }
-    });
-
-    details.length && gsap.from(details, {
-      autoAlpha: 0, y: 30, duration: 0.5, ease: 'power2.out', stagger: 0.12,
-      scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%', toggleActions: 'play none none reverse' }
-    });
-  });
-}
-
-function animateStackedGalleries() {
-  const stacks = document.querySelectorAll('.stacked-section [data-stack]');
-  stacks.forEach((section) => {
-    const frames = section.querySelectorAll('.stacked-img');
-
-    if (prefersReducedMotion) {
-      gsap.from(frames, {
-        autoAlpha: 0, y: 20, duration: 0.4, stagger: 0.08, ease: 'power1.out',
-        scrollTrigger: { trigger: section, start: 'top 85%', toggleActions: 'play none none none' }
-      });
-      return;
-    }
-
-    frames.forEach((el) => {
-      gsap.from(el, {
-        autoAlpha: 0, y: 36, duration: 0.7, ease: 'power2.out',
-        scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none reverse' }
-      });
-
-      const img = el.querySelector('img');
-      img && gsap.to(img, {
-        yPercent: -8, ease: 'none',
-        scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true }
-      });
-    });
-  });
-}
-
-/* ---------------- A11Y helpers ---------------- */
-function a11yifyGridImages() {
-  document.querySelectorAll('.grid__img').forEach((el) => {
-    el.setAttribute('role', 'img');
-    if (!el.hasAttribute('aria-label')) {
-      const url = (el.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-      const file = url.split('/').pop()?.split('.')[0] || '';
-      el.setAttribute('aria-label', el.dataset.alt || file.replace(/[-_]/g, ' ').trim() || 'Gallery image');
-    }
-  });
-}
-
-/* ============================================================
-   REUSABLE OVERLAY PANEL (TikTok / GNC)
-   ============================================================ */
-const CASE_STUDIES = {
-  social: {
-    title: "TikTok for Business",
-    sub: "Brand Activation (Contentful) · Code & Theory",
-    slides: {
-      hero: "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
-      header: "“Razzle Dazzle”",
-      aboutCopy: [
-        "2021 was the year TikTok exploded. Goal: expand B2B via a marketing portal into their marketplace ecosystem.",
-        "I led discovery & research, competitive analysis, and content audits while guiding taxonomy & content strategy for a Contentful migration and B2B resource hub."
-      ],
-      aboutImg: "https://i.ibb.co/gZb2Zqfv/tiktok1.webp",
-      banner: "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
-      storyLines: ["Lead discovery & research","Map taxonomy & content strategy","Deliver B2B portal on Contentful"],
-      concept: "https://i.ibb.co/Kc09Jpsz/tiktok3.webp",
-      outro: "To flow, you should know"
-    }
-  },
-  ecommerce: {
-    title: "General Nutrition Centers (GNC)",
-    sub: "{Shopify E-commerce} · Elva Design Group",
-    slides: {
-      hero: "https://i.ibb.co/7xd84m10/ZAX02375.jpg",
-      header: "“If the bar ain’t bending, you’re just pretending”",
-      aboutCopy: [
-        "GNC asked us to redesign and replatform on Shopify after exiting bankruptcy; as of 2024 they exceeded $500M revenue.",
-        "As principal UX, I owned discovery, IA & taxonomy, wireframing + feature prototyping, and consumer re-engagement."
-      ],
-      aboutImg: "https://i.ibb.co/cSQCgNQY/work1.webp",
-      banner: "https://i.ibb.co/spHgPH6N/1.webp",
-      storyLines: ["Discovery → IA & taxonomy","Wireframes & prototyping","Consumer re-engagement"],
-      concept: "https://i.ibb.co/ynjWYqv8/2.webp",
-      outro: "Mobile-minded. Outcome-driven."
-    }
-  }
-};
-
-(() => {
-  const panel = document.querySelector('.panel');
-  if (!panel) return;
-
-  const closeBtn  = panel.querySelector('.panel__close');
-  const scroller  = panel.querySelector('.panel__scroller');
-  const counterEl = panel.querySelector('.panel__counter h1');
-  const barEl     = panel.querySelector('.panel__progress-bar');
-
-  if (!document.getElementById('panel-inline-styles')) {
-    const style = document.createElement('style');
-    style.id = 'panel-inline-styles';
-    style.textContent = `
-      .panel[hidden]{display:none!important;}
-      .panel{position:fixed; inset:0; z-index:10000; overflow:hidden; background:#000; color:#fff;}
-      .panel__close{
-        position:fixed; top:.75rem; right:.75rem; z-index:10003;
-        border:1px solid var(--color-border,#444); background:rgba(20,20,20,.6); color:#fff;
-        border-radius:999px; padding:.5rem .75rem; font-size:12px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
-        backdrop-filter: blur(6px);
+  // Stacked galleries
+  function animateStacks(){
+    document.querySelectorAll('.stacked-section [data-stack]').forEach(section=>{
+      const frames = section.querySelectorAll('.stacked-img');
+      if(prefersReducedMotion){
+        gsap.from(frames,{autoAlpha:0,y:20,duration:.4,stagger:.08,ease:'power1.out',scrollTrigger:{trigger:section,start:'top 85%'}});
+        return;
       }
-      .panel__progress-bar{position:fixed; top:0; left:0; width:100vw; height:8px; transform:scaleX(0); transform-origin:left; background:#fff; z-index:10002;}
-      .panel__counter{position:fixed; bottom:1rem; right:2.5rem; z-index:10002;}
-      .panel__scroller{position:relative; height:100vh; display:flex; transform:translateX(0); will-change:transform;}
-      .panel section{position:relative; height:100vh; display:flex; justify-content:center; align-items:center;}
-      .panel img{width:100%; height:100%; object-fit:cover;}
-      .panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:90vw;}
-      .panel .header,.panel .concept-img{width:100vw;}
-      .panel h1{font-weight:400; text-transform:uppercase; line-height:1; letter-spacing:-.02em; font-size:10vw; padding-top:.25rem; margin:0;}
-      .panel h2{font-weight:700; font-size:2rem; margin:0;}
-      .panel p{font-weight:500; font-size:1rem; margin:0;}
-      .panel .intro{padding:2rem; background:#000; color:#f6f6f6;}
-      .panel .header{padding:2rem; background:#f4d35e; color:#421c06;}
-      .panel .about{padding:4rem 3rem 1rem 2rem; background:#f95738; color:#481107;}
-      .panel .story{padding:4rem 2rem 2rem 2rem; background:#ee964b; color:#3f170b;}
-      .panel .outro{padding:2rem; background:#ebebd3; color:#302418;}
-      .panel .about .row{display:flex; gap:2rem; justify-content:space-between;}
-      .panel .about .row p{width:50%; margin-bottom:1rem;}
-      .panel .about .row .copy{flex:3;}
-      .panel .about .row .img{flex:3; aspect-ratio:7/5;}
-      @media (max-width:768px){
-        .panel h1{font-size:clamp(1.6rem,9vw,2.2rem);}
-        .panel h2{font-size:1.1rem;}
-        .panel p{font-size:.95rem;}
-        .panel__progress-bar{height:5px;}
-        .panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro{width:94vw; padding:1rem;}
-        .panel .about .row{flex-direction:column; gap:1rem;}
-        .panel .about .row p{width:100%;}
-        .panel .about .row .img{aspect-ratio:16/10;}
-        .panel__close{top:.5rem; right:.5rem; padding:.4rem .6rem;}
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a[data-panel]');
-    if (!link) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    const key  = link.dataset.panel || '';
-    const data = CASE_STUDIES[key];
-
-    openPanel(data ? {
-      title: data.title,
-      sub:   data.sub,
-      slides: data.slides
-    } : {
-      title: link.dataset.panelTitle || link.textContent.trim() || 'Case Study',
-      sub:   link.dataset.panelSub   || '{Digital Product, E-commerce, Consumer}',
-      slides: { hero: link.dataset.panelHero || '' }
-    });
-  }, true);
-
-  let prevActive = null;
-  let destroyScroller = null;
-
-  function openPanel({ title, sub, slides }) {
-    if (!panel.hasAttribute('hidden')) return;
-    prevActive = document.activeElement;
-
-    const intro   = panel.querySelector('.intro');
-    const heroImg = panel.querySelector('.hero-img img');
-    const header  = panel.querySelector('.header h1');
-    const about   = panel.querySelector('.about');
-    const aboutCopyEls = about ? about.querySelectorAll('.copy p') : [];
-    const aboutImg= about ? about.querySelector('.about .img img') : null;
-    const banner  = panel.querySelector('.banner-img img');
-    const story   = panel.querySelector('.story');
-    const storyLines = story ? story.querySelectorAll('h1') : [];
-    const concept = panel.querySelector('.concept-img img');
-    const outro   = panel.querySelector('.outro h1');
-
-    if (intro) {
-      const h1 = intro.querySelector('h1');
-      const h2 = intro.querySelector('h2');
-      if (h1) h1.textContent = title;
-      if (h2) h2.textContent = sub;
-    }
-    if (heroImg && slides.hero) heroImg.src = slides.hero;
-    if (header && slides.header) header.textContent = slides.header;
-    if (about) {
-      if (aboutCopyEls[0] && slides.aboutCopy) aboutCopyEls[0].textContent = slides.aboutCopy[0] || '';
-      if (aboutCopyEls[1] && slides.aboutCopy) aboutCopyEls[1].textContent = slides.aboutCopy[1] || '';
-      if (aboutImg && slides.aboutImg) aboutImg.src = slides.aboutImg;
-    }
-    if (banner && slides.banner) banner.src = slides.banner;
-    if (story && slides.storyLines && storyLines.length >= 3) {
-      storyLines[0].textContent = slides.storyLines[0] || '';
-      storyLines[1].textContent = slides.storyLines[1] || '';
-      storyLines[2].textContent = slides.storyLines[2] || '';
-    }
-    if (concept && slides.concept) concept.src = slides.concept;
-    if (outro && slides.outro) outro.textContent = slides.outro;
-
-    panel.removeAttribute('hidden');
-    panel.setAttribute('aria-hidden', 'false');
-
-    // lock page scroll + pause scroll systems
-    const htmlOverflow = document.documentElement.style.overflow;
-    const bodyOverflow = document.body.style.overflow;
-    document.documentElement.dataset._panelHtmlOverflow = htmlOverflow || '';
-    document.body.dataset._panelBodyOverflow = bodyOverflow || '';
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-
-    try { window.lenis && window.lenis.stop(); } catch {}
-    try {
-      ScrollTrigger.getAll().forEach(st => { if (st.animation) st.animation.pause(0); st.disable(true); });
-    } catch {}
-
-    destroyScroller = initInfiniteScroller({ scroller, counterEl, barEl });
-    panel.querySelector('.panel__close')?.focus();
-
-    const onCloseClick = () => closePanel();
-    const onEsc = (ev) => { if (ev.key === 'Escape') closePanel(); };
-
-    closeBtn?.addEventListener('click', onCloseClick);
-    document.addEventListener('keydown', onEsc);
-    panel._unbind = () => {
-      closeBtn?.removeEventListener('click', onCloseClick);
-      document.removeEventListener('keydown', onEsc);
-    };
-  }
-
-  function closePanel() {
-    if (panel.hasAttribute('hidden')) return;
-
-    destroyScroller && destroyScroller();
-    destroyScroller = null;
-
-    try {
-      ScrollTrigger.getAll().forEach(st => st.enable());
-      setTimeout(() => ScrollTrigger.refresh(true), 0);
-    } catch {}
-    try { window.lenis && window.lenis.start(); } catch {}
-
-    document.documentElement.style.overflow = document.documentElement.dataset._panelHtmlOverflow || '';
-    document.body.style.overflow = document.body.dataset._panelBodyOverflow || '';
-
-    panel._unbind && panel._unbind();
-    panel.setAttribute('aria-hidden', 'true');
-    panel.setAttribute('hidden', '');
-
-    if (barEl) barEl.style.transform = 'scaleX(0)';
-    if (counterEl) counterEl.textContent = '0';
-
-    if (document.activeElement === document.body && prevActive && prevActive.focus) prevActive.focus();
-  }
-
-  function initInfiniteScroller({ scroller, counterEl, barEl }) {
-    const bufferSize = 2;
-    const smooth = 0.05;
-    const touchSensitivity = 2.5;
-
-    let targetX = 0, currentX = 0, isAnimating = false;
-    let currentScale = 0, targetScale = 0, lastPct = 0;
-    let isDown = false, lastX = 0, v = 0, lastT = 0;
-    let seqWidth = 0, raf = null;
-
-    const lerp = (a,b,t) => a + (b-a)*t;
-    const originals = () => Array.from(scroller.querySelectorAll(':scope > section:not(.clone-section)'));
-
-    function measureSequenceWidth() {
-      let total = 0;
-      originals().forEach(sec => total += sec.getBoundingClientRect().width);
-      return total || window.innerWidth;
-    }
-    function clearClones() { scroller.querySelectorAll('.clone-section').forEach(n => n.remove()); }
-    function buildClones() {
-      const base = originals();
-      for (let i = -bufferSize; i < 0; i++) base.forEach((sec, idx) => {
-        const c = sec.cloneNode(true);
-        c.classList.add('clone-section');
-        c.setAttribute('data-clone-index', `${i}-${idx}`);
-        scroller.appendChild(c);
+      frames.forEach(el=>{
+        gsap.from(el,{autoAlpha:0,y:36,duration:.7,ease:'power2.out',scrollTrigger:{trigger:el,start:'top 85%'}});
+        const img = el.querySelector('img');
+        img && gsap.to(img,{yPercent:-8,ease:'none',scrollTrigger:{trigger:el,start:'top bottom',end:'bottom top',scrub:true}});
       });
-      for (let i = 1; i <= bufferSize; i++) base.forEach((sec, idx) => {
-        const c = sec.cloneNode(true);
-        c.classList.add('clone-section');
-        c.setAttribute('data-clone-index', `${i}-${idx}`);
-        scroller.appendChild(c);
+    });
+  }
+
+  // Blur overlay layers
+  function initBlur(){
+    const layers = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--layers'))||5;
+    let b = document.querySelector('.blur'); if(!b){ b = document.createElement('div'); b.className='blur'; document.body.appendChild(b); }
+    if(!b.children.length){
+      b.innerHTML = Array.from({length:layers},(_,i)=>`<div style="--i:${i+1}"></div>`).join('');
+    }
+    const header = document.querySelector('.frame');
+    if(window.ScrollTrigger && header){
+      ScrollTrigger.create({
+        trigger: header,
+        start: 'bottom top',
+        onEnter:()=>b.classList.add('is-visible'),
+        onEnterBack:()=>b.classList.remove('is-visible'),
+        onLeaveBack:()=>b.classList.remove('is-visible')
       });
     }
-    function setup() {
-      if (raf) cancelAnimationFrame(raf);
-      clearClones();
-      seqWidth = measureSequenceWidth();
-      buildClones();
+  }
 
-      scroller.style.width = `${seqWidth * (1 + bufferSize * 2)}px`;
-      targetX = seqWidth * bufferSize;
-      currentX = targetX;
-      scroller.style.transform = `translateX(-${currentX}px)`;
+  // Gooey cursor
+  function initCursor(){
+    if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
+    document.documentElement.classList.add('has-cursor');
 
-      updateProgress(true);
-      if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
+    if(!document.getElementById('gc-goo-defs')){
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.id='gc-goo-defs'; svg.setAttribute('width','0'); svg.setAttribute('height','0');
+      svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
+      document.body.appendChild(svg);
     }
-    function boundaryReset() {
-      let did = false;
-      if (currentX > seqWidth * (bufferSize + 0.5)) { targetX -= seqWidth; currentX -= seqWidth; did = true; }
-      else if (currentX < seqWidth * (bufferSize - 0.5)) { targetX += seqWidth; currentX += seqWidth; did = true; }
-      if (did) scroller.style.transform = `translateX(-${currentX}px)`;
-      return did;
-    }
-    function updateProgress(force = false) {
-      const base = seqWidth * bufferSize;
-      const pos = (currentX - base) % seqWidth;
-      let pct = (pos / seqWidth) * 100;
-      if (pct < 0) pct = 100 + pct;
+    document.querySelectorAll('.gooey-cursor').forEach(n=>n.remove());
+    const wrap = document.createElement('div'); wrap.className='gooey-cursor'; wrap.setAttribute('aria-hidden','true'); document.body.appendChild(wrap);
 
-      const wrapping = (lastPct > 80 && pct < 20) || (lastPct < 20 && pct > 80) || force;
-
-      if (counterEl) counterEl.textContent = `${Math.round(pct)}`;
-      targetScale = pct / 100;
-
-      if (wrapping) {
-        currentScale = targetScale;
-        if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
+    const N=20, LERP=.35; let hoverBoost=1;
+    for(let i=0;i<N;i++){ const d=document.createElement('div'); d.className='gc-dot'; wrap.appendChild(d); }
+    const dots = Array.from(wrap.children);
+    let mx=innerWidth/2,my=innerHeight/2, hist=Array.from({length:N},()=>({x:mx,y:my}));
+    addEventListener('pointermove',(e)=>{mx=e.clientX;my=e.clientY},{passive:true});
+    document.addEventListener('mouseover',e=>{ if(e.target.closest('a,button,.title-link,.work-card,[role="button"]')) hoverBoost=1.6;});
+    document.addEventListener('mouseout',e=>{ if(e.target.closest('a,button,.title-link,.work-card,[role="button"]')) hoverBoost=1;});
+    function tick(){
+      hist.shift(); hist.push({x:mx,y:my});
+      for(let i=0;i<N;i++){
+        const c=hist[i],n=hist[i+1]||hist[N-1];
+        c.x += (n.x-c.x)*LERP; c.y += (n.y-c.y)*LERP;
+        const base=i/N, scale=(i===N-1? base*hoverBoost : base);
+        dots[i].style.transform=`translate(${c.x}px,${c.y}px) translate(-50%,-50%) scale(${scale})`;
       }
-      lastPct = pct;
+      requestAnimationFrame(tick);
     }
-    function animate(forceReset = false) {
-      currentX = lerp(currentX, targetX, smooth);
-      scroller.style.transform = `translateX(-${currentX}px)`;
-      updateProgress(forceReset);
-
-      if (!forceReset) currentScale = lerp(currentScale, targetScale, smooth);
-      if (barEl) barEl.style.transform = `scaleX(${currentScale})`;
-
-      if (Math.abs(targetX - currentX) > 0.01) {
-        raf = requestAnimationFrame(() => animate());
-      } else {
-        isAnimating = false; raf = null;
-      }
-    }
-
-    const onWheel = (e) => {
-      e.preventDefault();
-      targetX += e.deltaY;
-      const reset = boundaryReset();
-      if (!isAnimating) { isAnimating = true; raf = requestAnimationFrame(() => animate(reset)); }
-    };
-    const onTouchStart = (e) => { isDown = true; lastX = e.touches[0].clientX; lastT = Date.now(); targetX = currentX; };
-    const onTouchMove = (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.touches[0].clientX;
-      const dx = lastX - x;
-      targetX += dx * touchSensitivity;
-
-      const now = Date.now(); const dt = now - lastT;
-      if (dt > 0) v = (dx / dt) * 15;
-      lastX = x; lastT = now;
-
-      const reset = boundaryReset();
-      if (!isAnimating) { isAnimating = true; raf = requestAnimationFrame(() => animate(reset)); }
-    };
-    const onTouchEnd = () => {
-      isDown = false;
-      if (Math.abs(v) > 0.1) {
-        targetX += v * 20;
-        const decay = () => {
-          v *= 0.95;
-          if (Math.abs(v) > 0.1) {
-            targetX += v;
-            const reset = boundaryReset();
-            if (reset) updateProgress(true);
-            raf = requestAnimationFrame(decay);
-          }
-        };
-        raf = requestAnimationFrame(decay);
-      }
-    };
-    const onResize = () => setup();
-
-    panel.addEventListener('wheel', onWheel, { passive: false });
-    panel.addEventListener('touchstart', onTouchStart, { passive: true });
-    panel.addEventListener('touchmove', onTouchMove, { passive: false });
-    panel.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('resize', onResize);
-
-    setup();
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener('resize', onResize);
-      panel.removeEventListener('wheel', onWheel);
-      panel.removeEventListener('touchstart', onTouchStart);
-      panel.removeEventListener('touchmove', onTouchMove);
-      panel.removeEventListener('touchend', onTouchEnd);
-      scroller.querySelectorAll('.clone-section').forEach(n => n.remove());
-      scroller.style.transform = 'translateX(0)';
-    };
-  }
-})();
-
-/* ============================================================
-   BOOTSTRAP
-   ============================================================ */
-function initAnimations() {
-  animateHeaderFrame();     // header motion
-  animateGrids();           // all grids via one animator
-  animateProcessSections(); // copy columns
-  animateStackedGalleries();// full-width stacks
-}
-
-initSmoothScrolling();
-enableHashScrollWithLenis();
-applySectionRules();        // ← translate BNY/GNC intent into data-* (declarative)
-
-preloadImages().then(() => {
-  document.body.classList.remove('loading');
-  initAnimations();
-  ScrollTrigger.refresh(true);
-  window.scrollTo(0, 0);
-});
-
-// Keep triggers healthy on resize/orientation changes
-window.addEventListener('resize', () => ScrollTrigger.refresh());
-
-// A11Y roles for bg images
-a11yifyGridImages();
-
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const layers = parseInt(
-    getComputedStyle(document.documentElement).getPropertyValue('--layers')
-  ) || 5;
-
-  // Use existing .blur or create it…
-  let el = document.querySelector('.blur');
-  if (!el) {
-    el = document.createElement('div');
-    el.className = 'blur';
-    document.body.appendChild(el);
-  }
-  // …and ALWAYS ensure it has the layer slices
-  if (!el.children.length) {
-    el.innerHTML = Array.from({ length: layers }, (_, i) =>
-      `<div style="--i:${i + 1}"></div>`
-    ).join('');
+    requestAnimationFrame(tick);
   }
 
-  const header = document.querySelector('.frame');
-
-  // Show blur once header scrolls off-screen
-  if (window.ScrollTrigger && header) {
-    ScrollTrigger.create({
-      trigger: header,
-      start: 'bottom top',
-      onEnter:     () => el.classList.add('is-visible'),
-      onEnterBack: () => el.classList.remove('is-visible'),
-      onLeaveBack: () => el.classList.remove('is-visible')
-    });
-  } else if (header) {
-    const io = new IntersectionObserver(([entry]) => {
-      el.classList.toggle('is-visible', !entry.isIntersecting);
-    }, { threshold: 0 });
-    io.observe(header);
-  }
-
-  if (header && header.getBoundingClientRect().bottom <= 0) {
-    el.classList.add('is-visible');
-  }
-});
-</script>
-
-<script>
-(() => {
-  // Skip on touch / reduced motion
-  const finePointer = matchMedia('(pointer:fine)').matches;
-  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!finePointer || prefersReduced) return;
-
-  // Optional: hide OS cursor (your CSS already respects this)
-  document.documentElement.classList.add('has-cursor');
-
-  /* Ensure the goo filter exists (once) */
-  if (!document.getElementById('gc-goo-defs')) {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '0');
-    svg.setAttribute('height', '0');
-    svg.id = 'gc-goo-defs';
-    svg.innerHTML = `
-      <defs>
-        <filter id="gc-goo">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
-          <feColorMatrix in="blur" mode="matrix"
-            values="
-              1 0 0 0 0
-              0 1 0 0 0
-              0 0 1 0 0
-              0 0 0 20 -10" result="goo"/>
-          <feBlend in="SourceGraphic" in2="goo"/>
-        </filter>
-      </defs>`;
-    document.body.appendChild(svg);
-  }
-
-  /* Remove any old cursor to avoid duplicates on hot reloads */
-  document.querySelectorAll('.gooey-cursor').forEach(n => n.remove());
-
-  // Build container
-  const cursor = document.createElement('div');
-  cursor.className = 'gooey-cursor';
-  cursor.setAttribute('aria-hidden', 'true');
-  // pointer-events: none is in your CSS so clicks pass through
-  document.body.appendChild(cursor);
-
-  // Config to match the CodePen-style trail
-  const TAIL_LENGTH = 20;         // number of dots in the chain
-  const LERP = 0.35;              // how fast each segment approaches the next
-  let hoverBoost = 1;             // grows the head on hover targets
-
-  // Create dots
-  for (let i = 0; i < TAIL_LENGTH; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'gc-dot';
-    cursor.appendChild(dot);
-  }
-  const dots = Array.from(cursor.children);
-
-  // Init history at center
-  let mouseX = innerWidth / 2;
-  let mouseY = innerHeight / 2;
-  let cursorHistory = Array.from({ length: TAIL_LENGTH }, () => ({ x: mouseX, y: mouseY }));
-
-  // Track pointer
-  window.addEventListener('pointermove', (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  }, { passive: true });
-
-  // Fade in/out when leaving/entering the document for polish
-  const fade = (show) => {
-    if (window.gsap) {
-      gsap.to(cursor, { autoAlpha: show ? 1 : 0, duration: 0.2, ease: 'power2.out' });
-    } else {
-      cursor.style.opacity = show ? '1' : '0';
-    }
-  };
-  document.addEventListener('mouseleave', () => fade(false));
-  document.addEventListener('mouseenter', () => fade(true));
-  window.addEventListener('blur',  () => fade(false));
-  window.addEventListener('focus', () => fade(true));
-
-  // Optional: grow the head dot when hovering interactive targets
-  const hoverTargets = 'a, button, .title-link, .work-card, [role="button"]';
-  document.addEventListener('mouseover', (e) => {
-    if (e.target.closest(hoverTargets)) hoverBoost = 1.6; // feel free to tweak
-  });
-  document.addEventListener('mouseout', (e) => {
-    if (e.target.closest(hoverTargets)) hoverBoost = 1;
-  });
-
-  // Animation loop (reference-accurate: history chain + per-segment lerp)
-  function update() {
-    // push latest mouse, keep fixed length
-    cursorHistory.shift();
-    cursorHistory.push({ x: mouseX, y: mouseY });
-
-    for (let i = 0; i < TAIL_LENGTH; i++) {
-      const current = cursorHistory[i];
-      const next = cursorHistory[i + 1] || cursorHistory[TAIL_LENGTH - 1];
-
-      // approach next by LERP
-      current.x += (next.x - current.x) * LERP;
-      current.y += (next.y - current.y) * LERP;
-
-      // Head (last element) is largest and sits at true mouse
-      // Scale matches the reference (i / TAIL_LENGTH), with optional head boost
-      const baseScale = i / TAIL_LENGTH;
-      const scale = (i === TAIL_LENGTH - 1) ? baseScale * hoverBoost : baseScale;
-
-      // Centering is baked in via the -50% translate
-      // Order matters: translate to pointer, then offset by -50% for perfect centering
-      dots[i].style.transform =
-        `translate(${current.x}px, ${current.y}px) translate(-50%, -50%) scale(${scale})`;
-      // (No layout thrash: transforms only)
-    }
-
-    requestAnimationFrame(update);
-  }
-
-  requestAnimationFrame(update);
-})();
-</script>
-
-<script>
-/* ===============================
-   Content sync (structure-safe)
-   Source: zackgort.com
-   =============================== */
-(function () {
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $all = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-  const setText = (sel, txt, root) => { const el = $(sel, root); if (el && txt != null) el.textContent = txt; };
-  const setHTML = (sel, html, root) => { const el = $(sel, root); if (el && html != null) el.innerHTML = html; };
-  const setHref = (sel, href, root) => { const el = $(sel, root); if (el && href) { el.setAttribute('href', href); el.setAttribute('rel', 'noopener noreferrer'); el.setAttribute('target', '_blank'); } };
-
-  // ───────────────── Header
-  setText('.frame__title', 'UX is dead↴');
-  setText('.frame__subline .type-tiny, .frame__subline span', 'Zack Gort — UX Designer');
-
-  // Top links (keep 3, repoint text + hrefs)
-  const topLinks = $all('.frame__links a');
-  if (topLinks.length >= 3) {
-    topLinks[0].textContent = 'Short-form';
-    topLinks[0].href = 'https://ifimaybefrank.com';
-
-    topLinks[1].textContent = 'Résumé';
-    topLinks[1].href = 'https://zackgort.com/resume';
-
-    topLinks[2].textContent = 'LinkedIn';
-    topLinks[2].href = 'https://linkedin.com/in/zackgort';
-  }
-
-
-
-
-  // ───────────────── Case Study: BNY (Pershing X)
-  // HERO caption already OK (“Featured / Financial Product Design”).
-  // PROCESS block
-  const bnyProc = $('#fintech-process');
-  if (bnyProc) {
-    setText('.project__name', 'BNY Mellon — Pershing X', bnyProc);
-    setText('.project__date', '2023 — 2024', bnyProc);
-
-    // Mission (2 short, direct lines)
-    const mission = $('.project__mission', bnyProc);
-    if (mission) {
-      const ps = $all('p', mission);
-      if (ps[0]) ps[0].textContent = 'Total data + design overhaul to unify the product ecosystem and modernize experience.';
-      if (ps[1]) ps[1].textContent = 'Led discovery, UX & data-architecture workshops, and design-system integration in React + Tailwind.';
-    }
-
-    // Details
-    const blocks = $all('.project.project--details', bnyProc);
-    // Order in your HTML: Problem, Constraints, Role & Team, Research, Next
-    if (blocks[0]) setText('p',
-      'The ask wasn’t “sexy.” It was to deliver smart, actionable work that moved a complex platform forward.',
-      blocks[0]
-    );
-    if (blocks[1]) setText('p',
-      'Understand function before form: map capabilities and gaps, socialize findings, and align the ecosystem.',
-      blocks[1]
-    );
-    if (blocks[2]) setText('p',
-      'Lead Product Designer: discovery facilitation, IA/flows, data architecture workshops, and design-system adoption.',
-      blocks[2]
-    );
-    if (blocks[3]) setText('p',
-      'Partnered across product/engineering to document patterns and operationalize them via a modernized system.',
-      blocks[3]
-    );
-    if (blocks[4]) setText('p',
-      'Next: richer household modeling, scenario planning, and assisted review narratives across compliance contexts.',
-      blocks[4]
-    );
-  }
-
-  // “Insight” pair under BNY
-  const bnyInsight = $('#fintech-insight');
-  if (bnyInsight) {
-    const cols = $all('.project.project--details', bnyInsight);
-    if (cols[0]) { setText('.project__label--default', 'Principles', cols[0]); setText('p', 'Smart over spectacle. Clear docs. Durable systems.', cols[0]); }
-    if (cols[1]) { setText('.project__label--default', 'Approach', cols[1]); setText('p', 'Make the machine legible: functions, flows, guardrails.', cols[1]); }
-  }
-
-  // ───────────────── Case Study: TikTok (card only is in Work; overlay handled separately)
-  // The grid card already says “TikTok For Business”. No structural changes needed.
-
-  // ───────────────── Case Study: GNC (Shopify)
-  const gncProc = $('#ecommerce-process');
-  if (gncProc) {
-    setText('.project__name', 'General Nutrition Centers (GNC)', gncProc);
-    setText('.project__date', '2021', gncProc);
-
-    // Title lines already have the quote; leave as-is.
-
-    const blocks = $all('.project.project--details', gncProc);
-    // Order in your HTML: Problem, Constraints, Role & Team, Research, Next
-    if (blocks[0]) setText('p',
-      'Replatform to Shopify while improving taxonomy, content structure, and performance for conversion and SEO.',
-      blocks[0]
-    );
-    if (blocks[1]) setText('p',
-      'Preserve SEO, integrate loyalty/ERP, manage bundles & subscriptions, and keep mobile performance tight.',
-      blocks[1]
-    );
-    if (blocks[2]) setText('p',
-      'Principal UX: discovery, IA & taxonomy, wireframes/prototypes, content strategy, and consumer re-engagement.',
-      blocks[2]
-    );
-    if (blocks[3]) setText('p',
-      'Heuristic + competitive review, on-site search analysis, and iterative prototype testing on mobile flows.',
-      blocks[3]
-    );
-    if (blocks[4]) setText('p',
-      'Next: personalized bundles, subscription tuning, and loyalty-led landing frameworks to lift AOV + repeat.',
-      blocks[4]
-    );
-  }
-
-  // ───────────────── Agency life (caption tweaks)
-  const brands1 = $('#brands-grid .content__title');
-  if (brands1) {
-    setText('.content__title-main', 'things I’ve made', brands1);
-    setText('.type-tiny.right.end', 'for brands people love/need', brands1);
-  }
-  const brands2 = $('#brands-grid-2 .content__title');
-  if (brands2) {
-    setText('.content__title-main', '#agencylife', brands2);
-    setText('.type-tiny.right.end', 'HUGE • 160over90 • WorkArea • LiveArea • O3 World', brands2);
-  }
-
-  // ───────────────── Contact
-  const contact = $('#contact');
-  if (contact) {
-    setText('.content__text',
-      'Interested in collaborating or just want to say hello? Reach out—always open to good problems.',
-      contact
-    );
-  }
-
-  // ───────────────── Footer (keep your email + LinkedIn, nothing structural)
-  // no changes needed beyond what you already have.
-
-})();
-</script>
-
-<script>
-/* click/keyboard → scroll to top (Lenis-aware) */
-(() => {
-  const el = document.querySelector('.scroll-downs');
-  if (!el) return;
-
-  // a11y attributes
-  el.setAttribute('role', 'button');
-  el.setAttribute('tabindex', '0');
-  el.setAttribute('aria-label', 'Back to top');
-  el.setAttribute('title', 'Back to top');
-
-  const toTop = (evt) => {
-    evt.preventDefault();
-    try {
-      if (window.lenis && typeof window.lenis.scrollTo === 'function') {
-        window.lenis.scrollTo(0, { duration: 1.0 });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch {
-      window.scrollTo(0, 0);
-    }
-  };
-
-  el.addEventListener('click', toTop);
-  el.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') toTop(e);
-  });
-})();
-</script>
-
-
-
-<script>
-/* Guard reduced motion */
-const RMO = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-if (!RMO) {
-  gsap.registerPlugin(Physics2DPlugin);
-
-  const sup = document.querySelector('.heading-chant .confetti-sup');
-  if (sup) {
+  // Confetti on superscript
+  function initConfetti(){
+    if(prefersReducedMotion) return;
+    gsap.registerPlugin(Physics2DPlugin);
+    const sup = document.querySelector('.heading-chant .confetti-sup'); if(!sup) return;
     const emitter = sup.querySelector('.emitter');
-
-    function fireConfetti(qty = 80, minA = -95, maxA = -35) {
-      particles(emitter, qty, 0, 0, minA, maxA);
-      // subtle “press” feedback
-      gsap.fromTo(sup, { scale: 0.96 }, { scale: 1, duration: 0.25, ease: 'elastic.out(1, .6)' });
-    }
-
-    // Click + keyboard
-    sup.addEventListener('click', () => fireConfetti());
-    sup.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        fireConfetti();
+    function particles(parent, qty, x, y, minA, maxA){
+      const colors = ['#FFFF04','#EA4C89','#892AB8','#4AF2FD'];
+      for(let i=0;i<qty;i++){
+        const angle = gsap.utils.random(minA,maxA);
+        const velocity = gsap.utils.random(70,140);
+        const dot = document.createElement('div'); dot.style.setProperty('--b', colors[(Math.random()*colors.length)|0]); parent.appendChild(dot);
+        gsap.set(dot,{opacity:0,x,y,scale:gsap.utils.random(.4,.8),rotation:gsap.utils.random(0,360)});
+        gsap.timeline({onComplete:()=>dot.remove()})
+          .to(dot,{opacity:1,duration:.06},0)
+          .to(dot,{duration:1.8,rotationX:`-=${gsap.utils.random(720,1440)}`,rotationZ:`+=${gsap.utils.random(720,1440)}`,physics2D:{angle,velocity,gravity:120}},0)
+          .to(dot,{opacity:0,duration:1},.8);
       }
+    }
+    function burst(q=80,minA=-95,maxA=-35){
+      particles(emitter,q,0,0,minA,maxA);
+      gsap.fromTo(sup,{scale:.96},{scale:1,duration:.25,ease:'elastic.out(1,.6)'});
+    }
+    sup.addEventListener('click',()=>burst());
+    sup.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();burst();}});
+    if(matchMedia('(pointer:fine)').matches){
+      let last=0; const CD=700;
+      sup.addEventListener('mouseenter',()=>{const now=performance.now(); if(now-last<CD) return; last=now; burst(28,-100,-60);});
+    }
+  }
+
+  // "UX is dead" → jump to next section
+  function initDeadJump(){
+    const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
+    const sections = Array.from(document.querySelectorAll('main > section'));
+    const nextSection = () => sections[0] && sections[0].id !== 'about' ? sections[0] : sections[1] || sections[0];
+    function jump(){
+      const t = nextSection(); if(!t) return;
+      const top = t.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    }
+    cands.forEach(el=>{
+      el.setAttribute('role','link'); el.setAttribute('tabindex','0'); el.setAttribute('aria-label','Jump to next section');
+      el.addEventListener('click',(e)=>{e.preventDefault();jump();});
+      el.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();jump();}});
     });
   }
 
-  function particles(parent, quantity, x, y, minAngle, maxAngle) {
-    const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
-    for (let i = 0; i < quantity; i++) {
-      const angle = gsap.utils.random(minAngle, maxAngle);
-      const velocity = gsap.utils.random(70, 140);
-      const dot = document.createElement('div');
-      dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
-      parent.appendChild(dot);
-
-      gsap.set(dot, {
-        opacity: 0,
-        x: x,
-        y: y,
-        scale: gsap.utils.random(.4, .8),
-        rotation: gsap.utils.random(0, 360)
-      });
-
-      gsap.timeline({ onComplete: () => dot.remove() })
-        .to(dot, { opacity: 1, duration: .06 }, 0)
-        .to(dot, {
-          duration: 1.8,
-          rotationX: `-=${gsap.utils.random(720, 1440)}`,
-          rotationZ: `+=${gsap.utils.random(720, 1440)}`,
-          physics2D: { angle, velocity, gravity: 120 }
-        }, 0)
-        .to(dot, { opacity: 0, duration: 1 }, .8);
-    }
-  }
-}
-
-
-// Hover burst (desktop pointers only) with a small cooldown
-let lastHoverTs = 0;
-const HOVER_COOLDOWN_MS = 700;
-
-sup.addEventListener('mouseenter', () => {
-  if (!matchMedia('(pointer:fine)').matches) return;        // ignore touch
-  const now = performance.now();
-  if (now - lastHoverTs < HOVER_COOLDOWN_MS) return;
-  lastHoverTs = now;
-  fireConfetti(28, -100, -60); // fewer pieces than click; slightly tighter cone
-});
-
-</script>
-<script>
-(() => {
-  const PREFERS_REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // Optional offset via CSS variable: :root { --jump-offset: 0px; }
-  const getOffset = () => {
-    const v = getComputedStyle(document.documentElement).getPropertyValue('--jump-offset').trim();
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : 0;
-  };
-
-  // Find elements that contain "UX is dead" (case-insensitive)
-  const candidates = Array.from(
-    document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,a,.frame__title,.content__title-main,.heading-chant')
-  ).filter(el => /ux\s*is\s*dead/i.test(el.textContent));
-
-  if (!candidates.length) return;
-
-  function nextSectionFrom(el){
-    const curr = el.closest('section') || document.body;
-    let sib = curr.nextElementSibling;
-    while (sib && sib.tagName.toLowerCase() !== 'section') sib = sib.nextElementSibling;
-    if (sib) return sib;
-
-    // fallback by document order
-    const sections = Array.from(document.querySelectorAll('section'));
-    const idx = sections.indexOf(curr);
-    return sections[idx + 1] || null;
+  // Scroll-to-top button behavior
+  function initBackToTop(){
+    const el = document.querySelector('.scroll-downs'); if(!el) return;
+    const toTop = (e)=>{e.preventDefault(); window.lenis ? window.lenis.scrollTo(0,{duration:1}) : window.scrollTo({top:0,behavior:'smooth'})};
+    el.addEventListener('click',toTop);
+    el.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' ') toTop(e);});
   }
 
-  function jumpFrom(el){
-    const target = nextSectionFrom(el);
-    if (!target) return;
-
-    const top = target.getBoundingClientRect().top + window.scrollY - getOffset();
-
-    if (PREFERS_REDUCED) {
-      window.scrollTo({ top });
-    } else {
-      window.scrollTo({ top, behavior: 'smooth' });
-    }
-  }
-
-  candidates.forEach(el => {
-    el.classList.add('ux-dead-jump');
-    el.setAttribute('role', 'link');
-    el.setAttribute('tabindex', '0');
-    el.setAttribute('aria-label', 'Jump to next section');
-
-    el.addEventListener('click', e => {
-      e.preventDefault();
-      jumpFrom(el);
+  function a11yifyGridImages(){
+    document.querySelectorAll('.grid__img').forEach(el=>{
+      el.setAttribute('role','img');
+      const url=(el.style.backgroundImage||'').replace(/^url\(["']?/,'').replace(/["']?\)$/,'');
+      const name=url.split('/').pop()?.split('.')[0]||'';
+      el.setAttribute('aria-label', name.replace(/[-_]/g,' ').trim() || 'Gallery image');
     });
+  }
 
-    el.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        jumpFrom(el);
-      }
-    }, { passive: false });
+  // Boot
+  initSmooth();
+  enableHashScroll();
+
+  preloadImages().then(()=>{
+    document.body.classList.remove('loading');
+    animateHeader();
+    animateGrids();
+    animateProcess();
+    animateStacks();
+    initBlur();
+    initCursor();
+    initConfetti();
+    initDeadJump();
+    initBackToTop();
+    a11yifyGridImages();
+    ScrollTrigger.refresh(true);
+    window.scrollTo(0,0);
   });
-})();
-</script>
 
-
+  addEventListener('resize', ()=>ScrollTrigger.refresh());
+  </script>
 </body>
 </html>

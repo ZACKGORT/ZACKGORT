@@ -1016,6 +1016,18 @@ a + a { margin-inline-start: .6rem; }
   .blur{ display: none !important; }
 }
 
+
+/* Make the trigger look tappable on mobile and avoid header overlap when scrolled */
+@media (max-width:768px), (pointer:coarse){
+  .ux-dead-jump{
+    text-decoration: underline;
+    text-underline-offset: .12em;
+    cursor: pointer;
+  }
+  /* If you have a fixed header, set a safe scroll margin */
+  section { scroll-margin-top: 10vh; }
+}
+
 </style>
 </head>
 <body class="loading">
@@ -2769,6 +2781,54 @@ sup.addEventListener('mouseenter', () => {
   fireConfetti(28, -100, -60); // fewer pieces than click; slightly tighter cone
 });
 
+</script>
+<script>
+(() => {
+  const isMobile = matchMedia('(max-width:768px)').matches || matchMedia('(pointer:coarse)').matches;
+  if (!isMobile) return;
+
+  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Find any heading/paragraph/etc. that contains "UX is dead"
+  const candidates = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,a,.frame__title,.content__title-main'))
+    .filter(el => /ux\s*is\s*dead/i.test(el.textContent));
+
+  if (!candidates.length) return;
+
+  function nextSectionFrom(el){
+    const curr = el.closest('section') || document.body;
+    // walk forward to next <section>
+    let sib = curr.nextElementSibling;
+    while (sib && sib.tagName.toLowerCase() !== 'section') sib = sib.nextElementSibling;
+    if (sib) return sib;
+
+    // fallback: use document order
+    const sections = Array.from(document.querySelectorAll('section'));
+    const idx = sections.indexOf(curr);
+    return sections[idx + 1] || null;
+  }
+
+  function jump(el){
+    const target = nextSectionFrom(el);
+    if (!target) return;
+    if (prefersReduced) {
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY });
+    } else {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  candidates.forEach(el => {
+    el.classList.add('ux-dead-jump');
+    el.setAttribute('role', 'link');
+    el.setAttribute('tabindex', '0');
+
+    el.addEventListener('click', e => { e.preventDefault(); jump(el); });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(el); }
+    }, { passive: false });
+  });
+})();
 </script>
 
 </body>

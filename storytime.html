@@ -222,7 +222,6 @@ document.documentElement.classList.add('js');
       ],
       tags: [
         { label: "#About", href: "#about" },
-        { label: "#XP", href: "#skills" },
         { label: "#Work", href: "#work", settle: "end" },
         { label: "#Product", href: "#fintech" },
         { label: "#E-commerce", href: "#ecommerce" },
@@ -459,7 +458,10 @@ document.documentElement.classList.add('js');
     // HEADER / FRAME
     const header = el('header','frame');
     header.innerHTML = `
-      <h2 class="frame__title ux-dead-jump">${CONTENT.header.title}</h2>
+      <h2 class="frame__title">
+  <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
+</h2>
+
       <div class="frame__subline type-tiny">
         <span>${CONTENT.header.subline}</span>
         <nav class="frame__links flex-line">
@@ -917,38 +919,68 @@ document.documentElement.classList.add('js');
     }
   }
 
-  function initCursor(){
-    if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
-    document.documentElement.classList.add('has-cursor');
+function initCursor(){
+  if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
+  document.documentElement.classList.add('has-cursor');
 
-    if(!document.getElementById('gc-goo-defs')){
-      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-      svg.id='gc-goo-defs'; svg.setAttribute('width','0'); svg.setAttribute('height','0');
-      svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
-      document.body.appendChild(svg);
-    }
-    document.querySelectorAll('.gooey-cursor').forEach(n=>n.remove());
-    const wrap = document.createElement('div'); wrap.className='gooey-cursor'; wrap.setAttribute('aria-hidden','true'); document.body.appendChild(wrap);
+  if(!document.getElementById('gc-goo-defs')){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.id='gc-goo-defs'; svg.setAttribute('width','0'); svg.setAttribute('height','0');
+    svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
+    document.body.appendChild(svg);
+  }
 
-    const N=20, LERP=.35; let hoverBoost=1;
-    for(let i=0;i<N;i++){ const d=document.createElement('div'); d.className='gc-dot'; wrap.appendChild(d); }
-    const dots = Array.from(wrap.children);
-    let mx=innerWidth/2,my=innerHeight/2, hist=Array.from({length:N},()=>({x:mx,y:my}));
-    addEventListener('pointermove',(e)=>{mx=e.clientX;my=e.clientY},{passive:true});
-    document.addEventListener('mouseover',e=>{ if(e.target.closest('a,button,.title-link,.work-card,[role="button"]')) hoverBoost=1.6;});
-    document.addEventListener('mouseout',e=>{ if(e.target.closest('a,button,.title-link,.work-card,[role="button"]')) hoverBoost=1;});
-    function tick(){
-      hist.shift(); hist.push({x:mx,y:my});
-      for(let i=0;i<N;i++){
-        const c=hist[i],n=hist[i+1]||hist[N-1];
-        c.x += (n.x-c.x)*LERP; c.y += (n.y-c.y)*LERP;
-        const base=i/N, scale=(i===N-1? base*hoverBoost : base);
-        dots[i].style.transform=`translate(${c.x}px,${c.y}px) translate(-50%,-50%) scale(${scale})`;
-      }
-      requestAnimationFrame(tick);
+  // Reset container and build dots
+  document.querySelectorAll('.gooey-cursor').forEach(n=>n.remove());
+  const wrap = document.createElement('div');
+  wrap.className='gooey-cursor';
+  wrap.setAttribute('aria-hidden','true');
+  document.body.appendChild(wrap);
+
+  const N = 20;               // number of dots
+  const LERP = .35;           // trailing smoothness
+  const LINK_SHRINK = 0.55;   // head-dot size multiplier on link hover
+  let hoverBoost = 1;         // 1 = normal, <1 = smaller (we’ll set to LINK_SHRINK)
+
+  for (let i=0;i<N;i++){
+    const d = document.createElement('div');
+    d.className = 'gc-dot';
+    wrap.appendChild(d);
+  }
+  const dots = Array.from(wrap.children);
+
+  let mx = innerWidth/2, my = innerHeight/2;
+  const hist = Array.from({length:N},()=>({x:mx,y:my}));
+
+  addEventListener('pointermove', (e)=>{ mx=e.clientX; my=e.clientY; }, {passive:true});
+
+  // Only shrink on actual links, per your ask.
+  document.addEventListener('pointerover', (e)=>{
+    if (e.target.closest('a[href], [role="link"]')) hoverBoost = LINK_SHRINK;
+  }, true);
+
+  document.addEventListener('pointerout', (e)=>{
+    if (e.target.closest('a[href], [role="link"]')) hoverBoost = 1;
+  }, true);
+
+  function tick(){
+    hist.shift(); hist.push({x:mx,y:my});
+    for(let i=0;i<N;i++){
+      const c = hist[i], n = hist[i+1] || hist[N-1];
+      c.x += (n.x - c.x) * LERP;
+      c.y += (n.y - c.y) * LERP;
+
+      const base = i / N;
+      // Only the lead (last) dot changes size when hovering links
+      const scale = (i === N-1) ? base * hoverBoost : base;
+
+      dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
     }
     requestAnimationFrame(tick);
   }
+  requestAnimationFrame(tick);
+}
+
 
   function initConfetti(){
     if(prefersReducedMotion || !has('Physics2DPlugin')) return;
@@ -1125,6 +1157,24 @@ document.documentElement.classList.add('js');
 
   addEventListener('resize', ()=>ScrollTrigger.refresh());
 })();
+
+
+function initDeadJump(){
+  // If the header already has a real link, let enableHashScroll handle it.
+  if (document.querySelector('.frame .frame__title a[href="#about"]')) return;
+  const el = document.querySelector('.frame__title');
+  const t  = document.getElementById('about');
+  if(!el || !t) return;
+  const go = ()=> {
+    const y = t.getBoundingClientRect().top + window.pageYOffset;
+    window.lenis ? window.lenis.scrollTo(y,{duration:1}) : window.scrollTo({top:y,behavior:'smooth'});
+    history.pushState(null,'','#about');
+  };
+  el.setAttribute('role','link'); el.setAttribute('tabindex','0');
+  el.addEventListener('click',(e)=>{e.preventDefault();go();});
+  el.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+}
+
 </script>
 </body>
 </html>

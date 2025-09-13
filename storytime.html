@@ -7,17 +7,18 @@
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
   <title>Layout Formation on Scroll | Codrops</title>
 
-<!-- GSAP core + plugins -->
-<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-<script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
-<script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
+  <!-- GSAP core + plugins -->
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
 
-<!-- ImagesLoaded -->
-<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <!-- ImagesLoaded -->
+  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
 
-<!-- Lenis smooth scroll -->
-<script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
-<style>
+  <!-- Lenis smooth scroll -->
+  <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
+
+  <style>
 /* ===============================
    CORE TOKENS & RESET
    =============================== */
@@ -305,10 +306,6 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 #work .grid__item .title-link{ pointer-events:auto; text-decoration:none; }
 #work .grid__item .title-link:hover{ text-decoration:underline; }
 
-
-
-
-
 /* ===============================
    PROJECT BLOCKS
    =============================== */
@@ -362,18 +359,15 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   margin:0;
 }
 
-/* ===== process 2-up columns (restore previous behavior) ===== */
+/* ===== process 2-up columns ===== */
 [id$="-process"]{
   display:grid;
-  grid-template-columns: 1fr;           /* mobile-first: single column */
+  grid-template-columns: 1fr;
   gap: 2rem 3rem;
   align-items: start;
 }
-/* remove extra spacing on items inside the process grid */
 [id$="-process"] > .project{ margin:0; padding:0; }
-/* allow long copy to use full column width */
 [id$="-process"] .project--details p{ max-width: none; }
-/* keep label microtype */
 [id$="-process"] .project__label{
   letter-spacing:.04em;
   text-transform:uppercase;
@@ -420,7 +414,6 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 }
 .intro__title-sub{ font-size:clamp(1.5rem,20vw,8rem); max-width:15ch; margin:0 auto; }
 
-
 /* ===== Skills: 3-up columns ===== */
 #skills .trio-grid{
   display:grid;
@@ -430,21 +423,15 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 }
 #skills .trio-col h4{ margin:0 0 .5rem; }
 #skills .trio-col .content__text{ margin:.15rem 0; }
-
-/* Tablet: 2-up */
 @media (max-width: 1024px){
   #skills .trio-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-
-/* Mobile: stack */
 @media (max-width: 768px){
   #skills .trio-grid{
     grid-template-columns: 1fr;
     gap: 1.25rem;
   }
 }
-
-
 
 /* ===============================
    PANEL (OVERLAY)
@@ -635,37 +622,29 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 /* ===============================
    BOTTOM BLUR OVERLAY
    =============================== */
-/* ===== Bottom blur overlay (robust) ===== */
 .blur{
   position:fixed; inset:0; z-index:1000;
   pointer-events:none;
   opacity:0; transition:opacity .35s ease;
-  /* intentionally no isolation/contain to avoid backdrop bugs */
 }
 .blur.is-visible{ opacity:1; }
-
 .blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:"";
   position:absolute; inset:0 -250%;
-  /* values come from inline --blur / --maskStart set by JS */
   -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
           backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
 }
-
-/* Fallback when backdrop-filter isn't supported */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
-  .blur{ opacity:1; } /* show a soft shade instead of hiding it */
+  .blur{ opacity:1; }
   .blur > div::after{
     -webkit-backdrop-filter:none; backdrop-filter:none;
     background:linear-gradient(180deg, rgba(0,0,0,0) 0, rgba(0,0,0,.35) 100%);
     -webkit-mask:none; mask:none;
   }
 }
-
-
 
 /* ===============================
    GOOEY CURSOR
@@ -698,20 +677,13 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 
 /* ===============================
    SEVENTH GRID — SECTION SPACING
-   (section after the one containing the 7th grid)
    =============================== */
-/* Modern path */
 @supports selector(:has(*)){
-  section.content:has(.grid[data-grid-seventh]){
-    margin-bottom:clamp(6rem, 18vh, 22rem);
-  }
+  section.content:has(.grid[data-grid-seventh]){ margin-bottom:clamp(6rem, 18vh, 22rem); }
   @media (max-width:768px){
-    section.content:has(.grid[data-grid-seventh]){
-      margin-bottom:12vh;
-    }
+    section.content:has(.grid[data-grid-seventh]){ margin-bottom:12vh; }
   }
 }
-/* Fallback (no :has) – add interior spacing via the grid itself */
 .grid[data-grid-seventh]{ margin-bottom:clamp(6rem, 18vh, 22rem); }
 @media (max-width:768px){
   .grid[data-grid-seventh]{ margin-bottom:12vh; }
@@ -804,7 +776,7 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   .project__title{ font-size:clamp(1.8rem,11vw,3.2rem); margin:6vh 0 4vh; }
   .project--details p{ max-width:none; }
 
-  /* process grid: explicit mobile stack + tighter gap */
+  /* process grid */
   [id$="-process"]{ grid-template-columns:1fr; gap:1.25rem; }
 
   .intro__info{ bottom:16px; font-size:10px; opacity:.65; }
@@ -847,32 +819,25 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   }
 }
 
-
-
-/* === Inline link spacing, anywhere consecutive links appear === */
+/* Inline link spacing */
 a + a { margin-inline-start: .6rem; }
 
-/* === Clustered/nav links (frame header or any link row) === */
+/* Spaced link rows */
 .frame__links{
   display: flex;
   flex-wrap: wrap;
-  /* row-gap | column-gap */
   gap: .35rem clamp(.5rem, 1.2vw, 1rem);
 }
 .frame__links a{
   display: inline-flex;
   align-items: center;
-  padding: .25rem .55rem;   /* <-- horizontal padding */
-  border-radius: .35rem;    /* nicer focus ring */
+  padding: .25rem .55rem;
+  border-radius: .35rem;
 }
-
-/* Mobile tweaks */
 @media (max-width:768px){
   .frame__links{ gap: .25rem .6rem; }
   .frame__links a{ padding: .2rem .45rem; }
 }
-
-/* === Utility: apply to any container that should lay out links with spacing === */
 .links--spaced{
   display: flex;
   flex-wrap: wrap;
@@ -881,64 +846,48 @@ a + a { margin-inline-start: .6rem; }
 }
 .links--spaced > a{ padding-inline: .5rem; }
 
-/* ===============================
-   TINY DEVICES
-   =============================== */
+/* Tiny devices */
 @media (max-width:390px){
   :root{ font-size:14px; }
   .grid__img, .grid__item{ min-height:100px; padding-bottom:.5rem; }
 }
 
-
-
-
-
-
-/* === Unique heading with superscript — "chant" === */
+/* Unique heading with superscript — "chant" */
 .heading-chant{
   display: inline-flex;
   align-items: flex-start;
   gap: .35ch;
   margin: clamp(.5rem, 1.2vh, 1rem) 0;
-
-  /* type */
   font-family: "bricolage-grotesque-48", sans-serif;
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: .95;
   font-size: clamp(3.6rem, 4vw, 3.6rem);
   color: var(--color-text);
-
-  /* subtle underline vibe */
   text-decoration: none;
   text-decoration-thickness: .08em;
   text-underline-offset: .12em;
   text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
 }
-
-/* Superscript tuning inside this heading */
 .heading-chant sup{
   font-size: .35em;
   line-height: 0;
   margin-left: .3ch;
   letter-spacing: .04em;
   color: var(--color-text-alt);
-  vertical-align: baseline;        /* ignore default */
-  transform: translateY(-.6em);    /* precise lift */
+  vertical-align: baseline;
+  transform: translateY(-.6em);
 }
 
-
-
-
-/* Clickable superscript w/ emitter */
+/* Confetti trigger */
 .heading-chant .confetti-sup{
   position: relative;
   display: inline-flex;
   align-items: flex-start;
   cursor: pointer;
   user-select: none;
-  margin-left: .3ch;                 /* small gap from “XP!” */
-  padding: 0 .2ch;                   /* clickable target */
+  margin-left: .3ch;
+  padding: 0 .2ch;
   border-radius: .25rem;
   outline: none;
 }
@@ -954,22 +903,15 @@ a + a { margin-inline-start: .6rem; }
   overflow: visible;
   z-index: 2;
 }
-
-/* confetti dots */
 .heading-chant .confetti-sup .emitter > div{
   position: absolute;
   width: 8px; height: 8px;
   background: var(--b, #fff);
-  border-radius: 2px;                /* soft squares */
+  border-radius: 2px;
   will-change: transform, opacity;
   mix-blend-mode: normal;
 }
-
-/* optional: colorful theme consistent w/ your palette */
-:root{
-  --confetti-colors: #FFFF04, #EA4C89, #892AB8, #4AF2FD;
-}
-
+:root{ --confetti-colors: #FFFF04, #EA4C89, #892AB8, #4AF2FD; }
 .heading-chant .confetti-sup:hover{
   text-decoration: underline;
   text-decoration-thickness: .08em;
@@ -977,62 +919,38 @@ a + a { margin-inline-start: .6rem; }
   text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
 }
 
-/* =========================================
-   MOBILE BLUR DIAL-DOWN (performance-first)
-   ========================================= */
+/* MOBILE BLUR DIAL-DOWN (perf) */
 @media (max-width: 768px){
-  /* Smaller kernel, shorter mask, lower saturation */
   :root{
-    --blur-max: 8;      /* was 40 */
-    --mask-stop: 18;    /* was 35 — shorter blurred band */
-    --saturate: .0;    /* was .1  */
+    --blur-max: 8;
+    --mask-stop: 18;
+    --saturate: .0;
   }
-
-  /* Show less intensity overall */
   .blur{ opacity: .75; }
-
-  /* Process fewer layers: keep first 3, hide the rest */
   .blur > div:nth-child(n+4){ display: none; }
-
-  /* Shrink the filtered spill area to reduce GPU cost */
-  .blur > div::after{ inset: 0 -60%; }  /* was 0 -250% */
-
-  /* Optional: tighten the solid band at the very bottom */
+  .blur > div::after{ inset: 0 -60%; }
   .blur > div::before{ height: calc((var(--stop) * .8) * 1%); }
 }
-
-/* Coarse pointers (many phones/tablets) — dial down further */
 @media (pointer: coarse){
-  :root{
-    --blur-max: 6;
-    --saturate: .05;
-  }
+  :root{ --blur-max: 6; --saturate: .05; }
 }
-
-/* Respect accessibility (motion often correlates with effects aversion) */
 @media (prefers-reduced-motion: reduce){
   .blur{ display: none !important; }
 }
+.blur > div::after{ background: rgba(0,0,0,.001); }
 
+/* === Blurry scroll section hook === */
+.blur-scroll{ will-change: filter; }
+  </style>
+</head>
 
-
-/* Ensure the compositor commits the backdrop blur box */
-.blur > div::after{
-  background: rgba(0,0,0,.001); /* invisible, just forces a paint */
-}
-
-
-
-
-
-</style>
 <body class="loading">
   <main id="app"></main>
   <div class="blur"></div>
   <div id="panel-root"></div>
 
 <script>
-/* app.js — complete, fixed */
+/* app.js — complete, with blurry scroll section */
 
 document.documentElement.classList.add('js');
 
@@ -1075,9 +993,9 @@ document.documentElement.classList.add('js');
       tags: [
         { label: "#About", href: "#about" },
         { label: "#Work", href: "#work", settle: "end" },
-        { label: "#Product", href: "#fintech", settle: "end"  },
+        { label: "#Product", href: "#fintech", settle: "end" },
         { label: "#E-commerce", href: "#ecommerce", settle: "end"  },
-        { label: "#Connect", href: "#contact" }
+        { label: "#Connect", href: "#contact", settle: "end"  }
       ]
     },
 
@@ -1087,6 +1005,7 @@ document.documentElement.classList.add('js');
       byline: "— Zack Gort, Senior User Experience Designer"
     },
 
+    /* (kept in case you reuse later) */
     heroMosaic: {
       leadCopyA: { title: "UX Design & Data", text: "What 98% of my work looks like..." },
       leadCopyB: { title: "UI Design & Brand Systems", text: "...the other 2%" },
@@ -1108,7 +1027,6 @@ document.documentElement.classList.add('js');
       ]
     },
 
-
     skills: {
       cols: [
         {
@@ -1125,52 +1043,51 @@ document.documentElement.classList.add('js');
       ]
     },
 
-workSelect: {
-  captionTitle: "select works",
-  tiles: [
-    "https://i.ibb.co/c3vLP47/image-445-min.png",
-    "https://i.ibb.co/jJD2YPJ/image-438-min.png",
-    "https://i.ibb.co/Ct9DZd9/image-442-min.png",
-    "https://i.ibb.co/jMfm8Kx/image-439-min.png",
-    "https://i.ibb.co/RymyPtP/image-443-min.png"
-  ],
-  cards: [
-    { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓" },
-    { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓" },
-    { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
-  ]
-},
-
+    workSelect: {
+      captionTitle: "select works",
+      tiles: [
+        "https://i.ibb.co/c3vLP47/image-445-min.png",
+        "https://i.ibb.co/jJD2YPJ/image-438-min.png",
+        "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+        "https://i.ibb.co/jMfm8Kx/image-439-min.png",
+        "https://i.ibb.co/RymyPtP/image-443-min.png"
+      ],
+      cards: [
+        { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓" },
+        { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓" },
+        { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
+      ]
+    },
 
     brandsGrid: {
       title: "Portfolio",
       subtitle: "UX & Design",
-  images: [
-    "https://i.ibb.co/0VmJ708g/work3.webp",
-    "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
-    "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
-    "https://i.ibb.co/xSVNc6mg/huge4.webp",
-    "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
-    "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
-    "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
-    "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
-    "https://i.ibb.co/xqfFFj48/browse-location-list-68c48666baf6e.webp",
-    "https://i.ibb.co/XZ8QtMx9/610811e9c2fa676f3fb1255f-zax02412-68c4866404de0.webp",
-    "https://i.ibb.co/W4XvQk1t/1-vk-U8l-Zmqn-OHghe-Os-K0qtrw.webp",
-    "https://i.ibb.co/0p7Ktz5L/1-Tut-Ce-PQB0b-SCo-Mf-MTWJb-Q.webp",
-    "https://i.ibb.co/vxXJ7fSV/1-rqzz-Cscn-OIL96-Vm-Ln0v7d-A.webp",
-    "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
-    "https://i.ibb.co/MJLfbdm/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp",
-    "https://i.ibb.co/ZzQnmrNr/1-GFvd-yw-Ap-PELXmtr-Fbx-Vug.webp",
-    "https://i.ibb.co/RTTZh2gq/1-1-QGGK09-DGx0-R4p-d-Jg6xiw.webp",
-    "https://i.ibb.co/vx76zjgf/10.webp",
-    "https://i.ibb.co/rft2bf0T/9.webp",
-    "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
-    "https://i.ibb.co/Jrb2Npd/image-020.png",
-    "https://i.ibb.co/0QTSr27/dana-mobile.png",
-    "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-    "https://i.ibb.co/QdmJdXh/AM-wire.jpg",
-    "https://i.ibb.co/68t5b9S/Mask-group-7-min.png"
+      images: [
+        "https://i.ibb.co/0VmJ708g/work3.webp",
+        "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
+        "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
+        "https://i.ibb.co/xSVNc6mg/huge4.webp",
+        "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
+        "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
+        "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
+        "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
+        "https://i.ibb.co/xqfFFj48/browse-location-list-68c48666baf6e.webp",
+        "https://i.ibb.co/XZ8QtMx9/610811e9c2fa676f3fb1255f-zax02412-68c4866404de0.webp",
+        "https://i.ibb.co/W4XvQk1t/1-vk-U8l-Zmqn-OHghe-Os-K0qtrw.webp",
+        "https://i.ibb.co/0p7Ktz5L/1-Tut-Ce-PQB0b-SCo-Mf-MTWJb-Q.webp",
+        "https://i.ibb.co/vxXJ7fSV/1-rqzz-Cscn-OIL96-Vm-Ln0v7d-A.webp",
+        "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
+        "https://i.ibb.co/MJLfbdm/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp",
+        "https://i.ibb.co/ZzQnmrNr/1-GFvd-yw-Ap-PELXmtr-Fbx-Vug.webp",
+        "https://i.ibb.co/RTTZh2gq/1-1-QGGK09-DGx0-R4p-d-Jg6xiw.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
+        "https://i.ibb.co/Jrb2Npd/image-020.png",
+        "https://i.ibb.co/0QTSr27/dana-mobile.png",
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/QdmJdXh/AM-wire.jpg",
+        "https://i.ibb.co/68t5b9S/Mask-group-7-min.png"
       ]
     },
 
@@ -1308,9 +1225,8 @@ workSelect: {
     const header = el('header','frame');
     header.innerHTML = `
       <h2 class="frame__title">
-  <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
-</h2>
-
+        <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
+      </h2>
       <div class="frame__subline type-tiny">
         <span>${CONTENT.header.subline}</span>
         <nav class="frame__links flex-line">
@@ -1327,8 +1243,7 @@ workSelect: {
     app.appendChild(header);
 
     // ABOUT
-    const about = el('section','content content--padded');
-    about.id = 'about';
+    const about = el('section','content content--padded'); about.id = 'about';
     about.innerHTML = `
       <h3 class="heading-chant">
         ${CONTENT.about.heading}
@@ -1341,7 +1256,17 @@ workSelect: {
     `;
     app.appendChild(about);
 
+    // BLURRY SCROLL — replaces the inline hero mosaic
+    const blurSec = el('section','content content--padded blur-scroll'); blurSec.id = 'about-blur';
+    blurSec.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem">
+      </div>
+      <div class="content__text">
+        <p>I’m a user experience designer who specializes in high-density data, IA, and systems that scale. I partner with product and engineering to turn ambiguous spaces into modular, measurable solutions—balancing speed, accessibility, and clarity.</p>
 
+      </div>
+    `;
+    app.appendChild(blurSec);
 
     // SKILLS
     const skills = el('section','content content--padded'); skills.id = 'skills';
@@ -1356,23 +1281,22 @@ workSelect: {
     `;
     app.appendChild(skills);
 
-// WORK SELECT
-const work = el('section','content content--padded'); work.id='work';
-work.innerHTML = `
-  <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
-  <div class="grid grid--columns grid--spaced" data-grid-second>
-    ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-    ${CONTENT.workSelect.cards.map(c => `
-      <div class="grid__item work-card">
-        <h4 class="type-tiny">
-          <a class="title-link" href="${c.href}" ${c.ext?'target="_blank" rel="noopener noreferrer"':''}>${c.title}</a>
-        </h4>
-        <p>${c.glyph||''}</p>
-      </div>`).join('')}
-  </div>
-`;
-app.appendChild(work);
-
+    // WORK SELECT
+    const work = el('section','content content--padded'); work.id='work';
+    work.innerHTML = `
+      <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
+      <div class="grid grid--columns grid--spaced" data-grid-second>
+        ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+        ${CONTENT.workSelect.cards.map(c => `
+          <div class="grid__item work-card">
+            <h4 class="type-tiny">
+              <a class="title-link" href="${c.href}" ${c.ext?'target="_blank" rel="noopener noreferrer"':''}>${c.title}</a>
+            </h4>
+            <p>${c.glyph||''}</p>
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(work);
 
     // BRANDS GRID
     const brands = el('section','content content--padded content--full'); brands.id='brands-grid';
@@ -1576,147 +1500,140 @@ app.appendChild(work);
     new Promise(res => imagesLoaded(document.querySelectorAll(sel), { background:true }, res));
 
   /* ------- TIMELINE ENGINE ------- */
-function animateGrids(){
-  const mq = matchMedia('(max-width:768px)');
-  const isMobile = () => mq.matches;
+  function animateGrids(){
+    const mq = matchMedia('(max-width:768px)');
+    const isMobile = () => mq.matches;
 
-  const modes = {
-    second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
-    fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
-    sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
-    ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
-  };
+    const modes = {
+      second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
+      fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
+      sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
+      ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
+    };
 
-  function defaultEndPx(mode, grid){
-    const count = grid.querySelectorAll('.grid__img').length || 6;
-    const section = grid.closest('section') || grid.parentNode;
-    const hasCaption = !!section.querySelector('.content__title');
-    const cfg = ({
-      second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
-      fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
-      sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
-      ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
-    })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
+    function defaultEndPx(mode, grid){
+      const count = grid.querySelectorAll('.grid__img').length || 6;
+      const section = grid.closest('section') || grid.parentNode;
+      const hasCaption = !!section.querySelector('.content__title');
+      const cfg = ({
+        second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+        fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
+        sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
+        ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
+      })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
 
-    const tilesOverMin = Math.max(0, count - 4);
-    const vh = (isMobile()?cfg.base.m:cfg.base.d)
-             + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
-             + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
-    return `+=${Math.round(window.innerHeight * (vh/100))}`;
-  }
-  const parseScrub = (v, fb) => {
-    if(v==null || v==='') return fb;
-    if(v==='true') return true;
-    if(v==='false') return false;
-    const n = parseFloat(v); return isNaN(n) ? fb : n;
-  };
+      const tilesOverMin = Math.max(0, count - 4);
+      const vh = (isMobile()?cfg.base.m:cfg.base.d)
+               + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
+               + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
+      return `+=${Math.round(window.innerHeight * (vh/100))}`;
+    }
+    const parseScrub = (v, fb) => {
+      if(v==null || v==='') return fb;
+      if(v==='true') return true;
+      if(v==='false') return false;
+      const n = parseFloat(v); return isNaN(n) ? fb : n;
+    };
 
-  const pinType = 'transform';        // consistent with Lenis/normalized scroll
-  const anticipate = 1.2;             // reduce “snap” at pin start
-  const grids = [...document.querySelectorAll(
-    '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
-  )];
+    const pinType = 'transform';
+    const anticipate = 1.2;
+    const grids = [...document.querySelectorAll(
+      '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+    )];
 
-  grids.forEach(grid=>{
-    const imgs  = grid.querySelectorAll('.grid__img');
-    const items = grid.querySelectorAll('.grid__item');
-    if(!imgs.length && !items.length) return;
+    grids.forEach(grid=>{
+      const imgs  = grid.querySelectorAll('.grid__img');
+      const items = grid.querySelectorAll('.grid__item');
+      if(!imgs.length && !items.length) return;
 
-    const section = grid.closest('section') || grid.parentNode;
-    const defaultMode =
-      grid.hasAttribute('data-grid-second') ? 'second' :
-      grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
-      grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+      const section = grid.closest('section') || grid.parentNode;
+      const defaultMode =
+        grid.hasAttribute('data-grid-second') ? 'second' :
+        grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+        grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
 
-    const d = grid.dataset;
-    const mode = d.mode || defaultMode;
+      const d = grid.dataset;
+      const mode = d.mode || defaultMode;
 
-    const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+      const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
 
-    const base = modes[mode] || modes.ninth;
-    const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
-    const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+      const base = modes[mode] || modes.ninth;
+      const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+      const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
 
-    const tl = gsap.timeline({
-      defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end,
-        pin: section,
-        pinType,
-        pinReparent: true,           // prevent layout “jump” when pinning
-        scrub,
-        anticipatePin: anticipate,
-        pinSpacing: true,
-        invalidateOnRefresh: true
+      const tl = gsap.timeline({
+        defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end,
+          pin: section,
+          pinType,
+          pinReparent: true,
+          scrub,
+          anticipatePin: anticipate,
+          pinSpacing: true,
+          invalidateOnRefresh: true
+        }
+      });
+
+      if(mode==='second'){
+        const mid = Math.floor(imgs.length/2);
+        tl.from(imgs,{
+          stagger:{amount:.3,from:'center'},
+          y:()=>innerHeight,
+          transformOrigin:'50% 0%',
+          rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(matchMedia('(max-width:768px)').matches?1.5:3)
+        }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
+      }
+      if(mode==='fifth'){
+        tl.set(grid,{perspective:1000}).from(imgs,{
+          stagger:{amount:.4,from:'random',grid:[4,9]},
+          y:()=>innerHeight, rotationX:matchMedia('(max-width:768px)').matches?-40:-70,
+          transformOrigin:'50% 0%', z:matchMedia('(max-width:768px)').matches?-450:-900, autoAlpha:0
+        });
+      }
+      if(mode==='sixth'){
+        tl.from(imgs,{
+          stagger:{amount:.25,from:'edges',grid:[3,3]},
+          scale:matchMedia('(max-width:768px)').matches?.82:.7, autoAlpha:0
+        }).from(grid,{scale:matchMedia('(max-width:768px)').matches?.92:.85,skewY:matchMedia('(max-width:768px)').matches?1.5:3},0);
+      }
+      if(mode==='ninth'){
+        const caption = section.querySelector('.content__title');
+        tl.from(imgs,{
+          transformOrigin:'100% -450%',
+          stagger:.07, scaleX:1.02, skewX:matchMedia('(max-width:768px)').matches?7:15,
+          xPercent:matchMedia('(max-width:768px)').matches?18:50, rotation:matchMedia('(max-width:768px)').matches?-5:-10, autoAlpha:0
+        });
+        if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
       }
     });
-
-    if(mode==='second'){
-      const mid = Math.floor(imgs.length/2);
-      tl.from(imgs,{
-        stagger:{amount:.3,from:'center'},
-        y:()=>innerHeight,
-        transformOrigin:'50% 0%',
-        rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(matchMedia('(max-width:768px)').matches?1.5:3)
-      }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
-    }
-    if(mode==='fifth'){
-      tl.set(grid,{perspective:1000}).from(imgs,{
-        stagger:{amount:.4,from:'random',grid:[4,9]},
-        y:()=>innerHeight, rotationX:matchMedia('(max-width:768px)').matches?-40:-70,
-        transformOrigin:'50% 0%', z:matchMedia('(max-width:768px)').matches?-450:-900, autoAlpha:0
-      });
-    }
-    if(mode==='sixth'){
-      tl.from(imgs,{
-        stagger:{amount:.25,from:'edges',grid:[3,3]},
-        scale:matchMedia('(max-width:768px)').matches?.82:.7, autoAlpha:0
-      }).from(grid,{scale:matchMedia('(max-width:768px)').matches?.92:.85,skewY:matchMedia('(max-width:768px)').matches?1.5:3},0);
-    }
-    if(mode==='ninth'){
-      const caption = section.querySelector('.content__title');
-      tl.from(imgs,{
-        transformOrigin:'100% -450%',
-        stagger:.07, scaleX:1.02, skewX:matchMedia('(max-width:768px)').matches?7:15,
-        xPercent:matchMedia('(max-width:768px)').matches?18:50, rotation:matchMedia('(max-width:768px)').matches?-5:-10, autoAlpha:0
-      });
-      if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
-    }
-  });
-}
-
-
-function animateHeader(){
-  const frame = document.querySelector('.frame');
-  const title = frame?.querySelector('.frame__title');
-  if(!frame||!title) return;
-
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    gsap.from(frame,{autoAlpha:0,duration:.6,ease:'power1.out',scrollTrigger:{trigger:frame,start:'top 95%'}});
-    return;
   }
 
-  // Fade + slight push as soon as you scroll, no dead zone.
-  gsap.timeline({
-    defaults: { ease: 'none' },
-    scrollTrigger: {
-      trigger: frame,
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true,
-      invalidateOnRefresh: true
-    }
-  })
-  .to(frame, { 
-    // opacity is more predictable than filter/brightness for that “veil” feel
-    opacity: 0.38, 
-    yPercent: 14 
-  }, 0)
-  .to(title, { xPercent: -80 }, 0);
-}
+  function animateHeader(){
+    const frame = document.querySelector('.frame');
+    const title = frame?.querySelector('.frame__title');
+    if(!frame||!title) return;
 
+    if (prefersReducedMotion) {
+      gsap.from(frame,{autoAlpha:0,duration:.6,ease:'power1.out',scrollTrigger:{trigger:frame,start:'top 95%'}});
+      return;
+    }
+
+    gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: frame,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        invalidateOnRefresh: true
+      }
+    })
+    .to(frame, { opacity: 0.38, yPercent: 14 }, 0)
+    .to(title, { xPercent: -80 }, 0);
+  }
 
   function animateProcess(){
     document.querySelectorAll('[id$="-process"]').forEach(process=>{
@@ -1747,151 +1664,132 @@ function animateHeader(){
     });
   }
 
+  function initCursor(){
+    if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
+    document.documentElement.classList.add('has-cursor');
 
+    if(!document.getElementById('gc-goo-defs')){
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.id='gc-goo-defs'; svg.setAttribute('width','0'); svg.setAttribute('height','0');
+      svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
+      document.body.appendChild(svg);
+    }
 
-function initCursor(){
-  if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
-  document.documentElement.classList.add('has-cursor');
+    document.querySelectorAll('.gooey-cursor').forEach(n=>n.remove());
+    const wrap = document.createElement('div');
+    wrap.className='gooey-cursor';
+    wrap.setAttribute('aria-hidden','true');
+    document.body.appendChild(wrap);
 
-  if(!document.getElementById('gc-goo-defs')){
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.id='gc-goo-defs'; svg.setAttribute('width','0'); svg.setAttribute('height','0');
-    svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
-    document.body.appendChild(svg);
-  }
+    const N = 20;
+    const LERP = .35;
+    const LINK_SHRINK = 0.55;
+    let hoverBoost = 1;
 
-  // Reset container and build dots
-  document.querySelectorAll('.gooey-cursor').forEach(n=>n.remove());
-  const wrap = document.createElement('div');
-  wrap.className='gooey-cursor';
-  wrap.setAttribute('aria-hidden','true');
-  document.body.appendChild(wrap);
+    for (let i=0;i<N;i++){
+      const d = document.createElement('div');
+      d.className = 'gc-dot';
+      wrap.appendChild(d);
+    }
+    const dots = Array.from(wrap.children);
 
-  const N = 20;               // number of dots
-  const LERP = .35;           // trailing smoothness
-  const LINK_SHRINK = 0.55;   // head-dot size multiplier on link hover
-  let hoverBoost = 1;         // 1 = normal, <1 = smaller (we’ll set to LINK_SHRINK)
+    let mx = innerWidth/2, my = innerHeight/2;
+    const hist = Array.from({length:N},()=>({x:mx,y:my}));
 
-  for (let i=0;i<N;i++){
-    const d = document.createElement('div');
-    d.className = 'gc-dot';
-    wrap.appendChild(d);
-  }
-  const dots = Array.from(wrap.children);
+    addEventListener('pointermove', (e)=>{ mx=e.clientX; my=e.clientY; }, {passive:true});
 
-  let mx = innerWidth/2, my = innerHeight/2;
-  const hist = Array.from({length:N},()=>({x:mx,y:my}));
+    document.addEventListener('pointerover', (e)=>{
+      if (e.target.closest('a[href], [role="link"]')) hoverBoost = LINK_SHRINK;
+    }, true);
+    document.addEventListener('pointerout', (e)=>{
+      if (e.target.closest('a[href], [role="link"]')) hoverBoost = 1;
+    }, true);
 
-  addEventListener('pointermove', (e)=>{ mx=e.clientX; my=e.clientY; }, {passive:true});
+    function tick(){
+      hist.shift(); hist.push({x:mx,y:my});
+      for(let i=0;i<N;i++){
+        const c = hist[i], n = hist[i+1] || hist[N-1];
+        c.x += (n.x - c.x) * LERP;
+        c.y += (n.y - c.y) * LERP;
 
-  // Only shrink on actual links, per your ask.
-  document.addEventListener('pointerover', (e)=>{
-    if (e.target.closest('a[href], [role="link"]')) hoverBoost = LINK_SHRINK;
-  }, true);
+        const base = i / N;
+        const scale = (i === N-1) ? base * hoverBoost : base;
 
-  document.addEventListener('pointerout', (e)=>{
-    if (e.target.closest('a[href], [role="link"]')) hoverBoost = 1;
-  }, true);
-
-  function tick(){
-    hist.shift(); hist.push({x:mx,y:my});
-    for(let i=0;i<N;i++){
-      const c = hist[i], n = hist[i+1] || hist[N-1];
-      c.x += (n.x - c.x) * LERP;
-      c.y += (n.y - c.y) * LERP;
-
-      const base = i / N;
-      // Only the lead (last) dot changes size when hovering links
-      const scale = (i === N-1) ? base * hoverBoost : base;
-
-      dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
+        dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
+      }
+      requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
-}
 
+  function initConfetti(){
+    const sup = document.querySelector('.heading-chant .confetti-sup'); 
+    if(!sup) return;
 
-function initConfetti(){
-  // Clickable superscript inside the About heading
-  const sup = document.querySelector('.heading-chant .confetti-sup'); 
-  if(!sup) return;
+    const emitter = sup.querySelector('.emitter');
+    const physicsAvailable =
+      !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
+    if (!physicsAvailable) return;
 
-  const emitter = sup.querySelector('.emitter');
+    function particles(parent, qty, x, y, minA, maxA){
+      const colors = ['#FFFF04','#EA4C89','#892AB8','#4AF2FD'];
+      for(let i=0;i<qty;i++){
+        const angle = gsap.utils.random(minA,maxA);
+        const velocity = gsap.utils.random(70,140);
+        const dot = document.createElement('div');
+        dot.style.setProperty('--b', colors[(Math.random()*colors.length)|0]);
+        parent.appendChild(dot);
 
-  // Require GSAP Physics2D (your script tag already includes it)
-  const physicsAvailable =
-    !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
-  if (!physicsAvailable) return;
+        gsap.set(dot,{opacity:0,x,y,scale:gsap.utils.random(.4,.8),rotation:gsap.utils.random(0,360)});
+        gsap.timeline({onComplete:()=>dot.remove()})
+          .to(dot,{opacity:1,duration:.06},0)
+          .to(dot,{
+            duration:1.8,
+            rotationX:`-=${gsap.utils.random(720,1440)}`,
+            rotationZ:`+=${gsap.utils.random(720,1440)}`,
+            physics2D:{angle,velocity,gravity:120}
+          },0)
+          .to(dot,{opacity:0,duration:1},.8);
+      }
+    }
+    function burst(q=80,minA=-95,maxA=-35){
+      particles(emitter,q,0,0,minA,maxA);
+      gsap.fromTo(sup,{scale:.96},{scale:1,duration:.25,ease:'elastic.out(1,.6)'});
+    }
 
-  // --- helpers ---
-  function particles(parent, qty, x, y, minA, maxA){
-    const colors = ['#FFFF04','#EA4C89','#892AB8','#4AF2FD'];
-    for(let i=0;i<qty;i++){
-      const angle = gsap.utils.random(minA,maxA);
-      const velocity = gsap.utils.random(70,140);
-      const dot = document.createElement('div');
-      dot.style.setProperty('--b', colors[(Math.random()*colors.length)|0]);
-      parent.appendChild(dot);
+    sup.addEventListener('click',()=>burst());
+    sup.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();burst();}});
 
-      gsap.set(dot,{opacity:0,x,y,scale:gsap.utils.random(.4,.8),rotation:gsap.utils.random(0,360)});
-      gsap.timeline({onComplete:()=>dot.remove()})
-        .to(dot,{opacity:1,duration:.06},0)
-        .to(dot,{
-          duration:1.8,
-          rotationX:`-=${gsap.utils.random(720,1440)}`,
-          rotationZ:`+=${gsap.utils.random(720,1440)}`,
-          physics2D:{angle,velocity,gravity:120}
-        },0)
-        .to(dot,{opacity:0,duration:1},.8);
+    if(!prefersReducedMotion && matchMedia('(pointer:fine)').matches){
+      let last=0; const CD=700;
+      sup.addEventListener('mouseenter',()=>{
+        const now=performance.now(); if(now-last<CD) return; last=now; burst(28,-100,-60);
+      });
+    }
+
+    if (prefersReducedMotion) return;
+
+    let firedAuto = false;
+    const auto = () => { if (firedAuto) return; firedAuto = true; burst(54, -100, -35); };
+
+    if (typeof ScrollTrigger !== 'undefined') {
+      const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
+      ScrollTrigger.create({
+        trigger: triggerEl,
+        start: 'top 65%',
+        once: true,
+        onEnter: auto
+      });
+    }
+
+    const isSupInView = () => {
+      const r = sup.getBoundingClientRect();
+      return r.top < innerHeight * 0.65 && r.bottom > 0;
+    };
+    if (location.hash === '#about' || isSupInView()) {
+      setTimeout(auto, 400);
     }
   }
-  function burst(q=80,minA=-95,maxA=-35){
-    particles(emitter,q,0,0,minA,maxA);
-    gsap.fromTo(sup,{scale:.96},{scale:1,duration:.25,ease:'elastic.out(1,.6)'});
-  }
-
-  // --- manual triggers (always on) ---
-  sup.addEventListener('click',()=>burst());
-  sup.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();burst();}});
-
-  // Hover flair only when motion is OK + fine pointer
-  if(!prefersReducedMotion && matchMedia('(pointer:fine)').matches){
-    let last=0; const CD=700;
-    sup.addEventListener('mouseenter',()=>{
-      const now=performance.now(); if(now-last<CD) return; last=now; burst(28,-100,-60);
-    });
-  }
-
-  // --- auto trigger on arrival (first time only) ---
-  // respect reduced motion
-  if (prefersReducedMotion) return;
-
-  let firedAuto = false;
-  const auto = () => { if (firedAuto) return; firedAuto = true; burst(54, -100, -35); };
-
-  // 1) When scrolling down into the About section (once)
-  if (typeof ScrollTrigger !== 'undefined') {
-    const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
-    ScrollTrigger.create({
-      trigger: triggerEl,
-      start: 'top 65%',   // "arrive" point
-      once: true,         // fire one time
-      onEnter: auto
-    });
-  }
-
-  // 2) If the page loads already at #about (deep link) or it's already in view
-  //    wait a beat so layout settles and ScrollTrigger (if present) refreshes.
-  const isSupInView = () => {
-    const r = sup.getBoundingClientRect();
-    return r.top < innerHeight * 0.65 && r.bottom > 0;
-  };
-  if (location.hash === '#about' || isSupInView()) {
-    setTimeout(auto, 400);
-  }
-}
-
 
   function initDeadJump(){
     const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
@@ -1927,7 +1825,6 @@ function initConfetti(){
 
   /* -----------------------------
      CASE STUDY TIMING OVERRIDES
-     (before creating ScrollTriggers)
   ----------------------------- */
   function tuneCaseStudyTiming() {
     const mq = window.matchMedia('(max-width: 768px)');
@@ -1943,13 +1840,15 @@ function initConfetti(){
 
     function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
       const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
-      const vh = isMobile() ? baseVH.mobile : baseVH.desktop;
-      const per = isMobile() ? perTileVH.mobile : perTileVH.desktop;
+      const vh = isMobile ? baseVH.mobile : baseVH.desktop;
+      const per = isMobile ? perTileVH.mobile : perTileVH.desktop;
       const boost = captionBoostVH && grid.closest('section')?.querySelector('.content__title')
-        ? (isMobile() ? captionBoostVH.mobile : captionBoostVH.desktop)
+        ? (isMobile ? captionBoostVH.mobile : captionBoostVH.desktop)
         : 0;
       const tilesOverMin = Math.max(0, tiles - minTiles);
-      const totalVH = vh + tilesOverMin * per + boost;
+      const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop) +
+                      tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop) +
+                      (grid.closest('section')?.querySelector('.content__title') ? (isMobile() ? (captionBoostVH.mobile||0):(captionBoostVH.desktop||0)) : 0);
       const px = Math.round(window.innerHeight * (totalVH / 100));
       return `+=${px}`;
     }
@@ -1994,9 +1893,79 @@ function initConfetti(){
   }
 
   /* -----------------------------
+     BLURRY SCROLL FILTER
+  ----------------------------- */
+  function ensureScrollBlurFilter(){
+    if (document.getElementById('ux-blur-defs')) return;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.id = 'ux-blur-defs';
+    svg.setAttribute('width','0');
+    svg.setAttribute('height','0');
+    svg.style.position = 'absolute';
+    svg.style.left = '-9999px';
+    svg.innerHTML = `
+      <defs>
+        <filter id="ux-blur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur id="ux-blur-fe" in="SourceGraphic" stdDeviation="0 0" />
+        </filter>
+      </defs>
+    `;
+    document.body.appendChild(svg);
+  }
+
+  /* Replace your existing initScrollSpeedBlur with this */
+function initScrollSpeedBlur({
+  targetSel = '.blur-scroll',   // section to blur
+  feId = '#ux-blur-fe',         // <feGaussianBlur> element id
+  scale = 0.30,                 // matches: blur = abs(diff) * 0.3
+  max = 20,                     // cap (your old "0 20")
+  axis = 'y'                    // 'x' or 'y' axis blur
+} = {}) {
+  const target = document.querySelector(targetSel);
+  const fe = document.querySelector(feId);
+  if (!target || !fe) return;
+
+  // Apply the SVG filter to the target once.
+  target.style.filter = 'url(#ux-blur)';
+
+  // Respect reduced motion
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+    return;
+  }
+
+  let lastY = window.pageYOffset || 0;
+  let lastX = window.pageXOffset || 0;
+
+  // Use rAF so it plays nicely with Lenis (we already drive Lenis via gsap.ticker)
+  function tick(){
+    const y = window.pageYOffset || 0;
+    const x = window.pageXOffset || 0;
+
+    // raw per-frame delta like your original looper()
+    const dy = y - lastY;
+    const dx = x - lastX;
+
+    const delta = axis === 'x' ? Math.abs(dx) : Math.abs(dy);
+
+    // same feel as: speed = diff * .1; blur = |speed| * 3
+    const blur = Math.min(max, delta * scale);
+
+    // set "0 N" for vertical or "N 0" for horizontal
+    const dev = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
+    gsap.set(fe, { attr: { stdDeviation: dev } });
+
+    lastY = y;
+    lastX = x;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+
+  /* -----------------------------
      BOOT
   ----------------------------- */
-  // Ensure minimal shell in case the HTML is bare.
   if (!document.querySelector('#app')) {
     const main = document.createElement('main'); main.id = 'app';
     document.body.appendChild(main);
@@ -2012,24 +1981,26 @@ function initConfetti(){
   initSmooth();
   enableHashScroll();
 
-  // Apply case-study timing BEFORE building ScrollTriggers
+  // Case-study timings BEFORE building triggers
   tuneCaseStudyTiming();
 
-preloadImages().then(()=>{
-  document.body.classList.remove('loading');
-  animateHeader();
-  animateGrids();
-  animateProcess();
-  animateStacks();
-  initCursor();
-  initConfetti();        // never reached once the error above throws
-  initDeadJump();
-  initBackToTop();
-  a11yifyGridImages();
-  ScrollTrigger.refresh(true);
-  window.scrollTo(0,0);
-});
-
+  // Build + run
+  preloadImages().then(()=>{
+    document.body.classList.remove('loading');
+    animateHeader();
+    animateGrids();
+    animateProcess();
+    animateStacks();
+    initCursor();
+    initConfetti();
+    initDeadJump();
+    initBackToTop();
+    a11yifyGridImages();
+    ensureScrollBlurFilter();
+    initScrollSpeedBlur();
+    ScrollTrigger.refresh(true);
+    window.scrollTo(0,0);
+  });
 
   // Keep timings fresh on breakpoint changes
   const mq = window.matchMedia('(max-width: 768px)');
@@ -2039,34 +2010,16 @@ preloadImages().then(()=>{
 
   addEventListener('resize', ()=>ScrollTrigger.refresh());
 })();
-
-
-function initDeadJump(){
-  // If the header already has a real link, let enableHashScroll handle it.
-  if (document.querySelector('.frame .frame__title a[href="#about"]')) return;
-  const el = document.querySelector('.frame__title');
-  const t  = document.getElementById('about');
-  if(!el || !t) return;
-  const go = ()=> {
-    const y = t.getBoundingClientRect().top + window.pageYOffset;
-    window.lenis ? window.lenis.scrollTo(y,{duration:1}) : window.scrollTo({top:y,behavior:'smooth'});
-    history.pushState(null,'','#about');
-  };
-  el.setAttribute('role','link'); el.setAttribute('tabindex','0');
-  el.addEventListener('click',(e)=>{e.preventDefault();go();});
-  el.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
-}
-
 </script>
+
 <script>
+/* Bottom blur overlay bootstrap (unchanged) */
 document.addEventListener('DOMContentLoaded', () => {
-  // Read tokens (with safe fallbacks)
   const cs = getComputedStyle(document.documentElement);
   const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
   const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
   const maskStop = +cs.getPropertyValue('--mask-stop')?.trim() || 35;
 
-  // Ensure .blur exists
   let blur = document.querySelector('.blur');
   if (!blur) {
     blur = document.createElement('div');
@@ -2074,14 +2027,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(blur);
   }
 
-  // Build slices if missing; compute values in JS (no CSS trig)
   if (!blur.children.length) {
     let html = '';
     for (let i = 1; i <= layers; i++) {
       const t     = i / layers;
-      const blurV = Math.sin((1 - t) * Math.PI / 2) * blurMax; // px
-      const stop  = Math.sin(t * Math.PI / 2) * maskStop;      // %
-      const start = (100 - stop).toFixed(4) + '%';             // gradient start
+      const blurV = Math.sin((1 - t) * Math.PI / 2) * blurMax;
+      const stop  = Math.sin(t * Math.PI / 2) * maskStop;
+      const start = (100 - stop).toFixed(4) + '%';
       html += `<div style="--i:${i}; --blur:${blurV.toFixed(3)}px; --maskStart:${start}"></div>`;
     }
     blur.innerHTML = html;
@@ -2091,7 +2043,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const show = () => blur.classList.add('is-visible');
   const hide = () => blur.classList.remove('is-visible');
 
-  // Toggle visibility when header scrolls away
   if (window.ScrollTrigger && header) {
     ScrollTrigger.create({
       trigger: header,
@@ -2105,12 +2056,9 @@ document.addEventListener('DOMContentLoaded', () => {
     io.observe(header);
   }
 
-  // If we landed below the header already, show immediately
   if (header && header.getBoundingClientRect().bottom <= 0) show();
 });
 </script>
-
-
 
 </body>
 </html>

@@ -1028,6 +1028,20 @@ a + a { margin-inline-start: .6rem; }
   section { scroll-margin-top: 10vh; }
 }
 
+
+/* Make the trigger look interactive on all devices */
+.ux-dead-jump{
+  text-decoration: none;
+  text-underline-offset: .12em;
+  cursor: pointer;
+}
+
+/* If you have a fixed/sticky header, set the offset here */
+:root { --jump-offset: 0px; }   /* e.g., 72px if your header is 72px tall */
+
+/* Also helpful so native scrollIntoView targets don’t hide under headers */
+section { scroll-margin-top: var(--jump-offset); }
+
 </style>
 </head>
 <body class="loading">
@@ -2784,37 +2798,44 @@ sup.addEventListener('mouseenter', () => {
 </script>
 <script>
 (() => {
-  const isMobile = matchMedia('(max-width:768px)').matches || matchMedia('(pointer:coarse)').matches;
-  if (!isMobile) return;
+  const PREFERS_REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Optional offset via CSS variable: :root { --jump-offset: 0px; }
+  const getOffset = () => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--jump-offset').trim();
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+  };
 
-  // Find any heading/paragraph/etc. that contains "UX is dead"
-  const candidates = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,a,.frame__title,.content__title-main'))
-    .filter(el => /ux\s*is\s*dead/i.test(el.textContent));
+  // Find elements that contain "UX is dead" (case-insensitive)
+  const candidates = Array.from(
+    document.querySelectorAll('h1,h2,h3,h4,h5,h6,p,span,a,.frame__title,.content__title-main,.heading-chant')
+  ).filter(el => /ux\s*is\s*dead/i.test(el.textContent));
 
   if (!candidates.length) return;
 
   function nextSectionFrom(el){
     const curr = el.closest('section') || document.body;
-    // walk forward to next <section>
     let sib = curr.nextElementSibling;
     while (sib && sib.tagName.toLowerCase() !== 'section') sib = sib.nextElementSibling;
     if (sib) return sib;
 
-    // fallback: use document order
+    // fallback by document order
     const sections = Array.from(document.querySelectorAll('section'));
     const idx = sections.indexOf(curr);
     return sections[idx + 1] || null;
   }
 
-  function jump(el){
+  function jumpFrom(el){
     const target = nextSectionFrom(el);
     if (!target) return;
-    if (prefersReduced) {
-      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY });
+
+    const top = target.getBoundingClientRect().top + window.scrollY - getOffset();
+
+    if (PREFERS_REDUCED) {
+      window.scrollTo({ top });
     } else {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollTo({ top, behavior: 'smooth' });
     }
   }
 
@@ -2822,14 +2843,23 @@ sup.addEventListener('mouseenter', () => {
     el.classList.add('ux-dead-jump');
     el.setAttribute('role', 'link');
     el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Jump to next section');
 
-    el.addEventListener('click', e => { e.preventDefault(); jump(el); });
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      jumpFrom(el);
+    });
+
     el.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(el); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        jumpFrom(el);
+      }
     }, { passive: false });
   });
 })();
 </script>
+
 
 </body>
 </html>

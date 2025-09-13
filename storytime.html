@@ -7,17 +7,17 @@
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
   <title>Layout Formation on Scroll | Codrops</title>
 
-  <!-- GSAP core + plugins -->
-  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
-  <!-- ImagesLoaded -->
-  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-  <!-- Lenis smooth scroll -->
-  <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
+<!-- GSAP core + plugins -->
 <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
 <script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
+
+<!-- ImagesLoaded -->
+<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+
+<!-- Lenis smooth scroll -->
+<script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
 <style>
-  <style>
     /* ===== your full CSS from earlier (unchanged) ===== */
     /* I kept everything intact so nothing relies on overrides. */
     /* If you want me to inline a trimmed version, say the word. */
@@ -166,18 +166,14 @@
     @media (prefers-reduced-motion:reduce){.blur{display:none !important}}
     .ux-dead-jump{text-decoration:none;text-underline-offset:.12em;cursor:pointer}
     section{scroll-margin-top:var(--jump-offset)}
-  </style>
+    
+
+    
 </style>
-</head>
 <body class="loading">
-<main>
-<body class="loading">
-  <!-- Minimal shell -->
   <main id="app"></main>
   <div class="blur"></div>
   <div id="panel-root"></div>
-
-</main> 
   <script>
 /* app.js — single file build (CONTENT + RENDER + ANIMATIONS + TIMING FIX) */
 
@@ -385,10 +381,13 @@ document.documentElement.classList.add('js');
         "https://i.ibb.co/Fgxcqj0/16.jpg",
         "https://i.ibb.co/dcXH5fn/13.jpg"
       ],
-      insight: [
-        ["Problem","Advisors juggle 6–10 tools per client task. Context switching and duplicated data increase risk and slow portfolio actions. Legacy UI hid critical states and scattered client insights."],
-        ["Constraints","Strict audit trails (SEC/FINRA), complex permissioning, and heterogeneous custodial feeds. Needed low cognitive load under heavy data density and real-time prices."]
-      ],
+insight: [
+  ["Platform & IA",
+   "Composable workspace that unifies CRM context with portfolio actions; permissions & auditability shape component boundaries."],
+  ["Outcome",
+   "Fewer tool switches, clearer states, and faster rebalance/review cycles across dense data views."]
+],
+
       stack: [
         ["https://i.ibb.co/XkM2hn8n/bny1.png","BNY 1"],
         ["https://i.ibb.co/vvMZmq94/bny2.png","BNY 2"],
@@ -608,38 +607,27 @@ document.documentElement.classList.add('js');
     finProc.innerHTML = finIntro + finDetails;
     app.appendChild(finProc);
 
-// FINTECH — DISCOVERY
-document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
-  const end = calcEndPx(grid, {
-    baseVH: { desktop: 150, mobile: 110 },
-    perTileVH: { desktop: 6, mobile: 4 }
-  });
-  setTiming(grid, {
-    mode: 'ninth',
-    endDesk: end,
-    endMob: end,
-    scrubDesk: 0.45,
-    scrubMob: 0.32
-  });
-  grid.dataset.anticipatePin = '0';   // 👈 prevent early pin overlap
-});
+// FINTECH — DISCOVERY (grid with sweep animation)
+const finDisc = el('section','content content--full content--cutoff'); 
+finDisc.id = 'fintech-discovery';
+finDisc.innerHTML = `
+  <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+    ${CONTENT.fintech.discoveryImages.map(src => `
+      <div class="grid__img" style="background-image:url(${src})"></div>
+    `).join('')}
+  </div>`;
+app.appendChild(finDisc);
 
-    // FINTECH — INSIGHT
-    const finInsight = el('section','content content--padded'); finInsight.id='fintech-insight';
-    finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
-      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-        <span class="project__label project__label--default">${label}</span>
-        <p>${text}</p>
-      </section>`).join('');
-    app.appendChild(finInsight);
+// FINTECH — INSIGHT (two-up text pair)
+const finInsight = el('section','content content--padded'); 
+finInsight.id = 'fintech-insight';
+finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
+  <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+    <span class="project__label project__label--default">${label}</span>
+    <p>${text}</p>
+  </section>`).join('');
+app.appendChild(finInsight);
 
-    // FINTECH — STACK
-    const finStack = el('section','content content--full stacked-section'); finStack.id='fintech-stack';
-    finStack.innerHTML = `
-      <div class="stacked-gallery" data-stack>
-        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img src="${src}" alt="${alt}"></figure>`).join('')}
-      </div>`;
-    app.appendChild(finStack);
 
     // ECOM HERO
     const ecoHero = el('section','content content--padded content--full'); ecoHero.id='ecommerce';
@@ -1057,24 +1045,14 @@ function animateGrids(){
       return `+=${px}`;
     }
 
-    // BNY — HERO (use "sixth" feel, steadier scrubs)
-    document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
-      const end = calcEndPx(grid, {
-        baseVH: { desktop: 120, mobile: 90 },
-        perTileVH: { desktop: 10, mobile: 7 },
-        captionBoostVH: { desktop: 12, mobile: 8 }
-      });
-      setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
-    });
-
-    // BNY — DISCOVERY (lateral sweep, numeric scrub)
-    document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
-      const end = calcEndPx(grid, {
-        baseVH: { desktop: 150, mobile: 110 },
-        perTileVH: { desktop: 6, mobile: 4 }
-      });
-      setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
-    });
+// BNY — DISCOVERY (inside tuneCaseStudyTiming) ✅ keep this one
+document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
+  const end = calcEndPx(grid, {
+    baseVH: { desktop: 150, mobile: 110 },
+    perTileVH: { desktop: 6, mobile: 4 }
+  });
+  setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
+});
 
     // GNC — HERO
     document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
@@ -1143,7 +1121,6 @@ function animateGrids(){
   addEventListener('resize', ()=>ScrollTrigger.refresh());
 })();
 
-</script>
-
+  </script>
 </body>
 </html>

@@ -172,6 +172,8 @@
   font-size: clamp(3.9rem, 6vw, 3.9rem); /* was 2.6rem, 4vw, 2.6rem */
 }
 
+/* Scrub-friendly blur (no easing lag) */
+.blur { transition: none !important; }
     
 </style>
 <body class="loading">
@@ -727,129 +729,147 @@ document.documentElement.classList.add('js');
     new Promise(res => imagesLoaded(document.querySelectorAll(sel), { background:true }, res));
 
   /* ------- TIMELINE ENGINE ------- */
-  function animateGrids(){
-    const mq = matchMedia('(max-width:768px)');
-    const isMobile = () => mq.matches;
+function animateGrids(){
+  const mq = matchMedia('(max-width:768px)');
+  const isMobile = () => mq.matches;
 
-    const modes = {
-      second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
-      fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
-      sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
-      ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
-    };
+  const modes = {
+    second: { endDesk:'+=250%', endMob:'+=140%', scrubDesk:.5,  scrubMob:.25 },
+    fifth:  { endDesk:'+=250%', endMob:'+=150%', scrubDesk:.3,  scrubMob:.2  },
+    sixth:  { endDesk:'+=180%', endMob:'+=120%', scrubDesk:.6,  scrubMob:.4  },
+    ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
+  };
 
-    function defaultEndPx(mode, grid){
-      const count = grid.querySelectorAll('.grid__img').length || 6;
-      const section = grid.closest('section') || grid.parentNode;
-      const hasCaption = !!section.querySelector('.content__title');
-      const cfg = ({
-        second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
-        fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
-        sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
-        ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
-      })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
+  function defaultEndPx(mode, grid){
+    const count = grid.querySelectorAll('.grid__img').length || 6;
+    const section = grid.closest('section') || grid.parentNode;
+    const hasCaption = !!section.querySelector('.content__title');
+    const cfg = ({
+      second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+      fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
+      sixth:  { base:{d:180,m:120}, per:{d: 6,m:4}, cap:{d:10,m:6} },
+      ninth:  { base:{d:210,m:130}, per:{d: 6,m:4}, cap:{d:12,m:8} }
+    })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
 
-      const tilesOverMin = Math.max(0, count - 4);
-      const vh = (isMobile()?cfg.base.m:cfg.base.d)
-               + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
-               + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
-      return `+=${Math.round(window.innerHeight * (vh/100))}`;
-    }
-    const parseScrub = (v, fb) => {
-      if(v==null || v==='') return fb;
-      if(v==='true') return true;
-      if(v==='false') return false;
-      const n = parseFloat(v); return isNaN(n) ? fb : n;
-    };
+    const tilesOverMin = Math.max(0, count - 4);
+    const vh = (isMobile()?cfg.base.m:cfg.base.d)
+             + tilesOverMin * (isMobile()?cfg.per.m:cfg.per.d)
+             + (hasCaption ? (isMobile()?cfg.cap.m:cfg.cap.d) : 0);
+    return `+=${Math.round(window.innerHeight * (vh/100))}`;
+  }
+  const parseScrub = (v, fb) => {
+    if(v==null || v==='') return fb;
+    if(v==='true') return true;
+    if(v==='false') return false;
+    const n = parseFloat(v); return isNaN(n) ? fb : n;
+  };
 
-    const grids = [...document.querySelectorAll(
-      '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
-    )];
+  const pinType = 'transform';        // consistent with Lenis/normalized scroll
+  const anticipate = 1.2;             // reduce “snap” at pin start
+  const grids = [...document.querySelectorAll(
+    '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+  )];
 
-    grids.forEach(grid=>{
-      const imgs  = grid.querySelectorAll('.grid__img');
-      const items = grid.querySelectorAll('.grid__item');
-      if(!imgs.length && !items.length) return;
+  grids.forEach(grid=>{
+    const imgs  = grid.querySelectorAll('.grid__img');
+    const items = grid.querySelectorAll('.grid__item');
+    if(!imgs.length && !items.length) return;
 
-      const section = grid.closest('section') || grid.parentNode;
-      let defaultMode = grid.hasAttribute('data-grid-second') ? 'second' :
-                        grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
-                        grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+    const section = grid.closest('section') || grid.parentNode;
+    const defaultMode =
+      grid.hasAttribute('data-grid-second') ? 'second' :
+      grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+      grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
 
-      const d = grid.dataset;
-      const mode = d.mode || defaultMode;
+    const d = grid.dataset;
+    const mode = d.mode || defaultMode;
 
-      const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+    const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
 
-      const base = modes[mode] || modes.ninth;
-      const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
-      const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+    const base = modes[mode] || modes.ninth;
+    const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+    const scrub = parseScrub(isMobile()? d.scrubMobile : d.scrubDesktop, fallbackScrub);
 
-      const anticipatePin = (d.anticipatePin != null)
-        ? +d.anticipatePin
-        : (mode==='second' || mode==='fifth' ? 1 : 0);
-
-      const tl = gsap.timeline({
-        defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end,
-          pin: section,
-          scrub,
-          pinSpacing: true,
-          anticipatePin,
-          invalidateOnRefresh: true
-        }
-      });
-
-      if(mode==='second'){
-        const mid = Math.floor(imgs.length/2);
-        tl.from(imgs,{
-          stagger:{amount:.3,from:'center'},
-          y:()=>innerHeight,
-          transformOrigin:'50% 0%',
-          rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(matchMedia('(max-width:768px)').matches?1.5:3)
-        }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
-      }
-      if(mode==='fifth'){
-        tl.set(grid,{perspective:1000}).from(imgs,{
-          stagger:{amount:.4,from:'random',grid:[4,9]},
-          y:()=>innerHeight, rotationX:matchMedia('(max-width:768px)').matches?-40:-70,
-          transformOrigin:'50% 0%', z:matchMedia('(max-width:768px)').matches?-450:-900, autoAlpha:0
-        });
-      }
-      if(mode==='sixth'){
-        tl.from(imgs,{
-          stagger:{amount:.25,from:'edges',grid:[3,3]},
-          scale:matchMedia('(max-width:768px)').matches?.82:.7, autoAlpha:0
-        }).from(grid,{scale:matchMedia('(max-width:768px)').matches?.92:.85,skewY:matchMedia('(max-width:768px)').matches?1.5:3},0);
-      }
-      if(mode==='ninth'){
-        const caption = section.querySelector('.content__title');
-        tl.from(imgs,{
-          transformOrigin:'100% -450%',
-          stagger:.07, scaleX:1.02, skewX:matchMedia('(max-width:768px)').matches?7:15,
-          xPercent:matchMedia('(max-width:768px)').matches?18:50, rotation:matchMedia('(max-width:768px)').matches?-5:-10, autoAlpha:0
-        });
-        if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
+    const tl = gsap.timeline({
+      defaults: { ease: (mode==='sixth' ? 'none' : 'power3') },
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end,
+        pin: section,
+        pinType,
+        pinReparent: true,           // prevent layout “jump” when pinning
+        scrub,
+        anticipatePin: anticipate,
+        pinSpacing: true,
+        invalidateOnRefresh: true
       }
     });
-  }
 
-  function animateHeader(){
-    const frame = document.querySelector('.frame');
-    const title = frame?.querySelector('.frame__title');
-    if(!frame||!title) return;
-
-    if(prefersReducedMotion){
-      gsap.from(frame,{autoAlpha:0,duration:.6,ease:'power1.out',scrollTrigger:{trigger:frame,start:'top 95%'}});
-      return;
+    if(mode==='second'){
+      const mid = Math.floor(imgs.length/2);
+      tl.from(imgs,{
+        stagger:{amount:.3,from:'center'},
+        y:()=>innerHeight,
+        transformOrigin:'50% 0%',
+        rotation:(i)=> (i<mid?-1:1)*Math.abs(i-mid)*(matchMedia('(max-width:768px)').matches?1.5:3)
+      }).from(items,{stagger:{amount:.3,from:'center'},yPercent:100,autoAlpha:0},0);
     }
-    gsap.timeline({defaults:{ease:'none'},scrollTrigger:{trigger:frame,start:'clamp(top bottom)',end:'bottom top',scrub:true}})
-       .to(frame,{yPercent:35,scale:.95,filter:'brightness(30%)'})
-       .to(title,{xPercent:-80},0);
+    if(mode==='fifth'){
+      tl.set(grid,{perspective:1000}).from(imgs,{
+        stagger:{amount:.4,from:'random',grid:[4,9]},
+        y:()=>innerHeight, rotationX:matchMedia('(max-width:768px)').matches?-40:-70,
+        transformOrigin:'50% 0%', z:matchMedia('(max-width:768px)').matches?-450:-900, autoAlpha:0
+      });
+    }
+    if(mode==='sixth'){
+      tl.from(imgs,{
+        stagger:{amount:.25,from:'edges',grid:[3,3]},
+        scale:matchMedia('(max-width:768px)').matches?.82:.7, autoAlpha:0
+      }).from(grid,{scale:matchMedia('(max-width:768px)').matches?.92:.85,skewY:matchMedia('(max-width:768px)').matches?1.5:3},0);
+    }
+    if(mode==='ninth'){
+      const caption = section.querySelector('.content__title');
+      tl.from(imgs,{
+        transformOrigin:'100% -450%',
+        stagger:.07, scaleX:1.02, skewX:matchMedia('(max-width:768px)').matches?7:15,
+        xPercent:matchMedia('(max-width:768px)').matches?18:50, rotation:matchMedia('(max-width:768px)').matches?-5:-10, autoAlpha:0
+      });
+      if(caption) tl.from(caption,{autoAlpha:0,yPercent:40},.35);
+    }
+  });
+}
+
+
+function animateHeader(){
+  const frame = document.querySelector('.frame');
+  const title = frame?.querySelector('.frame__title');
+  if(!frame||!title) return;
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.from(frame,{autoAlpha:0,duration:.6,ease:'power1.out',scrollTrigger:{trigger:frame,start:'top 95%'}});
+    return;
   }
+
+  // Fade + slight push as soon as you scroll, no dead zone.
+  gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: frame,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      invalidateOnRefresh: true
+    }
+  })
+  .to(frame, { 
+    // opacity is more predictable than filter/brightness for that “veil” feel
+    opacity: 0.38, 
+    yPercent: 14 
+  }, 0)
+  .to(title, { xPercent: -80 }, 0);
+}
+
 
   function animateProcess(){
     document.querySelectorAll('[id$="-process"]').forEach(process=>{
@@ -880,23 +900,41 @@ document.documentElement.classList.add('js');
     });
   }
 
-  function initBlur(){
-    const layers = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--layers'))||5;
-    let b = document.querySelector('.blur'); if(!b){ b = document.createElement('div'); b.className='blur'; document.body.appendChild(b); }
-    if(!b.children.length){
-      b.innerHTML = Array.from({length:layers},(_,i)=>`<div style="--i:${i+1}"></div>`).join('');
-    }
-    const header = document.querySelector('.frame');
-    if(window.ScrollTrigger && header){
-      ScrollTrigger.create({
-        trigger: header,
-        start: 'bottom top',
-        onEnter:()=>b.classList.add('is-visible'),
-        onEnterBack:()=>b.classList.remove('is-visible'),
-        onLeaveBack:()=>b.classList.remove('is-visible')
-      });
-    }
+function initBlur(){
+  const layers = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--layers'))||5;
+  let b = document.querySelector('.blur'); 
+  if(!b){
+    b = document.createElement('div'); 
+    b.className='blur'; 
+    document.body.appendChild(b);
   }
+  if(!b.children.length){
+    b.innerHTML = Array.from({length:layers},(_,i)=>`<div style="--i:${i+1}"></div>`).join('');
+  }
+
+  // Be sure scrubbing isn't smoothed by CSS transitions
+  b.style.transition = 'none';
+
+  const header = document.querySelector('.frame');
+  if(!window.ScrollTrigger || !header) return;
+
+  // Instead of toggling a class later, scrub the blur from 0→1 as the header scrolls out
+  gsap.fromTo(b, 
+    { opacity: 0 }, 
+    {
+      opacity: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: header,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        invalidateOnRefresh: true
+      }
+    }
+  );
+}
+
 
 function initCursor(){
   if(!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;

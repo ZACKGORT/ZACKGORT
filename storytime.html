@@ -7,16 +7,14 @@
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
   <title>Layout Formation on Scroll | Codrops</title>
 
-<!-- GSAP core + plugins -->
-<script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-<script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
-<script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
+  <!-- GSAP core + plugins -->
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <!-- ImagesLoaded -->
+  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <!-- Lenis smooth scroll -->
+  <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
 
-<!-- ImagesLoaded -->
-<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
-
-<!-- Lenis smooth scroll -->
-<script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
 <style>
 /* ===============================
    CORE TOKENS & RESET
@@ -930,93 +928,6 @@ a + a { margin-inline-start: .6rem; }
   transform: translateY(-.6em);    /* precise lift */
 }
 
-
-
-
-/* Clickable superscript w/ emitter */
-.heading-chant .confetti-sup{
-  position: relative;
-  display: inline-flex;
-  align-items: flex-start;
-  cursor: pointer;
-  user-select: none;
-  margin-left: .3ch;                 /* small gap from “XP!” */
-  padding: 0 .2ch;                   /* clickable target */
-  border-radius: .25rem;
-  outline: none;
-}
-.heading-chant .confetti-sup:focus-visible{
-  box-shadow: 0 0 0 2px rgba(255,255,255,.5);
-}
-.heading-chant .confetti-sup .emitter{
-  position: absolute;
-  top: 0; left: 50%;
-  width: 0; height: 0;
-  transform: translate(-50%, -60%);
-  pointer-events: none;
-  overflow: visible;
-  z-index: 2;
-}
-
-/* confetti dots */
-.heading-chant .confetti-sup .emitter > div{
-  position: absolute;
-  width: 8px; height: 8px;
-  background: var(--b, #fff);
-  border-radius: 2px;                /* soft squares */
-  will-change: transform, opacity;
-  mix-blend-mode: normal;
-}
-
-/* optional: colorful theme consistent w/ your palette */
-:root{
-  --confetti-colors: #FFFF04, #EA4C89, #892AB8, #4AF2FD;
-}
-
-.heading-chant .confetti-sup:hover{
-  text-decoration: underline;
-  text-decoration-thickness: .08em;
-  text-underline-offset: .12em;
-  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
-}
-
-/* =========================================
-   MOBILE BLUR DIAL-DOWN (performance-first)
-   ========================================= */
-@media (max-width: 768px){
-  /* Smaller kernel, shorter mask, lower saturation */
-  :root{
-    --blur-max: 8;      /* was 40 */
-    --mask-stop: 18;    /* was 35 — shorter blurred band */
-    --saturate: .06;    /* was .1  */
-  }
-
-  /* Show less intensity overall */
-  .blur{ opacity: .75; }
-
-  /* Process fewer layers: keep first 3, hide the rest */
-  .blur > div:nth-child(n+4){ display: none; }
-
-  /* Shrink the filtered spill area to reduce GPU cost */
-  .blur > div::after{ inset: 0 -60%; }  /* was 0 -250% */
-
-  /* Optional: tighten the solid band at the very bottom */
-  .blur > div::before{ height: calc((var(--stop) * .8) * 1%); }
-}
-
-/* Coarse pointers (many phones/tablets) — dial down further */
-@media (pointer: coarse){
-  :root{
-    --blur-max: 6;
-    --saturate: .05;
-  }
-}
-
-/* Respect accessibility (motion often correlates with effects aversion) */
-@media (prefers-reduced-motion: reduce){
-  .blur{ display: none !important; }
-}
-
 </style>
 <body class="loading">
   <main id="app"></main>
@@ -1067,8 +978,8 @@ document.documentElement.classList.add('js');
       tags: [
         { label: "#About", href: "#about" },
         { label: "#Work", href: "#work", settle: "end" },
-        { label: "#Product", href: "#fintech" },
-        { label: "#E-commerce", href: "#ecommerce" },
+        { label: "#Product", href: "#fintech", settle: "end"  },
+        { label: "#E-commerce", href: "#ecommerce", settle: "end"  },
         { label: "#Connect", href: "#contact" }
       ]
     },

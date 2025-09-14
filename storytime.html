@@ -62,8 +62,8 @@
   --cs-ink:#2c241a;
 
   /* Typography defaults */
-  --fs-xxs:11px;
-  --fs-body:16px;
+  --fs-xxs:12px;
+  --fs-body:18px;
 
   /* Stacking */
   --z-blur: 1000;
@@ -103,6 +103,14 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   letter-spacing:.06em;
   font-weight:400;
   color:var(--color-label);
+}
+
+
+/* Left-justify the tiny note but keep it on the right edge */
+.type-tiny.right.end{
+  text-align: left;         /* override .right */
+  max-width: 364px;         /* from earlier */
+  margin-inline-start: auto;/* stays flush-right */
 }
 
 /* =========================================================
@@ -965,6 +973,14 @@ a + a { margin-inline-start: .6rem; }
 
 /* === Blurry scroll section hook === */
 .blur-scroll{ will-change: filter; }
+
+
+/* Constrain tiny right-aligned notes */
+.type-tiny.right.end{
+  max-width: 364px;
+  margin-inline-start: auto; /* keeps it flush-right */
+}
+
   </style>
 </head>
 
@@ -1213,7 +1229,7 @@ document.documentElement.classList.add('js');
     },
 
     contact: {
-      blurb: "Interested in collaborating or just want to say hello? Reach out—always open to good problems.",
+      blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
       email: "zack@reasonably.cc",
       linkedin: "https://www.linkedin.com/in/zackgort/"
     }
@@ -1266,8 +1282,11 @@ document.documentElement.classList.add('js');
     blurSec.innerHTML = `
       <div class="content__title" style="margin:.25rem 0 .5rem"></div>
       <div class="content__text">
-        <p>I think. I make. I think about design and data as systems, business requirements, and how to raise the bar with each engagement.</p>
-        <p>I make things that strive to define new paradigms in e-commerce and digital product design.</p>
+        <p>I think. I make. I think about design and data as systems. I think about how to get the best out of business requirements. I think about form and function.</p>
+        <p></p>
+        <p>I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.</p>
+        <p></p>
+        <p>Now, as for design. I design experiences :)</p>        
       </div>
       <p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">
         Look, I didn't use AI to build this website. I found a gsap library that intrigued me, read the documentation,

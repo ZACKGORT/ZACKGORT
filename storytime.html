@@ -52,7 +52,7 @@
   --layers:5;
   --blur-max:40;
   --mask-stop:35;
-  --saturate:.99;
+  --saturate:0;
 
   /* Panel palette */
   --cs-accent:#f4d35e;
@@ -609,31 +609,10 @@ a + a { margin-inline-start:.6rem; }
 .blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:""; position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
-}
-
-
-@media (max-width:768px){
-  :root{
-    font-size:15px;
-    --page-padding:1rem;
-    --grid-gap:.75rem;
-
-    /* blur tuning (mobile) */
-    --blur-max:9;
-    --mask-stop:18;
-    --saturate:.99; /* ← reset saturation on mobile */
-  }
-
-  /* keep the overlay lightweight on mobile */
-  .blur{ opacity:.85; }
-  .blur > div:nth-child(n+4){ display:none; }   /* fewer layers = smoother */
-  .blur > div::after{ inset:0 -60%; }           /* avoid iOS edge tiling */
-  
-  /* …rest of your existing mobile rules… */
 }
 
 /* =========================================================
@@ -1126,14 +1105,18 @@ agencyGrid: {
   title: "#agencylife",
   images: [
     "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
+
     "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
     "https://i.ibb.co/Xr97WzXX/DSC06055-1.webp",
+
     "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
     "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
+
     "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
     "https://i.ibb.co/m5yN57gn/IMG-20160526-164803987-01.jpg",
     "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
     "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
+
     "https://i.ibb.co/c3vLP47/image-445-min.png",
     "https://i.ibb.co/RymyPtP/image-443-min.png",
     "https://i.ibb.co/Ct9DZd9/image-442-min.png",
@@ -1205,13 +1188,13 @@ agencyGrid: {
       process: {
         domain: "General Nutrition Centers",
         date: "2021",
-        titleLines: ["if the bar ain't bending, you’re just pretending"],
+        titleLines: ["if the bar ain't bending,","you’re just pretending"],
         details: [
           ["Problem","Legacy platform slowed releases, taxonomy was inconsistent across PLP/PDP, and content was duplicated across regions — hurting SEO, conversions, and loyalty enrollment."],
           ["Constraints","Rapid Shopify migration with SEO preservation, loyalty & ERP integrations, SKU complexity (bundles/subscriptions), and performance budgets for mobile."],
           ["Role & Team","Lead UX (IA/flows). Partnered with PM, Tech Lead, Shopify devs, Content, Merchandising, and Analytics. Weekly reviews with exec stakeholders."],
           ["Research","Heuristic audits, keyword & on-site search analysis, card sorts + tree tests for navigation, and prototype testing on mobile PLP/PDP + checkout."],
-          ["This is the whey","Personalized bundles, subscription skews by cycle, and loyalty-led landing frameworks to lift AOV and repeat purchase."]
+          ["Next","Personalized bundles, subscription skews by cycle, and loyalty-led landing frameworks to lift AOV and repeat purchase."]
         ]
       },
       discoveryImages: [
@@ -1748,8 +1731,8 @@ app.appendChild(agency);
     wrap.setAttribute('aria-hidden','true');
     document.body.appendChild(wrap);
 
-    const N = 30;
-    const LERP = .55;
+    const N = 20;
+    const LERP = .35;
     const LINK_SHRINK = 0.55;
     let hoverBoost = 1;
 
@@ -2074,7 +2057,7 @@ app.appendChild(agency);
 document.addEventListener('DOMContentLoaded', () => {
   const cs = getComputedStyle(document.documentElement);
   const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
-  const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 50;
+  const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
   const maskStop = +cs.getPropertyValue('--mask-stop')?.trim() || 35;
 
   let blur = document.querySelector('.blur');

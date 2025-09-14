@@ -52,7 +52,7 @@
   --layers:5;
   --blur-max:40;
   --mask-stop:35;
-  --saturate:1;
+  --saturate:.99; /* reset */
 
   /* Panel palette */
   --cs-accent:#f4d35e;
@@ -577,7 +577,7 @@ a + a { margin-inline-start:.6rem; }
   border:2px solid #fff; border-radius:25px; opacity:.75; box-sizing:content-box;
 }
 .scroller{
-  width:3px; height:10px; border-radius:0;
+  width:3px; height:10px; border-radius:25%;
   background-color:#fff; animation:scroll 2.2s cubic-bezier(.15,.41,.69,.94) infinite;
 }
 @keyframes scroll{
@@ -609,8 +609,8 @@ a + a { margin-inline-start:.6rem; }
 .blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:""; position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
 }
@@ -670,7 +670,6 @@ a + a { margin-inline-start:.6rem; }
   text-decoration-color:color-mix(in oklab,var(--color-text) 45%, transparent);
 }
 
-
 /* === Title System (unified look) === */
 :root{
   --title-size-d: clamp(3rem, 6vw, 4rem);
@@ -695,7 +694,7 @@ a + a { margin-inline-start:.6rem; }
   text-decoration-thickness:.08em;
   text-underline-offset:.12em;
   text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
-  text-transform:none; /* neutralize any .type-tiny uppercase on grid titles */
+  text-transform:none;
 }
 
 /* Size only for section/grid titles (process title keeps its own clamp) */
@@ -733,7 +732,6 @@ a + a { margin-inline-start:.6rem; }
     transform:translateY(-.5em);
   }
 }
-
 
 /* Blurry scroll hook */
 .blur-scroll{ will-change:filter; }
@@ -785,7 +783,7 @@ a + a { margin-inline-start:.6rem; }
     --grid-gap:.75rem;
     --blur-max:9;      /* perf dial-down */
     --mask-stop:18;
-    --saturate:.0;
+    --saturate:.99;    /* reset on mobile too */
   }
 
   .frame{
@@ -891,10 +889,6 @@ a + a { margin-inline-start:.6rem; }
   .blackout.tip:hover::after,
   .blackout.tip:focus-visible::after{ transform:translate(-50%, 4px); }
 
-  /* Heading downsizing */
-  .heading-chant{ font-size:clamp(2rem,8.5vw,2.6rem); }
-  .heading-chant sup{ transform:translateY(-.5em); }
-
   /* Frame link padding tweak */
   .frame__links{ gap:.25rem .6rem; }
   .frame__links a{ padding:.2rem .45rem; }
@@ -967,6 +961,7 @@ a + a { margin-inline-start:.6rem; }
 @media (max-width:768px){
   .grid[data-grid-seventh]{ margin-bottom:12vh; }
 }
+
 
   </style>
 </head>

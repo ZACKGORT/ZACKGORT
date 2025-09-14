@@ -167,6 +167,15 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   word-spacing:.15em;
   font-family:"bricolage-grotesque-48",sans-serif;
 }
+/* Tiny arrow in the big hero title */
+.frame__title sup.title-sup{
+  font-size:.35em;
+  line-height:0;
+  display:inline-block;
+  vertical-align:baseline;
+  transform:translateY(-.6em);
+  letter-spacing:.04em;
+}
 
 /* =========================================================
    CONTENT SECTIONS
@@ -869,7 +878,6 @@ a + a { margin-inline-start: .6rem; }
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: .95;
-  /* ~150% bump */
   font-size: clamp(5.4rem, 6vw, 5.4rem);
   color: var(--color-text);
   text-decoration: none;
@@ -886,6 +894,15 @@ a + a { margin-inline-start: .6rem; }
   vertical-align: baseline;
   transform: translateY(-.6em);
 }
+
+/* Make ¡Viva la XP! smaller on mobile */
+.heading-chant{
+  font-size: clamp(2rem, 8.5vw, 2.6rem);
+}
+.heading-chant sup{
+  transform: translateY(-.5em); /* nudge superscript a touch on smaller size */
+}
+
 
 /* Confetti trigger */
 .heading-chant .confetti-sup{
@@ -991,7 +1008,7 @@ document.documentElement.classList.add('js');
   ----------------------------- */
   const CONTENT = {
     header: {
-      title: "UX is dead↓",
+      title: 'UX is dead<sup class="title-sup" aria-hidden="true">↓</sup>',
       logo: "ZCKGRT",
       subline: "Zack Gort — Digital Designer",
       links: [
@@ -1196,7 +1213,7 @@ document.documentElement.classList.add('js');
     },
 
     contact: {
-      blurb: "Look, I didn't use AI to build this website. I found a gsap library that intrigued me, read the documentation, decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS for efficiency, added ad hoc functionality + features, idiosyncratic interactive 'easter eggs', and splashed on some visual fluff for good measure.",
+      blurb: "Interested in collaborating or just want to say hello? Reach out—always open to good problems.",
       email: "zack@reasonably.cc",
       linkedin: "https://www.linkedin.com/in/zackgort/"
     }
@@ -1248,15 +1265,16 @@ document.documentElement.classList.add('js');
     const blurSec = el('section','content content--padded blur-scroll'); blurSec.id = 'about-blur';
     blurSec.innerHTML = `
       <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-      <div class="content__title" style="margin:.25rem 0 .5rem">
-      </div>
       <div class="content__text">
-        <p>I think. I make. I think about design and data as systems. I think about how to get the best out of business requirements. I think about form and function.</p>
-        <p></p>
-        <p>I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.</p>
-        <p></p>
-        <p>Now, as for design. I design experiences :)</p>        
+        <p>I think. I make. I think about design and data as systems, business requirements, and how to raise the bar with each engagement.</p>
+        <p>I make things that strive to define new paradigms in e-commerce and digital product design.</p>
       </div>
+      <p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">
+        Look, I didn't use AI to build this website. I found a gsap library that intrigued me, read the documentation,
+        decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS
+        for efficiency, added ad hoc functionality + features, idiosyncratic interactive 'easter eggs', and splashed on
+        some visual fluff for good measure.
+      </p>
     `;
     app.appendChild(blurSec);
 
@@ -1434,7 +1452,7 @@ document.documentElement.classList.add('js');
     // CONTACT
     const contact = el('section','content content--padded'); contact.id='contact';
     contact.innerHTML = `
-      <h4 class="type-tiny">Note from self:</h4>
+      <h4 class="type-tiny">Contact</h4>
       <p class="content__text">${CONTENT.contact.blurb}</p>`;
     app.appendChild(contact);
 

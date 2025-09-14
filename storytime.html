@@ -19,9 +19,9 @@
   <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
 
   <style>
-/* ===============================
-   CORE TOKENS & RESET
-   =============================== */
+/* =========================================================
+   RESET & TOKENS
+   ========================================================= */
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -64,6 +64,10 @@
   /* Typography defaults */
   --fs-xxs:11px;
   --fs-body:16px;
+
+  /* Stacking */
+  --z-blur: 1000;
+  --z-footer: 1002;
 }
 
 html, body { width:100%; overflow-x:hidden; }
@@ -101,9 +105,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   color:var(--color-label);
 }
 
-/* ===============================
+/* =========================================================
    LOADER
-   =============================== */
+   ========================================================= */
 .js .loading::before,
 .js .loading::after{ content:""; position:fixed; z-index:1000; }
 .js .loading::before{ inset:0; background:var(--color-bg); }
@@ -114,9 +118,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 }
 @keyframes loaderAnim{ to{ opacity:1; transform:scale3d(.5,.5,1); } }
 
-/* ===============================
+/* =========================================================
    HERO / FRAME
-   =============================== */
+   ========================================================= */
 .frame{
   padding:var(--page-padding);
   position:relative;
@@ -164,9 +168,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   font-family:"bricolage-grotesque-48",sans-serif;
 }
 
-/* ===============================
+/* =========================================================
    CONTENT SECTIONS
-   =============================== */
+   ========================================================= */
 .content{
   position:relative;
   min-height:100dvh;
@@ -217,9 +221,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   text-wrap:balance;
 }
 
-/* ===============================
+/* =========================================================
    GRID SYSTEM
-   =============================== */
+   ========================================================= */
 .grid{
   grid-area:main;
   display:grid;
@@ -306,9 +310,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 #work .grid__item .title-link{ pointer-events:auto; text-decoration:none; }
 #work .grid__item .title-link:hover{ text-decoration:underline; }
 
-/* ===============================
+/* =========================================================
    PROJECT BLOCKS
-   =============================== */
+   ========================================================= */
 .project{
   padding:1rem;
   max-width:1000px;
@@ -433,9 +437,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   }
 }
 
-/* ===============================
+/* =========================================================
    PANEL (OVERLAY)
-   =============================== */
+   ========================================================= */
 .panel{ font-feature-settings:"liga","kern"; letter-spacing:0; }
 .panel .chapter{
   font-size:var(--fs-xxs);
@@ -505,9 +509,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 .panel__progress-bar{ height:6px; background:linear-gradient(90deg, #fff 0%, rgba(255,255,255,.8) 100%); opacity:.85; }
 .panel__counter h1{ font-size:clamp(18px,2.2vw,28px); letter-spacing:.06em; font-weight:500; color:#fff; opacity:.9; }
 
-/* ===============================
+/* =========================================================
    STACKED GALLERIES (shared)
-   =============================== */
+   ========================================================= */
 .stacked-section{ position:relative; z-index:0; isolation:isolate; contain:paint; }
 .content--full.stacked-section{ display:block; height:auto; min-height:0; }
 .stacked-gallery{ display:grid; justify-items:center; }
@@ -523,9 +527,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   -webkit-transform:translateZ(0);
 }
 
-/* IDs keep working if present in markup */
+/* ID hooks for stacks (no extra rules needed) */
 #fintech-stack,
-#ecommerce-stack{ /* no extra rules needed; inherits shared classes */ }
+#ecommerce-stack{}
 
 /* Insight blocks */
 #fintech-insight{
@@ -553,9 +557,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 /* Seventh grid copy padding tweak */
 [data-grid-seventh] .grid__item.span-3{ padding-block:1.5rem; }
 
-/* ===============================
+/* =========================================================
    FOOTER
-   =============================== */
+   ========================================================= */
 .page-footer{
   padding:var(--page-padding);
   display:grid;
@@ -566,11 +570,14 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   margin-top:40vh;
   grid-template-columns:auto;
   justify-content:space-between;
+
+  position: relative;   /* stacking context above blur */
+  z-index: var(--z-footer);
 }
 
-/* ===============================
+/* =========================================================
    SCROLL INDICATOR + BACK-TO-TOP
-   =============================== */
+   ========================================================= */
 .scroll-downs{
   position:fixed;
   left:50%;
@@ -619,11 +626,11 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 .scroll-downs:hover::after{ opacity:.95; transform:translate(-50%, -12px); }
 .scroll-downs:focus-visible{ outline:2px solid #fff; outline-offset:4px; }
 
-/* ===============================
+/* =========================================================
    BOTTOM BLUR OVERLAY
-   =============================== */
+   ========================================================= */
 .blur{
-  position:fixed; inset:0; z-index:1000;
+  position:fixed; inset:0; z-index:var(--z-blur);
   pointer-events:none;
   opacity:0; transition:opacity .35s ease;
 }
@@ -646,9 +653,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   }
 }
 
-/* ===============================
+/* =========================================================
    GOOEY CURSOR
-   =============================== */
+   ========================================================= */
 @media (pointer:fine){
   html.has-cursor body,
   html.has-cursor a,
@@ -675,9 +682,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
 .gooey-cursor, .gooey-cursor *{ pointer-events:none !important; }
 @media (pointer:coarse){ .gooey-cursor{ display:none !important; } }
 
-/* ===============================
+/* =========================================================
    SEVENTH GRID — SECTION SPACING
-   =============================== */
+   ========================================================= */
 @supports selector(:has(*)){
   section.content:has(.grid[data-grid-seventh]){ margin-bottom:clamp(6rem, 18vh, 22rem); }
   @media (max-width:768px){
@@ -689,9 +696,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   .grid[data-grid-seventh]{ margin-bottom:12vh; }
 }
 
-/* ===============================
+/* =========================================================
    DESKTOP ENHANCEMENTS
-   =============================== */
+   ========================================================= */
 @media screen and (min-width:53em){
   :root{ --page-padding:1rem; }
   .frame{
@@ -711,9 +718,9 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   .page-footer{ grid-template-columns:repeat(3,auto); }
 }
 
-/* ===============================
+/* =========================================================
    MOBILE LAYOUT
-   =============================== */
+   ========================================================= */
 @media (max-width:768px){
   :root{
     font-size:15px;
@@ -862,7 +869,8 @@ a + a { margin-inline-start: .6rem; }
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: .95;
-  font-size: clamp(3.6rem, 4vw, 3.6rem);
+  /* ~150% bump */
+  font-size: clamp(5.4rem, 6vw, 5.4rem);
   color: var(--color-text);
   text-decoration: none;
   text-decoration-thickness: .08em;
@@ -929,7 +937,6 @@ a + a { margin-inline-start: .6rem; }
   .blur{ opacity: .75; }
   .blur > div:nth-child(n+4){ display: none; }
   .blur > div::after{ inset: 0 -60%; }
-  .blur > div::before{ height: calc((var(--stop) * .8) * 1%); }
 }
 @media (pointer: coarse){
   :root{ --blur-max: 6; --saturate: .05; }
@@ -941,19 +948,6 @@ a + a { margin-inline-start: .6rem; }
 
 /* === Blurry scroll section hook === */
 .blur-scroll{ will-change: filter; }
-
-:root{
-  --z-blur: 1000;
-  --z-footer: 1002; /* higher than --z-blur */
-}
-
-.blur{ z-index: var(--z-blur); }
-
-.page-footer{
-  position: relative;   /* creates a stacking context */
-  z-index: var(--z-footer);
-}
-
   </style>
 </head>
 
@@ -963,7 +957,9 @@ a + a { margin-inline-start: .6rem; }
   <div id="panel-root"></div>
 
 <script>
-/* app.js — complete, with blurry scroll section */
+/* =========================================================
+   APP — STRUCTURE & BEHAVIOR
+   ========================================================= */
 
 document.documentElement.classList.add('js');
 
@@ -1017,30 +1013,6 @@ document.documentElement.classList.add('js');
       sup: "experience",
       byline: "— Zack Gort, Senior User Experience Designer"
     },
-
-    /* (kept in case you reuse later) */
-    heroMosaic: {
-      leadCopyA: { title: "UX Design & Data", text: "What 98% of my work looks like..." },
-      leadCopyB: { title: "UI Design & Brand Systems", text: "...the other 2%" },
-      imagesA: [
-        ["https://i.ibb.co/VYS1xRzh/work2.webp", "span-2 ar-narrow"],
-        ["https://i.ibb.co/ynjWYqv8/2.webp", "ar-wide span-2"],
-        ["https://i.ibb.co/cXg5Phdc/3.webp", "ar-wide span-2"],
-        ["https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png", "ar-narrow span-2"],
-        ["https://i.ibb.co/23T984XS/huge2.webp", "ar-wide span-2"],
-        ["https://i.ibb.co/HTRJDL9w/tiktok2.webp", "ar-wide span-2"]
-      ],
-      imagesB: [
-        ["https://i.ibb.co/MrFyzRt/work3.webp", "ar-rect"],
-        ["https://i.ibb.co/Kc09Jpsz/tiktok3.webp", "ar-wide span-2"],
-        ["https://i.ibb.co/cXh31wt5/Frame-2147223570.png", "ar-narrow span-2"],
-        ["https://i.ibb.co/fpbcrXp/Frame-4348.png", "ar-wide span-2"],
-        ["https://i.ibb.co/28bQ3XM/Mask-group.png", "ar-rect span-2"],
-        ["https://i.ibb.co/NtWgd7T/dana-mobile-mockup.jpg", "ar-wide span-3"]
-      ]
-    },
-
-
 
     skills: {
       cols: [
@@ -1268,20 +1240,22 @@ document.documentElement.classList.add('js');
           <span class="emitter" aria-hidden="true"></span>
         </sup>
       </h3>
-      <p class="type-tiny right end">— Zack Gort, Senior <span style="color:#fff;background-color:#fff;">User</span> Experience Designer</p>
+      <p class="type-tiny right end">${CONTENT.about.byline}</p>
     `;
     app.appendChild(about);
 
-    // BLURRY SCROLL — replaces the inline hero mosaic
+    // BLURRY SCROLL — inline section for speed-blur filter
     const blurSec = el('section','content content--padded blur-scroll'); blurSec.id = 'about-blur';
     blurSec.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
       <div class="content__title" style="margin:.25rem 0 .5rem">
       </div>
       <div class="content__text">
-        <p>I think. I make. I think about design and data as systems, business requirements, and how to raise the bar with each engagement.</p>
+        <p>I think. I make. I think about design and data as systems. I think about how to get the best out of business requirements. I think about form and function.</p>
         <p></p>
-
-        <p>I make things that strive to define new paradigms in e-commerce and digital product design</p>        
+        <p>I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.</p>
+        <p></p>
+        <p>Now, as for design. I design experiences :)</p>        
       </div>
     `;
     app.appendChild(blurSec);
@@ -1614,8 +1588,12 @@ document.documentElement.classList.add('js');
       if(mode==='sixth'){
         tl.from(imgs,{
           stagger:{amount:.25,from:'edges',grid:[3,3]},
-          scale:matchMedia('(max-width:768px)').matches?.82:.7, autoAlpha:0
-        }).from(grid,{scale:matchMedia('(max-width:768px)').matches?.92:.85,skewY:matchMedia('(max-width:768px)').matches?1.5:3},0);
+          scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
+          autoAlpha:0
+        }).from(grid,{
+          scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
+          skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
+        },0);
       }
       if(mode==='ninth'){
         const caption = section.querySelector('.content__title');
@@ -1858,15 +1836,11 @@ document.documentElement.classList.add('js');
 
     function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
       const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
-      const vh = isMobile ? baseVH.mobile : baseVH.desktop;
-      const per = isMobile ? perTileVH.mobile : perTileVH.desktop;
-      const boost = captionBoostVH && grid.closest('section')?.querySelector('.content__title')
-        ? (isMobile ? captionBoostVH.mobile : captionBoostVH.desktop)
-        : 0;
       const tilesOverMin = Math.max(0, tiles - minTiles);
-      const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop) +
-                      tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop) +
-                      (grid.closest('section')?.querySelector('.content__title') ? (isMobile() ? (captionBoostVH.mobile||0):(captionBoostVH.desktop||0)) : 0);
+      const hasCaption = !!(grid.closest('section')?.querySelector('.content__title'));
+      const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop)
+                    + tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop)
+                    + (hasCaption ? (isMobile() ? (captionBoostVH.mobile||0):(captionBoostVH.desktop||0)) : 0);
       const px = Math.round(window.innerHeight * (totalVH / 100));
       return `+=${px}`;
     }
@@ -1911,7 +1885,7 @@ document.documentElement.classList.add('js');
   }
 
   /* -----------------------------
-     BLURRY SCROLL FILTER
+     SCROLL SPEED BLUR (SVG filter)
   ----------------------------- */
   function ensureScrollBlurFilter(){
     if (document.getElementById('ux-blur-defs')) return;
@@ -1931,55 +1905,47 @@ document.documentElement.classList.add('js');
     document.body.appendChild(svg);
   }
 
-  /* Replace your existing initScrollSpeedBlur with this */
-function initScrollSpeedBlur({
-  targetSel = '.blur-scroll',   // section to blur
-  feId = '#ux-blur-fe',         // <feGaussianBlur> element id
-  scale = 0.30,                 // matches: blur = abs(diff) * 0.3
-  max = 20,                     // cap (your old "0 20")
-  axis = 'y'                    // 'x' or 'y' axis blur
-} = {}) {
-  const target = document.querySelector(targetSel);
-  const fe = document.querySelector(feId);
-  if (!target || !fe) return;
+  function initScrollSpeedBlur({
+    targetSel = '.blur-scroll',   // section to blur
+    feId = '#ux-blur-fe',         // <feGaussianBlur> element id
+    scale = 0.30,                 // blur = abs(diff) * scale
+    max = 20,                     // cap
+    axis = 'y'                    // 'x' or 'y'
+  } = {}) {
+    const target = document.querySelector(targetSel);
+    const fe = document.querySelector(feId);
+    if (!target || !fe) return;
 
-  // Apply the SVG filter to the target once.
-  target.style.filter = 'url(#ux-blur)';
+    // Apply the SVG filter to the target once.
+    target.style.filter = 'url(#ux-blur)';
 
-  // Respect reduced motion
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    gsap.set(fe, { attr: { stdDeviation: '0 0' } });
-    return;
-  }
+    // Respect reduced motion
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+      return;
+    }
 
-  let lastY = window.pageYOffset || 0;
-  let lastX = window.pageXOffset || 0;
+    let lastY = window.pageYOffset || 0;
+    let lastX = window.pageXOffset || 0;
 
-  // Use rAF so it plays nicely with Lenis (we already drive Lenis via gsap.ticker)
-  function tick(){
-    const y = window.pageYOffset || 0;
-    const x = window.pageXOffset || 0;
+    function tick(){
+      const y = window.pageYOffset || 0;
+      const x = window.pageXOffset || 0;
 
-    // raw per-frame delta like your original looper()
-    const dy = y - lastY;
-    const dx = x - lastX;
+      const dy = y - lastY;
+      const dx = x - lastX;
+      const delta = axis === 'x' ? Math.abs(dx) : Math.abs(dy);
 
-    const delta = axis === 'x' ? Math.abs(dx) : Math.abs(dy);
+      const blur = Math.min(max, delta * scale);
+      const dev = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
+      gsap.set(fe, { attr: { stdDeviation: dev } });
 
-    // same feel as: speed = diff * .1; blur = |speed| * 3
-    const blur = Math.min(max, delta * scale);
-
-    // set "0 N" for vertical or "N 0" for horizontal
-    const dev = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
-    gsap.set(fe, { attr: { stdDeviation: dev } });
-
-    lastY = y;
-    lastX = x;
+      lastY = y;
+      lastX = x;
+      requestAnimationFrame(tick);
+    }
     requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
-}
-
 
   /* -----------------------------
      BOOT
@@ -2002,7 +1968,7 @@ function initScrollSpeedBlur({
   // Case-study timings BEFORE building triggers
   tuneCaseStudyTiming();
 
-  // Build + run
+  // Build + run after images settle
   preloadImages().then(()=>{
     document.body.classList.remove('loading');
     animateHeader();
@@ -2031,7 +1997,9 @@ function initScrollSpeedBlur({
 </script>
 
 <script>
-/* Bottom blur overlay bootstrap (unchanged) */
+/* =========================================================
+   BOTTOM BLUR OVERLAY BOOTSTRAP
+   ========================================================= */
 document.addEventListener('DOMContentLoaded', () => {
   const cs = getComputedStyle(document.documentElement);
   const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
@@ -2074,10 +2042,9 @@ document.addEventListener('DOMContentLoaded', () => {
     io.observe(header);
   }
 
+  // If the page loads already scrolled past the header, ensure blur shows.
   if (header && header.getBoundingClientRect().bottom <= 0) show();
 });
-
-
 </script>
 
 </body>

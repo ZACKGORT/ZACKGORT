@@ -670,6 +670,71 @@ a + a { margin-inline-start:.6rem; }
   text-decoration-color:color-mix(in oklab,var(--color-text) 45%, transparent);
 }
 
+
+/* === Title System (unified look) === */
+:root{
+  --title-size-d: clamp(3rem, 6vw, 4rem);
+  --title-size-m: clamp(2rem, 8.5vw, 2.6rem);
+}
+
+/* Shared “chant” look (no size here so process titles keep theirs) */
+.heading-chant,
+.content__title-main,
+.grid-head__title,
+[id$="-process"] .project--intro .project__title{
+  display:inline-flex;
+  align-items:flex-start;
+  gap:.35ch;
+  margin:clamp(.5rem,1.2vh,1rem) 0;
+  font-family:"bricolage-grotesque-48",sans-serif;
+  font-weight:500;
+  letter-spacing:-.01em;
+  line-height:.95;
+  color:var(--color-text);
+  text-decoration:none;
+  text-decoration-thickness:.08em;
+  text-underline-offset:.12em;
+  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
+  text-transform:none; /* neutralize any .type-tiny uppercase on grid titles */
+}
+
+/* Size only for section/grid titles (process title keeps its own clamp) */
+.heading-chant,
+.content__title-main,
+.grid-head__title{
+  font-size:var(--title-size-d);
+}
+
+/* Sup styling for all chant titles */
+.heading-chant sup,
+.content__title-main sup,
+.grid-head__title sup,
+[id$="-process"] .project--intro .project__title sup{
+  font-size:.35em;
+  line-height:0;
+  margin-left:.3ch;
+  letter-spacing:.04em;
+  color:var(--color-text-alt);
+  vertical-align:baseline;
+  transform:translateY(-.6em);
+}
+
+/* ---- media queries (keep with your grouped queries) ---- */
+@media (max-width:768px){
+  .heading-chant,
+  .content__title-main,
+  .grid-head__title{
+    font-size:var(--title-size-m);
+  }
+  .heading-chant sup,
+  .content__title-main sup,
+  .grid-head__title sup,
+  [id$="-process"] .project--intro .project__title sup{
+    transform:translateY(-.5em);
+  }
+}
+
+
 /* Blurry scroll hook */
 .blur-scroll{ will-change:filter; }
 
@@ -737,7 +802,7 @@ a + a { margin-inline-start:.6rem; }
 
   .content--padded{ padding:var(--page-padding); }
   .content__title{ margin:2.5rem 0 1rem; }
-  .content__title-main{ font-size:clamp(1.6rem,7.5vw,3rem); }
+
   .content__text{ font-size:clamp(1.05rem,4.3vw,1.25rem); }
 
   #work{ margin-bottom:clamp(4rem,12vh,8rem); }
@@ -946,7 +1011,7 @@ document.documentElement.classList.add('js');
   ----------------------------- */
   const CONTENT = {
     header: {
-      title: 'UX is dead↓',
+      title: 'UX is dead.',
       logo: "ZCKGRT",
       subline: "Zack Gort — Digital Designer",
       links: [

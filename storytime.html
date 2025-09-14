@@ -1042,6 +1042,34 @@ a + a { margin-inline-start: .6rem; }
 }
 
 
+/* Mobile tooltip: bigger, centered, below the trigger, no edge clipping */
+@media (max-width: 768px){
+  .blackout.tip::after{
+    top: calc(100% + 10px);      /* place below the word */
+    bottom: auto;                 /* override desktop */
+    left: 50%;
+    right: auto;                  /* override desktop */
+    transform: translate(-50%, 0);
+    width: min(92vw, 420px);      /* wider on mobile */
+    padding: .6rem .75rem;
+    font-size: 12.5px;
+    line-height: 1.45;
+    text-align: center;
+    white-space: normal;          /* ensure wrapping */
+  }
+  .blackout.tip::before{
+    top: 100%;                    /* arrow above tooltip (pointing up) */
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -2px) rotate(45deg);
+  }
+  /* Slight lift on show for mobile */
+  .blackout.tip:hover::after,
+  .blackout.tip:focus-visible::after{
+    transform: translate(-50%, 4px);
+  }
+}
 
   </style>
 </head>
@@ -2158,6 +2186,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (header && header.getBoundingClientRect().bottom <= 0) show();
 });
 </script>
+
+
 
 </body>
 </html>

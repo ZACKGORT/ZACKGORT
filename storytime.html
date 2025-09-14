@@ -791,6 +791,41 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
     grid-template-rows:auto;
   }
 
+/* === Brands & Agency: put title ABOVE the grid on all breakpoints === */
+
+/* Stop the one-cell CSS Grid so children stack by DOM order */
+#brands-grid.content--full,
+#brands-grid-2.content--full{
+  display: block !important;   /* overrides .content--full { display:grid } */
+  min-height: auto !important; /* no forced viewport height */
+}
+
+/* Center the title block and give it breathing room before the gallery */
+#brands-grid .grid-head,
+#brands-grid-2 .grid-head{
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 0 auto calc(var(--grid-gap) * 1.75); /* space between title and grid */
+  padding-inline: var(--page-padding);
+}
+
+/* Keep the title itself centered */
+#brands-grid .grid-head__title,
+#brands-grid-2 .grid-head__title{
+  display: inline-block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* No subtitles for these sections */
+#brands-grid .grid-head__subtitle,
+#brands-grid-2 .grid-head__subtitle{
+  display: none !important;
+}
+
+
+
   [data-grid-ninth]{ grid-template-columns:repeat(2,1fr); }
   #work .grid{ grid-template-columns:repeat(2,1fr); }
   #work .grid__item{ padding:.75rem; }
@@ -956,7 +991,7 @@ a + a { margin-inline-start: .6rem; }
 /* MOBILE BLUR DIAL-DOWN (perf) */
 @media (max-width: 768px){
   :root{
-    --blur-max: 8;
+    --blur-max: 9;
     --mask-stop: 18;
     --saturate: .0;
   }
@@ -1174,8 +1209,7 @@ cards: [
     },
 
     brandsGrid: {
-      title: "Projects",
-      subtitle: "UX & Design",
+      title: "#design",
       images: [
         "https://i.ibb.co/0VmJ708g/work3.webp",
         "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
@@ -1206,8 +1240,7 @@ cards: [
     },
 
     agencyGrid: {
-      title: "Places",
-      subtitle: "startups, shops, and agencies",
+      title: "#agencylife",
       images: [
         "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
         "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
@@ -1218,7 +1251,12 @@ cards: [
         "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
         "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
         "https://i.ibb.co/RymyPtP/image-443-min.png",
-        "https://i.ibb.co/cYysMW7/640b4f5c077e33763e82fcba-PXL-20220815-141417163-MP-2-p-2000.jpg"
+        "https://i.ibb.co/cYysMW7/640b4f5c077e33763e82fcba-PXL-20220815-141417163-MP-2-p-2000.jpg",
+        "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
+        "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
+        "https://i.ibb.co/fYM2drZG/1-UATKEet6-Vtc-Lk-A8r-Yspj-FQ.webp",
+        "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
+        "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp"
       ]
     },
 
@@ -1436,32 +1474,33 @@ work.innerHTML = `
 `;
 app.appendChild(work);
 
+// BRANDS GRID
+const brands = el('section','content content--padded content--full'); brands.id='brands-grid';
+brands.innerHTML = `
+  <div class="grid-head">
+    <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
+  </div>
+  <div class="grid grid--spaced grid--small" data-grid-fifth>
+    ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+  </div>
+`;
+app.appendChild(brands);
 
-    // BRANDS GRID
-    const brands = el('section','content content--padded content--full'); brands.id='brands-grid';
-    brands.innerHTML = `
-      <div class="grid grid--spaced grid--small" data-grid-fifth>
-        ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-      </div>
-      <div class="content__title">
-        <h2 class="content__title-main">${CONTENT.brandsGrid.title}</h2>
-        <p class="type-tiny right end">${CONTENT.brandsGrid.subtitle}</p>
-      </div>
-    `;
-    app.appendChild(brands);
 
-    // AGENCY GRID
-    const agency = el('section','content content--full'); agency.id='brands-grid-2';
-    agency.innerHTML = `
-      <div class="grid grid--columns grid--spaced" data-grid-ninth>
-        ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-      </div>
-      <div class="content__title">
-        <h2 class="content__title-main">${CONTENT.agencyGrid.title}</h2>
-        <p class="type-tiny right end">${CONTENT.agencyGrid.subtitle}</p>
-      </div>
-    `;
-    app.appendChild(agency);
+// AGENCY GRID
+const agency = el('section','content content--padded content--full'); agency.id='brands-grid-2';
+agency.innerHTML = `
+  <div class="grid-head">
+    <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
+  </div>
+  <div class="grid grid--columns grid--spaced" data-grid-ninth>
+    ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+  </div>
+`;
+app.appendChild(agency);
+
+
+
 
     // FINTECH — HERO
     const finHero = el('section','content content--padded content--full'); finHero.id='fintech';
@@ -1650,10 +1689,12 @@ app.appendChild(work);
       ninth:  { endDesk:'+=210%', endMob:'+=130%', scrubDesk:.45, scrubMob:.32 }
     };
 
+    
+
     function defaultEndPx(mode, grid){
       const count = grid.querySelectorAll('.grid__img').length || 6;
       const section = grid.closest('section') || grid.parentNode;
-      const hasCaption = !!section.querySelector('.content__title');
+      const hasCaption = !!section.querySelector('.content__title, .grid-head');
       const cfg = ({
         second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
         fifth:  { base:{d:240,m:150}, per:{d: 8,m:5}, cap:{d:10,m:6} },
@@ -1743,7 +1784,7 @@ app.appendChild(work);
         },0);
       }
       if(mode==='ninth'){
-        const caption = section.querySelector('.content__title');
+        const caption = section.querySelector('.content__title, .grid-head');
         tl.from(imgs,{
           transformOrigin:'100% -450%',
           stagger:.07, scaleX:1.02, skewX:matchMedia('(max-width:768px)').matches?7:15,
@@ -1984,7 +2025,7 @@ app.appendChild(work);
     function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
       const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
       const tilesOverMin = Math.max(0, tiles - minTiles);
-      const hasCaption = !!(grid.closest('section')?.querySelector('.content__title'));
+      const hasCaption = !!(grid.closest('section')?.querySelector('.content__title, .grid-head'));
       const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop)
                     + tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop)
                     + (hasCaption ? (isMobile() ? (captionBoostVH.mobile||0):(captionBoostVH.desktop||0)) : 0);

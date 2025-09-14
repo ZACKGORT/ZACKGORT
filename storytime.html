@@ -105,13 +105,15 @@ a:focus-visible{ outline:2px solid red; background:transparent; }
   color:var(--color-label);
 }
 
-
-/* Left-justify the tiny note but keep it on the right edge */
+/* tiny note: left-justified, stuck to right edge, width-capped */
 .type-tiny.right.end{
-  text-align: left;         /* override .right */
-  max-width: 364px;         /* from earlier */
-  margin-inline-start: auto;/* stays flush-right */
+  text-align:left;
+  max-width:364px;
+  margin-inline-start:auto;
 }
+
+
+
 
 /* =========================================================
    LOADER
@@ -876,40 +878,39 @@ a + a { margin-inline-start: .6rem; }
   .grid__img, .grid__item{ min-height:100px; padding-bottom:.5rem; }
 }
 
-/* Unique heading with superscript — "chant" */
+/* desktop/base size (keep this one) */
 .heading-chant{
-  display: inline-flex;
-  align-items: flex-start;
-  gap: .35ch;
-  margin: clamp(.5rem, 1.2vh, 1rem) 0;
-  font-family: "bricolage-grotesque-48", sans-serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: .95;
-  font-size: clamp(5.4rem, 6vw, 5.4rem);
-  color: var(--color-text);
-  text-decoration: none;
-  text-decoration-thickness: .08em;
-  text-underline-offset: .12em;
-  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
+  display:inline-flex;
+  align-items:flex-start;
+  gap:.35ch;
+  margin:clamp(.5rem,1.2vh,1rem) 0;
+  font-family:"bricolage-grotesque-48",sans-serif;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  line-height:.95;
+  font-size:clamp(3.4rem,6vw,3.4rem);
+  color:var(--color-text);
+  text-decoration:none;
+  text-decoration-thickness:.08em;
+  text-underline-offset:.12em;
+  text-decoration-color:color-mix(in oklab,var(--color-text) 45%,transparent);
 }
 .heading-chant sup{
-  font-size: .35em;
-  line-height: 0;
-  margin-left: .3ch;
-  letter-spacing: .04em;
-  color: var(--color-text-alt);
-  vertical-align: baseline;
-  transform: translateY(-.6em);
+  font-size:.35em;
+  line-height:0;
+  margin-left:.3ch;
+  letter-spacing:.04em;
+  color:var(--color-text-alt);
+  vertical-align:baseline;
+  transform:translateY(-.6em);
 }
 
-/* Make ¡Viva la XP! smaller on mobile */
-.heading-chant{
-  font-size: clamp(2rem, 8.5vw, 2.6rem);
+/* mobile-only downsizing */
+@media (max-width:768px){
+  .heading-chant{ font-size:clamp(2rem,8.5vw,2.6rem); }
+  .heading-chant sup{ transform:translateY(-.5em); }
 }
-.heading-chant sup{
-  transform: translateY(-.5em); /* nudge superscript a touch on smaller size */
-}
+
 
 
 /* Confetti trigger */
@@ -981,6 +982,67 @@ a + a { margin-inline-start: .6rem; }
   margin-inline-start: auto; /* keeps it flush-right */
 }
 
+
+/* White-out a word while keeping spacing intact */
+.blackout{
+  color: transparent;            /* hide the glyphs but keep the width */
+  background: #fff;              /* the bar */
+  padding: 0 .15em;              /* a little breathing room */
+  border-radius: 2px;            /* softer edge */
+  -webkit-box-decoration-break: clone; /* if it wraps, keep background */
+  box-decoration-break: clone;
+}
+
+/* Tooltip for blackout span */
+.blackout.tip{
+  position: relative;
+  cursor: help;
+}
+.blackout.tip::after{
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  transform: translateY(-6px);
+  background: rgba(0,0,0,.88);
+  color: #fff;
+  padding: .45rem .55rem;
+  border-radius: 6px;
+  width: min(360px, 80vw);
+  font-size: 10px;
+  line-height: 1.35;
+  letter-spacing: .02em;
+  text-transform: none;          /* keep normal casing */
+  white-space: normal;
+  box-shadow: 0 6px 18px rgba(0,0,0,.28);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10005;
+  transition: opacity .15s ease, transform .15s ease;
+}
+.blackout.tip::before{
+  content: "";
+  position: absolute;
+  bottom: calc(100% - 2px);
+  right: .6rem;
+  width: 8px; height: 8px;
+  background: rgba(0,0,0,.88);
+  transform: translateY(50%) rotate(45deg);
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+.blackout.tip:hover::after,
+.blackout.tip:focus-visible::after{
+  opacity: 1;
+  transform: translateY(-10px);
+}
+.blackout.tip:hover::before,
+.blackout.tip:focus-visible::before{
+  opacity: 1;
+}
+
+
+
   </style>
 </head>
 
@@ -1041,11 +1103,13 @@ document.documentElement.classList.add('js');
       ]
     },
 
-    about: {
-      heading: "¡Viva la XP!",
-      sup: "experience",
-      byline: "— Zack Gort, Senior User Experience Designer"
-    },
+about: {
+  heading: "¡Viva la XP!",
+  sup: "experience",
+  byline: "— Zack Gort, Senior <span class=\"blackout tip\" tabindex=\"0\" data-tip=\"From &quot;User Experience&quot; to whatever it will become, &quot;Experience&quot; unironically remains essential.\">User</span> Experience Designer"
+
+},
+
 
     skills: {
       cols: [
@@ -1296,6 +1360,17 @@ document.documentElement.classList.add('js');
       </p>
     `;
     app.appendChild(blurSec);
+
+    // After you've created `blurSec` in renderApp():
+{
+  const msg = 'From "User Experience" to whatever it will become, "Experience" unironically remains essential.';
+  const holder = blurSec.querySelector('.content__text');
+  holder.querySelector('.blur-sig')?.remove();                 // remove old note if present
+  const sig = el('p','type-tiny right end blur-sig');
+  sig.textContent = msg;                                       // left-justified by your override
+  holder.appendChild(sig);
+}
+
 
     // SKILLS
     const skills = el('section','content content--padded'); skills.id = 'skills';

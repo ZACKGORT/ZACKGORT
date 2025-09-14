@@ -941,6 +941,19 @@ a + a { margin-inline-start: .6rem; }
 
 /* === Blurry scroll section hook === */
 .blur-scroll{ will-change: filter; }
+
+:root{
+  --z-blur: 1000;
+  --z-footer: 1002; /* higher than --z-blur */
+}
+
+.blur{ z-index: var(--z-blur); }
+
+.page-footer{
+  position: relative;   /* creates a stacking context */
+  z-index: var(--z-footer);
+}
+
   </style>
 </head>
 
@@ -1027,6 +1040,8 @@ document.documentElement.classList.add('js');
       ]
     },
 
+
+
     skills: {
       cols: [
         {
@@ -1035,7 +1050,8 @@ document.documentElement.classList.add('js');
             "User Experience Design",
             "Content & Brand Strategy {B2B+C}",
             "Visual Interface Design",
-            "Accessibility Compliance"
+            "Accessibility Compliance",
+            "+" 
           ]
         },
         { heading: "#savvy", items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"] },
@@ -1262,8 +1278,10 @@ document.documentElement.classList.add('js');
       <div class="content__title" style="margin:.25rem 0 .5rem">
       </div>
       <div class="content__text">
-        <p>I’m a user experience designer who specializes in high-density data, IA, and systems that scale. I partner with product and engineering to turn ambiguous spaces into modular, measurable solutions—balancing speed, accessibility, and clarity.</p>
+        <p>I think. I make. I think about design and data as systems, business requirements, and how to raise the bar with each engagement.</p>
+        <p></p>
 
+        <p>I make things that strive to define new paradigms in e-commerce and digital product design</p>        
       </div>
     `;
     app.appendChild(blurSec);
@@ -2058,6 +2076,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (header && header.getBoundingClientRect().bottom <= 0) show();
 });
+
+
 </script>
 
 </body>

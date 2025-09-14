@@ -52,7 +52,7 @@
   --layers:5;
   --blur-max:40;
   --mask-stop:35;
-  --saturate:1;
+  --saturate:.99;
 
   /* Panel palette */
   --cs-accent:#f4d35e;
@@ -609,10 +609,31 @@ a + a { margin-inline-start:.6rem; }
 .blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:""; position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .0));
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
+}
+
+
+@media (max-width:768px){
+  :root{
+    font-size:15px;
+    --page-padding:1rem;
+    --grid-gap:.75rem;
+
+    /* blur tuning (mobile) */
+    --blur-max:9;
+    --mask-stop:18;
+    --saturate:.99; /* ← reset saturation on mobile */
+  }
+
+  /* keep the overlay lightweight on mobile */
+  .blur{ opacity:.85; }
+  .blur > div:nth-child(n+4){ display:none; }   /* fewer layers = smoother */
+  .blur > div::after{ inset:0 -60%; }           /* avoid iOS edge tiling */
+  
+  /* …rest of your existing mobile rules… */
 }
 
 /* =========================================================

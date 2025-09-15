@@ -775,15 +775,16 @@ a + a { margin-inline-start:.6rem; }
   #skills .trio-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
-/* Mobile layout */
 @media (max-width:768px){
   :root{
     font-size:15px;
     --page-padding:1rem;
     --grid-gap:.75rem;
-    --blur-max:9;      /* perf dial-down */
-    --mask-stop:18;
-    --saturate:.99;    /* reset on mobile too */
+
+    /* Nuanced blur for mobile */
+    --blur-max: 10;   /* softer max blur */
+    --mask-stop: 20;  /* slightly taller fade */
+    --saturate: .99;  /* keep color fidelity on Android/Brave */
   }
 
   .frame{
@@ -975,6 +976,7 @@ a + a { margin-inline-start:.6rem; }
     margin: 0;       /* no extra spacing surprises */
   }
 }
+
 
   </style>
 </head>

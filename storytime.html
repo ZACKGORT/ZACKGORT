@@ -2146,23 +2146,19 @@ function fixMobileBlurResume(){
   /* -----------------------------
      SCROLL SPEED BLUR (SVG filter)
   ----------------------------- */
-  function ensureScrollBlurFilter(){
-    if (document.getElementById('ux-blur-defs')) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.id = 'ux-blur-defs';
-    svg.setAttribute('width','0');
-    svg.setAttribute('height','0');
-    svg.style.position = 'absolute';
-    svg.style.left = '-9999px';
-    svg.innerHTML = `
-      <defs>
-        <filter id="ux-blur" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur id="ux-blur-fe" in="SourceGraphic" stdDeviation="0 0" />
-        </filter>
-      </defs>
-    `;
-    document.body.appendChild(svg);
-  }
+const disableScrollyBlur = matchMedia('(max-width:768px)').matches || matchMedia('(pointer:coarse)').matches;
+
+if (!disableScrollyBlur) {
+  ensureScrollBlurFilter();
+  initScrollSpeedBlur();
+} else {
+  // make sure nothing remains blurred
+  const t = document.querySelector('.blur-scroll');
+  if (t) t.style.filter = 'none';
+  const fe = document.querySelector('#ux-blur-fe');
+  if (fe) gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+}
+
 
   function initScrollSpeedBlur({
     targetSel = '.blur-scroll',   // section to blur

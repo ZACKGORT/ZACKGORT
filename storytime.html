@@ -962,6 +962,16 @@ a + a { margin-inline-start:.6rem; }
   .grid[data-grid-seventh]{ margin-bottom:12vh; }
 }
 
+@media (max-width:768px){
+  .frame{
+    /* Make room above the title and push it to the bottom */
+    grid-template-rows: auto auto auto 1fr auto; /* logo, tags, sponsor, spacer, title */
+    align-content: stretch; /* let that 1fr spacer expand */
+  }
+  .frame__title{
+    align-self: end; /* belt-and-suspenders for odd grid engines */
+  }
+}
 
   </style>
 </head>

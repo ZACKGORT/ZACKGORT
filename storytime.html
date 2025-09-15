@@ -1113,42 +1113,45 @@ a + a { margin-inline-start:.6rem; }
     document.body.appendChild(svg);
   }
 
-  function initScrollSpeedBlur({
-    targetSel = '.blur-scroll',
-    feId = '#ux-blur-fe',
-    scale = 0.30,
-    max = 20,
-    axis = 'y'
-  } = {}) {
-    const target = document.querySelector(targetSel);
-    const fe = document.querySelector(feId);
-    if (!target || !fe) return;
+function initScrollSpeedBlur({
+  targetSel = '.blur-scroll',
+  feId = '#ux-blur-fe',
+  scale = 0.30,
+  max = 20,
+  axis = 'y'
+} = {}) {
+  const targets = document.querySelectorAll(targetSel);
+  const fe = document.querySelector(feId);
+  if (!targets.length || !fe) return;
 
-    target.style.filter = 'url(#ux-blur)';
-    if (prefersReducedMotion) {
-      gsap.set(fe, { attr: { stdDeviation: '0 0' } });
-      return;
-    }
+  // apply the SVG filter to every target section
+  targets.forEach(t => t.style.filter = 'url(#ux-blur)');
 
-    let lastY = window.pageYOffset || 0;
-    let lastX = window.pageXOffset || 0;
+  if (prefersReducedMotion) {
+    gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+    return;
+  }
 
-    function tick() {
-      const y = window.pageYOffset || 0;
-      const x = window.pageXOffset || 0;
-      const dy = Math.abs(y - lastY);
-      const dx = Math.abs(x - lastX);
-      const delta = axis === 'x' ? dx : dy;
+  let lastY = window.pageYOffset || 0;
+  let lastX = window.pageXOffset || 0;
 
-      const blur = Math.min(max, delta * scale);
-      const dev  = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
-      gsap.set(fe, { attr: { stdDeviation: dev } });
+  function tick() {
+    const y = window.pageYOffset || 0;
+    const x = window.pageXOffset || 0;
+    const dy = Math.abs(y - lastY);
+    const dx = Math.abs(x - lastX);
+    const delta = axis === 'x' ? dx : dy;
 
-      lastY = y; lastX = x;
-      requestAnimationFrame(tick);
-    }
+    const blur = Math.min(max, delta * scale);
+    const dev  = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
+    gsap.set(fe, { attr: { stdDeviation: dev } });
+
+    lastY = y; lastX = x;
     requestAnimationFrame(tick);
   }
+  requestAnimationFrame(tick);
+}
+
 
   // ---------------------------------------------------------------------------
   // Bottom blur overlay layers + visibility rules

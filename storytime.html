@@ -1570,36 +1570,41 @@ app.appendChild(agency);
 function fixMobileBlurResume(){
   const blur   = document.querySelector('.blur');
   const header = document.querySelector('.frame');
-  const fe     = document.querySelector('#ux-blur-fe'); // SVG scroll-speed blur
+  const fe     = document.querySelector('#ux-blur-fe'); // SVG <feGaussianBlur> for speed blur
 
   const update = () => {
     if (!blur || !header) return;
 
-    // 1) Reset the SVG blur (so text sections don't stay blurred)
+    // A) Zero any SVG speed-blur so text sections can’t remain blurred
     if (fe) gsap.set(fe, { attr: { stdDeviation: '0 0' } });
 
-    // 2) Re-evaluate overlay visibility based on header position
-    const show = header.getBoundingClientRect().bottom <= 0;
-    blur.classList.toggle('is-visible', show);
+    // B) Re-evaluate whether the overlay should even be visible right now
+    const shouldShow = header.getBoundingClientRect().bottom <= 0;
+    blur.classList.toggle('is-visible', shouldShow);
 
-    // 3) Nudge the compositor to drop any stale backdrop-filter cache
-    blur.style.transition = 'none';
-    // Force a reflow
+    // C) Nudge the compositor: briefly kill backdrop-filter, then restore
+    blur.classList.add('bf-reset');     // uses the CSS helper above
+    // Force a reflow while disabled
     void blur.offsetHeight;
-    blur.style.transition = '';
-
-    // 4) Refresh ScrollTrigger after tab resume
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    requestAnimationFrame(() => {
+      blur.classList.remove('bf-reset');
+      // D) Refresh scroll triggers after resume
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    });
   };
 
-  // When returning to the tab (Android/Brave often resumes here)
+  // Fire when returning to the tab/app
   window.addEventListener('visibilitychange', () => {
     if (!document.hidden) setTimeout(update, 80);
-  });
+  }, { passive: true });
 
-  // Some devices fire pageshow/focus instead
-  window.addEventListener('pageshow', update);
-  window.addEventListener('focus', update);
+  // Some Android/Brave paths hit pageshow/focus instead
+  window.addEventListener('pageshow', (e) => {
+    // bfcache resumes can be immediate; no delay needed
+    setTimeout(update, e && e.persisted ? 0 : 80);
+  }, { passive: true });
+
+  window.addEventListener('focus', () => setTimeout(update, 80), { passive: true });
 }
 
 
@@ -2135,6 +2140,7 @@ function fixMobileBlurResume(){
     a11yifyGridImages();
     ensureScrollBlurFilter();
     initScrollSpeedBlur();
+    fixMobileBlurResume(); 
     ScrollTrigger.refresh(true);
     window.scrollTo(0,0);
   });

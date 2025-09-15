@@ -753,6 +753,17 @@ a + a { margin-inline-start:.6rem; }
 /* Blurry scroll hook */
 .blur-scroll{ will-change:filter; }
 
+/* Hard reset already exists: .blur.bf-reset > div::after { backdrop-filter:none } */
+
+/* Temp hide used during JS reset (so you never “see” the stuck blur) */
+.blur.bf-off { opacity:0 !important; }
+
+/* Optional permanent degrade if device keeps failing after a few resumes */
+.blur.no-bf > div::after{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 /* Blackout tooltip */
 .blackout{
   color:transparent; background:#fff; padding:0 .15em; border-radius:2px;
@@ -1204,72 +1215,90 @@ a + a { margin-inline-start:.6rem; }
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency
   // ---------------------------------------------------------------------------
-  function fixMobileBlurResume(){
-    const blur   = document.querySelector('.blur');
-    const header = document.querySelector('.frame');
-    const fe     = document.querySelector('#ux-blur-fe');
+// Mobile/Tab-resume blur resiliency (iOS + Android)
+function fixMobileBlurResume(){
+  const blur      = document.querySelector('.blur');
+  const header    = document.querySelector('.frame');
+  const fe        = document.querySelector('#ux-blur-fe');           // <feGaussianBlur> for scroll-speed blur
+  const targetSel = '.blur-scroll';                                  // section that uses url(#ux-blur)
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  let resets = 0;
 
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    let resumes = 0;
-    const degradeKey = 'bfDegraded';
-    let degraded = localStorage.getItem(degradeKey) === '1';
+  if (!blur || !header) return;
 
-    function rebuildChildren(){
-      if(!blur) return;
-      buildBlurLayers(blur);
-    }
-    function hardOff(on){
-      if(!blur) return;
-      blur.classList.toggle('bf-off', !!on);
-      if(on && fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
-    }
-    function update(){
-      if(!blur || !header) return;
-
-      hardOff(true);
-
-      const blurTarget = document.querySelector('.blur-scroll');
-      if (fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
-      if (blurTarget) {
-        blurTarget.style.filter = 'none';
-        void blurTarget.offsetHeight;
-        blurTarget.style.filter = 'url(#ux-blur)';
-      }
-
-      rebuildChildren();
-
-      blur.classList.add('bf-reset');
-      void blur.offsetHeight;
-
-      const shouldShow = header.getBoundingClientRect().bottom <= 0;
-      blur.classList.toggle('is-visible', shouldShow);
-
-      requestAnimationFrame(() => {
-        blur.classList.remove('bf-reset');
-        hardOff(false);
-        if (window.ScrollTrigger) ScrollTrigger.refresh();
-      });
-
-      resumes++;
-      if (!degraded && isAndroid && resumes >= 2) {
-        degraded = true;
-        localStorage.setItem(degradeKey, '1');
-        blur.classList.add('no-bf');
-      }
-    }
-
-    window.addEventListener('visibilitychange', () => {
-      if (document.hidden) hardOff(true);
-      else setTimeout(update, 60);
-    }, { passive:true });
-
-    window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
-    window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
-    window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
-    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
-
-    update();
+  // rebuild overlay layers if empty or after a platform hiccup
+  function rebuildLayers(){
+    if (!blur.children.length) buildBlurLayers(blur);
   }
+
+  // single, robust reset routine
+  function resetAll(){
+    // 0) Hide overlay while we poke filters, so there’s no flash
+    blur.classList.add('bf-off');
+
+    // 1) Zero out the SVG blur (scroll-speed blur)
+    if (fe) gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+
+    // 2) Drop & reapply the filter URL on the target element to force a repaint
+    const target = document.querySelector(targetSel);
+    if (target){
+      target.style.filter = 'none';
+      // two RAFs helps iOS after bfcache/tab-resume
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          target.style.filter = 'url(#ux-blur)';
+        });
+      });
+    }
+
+    // 3) Rebuild/refresh overlay layers & force a backdrop-filter reflow
+    rebuildLayers();
+    blur.classList.add('bf-reset');         // CSS turns backdrop-filter off
+    // Force reflow on overlay & children (some WebKit builds need this)
+    void blur.offsetHeight;
+    Array.from(blur.children).forEach(c => { c.style.willChange='transform'; void c.offsetHeight; c.style.willChange=''; });
+    blur.classList.remove('bf-reset');
+
+    // 4) Decide visibility based on header intersection (same rule you use on scroll)
+    const show = header.getBoundingClientRect().bottom <= 0;
+    blur.classList.toggle('is-visible', show);
+
+    // 5) Bring overlay back and refresh ScrollTrigger layout
+    requestAnimationFrame(() => {
+      blur.classList.remove('bf-off');
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    });
+
+    // 6) Gentle degrade on devices that keep failing after multiple resumes
+    resets++;
+    if (isAndroid && resets >= 3) {
+      blur.classList.add('no-bf');   // disables backdrop-filter permanently for this session
+    }
+  }
+
+  // When to run the reset:
+  const schedule = (ms=60) => setTimeout(resetAll, ms);
+
+  window.addEventListener('visibilitychange', () => {
+    if (!document.hidden) schedule(80);     // returning to tab/app
+  }, { passive:true });
+
+  window.addEventListener('pageshow', (e) => {
+    schedule(e.persisted ? 0 : 30);         // bfcache restore vs. cold paint
+  }, { passive:true });
+
+  window.addEventListener('focus', () => {
+    schedule(60);                            // return from app switcher without full visibilitychange
+  }, { passive:true });
+
+  window.addEventListener('orientationchange', () => {
+    schedule(140);                           // rotate often breaks the compositor state
+  }, { passive:true });
+
+  // First run (in case the page loads into a background tab or returns from cache)
+  schedule(0);
+}
+
 
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling

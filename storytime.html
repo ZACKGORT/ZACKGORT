@@ -986,6 +986,30 @@ a + a { margin-inline-start:.6rem; }
   }
 }
 
+/* Use the blur-section layout for fintech insight */
+#fintech-insight{
+  display:block;                /* override previous grid */
+  padding:var(--page-padding);  /* mirrors .content--padded */
+}
+#fintech-insight .content__text p{
+  max-width:70ch;               /* comfy reading width */
+}
+#fintech-insight .content__text .type-tiny{
+  color:var(--color-label);
+}
+
+
+/* Use the blur-section layout for GNC insight */
+#ecommerce-insight{
+  display:block;                /* override the old grid/details layout */
+  padding:var(--page-padding);  /* mirrors .content--padded */
+}
+#ecommerce-insight .content__text p{
+  max-width:70ch;               /* comfy reading width */
+}
+#ecommerce-insight .content__text .type-tiny{
+  color:var(--color-label);
+}
 
   </style>
 </head>
@@ -1469,14 +1493,27 @@ app.appendChild(agency);
       </div>`;
     app.appendChild(finDisc);
 
-    // FINTECH — INSIGHT
-    const finInsight = el('section','content content--padded'); finInsight.id='fintech-insight';
-    finInsight.innerHTML = CONTENT.fintech.insight.map(([label,text],i)=>`
-      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-        <span class="project__label project__label--default">${label}</span>
-        <p>${text}</p>
-      </section>`).join('');
-    app.appendChild(finInsight);
+// FINTECH — INSIGHT (uses the blur-section layout)
+const finInsight = el('section','content content--padded'); 
+finInsight.id = 'fintech-insight';
+
+const insightParas = CONTENT.fintech.insight.map(([label, text]) => `
+  <p>
+    <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+      ${label}
+    </span>
+    ${text}
+  </p>
+`).join('');
+
+finInsight.innerHTML = `
+  <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+  <div class="content__text">
+    ${insightParas}
+  </div>
+`;
+app.appendChild(finInsight);
+
 
     // FINTECH — STACK
     const finStack = el('section','content content--full stacked-section'); finStack.id='fintech-stack';
@@ -1526,14 +1563,27 @@ app.appendChild(agency);
       </div>`;
     app.appendChild(ecoDisc);
 
-    // ECOM — INSIGHT
-    const ecoInsight = el('section','content content--padded'); ecoInsight.id='ecommerce-insight';
-    ecoInsight.innerHTML = CONTENT.ecommerce.insight.map(([label,text])=>`
-      <section class="project project--details project--left">
-        <span class="project__label project__label--default">${label}</span>
-        <p>${text}</p>
-      </section>`).join('');
-    app.appendChild(ecoInsight);
+// ECOM — INSIGHT (uses the blur-section layout)
+const ecoInsight = el('section','content content--padded');
+ecoInsight.id = 'ecommerce-insight';
+
+const ecoInsightParas = CONTENT.ecommerce.insight.map(([label, text]) => `
+  <p>
+    <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+      ${label}
+    </span>
+    ${text}
+  </p>
+`).join('');
+
+ecoInsight.innerHTML = `
+  <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+  <div class="content__text">
+    ${ecoInsightParas}
+  </div>
+`;
+app.appendChild(ecoInsight);
+
 
     // ECOM — STACK
     const ecoStack = el('section','content content--full stacked-section'); ecoStack.id='ecommerce-stack';

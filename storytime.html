@@ -775,17 +775,30 @@ a + a { margin-inline-start:.6rem; }
   #skills .trio-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
+/* Mobile tuning */
 @media (max-width:768px){
   :root{
     font-size:15px;
     --page-padding:1rem;
     --grid-gap:.75rem;
 
-    /* Nuanced blur for mobile */
-    --blur-max: 10;   /* softer max blur */
-    --mask-stop: 20;  /* slightly taller fade */
+    /* NUANCED mobile blur */
+    --blur-max: 10;   /* lighter effect reduces “sticky” state */
+    --mask-stop: 20;
     --saturate: .99;  /* keep color fidelity on Android/Brave */
   }
+
+  /* Smaller overdraw & fewer layers = fewer compositor glitches */
+  .blur > div:nth-child(n+4){ display:none; }
+  .blur > div::after{ inset: 0 -60%; }
+}
+
+/* Backdrop-filter reset helper (we toggle this class in JS) */
+.blur.bf-reset > div::after{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 
   .frame{
     height:auto;

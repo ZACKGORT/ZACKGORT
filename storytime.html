@@ -1556,6 +1556,45 @@ app.appendChild(agency);
     app.appendChild(s);
   }
 
+
+
+function fixMobileBlurResume(){
+  const blur   = document.querySelector('.blur');
+  const header = document.querySelector('.frame');
+  const fe     = document.querySelector('#ux-blur-fe'); // SVG scroll-speed blur
+
+  const update = () => {
+    if (!blur || !header) return;
+
+    // 1) Reset the SVG blur (so text sections don't stay blurred)
+    if (fe) gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+
+    // 2) Re-evaluate overlay visibility based on header position
+    const show = header.getBoundingClientRect().bottom <= 0;
+    blur.classList.toggle('is-visible', show);
+
+    // 3) Nudge the compositor to drop any stale backdrop-filter cache
+    blur.style.transition = 'none';
+    // Force a reflow
+    void blur.offsetHeight;
+    blur.style.transition = '';
+
+    // 4) Refresh ScrollTrigger after tab resume
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  };
+
+  // When returning to the tab (Android/Brave often resumes here)
+  window.addEventListener('visibilitychange', () => {
+    if (!document.hidden) setTimeout(update, 80);
+  });
+
+  // Some devices fire pageshow/focus instead
+  window.addEventListener('pageshow', update);
+  window.addEventListener('focus', update);
+}
+
+
+
   /* -----------------------------
      BEHAVIOR
   ----------------------------- */

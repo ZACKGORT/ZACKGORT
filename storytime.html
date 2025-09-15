@@ -1572,40 +1572,91 @@ function fixMobileBlurResume(){
   const header = document.querySelector('.frame');
   const fe     = document.querySelector('#ux-blur-fe'); // SVG <feGaussianBlur> for speed blur
 
-  const update = () => {
-    if (!blur || !header) return;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const isBrave   = !!(navigator.brave && navigator.brave.isBrave);
+  let resumes = 0;
+  const degradeKey = 'bfDegraded';
+  let degraded = localStorage.getItem(degradeKey) === '1';
 
-    // A) Zero any SVG speed-blur so text sections can’t remain blurred
-    if (fe) gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+  function rebuildChildren(){
+    if(!blur) return;
+    const cs = getComputedStyle(document.documentElement);
+    const layers   = +cs.getPropertyValue('--layers').trim()    || 5;
+    const blurMax  = +cs.getPropertyValue('--blur-max').trim()  || 40;
+    const maskStop = +cs.getPropertyValue('--mask-stop').trim() || 35;
+    let html = '';
+    for (let i = 1; i <= layers; i++) {
+      const t = i / layers;
+      const b = Math.sin((1 - t) * Math.PI / 2) * blurMax;
+      const stop = Math.sin(t * Math.PI / 2) * maskStop;
+      const start = (100 - stop).toFixed(4) + '%';
+      html += `<div style="--i:${i}; --blur:${b.toFixed(3)}px; --maskStart:${start}"></div>`;
+    }
+    blur.innerHTML = html;
+  }
 
-    // B) Re-evaluate whether the overlay should even be visible right now
+  function hardOff(on){
+    if(!blur) return;
+    blur.classList.toggle('bf-off', !!on);
+    if(on && fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
+  }
+
+  function update(){
+    if(!blur || !header) return;
+
+    // 1) hide overlay while we recompose it
+    hardOff(true);
+
+    // 2) zero speed-blur + reapply filter target cleanly
+    if (fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
+    const blurTarget = document.querySelector('.blur-scroll');
+    if (blurTarget) {
+      blurTarget.style.filter = 'none';
+      void blurTarget.offsetHeight;           // reflow
+      blurTarget.style.filter = 'url(#ux-blur)';
+    }
+
+    // 3) rebuild layer stack to force a brand-new backdrop compositor layer
+    rebuildChildren();
+
+    // 4) drop cached backdrop-filter once, then restore
+    blur.classList.add('bf-reset');
+    void blur.offsetHeight;                  // reflow
+
+    // 5) set correct visibility based on current scroll
     const shouldShow = header.getBoundingClientRect().bottom <= 0;
     blur.classList.toggle('is-visible', shouldShow);
 
-    // C) Nudge the compositor: briefly kill backdrop-filter, then restore
-    blur.classList.add('bf-reset');     // uses the CSS helper above
-    // Force a reflow while disabled
-    void blur.offsetHeight;
     requestAnimationFrame(() => {
       blur.classList.remove('bf-reset');
-      // D) Refresh scroll triggers after resume
+      hardOff(false);
       if (window.ScrollTrigger) ScrollTrigger.refresh();
     });
-  };
 
-  // Fire when returning to the tab/app
+    // 6) persistent Android quirk → graceful degradation
+    resumes++;
+    if (!degraded && isAndroid && resumes >= 2) {
+      degraded = true;
+      localStorage.setItem(degradeKey, '1');
+      blur.classList.add('no-bf');           // fallback gradient, no backdrop-filter
+    }
+  }
+
+  // Turn off overlay while backgrounded; rebuild on resume
   window.addEventListener('visibilitychange', () => {
-    if (!document.hidden) setTimeout(update, 80);
-  }, { passive: true });
+    if (document.hidden) hardOff(true);
+    else setTimeout(update, 60);
+  }, { passive:true });
 
-  // Some Android/Brave paths hit pageshow/focus instead
-  window.addEventListener('pageshow', (e) => {
-    // bfcache resumes can be immediate; no delay needed
-    setTimeout(update, e && e.persisted ? 0 : 80);
-  }, { passive: true });
+  window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
+  window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
+  window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
+  window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
 
-  window.addEventListener('focus', () => setTimeout(update, 80), { passive: true });
+  // prime state
+  update();
 }
+
 
 
 

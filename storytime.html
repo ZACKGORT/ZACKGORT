@@ -964,12 +964,15 @@ a + a { margin-inline-start:.6rem; }
 
 @media (max-width:768px){
   .frame{
-    /* Make room above the title and push it to the bottom */
-    grid-template-rows: auto auto auto 1fr auto; /* logo, tags, sponsor, spacer, title */
-    align-content: stretch; /* let that 1fr spacer expand */
+    /* rows: logo, tags, sponsor, spacer, title-at-bottom */
+    grid-template-rows: auto auto auto 1fr auto;
+    align-content: stretch;
+    /* exactly 50px from the viewport bottom (plus safe area on iOS) */
+    padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   }
   .frame__title{
-    align-self: end; /* belt-and-suspenders for odd grid engines */
+    align-self: end; /* keep it at the bottom row */
+    margin: 0;       /* no extra spacing surprises */
   }
 }
 

@@ -104,6 +104,9 @@ body{
   -moz-osx-font-smoothing:grayscale;
 }
 
+/* NEW: prevent overscroll glow confusing ScrollTrigger on mobile */
+html, body { overscroll-behavior-y: none; }
+
 /* Links & buttons */
 a{ color:var(--color-link); text-decoration:none; outline:none; cursor:pointer; }
 a:hover{ color:var(--color-link-hover); text-decoration:underline; }
@@ -1036,6 +1039,12 @@ a + a { margin-inline-start:.6rem; }
 #ecommerce-insight .content__text .type-tiny{
   color:var(--color-label);
 }
+
+/* NEW: prefer dvh where available for pinned/full sections */
+@supports (height: 100dvh){
+  .frame,
+  .content--full { min-height: 100dvh; }
+}
   </style>
 </head>
 
@@ -1061,7 +1070,8 @@ a + a { margin-inline-start:.6rem; }
     } else {
       gsap.registerPlugin(ScrollTrigger);
     }
-    ScrollTrigger.normalizeScroll(true);
+    // Only normalize when NOT using Lenis (prevents tug-of-war on mobile)
+    if (!has('Lenis')) ScrollTrigger.normalizeScroll(true);
   }
 
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1077,63 +1087,6 @@ a + a { margin-inline-start:.6rem; }
     if (html != null) n.innerHTML = html;
     return n;
   };
-
-  // ---------------------------------------------------------------------------
-  // SVG filter for scroll-speed blur
-  // ---------------------------------------------------------------------------
-  function ensureScrollBlurFilter() {
-    if (document.getElementById('ux-blur-defs')) return;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.id = 'ux-blur-defs';
-    svg.setAttribute('width','0'); svg.setAttribute('height','0');
-    svg.setAttribute('aria-hidden','true');
-    svg.style.position = 'absolute';
-    svg.style.left = '-9999px';
-    svg.innerHTML = `
-      <defs>
-        <filter id="ux-blur" x="-100%" y="-100%" width="400%" height="400%">
-          <feGaussianBlur id="ux-blur-fe" in="SourceGraphic" stdDeviation="0 0" edgeMode="duplicate"/>
-        </filter>
-      </defs>`;
-    document.body.appendChild(svg);
-  }
-
-  function initScrollSpeedBlur({
-    targetSel = '.blur-scroll',
-    feId = '#ux-blur-fe',
-    scale = 0.30,
-    max = 20,
-    axis = 'y'
-  } = {}) {
-    const target = document.querySelector(targetSel);
-    const fe = document.querySelector(feId);
-    if (!target || !fe) return;
-
-    target.style.filter = 'url(#ux-blur)';
-    if (prefersReducedMotion) {
-      gsap.set(fe, { attr: { stdDeviation: '0 0' } });
-      return;
-    }
-
-    let lastY = window.pageYOffset || 0;
-    let lastX = window.pageXOffset || 0;
-
-    function tick() {
-      const y = window.pageYOffset || 0;
-      const x = window.pageXOffset || 0;
-      const dy = Math.abs(y - lastY);
-      const dx = Math.abs(x - lastX);
-      const delta = axis === 'x' ? dx : dy;
-
-      const blur = Math.min(max, delta * scale);
-      const dev  = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
-      gsap.set(fe, { attr: { stdDeviation: dev } });
-
-      lastY = y; lastX = x;
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
 
   // ---------------------------------------------------------------------------
   // Bottom blur overlay layers + visibility rules
@@ -1171,7 +1124,11 @@ a + a { margin-inline-start:.6rem; }
 
     // Show when header is out of view; hide when header is visible.
     if (header) {
-      const ioHeader = new IntersectionObserver(([e]) => e.isIntersecting ? hide() : show(), { threshold: 0 });
+      // LESS TWITCHY on mobile: wait until header is ~60px out of view
+      const ioHeader = new IntersectionObserver(
+        ([e]) => e.isIntersecting ? hide() : show(),
+        { threshold: 0, rootMargin: '0px 0px -60px 0px' }
+      );
       ioHeader.observe(header);
     }
 
@@ -1182,62 +1139,64 @@ a + a { margin-inline-start:.6rem; }
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency
   // ---------------------------------------------------------------------------
-function fixMobileBlurResume(){
-  const blur   = document.querySelector('.blur');
-  const header = document.querySelector('.frame');
+  function fixMobileBlurResume(){
+    const blur   = document.querySelector('.blur');
+    const header = document.querySelector('.frame');
 
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  let resumes = 0;
-  const degradeKey = 'bfDegraded';
-  let degraded = localStorage.getItem(degradeKey) === '1';
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    let resumes = 0;
+    const degradeKey = 'bfDegraded';
+    let degraded = localStorage.getItem(degradeKey) === '1';
 
-  function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
-  function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
+    function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
+    function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
 
-  function update(){
-    if(!blur || !header) return;
+    function update(){
+      if(!blur || !header) return;
 
-    hardOff(true);
-    rebuildChildren();
+      hardOff(true);
+      rebuildChildren();
 
-    blur.classList.add('bf-reset'); // temporary BF reset to nudge mobile
-    void blur.offsetHeight;
+      blur.classList.add('bf-reset'); // temporary BF reset to nudge mobile
+      void blur.offsetHeight;
 
-    const shouldShow = header.getBoundingClientRect().bottom <= 0;
-    blur.classList.toggle('is-visible', shouldShow);
+      const shouldShow = header.getBoundingClientRect().bottom <= 0;
+      blur.classList.toggle('is-visible', shouldShow);
 
-    requestAnimationFrame(() => {
-      blur.classList.remove('bf-reset');
-      hardOff(false);
-      if (window.ScrollTrigger) ScrollTrigger.refresh();
-    });
+      requestAnimationFrame(() => {
+        blur.classList.remove('bf-reset');
+        hardOff(false);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      });
 
-    resumes++;
-    if (!degraded && isAndroid && resumes >= 2) {
-      degraded = true;
-      localStorage.setItem(degradeKey, '1');
-      blur.classList.add('no-bf'); // optional degrade after multiple resumes
+      resumes++;
+      if (!degraded && isAndroid && resumes >= 2) {
+        degraded = true;
+        localStorage.setItem(degradeKey, '1');
+        blur.classList.add('no-bf'); // optional degrade after multiple resumes
+      }
     }
+
+    window.addEventListener('visibilitychange', () => {
+      document.hidden ? hardOff(true) : setTimeout(update, 60);
+    }, { passive:true });
+
+    window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
+    window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
+    window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
+    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
+
+    update();
   }
-
-  window.addEventListener('visibilitychange', () => {
-    document.hidden ? hardOff(true) : setTimeout(update, 60);
-  }, { passive:true });
-
-  window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
-  window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
-  window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
-  window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
-
-  update();
-}
-
 
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling
   // ---------------------------------------------------------------------------
   function initSmooth() {
     if (!has('Lenis')) return;
+    const isTouchOrMobile = matchMedia('(pointer:coarse), (max-width: 768px)').matches;
+    if (isTouchOrMobile) return; // Use native scroll on touch devices
+
     window.lenis = new Lenis({ lerp: 0.15 });
     window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
     gsap.ticker.add((t)=>window.lenis.raf(t*1000));
@@ -1353,8 +1312,10 @@ function fixMobileBlurResume(){
       const n = parseFloat(v); return isNaN(n) ? fb : n;
     };
 
-    const pinType = 'transform';
-    const anticipate = 1.2;
+    // NEW: use fixed pinning on mobile to avoid toolbar/transform quirks
+    const pinType = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
+    const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
+
     const grids = [...document.querySelectorAll(
       '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
     )];
@@ -1944,8 +1905,8 @@ function fixMobileBlurResume(){
     `;
     app.appendChild(about);
 
-    // BLURRY SCROLL — inline section for speed-blur filter
-const blurSec = el('section','content content--padded'); blurSec.id = 'about-blur';
+    // BLURRY SCROLL — inline section for speed-blur filter (text only now)
+    const blurSec = el('section','content content--padded'); blurSec.id = 'about-blur';
     blurSec.innerHTML = `
       <div class="content__title" style="margin:.25rem 0 .5rem"></div>
       <div class="content__text">
@@ -2199,35 +2160,33 @@ const blurSec = el('section','content content--padded'); blurSec.id = 'about-blu
   // ---------------------------------------------------------------------------
   // BOOT
   // ---------------------------------------------------------------------------
-async function start() {
-  renderApp();
+  async function start() {
+    renderApp();
 
-  // ensureScrollBlurFilter();   ← remove
-  // initScrollSpeedBlur();      ← remove
-  initBlurOverlayVisibility();
-  fixMobileBlurResume();
+    // Removed scroll-speed blur filter functions.
+    initBlurOverlayVisibility();
+    fixMobileBlurResume();
 
-  initSmooth();
-  enableHashScroll();
+    initSmooth();
+    enableHashScroll();
 
-  a11yifyGridImages();
-  tuneCaseStudyTiming();
+    a11yifyGridImages();
+    tuneCaseStudyTiming();
 
-  animateHeader();
-  animateGrids();
-  animateProcess();
-  animateStacks();
-  initCursor();
-  initConfetti();
-  initDeadJump();
-  initBackToTop();
+    animateHeader();
+    animateGrids();
+    animateProcess();
+    animateStacks();
+    initCursor();
+    initConfetti();
+    initDeadJump();
+    initBackToTop();
 
-  try { await preloadImages(); } catch(e) {}
-  document.body.classList.remove('loading');
+    try { await preloadImages(); } catch(e) {}
+    document.body.classList.remove('loading');
 
-  if (window.ScrollTrigger) ScrollTrigger.refresh();
-}
-
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once:true });

@@ -572,13 +572,21 @@
       }
       .intro__title-sub{ font-size:clamp(1.5rem,20vw,8rem); max-width:15ch; margin:0 auto; }
 
-      /* Skills */
-      #skills .trio-grid{
-        display:grid; grid-template-columns:repeat(3, minmax(0,1fr));
-        gap:clamp(1rem,3vw,2rem); align-items:start;
-      }
-      #skills .trio-col h4{ margin:0 0 .5rem; }
-      #skills .trio-col .content__text{ margin:.15rem 0; }
+/* Stack each skill item on its own line */
+#skills .trio-col{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* keep vertical rhythm and remove the global inline left gap */
+#skills .trio-col .skills-link{
+  margin: .15rem 0 0;
+}
+#skills .trio-col .skills-link + .skills-link{
+  margin-inline-start: 0;
+}
+
 
       /* =========================================================
          PANEL (OVERLAY)

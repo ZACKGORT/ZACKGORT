@@ -70,7 +70,7 @@
   /* Blur overlay */
   --layers:5;
   --blur-max:40;
-  --mask-stop:35;
+  --mask-stop:25;
   --saturate:.99; /* reset */
 
   /* Panel palette */
@@ -1087,6 +1087,12 @@ a + a { margin-inline-start:.6rem; }
 
 
 
+/* If backdrop-filter is unsupported, don't try to blur; use a soft gradient */
+.blur.no-bf > div {
+  -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+  background: linear-gradient(to top, rgba(0,0,0,.28), rgba(0,0,0,0) 60%);
+}
 
   </style>
 </head>
@@ -1139,7 +1145,7 @@ function buildBlurLayers(blur) {
   const cs = getComputedStyle(document.documentElement);
   const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
   const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
-  const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 25; // percent of viewport height
+  const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 15; // percent of viewport height
 
   let html = '';
   for (let i = 1; i <= layers; i++) {
@@ -2219,6 +2225,7 @@ app.appendChild(agency);
     renderApp();
 
     // Removed scroll-speed blur filter functions.
+    tuneForAndroid();  
     initBlurOverlayVisibility();
     fixMobileBlurResume();
 
@@ -2249,6 +2256,35 @@ app.appendChild(agency);
     start();
   }
 })();
+
+
+function supportsBackdropFilter(){
+  try {
+    return (CSS && (CSS.supports('backdrop-filter','blur(1px)') ||
+                    CSS.supports('-webkit-backdrop-filter','blur(1px)')));
+  } catch { return false; }
+}
+
+function tuneForAndroid(){
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const dm = (navigator.deviceMemory || 8); // best-effort; 8GB default
+
+  // Lower the cost on Android or low-memory devices
+  if (isAndroid || dm <= 4) {
+    const rs = document.documentElement.style;
+    // Fewer layers + smaller kernel keep GPU happy
+    rs.setProperty('--layers',  isAndroid ? '5' : '4');
+    rs.setProperty('--blur-max', isAndroid ? '14' : '12'); // px
+    rs.setProperty('--saturate', '1'); // neutral; marginal win on some GPUs
+  }
+
+  // If no BF, enable gradient fallback
+  if (!supportsBackdropFilter()) {
+    document.querySelector('.blur')?.classList.add('no-bf');
+  }
+}
+
+
 </script>
 </body>
 </html>

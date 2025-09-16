@@ -69,7 +69,7 @@
 
   /* Blur overlay */
   --layers: 1;      /* from 5 */
-  --blur-max: 16;   /* 12–18px looks “moderate” but is cheap(ish) */
+  --blur-max: 24;   /* 12–18px looks “moderate” but is cheap(ish) */
   --mask-stop: 35;  /* ~35vh coverage at the bottom */
 
   /* Panel palette */
@@ -1099,6 +1099,55 @@ a + a { margin-inline-start:.6rem; }
   .blur { display: none !important; }
 }
 
+
+
+/* === Skills hover (fx-2 style) === */
+.skills-link{
+  position:relative;
+  display:inline-block;
+  cursor:pointer;
+  text-decoration:none;
+  color:var(--color-text);
+  outline:0;
+}
+.skills-link span{ display:inline-block; white-space:normal; }
+
+/* fx-2 underline */
+.skills-link[data-fx="2"]::after{
+  content:"";
+  position:absolute; left:0; bottom:0;
+  width:100%; height:2px;
+  background: currentColor;
+  transform-origin: 0% 50%;
+  transform: scale3d(0,1,1);
+  transition: transform .2s cubic-bezier(.390,.575,.565,1);
+}
+.skills-link[data-fx="2"]:hover::after,
+.skills-link[data-fx="2"]:focus-visible::after{
+  transform: scale3d(1,1,1);
+}
+
+/* Floating preview (same structure as demo) */
+.hover-reveal{
+  position:fixed; top:0; left:0;
+  width:220px; height:160px;
+  pointer-events:none; opacity:0;
+  z-index:10010; /* above content, below your cursor/scroll UI */
+}
+.hover-reveal__inner,
+.hover-reveal__img{ position:relative; width:100%; height:100%; }
+.hover-reveal__deco{
+  position:absolute; inset:0; background:#181314; opacity:.18;
+}
+.hover-reveal__img{
+  background-size:cover; background-position:50% 50%;
+}
+
+/* Disable on touch/mobiles */
+@media (hover:none), (pointer:coarse){
+  .hover-reveal{ display:none !important; }
+}
+
   </style>
 </head>
 
@@ -1108,7 +1157,7 @@ a + a { margin-inline-start:.6rem; }
   <div id="panel-root"></div>
   <div class="blur"></div>
 <script>
-/* app.js — Zack Gort — Layout Formation on Scroll */
+/* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal */
 (function () {
   'use strict';
 
@@ -1124,7 +1173,7 @@ a + a { margin-inline-start:.6rem; }
     } else {
       gsap.registerPlugin(ScrollTrigger);
     }
-    // NOTE: normalizeScroll now handled inside initSmooth() to avoid Lenis race.
+    // normalizeScroll handled in initSmooth() to avoid Lenis race
   }
 
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1148,110 +1197,98 @@ a + a { margin-inline-start:.6rem; }
     const cs = getComputedStyle(document.documentElement);
     const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
     const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
-    const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 15; // percent of viewport height
+    const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 15;
 
     let html = '';
     for (let i = 1; i <= layers; i++) {
       const t = i / layers;
-      // Stronger blur near the bottom, gentler higher up:
       const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
-
-      // Convert your previous "mask stop" into a top offset (vh) for the slab
-      // so only the bottom chunk owns a backdrop-filter.
-      const stop   = Math.sin(t * Math.PI / 2) * stopMax; // 0..stopMax (%)
-      const topVh  = (100 - stop).toFixed(3);             // bottom (100 - stop)
-
+      const stop   = Math.sin(t * Math.PI / 2) * stopMax;
+      const topVh  = (100 - stop).toFixed(3);
       html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
     }
     blur.innerHTML = html;
   }
 
-function initBlurOverlayVisibility() {
-  // ⬇ add this
-  if (matchMedia('(pointer:coarse), (max-width: 768px)').matches) return;
+  function initBlurOverlayVisibility() {
+    let blur = document.querySelector('.blur');
+    if (!blur) {
+      blur = document.createElement('div');
+      blur.className = 'blur';
+      document.body.appendChild(blur);
+    }
+    if (!blur.children.length) buildBlurLayers(blur);
 
-  let blur = document.querySelector('.blur');
-  if (!blur) {
-    blur = document.createElement('div');
-    blur.className = 'blur';
-    document.body.appendChild(blur);
+    const header = document.querySelector('.frame');
+
+    const show = () => blur.classList.add('is-visible');
+    const hide = () => blur.classList.remove('is-visible');
+
+    if (header) {
+      const ioHeader = new IntersectionObserver(
+        ([e]) => e.isIntersecting ? hide() : show(),
+        { threshold: 0, rootMargin: '0px 0px -60px 0px' }
+      );
+      ioHeader.observe(header);
+    }
+
+    if (header && header.getBoundingClientRect().bottom <= 0) show();
+
+    window.addEventListener('resize', () => buildBlurLayers(blur), { passive:true });
   }
-  if (!blur.children.length) buildBlurLayers(blur);
-
-  const header = document.querySelector('.frame');
-
-  const show = () => blur.classList.add('is-visible');
-  const hide = () => blur.classList.remove('is-visible');
-
-  if (header) {
-    const ioHeader = new IntersectionObserver(
-      ([e]) => e.isIntersecting ? hide() : show(),
-      { threshold: 0, rootMargin: '0px 0px -60px 0px' }
-    );
-    ioHeader.observe(header);
-  }
-
-  if (header && header.getBoundingClientRect().bottom <= 0) show();
-  window.addEventListener('resize', () => buildBlurLayers(blur), { passive:true });
-}
-
 
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency
   // ---------------------------------------------------------------------------
-function fixMobileBlurResume(){
-  // ⬇ add this
-  if (matchMedia('(pointer:coarse), (max-width: 768px)').matches) return;
+  function fixMobileBlurResume(){
+    const blur   = document.querySelector('.blur');
+    const header = document.querySelector('.frame');
 
-  const blur   = document.querySelector('.blur');
-  const header = document.querySelector('.frame');
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  let resumes = 0;
-  const degradeKey = 'bfDegraded';
-  let degraded = localStorage.getItem(degradeKey) === '1';
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    let resumes = 0;
+    const degradeKey = 'bfDegraded';
+    let degraded = localStorage.getItem(degradeKey) === '1';
 
-  function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
-  function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
+    function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
+    function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
 
-  function update(){
-    if(!blur || !header) return;
+    function update(){
+      if(!blur || !header) return;
+      hardOff(true);
+      rebuildChildren();
 
-    hardOff(true);
-    rebuildChildren();
+      blur.classList.add('bf-reset');
+      void blur.offsetHeight;
 
-    blur.classList.add('bf-reset');
-    void blur.offsetHeight;
+      const shouldShow = header.getBoundingClientRect().bottom <= 0;
+      blur.classList.toggle('is-visible', shouldShow);
 
-    const shouldShow = header.getBoundingClientRect().bottom <= 0;
-    blur.classList.toggle('is-visible', shouldShow);
+      requestAnimationFrame(() => {
+        blur.classList.remove('bf-reset');
+        hardOff(false);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      });
 
-    requestAnimationFrame(() => {
-      blur.classList.remove('bf-reset');
-      hardOff(false);
-      if (window.ScrollTrigger) ScrollTrigger.refresh();
-    });
-
-    resumes++;
-    if (!degraded && isAndroid && resumes >= 2) {
-      degraded = true;
-      localStorage.setItem(degradeKey, '1');
-      blur.classList.add('no-bf');
+      resumes++;
+      if (!degraded && isAndroid && resumes >= 2) {
+        degraded = true;
+        localStorage.setItem(degradeKey, '1');
+        blur.classList.add('no-bf');
+      }
     }
+
+    window.addEventListener('visibilitychange', () => {
+      document.hidden ? hardOff(true) : setTimeout(update, 60);
+    }, { passive:true });
+
+    window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
+    window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
+    window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
+    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
+    window.addEventListener('resize', () => setTimeout(update, 60), { passive:true });
+
+    update();
   }
-
-  window.addEventListener('visibilitychange', () => {
-    document.hidden ? hardOff(true) : setTimeout(update, 60);
-  }, { passive:true });
-
-  window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
-  window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
-  window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
-  window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
-  window.addEventListener('resize', () => setTimeout(update, 60), { passive:true });
-
-  update();
-}
-
 
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling
@@ -1261,11 +1298,10 @@ function fixMobileBlurResume(){
     const usingLenis = has('Lenis') && !isMobile;
 
     if (has('ScrollTrigger')) {
-      // If we use Lenis, DO NOT normalize (they fight); otherwise do.
       ScrollTrigger.normalizeScroll(!usingLenis);
     }
 
-    if (!usingLenis) return; // native scroll on touch devices or no Lenis loaded
+    if (!usingLenis) return;
 
     window.lenis = new Lenis({ lerp: 0.15 });
     window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
@@ -1382,7 +1418,6 @@ function fixMobileBlurResume(){
       const n = parseFloat(v); return isNaN(n) ? fb : n;
     };
 
-    // NEW: use fixed pinning on mobile to avoid toolbar/transform quirks
     const pinType = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
     const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
 
@@ -1682,7 +1717,6 @@ function fixMobileBlurResume(){
       return `+=${px}`;
     }
 
-    // BNY — HERO → steadier “sixth”
     document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
       const end = calcEndPx(grid, {
         baseVH: { desktop: 120, mobile: 90 },
@@ -1692,7 +1726,6 @@ function fixMobileBlurResume(){
       setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
     });
 
-    // BNY — DISCOVERY → lateral sweep (“ninth”)
     document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
       const end = calcEndPx(grid, {
         baseVH: { desktop: 150, mobile: 110 },
@@ -1701,7 +1734,6 @@ function fixMobileBlurResume(){
       setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
     });
 
-    // GNC — HERO
     document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
       const end = calcEndPx(grid, {
         baseVH: { desktop: 135, mobile: 95 },
@@ -1711,7 +1743,6 @@ function fixMobileBlurResume(){
       setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.40, scrubMob: 0.28 });
     });
 
-    // GNC — DISCOVERY
     document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
       const end = calcEndPx(grid, {
         baseVH: { desktop: 160, mobile: 110 },
@@ -1722,9 +1753,9 @@ function fixMobileBlurResume(){
   }
 
   // ===========================================================================
-  // CONTENT MODEL (unchanged)
+  // CONTENT MODEL
   // ===========================================================================
-  const CONTENT = { /* ...same content object as your last version... */ 
+  const CONTENT = {
     header: {
       title: 'UX is dead↴',
       logo: "ZCKGRT",
@@ -1793,10 +1824,8 @@ function fixMobileBlurResume(){
         "https://i.ibb.co/XZ8QtMx9/610811e9c2fa676f3fb1255f-zax02412-68c4866404de0.webp",
         "https://i.ibb.co/W4XvQk1t/1-vk-U8l-Zmqn-OHghe-Os-K0qtrw.webp",
         "https://i.ibb.co/0p7Ktz5L/1-Tut-Ce-PQB0b-SCo-Mf-MTWJb-Q.webp",
-
         "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
         "https://i.ibb.co/MJLfbdm/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp",
-
         "https://i.ibb.co/RTTZh2gq/1-1-QGGK09-DGx0-R4p-d-Jg6xiw.webp",
         "https://i.ibb.co/vx76zjgf/10.webp",
         "https://i.ibb.co/rft2bf0T/9.webp",
@@ -1812,18 +1841,14 @@ function fixMobileBlurResume(){
       title: "#agencylife",
       images: [
         "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
-
         "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
         "https://i.ibb.co/Xr97WzXX/DSC06055-1.webp",
-
         "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
         "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
-
         "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
         "https://i.ibb.co/m5yN57gn/IMG-20160526-164803987-01.jpg",
         "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
         "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
-
         "https://i.ibb.co/c3vLP47/image-445-min.png",
         "https://i.ibb.co/RymyPtP/image-443-min.png",
         "https://i.ibb.co/Ct9DZd9/image-442-min.png",
@@ -1933,6 +1958,24 @@ function fixMobileBlurResume(){
   };
 
   // ---------------------------------------------------------------------------
+  // SKILL IMAGE MAP + helper (used by hover reveal)
+  // ---------------------------------------------------------------------------
+  const SKILL_IMG = {
+    "User Experience Design": "https://i.ibb.co/cSQCgNQY/work1.webp",
+    "Content & Brand Strategy {B2B+C}": "https://i.ibb.co/ynjWYqv8/2.webp",
+    "Visual Interface Design": "https://i.ibb.co/xS49C07B/bny3.png",
+    "Accessibility Compliance": "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+    "+": "https://i.ibb.co/gtQLYJQ/17.jpg",
+    "Figma, Adobe CS": "https://i.ibb.co/0QTSr27/dana-mobile.png",
+    "HTML/CSS/Js": "https://i.ibb.co/FJNG1jC/14.jpg",
+    "Pen & Paper": "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
+    "Whiteboard": "https://i.ibb.co/m5yN57gn/IMG-20160526-164803987-01.jpg",
+    "AI + Creative Coding": "https://i.ibb.co/fxjgcYD/18.png",
+    "Design Systems & Workflows": "https://i.ibb.co/vvMZmq94/bny2.png"
+  };
+  const imgFor = (label) => SKILL_IMG[label] || "https://i.ibb.co/cSQCgNQY/work1.webp";
+
+  // ---------------------------------------------------------------------------
   // RENDERER
   // ---------------------------------------------------------------------------
   function renderApp() {
@@ -1975,7 +2018,7 @@ function fixMobileBlurResume(){
     `;
     app.appendChild(about);
 
-    // BLURRY SCROLL — inline section for speed-blur filter (text only now)
+    // BLURRY SCROLL — inline section (text only)
     const blurSec = el('section','content content--padded'); blurSec.id = 'about-blur';
     blurSec.innerHTML = `
       <div class="content__title" style="margin:.25rem 0 .5rem"></div>
@@ -1995,14 +2038,18 @@ function fixMobileBlurResume(){
     `;
     app.appendChild(blurSec);
 
-    // SKILLS
+    // SKILLS (items rendered as fx-2 hoverable links with data-img)
     const skills = el('section','content content--padded'); skills.id = 'skills';
     skills.innerHTML = `
       <div class="trio-grid">
         ${CONTENT.skills.cols.map(col => `
           <div class="trio-col">
             <h4 class="type-tiny">${col.heading}</h4>
-            ${col.items.map(t => `<p class="content__text">${t}</p>`).join('')}
+            ${col.items.map(t => `
+              <a class="content__text skills-link" data-fx="2" data-img="${imgFor(t)}" href="#" role="link" aria-label="${t}" onclick="return false;">
+                <span>${t}</span>
+              </a>
+            `).join('')}
           </div>`).join('')}
       </div>
     `;
@@ -2030,7 +2077,7 @@ function fixMobileBlurResume(){
     `;
     app.appendChild(work);
 
-    // BRANDS GRID (match AGENCY layout + animation)
+    // BRANDS GRID
     const brands = el('section','content content--padded content--full');
     brands.id = 'brands-grid';
     brands.innerHTML = `
@@ -2230,12 +2277,98 @@ function fixMobileBlurResume(){
   }
 
   // ---------------------------------------------------------------------------
+  // SKILLS fx-2 HOVER REVEAL
+  // ---------------------------------------------------------------------------
+  function initSkillsHoverReveal(){
+    const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
+    if (isTouch) return; // no hover on touch
+
+    // Build floating node once
+    let root = document.getElementById('hoverReveal');
+    if (!root){
+      root = document.createElement('div');
+      root.id = 'hoverReveal';
+      root.className = 'hover-reveal';
+      root.innerHTML = `
+        <div class="hover-reveal__inner">
+          <div class="hover-reveal__deco"></div>
+          <div class="hover-reveal__img"></div>
+        </div>`;
+      document.body.appendChild(root);
+    }
+    const imgBox = root.querySelector('.hover-reveal__img');
+
+    // Smooth follow
+    const follow = { x: innerWidth/2, y: innerHeight/2 };
+    const pos    = { x: follow.x,   y: follow.y };
+    const lerp = (a,b,t)=>a+(b-a)*t;
+    let raf;
+    const tick = () => {
+      pos.x = lerp(pos.x, follow.x, 0.16);
+      pos.y = lerp(pos.y, follow.y, 0.16);
+      gsap.set(root, { x: pos.x, y: pos.y, xPercent:-50, yPercent:-50 });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    addEventListener('pointermove', e => { follow.x = e.clientX; follow.y = e.clientY; }, { passive:true });
+
+    // Helpers
+    const preload = (url) => new Promise((res, rej)=>{
+      imgBox.style.backgroundImage = `url(${url})`;
+      const img = new Image();
+      img.onload = () => res();
+      img.onerror = rej;
+      img.src = url;
+    });
+
+    let inTl, outTl;
+    const killTL = ()=>{ inTl && inTl.kill(); outTl && outTl.kill(); inTl = outTl = null; };
+
+    // fx-2 look
+    const showFx2 = ()=>{
+      killTL();
+      gsap.set(root, { autoAlpha:1, scale:1, rotation:0 });
+      inTl = gsap.timeline()
+        .fromTo(root, { rotation:-6, yPercent:8, scale:0.92 }, { rotation:0, yPercent:0, scale:1, duration:0.6, ease:'power3.out' }, 0)
+        .fromTo(imgBox, { scale:1.04 }, { scale:1, duration:0.5, ease:'power2.out' }, 0);
+    };
+    const hide = ()=>{
+      killTL();
+      outTl = gsap.to(root, { autoAlpha:0, scale:0.98, rotation:-1, duration:0.28, ease:'power2.out' });
+    };
+
+    // Delegate to skills links
+    const skills = document.getElementById('skills');
+    if (!skills) return;
+
+    let token = 0;
+    skills.addEventListener('pointerenter', (e)=>{
+      const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
+      const url = a.getAttribute('data-img'); const myToken = ++token;
+      preload(url).then(()=>{ if(myToken===token) showFx2(); }).catch(()=>{});
+    }, true);
+
+    skills.addEventListener('pointerleave', (e)=>{
+      if (e.target.closest('.skills-link')) hide();
+    }, true);
+
+    // Keyboard focus a11y
+    skills.addEventListener('focusin', (e)=>{
+      const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
+      const url = a.getAttribute('data-img'); const myToken = ++token;
+      preload(url).then(()=>{ if(myToken===token) showFx2(); }).catch(()=>{});
+    });
+    skills.addEventListener('focusout', (e)=>{
+      if (e.target.closest('.skills-link')) hide();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // BOOT
   // ---------------------------------------------------------------------------
   async function start() {
     renderApp();
 
-    // Removed scroll-speed blur filter functions.
     tuneForAndroid();  
     initBlurOverlayVisibility();
     fixMobileBlurResume();
@@ -2255,6 +2388,9 @@ function fixMobileBlurResume(){
     initDeadJump();
     initBackToTop();
 
+    // Skills hover preview
+    initSkillsHoverReveal();
+
     try { await preloadImages(); } catch(e) {}
     document.body.classList.remove('loading');
 
@@ -2268,7 +2404,9 @@ function fixMobileBlurResume(){
   }
 })();
 
-
+// -----------------------------------------------------------------------------
+// Helpers outside IIFE (kept as in your page)
+// -----------------------------------------------------------------------------
 function supportsBackdropFilter(){
   try {
     return (CSS && (CSS.supports('backdrop-filter','blur(1px)') ||
@@ -2278,36 +2416,25 @@ function supportsBackdropFilter(){
 
 function tuneForAndroid(){
   const isAndroid = /Android/i.test(navigator.userAgent);
-  const dm = (navigator.deviceMemory || 8); // best-effort; 8GB default
+  const dm = (navigator.deviceMemory || 8);
   const rs = document.documentElement.style;
 
-  const clampBlurMax = (cap) => {
-  const cur = parseFloat(getComputedStyle(document.documentElement)
-               .getPropertyValue('--blur-max')) || cap;
-  rs.setProperty('--blur-max', String(Math.min(cur, cap)));
-};
-
-if (isAndroid) clampBlurMax(12);
-if (dm <= 4)   clampBlurMax(12);
-
-  // Lower the cost on Android or low-memory devices
   if (isAndroid || dm <= 4) {
     rs.setProperty('--layers',  isAndroid ? '5' : '4');
-    rs.setProperty('--blur-max', isAndroid ? '14' : '12'); // px
-    rs.setProperty('--saturate', '1'); // neutral; marginal win on some GPUs
+    rs.setProperty('--blur-max', isAndroid ? '14' : '12');
+    rs.setProperty('--saturate', '1');
   }
 
-  // Extra-tight floor for very small screens
   if (matchMedia('(max-width:480px)').matches){
     rs.setProperty('--layers','4');
     rs.setProperty('--blur-max','12');
   }
 
-  // If no BF, enable gradient fallback
   if (!supportsBackdropFilter()) {
     document.querySelector('.blur')?.classList.add('no-bf');
   }
 }
+
 </script>
 </body>
 </html>

@@ -123,8 +123,10 @@
         -moz-osx-font-smoothing:grayscale;
       }
 
-      /* NEW: prevent overscroll glow confusing ScrollTrigger on mobile */
-      html, body { overscroll-behavior-y: none; }
+
+html, body { overscroll-behavior-y: none; }     /* block P2R/glow at the root */
+#app { overscroll-behavior: contain; }          /* don’t bubble overscroll out of main */
+
 
       /* Links & buttons — global pink hover + fx-2 underline */
       a{

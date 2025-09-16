@@ -98,9 +98,10 @@
               --fs-xxs:12px;
   --fs-body:18px;
   /* Z */
-              --z-blur:10000;
+  --z-blur:10000;
   --z-footer:10020;
-  --z-ui: 10050;  
+  --z-ui: 10050;
+  --z-tooltip: 40000;  
   /* ↑ footer above blur */
 }
 html,body {
@@ -689,108 +690,7 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 #skills .trio-col .skills-link + .skills-link {
   margin-inline-start:0;
 }
-/* =========================================================
-               PANEL (OVERLAY)
-               ========================================================= */
-            .panel {
-  font-feature-settings:"liga","kern";
-  letter-spacing:0;
-}
-.panel .chapter {
-  font-size:var(--fs-xxs);
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  opacity:.85;
-  color:#cfcac0;
-  margin-bottom:.5rem;
-}
-.panel .title {
-  font-weight:400;
-  line-height:.95;
-  letter-spacing:-.02em;
-  text-transform:uppercase;
-  font-size:clamp(2rem,6.5vw,5rem);
-  margin:.2rem 0 .6rem;
-}
-.panel .text {
-  font-size:1.05rem;
-  line-height:1.5;
-  color:#ddd7cd;
-}
-.panel .text p {
-  margin:0 0 .85rem;
-}
-.split-text .word {
-  display:inline-block;
-  overflow:hidden;
-}
-.split-text .word > span {
-  display:inline-block;
-  transform:translateY(110%);
-  opacity:0;
-}
-.frosted-glass {
-  --bg:rgba(18,18,18,.42);
-  background:var(--bg);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:1.1rem 1.25rem;
-  backdrop-filter:saturate(0%) blur(12px);
-  -webkit-backdrop-filter:saturate(0%) blur(12px);
-  box-shadow:0 8px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.05);
-}
-.panel-content-blur-edges {
-  -webkit-mask-image:radial-gradient(120% 100% at 50% 50%,#000 60%,transparent 100%);
-  mask-image:radial-gradient(120% 100% at 50% 50%,#000 60%,transparent 100%);
-}
-.panel .intro {
-  background:var(--cs-deep);
-  color:#f6f6f6;
-}
-.panel .header {
-  background:var(--cs-accent);
-  color:#421c06;
-}
-.panel .about {
-  background:var(--cs-warm);
-  color:#2f0e08;
-}
-.panel .story {
-  background:#ee964b;
-  color:#3f170b;
-}
-.panel .outro {
-  background:var(--cs-soft);
-  color:var(--cs-ink);
-}
-.panel .about .row {
-  display:flex;
-  gap:2rem;
-  align-items:flex-start;
-  width:100%;
-}
-.panel .about .row .copy {
-  flex:3;
-}
-.panel .about .row .img {
-  flex:3;
-}
-.panel .about .row .img img {
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
-}
-.panel__progress-bar {
-  height:6px;
-  background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.8) 100%);
-  opacity:.85;
-}
-.panel__counter h1 {
-  font-size:clamp(18px,2.2vw,28px);
-  letter-spacing:.06em;
-  font-weight:500;
-  color:#fff;
-  opacity:.9;
-}
+
 /* =========================================================
                STACKED GALLERIES
                ========================================================= */
@@ -1145,17 +1045,19 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 }
 */
 
-            /* Temp hide during JS reset */
-            .blur.bf-off {
+/* Temp hide during JS reset */
+.blur.bf-off {
   opacity:0 !important;
 }
 /* Optional degrade */
-            .blur.no-bf > div::after {
+.blur.no-bf > div::after {
   -webkit-backdrop-filter:none !important;
   backdrop-filter:none !important;
 }
+
+
 /* Blackout tooltip */
-            .blackout {
+.blackout {
   color:transparent;
   background:#fff;
   padding:0 .15em;
@@ -1166,6 +1068,7 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 .blackout.tip {
   position:relative;
   cursor:help;
+  
 }
 .blackout.tip::after {
   content:attr(data-tip);
@@ -1178,7 +1081,7 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
   padding:.45rem .55rem;
   border-radius:0;
   width:min(360px,80vw);
-  font-size:1.8em;
+  font-size:1.2em;
   line-height:1.2;
   letter-spacing:.02em;
   text-transform:none;
@@ -1196,73 +1099,146 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
   right:.6rem;
   width:8px;
   height:8px;
-  background:rgba(0,0,0,.88);
+  background: #000;                 /* match the backing */
+  z-index: calc(var(--z-tooltip) + 1) !important;
   transform:translateY(50%) rotate(45deg);
   opacity:0;
   transition:opacity .15s ease;
 }
 .blackout.tip:hover::after,.blackout.tip:focus-visible::after {
   opacity:1;
-  transform:translateY(-10px);
+  transform:translateY(auto);
 }
 .blackout.tip:hover::before,.blackout.tip:focus-visible::before {
   opacity:1;
 }
 /* Blur redaction variant */
-            .blackout.blackout--blur {
+.blackout.blackout--blur {
   /* override base blackout */
-              color:inherit;
+color:inherit;
   /* keep text visible under blur */
-              background:rgba(0,0,0,0);
+background:rgba(0,0,0,0);
   /* “solid tape” look */
 
-              -webkit-box-decoration-break:clone;
+-webkit-box-decoration-break:clone;
   box-decoration-break:clone;
   position:relative;
 }
 /* Only blur the inner span,so we can toggle it */
-            .blackout.blackout--blur > span {
+.blackout.blackout--blur > span {
   display:inline-block;
   filter:blur(var(--blur-amt,4px));
   transition:filter .18s ease;
 }
 /* Hover = reduce blur */
-            .blackout.blackout--blur:hover > span {
+.blackout.blackout--blur:hover > span {
   --blur-amt:0.5px;
 }
 /* When JS marks it as revealed (on selection) remove blur */
-            .blackout.blackout--blur[data-reveal="1"] > span,.blackout.blackout--blur:focus-within > span {
+.blackout.blackout--blur[data-reveal="1"] > span,.blackout.blackout--blur:focus-within > span {
   --blur-amt:0;
 }
 /* Optional:nicer selection colors */
-            .blackout.blackout--blur > span::selection {
+.blackout.blackout--blur > span::selection {
   background:rgba(255,255,255,.25);
   color:inherit;
 }
+
+
+/* === SIMPLE TOOLTIP FIX (black backing • above all • mobile placement) === */
+:root { --z-tooltip: 40000; } /* higher than blur(10000) + any UI */
+
+/* base */
+.blackout.tip { position: relative; }
+
+/* bubble */
+.blackout.tip::after{
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);   /* sits above trigger on desktop */
+  right: 0;
+  background: rgba(0,0,0,.85);/* solid black backing */
+  color: #fff;
+  padding: .6rem .75rem;
+  border-radius: 10px;
+  width: min(360px, 80vw);
+  font-size: 1rem;
+  line-height: 1.4;
+  white-space: normal;
+  box-shadow: 0 12px 28px rgba(0,0,0,.45);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  z-index: var(--z-tooltip);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+/* arrow */
+.blackout.tip::before{
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 12px;
+  width: 10px; height: 10px;
+  background: rgba(0,0,0,1);
+  transform: rotate(45deg);
+  opacity: 0;
+  z-index: var(--z-tooltip);
+  transition: opacity .18s ease;
+}
+
+/* show on hover/focus */
+.blackout.tip:hover::after,
+.blackout.tip:focus-visible::after { opacity: 1; transform: translateY(0); }
+.blackout.tip:hover::before,
+.blackout.tip:focus-visible::before { opacity: 1; }
+
+/* Mobile: center it below the trigger, bigger type */
+@media (max-width: 768px){
+  .blackout.tip::after{
+    top: calc(100% + 10px);
+    bottom: auto;
+    left: 50%; right: auto;
+    transform: translate(-50%, 4px);
+    width: min(92vw, 420px);
+    font-size: 16px;
+    line-height: 1.45;
+    text-align: left;
+  }
+  .blackout.tip:hover::after,
+  .blackout.tip:focus-visible::after { transform: translate(-50%, 0); }
+
+  .blackout.tip::before{
+    top: 100%; bottom: auto;
+    left: 50%; right: auto;
+    transform: translate(-50%, -2px) rotate(45deg);
+  }
+}
+
 /* =========================================================
                QUERY GROUP — MEDIA & FEATURE QUERIES
                ========================================================= */
 
-            /* Aspect ratio:keep 16:9 on wide viewports */
-            @media (max-aspect-ratio:16/9) {
+/* Aspect ratio:keep 16:9 on wide viewports */
+@media (max-aspect-ratio:16/9) {
   .grid:not(.grid--zoomed) {
   width:100%;
   height:auto;
   aspect-ratio:16/9;
 }
 }/* Mobile tuning */
-            @media (max-width:768px) {
+@media (max-width:768px) {
   :root {
   font-size:15px;
   --page-padding:1rem;
   --grid-gap:.75rem;
   /* Mobile blur */
-                --blur-max:18;
+  --blur-max:18;
   --mask-stop:20;
   --saturate:0;
 }
 /* Backdrop-filter reset helper */
-            .blur.bf-reset > div::after {
+  .blur.bf-reset > div::after {
   -webkit-backdrop-filter:none !important;
   backdrop-filter:none !important;
 }
@@ -1377,43 +1353,7 @@ section.content:has(.grid[data-grid-ninth]) {
   font-size:10px;
   opacity:.65;
 }
-.panel h1 {
-  font-size:clamp(1.6rem,9vw,2.2rem);
-}
-.panel h2 {
-  font-size:1.1rem;
-}
-.panel p {
-  font-size:.95rem;
-}
-.panel__counter h1 {
-  font-size:.95rem;
-}
-.panel__progress-bar {
-  height:5px;
-}
-.panel .intro,.panel .hero-img,.panel .about,.panel .banner-img,.panel .story,.panel .outro {
-  width:94vw;
-  padding:1rem;
-}
-.panel .header,.panel .concept-img {
-  width:100vw;
-}
-.panel .about .row {
-  flex-direction:column;
-  gap:1rem;
-}
-.panel .about .row p {
-  width:100%;
-}
-.panel .about .row .img {
-  aspect-ratio:16/10;
-}
-.panel__close {
-  top:.5rem;
-  right:.5rem;
-  padding:.4rem .6rem;
-}
+
 .page-footer {
   grid-template-columns:1fr;
   gap:.5rem;
@@ -1762,7 +1702,6 @@ section.content:has(.grid[data-grid-ninth]) {
   <body class="loading">
     <a class="skip-link" href="#about">Skip to content</a>
     <main id="app"></main>
-    <div id="panel-root"></div>
     <div class="blur"></div>
     <script>
       /* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */

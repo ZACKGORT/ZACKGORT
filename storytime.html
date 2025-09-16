@@ -446,6 +446,14 @@ a + a { margin-inline-start:.6rem; }
   letter-spacing:.04em; text-transform:uppercase; opacity:.85;
 }
 
+
+#fintech-process .project__label,
+#ecommerce-process .project__label{
+  font-weight: 700;
+  font-variation-settings: "slnt" 0, "wdth" 100, "wght" 700, "INKT" 0;
+}
+
+
 /* Intro helper note */
 .intro__info{
   position:fixed; left:50%;
@@ -1108,6 +1116,12 @@ a + a { margin-inline-start:.6rem; }
   .blur { display: none !important; }
 }
 
+/* Stack skills columns vertically on mobile */
+@media (max-width: 768px){
+  #skills .trio-grid{
+    grid-template-columns: 1fr; /* 3 → 1 */
+  }
+}
 
 
 /* === Skills hover (fx-2 style) === */
@@ -1874,19 +1888,21 @@ a + a { margin-inline-start:.6rem; }
         "https://i.ibb.co/vvMZmq94/bny2.png"
       ],
       heroCaption: { title: " ", subtitle: " " },
-      process: {
-        domain: "BNY Mellon — Pershing X",
-        date: "Publicis Sapient",
-        mission: [
-          "Pershing X required a total data & design overhaul towards unifying their financial product ecosystem.",
-        ],
-        details: [
-          ["Problem","Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."],
-          ["Constraints","SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."],
-          ["Role & Team","Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."],
-          ["Research","Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."]
-        ]
-      },
+process: {
+  client: "BNY Mellon — Pershing X",
+  agency: "Publicis Sapient",
+  role: [
+    "Senior User Experience Designer, Product Design Lead",
+  ],
+  details: [
+    ["Problem","Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."],
+    ["Constraints","SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."],
+    ["Role & Team","Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."],
+    ["Research","Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."]
+  ]
+},
+
+
       discoveryImages: [
         "https://i.ibb.co/wZY2bhKF/bny4.png",
         "https://i.ibb.co/xS49C07B/bny3.png",
@@ -1920,17 +1936,22 @@ a + a { margin-inline-start:.6rem; }
         "https://i.ibb.co/gZ58PKyk/4.webp"
       ],
       heroCaption: { title: " ", subtitle: " " },
-      process: {
-        domain: "General Nutrition Centers",
-        date: "2021",
-        titleLines: ["This is the Whey"],
-        details: [
-          ["Problem","GNC asked us to shake things up; providing them with a modern e-commerce solution."],
-          ["Scope","We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
-          ["Heavy lift. Huge Gains.","Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
-          ["If the bar ain't bending, you're just pretending","Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
-        ]
-      },
+process: {
+  client: "General Nutrition Centers (GNC)",
+  agency: "Elva Design Group",
+  titleLines: ["This is the Whey"],
+  role: [
+    "Senior User Experience Designer (IA/flows). Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics.",
+    "Tight cadence, top-tier design + strategy, weekly exec reviews."
+  ],
+  details: [
+    ["Problem","GNC asked us to shake things up; providing them with a modern e-commerce solution."],
+    ["Scope","We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
+    ["Heavy lift. Huge Gains.","Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
+    ["If the bar ain't bending, you're just pretending","Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
+  ]
+},
+
       discoveryImages: [
         "https://i.ibb.co/gZ58PKyk/4.webp",
         "https://i.ibb.co/cXg5Phdc/3.webp",
@@ -2127,24 +2148,28 @@ a + a { margin-inline-start:.6rem; }
 
     // FINTECH — PROCESS
     const finProc = el('section','content content--padded'); finProc.id='fintech-process';
-    const finIntro = `
-      <section class="project project--intro">
-        <span class="project__label project__label--name">Client:</span>
-        <span class="project__name">${CONTENT.fintech.process.domain}</span>
-        <span class="project__label project__label--date">Agency:</span>
-        <span class="project__date">${CONTENT.fintech.process.date}</span>
-        <h2 class="project__title"><span class="project__title-line">design systems and data refactorization</span></h2>
+const finIntro = `
+  <section class="project project--intro">
+    <span class="project__label project__label--name">Client</span>
+    <span class="project__name">${CONTENT.fintech.process.client}</span>
 
-        <div class="project__mission content__text">
-          <p>
-            <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-              Mission
-            </span>
-            ${CONTENT.fintech.process.mission[0]}
-          </p>
-          ${CONTENT.fintech.process.mission.slice(1).map(p=>`<p>${p}</p>`).join('')}
-        </div>
-      </section>`;
+    <span class="project__label project__label--date">Agency</span>
+    <span class="project__date">${CONTENT.fintech.process.agency}</span>
+
+    <h2 class="project__title"><span class="project__title-line">design systems and data refactorization</span></h2>
+
+    <div class="project__mission content__text">
+      <p>
+        <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+          Role
+        </span>
+        ${CONTENT.fintech.process.role[0]}
+      </p>
+      ${CONTENT.fintech.process.role.slice(1).map(p=>`<p>${p}</p>`).join('')}
+    </div>
+  </section>`;
+
+
     const finDetails = CONTENT.fintech.process.details.map(([label,text],i) => `
       <section class="project project--details ${i%2===0?'project--left':'project--right'}">
         <span class="project__label project__label--default">${label}</span>
@@ -2206,16 +2231,29 @@ a + a { margin-inline-start:.6rem; }
 
     // ECOM — PROCESS
     const ecoProc = el('section','content content--padded'); ecoProc.id='ecommerce-process';
-    const ecoIntro = `
-      <section class="project project--intro">
-        <span class="project__label project__label--name">Domain</span>
-        <span class="project__name">${CONTENT.ecommerce.process.domain}</span>
-        <span class="project__label project__label--date">E-commerce · Shopify</span>
-        <span class="project__date">${CONTENT.ecommerce.process.date}</span>
-        <h2 class="project__title">
-          ${CONTENT.ecommerce.process.titleLines?.map(t=>`<span class="project__title-line">${t}</span>`).join('') || ''}
-        </h2>
-      </section>`;
+const ecoIntro = `
+  <section class="project project--intro">
+    <span class="project__label project__label--name">Client</span>
+    <span class="project__name">${CONTENT.ecommerce.process.client}</span>
+
+    <span class="project__label project__label--date">Agency</span>
+    <span class="project__date">${CONTENT.ecommerce.process.agency}</span>
+
+    <h2 class="project__title">
+      ${CONTENT.ecommerce.process.titleLines?.map(t=>`<span class="project__title-line">${t}</span>`).join('') || ''}
+    </h2>
+
+    <div class="project__mission content__text">
+      <p>
+        <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+          Role
+        </span>
+        ${CONTENT.ecommerce.process.role[0] || ''}
+      </p>
+      ${(CONTENT.ecommerce.process.role || []).slice(1).map(p=>`<p>${p}</p>`).join('')}
+    </div>
+  </section>`;
+
     const ecoDetails = CONTENT.ecommerce.process.details.map(([label,text],i)=>`
       <section class="project project--details ${i%2===0?'project--left':'project--right'}">
         <span class="project__label project__label--default">${label}</span>

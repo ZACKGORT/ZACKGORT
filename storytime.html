@@ -1344,6 +1344,23 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 .ar-wide,.ar-narrow,.ar-rect {
   aspect-ratio:auto;
 }
+
+/* Space for captions on ninth-mode grids (brands / agency) */
+section.content:has(.grid[data-grid-ninth]) {
+  margin-bottom: clamp(6rem, 18vh, 22rem);
+}
+@media (max-width: 768px) {
+  section.content:has(.grid[data-grid-ninth]) { margin-bottom: 12vh; }
+}
+
+/* Fallback for browsers without :has() support */
+.grid[data-grid-ninth] { margin-bottom: clamp(6rem, 18vh, 22rem); }
+@media (max-width: 768px) { .grid[data-grid-ninth] { margin-bottom: 12vh; } }
+
+/* Keep captions above tiles */
+.grid-caption { position: relative; z-index: 2; }
+
+
 .project {
   margin:12vh auto;
   grid-column-gap:1.25rem;
@@ -2058,7 +2075,7 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
           function defaultEndPx(mode, grid) {
             const count = grid.querySelectorAll('.grid__img').length || 6;
             const section = grid.closest('section') || grid.parentNode;
-            const hasCaption = !!section.querySelector('.content__title, .grid-head');
+            const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
             const cfg = ({
               second: {
                 base: {
@@ -2209,6 +2226,7 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
                 autoAlpha: 0
               }, 0);
             }
+            
             if (mode === 'fifth') {
               tl.set(grid, {
                 perspective: 1000
@@ -2250,6 +2268,10 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
                 rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
                 autoAlpha: 0
               });
+              const headCap   = section.querySelector('.content__title, .grid-head');
+              const bottomCap = section.querySelector('.grid-caption');
+              if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 40 }, 0.35);
+              if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20 }, 0.55);
               if (caption) tl.from(caption, {
                 autoAlpha: 0,
                 yPercent: 40
@@ -2257,6 +2279,8 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
             }
           });
         }
+
+      
 
         function animateProcess() {
           document.querySelectorAll('[id$="-process"]').forEach(process => {
@@ -2887,13 +2911,15 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
               "GEICO",
               "Kent State University",
               "University of Wisconsin Madison",
+              "Texas A&M",              
               "The Philadelphia Eagles",
               "Philadelphia Soul",
+              "Comcast Spectacor",              
               "Power Home Remodeling Group",
               "Rachel Roy",
               "Goya",
               "Merck Animal Health",
-              "Comcast",
+              "Charter",
               "La Colombe",
               "Vertex SMB",
               "SEIC",
@@ -2902,6 +2928,8 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
               "Hardinge",
               "West Marine",
               "YETI",
+              "Organic Girl",
+              "LIDL",                            
             ]
           },
 
@@ -2925,14 +2953,14 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
               "https://i.ibb.co/B6vFwH6/zoom-zack.gif",
             ],
             names: [
-              "One Sixty Over Ninety",
-              "O3 World", ,
-              "Workarea", ,
-              "Livearea", ,
-              "Huge", ,
-              "Elva Design Group", ,
-              "Code & Theory", ,
-              "Publicis Sapient",
+              "One Sixty Over Ninety {Branding & Advertising; Consumer, .EDU}",
+              "O3 World {Financial Product & iOS}", ,
+              "Workarea {Proprietary SaaS E-commerce}",
+              "Livearea {SalesForce E-commerce}",
+              "Huge {Luxury/Lifestyle E-commerce}",
+              "Elva Design Group {Shopify E-commerce}",
+              "Code & Theory {Social Media & Entertainment: TikTok For Business, Contentful}",
+              "Publicis Sapient {Financial Product: BNY Melon — Pershing X}",
             ]
           },
 

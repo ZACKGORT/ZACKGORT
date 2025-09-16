@@ -69,10 +69,10 @@
 
   /* Blur overlay */
   --layers:5;
-  --blur-max:62;
+  --blur-max:48;
   --blur-gain: 1.5;   
-  --mask-stop:25;
-  --saturate:.99; /* reset */
+  --maskStart: 72%;
+  --saturate:0; /* reset */
 
   /* Panel palette */
   --cs-accent:#f4d35e;
@@ -498,8 +498,8 @@ a + a { margin-inline-start:.6rem; }
   border:1px solid rgba(255,255,255,.08);
   border-radius:18px;
   padding:1.1rem 1.25rem;
-  backdrop-filter:saturate(135%) blur(12px);
-  -webkit-backdrop-filter:saturate(135%) blur(12px);
+  backdrop-filter:saturate(0%) blur(12px);
+  -webkit-backdrop-filter:saturate(0%) blur(12px);
   box-shadow:0 8px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .panel-content-blur-edges{
@@ -630,8 +630,8 @@ a + a { margin-inline-start:.6rem; }
 .blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:""; position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, 0));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, 0));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
 }
@@ -859,7 +859,7 @@ a + a { margin-inline-start:.6rem; }
     /* Mobile blur */
     --blur-max: 18; 
     --mask-stop: 20;
-    --saturate: .99;
+    --saturate: 0;
   }
 
 /* Backdrop-filter reset helper */
@@ -2274,6 +2274,15 @@ function tuneForAndroid(){
   const isAndroid = /Android/i.test(navigator.userAgent);
   const dm = (navigator.deviceMemory || 8); // best-effort; 8GB default
   const rs = document.documentElement.style;
+
+  const clampBlurMax = (cap) => {
+  const cur = parseFloat(getComputedStyle(document.documentElement)
+               .getPropertyValue('--blur-max')) || cap;
+  rs.setProperty('--blur-max', String(Math.min(cur, cap)));
+};
+
+if (isAndroid) clampBlurMax(12);
+if (dm <= 4)   clampBlurMax(12);
 
   // Lower the cost on Android or low-memory devices
   if (isAndroid || dm <= 4) {

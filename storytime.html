@@ -121,13 +121,8 @@ body {
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
-html,body {
-  overscroll-behavior-y:none;
-}
-/* block P2R/glow at the root */
-      #app {
-  overscroll-behavior:contain;
-}
+html, body { overscroll-behavior-y: auto !important; }
+#app { overscroll-behavior: auto !important; }
 /* don’t bubble overscroll out of main */
 
 
@@ -1752,7 +1747,15 @@ section.content:has(.grid[data-grid-ninth]) {
   max-width:1100px;
 }
 
-
+@media (hover:none), (pointer:coarse) {
+  /* This previously hid the preview; now we keep it visible so tap can show it */
+  .hover-reveal {
+    display: block !important;
+    width: min(46vw, 280px);
+    height: min(34vh, 220px);
+    /* JS positions it; keep as fixed with the defaults already in your CSS */
+  }
+}
 </style>
   </head>
 
@@ -3673,7 +3676,6 @@ section.content:has(.grid[data-grid-ninth]) {
         // ---------------------------------------------------------------------------
         async function start() {
           renderApp();
-          disablePullToRefresh();
           initVisibilityPerfGuards();
           // Blur overlay (still desktop-only in your CSS; code path intact)
           tuneForAndroid();

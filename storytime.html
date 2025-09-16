@@ -627,6 +627,13 @@ a + a { margin-inline-start:.6rem; }
 }
 .blur.is-visible{ opacity:1; }
 .blur > div{ position:absolute; inset:0; }
+.blur > div::after{
+  content:""; position:absolute; inset:0 -250%;
+  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
+          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
+  -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
+          mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
+}
 
 /* Ensure pinned sections never overtake the blur overlay */
 .pin-spacer,
@@ -1128,22 +1135,28 @@ if (has('ScrollTrigger')) {
   // ---------------------------------------------------------------------------
   // Bottom blur overlay layers + visibility rules
   // ---------------------------------------------------------------------------
-  function buildBlurLayers(blur) {
-    const cs = getComputedStyle(document.documentElement);
-    const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
-    const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
-    const maskStop = +cs.getPropertyValue('--mask-stop')?.trim() || 35;
+function buildBlurLayers(blur) {
+  const cs = getComputedStyle(document.documentElement);
+  const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
+  const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
+  const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 35; // percent of viewport height
 
-    let html = '';
-    for (let i = 1; i <= layers; i++) {
-      const t = i / layers;
-      const b = Math.sin((1 - t) * Math.PI / 2) * blurMax;
-      const stop = Math.sin(t * Math.PI / 2) * maskStop;
-      const start = (100 - stop).toFixed(4) + '%';
-      html += `<div style="--i:${i}; --blur:${b.toFixed(3)}px; --maskStart:${start}"></div>`;
-    }
-    blur.innerHTML = html;
+  let html = '';
+  for (let i = 1; i <= layers; i++) {
+    const t = i / layers;
+    // Stronger blur near the bottom, gentler higher up:
+    const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
+
+    // Convert your previous "mask stop" into a top offset (vh) for the slab
+    // so only the bottom chunk owns a backdrop-filter.
+    const stop   = Math.sin(t * Math.PI / 2) * stopMax; // 0..stopMax (%)
+    const topVh  = (100 - stop).toFixed(3);             // bottom (100 - stop)
+
+    html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
   }
+  blur.innerHTML = html;
+}
+
 
   function initBlurOverlayVisibility() {
     let blur = document.querySelector('.blur');

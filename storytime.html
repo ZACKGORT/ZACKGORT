@@ -756,8 +756,6 @@ a + a { margin-inline-start:.6rem; }
   }
 }
 
-/* Blurry scroll hook */
-.blur-scroll{ will-change:filter; }
 
 /* Hard reset exists: .blur.bf-reset > div::after { backdrop-filter:none } */
 
@@ -1184,72 +1182,56 @@ a + a { margin-inline-start:.6rem; }
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency
   // ---------------------------------------------------------------------------
-  function fixMobileBlurResume(){
-    const blur   = document.querySelector('.blur');
-    const header = document.querySelector('.frame');
-    const fe     = document.querySelector('#ux-blur-fe');
+function fixMobileBlurResume(){
+  const blur   = document.querySelector('.blur');
+  const header = document.querySelector('.frame');
 
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    let resumes = 0;
-    const degradeKey = 'bfDegraded';
-    let degraded = localStorage.getItem(degradeKey) === '1';
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  let resumes = 0;
+  const degradeKey = 'bfDegraded';
+  let degraded = localStorage.getItem(degradeKey) === '1';
 
-    function rebuildChildren(){
-      if(!blur) return;
-      buildBlurLayers(blur);
+  function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
+  function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
+
+  function update(){
+    if(!blur || !header) return;
+
+    hardOff(true);
+    rebuildChildren();
+
+    blur.classList.add('bf-reset'); // temporary BF reset to nudge mobile
+    void blur.offsetHeight;
+
+    const shouldShow = header.getBoundingClientRect().bottom <= 0;
+    blur.classList.toggle('is-visible', shouldShow);
+
+    requestAnimationFrame(() => {
+      blur.classList.remove('bf-reset');
+      hardOff(false);
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    });
+
+    resumes++;
+    if (!degraded && isAndroid && resumes >= 2) {
+      degraded = true;
+      localStorage.setItem(degradeKey, '1');
+      blur.classList.add('no-bf'); // optional degrade after multiple resumes
     }
-    function hardOff(on){
-      if(!blur) return;
-      blur.classList.toggle('bf-off', !!on);
-      if(on && fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
-    }
-    function update(){
-      if(!blur || !header) return;
-
-      hardOff(true);
-
-      const blurTarget = document.querySelector('.blur-scroll');
-      if (fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
-      if (blurTarget) {
-        blurTarget.style.filter = 'none';
-        void blurTarget.offsetHeight;
-        blurTarget.style.filter = 'url(#ux-blur)';
-      }
-
-      rebuildChildren();
-
-      blur.classList.add('bf-reset');
-      void blur.offsetHeight;
-
-      const shouldShow = header.getBoundingClientRect().bottom <= 0;
-      blur.classList.toggle('is-visible', shouldShow);
-
-      requestAnimationFrame(() => {
-        blur.classList.remove('bf-reset');
-        hardOff(false);
-        if (window.ScrollTrigger) ScrollTrigger.refresh();
-      });
-
-      resumes++;
-      if (!degraded && isAndroid && resumes >= 2) {
-        degraded = true;
-        localStorage.setItem(degradeKey, '1');
-        blur.classList.add('no-bf');
-      }
-    }
-
-    window.addEventListener('visibilitychange', () => {
-      if (document.hidden) hardOff(true);
-      else setTimeout(update, 60);
-    }, { passive:true });
-
-    window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
-    window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
-    window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
-    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
-
-    update();
   }
+
+  window.addEventListener('visibilitychange', () => {
+    document.hidden ? hardOff(true) : setTimeout(update, 60);
+  }, { passive:true });
+
+  window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
+  window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
+  window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
+  window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
+
+  update();
+}
+
 
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling
@@ -1963,7 +1945,7 @@ a + a { margin-inline-start:.6rem; }
     app.appendChild(about);
 
     // BLURRY SCROLL — inline section for speed-blur filter
-    const blurSec = el('section','content content--padded blur-scroll'); blurSec.id = 'about-blur';
+const blurSec = el('section','content content--padded'); blurSec.id = 'about-blur';
     blurSec.innerHTML = `
       <div class="content__title" style="margin:.25rem 0 .5rem"></div>
       <div class="content__text">
@@ -2217,34 +2199,35 @@ a + a { margin-inline-start:.6rem; }
   // ---------------------------------------------------------------------------
   // BOOT
   // ---------------------------------------------------------------------------
-  async function start() {
-    renderApp();
+async function start() {
+  renderApp();
 
-    ensureScrollBlurFilter();
-    initScrollSpeedBlur();
-    initBlurOverlayVisibility();
-    fixMobileBlurResume();
+  // ensureScrollBlurFilter();   ← remove
+  // initScrollSpeedBlur();      ← remove
+  initBlurOverlayVisibility();
+  fixMobileBlurResume();
 
-    initSmooth();
-    enableHashScroll();
+  initSmooth();
+  enableHashScroll();
 
-    a11yifyGridImages();
-    tuneCaseStudyTiming();
+  a11yifyGridImages();
+  tuneCaseStudyTiming();
 
-    animateHeader();
-    animateGrids();
-    animateProcess();
-    animateStacks();
-    initCursor();
-    initConfetti();
-    initDeadJump();
-    initBackToTop();
+  animateHeader();
+  animateGrids();
+  animateProcess();
+  animateStacks();
+  initCursor();
+  initConfetti();
+  initDeadJump();
+  initBackToTop();
 
-    try { await preloadImages(); } catch(e) {}
-    document.body.classList.remove('loading');
+  try { await preloadImages(); } catch(e) {}
+  document.body.classList.remove('loading');
 
-    if (window.ScrollTrigger) ScrollTrigger.refresh();
-  }
+  if (window.ScrollTrigger) ScrollTrigger.refresh();
+}
+
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once:true });

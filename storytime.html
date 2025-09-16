@@ -1113,16 +1113,14 @@ a + a { margin-inline-start:.6rem; }
   document.documentElement.classList.add('js');
   const has = (k) => typeof window[k] !== 'undefined';
 
-if (has('ScrollTrigger')) {
-  if (has('Physics2DPlugin')) {
-    gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
-  } else {
-    gsap.registerPlugin(ScrollTrigger);
+  if (has('ScrollTrigger')) {
+    if (has('Physics2DPlugin')) {
+      gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
+    } else {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+    // NOTE: normalizeScroll now handled inside initSmooth() to avoid Lenis race.
   }
-  // Only normalize when we’re NOT using Lenis. Prevents tug-of-war on mobile.
-  if (!has('Lenis')) ScrollTrigger.normalizeScroll(true);
-}
-
 
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1141,28 +1139,27 @@ if (has('ScrollTrigger')) {
   // ---------------------------------------------------------------------------
   // Bottom blur overlay layers + visibility rules
   // ---------------------------------------------------------------------------
-function buildBlurLayers(blur) {
-  const cs = getComputedStyle(document.documentElement);
-  const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
-  const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
-  const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 15; // percent of viewport height
+  function buildBlurLayers(blur) {
+    const cs = getComputedStyle(document.documentElement);
+    const layers   = +cs.getPropertyValue('--layers')?.trim()    || 5;
+    const blurMax  = +cs.getPropertyValue('--blur-max')?.trim()  || 40;
+    const stopMax  = +cs.getPropertyValue('--mask-stop')?.trim() || 15; // percent of viewport height
 
-  let html = '';
-  for (let i = 1; i <= layers; i++) {
-    const t = i / layers;
-    // Stronger blur near the bottom, gentler higher up:
-    const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
+    let html = '';
+    for (let i = 1; i <= layers; i++) {
+      const t = i / layers;
+      // Stronger blur near the bottom, gentler higher up:
+      const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
 
-    // Convert your previous "mask stop" into a top offset (vh) for the slab
-    // so only the bottom chunk owns a backdrop-filter.
-    const stop   = Math.sin(t * Math.PI / 2) * stopMax; // 0..stopMax (%)
-    const topVh  = (100 - stop).toFixed(3);             // bottom (100 - stop)
+      // Convert your previous "mask stop" into a top offset (vh) for the slab
+      // so only the bottom chunk owns a backdrop-filter.
+      const stop   = Math.sin(t * Math.PI / 2) * stopMax; // 0..stopMax (%)
+      const topVh  = (100 - stop).toFixed(3);             // bottom (100 - stop)
 
-    html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
+      html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
+    }
+    blur.innerHTML = html;
   }
-  blur.innerHTML = html;
-}
-
 
   function initBlurOverlayVisibility() {
     let blur = document.querySelector('.blur');
@@ -1190,6 +1187,9 @@ function buildBlurLayers(blur) {
 
     // No footer-based hiding — keep blur visible through the footer.
     if (header && header.getBoundingClientRect().bottom <= 0) show();
+
+    // Recompute slabs on resize (desktop & mobile)
+    window.addEventListener('resize', () => buildBlurLayers(blur), { passive:true });
   }
 
   // ---------------------------------------------------------------------------
@@ -1241,6 +1241,7 @@ function buildBlurLayers(blur) {
     window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
     window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
     window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
+    window.addEventListener('resize', () => setTimeout(update, 60), { passive:true });
 
     update();
   }
@@ -1248,17 +1249,22 @@ function buildBlurLayers(blur) {
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling
   // ---------------------------------------------------------------------------
-function initSmooth() {
-  if (!has('Lenis')) return;
-  const isMobile = matchMedia('(pointer:coarse), (max-width: 768px)').matches;
-  if (isMobile) return; // native scroll on touch devices
+  function initSmooth() {
+    const isMobile = matchMedia('(pointer:coarse), (max-width: 768px)').matches;
+    const usingLenis = has('Lenis') && !isMobile;
 
-  window.lenis = new Lenis({ lerp: 0.15 });
-  window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
-  gsap.ticker.add((t)=>window.lenis.raf(t*1000));
-  gsap.ticker.lagSmoothing(0);
-}
+    if (has('ScrollTrigger')) {
+      // If we use Lenis, DO NOT normalize (they fight); otherwise do.
+      ScrollTrigger.normalizeScroll(!usingLenis);
+    }
 
+    if (!usingLenis) return; // native scroll on touch devices or no Lenis loaded
+
+    window.lenis = new Lenis({ lerp: 0.15 });
+    window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
+    gsap.ticker.add((t)=>window.lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+  }
 
   function enableHashScroll() {
     document.addEventListener('click',(e)=>{
@@ -2017,33 +2023,31 @@ function initSmooth() {
     `;
     app.appendChild(work);
 
-// BRANDS GRID (match AGENCY layout + animation)
-const brands = el('section','content content--padded content--full');
-brands.id = 'brands-grid';
-brands.innerHTML = `
-  <div class="grid-head">
-    <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
-  </div>
-  <div class="grid grid--columns grid--spaced" data-grid-ninth>
-    ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-  </div>
-`;
-app.appendChild(brands);
+    // BRANDS GRID (match AGENCY layout + animation)
+    const brands = el('section','content content--padded content--full');
+    brands.id = 'brands-grid';
+    brands.innerHTML = `
+      <div class="grid-head">
+        <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
+      </div>
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+    `;
+    app.appendChild(brands);
 
-
-// AGENCY GRID
-const agency = el('section','content content--padded content--full');
-agency.id = 'brands-grid-2';
-agency.innerHTML = `
-  <div class="grid-head">
-    <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
-  </div>
-  <div class="grid grid--columns grid--spaced" data-grid-ninth>
-    ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-  </div>
-`;
-app.appendChild(agency);
-
+    // AGENCY GRID
+    const agency = el('section','content content--padded content--full');
+    agency.id = 'brands-grid-2';
+    agency.innerHTML = `
+      <div class="grid-head">
+        <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
+      </div>
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+    `;
+    app.appendChild(agency);
 
     // FINTECH — HERO
     const finHero = el('section','content content--padded content--full'); finHero.id='fintech';
@@ -2268,14 +2272,19 @@ function supportsBackdropFilter(){
 function tuneForAndroid(){
   const isAndroid = /Android/i.test(navigator.userAgent);
   const dm = (navigator.deviceMemory || 8); // best-effort; 8GB default
+  const rs = document.documentElement.style;
 
   // Lower the cost on Android or low-memory devices
   if (isAndroid || dm <= 4) {
-    const rs = document.documentElement.style;
-    // Fewer layers + smaller kernel keep GPU happy
     rs.setProperty('--layers',  isAndroid ? '5' : '4');
     rs.setProperty('--blur-max', isAndroid ? '14' : '12'); // px
     rs.setProperty('--saturate', '1'); // neutral; marginal win on some GPUs
+  }
+
+  // Extra-tight floor for very small screens
+  if (matchMedia('(max-width:480px)').matches){
+    rs.setProperty('--layers','4');
+    rs.setProperty('--blur-max','12');
   }
 
   // If no BF, enable gradient fallback
@@ -2283,8 +2292,6 @@ function tuneForAndroid(){
     document.querySelector('.blur')?.classList.add('no-bf');
   }
 }
-
-
 </script>
 </body>
 </html>

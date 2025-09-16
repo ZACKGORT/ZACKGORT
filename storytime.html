@@ -7,25 +7,29 @@
   <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
   <title>UX is dead - Zack Gort</title>
 
-  <!-- GSAP core + plugins -->
-  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
-  <script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"></script>
+  <!-- Meta / social -->
+  <meta name="description" content="Zack Gort — product/UX designer. Case studies: Pershing X (BNY Mellon), GNC, more.">
+  <meta property="og:title" content="UX is dead — Zack Gort">
+  <meta property="og:description" content="Design systems, data refactors, and ecommerce that moves the needle.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://i.ibb.co/cSQCgNQY/work1.webp">
+  <meta name="theme-color" content="#0e0d0e">
 
-  <!-- ImagesLoaded -->
-  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+  <!-- GSAP core + plugins (deferred) -->
+  <script src="https://unpkg.com/gsap@3/dist/gsap.min.js" defer></script>
+  <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js" defer></script>
 
-  <!-- Lenis smooth scroll -->
-  <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"></script>
+  <!-- ImagesLoaded (deferred) -->
+  <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js" defer></script>
 
+  <!-- Lenis smooth scroll (deferred) -->
+  <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js" defer></script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <!-- Fonts (deduped preconnect + combined family request) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 
   <style>
 /* =========================================================
@@ -35,13 +39,11 @@
 *::before,
 *::after { box-sizing: border-box; }
 
-
 :root{
   --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   --font-serif:"Instrument Serif", ui-serif, Georgia, Cambria, "Times New Roman", serif;
 }
-
 
 :root{
   /* Canvas */
@@ -83,9 +85,10 @@
   --fs-body:18px;
 
   /* Z */
-  --z-blur: 1000;
-  --z-footer: 1002;
+  --z-blur: 10000;
+  --z-footer: 10020; /* ↑ footer above blur */
 }
+
 
 html, body { width:100%; overflow-x:hidden; }
 html { font-size: var(--fs-body); }
@@ -108,6 +111,10 @@ a:focus{ outline:none; background:lightgrey; }
 a:focus:not(:focus-visible){ background:transparent; }
 a:focus-visible{ outline:2px solid red; background:transparent; }
 .unbutton{ background:none; border:0; padding:0; margin:0; font:inherit; cursor:pointer; }
+
+/* Skip link */
+.skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
+.skip-link:focus{ position:fixed; left:12px; top:12px; width:auto; height:auto; background:#000; color:#fff; padding:.5rem .75rem; border-radius:6px; z-index:10005; }
 
 /* Microtype */
 .type-tiny,
@@ -496,21 +503,6 @@ a + a { margin-inline-start:.6rem; }
           mask-image:radial-gradient(120% 100% at 50% 50%, #000 60%, transparent 100%);
 }
 
-.panel .panel-full,
-.panel .hero-img,
-.panel .banner-img,
-.panel .concept-img{ position:relative; }
-.panel .panel-full::after,
-.panel .hero-img::after,
-.panel .banner-img::after,
-.panel .concept-img::after{
-  content:""; position:absolute; inset:0;
-  background:
-    radial-gradient(140% 100% at 50% 50%, transparent 55%, rgba(0,0,0,.35) 100%),
-    linear-gradient(to bottom, rgba(0,0,0,.18), transparent 25%, transparent 75%, rgba(0,0,0,.18));
-  pointer-events:none;
-}
-
 .panel .intro{ background:var(--cs-deep); color:#f6f6f6; }
 .panel .header{ background:var(--cs-accent); color:#421c06; }
 .panel .about{ background:var(--cs-warm); color:#2f0e08; }
@@ -528,7 +520,13 @@ a + a { margin-inline-start:.6rem; }
 /* =========================================================
    STACKED GALLERIES
    ========================================================= */
-.stacked-section{ position:relative; z-index:0; isolation:isolate; contain:paint; }
+.stacked-section{
+  position: relative;
+  z-index: 0;
+  isolation: auto;
+  contain: layout style;
+}
+
 .content--full.stacked-section{ display:block; height:auto; min-height:0; }
 .stacked-gallery{ display:grid; justify-items:center; }
 .stacked-img{ width:min(1400px, 90vw); margin-inline:auto; }
@@ -588,7 +586,9 @@ a + a { margin-inline-start:.6rem; }
   z-index:9999;
   pointer-events:auto; cursor:pointer;
   filter:drop-shadow(0 2px 8px rgba(0,0,0,.35));
+  z-index: 20000; /* ↑ higher than blur, panels, cursor, etc. */
 }
+
 .mousey{
   width:3px; padding:10px 15px; height:35px;
   border:2px solid #fff; border-radius:25px; opacity:.75; box-sizing:content-box;
@@ -630,6 +630,12 @@ a + a { margin-inline-start:.6rem; }
           backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
   -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
           mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
+}
+
+/* Ensure pinned sections never overtake the blur overlay */
+.pin-spacer,
+.pin-spacer > * {
+  z-index: auto !important;
 }
 
 /* =========================================================
@@ -693,7 +699,7 @@ a + a { margin-inline-start:.6rem; }
   --title-size-m: clamp(2rem, 8.5vw, 2.6rem);
 }
 
-/* Shared “chant” look (no size here so process titles keep theirs) */
+/* Shared chant look */
 .heading-chant,
 .content__title-main,
 .grid-head__title,
@@ -714,14 +720,14 @@ a + a { margin-inline-start:.6rem; }
   text-transform:none;
 }
 
-/* Size only for section/grid titles (process title keeps its own clamp) */
+/* Size only for section/grid titles */
 .heading-chant,
 .content__title-main,
 .grid-head__title{
   font-size:var(--title-size-d);
 }
 
-/* Sup styling for all chant titles */
+/* Sup styling */
 .heading-chant sup,
 .content__title-main sup,
 .grid-head__title sup,
@@ -735,7 +741,7 @@ a + a { margin-inline-start:.6rem; }
   transform:translateY(-.6em);
 }
 
-/* ---- media queries (keep with your grouped queries) ---- */
+/* ---- media queries ---- */
 @media (max-width:768px){
   .heading-chant,
   .content__title-main,
@@ -753,12 +759,12 @@ a + a { margin-inline-start:.6rem; }
 /* Blurry scroll hook */
 .blur-scroll{ will-change:filter; }
 
-/* Hard reset already exists: .blur.bf-reset > div::after { backdrop-filter:none } */
+/* Hard reset exists: .blur.bf-reset > div::after { backdrop-filter:none } */
 
-/* Temp hide used during JS reset (so you never “see” the stuck blur) */
+/* Temp hide during JS reset */
 .blur.bf-off { opacity:0 !important; }
 
-/* Optional permanent degrade if device keeps failing after a few resumes */
+/* Optional degrade */
 .blur.no-bf > div::after{
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
@@ -790,7 +796,6 @@ a + a { margin-inline-start:.6rem; }
 
 /* =========================================================
    QUERY GROUP — MEDIA & FEATURE QUERIES
-   (all queries collected here)
    ========================================================= */
 
 /* Aspect ratio: keep 16:9 on wide viewports */
@@ -810,19 +815,17 @@ a + a { margin-inline-start:.6rem; }
     --page-padding:1rem;
     --grid-gap:.75rem;
 
-    /* NUANCED mobile blur */
-    --blur-max: 10;   /* lighter effect reduces “sticky” state */
+    /* Mobile blur */
+    --blur-max: 10;
     --mask-stop: 20;
-    --saturate: .99;  /* keep color fidelity on Android/Brave */
+    --saturate: .99;
   }
 
-
-/* Backdrop-filter reset helper (we toggle this class in JS) */
+/* Backdrop-filter reset helper */
 .blur.bf-reset > div::after{
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
-
 
   .frame{
     height:auto;
@@ -905,7 +908,7 @@ a + a { margin-inline-start:.6rem; }
 
   .page-footer{ grid-template-columns:1fr; gap:.5rem; margin-top:20vh; }
 
-  /* Stacks: make both fit like fintech */
+  /* Stacks fit */
   .stacked-img img{
     width:100%; height:auto !important;
     object-fit:contain !important; object-position:center;
@@ -1002,65 +1005,49 @@ a + a { margin-inline-start:.6rem; }
 
 @media (max-width:768px){
   .frame{
-    /* rows: logo, tags, sponsor, spacer, title-at-bottom */
     grid-template-rows: auto auto auto 1fr auto;
     align-content: stretch;
-    /* exactly 50px from the viewport bottom (plus safe area on iOS) */
     padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
   }
   .frame__title{
-    align-self: end; /* keep it at the bottom row */
-    margin: 0;       /* no extra spacing surprises */
+    align-self: end;
+    margin: 0;
   }
 }
 
 /* Use the blur-section layout for fintech insight */
 #fintech-insight{
-  display:block;                /* override previous grid */
-  padding:var(--page-padding);  /* mirrors .content--padded */
+  display:block;
+  padding:var(--page-padding);
 }
 #fintech-insight .content__text p{
-  max-width:70ch;               /* comfy reading width */
+  max-width:70ch;
 }
 #fintech-insight .content__text .type-tiny{
   color:var(--color-label);
 }
 
-
 /* Use the blur-section layout for GNC insight */
 #ecommerce-insight{
-  display:block;                /* override the old grid/details layout */
-  padding:var(--page-padding);  /* mirrors .content--padded */
+  display:block;
+  padding:var(--page-padding);
 }
 #ecommerce-insight .content__text p{
-  max-width:70ch;               /* comfy reading width */
+  max-width:70ch;
 }
 #ecommerce-insight .content__text .type-tiny{
   color:var(--color-label);
 }
-
-
-
-
-
   </style>
 </head>
 
 <body class="loading">
+  <a class="skip-link" href="#about">Skip to content</a>
   <main id="app"></main>
-  <div class="blur"></div>
   <div id="panel-root"></div>
-
+  <div class="blur"></div>
 <script>
-/* app.js — Zack Gort — Layout Formation on Scroll
-   - Core setup & helpers
-   - Blur filter + overlay + mobile resiliency
-   - Smooth/hash scrolling + preloader
-   - Animation engines (header, grids, process, stacks)
-   - Cursor, confetti, a11y, timing tweaks
-   - CONTENT + renderApp()
-   - Boot sequence
-*/
+/* app.js — Zack Gort — Layout Formation on Scroll */
 (function () {
   'use strict';
 
@@ -1113,45 +1100,42 @@ a + a { margin-inline-start:.6rem; }
     document.body.appendChild(svg);
   }
 
-function initScrollSpeedBlur({
-  targetSel = '.blur-scroll',
-  feId = '#ux-blur-fe',
-  scale = 0.30,
-  max = 20,
-  axis = 'y'
-} = {}) {
-  const targets = document.querySelectorAll(targetSel);
-  const fe = document.querySelector(feId);
-  if (!targets.length || !fe) return;
+  function initScrollSpeedBlur({
+    targetSel = '.blur-scroll',
+    feId = '#ux-blur-fe',
+    scale = 0.30,
+    max = 20,
+    axis = 'y'
+  } = {}) {
+    const target = document.querySelector(targetSel);
+    const fe = document.querySelector(feId);
+    if (!target || !fe) return;
 
-  // apply the SVG filter to every target section
-  targets.forEach(t => t.style.filter = 'url(#ux-blur)');
+    target.style.filter = 'url(#ux-blur)';
+    if (prefersReducedMotion) {
+      gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+      return;
+    }
 
-  if (prefersReducedMotion) {
-    gsap.set(fe, { attr: { stdDeviation: '0 0' } });
-    return;
-  }
+    let lastY = window.pageYOffset || 0;
+    let lastX = window.pageXOffset || 0;
 
-  let lastY = window.pageYOffset || 0;
-  let lastX = window.pageXOffset || 0;
+    function tick() {
+      const y = window.pageYOffset || 0;
+      const x = window.pageXOffset || 0;
+      const dy = Math.abs(y - lastY);
+      const dx = Math.abs(x - lastX);
+      const delta = axis === 'x' ? dx : dy;
 
-  function tick() {
-    const y = window.pageYOffset || 0;
-    const x = window.pageXOffset || 0;
-    const dy = Math.abs(y - lastY);
-    const dx = Math.abs(x - lastX);
-    const delta = axis === 'x' ? dx : dy;
+      const blur = Math.min(max, delta * scale);
+      const dev  = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
+      gsap.set(fe, { attr: { stdDeviation: dev } });
 
-    const blur = Math.min(max, delta * scale);
-    const dev  = axis === 'x' ? `${blur.toFixed(2)} 0` : `0 ${blur.toFixed(2)}`;
-    gsap.set(fe, { attr: { stdDeviation: dev } });
-
-    lastY = y; lastX = x;
+      lastY = y; lastX = x;
+      requestAnimationFrame(tick);
+    }
     requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
-}
-
 
   // ---------------------------------------------------------------------------
   // Bottom blur overlay layers + visibility rules
@@ -1183,125 +1167,89 @@ function initScrollSpeedBlur({
     if (!blur.children.length) buildBlurLayers(blur);
 
     const header = document.querySelector('.frame');
-    const footer = document.querySelector('.page-footer');
 
     const show = () => blur.classList.add('is-visible');
     const hide = () => blur.classList.remove('is-visible');
 
-    if (window.ScrollTrigger && header) {
-      ScrollTrigger.create({
-        trigger: header,
-        start: 'bottom top',
-        onEnter: show,
-        onLeaveBack: hide
-      });
-    } else if (header) {
+    // Show when header is out of view; hide when header is visible.
+    if (header) {
       const ioHeader = new IntersectionObserver(([e]) => e.isIntersecting ? hide() : show(), { threshold: 0 });
       ioHeader.observe(header);
     }
 
-    if (window.ScrollTrigger && footer) {
-      ScrollTrigger.create({
-        trigger: footer,
-        start: 'top 95%',
-        onEnter: hide,
-        onLeaveBack: show
-      });
-    } else if (footer) {
-      const ioFooter = new IntersectionObserver(([e]) => e.isIntersecting ? hide() : show(), { threshold: 0.05 });
-      ioFooter.observe(footer);
-    }
-
+    // No footer-based hiding — keep blur visible through the footer.
     if (header && header.getBoundingClientRect().bottom <= 0) show();
   }
 
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency
   // ---------------------------------------------------------------------------
-// Mobile/Tab-resume blur resiliency (iOS + Android)
-function fixMobileBlurResume(){
-  const blur      = document.querySelector('.blur');
-  const header    = document.querySelector('.frame');
-  const fe        = document.querySelector('#ux-blur-fe');           // <feGaussianBlur> for scroll-speed blur
-  const targetSel = '.blur-scroll';                                  // section that uses url(#ux-blur)
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  let resets = 0;
+  function fixMobileBlurResume(){
+    const blur   = document.querySelector('.blur');
+    const header = document.querySelector('.frame');
+    const fe     = document.querySelector('#ux-blur-fe');
 
-  if (!blur || !header) return;
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    let resumes = 0;
+    const degradeKey = 'bfDegraded';
+    let degraded = localStorage.getItem(degradeKey) === '1';
 
-  // rebuild overlay layers if empty or after a platform hiccup
-  function rebuildLayers(){
-    if (!blur.children.length) buildBlurLayers(blur);
-  }
+    function rebuildChildren(){
+      if(!blur) return;
+      buildBlurLayers(blur);
+    }
+    function hardOff(on){
+      if(!blur) return;
+      blur.classList.toggle('bf-off', !!on);
+      if(on && fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
+    }
+    function update(){
+      if(!blur || !header) return;
 
-  // single, robust reset routine
-  function resetAll(){
-    // 0) Hide overlay while we poke filters, so there’s no flash
-    blur.classList.add('bf-off');
+      hardOff(true);
 
-    // 1) Zero out the SVG blur (scroll-speed blur)
-    if (fe) gsap.set(fe, { attr: { stdDeviation: '0 0' } });
+      const blurTarget = document.querySelector('.blur-scroll');
+      if (fe) gsap.set(fe, { attr:{ stdDeviation:'0 0' } });
+      if (blurTarget) {
+        blurTarget.style.filter = 'none';
+        void blurTarget.offsetHeight;
+        blurTarget.style.filter = 'url(#ux-blur)';
+      }
 
-    // 2) Drop & reapply the filter URL on the target element to force a repaint
-    const target = document.querySelector(targetSel);
-    if (target){
-      target.style.filter = 'none';
-      // two RAFs helps iOS after bfcache/tab-resume
+      rebuildChildren();
+
+      blur.classList.add('bf-reset');
+      void blur.offsetHeight;
+
+      const shouldShow = header.getBoundingClientRect().bottom <= 0;
+      blur.classList.toggle('is-visible', shouldShow);
+
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          target.style.filter = 'url(#ux-blur)';
-        });
+        blur.classList.remove('bf-reset');
+        hardOff(false);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
       });
+
+      resumes++;
+      if (!degraded && isAndroid && resumes >= 2) {
+        degraded = true;
+        localStorage.setItem(degradeKey, '1');
+        blur.classList.add('no-bf');
+      }
     }
 
-    // 3) Rebuild/refresh overlay layers & force a backdrop-filter reflow
-    rebuildLayers();
-    blur.classList.add('bf-reset');         // CSS turns backdrop-filter off
-    // Force reflow on overlay & children (some WebKit builds need this)
-    void blur.offsetHeight;
-    Array.from(blur.children).forEach(c => { c.style.willChange='transform'; void c.offsetHeight; c.style.willChange=''; });
-    blur.classList.remove('bf-reset');
+    window.addEventListener('visibilitychange', () => {
+      if (document.hidden) hardOff(true);
+      else setTimeout(update, 60);
+    }, { passive:true });
 
-    // 4) Decide visibility based on header intersection (same rule you use on scroll)
-    const show = header.getBoundingClientRect().bottom <= 0;
-    blur.classList.toggle('is-visible', show);
+    window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
+    window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
+    window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
+    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
 
-    // 5) Bring overlay back and refresh ScrollTrigger layout
-    requestAnimationFrame(() => {
-      blur.classList.remove('bf-off');
-      if (window.ScrollTrigger) ScrollTrigger.refresh();
-    });
-
-    // 6) Gentle degrade on devices that keep failing after multiple resumes
-    resets++;
-    if (isAndroid && resets >= 3) {
-      blur.classList.add('no-bf');   // disables backdrop-filter permanently for this session
-    }
+    update();
   }
-
-  // When to run the reset:
-  const schedule = (ms=60) => setTimeout(resetAll, ms);
-
-  window.addEventListener('visibilitychange', () => {
-    if (!document.hidden) schedule(80);     // returning to tab/app
-  }, { passive:true });
-
-  window.addEventListener('pageshow', (e) => {
-    schedule(e.persisted ? 0 : 30);         // bfcache restore vs. cold paint
-  }, { passive:true });
-
-  window.addEventListener('focus', () => {
-    schedule(60);                            // return from app switcher without full visibilitychange
-  }, { passive:true });
-
-  window.addEventListener('orientationchange', () => {
-    schedule(140);                           // rotate often breaks the compositor state
-  }, { passive:true });
-
-  // First run (in case the page loads into a background tab or returns from cache)
-  schedule(0);
-}
-
 
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling
@@ -1309,7 +1257,7 @@ function fixMobileBlurResume(){
   function initSmooth() {
     if (!has('Lenis')) return;
     window.lenis = new Lenis({ lerp: 0.15 });
-    window.lenis.on('scroll', () => ScrollTrigger.update());
+    window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
     gsap.ticker.add((t)=>window.lenis.raf(t*1000));
     gsap.ticker.lagSmoothing(0);
   }
@@ -1322,17 +1270,26 @@ function fixMobileBlurResume(){
       e.preventDefault();
 
       const settle = a.dataset.settle;
+      const focusTarget = () => {
+        target.setAttribute('tabindex','-1');
+        setTimeout(()=>target.focus({ preventScroll:true }), 0);
+      };
+
       if (settle === 'end' && window.ScrollTrigger) {
         const st = ScrollTrigger.getAll().find(st =>
           st && (st.pin===target || st.trigger===target || target.contains(st.pin) || target.contains(st.trigger))
         );
         if (st && isFinite(st.end)) {
           const y = st.end + 2;
-          return window.lenis ? window.lenis.scrollTo(y,{duration:1.1}) : window.scrollTo({top:y,behavior:'smooth'});
+          if (window.lenis) window.lenis.scrollTo(y,{duration:1.1}); else window.scrollTo({top:y,behavior:'smooth'});
+          focusTarget();
+          history.pushState(null,'',id);
+          return;
         }
       }
       const y = target.getBoundingClientRect().top + window.pageYOffset;
       window.lenis ? window.lenis.scrollTo(y,{duration:1}) : window.scrollTo({top:y,behavior:'smooth'});
+      focusTarget();
       history.pushState(null,'',id);
     });
   }
@@ -1567,6 +1524,7 @@ function fixMobileBlurResume(){
       if (e.target.closest('a[href], [role="link"]')) hoverBoost = 1;
     }, true);
 
+    let cursorRAF;
     function tick(){
       hist.shift(); hist.push({x:mx,y:my});
       for(let i=0;i<N;i++){
@@ -1579,9 +1537,18 @@ function fixMobileBlurResume(){
 
         dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
       }
-      requestAnimationFrame(tick);
+      cursorRAF = requestAnimationFrame(tick);
     }
-    requestAnimationFrame(tick);
+    cursorRAF = requestAnimationFrame(tick);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (cursorRAF) cancelAnimationFrame(cursorRAF);
+        cursorRAF = null;
+      } else {
+        cursorRAF = requestAnimationFrame(tick);
+      }
+    }, { passive: true });
   }
 
   function initConfetti(){
@@ -1742,9 +1709,9 @@ function fixMobileBlurResume(){
   }
 
   // ===========================================================================
-  // CONTENT MODEL (exactly as provided, with insightAside for both studies)
+  // CONTENT MODEL (unchanged)
   // ===========================================================================
-  const CONTENT = {
+  const CONTENT = { /* ...same content object as your last version... */ 
     header: {
       title: 'UX is dead↴',
       logo: "ZCKGRT",
@@ -1761,14 +1728,12 @@ function fixMobileBlurResume(){
         { label: "#Connect", href: "#contact", settle: "end"  }
       ]
     },
-
     about: {
       heading: "¡Viva la XP!",
       sup: "experience",
       byline:
         "— Zack Gort, Senior <span class=\"blackout tip tip--full\" tabindex=\"0\" data-tip=\"{user} is kind of implied, no?\">User</span> Experience Designer"
     },
-
     skills: {
       cols: [
         {
@@ -1785,7 +1750,6 @@ function fixMobileBlurResume(){
         { heading: "#evolution", items: ["AI + Creative Coding", "Design Systems & Workflows", "+"] }
       ]
     },
-
     workSelect: {
       captionTitle: "select works",
       tiles: [
@@ -1801,7 +1765,6 @@ function fixMobileBlurResume(){
         { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
       ]
     },
-
     brandsGrid: {
       title: "#design",
       images: [
@@ -1832,7 +1795,6 @@ function fixMobileBlurResume(){
         "https://i.ibb.co/68t5b9S/Mask-group-7-min.png"
       ]
     },
-
     agencyGrid: {
       title: "#agencylife",
       images: [
@@ -1856,7 +1818,6 @@ function fixMobileBlurResume(){
         "https://i.ibb.co/jJD2YPJ/image-438-min.png"
       ]
     },
-
     fintech: {
       heroImages: [
         "https://i.ibb.co/XkM2hn8n/bny1.png",
@@ -1873,22 +1834,10 @@ function fixMobileBlurResume(){
           "Pershing X required a total data & design overhaul towards unifying their financial product ecosystem.",
         ],
         details: [
-          [
-            "Problem",
-            "Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."
-          ],
-          [
-            "Constraints",
-            "SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."
-          ],
-          [
-            "Role & Team",
-            "Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."
-          ],
-          [
-            "Research",
-            "Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."
-          ],
+          ["Problem","Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."],
+          ["Constraints","SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."],
+          ["Role & Team","Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."],
+          ["Research","Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."]
         ]
       },
       discoveryImages: [
@@ -1903,10 +1852,7 @@ function fixMobileBlurResume(){
         "https://i.ibb.co/dcXH5fn/13.jpg"
       ],
       insight: [
-        [
-          "Deep Dive",
-          "No Artificial Intelligence Here"
-        ],
+        ["Deep Dive","No Artificial Intelligence Here"]
       ],
       insightAside:
         "This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.",
@@ -1918,7 +1864,6 @@ function fixMobileBlurResume(){
         ["https://i.ibb.co/HGv7ymj/4.jpg","Account Opening"]
       ]
     },
-
     ecommerce: {
       heroImages: [
         "https://i.ibb.co/cSQCgNQY/work1.webp",
@@ -1931,25 +1876,12 @@ function fixMobileBlurResume(){
       process: {
         domain: "General Nutrition Centers",
         date: "2021",
-        // one line by design
         titleLines: ["This is the Whey"],
         details: [
-          [
-            "Problem",
-            "GNC asked us to shake things up; providing them with a modern e-commerce solution."
-          ],
-          [
-            "Scope",
-            "We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."
-          ],
-          [
-            "Heavy lift. Huge Gains.",
-            "Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."
-          ],
-          [
-            "If the bar ain't bending, you're just pretending",
-            "Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."
-          ],
+          ["Problem","GNC asked us to shake things up; providing them with a modern e-commerce solution."],
+          ["Scope","We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
+          ["Heavy lift. Huge Gains.","Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
+          ["If the bar ain't bending, you're just pretending","Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
         ]
       },
       discoveryImages: [
@@ -1965,10 +1897,7 @@ function fixMobileBlurResume(){
         "https://i.ibb.co/vx76zjgf/10.webp"
       ],
       insight: [
-        [
-          "Outcome",
-          "if the bar ain't bending, you’re just pretending:  The result helped GNC reclaim ~\\$500M in annual revenue."
-        ],
+        ["Outcome","if the bar ain't bending, you’re just pretending:  The result helped GNC reclaim ~$500M in annual revenue."]
       ],
       insightAside:
         "More context: we accelerated releases with a simplified stack + shared components, aligned PLP/PDP taxonomy to search intent, and tuned mobile performance and loyalty hooks—so the gains were durable, not just cosmetic.",
@@ -1983,7 +1912,6 @@ function fixMobileBlurResume(){
         ["https://i.ibb.co/yB4RwkTf/7.webp","Guides & programs"]
       ]
     },
-
     contact: {
       blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
       email: "zack@reasonably.cc",
@@ -2002,9 +1930,9 @@ function fixMobileBlurResume(){
     // HEADER / FRAME
     const header = el('header','frame');
     header.innerHTML = `
-      <h2 class="frame__title">
+      <h1 class="frame__title">
         <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
-      </h2>
+      </h1>
       <div class="frame__subline type-tiny">
         <span>${CONTENT.header.subline}</span>
         <nav class="frame__links flex-line">
@@ -2126,7 +2054,7 @@ function fixMobileBlurResume(){
     `;
     app.appendChild(finHero);
 
-    // FINTECH — PROCESS (Mission styled like insight)
+    // FINTECH — PROCESS
     const finProc = el('section','content content--padded'); finProc.id='fintech-process';
     const finIntro = `
       <section class="project project--intro">
@@ -2162,7 +2090,7 @@ function fixMobileBlurResume(){
       </div>`;
     app.appendChild(finDisc);
 
-    // FINTECH — INSIGHT (with tiny right-aside)
+    // FINTECH — INSIGHT
     const finInsight = el('section','content content--padded'); finInsight.id = 'fintech-insight';
     const finInsightParas = CONTENT.fintech.insight.map(([label, text]) => `
       <p>
@@ -2189,7 +2117,7 @@ function fixMobileBlurResume(){
     const finStack = el('section','content content--full stacked-section'); finStack.id='fintech-stack';
     finStack.innerHTML = `
       <div class="stacked-gallery" data-stack>
-        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img src="${src}" alt="${alt}"></figure>`).join('')}
+        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
       </div>`;
     app.appendChild(finStack);
 
@@ -2233,7 +2161,7 @@ function fixMobileBlurResume(){
       </div>`;
     app.appendChild(ecoDisc);
 
-    // ECOM — INSIGHT (with tiny right-aside)
+    // ECOM — INSIGHT
     const ecoInsight = el('section','content content--padded'); ecoInsight.id = 'ecommerce-insight';
     const ecoInsightParas = CONTENT.ecommerce.insight.map(([label, text]) => `
       <p>
@@ -2260,7 +2188,7 @@ function fixMobileBlurResume(){
     const ecoStack = el('section','content content--full stacked-section'); ecoStack.id='ecommerce-stack';
     ecoStack.innerHTML = `
       <div class="stacked-gallery" data-stack>
-        ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img src="${src}" alt="${alt}"></figure>`).join('')}
+        ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
       </div>`;
     app.appendChild(ecoStack);
 
@@ -2324,10 +2252,6 @@ function fixMobileBlurResume(){
     start();
   }
 })();
-
 </script>
-
-
-
 </body>
 </html>

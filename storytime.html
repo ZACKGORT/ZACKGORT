@@ -2213,15 +2213,12 @@ section.content:has(.grid[data-grid-ninth]) {
                 rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
                 autoAlpha: 0
               });
-              const headCap   = section.querySelector('.content__title, .grid-head');
-              const bottomCap = section.querySelector('.grid-caption');
-              if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 40 }, 0.35);
-              if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20 }, 0.55);
-              if (caption) tl.from(caption, {
-                autoAlpha: 0,
-                yPercent: 40
-              }, .35);
-            }
+  const headCap   = section.querySelector('.content__title, .grid-head');
+  const bottomCap = section.querySelector('.grid-caption');
+
+  if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
+  if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
+}
           });
         }
 

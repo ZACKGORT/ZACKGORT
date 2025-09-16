@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <!-- Base so that all relative URLs resolve to your repo’s raw content -->
-  <base href="https://raw.githubusercontent.com/ZACKGORT/scroll/main/">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UX is dead - Zack Gort</title>
 
   <!-- Meta / social -->
@@ -945,7 +943,7 @@ a + a { margin-inline-start:.6rem; }
 .blackout.blackout--blur{
   /* override base blackout */
   color: inherit;                       /* keep text visible under blur */
-  background: rgba(0,0,0,.4);           /* “solid tape” look */
+  background: rgba(0,0,0,0);           /* “solid tape” look */
 
   -webkit-box-decoration-break: clone;
           box-decoration-break: clone;
@@ -1948,7 +1946,7 @@ document.addEventListener('pointerout', (e)=>{
     header: {
       title: 'UX is dead↴',
       logo: "ZCKGRT",
-      subline: "#OPENTOWORK",
+      subline: "ZACK GORT<br>Financial Product, E-commerce<br>Design Systems & Information Architecture<br>",
       links: [
         { label: "Résumé", href: "https://zackgort.com/resume" },
         { label: "LinkedIn", href: "https://linkedin.com/in/zackgort" }
@@ -1961,12 +1959,21 @@ document.addEventListener('pointerout', (e)=>{
         { label: "#Connect", href: "#contact", settle: "end"  }
       ]
     },
-    about: {
-      heading: "¡Viva la XP!",
-      sup: "experience",
-      byline:
-        "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"user is kind of implied, no?\"><span>User</span></span> Experience Designer"
-    },
+about: {
+  heading: "¡Viva la XP!",
+  sup: "experience",
+  byline:
+    "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"user is kind of implied, no?\"><span>User</span></span> Experience Designer",
+  copy: [
+    "I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function.",
+    "I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.",
+    "Now, as for design. I design those experiences :)"
+  ],
+  note:
+    "***A note from self: I didn't use AI to build this website. I found a gsap library that intrigued me, read the documentation, decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS for efficiency, added ad hoc functionality + features, included idiosyncratic interactive 'easter eggs', and splashed on some visual fluff for good measure."
+},
+
+
     skills: {
       cols: [
         {
@@ -2200,39 +2207,41 @@ process: {
     `;
     app.appendChild(header);
 
-    // ABOUT
-    const about = el('section','content content--padded'); about.id = 'about';
-    about.innerHTML = `
-      <h3 class="heading-chant">
-        ${CONTENT.about.heading}
-        <sup class="confetti-sup" role="button" tabindex="0" aria-label="experience (tap for confetti)">
-          ${CONTENT.about.sup}
-          <span class="emitter" aria-hidden="true"></span>
-        </sup>
-      </h3>
-      <p class="type-tiny right end">${CONTENT.about.byline}</p>
-    `;
-    app.appendChild(about);
 
-    // ABOUT text block
-    const blurSec = el('section','content content--padded'); blurSec.id = 'about-blur';
-    blurSec.innerHTML = `
-      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-      <div class="content__text">
-        <p>I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function.</p>
-        <p></p>
-        <p>I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.</p>
-        <p></p>
-        <p>Now, as for design. I design those experiences :)</p>        
-      </div>
-      <p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">
-        ***A note from self: I didn't use AI to build this website. I found a gsap library that intrigued me, read the documentation,
-        decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS
-        for efficiency, added ad hoc functionality + features, included idiosyncratic interactive 'easter eggs', and splashed on
-        some visual fluff for good measure.
-      </p>
-    `;
-    app.appendChild(blurSec);
+// ABOUT (hero)
+const about = el('section','content content--padded'); 
+about.id = 'about';
+about.innerHTML = `
+  <h3 class="heading-chant">
+    ${CONTENT.about.heading}
+    <sup class="confetti-sup" role="button" tabindex="0" aria-label="${CONTENT.about.sup} (tap for confetti)">
+      ${CONTENT.about.sup}
+      <span class="emitter" aria-hidden="true"></span>
+    </sup>
+  </h3>
+  <p class="type-tiny right end">${CONTENT.about.byline}</p>
+`;
+app.appendChild(about);
+
+// ABOUT — content (separate section)
+const aboutContent = el('section','content content--padded'); 
+aboutContent.id = 'about-content';
+
+const aboutCopyHTML = (CONTENT.about.copy || [])
+  .map(p => `<p>${p}</p>`)
+  .join('');
+
+aboutContent.innerHTML = `
+  <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+  <div class="content__text">
+    ${aboutCopyHTML}
+  </div>
+  ${CONTENT.about.note 
+    ? `<p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">${CONTENT.about.note}</p>` 
+    : '' }
+`;
+app.appendChild(aboutContent);
+
 
     // SKILLS (items rendered as fx-2 hoverable/tappable links with data-img)
     const skills = el('section','content content--padded'); skills.id = 'skills';

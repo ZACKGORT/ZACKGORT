@@ -1298,6 +1298,30 @@ a + a { margin-inline-start:.6rem; }
   .hover-reveal{ display:none !important; }
 }
 
+
+/* --- UX is dead title override --- */
+.frame__title .ux-dead-jump{
+  color: var(--color-text);
+  text-decoration: none;
+}
+.frame__title .ux-dead-jump:hover,
+.frame__title .ux-dead-jump:focus-visible{
+  color: var(--color-text);            /* no pink */
+}
+
+/* kill the fx-2 underline just for this title link */
+.frame__title .ux-dead-jump::after{
+  display: none !important;
+}
+
+/* accessible focus ring that matches the title style */
+.frame__title .ux-dead-jump:focus-visible{
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+
   </style>
 </head>
 
@@ -1747,6 +1771,20 @@ a + a { margin-inline-start:.6rem; }
         cursorRAF = requestAnimationFrame(tick);
       }
     }, { passive: true });
+
+
+    // helper right above the event listeners
+const isLink    = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
+const isNavLink = (t) => t && (t.closest('nav') || t.closest('.frame__links') || t.closest('.frame__tags'));
+
+document.addEventListener('pointerover', (e)=>{
+  if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = LINK_SHRINK;
+}, true);
+
+document.addEventListener('pointerout', (e)=>{
+  if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = 1;
+}, true);
+
   }
 
   function initConfetti(){
@@ -1931,17 +1969,17 @@ a + a { margin-inline-start:.6rem; }
     skills: {
       cols: [
         {
-          heading: "#experience",
+          heading: "#SPECIALIZATIONS",
           items: [
             "User Experience Design",
-            "Content & Brand Strategy {B2B+C}",
             "Visual Interface Design",
             "Accessibility Compliance",
+            "UX Research & Strategy",
             "+"
           ]
         },
-        { heading: "#savvy", items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"] },
-        { heading: "#evolution", items: ["AI + Creative Coding", "Design Systems & Workflows", "+"] }
+        { heading: "#TOOLS", items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"] },
+        { heading: "CURRENTLY", items: ["AI + Creative Coding", "Design Systems & Workflows", "+"] }
       ]
     },
     workSelect: {
@@ -2431,7 +2469,7 @@ const ecoIntro = `
     // CONTACT
     const contact = el('section','content content--padded'); contact.id='contact';
     contact.innerHTML = `
-      <h4 class="type-tiny">Contact</h4>
+      <h4 class="type-tiny">CONTACT</h4>
       <p class="content__text">${CONTENT.contact.blurb}</p>`;
     app.appendChild(contact);
 

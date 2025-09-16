@@ -1018,10 +1018,6 @@ html, body { overscroll-behavior-y: none; }     /* block P2R/glow at the root */
         .grid:not(.grid--zoomed){ width:100%; height:auto; aspect-ratio:16/9; }
       }
 
-      /* Tablet skills: 3 → 2 columns */
-      @media (max-width:1024px){
-        #skills .trio-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
-      }
 
       /* Mobile tuning */
       @media (max-width:768px){
@@ -1275,13 +1271,7 @@ html, body { overscroll-behavior-y: none; }     /* block P2R/glow at the root */
         .blur { display: none !important; }
       }
 
-      /* Stack skills columns vertically on mobile */
-      @media (max-width: 768px){
-        #skills .trio-grid{
-          grid-template-columns: 1fr; /* 3 → 1 */
-        }
-      }
-
+      
 
       /* === Skills hover (fx-2 style) === */
       .skills-link{
@@ -1308,6 +1298,20 @@ html, body { overscroll-behavior-y: none; }     /* block P2R/glow at the root */
       .skills-link[data-fx="2"]:focus-visible::after{
         transform: scale3d(1,1,1);
       }
+
+
+/* Skills: 3-up on desktop & tablet */
+#skills .trio-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: start;
+}
+
+/* Phones only: stack */
+@media (max-width: 768px){
+  #skills .trio-grid{ grid-template-columns: 1fr; }
+}
 
       /* Floating preview (same structure as demo) */
       .hover-reveal{

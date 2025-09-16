@@ -1157,7 +1157,7 @@ a + a { margin-inline-start:.6rem; }
   <div id="panel-root"></div>
   <div class="blur"></div>
 <script>
-/* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal */
+/* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
 (function () {
   'use strict';
 
@@ -1787,7 +1787,7 @@ a + a { margin-inline-start:.6rem; }
             "Content & Brand Strategy {B2B+C}",
             "Visual Interface Design",
             "Accessibility Compliance",
-            "+" 
+            "+"
           ]
         },
         { heading: "#savvy", items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"] },
@@ -1981,7 +1981,7 @@ a + a { margin-inline-start:.6rem; }
   function renderApp() {
     const app = $('#app');
     if (!app) return;
-    app.innerHTML = ''; // clean for idempotency
+    app.innerHTML = '';
 
     // HEADER / FRAME
     const header = el('header','frame');
@@ -2018,7 +2018,7 @@ a + a { margin-inline-start:.6rem; }
     `;
     app.appendChild(about);
 
-    // BLURRY SCROLL — inline section (text only)
+    // ABOUT text block
     const blurSec = el('section','content content--padded'); blurSec.id = 'about-blur';
     blurSec.innerHTML = `
       <div class="content__title" style="margin:.25rem 0 .5rem"></div>
@@ -2038,7 +2038,7 @@ a + a { margin-inline-start:.6rem; }
     `;
     app.appendChild(blurSec);
 
-    // SKILLS (items rendered as fx-2 hoverable links with data-img)
+    // SKILLS (items rendered as fx-2 hoverable/tappable links with data-img)
     const skills = el('section','content content--padded'); skills.id = 'skills';
     skills.innerHTML = `
       <div class="trio-grid">
@@ -2277,18 +2277,17 @@ a + a { margin-inline-start:.6rem; }
   }
 
   // ---------------------------------------------------------------------------
-  // SKILLS fx-2 HOVER REVEAL
+  // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)
   // ---------------------------------------------------------------------------
   function initSkillsHoverReveal(){
-    const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
-    if (isTouch) return; // no hover on touch
-
-    // Build floating node once
+    // Build floating node once (shared by desktop + mobile)
     let root = document.getElementById('hoverReveal');
     if (!root){
       root = document.createElement('div');
       root.id = 'hoverReveal';
       root.className = 'hover-reveal';
+      root.setAttribute('aria-hidden','true');
+      root.style.opacity = '0';
       root.innerHTML = `
         <div class="hover-reveal__inner">
           <div class="hover-reveal__deco"></div>
@@ -2298,19 +2297,24 @@ a + a { margin-inline-start:.6rem; }
     }
     const imgBox = root.querySelector('.hover-reveal__img');
 
-    // Smooth follow
+    const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
+
+    // Smooth follow (desktop); on mobile we position directly
     const follow = { x: innerWidth/2, y: innerHeight/2 };
     const pos    = { x: follow.x,   y: follow.y };
     const lerp = (a,b,t)=>a+(b-a)*t;
     let raf;
+
+    function positionRootAt(x, y) {
+      gsap.set(root, { x, y, xPercent:-50, yPercent:-50 });
+    }
+
     const tick = () => {
       pos.x = lerp(pos.x, follow.x, 0.16);
       pos.y = lerp(pos.y, follow.y, 0.16);
-      gsap.set(root, { x: pos.x, y: pos.y, xPercent:-50, yPercent:-50 });
+      positionRootAt(pos.x, pos.y);
       raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    addEventListener('pointermove', e => { follow.x = e.clientX; follow.y = e.clientY; }, { passive:true });
 
     // Helpers
     const preload = (url) => new Promise((res, rej)=>{
@@ -2337,30 +2341,80 @@ a + a { margin-inline-start:.6rem; }
       outTl = gsap.to(root, { autoAlpha:0, scale:0.98, rotation:-1, duration:0.28, ease:'power2.out' });
     };
 
-    // Delegate to skills links
+    // Event wiring
     const skills = document.getElementById('skills');
     if (!skills) return;
 
     let token = 0;
-    skills.addEventListener('pointerenter', (e)=>{
-      const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
-      const url = a.getAttribute('data-img'); const myToken = ++token;
-      preload(url).then(()=>{ if(myToken===token) showFx2(); }).catch(()=>{});
-    }, true);
 
-    skills.addEventListener('pointerleave', (e)=>{
-      if (e.target.closest('.skills-link')) hide();
-    }, true);
+    if (!isTouch) {
+      // Desktop hover
+      raf = requestAnimationFrame(tick);
+      addEventListener('pointermove', e => { follow.x = e.clientX; follow.y = e.clientY; }, { passive:true });
 
-    // Keyboard focus a11y
-    skills.addEventListener('focusin', (e)=>{
-      const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
-      const url = a.getAttribute('data-img'); const myToken = ++token;
-      preload(url).then(()=>{ if(myToken===token) showFx2(); }).catch(()=>{});
-    });
-    skills.addEventListener('focusout', (e)=>{
-      if (e.target.closest('.skills-link')) hide();
-    });
+      skills.addEventListener('pointerenter', (e)=>{
+        const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
+        const url = a.getAttribute('data-img'); const myToken = ++token;
+        preload(url).then(()=>{ if(myToken===token) showFx2(); }).catch(()=>{});
+      }, true);
+
+      skills.addEventListener('pointerleave', (e)=>{
+        if (e.target.closest('.skills-link')) hide();
+      }, true);
+
+      skills.addEventListener('focusin', (e)=>{
+        const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
+        const url = a.getAttribute('data-img'); const myToken = ++token;
+        preload(url).then(()=>{ if(myToken===token) showFx2(); }).catch(()=>{});
+      });
+      skills.addEventListener('focusout', (e)=>{
+        if (e.target.closest('.skills-link')) hide();
+      });
+
+    } else {
+      // Mobile tap
+      let open = null;
+      let lastDown = { x: innerWidth/2, y: innerHeight/2 };
+
+      // capture tap coordinates early
+      skills.addEventListener('pointerdown', (e)=>{
+        const a = e.target.closest('.skills-link'); if(!a) return;
+        lastDown = { x: e.clientX, y: e.clientY };
+      }, true);
+
+      // toggle on click
+      skills.addEventListener('click', (e)=>{
+        const a = e.target.closest('.skills-link[data-img]'); if(!a) return;
+        e.preventDefault();
+
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+
+        // position near tap (or fall back to element center)
+        const rect = a.getBoundingClientRect();
+        const x = lastDown.x || (rect.left + rect.width/2);
+        const y = lastDown.y || (rect.top  + rect.height/2);
+        positionRootAt(x, y);
+
+        if (open === a) {
+          hide(); open = null; return;
+        }
+
+        preload(url).then(()=>{
+          if (myToken !== token) return;
+          showFx2();
+          open = a;
+        }).catch(()=>{});
+      }, true);
+
+      // Dismiss on outside tap, scroll, or resize
+      document.addEventListener('click', (e)=>{
+        if (open && !e.target.closest('.skills-link')) { hide(); open = null; }
+      });
+      addEventListener('scroll', ()=>{ if (open){ hide(); open = null; }}, { passive:true });
+      addEventListener('resize', ()=>{ if (open){ hide(); open = null; }}, { passive:true });
+      addEventListener('orientationchange', ()=>{ if (open){ hide(); open = null; }}, { passive:true });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -2369,7 +2423,8 @@ a + a { margin-inline-start:.6rem; }
   async function start() {
     renderApp();
 
-    tuneForAndroid();  
+    // Blur overlay (still desktop-only in your CSS; code path intact)
+    tuneForAndroid();
     initBlurOverlayVisibility();
     fixMobileBlurResume();
 
@@ -2388,7 +2443,7 @@ a + a { margin-inline-start:.6rem; }
     initDeadJump();
     initBackToTop();
 
-    // Skills hover preview
+    // Skills hover/tap preview
     initSkillsHoverReveal();
 
     try { await preloadImages(); } catch(e) {}

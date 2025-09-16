@@ -1064,15 +1064,16 @@ a + a { margin-inline-start:.6rem; }
   document.documentElement.classList.add('js');
   const has = (k) => typeof window[k] !== 'undefined';
 
-  if (has('ScrollTrigger')) {
-    if (has('Physics2DPlugin')) {
-      gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
-    } else {
-      gsap.registerPlugin(ScrollTrigger);
-    }
-    // Only normalize when NOT using Lenis (prevents tug-of-war on mobile)
-    if (!has('Lenis')) ScrollTrigger.normalizeScroll(true);
+if (has('ScrollTrigger')) {
+  if (has('Physics2DPlugin')) {
+    gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
+  } else {
+    gsap.registerPlugin(ScrollTrigger);
   }
+  // Only normalize when we’re NOT using Lenis. Prevents tug-of-war on mobile.
+  if (!has('Lenis')) ScrollTrigger.normalizeScroll(true);
+}
+
 
   const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1192,16 +1193,17 @@ a + a { margin-inline-start:.6rem; }
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling
   // ---------------------------------------------------------------------------
-  function initSmooth() {
-    if (!has('Lenis')) return;
-    const isTouchOrMobile = matchMedia('(pointer:coarse), (max-width: 768px)').matches;
-    if (isTouchOrMobile) return; // Use native scroll on touch devices
+function initSmooth() {
+  if (!has('Lenis')) return;
+  const isMobile = matchMedia('(pointer:coarse), (max-width: 768px)').matches;
+  if (isMobile) return; // native scroll on touch devices
 
-    window.lenis = new Lenis({ lerp: 0.15 });
-    window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
-    gsap.ticker.add((t)=>window.lenis.raf(t*1000));
-    gsap.ticker.lagSmoothing(0);
-  }
+  window.lenis = new Lenis({ lerp: 0.15 });
+  window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
+  gsap.ticker.add((t)=>window.lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
+}
+
 
   function enableHashScroll() {
     document.addEventListener('click',(e)=>{

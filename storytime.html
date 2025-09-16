@@ -172,8 +172,10 @@ nav a:focus-visible,
 nav a::after,
 .frame__links a::after,
 .frame__tags a::after{
-  display: underline !important;        /* remove fx-2 underline in nav */
+  display: none !important;
+  content: none !important;
 }
+
 
 /* Keep their existing focus outline if you prefer */
 nav a:focus-visible,
@@ -1737,13 +1739,6 @@ a + a { margin-inline-start:.6rem; }
     const hist = Array.from({length:N},()=>({x:mx,y:my}));
 
     addEventListener('pointermove', (e)=>{ mx=e.clientX; my=e.clientY; }, {passive:true});
-
-    document.addEventListener('pointerover', (e)=>{
-      if (e.target.closest('a[href], [role="link"]')) hoverBoost = LINK_SHRINK;
-    }, true);
-    document.addEventListener('pointerout', (e)=>{
-      if (e.target.closest('a[href], [role="link"]')) hoverBoost = 1;
-    }, true);
 
     let cursorRAF;
     function tick(){

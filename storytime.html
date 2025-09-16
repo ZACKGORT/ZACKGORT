@@ -795,6 +795,34 @@ a + a { margin-inline-start:.6rem; }
 .blackout.tip:hover::before,
 .blackout.tip:focus-visible::before{ opacity:1; }
 
+/* Blurry redaction variant (text only) */
+.blackout--blur{
+  background: rgba(0,0,0,.4);   /* stronger tape */
+  color: transparent;            /* hide original text color */
+  position: relative;
+  -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
+}
+
+/* The inner span is what gets blurred */
+.blackout--blur > span{
+  color: var(--color-text);      /* re-ink text so it can be blurred */
+  display: inline-block;
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  opacity: .95;                  /* keeps it milky, not ghosted */
+  transform: translateZ(0);      /* avoids Safari clipping */
+}
+
+/* Optional: stronger tape */
+.blackout--blur.strong { background: rgba(0,0,0,.6); }
+
+/* Fallback for browsers without filter() support */
+@supports not (filter: blur(1px)) {
+  .blackout--blur > span { color: transparent; }
+}
+
+
 /* =========================================================
    QUERY GROUP — MEDIA & FEATURE QUERIES
    ========================================================= */
@@ -1045,6 +1073,10 @@ a + a { margin-inline-start:.6rem; }
   .frame,
   .content--full { min-height: 100dvh; }
 }
+
+
+
+
   </style>
 </head>
 
@@ -1677,7 +1709,7 @@ function initSmooth() {
       heading: "¡Viva la XP!",
       sup: "experience",
       byline:
-        "— Zack Gort, Senior <span class=\"blackout tip tip--full\" tabindex=\"0\" data-tip=\"{user} is kind of implied, no?\">User</span> Experience Designer"
+        "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"{user} is kind of implied, no?\"><span>User</span></span> Experience Designer"
     },
     skills: {
       cols: [

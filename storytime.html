@@ -1095,6 +1095,12 @@ a + a { margin-inline-start:.6rem; }
   background: linear-gradient(to top, rgba(0,0,0,.28), rgba(0,0,0,0) 60%);
 }
 
+
+/* MOBILE/TABLET: disable page blur entirely */
+@media (max-width: 768px), (pointer: coarse){
+  .blur { display: none !important; }
+}
+
   </style>
 </head>
 
@@ -1162,36 +1168,35 @@ a + a { margin-inline-start:.6rem; }
     blur.innerHTML = html;
   }
 
-  function initBlurOverlayVisibility() {
-    let blur = document.querySelector('.blur');
-    if (!blur) {
-      blur = document.createElement('div');
-      blur.className = 'blur';
-      document.body.appendChild(blur);
-    }
-    if (!blur.children.length) buildBlurLayers(blur);
+function initBlurOverlayVisibility() {
+  // ⬇ add this
+  if (matchMedia('(pointer:coarse), (max-width: 768px)').matches) return;
 
-    const header = document.querySelector('.frame');
-
-    const show = () => blur.classList.add('is-visible');
-    const hide = () => blur.classList.remove('is-visible');
-
-    // Show when header is out of view; hide when header is visible.
-    if (header) {
-      // LESS TWITCHY on mobile: wait until header is ~60px out of view
-      const ioHeader = new IntersectionObserver(
-        ([e]) => e.isIntersecting ? hide() : show(),
-        { threshold: 0, rootMargin: '0px 0px -60px 0px' }
-      );
-      ioHeader.observe(header);
-    }
-
-    // No footer-based hiding — keep blur visible through the footer.
-    if (header && header.getBoundingClientRect().bottom <= 0) show();
-
-    // Recompute slabs on resize (desktop & mobile)
-    window.addEventListener('resize', () => buildBlurLayers(blur), { passive:true });
+  let blur = document.querySelector('.blur');
+  if (!blur) {
+    blur = document.createElement('div');
+    blur.className = 'blur';
+    document.body.appendChild(blur);
   }
+  if (!blur.children.length) buildBlurLayers(blur);
+
+  const header = document.querySelector('.frame');
+
+  const show = () => blur.classList.add('is-visible');
+  const hide = () => blur.classList.remove('is-visible');
+
+  if (header) {
+    const ioHeader = new IntersectionObserver(
+      ([e]) => e.isIntersecting ? hide() : show(),
+      { threshold: 0, rootMargin: '0px 0px -60px 0px' }
+    );
+    ioHeader.observe(header);
+  }
+
+  if (header && header.getBoundingClientRect().bottom <= 0) show();
+  window.addEventListener('resize', () => buildBlurLayers(blur), { passive:true });
+}
+
 
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency

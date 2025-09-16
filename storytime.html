@@ -51,6 +51,7 @@
   --color-bg:#0e0d0e;
   --color-bg-content:#0e0d0e;
   --color-bg-frame:#FF8DA1;
+  --brand-pink: var(--color-bg-frame);  
 
   /* Text & UI */
   --color-text:#f5f3ee;
@@ -106,17 +107,85 @@ body{
 /* NEW: prevent overscroll glow confusing ScrollTrigger on mobile */
 html, body { overscroll-behavior-y: none; }
 
-/* Links & buttons */
-a{ color:var(--color-link); text-decoration:none; outline:none; cursor:pointer; }
-a:hover{ color:var(--color-link-hover); text-decoration:underline; }
-a:focus{ outline:none; background:lightgrey; }
-a:focus:not(:focus-visible){ background:transparent; }
-a:focus-visible{ outline:2px solid red; background:transparent; }
-.unbutton{ background:none; border:0; padding:0; margin:0; font:inherit; cursor:pointer; }
+/* Links & buttons — global pink hover + fx-2 underline */
+a{
+  position: relative;
+  color: var(--color-link);
+  text-decoration: none; /* we use the animated underline instead */
+  outline: none;
+  cursor: pointer;
+}
+
+/* Pink on hover/focus everywhere */
+a:hover,
+a:focus-visible{
+  color: var(--brand-pink);
+}
+
+/* fx-2 underline for ALL links (uses currentColor so it turns pink on hover) */
+a::after{
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 2px;
+  background: currentColor;
+  transform-origin: 0% 50%;
+  transform: scale3d(0,1,1);
+  transition: transform .2s cubic-bezier(.390,.575,.565,1);
+}
+a:hover::after,
+a:focus-visible::after{
+  transform: scale3d(1,1,1);
+}
+
+/* Accessibility focus ring */
+a:focus{ outline: none; }
+a:focus:not(:focus-visible){ outline: none; }
+a:focus-visible{
+  outline: 2px solid var(--brand-pink);
+  outline-offset: 2px;
+}
+
+/* Opt-out helper */
+a.no-underline::after{ display: none; }
 
 /* Skip link */
 .skip-link{ position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden; }
 .skip-link:focus{ position:fixed; left:12px; top:12px; width:auto; height:auto; background:#000; color:#fff; padding:.5rem .75rem; border-radius:6px; z-index:10005; }
+
+
+/* EXCEPT nav links (keep original look, no pink/underline) */
+nav a,
+.frame__links a,
+.frame__tags a{
+  color: var(--color-link);
+  text-transform: uppercase;
+}
+
+nav a:hover,
+nav a:focus-visible,
+.frame__links a:hover,
+.frame__links a:focus-visible,
+.frame__tags a:hover,
+.frame__tags a:focus-visible{
+  color: var(--color-link);        /* cancel the global pink */
+}
+
+nav a::after,
+.frame__links a::after,
+.frame__tags a::after{
+  display: underline !important;        /* remove fx-2 underline in nav */
+}
+
+/* Keep their existing focus outline if you prefer */
+nav a:focus-visible,
+.frame__links a:focus-visible,
+.frame__tags a:focus-visible{
+  outline: 2px solid currentColor; /* or remove if undesired */
+  outline-offset: 2px;
+}
+
+
 
 /* Microtype */
 
@@ -678,41 +747,99 @@ a + a { margin-inline-start:.6rem; }
 .gooey-cursor, .gooey-cursor *{ pointer-events:none; }
 
 /* =========================================================
-   TYPOGRAPHY SPECIAL
+   TYPOGRAPHY SPECIAL (fixed)
    ========================================================= */
 .heading-chant{
-  display:inline-flex; align-items:flex-start; gap:.35ch;
+  display:inline-flex;
+  align-items:flex-start;
+  gap:.35ch;
   margin:clamp(.5rem,1.2vh,1rem) 0;
   font-family:var(--font-sans);
-  font-weight:500; letter-spacing:-.01em; line-height:.95;
-  font-size:clamp(3.4rem,6vw,3.4rem); color:var(--color-text);
-  text-decoration:none; text-decoration-thickness:.08em; text-underline-offset:.12em;
-  text-decoration-color:color-mix(in oklab,var(--color-text) 45%,transparent);
+  font-weight:500;
+  letter-spacing:-.01em;
+  line-height:.95;
+  font-size:clamp(3.4rem,6vw,3.4rem);
+  color:var(--color-text);
+  text-decoration:none;
+  text-decoration-thickness:.08em;
+  text-underline-offset:.12em;
+  /* no underline by default, but keep a fallback color ready */
+  text-decoration-color: color-mix(in oklab, var(--color-text) 45%, transparent);
 }
+
 .heading-chant sup{
-  font-size:.35em; line-height:0; margin-left:.3ch; letter-spacing:.04em;
-  color:var(--color-text-alt); vertical-align:baseline; transform:translateY(-.6em);
+  font-size:.35em;
+  line-height:0;
+  margin-left:.3ch;
+  letter-spacing:.04em;
+  color:var(--color-text-alt);
+  vertical-align:baseline;
+  transform:translateY(-.6em);
 }
 
 /* Confetti trigger */
 .heading-chant .confetti-sup{
-  position:relative; display:inline-flex; align-items:flex-start;
-  cursor:pointer; user-select:none; margin-left:.3ch; padding:0 .2ch; border-radius:.25rem; outline:0;
+  position:relative;
+  display:inline-flex;
+  align-items:flex-start;
+  cursor:pointer;
+  user-select:none;
+  margin-left:.3ch;
+  padding:0 .2ch;
+  border-radius:.25rem;
+  outline:0;
+  /* animate color + underline color together */
+  transition:
+    color .18s ease,
+    text-decoration-color .18s ease;
 }
-.heading-chant .confetti-sup:focus-visible{ box-shadow:0 0 0 2px rgba(255,255,255,.5); }
+
+/* Accessible focus ring */
+.heading-chant .confetti-sup:focus-visible{
+  outline:2px solid rgba(255,255,255,.65);
+  outline-offset:2px;
+}
+
+/* Particle emitter anchor */
 .heading-chant .confetti-sup .emitter{
-  position:absolute; top:0; left:50%; width:0; height:0;
-  transform:translate(-50%, -60%); pointer-events:none; overflow:visible; z-index:2;
+  position:absolute;
+  top:0; left:50%;
+  width:0; height:0;
+  color:var(--brand-pink);
+  text-decoration-color:currentColor;
+  transform:translate(-50%, -60%);
+  pointer-events:none;
+  overflow:visible;
+  z-index:2;
 }
 .heading-chant .confetti-sup .emitter > div{
-  position:absolute; width:8px; height:8px; background:var(--b,#fff);
-  border-radius:2px; will-change:transform,opacity; mix-blend-mode:normal;
+  position:absolute;
+  width:8px; height:8px;
+  background:var(--b,#fff);
+  border-radius:2px;
+  will-change:transform,opacity;
+  mix-blend-mode:normal;
 }
+
+/* Confetti palette (kept) */
 :root{ --confetti-colors:#FFFF04,#EA4C89,#892AB8,#4AF2FD; }
-.heading-chant .confetti-sup:hover{
-  text-decoration:underline; text-decoration-thickness:.08em; text-underline-offset:.12em;
-  text-decoration-color:color-mix(in oklab,var(--color-text) 45%, transparent);
+
+/* Hover/active/focus = pink text + pink underline (fx-2 underline vibe) */
+.heading-chant .confetti-sup:hover,
+.heading-chant .confetti-sup:active,
+.heading-chant .confetti-sup:focus-visible{
+  color:var(--brand-pink);
+  text-decoration:underline;
+  text-decoration-thickness:.08em;
+  text-underline-offset:.12em;
+  text-decoration-color:currentColor; /* matches brand pink */
 }
+
+/* Optional: only add underline on hover for fine pointers */
+@media (pointer:fine){
+  .heading-chant .confetti-sup:hover{ text-decoration:underline; }
+}
+
 
 /* === Title System (unified look) === */
 :root{

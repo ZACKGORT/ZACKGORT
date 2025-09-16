@@ -68,11 +68,9 @@
   --cursor-size:28px;
 
   /* Blur overlay */
-  --layers:5;
-  --blur-max:48;
-  --blur-gain: 1.5;   
-  --maskStart: 72%;
-  --saturate:0; /* reset */
+  --layers: 1;      /* from 5 */
+  --blur-max: 16;   /* 12–18px looks “moderate” but is cheap(ish) */
+  --mask-stop: 35;  /* ~35vh coverage at the bottom */
 
   /* Panel palette */
   --cs-accent:#f4d35e;
@@ -630,10 +628,10 @@ a + a { margin-inline-start:.6rem; }
 .blur > div{ position:absolute; inset:0; }
 .blur > div::after{
   content:""; position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, 0));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, 0));
-  -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
-          mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
+  -webkit-backdrop-filter: blur(var(--blur, 24px)) saturate(var(--saturate, 0));
+          backdrop-filter: blur(var(--blur, 24px)) saturate(var(--saturate, 0));
+  -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 75%), #000 100%);
+          mask:linear-gradient(180deg, transparent 0 var(--maskStart, 75%), #000 100%);
 }
 
 /* Ensure pinned sections never overtake the blur overlay */

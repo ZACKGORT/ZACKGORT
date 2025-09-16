@@ -1201,56 +1201,59 @@ function initBlurOverlayVisibility() {
   // ---------------------------------------------------------------------------
   // Mobile/Android blur resiliency
   // ---------------------------------------------------------------------------
-  function fixMobileBlurResume(){
-    const blur   = document.querySelector('.blur');
-    const header = document.querySelector('.frame');
+function fixMobileBlurResume(){
+  // ⬇ add this
+  if (matchMedia('(pointer:coarse), (max-width: 768px)').matches) return;
 
-    const isAndroid = /Android/i.test(navigator.userAgent);
-    let resumes = 0;
-    const degradeKey = 'bfDegraded';
-    let degraded = localStorage.getItem(degradeKey) === '1';
+  const blur   = document.querySelector('.blur');
+  const header = document.querySelector('.frame');
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  let resumes = 0;
+  const degradeKey = 'bfDegraded';
+  let degraded = localStorage.getItem(degradeKey) === '1';
 
-    function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
-    function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
+  function rebuildChildren(){ if(blur) buildBlurLayers(blur); }
+  function hardOff(on){ if(blur) blur.classList.toggle('bf-off', !!on); }
 
-    function update(){
-      if(!blur || !header) return;
+  function update(){
+    if(!blur || !header) return;
 
-      hardOff(true);
-      rebuildChildren();
+    hardOff(true);
+    rebuildChildren();
 
-      blur.classList.add('bf-reset'); // temporary BF reset to nudge mobile
-      void blur.offsetHeight;
+    blur.classList.add('bf-reset');
+    void blur.offsetHeight;
 
-      const shouldShow = header.getBoundingClientRect().bottom <= 0;
-      blur.classList.toggle('is-visible', shouldShow);
+    const shouldShow = header.getBoundingClientRect().bottom <= 0;
+    blur.classList.toggle('is-visible', shouldShow);
 
-      requestAnimationFrame(() => {
-        blur.classList.remove('bf-reset');
-        hardOff(false);
-        if (window.ScrollTrigger) ScrollTrigger.refresh();
-      });
+    requestAnimationFrame(() => {
+      blur.classList.remove('bf-reset');
+      hardOff(false);
+      if (window.ScrollTrigger) ScrollTrigger.refresh();
+    });
 
-      resumes++;
-      if (!degraded && isAndroid && resumes >= 2) {
-        degraded = true;
-        localStorage.setItem(degradeKey, '1');
-        blur.classList.add('no-bf'); // optional degrade after multiple resumes
-      }
+    resumes++;
+    if (!degraded && isAndroid && resumes >= 2) {
+      degraded = true;
+      localStorage.setItem(degradeKey, '1');
+      blur.classList.add('no-bf');
     }
-
-    window.addEventListener('visibilitychange', () => {
-      document.hidden ? hardOff(true) : setTimeout(update, 60);
-    }, { passive:true });
-
-    window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
-    window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
-    window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
-    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
-    window.addEventListener('resize', () => setTimeout(update, 60), { passive:true });
-
-    update();
   }
+
+  window.addEventListener('visibilitychange', () => {
+    document.hidden ? hardOff(true) : setTimeout(update, 60);
+  }, { passive:true });
+
+  window.addEventListener('pagehide',  () => hardOff(true), { passive:true });
+  window.addEventListener('pageshow',  () => setTimeout(update, 0),  { passive:true });
+  window.addEventListener('focus',     () => setTimeout(update, 60), { passive:true });
+  window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive:true });
+  window.addEventListener('resize', () => setTimeout(update, 60), { passive:true });
+
+  update();
+}
+
 
   // ---------------------------------------------------------------------------
   // Smooth scrolling (Lenis) + anchor hash scrolling

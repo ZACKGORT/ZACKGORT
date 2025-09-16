@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zack Gort — FAQ (On-Scroll Typography Animations | Set 2)</title>
-  <meta name="description" content="Frequently asked questions about how I work — rendered with Codrops Set 2 on-scroll typography animations.">
-  <meta name="keywords" content="typography, animation, on-scroll, gsap, ScrollTrigger, FAQ, Zack Gort">
-  <meta name="author" content="Codrops + Zack Gort">
-  <link rel="stylesheet" href="https://use.typekit.net/zda3gdw.css">
+  <title>Zack Gort — FAQ (Single Effect + Gooey Cursor)</title>
+  <meta name="description" content="Frequently asked questions about how I work — single Codrops Set 2 effect (#28) + gooey cursor.">
+  <meta name="author" content="Zack Gort">
+
+  <!-- Only two fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,opsz,wght@0,14..32,400;0,14..32,600;0,14..32,800;1,14..32,400;1,14..32,600&family=Instrument+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
   <!-- Splitting CSS (needed for .word / .char wrappers) -->
   <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
   <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+
   <script>
     document.documentElement.className = "js";
     (function supportsCssVars () {
@@ -24,13 +26,26 @@
     }());
   </script>
 
-  <!-- ==== Base CSS from Codrops demo (kept) ==== -->
   <style>
+/* ---- Base / Codrops scaffold (trimmed) ---- */
 *,*::after,*::before{box-sizing:border-box;}
-:root{font-size:16px;--color-text:#FF8DA1;--color-bg:rgb(71,50,171);--color-link:#FF8DA1;--color-link-hover:#fff;--page-padding:1.5rem 2rem;}
-body{margin:0;color:var(--color-text);background-color:var(--color-bg);font-family:area-normal,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;}
-.demo-1{background-image:linear-gradient(180deg,hsl(240deg 91% 49%) 0%,hsl(252deg 93% 47%) 10%,hsl(258deg 93% 46%) 20%,hsl(263deg 93% 46%) 30%,hsl(266deg 91% 45%) 40%,hsl(269deg 88% 45%) 50%,hsl(272deg 78% 43%) 60%,hsl(275deg 69% 40%) 70%,hsl(277deg 60% 37%) 80%,hsl(294deg 74% 43%) 90%,hsl(258deg 76% 45%) 100%);}
-.demo-2{--color-text:#FF8DA1;--color-bg:#0e0e0e;--color-link:#FF8DA1;--color-link-hover:#fff;}
+:root{
+  font-size:16px;
+  --color-text:#fff;
+  --color-bg:#0e0e0e;
+  --color-link:#ede3e3;
+  --color-link-hover:#d68521;
+  --page-padding:1.5rem 2rem;
+}
+body{
+  margin:0;
+  color:var(--color-text);
+  background-color:var(--color-bg);
+  font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
 .js .loading::before,.js .loading::after{content:'';position:fixed;z-index:1000;}
 .js .loading::before{top:0;left:0;width:100%;height:100%;background:var(--color-bg);}
 .js .loading::after{top:50%;left:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;opacity:.4;background:var(--color-link);animation:loaderAnim .7s linear infinite alternate forwards;}
@@ -40,51 +55,92 @@ a:hover{color:var(--color-link-hover);outline:none;}
 a:focus{outline:none;background:lightgrey;}
 a:focus:not(:focus-visible){background:transparent;}
 a:focus-visible{outline:2px solid red;background:transparent;}
-.unbutton{background:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;}
-.unbutton:focus{outline:none;}
 main{counter-reset:section;}
 .splitting .word{white-space:nowrap;}
-.frame{color:var(--color-title);padding:var(--page-padding);display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto auto;grid-template-areas:'title' 'prev' 'demos' 'sponsor';justify-content:start;justify-items:end;margin-bottom:3rem;grid-gap:.5rem;align-items:start;font-weight:600;font-size:14px;}
+.frame{
+  color:var(--color-title);
+  padding:var(--page-padding);
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-rows:auto auto auto;
+  grid-template-areas:'title' 'prev' 'demos';
+  justify-content:start;
+  justify-items:end;
+  margin-bottom:3rem;
+  grid-gap:.5rem;
+  align-items:start;
+  font-weight:600;
+  font-size:14px;
+}
 .frame a:not(.frame__title-back),.line{white-space:nowrap;overflow:hidden;position:relative;}
-.frame a:not(.frame__title-back)::before,.line::before{content:'';height:1px;width:100%;background:currentColor;position:absolute;top:90%;transition:transform .3s;transform-origin:0% 50%;}
+.frame a:not(.frame__title-back)::before,.line::before{
+  content:'';height:1px;width:100%;background:currentColor;position:absolute;top:90%;
+  transition:transform .3s;transform-origin:0% 50%;
+}
 .frame a:not(.frame__title-back):hover::before,.line:hover::before{transform:scaleX(0);transform-origin:100% 50%;}
 .frame__title{grid-area:title;display:flex;align-items:center;}
-.frame__title-main{font-size:1rem;margin:0;font-weight:normal;}
 .frame__title-back{position:relative;display:flex;align-items:flex-end;}
 .frame__title-back svg{fill:currentColor;}
 .frame__prev{grid-area:prev;align-self:start;}
 .frame__demos{display:flex;gap:1rem;}
 .frame__demos span{opacity:.7;}
+
 .intro{height:100vh;display:grid;place-items:center;text-align:center;}
 .intro__title{display:grid;place-items:center;margin:0;line-height:.9;font-weight:300;}
-.intro__title-pre{font-family:norman-stencil,sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(2rem,10vw,9rem);}
-.intro__title-sub{font-size:clamp(1rem,6vw,2.75rem);}
-.intro__info{position:relative;max-width:26ch;opacity:.6;line-height:1.2;margin-bottom:4rem;padding-bottom:1rem;font-weight:600;font-size:14px;}
+.intro__title-pre{
+  font-family:"Instrument Serif",serif;
+  font-weight:700;
+  text-transform:uppercase;
+  font-size:clamp(2rem,10vw,9rem);
+  letter-spacing:.02em;
+}
+.intro__title-sub{
+  font-family:"Instrument Sans",sans-serif;
+  font-size:clamp(1rem,6vw,2.5rem);
+}
+.intro__info{
+  position:relative;max-width:32ch;opacity:.7;line-height:1.25;margin-bottom:4rem;padding-bottom:1rem;
+  font-weight:600;font-size:14px;
+}
 .intro__info::after{content:'';position:absolute;left:50%;width:1px;height:2rem;background:#fff;top:100%;}
+
 .content{display:flex;flex-direction:column;width:100vw;position:relative;padding:var(--page-padding);}
 .content:last-child{padding-bottom:40vh;}
-.content--full{padding:0;}
-.content p{max-width:860px;margin:1.5rem auto;font-size:1.15rem;line-height:1.55;font-weight:600;opacity:.92}
-.content--highlight p{font-size:clamp(1rem,3vw,2rem);}
-.content__title{font-size:10vw;line-height:.85;counter-increment:section;text-align:center;display:grid;gap:1.25rem;}
+.content p{
+  max-width:860px;margin:1.1rem auto;font-size:1.05rem;line-height:1.55;font-weight:600;opacity:.95;
+  font-family:"Instrument Sans",sans-serif;
+}
+.content__title{
+  font-size:9.6vw;line-height:.85;counter-increment:section;text-align:center;display:grid;gap:1.1rem;
+  font-family:"Instrument Sans",sans-serif;
+}
 .content__title--left{text-align:left;}
-.content__title--right{text-align:right;}
-.content__title::before{content:'.' counter(section);font-weight:400;font-family:area-normal,sans-serif;display:block;font-size:1rem;margin-bottom:10vh;text-align:center;}
-.content__title--sides{display:grid;grid-template-rows:auto auto;grid-template-columns:100%;text-align:left;gap:2rem;}
-.content__title--sides span:last-child{justify-self:end;}
-.font-10{font-family:norman-stencil,sans-serif;font-weight:800;}
-.font-12{font-family:halogen,sans-serif;font-weight:700;}
-.font-16{font-weight:initial;font-family:"inge-variable", sans-serif;font-variation-settings:"slnt" 0;}
-.font-19{font-weight:initial;font-family:"nagel-variable", sans-serif;font-variation-settings:"slnt" 0,"wght" 610;}
-.font-20{font-weight:initial;font-family:"borax-variable", sans-serif;font-variation-settings:"wght" 400;}
-.font-21{font-family:"gigantic", sans-serif;font-weight:900;font-style:normal;}
-.font-22{font-family:"capsule", sans-serif;font-weight:400;font-style:normal;}
-.font-23{font-family:"arsenica-variable", sans-serif;font-variation-settings:"opsz" 1000,"wght" 300;}
+.content__title::before{
+  content:'.' counter(section);
+  font-weight:700;
+  font-family:"Instrument Sans",sans-serif;
+  display:block;font-size:1rem;margin-bottom:10vh;text-align:center;opacity:.8;
+}
 .font-upper{text-transform:uppercase;}
-.char-wrap{display:inline-block;position:relative;overflow:hidden;}
-@media screen and (min-width:53em){
-  .frame{justify-items:start;grid-gap:2rem;grid-template-columns:auto auto 1fr auto;grid-template-rows:auto;grid-template-areas:'title prev demos sponsor';}
-  .frame__demos{justify-self:end;}
+
+/* ---- Gooey cursor styles ---- */
+.has-cursor .gooey-cursor{
+  position:fixed; inset:0;
+  pointer-events:none;
+  z-index:9999;
+  filter:url(#gc-goo);
+}
+.gooey-cursor .gc-dot{
+  position:fixed;
+  width:22px; height:22px;
+  border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.55));
+  mix-blend-mode: difference;
+  transform:translate(-50%,-50%) scale(0);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce){
+  .has-cursor .gooey-cursor{display:none;}
 }
   </style>
 </head>
@@ -93,154 +149,141 @@ main{counter-reset:section;}
   <main>
     <div class="frame">
       <div class="frame__title">
-        <a aria-label="Back to the zackgortcom" class="frame__title-back" href="https://zackgort.com">
-          <span>Codrops Article</span>
+        <a aria-label="portfolio link" class="frame__title-back" href="https://tympanus.net/codrops/?p=69734" target="_blank" rel="noopener">
+          <span>zackgort.com</span>
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path vector-effect="non-scaling-stroke" d="M18.25 15.5a.75.75 0 0 0 .75-.75v-9a.75.75 0 0 0-.75-.75h-9a.75.75 0 0 0 0 1.5h7.19L6.22 16.72a.75.75 0 1 0 1.06 1.06L17.5 7.56v7.19c0 .414.336.75.75.75z"/>
           </svg>
         </a>
       </div>
+
       <nav class="frame__demos">
         <a href="https://zackgort.com/resume" target="_blank" rel="noopener">Resume</a>
-        <span>      <a class="frame__prev" href="https://linkedin.com/in/zackgort">LinkedIn</a></span>
+        <a class="frame__prev" href="https://reasonably.cc" target="_blank" rel="noopener">Photography</a>
       </nav>
     </div>
 
     <div class="intro">
       <h1 class="intro__title">
-        <span class="intro__title-pre">Zack&nbsp;Gort</span>
-        <span class="intro__title-sub">FAQ — Reason first, resolution always.</span>
+        <span class="intro__title-pre">FU</span>
+        <span class="intro__title-sub">FAQ for you, silly goose :)</span>
       </h1>
-      <span class="intro__info">Scroll moderately to experience the animations. Strategy that ships. Systems people actually use.</span>
+      <span class="intro__info">Scroll for Q&A</span>
     </div>
 
-    <!-- === Set 2 content replaced with your FAQ === -->
-
-    <!-- Q1 -->
+    <!-- === ALL TITLES USE EFFECT #28 === -->
     <div class="content">
-      <h2 class="content__title content__title--left" data-splitting data-effect16>
-        <span class="font-16">What&nbsp;do&nbsp;you</span><span class="font-16">actually&nbsp;do?</span>
+      <h2 class="content__title content__title--left" data-splitting data-effect28>
+        <span>What&nbsp;do&nbsp;you&nbsp;actually&nbsp;do?</span>
       </h2>
     </div>
     <div class="content">
       <p>I turn messy product ecosystems into clear, usable experiences. Discovery → IA/taxonomy → prototyping → design systems → tight handoff. Less theater, more throughput.</p>
     </div>
 
-    <!-- Q2 -->
     <div class="content">
-      <h2 class="content__title" data-splitting data-effect17>
-        <span class="font-21 font-upper">Strategist</span><span class="font-21 font-upper">or&nbsp;Designer?</span>
+      <h2 class="content__title" data-splitting data-effect28>
+        <span class="font-upper">Strategist&nbsp;or&nbsp;Designer?</span>
       </h2>
     </div>
     <div class="content">
       <p>Both. I facilitate like a strategist (problems, goals, constraints) and ship like a designer (flows, components, content, specs). Strategy that never hits the UI is just a memo.</p>
     </div>
 
-    <!-- Q3 -->
     <div class="content">
-      <h2 class="content__title" data-splitting data-effect18>
-        <span class="font-22 font-upper">Where&nbsp;do&nbsp;you</span><span class="font-22 font-upper">add&nbsp;the&nbsp;most&nbsp;value?</span>
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Where&nbsp;do&nbsp;you&nbsp;add&nbsp;the&nbsp;most&nbsp;value?</span>
       </h2>
     </div>
     <div class="content">
       <p>Alignment. I get marketing, product, and engineering solving the same problem, in the same language, on the same timeline. I document decisions so velocity isn’t personality-dependent.</p>
     </div>
 
-    <!-- Q4 -->
     <div class="content">
-      <h2 class="content__title" data-splitting data-effect19>
-        <span class="font-21 font-upper">Approach</span><span class="font-21 font-upper">to&nbsp;Research?</span>
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Approach&nbsp;to&nbsp;Research?</span>
       </h2>
     </div>
     <div class="content">
       <p>Do enough to be dangerous early; keep learning as we ship. Competitive audits, content/IA reviews, lightweight qual with stakeholders/users, and synthesis that feeds the roadmap.</p>
     </div>
 
-    <!-- Q5 -->
     <div class="content">
-      <h2 class="content__title" data-splitting data-effect20>
-        <span class="font-12 font-upper">Design</span><span class="font-22 font-upper">System&nbsp;Philosophy?</span>
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Design&nbsp;System&nbsp;Philosophy?</span>
       </h2>
     </div>
     <div class="content">
       <p>Practical first. Systems should be canonical, implementation-friendly, and living—tokens, usage guidance, and examples wired to actual code (not a static PDF).</p>
     </div>
 
-    <!-- Q6 -->
-    <div class="content content--full">
-      <h2 class="content__title" data-splitting data-effect21>
-        <span class="font-20">Short</span><span class="font-18">Timelines?</span>
+    <div class="content">
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Short&nbsp;Timelines?</span>
       </h2>
     </div>
     <div class="content">
       <p>Name constraints early, pick the critical path, and build just enough scaffolding to ship safely. Componentize, reduce novelty, and prefer decisions that won’t age out in a quarter.</p>
     </div>
 
-    <!-- Q7 -->
-    <div class="content content--full">
-      <h2 class="content__title" data-splitting data-effect22>
-        <span class="font-23 font-upper">Tools</span><span class="font-16 font-upper">and</span><span class="font-23 font-upper">Stacks?</span>
+    <div class="content">
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Tools&nbsp;and&nbsp;Stacks?</span>
       </h2>
     </div>
     <div class="content">
       <p>Whatever keeps the team fast and honest. Figma for design + docs, Notion/Confluence for decision logs, and a component stack that matches the codebase (e.g., React + Tailwind). Headless (Contentful et al.) when structure matters.</p>
     </div>
 
-    <!-- Q8 -->
-    <div class="content content--full">
-      <h2 class="content__title" data-splitting data-effect23>
-        <span class="font-22 font-upper">What&nbsp;do</span><span class="font-20 font-upper">handoffs</span><span class="font-18 font-upper">look&nbsp;like?</span>
+    <div class="content">
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>What&nbsp;do&nbsp;handoffs&nbsp;look&nbsp;like?</span>
       </h2>
     </div>
     <div class="content">
       <p>Receipts: flows, variants, empty-state logic, content guidelines, accessibility notes, and acceptance criteria. I include “why” notes so future-you doesn’t have to reverse-engineer intent.</p>
     </div>
 
-    <!-- Q9 -->
-    <div class="content content--full">
-      <h2 class="content__title" data-splitting data-effect24>
-        <span class="font-15 font-upper">Communication&nbsp;Style?</span>
+    <div class="content">
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Communication&nbsp;Style?</span>
       </h2>
     </div>
     <div class="content">
       <p>Plain language. Problem → evidence → options → recommendation. I write it down, show tradeoffs, and keep the artifact current so it remains a source of truth.</p>
     </div>
 
-    <!-- Q10 -->
     <div class="content">
-      <h2 class="content__title content__title--left" data-splitting data-effect25>
-        <span class="font-13 font-16">Background?</span>
+      <h2 class="content__title content__title--left" data-splitting data-effect28>
+        <span>Background?</span>
       </h2>
     </div>
     <div class="content">
       <p>Design lead turned product-minded IC/manager. Agency, platform, and in-house across commerce, B2B, and enterprise. Formed by constraints, sharpened by shipping.</p>
     </div>
 
-    <!-- Q11 -->
-    <div class="content content--full">
-      <h2 class="content__title" data-splitting data-effect26>
-        <span class="font-19 font-upper">How&nbsp;do</span><span class="font-23 font-upper">we&nbsp;work&nbsp;together?</span>
+    <div class="content">
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>How&nbsp;do&nbsp;we&nbsp;work&nbsp;together?</span>
       </h2>
     </div>
     <div class="content">
       <p>Give me a problem owner, an engineer, and access to the people who feel the pain. I’ll map the system, propose a plan, and start delivering visible, testable increments immediately.</p>
     </div>
 
-    <!-- Q12 -->
     <div class="content">
-      <h2 class="content__title" data-splitting data-effect27>
-        <span class="font-19 font-upper">Availability</span>
-        <span class="font-19 font-upper">&nbsp;&amp;&nbsp;Engagements?</span>
+      <h2 class="content__title" data-splitting data-effect28>
+        <span>Availability&nbsp;&amp;&nbsp;Engagements?</span>
       </h2>
     </div>
     <div class="content">
       <p>Senior IC/lead, fractional product/design, or short, surgical engagements to unblock discovery, IA, or systemization. Flexible on timezone and cadence.</p>
     </div>
 
-    <!-- Contact (pin-friendly single word looks nice with fx28) -->
-    <div class="content content--full">
+    <!-- Contact -->
+    <div class="content">
       <h2 class="content__title" data-splitting data-effect28>
-        <span class="font-12 font-upper">Contact</span>
+        <span class="font-upper">Contact</span>
       </h2>
     </div>
     <div class="content">
@@ -250,253 +293,159 @@ main{counter-reset:section;}
     <div class="intro"><p><a class="line" href="#top">Back to top</a></p></div>
   </main>
 
-  <!-- Libs: versions aligned with your earlier setup -->
+  <!-- Libs -->
   <script src="https://unpkg.com/gsap@3.11.4/dist/gsap.min.js"></script>
   <script src="https://unpkg.com/gsap@3.11.4/dist/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/@studio-freight/lenis@0.2.28/bundled/lenis.min.js"></script>
   <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
 
-  <!-- Inline: utils/preloadFonts -->
-  <script>
-    const preloadFonts = (id) => new Promise((resolve) => {
-      WebFont.load({ typekit: { id }, active: resolve, inactive: resolve });
-    });
-  </script>
-
-  <!-- Inline: Set 2 (effects 16–29) — unchanged logic from the working setup -->
+  <!-- Effect #28 + Gooey Cursor -->
   <script>
     (function(){
       gsap.registerPlugin(ScrollTrigger);
 
-      // Smooth scroll (Lenis 0.2.x)
+      /* ===== Gooey cursor (ported) ===== */
+      function initGooeyCursor(){
+        const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const finePointer = matchMedia('(pointer:fine)').matches;
+        if (prefersReducedMotion || !finePointer) return;
+
+        document.documentElement.classList.add('has-cursor');
+
+        // SVG filter defs once
+        if (!document.getElementById('gc-goo-defs')) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+          svg.id = 'gc-goo-defs';
+          svg.setAttribute('width','0'); svg.setAttribute('height','0');
+          svg.innerHTML = `
+            <defs>
+              <filter id="gc-goo">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+                <feColorMatrix in="blur" mode="matrix"
+                  values="1 0 0 0 0
+                          0 1 0 0 0
+                          0 0 1 0 0
+                          0 0 0 20 -10" result="goo"/>
+                <feBlend in="SourceGraphic" in2="goo"/>
+              </filter>
+            </defs>`;
+          document.body.appendChild(svg);
+        }
+
+        // Build wrapper + dots
+        const wrap = document.createElement('div');
+        wrap.className = 'gooey-cursor';
+        wrap.setAttribute('aria-hidden','true');
+        document.body.appendChild(wrap);
+
+        const N = 20;            // number of dots
+        const LERP = 0.35;       // trail smoothing
+        const LINK_SHRINK = 0.55;// shrink when hovering links
+        let hoverBoost = 1;
+
+        for (let i=0;i<N;i++){
+          const d = document.createElement('div');
+          d.className = 'gc-dot';
+          wrap.appendChild(d);
+        }
+        const dots = Array.from(wrap.children);
+
+        let mx = innerWidth/2, my = innerHeight/2;
+        const hist = Array.from({length:N}, () => ({x:mx, y:my}));
+
+        addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; }, {passive:true});
+
+        let raf;
+        function tick(){
+          hist.shift(); hist.push({x:mx,y:my});
+          for (let i=0;i<N;i++){
+            const c = hist[i], n = hist[i+1] || hist[N-1];
+            c.x += (n.x - c.x) * LERP;
+            c.y += (n.y - c.y) * LERP;
+
+            const base = i / N;                           // tail → head
+            const scale = (i === N-1 ? base * hoverBoost : base);
+            dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%,-50%) scale(${scale})`;
+          }
+          raf = requestAnimationFrame(tick);
+        }
+        raf = requestAnimationFrame(tick);
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) { cancelAnimationFrame(raf); raf = null; }
+          else if (!raf) { raf = requestAnimationFrame(tick); }
+        }, {passive:true});
+
+        const isLink = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
+        const isNavish = (t) => t && (t.closest('nav') || t.closest('.frame'));
+        document.addEventListener('pointerover', e => { if (isLink(e.target) && !isNavish(e.target)) hoverBoost = LINK_SHRINK; }, true);
+        document.addEventListener('pointerout',  e => { if (isLink(e.target) && !isNavish(e.target)) hoverBoost = 1; }, true);
+      }
+
+      /* ===== Smooth scroll (Lenis) ===== */
       let lenis;
-      const initSmoothScrolling = () => {
-        try {
-          lenis = new Lenis({ lerp: 0.2, smooth: true });
+      function initSmooth(){
+        try{
+          lenis = new Lenis({ lerp:0.2, smooth:true });
           lenis.on('scroll', () => ScrollTrigger.update());
-          const scrollFn = (time) => { lenis.raf(time); requestAnimationFrame(scrollFn); };
-          requestAnimationFrame(scrollFn);
-        } catch(e) {}
-      };
+          const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+          requestAnimationFrame(raf);
+        } catch(e){}
+      }
 
-      const scroll = () => {
-        const q = (sel) => [...document.querySelectorAll(sel)];
-        const fx16Titles = q('.content__title[data-splitting][data-effect16]');
-        const fx17Titles = q('.content__title[data-splitting][data-effect17]');
-        const fx18Titles = q('.content__title[data-splitting][data-effect18]');
-        const fx19Titles = q('.content__title[data-splitting][data-effect19]');
-        const fx20Titles = q('.content__title[data-splitting][data-effect20]');
-        const fx21Titles = q('.content__title[data-splitting][data-effect21]');
-        const fx22Titles = q('.content__title[data-splitting][data-effect22]');
-        const fx23Titles = q('.content__title[data-splitting][data-effect23]');
-        const fx24Titles = q('.content__title[data-splitting][data-effect24]');
-        const fx25Titles = q('.content__title[data-splitting][data-effect25]');
-        const fx26Titles = q('.content__title[data-splitting][data-effect26]');
-        const fx27Titles = q('.content__title[data-splitting][data-effect27]');
-        const fx28Titles = q('.content__title[data-splitting][data-effect28]');
-        const fx29Titles = q('.content__title[data-splitting][data-effect29]');
-
-        fx16Titles.forEach(title => {
-          gsap.fromTo(title, { transformOrigin:'0% 50%', rotate:3 }, {
-            ease:'none', rotate:0,
-            scrollTrigger:{ trigger:title, start:'top bottom', end:'top top', scrub:true }
-          });
-          gsap.fromTo(title.querySelectorAll('.word'), { opacity:0.1 }, {
-            ease:'none', opacity:1, stagger:0.05,
-            scrollTrigger:{ trigger:title, start:'top bottom-=20%', end:'center top+=20%', scrub:true }
-          });
-        });
-
-        fx17Titles.forEach(title => {
-          const chars = title.querySelectorAll('.char');
-          chars.forEach(char => gsap.set(char.parentNode, { perspective: 1000 }));
-          gsap.fromTo(chars, {
-            'will-change':'opacity, transform',
-            opacity:0, rotateX:()=>gsap.utils.random(-120,120), z:()=>gsap.utils.random(-200,200)
-          }, {
-            ease:'none', opacity:1, rotateX:0, z:0, stagger:0.02,
-            scrollTrigger:{ trigger:title, start:'top bottom', end:'bottom top', scrub:true }
-          });
-        });
-
-        fx18Titles.forEach(title => {
-          const chars = title.querySelectorAll('.char');
-          chars.forEach(char => gsap.set(char.parentNode, { perspective: 1000 }));
-          gsap.fromTo(chars, { opacity:0.2, z:-800 }, {
-            ease:'back.out(1.2)', opacity:1, z:0, stagger:0.04,
-            scrollTrigger:{ trigger:title, start:'top bottom', end:'bottom top', scrub:true }
-          });
-        });
-
-        fx19Titles.forEach(title => {
-          const chars = title.querySelectorAll('.char');
-          chars.forEach(char => gsap.set(char.parentNode, { perspective: 1000 }));
-          gsap.fromTo(chars, {
-            'will-change':'opacity, transform', transformOrigin:'50% 0%',
-            opacity:0, rotationX:-90, z:-200
-          }, {
-            ease:'power1', opacity:1, rotationX:0, z:0, stagger:0.05,
-            scrollTrigger:{ trigger:title, start:'center bottom', end:'bottom top+=20%', scrub:true }
-          });
-        });
-
-        fx20Titles.forEach(title => {
-          const chars = title.querySelectorAll('.char');
-          chars.forEach(char => gsap.set(char.parentNode, { perspective: 1000 }));
-          gsap.fromTo(chars, {
-            'will-change':'opacity, transform', transformOrigin:'50% 100%',
-            opacity:0, rotationX:90
-          }, {
-            ease:'power4', opacity:1, rotationX:0, stagger:{ each:0.03, from:'random' },
-            scrollTrigger:{ trigger:title, start:'center bottom', end:'bottom top+=20%', scrub:true }
-          });
-        });
-
-        fx21Titles.forEach(title => {
-          const words = title.querySelectorAll('.word');
-          gsap.set(words, { yPercent:120, opacity:0 });
-          gsap.to(words, {
-            yPercent:0, opacity:1, ease:'back.out(1.4)', stagger:0.1,
-            scrollTrigger:{ trigger:title, start:'top bottom', end:'top 50%', scrub:0.8 }
-          });
-        });
-
-        fx22Titles.forEach(title => {
-          const words = title.querySelectorAll('.word');
-          gsap.set(title, { transformStyle:'preserve-3d' });
-          words.forEach((w,i)=> gsap.set(w,{ transformOrigin:'50% 50% -200px', rotationY:i%2?-90:90, opacity:0 }));
-          gsap.to(words, {
-            rotationY:0, opacity:1, ease:'expo.out', stagger:0.15,
-            scrollTrigger:{ trigger:title, start:'top bottom', end:'top 40%', scrub:0.8 }
-          });
-        });
-
-        fx23Titles.forEach(title => {
+      /* ===== Effect 28 only (Codrops Set 2) ===== */
+      function effect28(){
+        const titles = [...document.querySelectorAll('.content__title[data-splitting][data-effect28]')];
+        titles.forEach(title => {
           const words = [...title.querySelectorAll('.word')];
-          for (const [wordPosition, word] of words.entries()) {
-            gsap.fromTo(word.querySelectorAll('.char'), {
-              'will-change':'transform',
-              scale:0.01,
-              x:(pos,_,arr)=> wordPosition%2 ? pos*50 : (arr.length-pos-1)*-50
-            }, {
-              ease:'power4', scale:1, x:0,
-              scrollTrigger:{ trigger:word, start:'center bottom', end:'bottom top-=40%', scrub:true }
-            });
-          }
-        });
-
-        fx24Titles.forEach(title => {
-          const chars = title.querySelectorAll('.char');
-          const charsTotal = chars.length;
-          gsap.fromTo(chars, {
-            'will-change':'transform',
-            y: pos => {
-              const factor = pos < Math.ceil(charsTotal/2) ? pos : Math.ceil(charsTotal/2) - Math.abs(Math.floor(charsTotal/2) - pos) - 1;
-              return (charsTotal/2 - factor + 6) * 130;
-            }
-          }, {
-            ease:'elastic.out(.4)', y:0,
-            stagger:{ amount:0.1, from:'center' },
-            scrollTrigger:{ trigger:title, start:'top bottom', end:'bottom top-=50%', scrub:true }
-          });
-        });
-
-        fx25Titles.forEach(title => {
-          gsap.fromTo(title.querySelectorAll('.char'), {
-            'will-change':'transform', transformOrigin:'50% 100%', scaleY:0
-          }, {
-            ease:'power3.in', opacity:1, scaleY:1, stagger:0.05,
-            scrollTrigger:{ trigger:title, start:'center center', end:'+=500%', scrub:true, pin:title.parentNode }
-          });
-        });
-
-        fx26Titles.forEach(title => {
-          const words = [...title.querySelectorAll('.word')];
-          const tl = gsap.timeline({
-            scrollTrigger:{ trigger:title, start:'center center', end:'+=100%', scrub:true, pin:title.parentNode }
-          });
-          for (const [wordPosition, word] of words.entries()) {
-            tl.fromTo(word.querySelectorAll('.char'), {
-              'will-change':'transform',
-              transformOrigin: !wordPosition%2 ? '50% 0%' : '50% 100%',
-              scaleY:0
-            }, {
-              ease:'power1.inOut', scaleY:1, stagger:{ amount:0.3, from:'center' }
-            }, 0);
-          }
-        });
-
-        fx27Titles.forEach(title => {
-          const words = [...title.querySelectorAll('.word')];
-          words.forEach(word => gsap.set(word.parentNode, { perspective: 1000 }));
-          gsap.fromTo(words, {
-            'will-change':'opacity, transform',
-            z:()=>gsap.utils.random(500,950),
-            opacity:0,
-            xPercent:()=>gsap.utils.random(-100,100),
-            yPercent:()=>gsap.utils.random(-10,10),
-            rotationX:()=>gsap.utils.random(-90,90)
-          }, {
-            ease:'expo', opacity:1, rotationX:0, rotationY:0, xPercent:0, yPercent:0, z:0,
-            scrollTrigger:{ trigger:title, start:'center center', end:'+=300%', scrub:true, pin:title.parentNode },
-            stagger:{ each:0.006, from:'random' }
-          });
-        });
-
-        fx28Titles.forEach(title => {
-          const words = [...title.querySelectorAll('.word')];
-          for (const word of words) {
+          for (const word of words){
             const chars = word.querySelectorAll('.char');
-            const charsTotal = chars.length;
+            const total = chars.length;
+
             gsap.fromTo(chars, {
               'will-change':'transform, filter',
               transformOrigin:'50% 100%',
               scale: i => {
-                const f = i < Math.ceil(charsTotal/2) ? i : Math.ceil(charsTotal/2) - Math.abs(Math.floor(charsTotal/2) - i) - 1;
-                return gsap.utils.mapRange(0, Math.ceil(charsTotal/2), 0.5, 2.1, f);
+                const mid = Math.ceil(total/2);
+                const f = i < mid ? i : mid - Math.abs(Math.floor(total/2) - i) - 1;
+                return gsap.utils.mapRange(0, mid, 0.5, 2.1, f);
               },
               y: i => {
-                const f = i < Math.ceil(charsTotal/2) ? i : Math.ceil(charsTotal/2) - Math.abs(Math.floor(charsTotal/2) - i) - 1;
-                return gsap.utils.mapRange(0, Math.ceil(charsTotal/2), 0, 60, f);
+                const mid = Math.ceil(total/2);
+                const f = i < mid ? i : mid - Math.abs(Math.floor(total/2) - i) - 1;
+                return gsap.utils.mapRange(0, mid, 0, 60, f);
               },
               rotation: i => {
-                const f = i < Math.ceil(charsTotal/2) ? i : Math.ceil(charsTotal/2) - Math.abs(Math.floor(charsTotal/2) - i) - 1;
-                return i < charsTotal/2 ? gsap.utils.mapRange(0, Math.ceil(charsTotal/2), -4, 0, f)
-                                         : gsap.utils.mapRange(0, Math.ceil(charsTotal/2),  0, 4, f);
+                const mid = Math.ceil(total/2);
+                const f = i < mid ? i : mid - Math.abs(Math.floor(total/2) - i) - 1;
+                return i < total/2
+                  ? gsap.utils.mapRange(0, mid, -4, 0, f)
+                  : gsap.utils.mapRange(0, mid, 0, 4, f);
               },
               filter:'blur(12px) opacity(0)'
             }, {
-              ease:'power2.inOut', y:0, rotation:0, scale:1, filter:'blur(0px) opacity(1)',
-              scrollTrigger:{ trigger:word, start:'top bottom+=40%', end:'top top+=15%', scrub:true },
+              ease:'power2.inOut',
+              y:0, rotation:0, scale:1, filter:'blur(0px) opacity(1)',
+              scrollTrigger:{
+                trigger:word,
+                start:'top bottom+=40%',
+                end:'top top+=15%',
+                scrub:true
+              },
               stagger:{ amount:0.15, from:'center' }
             });
           }
         });
+      }
 
-        fx29Titles.forEach(title => {
-          const words = [...title.querySelectorAll('.word')];
-          for (const [pos,word] of words.entries()) {
-            const chars = word.querySelectorAll('.char');
-            gsap.fromTo(chars, {
-              'will-change':'transform',
-              transformOrigin: `${pos%2 ? 0 : 100}% ${pos%2 ? 100 : 0}%`,
-              scale: 0
-            }, {
-              ease:'power4', scale:1,
-              stagger:{ each:0.03, from: pos%2 ? 'end' : 'start' },
-              scrollTrigger:{ trigger:word, start:'top bottom-=10%', end:'top top', scrub:true }
-            });
-          }
-        });
-      };
-
-      // Boot after window load (JSFiddle/standalone safe)
+      // Boot
       window.addEventListener('load', () => {
-        Splitting();
-        preloadFonts('cvn8slu').then(() => {
+        Splitting();                                      // create .word / .char
+        (document.fonts?.ready || Promise.resolve()).then(() => {
           document.body.classList.remove('loading');
-          initSmoothScrolling();
-          scroll();
+          initSmooth();
+          effect28();
+          initGooeyCursor();
           setTimeout(() => ScrollTrigger.refresh(), 80);
         });
       });

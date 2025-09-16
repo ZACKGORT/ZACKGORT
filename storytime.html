@@ -627,19 +627,14 @@ a + a { margin-inline-start:.6rem; }
 }
 .blur.is-visible{ opacity:1; }
 .blur > div{ position:absolute; inset:0; }
-.blur > div::after{
-  content:""; position:absolute; inset:0 -250%;
-  -webkit-backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
-          backdrop-filter: blur(var(--blur, 0px)) saturate(var(--saturate, .99));
-  -webkit-mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
-          mask:linear-gradient(180deg, transparent 0 var(--maskStart, 65%), #000 100%);
-}
 
 /* Ensure pinned sections never overtake the blur overlay */
 .pin-spacer,
 .pin-spacer > * {
   z-index: auto !important;
 }
+
+
 
 /* =========================================================
    GOOEY CURSOR
@@ -795,32 +790,41 @@ a + a { margin-inline-start:.6rem; }
 .blackout.tip:hover::before,
 .blackout.tip:focus-visible::before{ opacity:1; }
 
-/* Blurry redaction variant (text only) */
-.blackout--blur{
-  background: rgba(0,0,0,.4);   /* stronger tape */
-  color: transparent;            /* hide original text color */
-  position: relative;
+/* Blur redaction variant */
+.blackout.blackout--blur{
+  /* override base blackout */
+  color: inherit;                       /* keep text visible under blur */
+  background: rgba(0,0,0,.4);           /* “solid tape” look */
+  border-radius: 2px;
   -webkit-box-decoration-break: clone;
           box-decoration-break: clone;
+  position: relative;
 }
 
-/* The inner span is what gets blurred */
-.blackout--blur > span{
-  color: var(--color-text);      /* re-ink text so it can be blurred */
+/* Only blur the inner span, so we can toggle it */
+.blackout.blackout--blur > span{
   display: inline-block;
-  filter: blur(5px);
-  -webkit-filter: blur(5px);
-  opacity: .95;                  /* keeps it milky, not ghosted */
-  transform: translateZ(0);      /* avoids Safari clipping */
+  filter: blur(var(--blur-amt, 4px));
+  transition: filter .18s ease;
 }
 
-/* Optional: stronger tape */
-.blackout--blur.strong { background: rgba(0,0,0,.6); }
-
-/* Fallback for browsers without filter() support */
-@supports not (filter: blur(1px)) {
-  .blackout--blur > span { color: transparent; }
+/* Hover = reduce blur */
+.blackout.blackout--blur:hover > span{
+  --blur-amt: 1.5px;
 }
+
+/* When JS marks it as revealed (on selection) remove blur */
+.blackout.blackout--blur[data-reveal="1"] > span,
+.blackout.blackout--blur:focus-within > span{
+  --blur-amt: 0;
+}
+
+/* Optional: nicer selection colors */
+.blackout.blackout--blur > span::selection{
+  background: rgba(255,255,255,.25);
+  color: inherit;
+}
+
 
 
 /* =========================================================

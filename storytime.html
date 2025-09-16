@@ -2761,6 +2761,67 @@
               }
             })();
 
+
+            /* ---- Pull-to-refresh guard (Chrome/Android) ---- */
+function disablePullToRefresh(){
+  const isTouch = matchMedia('(pointer:coarse)').matches;
+  if (!isTouch) return;
+
+  // CSS safety net (in case author CSS changes later)
+  document.documentElement.style.overscrollBehaviorY = 'none';
+  document.body.style.overscrollBehaviorY = 'none';
+
+  let maybe = false;
+  let lastY = 0;
+
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) { maybe = false; return; }
+    // ignore form fields / editable areas
+    if (e.target.closest('input, textarea, select, [contenteditable]')) { maybe = false; return; }
+    lastY = e.touches[0].clientY;
+    maybe = (window.scrollY <= 0); // only consider if we’re at the very top
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!maybe) return;
+    const y  = e.touches[0].clientY;
+    const dy = y - lastY;
+    lastY = y;
+
+    // pulling down while at the top → would trigger P2R
+    if (dy > 0) {
+      e.preventDefault();                // block P2R
+      if (window.scrollY !== 0) window.scrollTo(0, 0);
+    } else {
+      maybe = false; // user started scrolling up instead
+    }
+  }, { passive: false }); // must be non-passive to call preventDefault()
+}
+
+/* ---- Tiny runtime optimizations ---- */
+function initVisibilityPerfGuards(){
+  // Sleep GSAP ticker + Lenis when tab is hidden; wake when visible
+  document.addEventListener('visibilitychange', () => {
+    const hidden = document.hidden;
+    if (hidden) {
+      try { if (window.lenis) window.lenis.stop(); } catch {}
+      try { gsap.ticker.sleep(); } catch {}
+    } else {
+      try { if (window.lenis) window.lenis.start(); } catch {}
+      try { gsap.ticker.wake(); if (window.ScrollTrigger) ScrollTrigger.refresh(); } catch {}
+    }
+  }, { passive: true });
+
+  // Defer non-critical image preloading to idle so first paint isn’t blocked
+  const doPreload = () => { try { preloadImages(); } catch {} };
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(doPreload, { timeout: 1500 });
+  } else {
+    setTimeout(doPreload, 120);
+  }
+}
+
+
             // -----------------------------------------------------------------------------
             // Helpers outside IIFE (kept as in your page)
             // -----------------------------------------------------------------------------

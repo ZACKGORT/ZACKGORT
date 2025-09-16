@@ -1725,10 +1725,10 @@ function initSmooth() {
         "https://i.ibb.co/XZ8QtMx9/610811e9c2fa676f3fb1255f-zax02412-68c4866404de0.webp",
         "https://i.ibb.co/W4XvQk1t/1-vk-U8l-Zmqn-OHghe-Os-K0qtrw.webp",
         "https://i.ibb.co/0p7Ktz5L/1-Tut-Ce-PQB0b-SCo-Mf-MTWJb-Q.webp",
-        "https://i.ibb.co/vxXJ7fSV/1-rqzz-Cscn-OIL96-Vm-Ln0v7d-A.webp",
+
         "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
         "https://i.ibb.co/MJLfbdm/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp",
-        "https://i.ibb.co/ZzQnmrNr/1-GFvd-yw-Ap-PELXmtr-Fbx-Vug.webp",
+
         "https://i.ibb.co/RTTZh2gq/1-1-QGGK09-DGx0-R4p-d-Jg6xiw.webp",
         "https://i.ibb.co/vx76zjgf/10.webp",
         "https://i.ibb.co/rft2bf0T/9.webp",
@@ -1962,29 +1962,33 @@ function initSmooth() {
     `;
     app.appendChild(work);
 
-    // BRANDS GRID
-    const brands = el('section','content content--padded content--full'); brands.id='brands-grid';
-    brands.innerHTML = `
-      <div class="grid-head">
-        <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
-      </div>
-      <div class="grid grid--spaced grid--small" data-grid-fifth>
-        ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-      </div>
-    `;
-    app.appendChild(brands);
+// BRANDS GRID (match AGENCY layout + animation)
+const brands = el('section','content content--padded content--full');
+brands.id = 'brands-grid';
+brands.innerHTML = `
+  <div class="grid-head">
+    <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
+  </div>
+  <div class="grid grid--columns grid--spaced" data-grid-ninth>
+    ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+  </div>
+`;
+app.appendChild(brands);
 
-    // AGENCY GRID
-    const agency = el('section','content content--padded content--full'); agency.id='brands-grid-2';
-    agency.innerHTML = `
-      <div class="grid-head">
-        <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
-      </div>
-      <div class="grid grid--columns grid--spaced" data-grid-ninth>
-        ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-      </div>
-    `;
-    app.appendChild(agency);
+
+// AGENCY GRID
+const agency = el('section','content content--padded content--full');
+agency.id = 'brands-grid-2';
+agency.innerHTML = `
+  <div class="grid-head">
+    <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
+  </div>
+  <div class="grid grid--columns grid--spaced" data-grid-ninth>
+    ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+  </div>
+`;
+app.appendChild(agency);
+
 
     // FINTECH — HERO
     const finHero = el('section','content content--padded content--full'); finHero.id='fintech';

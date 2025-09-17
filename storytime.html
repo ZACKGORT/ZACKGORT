@@ -1706,2067 +1706,1500 @@ section.content:has(.grid[data-grid-ninth]) {
     <main id="app"></main>
     <div class="blur"></div>
     <script>
-      /* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
-      (function () {
-        'use strict';
+/* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
+(function () {
+  'use strict';
 
-        // ---------------------------------------------------------------------------
-        // Boot flags / vendor detection
-        // ---------------------------------------------------------------------------
-        document.documentElement.classList.add('js');
-        const has = (k) => typeof window[k] !== 'undefined';
+  // ---------------------------------------------------------------------------
+  // Boot flags / vendor detection
+  // ---------------------------------------------------------------------------
+  document.documentElement.classList.add('js');
+  const has = (k) => typeof window[k] !== 'undefined';
 
-        if (has('ScrollTrigger')) {
-          if (has('Physics2DPlugin')) {
-            gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
-          } else {
-            gsap.registerPlugin(ScrollTrigger);
-          }
-          // normalizeScroll handled in initSmooth() to avoid Lenis race
-        }
-
-        const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        // ---------------------------------------------------------------------------
-        // Tiny DOM helpers
-        // ---------------------------------------------------------------------------
-        const $ = (s, r = document) => r.querySelector(s);
-        const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-        const el = (tag, cls, html) => {
-          const n = document.createElement(tag);
-          if (cls) n.className = cls;
-          if (html != null) n.innerHTML = html;
-          return n;
-        };
-
-        // ---------------------------------------------------------------------------
-        // Bottom blur overlay layers + visibility rules
-        // ---------------------------------------------------------------------------
-        function buildBlurLayers(blur) {
-          const cs = getComputedStyle(document.documentElement);
-          const layers = +cs.getPropertyValue('--layers')?.trim() || 5;
-          const blurMax = +cs.getPropertyValue('--blur-max')?.trim() || 40;
-          const stopMax = +cs.getPropertyValue('--mask-stop')?.trim() || 15;
-
-          let html = '';
-          for (let i = 1; i <= layers; i++) {
-            const t = i / layers;
-            const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
-            const stop = Math.sin(t * Math.PI / 2) * stopMax;
-            const topVh = (100 - stop).toFixed(3);
-            html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
-          }
-          blur.innerHTML = html;
-        }
-
-        function initBlurOverlayVisibility() {
-          let blur = document.querySelector('.blur');
-          if (!blur) {
-            blur = document.createElement('div');
-            blur.className = 'blur';
-            document.body.appendChild(blur);
-          }
-          if (!blur.children.length) buildBlurLayers(blur);
-
-          const header = document.querySelector('.frame');
-
-          const show = () => blur.classList.add('is-visible');
-          const hide = () => blur.classList.remove('is-visible');
-
-          if (header) {
-            const ioHeader = new IntersectionObserver(
-              ([e]) => e.isIntersecting ? hide() : show(), {
-                threshold: 0,
-                rootMargin: '0px 0px -60px 0px'
-              }
-            );
-            ioHeader.observe(header);
-          }
-
-          if (header && header.getBoundingClientRect().bottom <= 0) show();
-
-          window.addEventListener('resize', () => buildBlurLayers(blur), {
-            passive: true
-          });
-        }
-
-        // ---------------------------------------------------------------------------
-        // Mobile/Android blur resiliency
-        // ---------------------------------------------------------------------------
-        function fixMobileBlurResume() {
-          const blur = document.querySelector('.blur');
-          const header = document.querySelector('.frame');
-
-          const isAndroid = /Android/i.test(navigator.userAgent);
-          let resumes = 0;
-          const degradeKey = 'bfDegraded';
-          let degraded = localStorage.getItem(degradeKey) === '1';
-
-          function rebuildChildren() {
-            if (blur) buildBlurLayers(blur);
-          }
-
-          function hardOff(on) {
-            if (blur) blur.classList.toggle('bf-off', !!on);
-          }
-
-          function update() {
-            if (!blur || !header) return;
-            hardOff(true);
-            rebuildChildren();
-
-            blur.classList.add('bf-reset');
-            void blur.offsetHeight;
-
-            const shouldShow = header.getBoundingClientRect().bottom <= 0;
-            blur.classList.toggle('is-visible', shouldShow);
-
-            requestAnimationFrame(() => {
-              blur.classList.remove('bf-reset');
-              hardOff(false);
-              if (window.ScrollTrigger) ScrollTrigger.refresh();
-            });
-
-            resumes++;
-            if (!degraded && isAndroid && resumes >= 2) {
-              degraded = true;
-              localStorage.setItem(degradeKey, '1');
-              blur.classList.add('no-bf');
-            }
-          }
-
-          window.addEventListener('visibilitychange', () => {
-            document.hidden ? hardOff(true) : setTimeout(update, 60);
-          }, {
-            passive: true
-          });
-
-          window.addEventListener('pagehide', () => hardOff(true), {
-            passive: true
-          });
-          window.addEventListener('pageshow', () => setTimeout(update, 0), {
-            passive: true
-          });
-          window.addEventListener('focus', () => setTimeout(update, 60), {
-            passive: true
-          });
-          window.addEventListener('orientationchange', () => setTimeout(update, 120), {
-            passive: true
-          });
-          window.addEventListener('resize', () => setTimeout(update, 60), {
-            passive: true
-          });
-
-          update();
-        }
-
-        // ---------------------------------------------------------------------------
-        // Smooth scrolling (Lenis) + anchor hash scrolling
-        // ---------------------------------------------------------------------------
-function initSmooth() {
-  // Use Lenis on ALL devices (desktop + mobile)
-  const usingLenis = has('Lenis');
-
-  // If GSAP is around, tell it we’re handling scroll ourselves
   if (has('ScrollTrigger')) {
-    ScrollTrigger.normalizeScroll(!usingLenis);
+    if (has('Physics2DPlugin')) {
+      gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
+    } else {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+    // normalizeScroll handled in initSmooth() to avoid Lenis race
   }
 
-  if (!usingLenis) return;
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Lenis smoothing; slightly higher lerp on touch feels better
-  const isTouch = matchMedia('(pointer:coarse), (hover:none), (max-width: 768px)').matches;
-  window.lenis = new Lenis({
-    lerp: isTouch ? 0.22 : 0.15,     // a touch-friendly ease
-    // The following options are ignored if not supported by the installed Lenis version
-    smoothTouch: true,               // legacy option (harmless if unsupported)
-    syncTouch: true,                 // v1 option (harmless if unsupported)
-  });
+  // ---------------------------------------------------------------------------
+  // Tiny DOM helpers
+  // ---------------------------------------------------------------------------
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
 
-  // Keep GSAP/ScrollTrigger in sync with Lenis
-  window.lenis.on('scroll', () => {
-    if (window.ScrollTrigger) ScrollTrigger.update();
-  });
+  // ---------------------------------------------------------------------------
+  // Bottom blur overlay layers + visibility rules
+  // ---------------------------------------------------------------------------
+  function buildBlurLayers(blur) {
+    const cs = getComputedStyle(document.documentElement);
+    const layers = +cs.getPropertyValue('--layers')?.trim() || 5;
+    const blurMax = +cs.getPropertyValue('--blur-max')?.trim() || 40;
+    const stopMax = +cs.getPropertyValue('--mask-stop')?.trim() || 15;
 
-  gsap.ticker.add((t) => window.lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
-}
+    let html = '';
+    for (let i = 1; i <= layers; i++) {
+      const t = i / layers;
+      const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
+      const stop = Math.sin(t * Math.PI / 2) * stopMax;
+      const topVh = (100 - stop).toFixed(3);
+      html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
+    }
+    blur.innerHTML = html;
+  }
 
+  function initBlurOverlayVisibility() {
+    let blur = document.querySelector('.blur');
+    if (!blur) {
+      blur = document.createElement('div');
+      blur.className = 'blur';
+      document.body.appendChild(blur);
+    }
+    if (!blur.children.length) buildBlurLayers(blur);
 
-        function enableHashScroll() {
-          document.addEventListener('click', (e) => {
-            const a = e.target.closest('a[href^="#"]');
-            if (!a) return;
-            const id = a.getAttribute('href');
-            if (!id || id.length < 2) return;
-            const target = document.querySelector(id);
-            if (!target) return;
-            e.preventDefault();
+    const header = document.querySelector('.frame');
 
-            const settle = a.dataset.settle;
-            const focusTarget = () => {
-              target.setAttribute('tabindex', '-1');
-              setTimeout(() => target.focus({
-                preventScroll: true
-              }), 0);
-            };
+    const show = () => blur.classList.add('is-visible');
+    const hide = () => blur.classList.remove('is-visible');
 
-            if (settle === 'end' && window.ScrollTrigger) {
-              const st = ScrollTrigger.getAll().find(st =>
-                st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
-              );
-              if (st && isFinite(st.end)) {
-                const y = st.end + 2;
-                if (window.lenis) window.lenis.scrollTo(y, {
-                  duration: 1.1
-                });
-                else window.scrollTo({
-                  top: y,
-                  behavior: 'smooth'
-                });
-                focusTarget();
-                history.pushState(null, '', id);
-                return;
-              }
-            }
-            const y = target.getBoundingClientRect().top + window.pageYOffset;
-            window.lenis ? window.lenis.scrollTo(y, {
-              duration: 1
-            }) : window.scrollTo({
-              top: y,
-              behavior: 'smooth'
-            });
-            focusTarget();
-            history.pushState(null, '', id);
-          });
+    if (header) {
+      const ioHeader = new IntersectionObserver(
+        ([e]) => e.isIntersecting ? hide() : show(), {
+          threshold: 0,
+          rootMargin: '0px 0px -60px 0px'
         }
-
-        // ---------------------------------------------------------------------------
-        // Utilities
-        // ---------------------------------------------------------------------------
-        const preloadImages = (sel = '.grid__img, .grid__img-inner') =>
-          new Promise(res => imagesLoaded(document.querySelectorAll(sel), {
-            background: true
-          }, res));
-
-        function a11yifyGridImages() {
-          document.querySelectorAll('.grid__img').forEach(el => {
-            el.setAttribute('role', 'img');
-            const url = (el.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-            const name = url.split('/').pop()?.split('.')[0] || '';
-            el.setAttribute('aria-label', name.replace(/[-_]/g, ' ').trim() || 'Gallery image');
-          });
-        }
-
-        // ---------------------------------------------------------------------------
-        // Animations
-        // ---------------------------------------------------------------------------
-        function animateHeader() {
-          const frame = document.querySelector('.frame');
-          const title = frame?.querySelector('.frame__title');
-          if (!frame || !title) return;
-
-          if (prefersReducedMotion) {
-            gsap.from(frame, {
-              autoAlpha: 0,
-              duration: .6,
-              ease: 'power1.out',
-              scrollTrigger: {
-                trigger: frame,
-                start: 'top 95%'
-              }
-            });
-            return;
-          }
-
-          gsap.timeline({
-              defaults: {
-                ease: 'none'
-              },
-              scrollTrigger: {
-                trigger: frame,
-                start: 'top top',
-                end: 'bottom top',
-                scrub: true,
-                invalidateOnRefresh: true
-              }
-            })
-            .to(frame, {
-              opacity: 0.38,
-              yPercent: 14
-            }, 0)
-            .to(title, {
-              xPercent: -80
-            }, 0);
-        }
-
-        function animateGrids() {
-          const mq = matchMedia('(max-width:768px)');
-          const isMobile = () => mq.matches;
-
-          const modes = {
-            second: {
-              endDesk: '+=250%',
-              endMob: '+=140%',
-              scrubDesk: .5,
-              scrubMob: .25
-            },
-            fifth: {
-              endDesk: '+=250%',
-              endMob: '+=150%',
-              scrubDesk: .3,
-              scrubMob: .2
-            },
-            sixth: {
-              endDesk: '+=180%',
-              endMob: '+=120%',
-              scrubDesk: .6,
-              scrubMob: .4
-            },
-            ninth: {
-              endDesk: '+=210%',
-              endMob: '+=130%',
-              scrubDesk: .45,
-              scrubMob: .32
-            }
-          };
-
-          function defaultEndPx(mode, grid) {
-            const count = grid.querySelectorAll('.grid__img').length || 6;
-            const section = grid.closest('section') || grid.parentNode;
-            const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
-            const cfg = ({
-              second: {
-                base: {
-                  d: 220,
-                  m: 140
-                },
-                per: {
-                  d: 10,
-                  m: 7
-                },
-                cap: {
-                  d: 12,
-                  m: 8
-                }
-              },
-              fifth: {
-                base: {
-                  d: 240,
-                  m: 150
-                },
-                per: {
-                  d: 8,
-                  m: 5
-                },
-                cap: {
-                  d: 10,
-                  m: 6
-                }
-              },
-              sixth: {
-                base: {
-                  d: 180,
-                  m: 120
-                },
-                per: {
-                  d: 6,
-                  m: 4
-                },
-                cap: {
-                  d: 10,
-                  m: 6
-                }
-              },
-              ninth: {
-                base: {
-                  d: 210,
-                  m: 130
-                },
-                per: {
-                  d: 6,
-                  m: 4
-                },
-                cap: {
-                  d: 12,
-                  m: 8
-                }
-              }
-            })[mode] || {
-              base: {
-                d: 200,
-                m: 120
-              },
-              per: {
-                d: 6,
-                m: 4
-              },
-              cap: {
-                d: 0,
-                m: 0
-              }
-            };
-
-            const tilesOverMin = Math.max(0, count - 4);
-            const vh = (isMobile() ? cfg.base.m : cfg.base.d) +
-              tilesOverMin * (isMobile() ? cfg.per.m : cfg.per.d) +
-              (hasCaption ? (isMobile() ? cfg.cap.m : cfg.cap.d) : 0);
-            return `+=${Math.round(window.innerHeight * (vh/100))}`;
-          }
-          const parseScrub = (v, fb) => {
-            if (v == null || v === '') return fb;
-            if (v === 'true') return true;
-            if (v === 'false') return false;
-            const n = parseFloat(v);
-            return isNaN(n) ? fb : n;
-          };
-
-          const pinType = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
-          const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
-
-          const grids = [...document.querySelectorAll(
-            '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
-          )];
-
-          grids.forEach(grid => {
-            const imgs = grid.querySelectorAll('.grid__img');
-            const items = grid.querySelectorAll('.grid__item');
-            if (!imgs.length && !items.length) return;
-
-            const section = grid.closest('section') || grid.parentNode;
-            const defaultMode =
-              grid.hasAttribute('data-grid-second') ? 'second' :
-              grid.hasAttribute('data-grid-fifth') ? 'fifth' :
-              grid.hasAttribute('data-grid-sixth') ? 'sixth' : 'ninth';
-
-            const d = grid.dataset;
-            const mode = d.mode || defaultMode;
-
-            const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
-
-            const base = modes[mode] || modes.ninth;
-            const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
-            const scrub = parseScrub(isMobile() ? d.scrubMobile : d.scrubDesktop, fallbackScrub);
-
-            const tl = gsap.timeline({
-              defaults: {
-                ease: (mode === 'sixth' ? 'none' : 'power3')
-              },
-              scrollTrigger: {
-                trigger: section,
-                start: 'top top',
-                end,
-                pin: section,
-                pinType,
-                pinReparent: true,
-                scrub,
-                anticipatePin: anticipate,
-                pinSpacing: true,
-                invalidateOnRefresh: true
-              }
-            });
-
-            if (mode === 'second') {
-              const mid = Math.floor(imgs.length / 2);
-              tl.from(imgs, {
-                stagger: {
-                  amount: .3,
-                  from: 'center'
-                },
-                y: () => innerHeight,
-                transformOrigin: '50% 0%',
-                rotation: (i) => (i < mid ? -1 : 1) * Math.abs(i - mid) * (matchMedia('(max-width:768px)').matches ? 1.5 : 3)
-              }).from(items, {
-                stagger: {
-                  amount: .3,
-                  from: 'center'
-                },
-                yPercent: 100,
-                autoAlpha: 0
-              }, 0);
-            }
-            
-            if (mode === 'fifth') {
-              tl.set(grid, {
-                perspective: 1000
-              }).from(imgs, {
-                stagger: {
-                  amount: .4,
-                  from: 'random',
-                  grid: [4, 9]
-                },
-                y: () => innerHeight,
-                rotationX: matchMedia('(max-width:768px)').matches ? -40 : -70,
-                transformOrigin: '50% 0%',
-                z: matchMedia('(max-width:768px)').matches ? -450 : -900,
-                autoAlpha: 0
-              });
-            }
-            if (mode === 'sixth') {
-              tl.from(imgs, {
-                stagger: {
-                  amount: .25,
-                  from: 'edges',
-                  grid: [3, 3]
-                },
-                scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
-                autoAlpha: 0
-              }).from(grid, {
-                scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
-                skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
-              }, 0);
-            }
-            if (mode === 'ninth') {
-              const caption = section.querySelector('.content__title, .grid-head');
-              tl.from(imgs, {
-                transformOrigin: '100% -450%',
-                stagger: .07,
-                scaleX: 1.02,
-                skewX: matchMedia('(max-width:768px)').matches ? 7 : 15,
-                xPercent: matchMedia('(max-width:768px)').matches ? 18 : 50,
-                rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
-                autoAlpha: 0
-              });
-  const headCap   = section.querySelector('.content__title, .grid-head');
-  const bottomCap = section.querySelector('.grid-caption');
-
-  if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
-  if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
-}
-          });
-        }
-
-      
-
-        function animateProcess() {
-          document.querySelectorAll('[id$="-process"]').forEach(process => {
-            const intro = process.querySelector('.project--intro');
-            const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
-            if (prefersReducedMotion) {
-              intro && gsap.from(intro, {
-                autoAlpha: 0,
-                y: 16,
-                duration: .35,
-                scrollTrigger: {
-                  trigger: intro,
-                  start: 'top 90%'
-                }
-              });
-              details.length && gsap.from(details, {
-                autoAlpha: 0,
-                y: 14,
-                duration: .3,
-                stagger: .08,
-                scrollTrigger: {
-                  trigger: process,
-                  start: 'top 85%'
-                }
-              });
-              return;
-            }
-            intro && gsap.from(intro, {
-              autoAlpha: 0,
-              y: 24,
-              duration: .6,
-              ease: 'power2.out',
-              scrollTrigger: {
-                trigger: intro,
-                start: 'top 80%'
-              }
-            });
-            details.length && gsap.from(details, {
-              autoAlpha: 0,
-              y: 30,
-              duration: .5,
-              ease: 'power2.out',
-              stagger: .12,
-              scrollTrigger: {
-                trigger: process,
-                start: 'top 75%',
-                end: 'bottom 30%'
-              }
-            });
-          });
-        }
-
-        function animateStacks() {
-          document.querySelectorAll('.stacked-section [data-stack]').forEach(section => {
-            const frames = section.querySelectorAll('.stacked-img');
-            if (prefersReducedMotion) {
-              gsap.from(frames, {
-                autoAlpha: 0,
-                y: 20,
-                duration: .4,
-                stagger: .08,
-                ease: 'power1.out',
-                scrollTrigger: {
-                  trigger: section,
-                  start: 'top 85%'
-                }
-              });
-              return;
-            }
-            frames.forEach(el => {
-              gsap.from(el, {
-                autoAlpha: 0,
-                y: 36,
-                duration: .7,
-                ease: 'power2.out',
-                scrollTrigger: {
-                  trigger: el,
-                  start: 'top 85%'
-                }
-              });
-              const img = el.querySelector('img');
-              img && gsap.to(img, {
-                yPercent: -8,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: el,
-                  start: 'top bottom',
-                  end: 'bottom top',
-                  scrub: true
-                }
-              });
-            });
-          });
-        }
-
-        // ---------------------------------------------------------------------------
-        // Cursor + Confetti + UX jump + back-to-top
-        // ---------------------------------------------------------------------------
-        function initCursor() {
-          if (!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
-          document.documentElement.classList.add('has-cursor');
-
-          if (!document.getElementById('gc-goo-defs')) {
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.id = 'gc-goo-defs';
-            svg.setAttribute('width', '0');
-            svg.setAttribute('height', '0');
-            svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
-            document.body.appendChild(svg);
-          }
-
-          document.querySelectorAll('.gooey-cursor').forEach(n => n.remove());
-          const wrap = document.createElement('div');
-          wrap.className = 'gooey-cursor';
-          wrap.setAttribute('aria-hidden', 'true');
-          document.body.appendChild(wrap);
-
-          const N = 20;
-          const LERP = .35;
-          const LINK_SHRINK = 0.55;
-          let hoverBoost = 1;
-
-          for (let i = 0; i < N; i++) {
-            const d = document.createElement('div');
-            d.className = 'gc-dot';
-            wrap.appendChild(d);
-          }
-          const dots = Array.from(wrap.children);
-
-          let mx = innerWidth / 2,
-            my = innerHeight / 2;
-          const hist = Array.from({
-            length: N
-          }, () => ({
-            x: mx,
-            y: my
-          }));
-
-          addEventListener('pointermove', (e) => {
-            mx = e.clientX;
-            my = e.clientY;
-          }, {
-            passive: true
-          });
-
-          let cursorRAF;
-
-          function tick() {
-            hist.shift();
-            hist.push({
-              x: mx,
-              y: my
-            });
-            for (let i = 0; i < N; i++) {
-              const c = hist[i],
-                n = hist[i + 1] || hist[N - 1];
-              c.x += (n.x - c.x) * LERP;
-              c.y += (n.y - c.y) * LERP;
-
-              const base = i / N;
-              const scale = (i === N - 1) ? base * hoverBoost : base;
-
-              dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
-            }
-            cursorRAF = requestAnimationFrame(tick);
-          }
-          cursorRAF = requestAnimationFrame(tick);
-
-          document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-              if (cursorRAF) cancelAnimationFrame(cursorRAF);
-              cursorRAF = null;
-            } else {
-              cursorRAF = requestAnimationFrame(tick);
-            }
-          }, {
-            passive: true
-          });
-
-          // helper right above the event listeners
-          const isLink = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
-          const isNavLink = (t) => t && (t.closest('nav') || t.closest('.frame__links') || t.closest('.frame__tags'));
-
-          document.addEventListener('pointerover', (e) => {
-            if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = LINK_SHRINK;
-          }, true);
-
-          document.addEventListener('pointerout', (e) => {
-            if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = 1;
-          }, true);
-
-        }
-
-        function initConfetti() {
-          const sup = document.querySelector('.heading-chant .confetti-sup');
-          if (!sup) return;
-
-          const emitter = sup.querySelector('span.emitter');
-          const physicsAvailable = !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
-          if (!physicsAvailable) return;
-
-          function particles(parent, qty, x, y, minA, maxA) {
-            const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
-            for (let i = 0; i < qty; i++) {
-              const angle = gsap.utils.random(minA, maxA);
-              const velocity = gsap.utils.random(70, 140);
-              const dot = document.createElement('div');
-              dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
-              parent.appendChild(dot);
-
-              gsap.set(dot, {
-                opacity: 0,
-                x,
-                y,
-                scale: gsap.utils.random(.4, .8),
-                rotation: gsap.utils.random(0, 360)
-              });
-              gsap.timeline({
-                  onComplete: () => dot.remove()
-                })
-                .to(dot, {
-                  opacity: 1,
-                  duration: .06
-                }, 0)
-                .to(dot, {
-                  duration: 1.8,
-                  rotationX: `-=${gsap.utils.random(720,1440)}`,
-                  rotationZ: `+=${gsap.utils.random(720,1440)}`,
-                  physics2D: {
-                    angle,
-                    velocity,
-                    gravity: 120
-                  }
-                }, 0)
-                .to(dot, {
-                  opacity: 0,
-                  duration: 1
-                }, .8);
-            }
-          }
-
-          function burst(q = 80, minA = -95, maxA = -35) {
-            particles(emitter, q, 0, 0, minA, maxA);
-            gsap.fromTo(sup, {
-              scale: .96
-            }, {
-              scale: 1,
-              duration: .25,
-              ease: 'elastic.out(1,.6)'
-            });
-          }
-
-          sup.addEventListener('click', () => burst());
-          sup.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              burst();
-            }
-          });
-
-          if (!prefersReducedMotion && matchMedia('(pointer:fine)').matches) {
-            let last = 0;
-            const CD = 700;
-            sup.addEventListener('mouseenter', () => {
-              const now = performance.now();
-              if (now - last < CD) return;
-              last = now;
-              burst(28, -100, -60);
-            });
-          }
-
-          if (prefersReducedMotion) return;
-
-          let firedAuto = false;
-          const auto = () => {
-            if (firedAuto) return;
-            firedAuto = true;
-            burst(54, -100, -35);
-          };
-
-          if (typeof ScrollTrigger !== 'undefined') {
-            const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
-            ScrollTrigger.create({
-              trigger: triggerEl,
-              start: 'top 65%',
-              once: true,
-              onEnter: auto
-            });
-          }
-
-          const isSupInView = () => {
-            const r = sup.getBoundingClientRect();
-            return r.top < innerHeight * 0.65 && r.bottom > 0;
-          };
-          if (location.hash === '#about' || isSupInView()) {
-            setTimeout(auto, 400);
-          }
-        }
-
-        function initDeadJump() {
-          const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
-          const sections = Array.from(document.querySelectorAll('main > section'));
-          const nextSection = () => sections[0] && sections[0].id !== 'about' ? sections[0] : sections[1] || sections[0];
-
-          function jump() {
-            const t = nextSection();
-            if (!t) return;
-            const top = t.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-              top,
-              behavior: prefersReducedMotion ? 'auto' : 'smooth'
-            });
-          }
-          cands.forEach(el => {
-            el.setAttribute('role', 'link');
-            el.setAttribute('tabindex', '0');
-            el.setAttribute('aria-label', 'Jump to next section');
-            el.addEventListener('click', (e) => {
-              e.preventDefault();
-              jump();
-            });
-            el.addEventListener('keydown', (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                jump();
-              }
-            });
-          });
-        }
-
-        function initBackToTop() {
-          const el = document.querySelector('.scroll-downs');
-          if (!el) return;
-          const toTop = (e) => {
-            e.preventDefault();
-            window.lenis ? window.lenis.scrollTo(0, {
-              duration: 1
-            }) : window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            })
-          };
-          el.addEventListener('click', toTop);
-          el.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') toTop(e);
-          });
-        }
-
-        // ---------------------------------------------------------------------------
-        // Case study timing overrides
-        // ---------------------------------------------------------------------------
-        function tuneCaseStudyTiming() {
-          const mq = window.matchMedia('(max-width: 768px)');
-          const isMobile = () => mq.matches;
-
-          function setTiming(grid, {
-            endDesk,
-            endMob,
-            scrubDesk,
-            scrubMob,
-            mode
-          }) {
-            if (mode) grid.dataset.mode = mode;
-            if (endDesk) grid.dataset.endDesktop = endDesk;
-            if (endMob) grid.dataset.endMobile = endMob;
-            if (scrubDesk != null) grid.dataset.scrubDesktop = scrubDesk;
-            if (scrubMob != null) grid.dataset.scrubMobile = scrubMob;
-          }
-
-          function calcEndPx(grid, {
-            baseVH,
-            perTileVH,
-            minTiles = 4,
-            captionBoostVH = 0
-          }) {
-            const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
-            const tilesOverMin = Math.max(0, tiles - minTiles);
-            const hasCaption = !!(grid.closest('section')?.querySelector('.content__title, .grid-head'));
-            const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop) +
-              tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop) +
-              (hasCaption ? (isMobile() ? (captionBoostVH.mobile || 0) : (captionBoostVH.desktop || 0)) : 0);
-            const px = Math.round(window.innerHeight * (totalVH / 100));
-            return `+=${px}`;
-          }
-
-          document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: {
-                desktop: 120,
-                mobile: 90
-              },
-              perTileVH: {
-                desktop: 10,
-                mobile: 7
-              },
-              captionBoostVH: {
-                desktop: 12,
-                mobile: 8
-              }
-            });
-            setTiming(grid, {
-              mode: 'sixth',
-              endDesk: end,
-              endMob: end,
-              scrubDesk: 0.55,
-              scrubMob: 0.38
-            });
-          });
-
-          document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: {
-                desktop: 150,
-                mobile: 110
-              },
-              perTileVH: {
-                desktop: 6,
-                mobile: 4
-              }
-            });
-            setTiming(grid, {
-              mode: 'ninth',
-              endDesk: end,
-              endMob: end,
-              scrubDesk: 0.45,
-              scrubMob: 0.32
-            });
-          });
-
-          document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: {
-                desktop: 135,
-                mobile: 95
-              },
-              perTileVH: {
-                desktop: 8,
-                mobile: 6
-              },
-              captionBoostVH: {
-                desktop: 10,
-                mobile: 6
-              }
-            });
-            setTiming(grid, {
-              endDesk: end,
-              endMob: end,
-              scrubDesk: 0.40,
-              scrubMob: 0.28
-            });
-          });
-
-          document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: {
-                desktop: 160,
-                mobile: 110
-              },
-              perTileVH: {
-                desktop: 5.5,
-                mobile: 4.5
-              }
-            });
-            setTiming(grid, {
-              endDesk: end,
-              endMob: end,
-              scrubDesk: 0.50,
-              scrubMob: 0.35
-            });
-          });
-        }
-
-        // ===========================================================================
-        // CONTENT MODEL
-        // ===========================================================================
-        const CONTENT = {
-          header: {
-            title: 'UX is dead↴',
-            logo: "ZCKGRT",
-            subline: "DIGITAL EXPERIENCE DESIGNER",
-            links: [
-              {
-                label: 'FAQ',
-                href: 'https://zackgort.com/faq'
-              },
-              {
-                label: 'Résumé',
-                href: 'https://zackgort.com/resume'
-              },
-              {
-                label: 'LinkedIn',
-                href: 'https://linkedin.com/in/zackgort'
-              }
-            ],
-
-            tags: [{
-                label: "#About",
-                href: "#about"
-              },
-              {
-                label: "#Work",
-                href: "#work",
-                settle: "end"
-              },
-              {
-                label: "#Product",
-                href: "#fintech",
-                settle: "end"
-              },
-              {
-                label: "#Ecommerce",
-                href: "#ecommerce",
-                settle: "end"
-              },
-              {
-                label: "#Connect",
-                href: "#contact",
-                settle: "end"
-              }
-            ]
-          },
-          about: {
-            heading: "¡Viva la XP!",
-            sup: "experience",
-            byline: "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"user is kind of implied, no?\"><span>User</span></span> Experience Designer",
-            copy: [
-              "I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function.",
-              "I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.",
-              "Now, as for design. I design those experiences :)"
-            ],
-            note: "— Disclaimer: <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"I found a gsap library that intrigued me, read the documentation, decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS for efficiency, added ad hoc functionality + features, included idiosyncratic interactive 'easter eggs', and splashed on some visual fluff for good measure.\"><span>I didn't use AI to build this website. </span></span>",
-          },
-
-          skills: {
-            cols: [{
-                heading: "#SPECIALIZATIONS",
-                items: [
-                  "User Experience Design",
-                  "Visual Interface Design",
-                  "Accessibility Compliance",
-                  "UX Research & Strategy",
-                  "+"
-                ]
-              },
-              {
-                heading: "#TOOLS",
-                items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"]
-              },
-              {
-                heading: "CURRENTLY",
-                items: ["AI + Creative Coding", "Design Systems & Workflows", "+"]
-              }
-            ]
-          },
-          workSelect: {
-            captionTitle: "select works",
-            tiles: [
-              "https://i.ibb.co/c3vLP47/image-445-min.png",
-              "https://i.ibb.co/jJD2YPJ/image-438-min.png",
-              "https://i.ibb.co/Ct9DZd9/image-442-min.png",
-              "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-              "https://i.ibb.co/x8Jy9P1f/11.webp"
-            ],
-            cards: [{
-                title: "BNY Mellon — Pershing X",
-                href: "#fintech",
-                glyph: "↓",
-                settle: "end"
-              },
-              {
-                title: "General Nutrition Centers {GNC}",
-                href: "#ecommerce",
-                glyph: "↓",
-                settle: "end"
-              },
-              {
-                title: "TikTok For Business",
-                href: "https://www.tiktok.com/about?lang=en",
-                ext: true,
-                glyph: "↗"
-              }
-            ]
-          },
-          brandsGrid: {
-            title: "#design",
-            images: [
-              "https://i.ibb.co/yBgB52s8/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp",
-              "https://i.ibb.co/QdmJdXh/AM-wire.jpg",
-              "https://i.ibb.co/Q9KH8n3/image-401-min.png",
-              "https://i.ibb.co/0spCQB3/image-7-Copy.png",
-              "https://i.ibb.co/ZG6v0p5/image-10.png",
-
-              "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
-              "https://i.ibb.co/cX4QjFf/Screenshot-20230217-102232.png",
-              "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
-              "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
-              "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
-
-              "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
-              "https://i.ibb.co/4Z3457T5/1-t-Yd-DX2-Ql-VLw-XI7gm3ev-MLw.webp",
-              "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
-              "https://i.ibb.co/X5NHxCV/image-414-min.png",
-              "https://i.ibb.co/0VmJ708g/work3.webp",
-
-              "https://i.ibb.co/cSQCgNQY/work1.webp",
-              "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
-              "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
-              "https://i.ibb.co/rft2bf0T/9.webp",
-              "https://i.ibb.co/vx76zjgf/10.webp",
-
-              "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-              "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
-              "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
-              "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
-              "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
-
-              "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
-              "https://i.ibb.co/Jrb2Npd/image-020.png",
-              "https://i.ibb.co/68t5b9S/Mask-group-7-min.png",
-              "https://i.ibb.co/pfvstSt/3.jpg",
-              "https://i.ibb.co/Xtk8Cqp/Mask-group-4-min.png",
-            ],
-//            names: ["BNY Mellon — Pershing X","General Nutrition Centers {GNC}","TikTok For Business","Dana Foundation","GEICO","Kent State University","University of Wisconsin Madison","Texas A&M","The Philadelphia Eagles","Philadelphia Soul","Comcast Spectacor","Power Home Remodeling Group","Rachel Roy","Goya","Merck Animal Health","Charter","La Colombe","Vertex SMB","SEIC","Aquasana","Simpson Strong-Tie","Hardinge","West Marine","YETI","Organic Girl","LIDL"]
-
-          },
-
-          agencyGrid: {
-            title: "#agencylife",
-            images: [
-              "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
-              "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
-              "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
-
-              "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
-              "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
-    
-
-              "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
-              
-              "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
-              "https://i.ibb.co/c3vLP47/image-445-min.png",
-              "https://i.ibb.co/RymyPtP/image-443-min.png",
-              "https://i.ibb.co/Ct9DZd9/image-442-min.png",
-
-            ],
-//            names: ["One Sixty Over Ninety","O3 World","Workarea","Livearea","Huge","Elva Design Group","Code & Theory","Publicis Sapient"]
-
-          },
-
-          fintech: {
-            heroImages: [
-              "https://i.ibb.co/XkM2hn8n/bny1.png",
-              "https://i.ibb.co/vvMZmq94/bny2.png",
-              "https://i.ibb.co/xS49C07B/bny3.png",
-              "https://i.ibb.co/wZY2bhKF/bny4.png",
-              "https://i.ibb.co/vvMZmq94/bny2.png"
-            ],
-            heroCaption: {
-              title: " ",
-              subtitle: " "
-            },
-            process: {
-              client: "BNY Mellon — Pershing X",
-              agency: "Publicis Sapient",
-              role: [
-                "Senior User Experience Designer, Product Design Lead",
-              ],
-              details: [
-                ["Problem", "Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."],
-                ["Constraints", "SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."],
-                ["Role & Team", "Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."],
-                ["Research", "Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."]
-              ]
-            },
-
-            discoveryImages: [
-              "https://i.ibb.co/wZY2bhKF/bny4.png",
-              "https://i.ibb.co/xS49C07B/bny3.png",
-              "https://i.ibb.co/vvMZmq94/bny2.png",
-              "https://i.ibb.co/XkM2hn8n/bny1.png",
-              "https://i.ibb.co/FJNG1jC/14.jpg",
-              "https://i.ibb.co/fxjgcYD/18.png",
-              "https://i.ibb.co/gtQLYJQ/17.jpg",
-              "https://i.ibb.co/Fgxcqj0/16.jpg",
-              "https://i.ibb.co/dcXH5fn/13.jpg"
-            ],
-            insight: [
-              ["Deep Dive", "No Artificial Intelligence Here"]
-            ],
-            insightAside: "This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.",
-            stack: [
-              ["https://i.ibb.co/XkM2hn8n/bny1.png", "BNY 1"],
-              ["https://i.ibb.co/vvMZmq94/bny2.png", "BNY 2"],
-              ["https://i.ibb.co/xS49C07B/bny3.png", "BNY 3"],
-              ["https://i.ibb.co/wZY2bhKF/bny4.png", "BNY 4"],
-              ["https://i.ibb.co/HGv7ymj/4.jpg", "Account Opening"]
-            ]
-          },
-          ecommerce: {
-            heroImages: [
-              "https://i.ibb.co/cSQCgNQY/work1.webp",
-              "https://i.ibb.co/spHgPH6N/1.webp",
-              "https://i.ibb.co/ynjWYqv8/2.webp",
-              "https://i.ibb.co/cXg5Phdc/3.webp",
-              "https://i.ibb.co/gZ58PKyk/4.webp"
-            ],
-            heroCaption: {
-              title: " ",
-              subtitle: " "
-            },
-            process: {
-              client: "General Nutrition Centers (GNC)",
-              agency: "Elva Design Group",
-              titleLines: ["This is the Whey"],
-              role: [
-                "Senior User Experience Designer (IA/flows). Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics.",
-                "Tight cadence, top-tier design + strategy, weekly exec reviews."
-              ],
-              details: [
-                ["Problem", "GNC asked us to shake things up; providing them with a modern e-commerce solution."],
-                ["Scope", "We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
-                ["Heavy lift. Huge Gains.", "Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
-                ["If the bar ain't bending, you're just pretending", "Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
-              ]
-            },
-
-            discoveryImages: [
-              "https://i.ibb.co/gZ58PKyk/4.webp",
-              "https://i.ibb.co/cXg5Phdc/3.webp",
-              "https://i.ibb.co/ynjWYqv8/2.webp",
-              "https://i.ibb.co/spHgPH6N/1.webp",
-              "https://i.ibb.co/Y7pGqJ69/5.webp",
-              "https://i.ibb.co/99h2bQMh/6.webp",
-              "https://i.ibb.co/yB4RwkTf/7.webp",
-              "https://i.ibb.co/7N2rDqrN/8.webp",
-              "https://i.ibb.co/rft2bf0T/9.webp",
-              "https://i.ibb.co/vx76zjgf/10.webp"
-            ],
-            insight: [
-              ["Outcome", "if the bar ain't bending, you’re just pretending:  The result helped GNC reclaim ~$500M in annual revenue."]
-            ],
-            insightAside: "More context: we accelerated releases with a simplified stack + shared components, aligned PLP/PDP taxonomy to search intent, and tuned mobile performance and loyalty hooks—so the gains were durable, not just cosmetic.",
-            stack: [
-              ["https://i.ibb.co/cSQCgNQY/work1.webp", "Homepage concept"],
-              ["https://i.ibb.co/spHgPH6N/1.webp", "PLP & filter system"],
-              ["https://i.ibb.co/ynjWYqv8/2.webp", "Subscription bundle flows"],
-              ["https://i.ibb.co/cXg5Phdc/3.webp", "PDP content blocks"],
-              ["https://i.ibb.co/gZ58PKyk/4.webp", "Cart & checkout refinements"],
-              ["https://i.ibb.co/Y7pGqJ69/5.webp", "Landing template variants"],
-              ["https://i.ibb.co/99h2bQMh/6.webp", "Mobile flows"],
-              ["https://i.ibb.co/yB4RwkTf/7.webp", "Guides & programs"]
-            ]
-          },
-          contact: {
-            blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
-            email: "zack@reasonably.cc",
-            linkedin: "https://www.linkedin.com/in/zackgort/"
-          }
-        };
-
-        // ---------------------------------------------------------------------------
-        // SKILL IMAGE MAP + helper (used by hover reveal)
-        // ---------------------------------------------------------------------------
-        const SKILL_IMG = {
-          "User Experience Design": "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
-          "Visual Interface Design": "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-          "Accessibility Compliance": "https://i.ibb.co/Z69xjMQY/tiktok-cat.gif",
-          "UX Research & Strategy": "https://i.ibb.co/pdc51pC/S1-Final-Homepage-Homepage-Narrative-Example.png",
-          "Figma, Adobe CS": "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
-          "HTML/CSS/Js": "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
-          "Pen & Paper": "https://i.ibb.co/Z2tsks1/image-434-min.png",
-          "Whiteboard": "https://i.ibb.co/ZW3j6T1/Photo-Selects-Sketch-Prep-1-1-Houghton-Nav.jpg",
-          "AI + Creative Coding": "https://i.ibb.co/RCnjfFv/6105c90759377c59c854a562-ZAX02142.jpg",
-          "Design Systems & Workflows": "https://i.ibb.co/McRbkzq/640cdd0717d12bcf72882e0f-6106ecd46ed1ff579fd6ed81-ZAX02288.jpg"
-        };
-        const imgFor = (label) => SKILL_IMG[label] || "https://i.ibb.co/cSQCgNQY/work1.webp";
-
-        // ---------------------------------------------------------------------------
-        // RENDERER
-        // ---------------------------------------------------------------------------
-        function renderApp() {
-          const app = $('#app');
-          if (!app) return;
-          app.innerHTML = '';
-
-          // HEADER / FRAME
-          const header = el('header', 'frame');
-          header.innerHTML = `
-                              <h1 class="frame__title">
-                                <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
-                              </h1>
-                              <div class="frame__subline type-tiny">
-                                <span>${CONTENT.header.subline}</span>
-                        <nav class="frame__links flex-line">
-                          ${CONTENT.header.links.map((l) => {
-                            const href = l.href || '#';
-                            const isInternal = href.startsWith('#') || href.startsWith('/');
-                            const attrs = [
-                              `href="${href}"`,
-                              !isInternal ? 'target="_blank" rel="noopener"' : '',
-                              l.tip ? 'class="nav-tip"' : '',
-                              l.tip ? `data-tip="${l.tip}"` : '',
-                              l.tip ? `title="${l.tip}"` : '' // native fallback
-                            ].filter(Boolean).join(' ');
-                            return `<a ${attrs}>${l.label}</a>`;
-                          }).join('')}
-                        </nav>
-
-                              </div>
-                              <nav class="frame__tags flex-line type-tiny">
-                                ${CONTENT.header.tags.map(t => `<a href="${t.href}" ${t.settle?`data-settle="${t.settle}"`:''}>${t.label}</a>`).join('')}
-                              </nav>
-                              <span class="frame__logo">${CONTENT.header.logo}</span>
-                            `;
-          app.appendChild(header);
-
-          // ABOUT (hero)
-          const about = el('section', 'content content--padded');
-          about.id = 'about';
-          about.innerHTML = `
-                          <h3 class="heading-chant">
-                            ${CONTENT.about.heading}
-                            <sup class="confetti-sup" role="button" tabindex="0" aria-label="${CONTENT.about.sup} (tap for confetti)">
-                              ${CONTENT.about.sup}
-                              <span class="emitter" aria-hidden="true"></span>
-                            </sup>
-                          </h3>
-                          <p class="type-tiny right end">${CONTENT.about.byline}</p>
-                        `;
-          app.appendChild(about);
-
-          // ABOUT — content (separate section)
-          const aboutContent = el('section', 'content content--padded');
-          aboutContent.id = 'about-content';
-
-          const aboutCopyHTML = (CONTENT.about.copy || [])
-            .map(p => `<p>${p}</p>`)
-            .join('');
-
-          aboutContent.innerHTML = `
-                          <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-                          <div class="content__text">
-                            ${aboutCopyHTML}
-                          </div>
-                          ${CONTENT.about.note
-                            ? `<p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">${CONTENT.about.note}</p>`
-                            : '' }
-                        `;
-          app.appendChild(aboutContent);
-
-          // SKILLS (items rendered as fx-2 hoverable/tappable links with data-img)
-          const skills = el('section', 'content content--padded');
-          skills.id = 'skills';
-          skills.innerHTML = `
-                              <div class="trio-grid">
-                                ${CONTENT.skills.cols.map(col => `
-                                  <div class="trio-col">
-                                    <h4 class="type-tiny">${col.heading}</h4>
-                                    ${col.items.map(t => `
-                                      <a class="content__text skills-link" data-fx="2" data-img="${imgFor(t)}" href="#" role="link" aria-label="${t}" onclick="return false;">
-                                        <span>${t}</span>
-                                      </a>
-                                    `).join('')}
-                                  </div>`).join('')}
-                              </div>
-                            `;
-          app.appendChild(skills);
-
-          // WORK SELECT
-          const work = el('section', 'content content--padded');
-          work.id = 'work';
-          work.innerHTML = `
-                              <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
-                              <div class="grid grid--columns grid--spaced" data-grid-second>
-                                ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-                                ${CONTENT.workSelect.cards.map(c => `
-                                  <div class="grid__item work-card">
-                                    <h4 class="type-tiny">
-                                      <a class="title-link"
-                                         href="${c.href}"
-                                         ${c.ext ? 'target="_blank" rel="noopener noreferrer"' : ''}
-                                         ${c.settle ? `data-settle="${c.settle}"` : ''}>
-                                         ${c.title}
-                                      </a>
-                                    </h4>
-                                    <p>${c.glyph || ''}</p>
-                                  </div>`).join('')}
-                              </div>
-                            `;
-          app.appendChild(work);
-
-          // BRANDS GRID
-          const brands = el('section', 'content content--padded content--full');
-          brands.id = 'brands-grid';
-          brands.innerHTML = `
-        <div class="grid-head">
-          <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
-        </div>
-        <div class="grid grid--columns grid--spaced" data-grid-ninth>
-          ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-        </div>
-        ${CONTENT.brandsGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.brandsGrid.names.join(' • ')}</p>` : ''}
-      `;
-          app.appendChild(brands);
-
-          // AGENCY GRID
-          const agency = el('section', 'content content--padded content--full');
-          agency.id = 'brands-grid-2';
-          agency.innerHTML = `
-        <div class="grid-head">
-          <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
-        </div>
-        <div class="grid grid--columns grid--spaced" data-grid-ninth>
-          ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-        </div>
-        ${CONTENT.agencyGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.agencyGrid.names.join(' • ')}</p>` : ''}
-      `;
-          app.appendChild(agency);
-
-          // FINTECH — HERO
-          const finHero = el('section', 'content content--padded content--full');
-          finHero.id = 'fintech';
-          finHero.innerHTML = `
-                              <div class="grid grid--columns grid--spaced" data-grid-ninth>
-                                ${CONTENT.fintech.heroImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-                              </div>
-                              <div class="content__title">
-                                <h2 class="content__title-main">${CONTENT.fintech.heroCaption.title}</h2>
-                                <p class="type-tiny right end">${CONTENT.fintech.heroCaption.subtitle}</p>
-                              </div>
-                            `;
-          app.appendChild(finHero);
-
-          // FINTECH — PROCESS
-          const finProc = el('section', 'content content--padded');
-          finProc.id = 'fintech-process';
-          const finIntro = `
-                          <section class="project project--intro">
-                            <span class="project__label project__label--name">Client</span>
-                            <span class="project__name">${CONTENT.fintech.process.client}</span>
-
-                            <span class="project__label project__label--date">Agency</span>
-                            <span class="project__date">${CONTENT.fintech.process.agency}</span>
-
-                            <h2 class="project__title"><span class="project__title-line">design systems, dashboards, data, & due diligence. </span></h2>
-
-                            <div class="project__mission content__text">
-                              <p>
-                                <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                                  Role
-                                </span>
-                                ${CONTENT.fintech.process.role[0]}
-                              </p>
-                              ${CONTENT.fintech.process.role.slice(1).map(p=>`<p>${p}</p>`).join('')}
-                            </div>
-                          </section>`;
-
-          const finDetails = CONTENT.fintech.process.details.map(([label, text], i) => `
-                              <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-                                <span class="project__label project__label--default">${label}</span>
-                                <p>${text}</p>
-                              </section>`).join('');
-          finProc.innerHTML = finIntro + finDetails;
-          app.appendChild(finProc);
-
-          // FINTECH — DISCOVERY
-          const finDisc = el('section', 'content content--full content--cutoff');
-          finDisc.id = 'fintech-discovery';
-          finDisc.innerHTML = `
-                              <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-                                ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-                              </div>`;
-          app.appendChild(finDisc);
-
-          // FINTECH — INSIGHT
-          const finInsight = el('section', 'content content--padded');
-          finInsight.id = 'fintech-insight';
-          const finInsightParas = CONTENT.fintech.insight.map(([label, text]) => `
-                              <p>
-                                <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                                  ${label}
-                                </span>
-                                ${text}
-                              </p>
-                            `).join('');
-          finInsight.innerHTML = `
-                              <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-                              <div class="content__text">
-                                ${finInsightParas}
-                              </div>
-                            `;
-          if (CONTENT.fintech.insightAside) {
-            const aside = el('p', 'type-tiny right end insight-aside');
-            aside.textContent = CONTENT.fintech.insightAside;
-            finInsight.querySelector('.content__text').appendChild(aside);
-          }
-          app.appendChild(finInsight);
-
-          // FINTECH — STACK
-          const finStack = el('section', 'content content--full stacked-section');
-          finStack.id = 'fintech-stack';
-          finStack.innerHTML = `
-                              <div class="stacked-gallery" data-stack>
-                                ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
-                              </div>`;
-          app.appendChild(finStack);
-
-          // ECOM — HERO
-          const ecoHero = el('section', 'content content--padded content--full');
-          ecoHero.id = 'ecommerce';
-          ecoHero.innerHTML = `
-                              <div class="grid grid--columns grid--spaced" data-grid-ninth>
-                                ${CONTENT.ecommerce.heroImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-                              </div>
-                              <div class="content__title">
-                                <h2 class="content__title-main">${CONTENT.ecommerce.heroCaption.title}</h2>
-                                <p class="type-tiny right end">${CONTENT.ecommerce.heroCaption.subtitle}</p>
-                              </div>`;
-          app.appendChild(ecoHero);
-
-          // ECOM — PROCESS
-          const ecoProc = el('section', 'content content--padded');
-          ecoProc.id = 'ecommerce-process';
-          const ecoIntro = `
-                          <section class="project project--intro">
-                            <span class="project__label project__label--name">Client</span>
-                            <span class="project__name">${CONTENT.ecommerce.process.client}</span>
-
-                            <span class="project__label project__label--date">Agency</span>
-                            <span class="project__date">${CONTENT.ecommerce.process.agency}</span>
-
-                            <h2 class="project__title">
-                              ${CONTENT.ecommerce.process.titleLines?.map(t=>`<span class="project__title-line">${t}</span>`).join('') || ''}
-                            </h2>
-
-                            <div class="project__mission content__text">
-                              <p>
-                                <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                                  Role
-                                </span>
-                                ${CONTENT.ecommerce.process.role[0] || ''}
-                              </p>
-                              ${(CONTENT.ecommerce.process.role || []).slice(1).map(p=>`<p>${p}</p>`).join('')}
-                            </div>
-                          </section>`;
-
-          const ecoDetails = CONTENT.ecommerce.process.details.map(([label, text], i) => `
-                              <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-                                <span class="project__label project__label--default">${label}</span>
-                                <p>${text}</p>
-                              </section>`).join('');
-          ecoProc.innerHTML = ecoIntro + ecoDetails;
-          app.appendChild(ecoProc);
-
-          // ECOM — DISCOVERY
-          const ecoDisc = el('section', 'content content--full content--cutoff');
-          ecoDisc.id = 'ecommerce-discovery';
-          ecoDisc.innerHTML = `
-                              <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-                                ${CONTENT.ecommerce.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
-                              </div>`;
-          app.appendChild(ecoDisc);
-
-          // ECOM — INSIGHT
-          const ecoInsight = el('section', 'content content--padded');
-          ecoInsight.id = 'ecommerce-insight';
-          const ecoInsightParas = CONTENT.ecommerce.insight.map(([label, text]) => `
-                              <p>
-                                <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                                  ${label}
-                                </span>
-                                ${text}
-                              </p>
-                            `).join('');
-          ecoInsight.innerHTML = `
-                              <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-                              <div class="content__text">
-                                ${ecoInsightParas}
-                              </div>
-                            `;
-          if (CONTENT.ecommerce.insightAside) {
-            const aside = el('p', 'type-tiny right end insight-aside');
-            aside.textContent = CONTENT.ecommerce.insightAside;
-            ecoInsight.querySelector('.content__text').appendChild(aside);
-          }
-          app.appendChild(ecoInsight);
-
-          // ECOM — STACK
-          const ecoStack = el('section', 'content content--full stacked-section');
-          ecoStack.id = 'ecommerce-stack';
-          ecoStack.innerHTML = `
-                              <div class="stacked-gallery" data-stack>
-                                ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
-                              </div>`;
-          app.appendChild(ecoStack);
-
-          // CONTACT
-          const contact = el('section', 'content content--padded');
-          contact.id = 'contact';
-          contact.innerHTML = `
-                              <h4 class="type-tiny">CONTACT</h4>
-                              <p class="content__text">${CONTENT.contact.blurb}</p>`;
-          app.appendChild(contact);
-
-          // FOOTER
-          const footer = el('footer', 'page-footer type-tiny');
-          footer.innerHTML = `
-                              <span>Hey, nice to see you down here!</span>
-                              <span><a href="mailto:${CONTENT.contact.email}">${CONTENT.contact.email}</a></span>
-                              <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
-          app.appendChild(footer);
-
-          // Scroll-to-top widget
-          const s = el('div', 'scroll-downs');
-          s.setAttribute('role', 'button');
-          s.setAttribute('tabindex', '0');
-          s.setAttribute('aria-label', 'Back to top');
-          s.innerHTML = `<div class="mousey"><div class="scroller"></div></div>`;
-          app.appendChild(s);
-        }
-
-        // ---------------------------------------------------------------------------
-        // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)
-        // ---------------------------------------------------------------------------
-        function initSkillsHoverReveal() {
-          // Build floating node once (shared by desktop + mobile)
-          let root = document.getElementById('hoverReveal');
-          if (!root) {
-            root = document.createElement('div');
-            root.id = 'hoverReveal';
-            root.className = 'hover-reveal';
-            root.setAttribute('aria-hidden', 'true');
-            root.style.opacity = '0';
-            root.innerHTML = `
-                                <div class="hover-reveal__inner">
-                                  <div class="hover-reveal__deco"></div>
-                                  <div class="hover-reveal__img"></div>
-                                </div>`;
-            document.body.appendChild(root);
-          }
-          const imgBox = root.querySelector('.hover-reveal__img');
-
-          const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
-
-          // Smooth follow (desktop); on mobile we position directly
-          const follow = {
-            x: innerWidth / 2,
-            y: innerHeight / 2
-          };
-          const pos = {
-            x: follow.x,
-            y: follow.y
-          };
-          const lerp = (a, b, t) => a + (b - a) * t;
-          let raf;
-
-// Put preview top-right of the pointer (bottom-left corner at the pointer)
-const PREVIEW_MARGIN = 16; // px
-
-function positionRootAt(x, y) {
-  const rect = root.getBoundingClientRect();
-  const w = rect.width  || 220;
-  const h = rect.height || 160;
-
-  // Anchor point (bottom-left) slightly to the right and above the cursor
-  let tx = x + PREVIEW_MARGIN;
-  let ty = y - PREVIEW_MARGIN;
-
-  // Keep it on-screen
-  tx = Math.min(Math.max(8, tx), innerWidth  - w - 8);
-  ty = Math.min(Math.max(h + 8, ty), innerHeight - 8);
-
-  gsap.set(root, {
-    x: tx,
-    y: ty,
-    xPercent: 0,    // left edge aligns to tx
-    yPercent: -100, // bottom edge aligns to ty (so box sits above)
-  });
-}
-
-
-          const tick = () => {
-            pos.x = lerp(pos.x, follow.x, 0.16);
-            pos.y = lerp(pos.y, follow.y, 0.16);
-            positionRootAt(pos.x, pos.y);
-            raf = requestAnimationFrame(tick);
-          };
-
-          // Helpers
-          const preload = (url) => new Promise((res, rej) => {
-            imgBox.style.backgroundImage = `url(${url})`;
-            const img = new Image();
-            img.onload = () => res();
-            img.onerror = rej;
-            img.src = url;
-          });
-
-          let inTl, outTl;
-          const killTL = () => {
-            inTl && inTl.kill();
-            outTl && outTl.kill();
-            inTl = outTl = null;
-          };
-
-          // fx-2 look
-          const showFx2 = () => {
-            killTL();
-            gsap.set(root, {
-              autoAlpha: 1,
-              scale: 1,
-              rotation: 0
-            });
-            inTl = gsap.timeline()
-              .fromTo(root, {
-                rotation: -6,
-                yPercent: 8,
-                scale: 0.92
-              }, {
-                rotation: 0,
-                yPercent: 0,
-                scale: 1,
-                duration: 0.6,
-                ease: 'power3.out'
-              }, 0)
-              .fromTo(imgBox, {
-                scale: 1.04
-              }, {
-                scale: 1,
-                duration: 0.5,
-                ease: 'power2.out'
-              }, 0);
-          };
-          const hide = () => {
-            killTL();
-            outTl = gsap.to(root, {
-              autoAlpha: 0,
-              scale: 0.98,
-              rotation: -1,
-              duration: 0.28,
-              ease: 'power2.out'
-            });
-          };
-
-          // Event wiring
-          const skills = document.getElementById('skills');
-          if (!skills) return;
-
-          let token = 0;
-
-          if (!isTouch) {
-            // Desktop hover
-            raf = requestAnimationFrame(tick);
-            addEventListener('pointermove', e => {
-              follow.x = e.clientX;
-              follow.y = e.clientY;
-            }, {
-              passive: true
-            });
-
-            skills.addEventListener('pointerenter', (e) => {
-              const a = e.target.closest('.skills-link[data-img]');
-              if (!a) return;
-              const url = a.getAttribute('data-img');
-              const myToken = ++token;
-              preload(url).then(() => {
-                if (myToken === token) showFx2();
-              }).catch(() => {});
-            }, true);
-
-            skills.addEventListener('pointerleave', (e) => {
-              if (e.target.closest('.skills-link')) hide();
-            }, true);
-
-            skills.addEventListener('focusin', (e) => {
-              const a = e.target.closest('.skills-link[data-img]');
-              if (!a) return;
-              const url = a.getAttribute('data-img');
-              const myToken = ++token;
-              preload(url).then(() => {
-                if (myToken === token) showFx2();
-              }).catch(() => {});
-            });
-            skills.addEventListener('focusout', (e) => {
-              if (e.target.closest('.skills-link')) hide();
-            });
-
-          } else {
-            // Mobile tap
-            let open = null;
-            let lastDown = {
-              x: innerWidth / 2,
-              y: innerHeight / 2
-            };
-
-            // capture tap coordinates early
-            skills.addEventListener('pointerdown', (e) => {
-              const a = e.target.closest('.skills-link');
-              if (!a) return;
-              lastDown = {
-                x: e.clientX,
-                y: e.clientY
-              };
-            }, true);
-
-            // toggle on click
-            skills.addEventListener('click', (e) => {
-              const a = e.target.closest('.skills-link[data-img]');
-              if (!a) return;
-              e.preventDefault();
-
-              const url = a.getAttribute('data-img');
-              const myToken = ++token;
-
-              // position near tap (or fall back to element center)
-              const rect = a.getBoundingClientRect();
-              const x = lastDown.x || (rect.left + rect.width / 2);
-              const y = lastDown.y || (rect.top + rect.height / 2);
-              positionRootAt(x, y);
-
-              if (open === a) {
-                hide();
-                open = null;
-                return;
-              }
-
-              preload(url).then(() => {
-                if (myToken !== token) return;
-                showFx2();
-                open = a;
-              }).catch(() => {});
-            }, true);
-
-            // Dismiss on outside tap, scroll, or resize
-            document.addEventListener('click', (e) => {
-              if (open && !e.target.closest('.skills-link')) {
-                hide();
-                open = null;
-              }
-            });
-            addEventListener('scroll', () => {
-              if (open) {
-                hide();
-                open = null;
-              }
-            }, {
-              passive: true
-            });
-            addEventListener('resize', () => {
-              if (open) {
-                hide();
-                open = null;
-              }
-            }, {
-              passive: true
-            });
-            addEventListener('orientationchange', () => {
-              if (open) {
-                hide();
-                open = null;
-              }
-            }, {
-              passive: true
-            });
-          }
-        }
-
-        // ---------------------------------------------------------------------------
-        // BOOT
-        // ---------------------------------------------------------------------------
-        async function start() {
-          renderApp();
-          initVisibilityPerfGuards();
-          // Blur overlay (still desktop-only in your CSS; code path intact)
-          tuneForAndroid();
-          initBlurOverlayVisibility();
-          fixMobileBlurResume();
-
-          initSmooth();
-          enableHashScroll();
-
-          a11yifyGridImages();
-          tuneCaseStudyTiming();
-
-          animateHeader();
-          animateGrids();
-          animateProcess();
-          animateStacks();
-          initCursor();
-          initConfetti();
-          initDeadJump();
-          initBackToTop();
-
-          // Skills hover/tap preview
-          initSkillsHoverReveal();
-
-          try {
-            await preloadImages();
-          } catch (e) {}
-          document.body.classList.remove('loading');
-
-          if (window.ScrollTrigger) ScrollTrigger.refresh();
-        }
-
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', start, {
-            once: true
-          });
-        } else {
-          start();
-        }
-      })();
-
-    /* ---- Pull-to-refresh guard (Chrome/Android) ---- */
-    function disablePullToRefresh() {
-      const isTouch = matchMedia('(pointer:coarse)').matches;
-      if (!isTouch) return;
-
-      // CSS safety net (in case author CSS changes later)
-      document.documentElement.style.overscrollBehaviorY = 'none';
-      document.body.style.overscrollBehaviorY = 'none';
-
-      let maybe = false;
-      let lastY = 0;
-
-      window.addEventListener('touchstart', (e) => {
-        if (e.touches.length !== 1) {
-          maybe = false;
-          return;
-        }
-        // ignore form fields / editable areas
-        if (e.target.closest('input, textarea, select, [contenteditable]')) {
-          maybe = false;
-          return;
-        }
-        lastY = e.touches[0].clientY;
-        maybe = (window.scrollY <= 0); // only consider if we’re at the very top
-      }, {
-        passive: true
-      });
-
-      window.addEventListener('touchmove', (e) => {
-        if (!maybe) return;
-        const y = e.touches[0].clientY;
-        const dy = y - lastY;
-        lastY = y;
-
-        // pulling down while at the top → would trigger P2R
-        if (dy > 0) {
-          e.preventDefault(); // block P2R
-          if (window.scrollY !== 0) window.scrollTo(0, 0);
-        } else {
-          maybe = false; // user started scrolling up instead
-        }
-      }, {
-        passive: false
-      }); // must be non-passive to call preventDefault()
+      );
+      ioHeader.observe(header);
     }
 
-    /* ---- Tiny runtime optimizations ---- */
-    function initVisibilityPerfGuards() {
-      // Sleep GSAP ticker + Lenis when tab is hidden; wake when visible
-      document.addEventListener('visibilitychange', () => {
-        const hidden = document.hidden;
-        if (hidden) {
-          try {
-            if (window.lenis) window.lenis.stop();
-          } catch {}
-          try {
-            gsap.ticker.sleep();
-          } catch {}
-        } else {
-          try {
-            if (window.lenis) window.lenis.start();
-          } catch {}
-          try {
-            gsap.ticker.wake();
-            if (window.ScrollTrigger) ScrollTrigger.refresh();
-          } catch {}
-        }
-      }, {
-        passive: true
+    if (header && header.getBoundingClientRect().bottom <= 0) show();
+
+    window.addEventListener('resize', () => buildBlurLayers(blur), { passive: true });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mobile/Android blur resiliency
+  // ---------------------------------------------------------------------------
+  function fixMobileBlurResume() {
+    const blur = document.querySelector('.blur');
+    const header = document.querySelector('.frame');
+
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    let resumes = 0;
+    const degradeKey = 'bfDegraded';
+    let degraded = localStorage.getItem(degradeKey) === '1';
+
+    function rebuildChildren() { if (blur) buildBlurLayers(blur); }
+    function hardOff(on) { if (blur) blur.classList.toggle('bf-off', !!on); }
+
+    function update() {
+      if (!blur || !header) return;
+      hardOff(true);
+      rebuildChildren();
+
+      blur.classList.add('bf-reset');
+      void blur.offsetHeight;
+
+      const shouldShow = header.getBoundingClientRect().bottom <= 0;
+      blur.classList.toggle('is-visible', shouldShow);
+
+      requestAnimationFrame(() => {
+        blur.classList.remove('bf-reset');
+        hardOff(false);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
       });
 
-      // Defer non-critical image preloading to idle so first paint isn’t blocked
-      const doPreload = () => {
-        try {
-          preloadImages();
-        } catch {}
+      resumes++;
+      if (!degraded && isAndroid && resumes >= 2) {
+        degraded = true;
+        localStorage.setItem(degradeKey, '1');
+        blur.classList.add('no-bf');
+      }
+    }
+
+    window.addEventListener('visibilitychange', () => {
+      document.hidden ? hardOff(true) : setTimeout(update, 60);
+    }, { passive: true });
+
+    window.addEventListener('pagehide', () => hardOff(true), { passive: true });
+    window.addEventListener('pageshow', () => setTimeout(update, 0), { passive: true });
+    window.addEventListener('focus', () => setTimeout(update, 60), { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive: true });
+    window.addEventListener('resize', () => setTimeout(update, 60), { passive: true });
+
+    update();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Smooth scrolling (Lenis) + anchor hash scrolling
+  // ---------------------------------------------------------------------------
+  function initSmooth() {
+    const usingLenis = has('Lenis');
+
+    if (has('ScrollTrigger')) {
+      ScrollTrigger.normalizeScroll(!usingLenis);
+    }
+    if (!usingLenis) return;
+
+    const isTouch = matchMedia('(pointer:coarse), (hover:none), (max-width: 768px)').matches;
+    window.lenis = new Lenis({
+      lerp: isTouch ? 0.22 : 0.15,
+      smoothTouch: true,
+      syncTouch: true,
+    });
+
+    window.lenis.on('scroll', () => { if (window.ScrollTrigger) ScrollTrigger.update(); });
+    gsap.ticker.add((t) => window.lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  function enableHashScroll() {
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href');
+      if (!id || id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+
+      const settle = a.dataset.settle;
+      const focusTarget = () => {
+        target.setAttribute('tabindex', '-1');
+        setTimeout(() => target.focus({ preventScroll: true }), 0);
       };
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(doPreload, {
-          timeout: 1500
+
+      if (settle === 'end' && window.ScrollTrigger) {
+        const st = ScrollTrigger.getAll().find(st =>
+          st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
+        );
+        if (st && isFinite(st.end)) {
+          const y = st.end + 2;
+          if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
+          else window.scrollTo({ top: y, behavior: 'smooth' });
+          focusTarget();
+          history.pushState(null, '', id);
+          return;
+        }
+      }
+      const y = target.getBoundingClientRect().top + window.pageYOffset;
+      window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
+      focusTarget();
+      history.pushState(null, '', id);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Utilities
+  // ---------------------------------------------------------------------------
+  const preloadImages = (sel = '.grid__img, .grid__img-inner') =>
+    new Promise(res => imagesLoaded(document.querySelectorAll(sel), { background: true }, res));
+
+  function a11yifyGridImages() {
+    document.querySelectorAll('.grid__img').forEach(el => {
+      el.setAttribute('role', 'img');
+      const url = (el.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+      const name = url.split('/').pop()?.split('.')[0] || '';
+      el.setAttribute('aria-label', name.replace(/[-_]/g, ' ').trim() || 'Gallery image');
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Animations
+  // ---------------------------------------------------------------------------
+  function animateHeader() {
+    const frame = document.querySelector('.frame');
+    const title = frame?.querySelector('.frame__title');
+    if (!frame || !title) return;
+
+    if (prefersReducedMotion) {
+      gsap.from(frame, {
+        autoAlpha: 0,
+        duration: .6,
+        ease: 'power1.out',
+        scrollTrigger: { trigger: frame, start: 'top 95%' }
+      });
+      return;
+    }
+
+    gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: frame,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        invalidateOnRefresh: true
+      }
+    })
+    .to(frame, { opacity: 0.38, yPercent: 14 }, 0)
+    .to(title, { xPercent: -80 }, 0);
+  }
+
+  function animateGrids() {
+    const mq = matchMedia('(max-width:768px)');
+    const isMobile = () => mq.matches;
+
+    const modes = {
+      second: { endDesk: '+=250%', endMob: '+=140%', scrubDesk: .5, scrubMob: .25 },
+      fifth:  { endDesk: '+=250%', endMob: '+=150%', scrubDesk: .3, scrubMob: .2  },
+      sixth:  { endDesk: '+=180%', endMob: '+=120%', scrubDesk: .6, scrubMob: .4  },
+      ninth:  { endDesk: '+=210%', endMob: '+=130%', scrubDesk: .45, scrubMob: .32 }
+    };
+
+    function defaultEndPx(mode, grid) {
+      const count = grid.querySelectorAll('.grid__img').length || 6;
+      const section = grid.closest('section') || grid.parentNode;
+      const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
+      const cfg = ({
+        second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+        fifth:  { base:{d:240,m:150}, per:{d:8, m:5}, cap:{d:10,m:6} },
+        sixth:  { base:{d:180,m:120}, per:{d:6, m:4}, cap:{d:10,m:6} },
+        ninth:  { base:{d:210,m:130}, per:{d:6, m:4}, cap:{d:12,m:8} }
+      })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
+
+      const tilesOverMin = Math.max(0, count - 4);
+      const vh = (isMobile() ? cfg.base.m : cfg.base.d) +
+                 tilesOverMin * (isMobile() ? cfg.per.m : cfg.per.d) +
+                 (hasCaption ? (isMobile() ? cfg.cap.m : cfg.cap.d) : 0);
+      return `+=${Math.round(window.innerHeight * (vh/100))}`;
+    }
+    const parseScrub = (v, fb) => {
+      if (v == null || v === '') return fb;
+      if (v === 'true') return true;
+      if (v === 'false') return false;
+      const n = parseFloat(v);
+      return isNaN(n) ? fb : n;
+    };
+
+    const pinType    = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
+    const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
+
+    const grids = [...document.querySelectorAll(
+      '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+    )];
+
+    grids.forEach(grid => {
+      const imgs  = grid.querySelectorAll('.grid__img');
+      const items = grid.querySelectorAll('.grid__item');
+      if (!imgs.length && !items.length) return;
+
+      const section = grid.closest('section') || grid.parentNode;
+      const defaultMode =
+        grid.hasAttribute('data-grid-second') ? 'second' :
+        grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+        grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+
+      const d = grid.dataset;
+      const mode = d.mode || defaultMode;
+
+      const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+
+      const base = modes[mode] || modes.ninth;
+      const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+      const scrub = parseScrub(isMobile() ? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+
+      const tl = gsap.timeline({
+        defaults: { ease: (mode === 'sixth' ? 'none' : 'power3') },
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end,
+          pin: section,
+          pinType,
+          pinReparent: true,
+          scrub,
+          anticipatePin: anticipate,
+          pinSpacing: true,
+          invalidateOnRefresh: true
+        }
+      });
+
+      if (mode === 'second') {
+        const mid = Math.floor(imgs.length / 2);
+        tl.from(imgs, {
+          stagger: { amount: .3, from: 'center' },
+          y: () => innerHeight,
+          transformOrigin: '50% 0%',
+          rotation: (i) => (i < mid ? -1 : 1) * Math.abs(i - mid) * (matchMedia('(max-width:768px)').matches ? 1.5 : 3)
+        }).from(items, {
+          stagger: { amount: .3, from: 'center' },
+          yPercent: 100,
+          autoAlpha: 0
+        }, 0);
+      }
+
+      if (mode === 'fifth') {
+        tl.set(grid, { perspective: 1000 }).from(imgs, {
+          stagger: { amount: .4, from: 'random', grid: [4, 9] },
+          y: () => innerHeight,
+          rotationX: matchMedia('(max-width:768px)').matches ? -40 : -70,
+          transformOrigin: '50% 0%',
+          z: matchMedia('(max-width:768px)').matches ? -450 : -900,
+          autoAlpha: 0
         });
+      }
+      if (mode === 'sixth') {
+        tl.from(imgs, {
+          stagger: { amount: .25, from: 'edges', grid: [3, 3] },
+          scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
+          autoAlpha: 0
+        }).from(grid, {
+          scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
+          skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
+        }, 0);
+      }
+      if (mode === 'ninth') {
+        tl.from(imgs, {
+          transformOrigin: '100% -450%',
+          stagger: .07,
+          scaleX: 1.02,
+          skewX: matchMedia('(max-width:768px)').matches ? 7 : 15,
+          xPercent: matchMedia('(max-width:768px)').matches ? 18 : 50,
+          rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
+          autoAlpha: 0
+        });
+        const headCap   = section.querySelector('.content__title, .grid-head');
+        const bottomCap = section.querySelector('.grid-caption');
+        if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
+        if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
+      }
+    });
+  }
+
+  function animateProcess() {
+    document.querySelectorAll('[id$="-process"]').forEach(process => {
+      const intro = process.querySelector('.project--intro');
+      const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
+      if (prefersReducedMotion) {
+        intro && gsap.from(intro, {
+          autoAlpha: 0, y: 16, duration: .35,
+          scrollTrigger: { trigger: intro, start: 'top 90%' }
+        });
+        details.length && gsap.from(details, {
+          autoAlpha: 0, y: 14, duration: .3, stagger: .08,
+          scrollTrigger: { trigger: process, start: 'top 85%' }
+        });
+        return;
+      }
+      intro && gsap.from(intro, {
+        autoAlpha: 0, y: 24, duration: .6, ease: 'power2.out',
+        scrollTrigger: { trigger: intro, start: 'top 80%' }
+      });
+      details.length && gsap.from(details, {
+        autoAlpha: 0, y: 30, duration: .5, ease: 'power2.out', stagger: .12,
+        scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%' }
+      });
+    });
+  }
+
+  function animateStacks() {
+    document.querySelectorAll('.stacked-section [data-stack]').forEach(section => {
+      const frames = section.querySelectorAll('.stacked-img');
+      if (prefersReducedMotion) {
+        gsap.from(frames, {
+          autoAlpha: 0, y: 20, duration: .4, stagger: .08, ease: 'power1.out',
+          scrollTrigger: { trigger: section, start: 'top 85%' }
+        });
+        return;
+      }
+      frames.forEach(el => {
+        gsap.from(el, {
+          autoAlpha: 0, y: 36, duration: .7, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 85%' }
+        });
+        const img = el.querySelector('img');
+        img && gsap.to(img, {
+          yPercent: -8, ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true }
+        });
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cursor + Confetti + UX jump + back-to-top
+  // ---------------------------------------------------------------------------
+  function initCursor() {
+    if (!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
+    document.documentElement.classList.add('has-cursor');
+
+    if (!document.getElementById('gc-goo-defs')) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.id = 'gc-goo-defs';
+      svg.setAttribute('width', '0');
+      svg.setAttribute('height', '0');
+      svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
+      document.body.appendChild(svg);
+    }
+
+    document.querySelectorAll('.gooey-cursor').forEach(n => n.remove());
+    const wrap = document.createElement('div');
+    wrap.className = 'gooey-cursor';
+    wrap.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(wrap);
+
+    const N = 20;
+    const LERP = .35;
+    const LINK_SHRINK = 0.55;
+    let hoverBoost = 1;
+
+    for (let i = 0; i < N; i++) {
+      const d = document.createElement('div');
+      d.className = 'gc-dot';
+      wrap.appendChild(d);
+    }
+    const dots = Array.from(wrap.children);
+
+    let mx = innerWidth / 2,
+        my = innerHeight / 2;
+    const hist = Array.from({ length: N }, () => ({ x: mx, y: my }));
+
+    addEventListener('pointermove', (e) => {
+      mx = e.clientX; my = e.clientY;
+    }, { passive: true });
+
+    let cursorRAF;
+
+    function tick() {
+      hist.shift();
+      hist.push({ x: mx, y: my });
+      for (let i = 0; i < N; i++) {
+        const c = hist[i], n = hist[i + 1] || hist[N - 1];
+        c.x += (n.x - c.x) * LERP;
+        c.y += (n.y - c.y) * LERP;
+
+        const base = i / N;
+        const scale = (i === N - 1) ? base * hoverBoost : base;
+
+        dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
+      }
+      cursorRAF = requestAnimationFrame(tick);
+    }
+    cursorRAF = requestAnimationFrame(tick);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (cursorRAF) cancelAnimationFrame(cursorRAF);
+        cursorRAF = null;
       } else {
-        setTimeout(doPreload, 120);
+        cursorRAF = requestAnimationFrame(tick);
+      }
+    }, { passive: true });
+
+    const isLink = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
+    const isNavLink = (t) => t && (t.closest('nav') || t.closest('.frame__links') || t.closest('.frame__tags'));
+
+    document.addEventListener('pointerover', (e) => {
+      if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = LINK_SHRINK;
+    }, true);
+
+    document.addEventListener('pointerout', (e) => {
+      if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = 1;
+    }, true);
+  }
+
+  function initConfetti() {
+    const sup = document.querySelector('.heading-chant .confetti-sup');
+    if (!sup) return;
+
+    const emitter = sup.querySelector('span.emitter');
+    const physicsAvailable = !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
+    if (!physicsAvailable) return;
+
+    function particles(parent, qty, x, y, minA, maxA) {
+      const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
+      for (let i = 0; i < qty; i++) {
+        const angle = gsap.utils.random(minA, maxA);
+        const velocity = gsap.utils.random(70, 140);
+        const dot = document.createElement('div');
+        dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
+        parent.appendChild(dot);
+
+        gsap.set(dot, {
+          opacity: 0, x, y,
+          scale: gsap.utils.random(.4, .8),
+          rotation: gsap.utils.random(0, 360)
+        });
+        gsap.timeline({ onComplete: () => dot.remove() })
+          .to(dot, { opacity: 1, duration: .06 }, 0)
+          .to(dot, {
+            duration: 1.8,
+            rotationX: `-=${gsap.utils.random(720,1440)}`,
+            rotationZ: `+=${gsap.utils.random(720,1440)}`,
+            physics2D: { angle, velocity, gravity: 120 }
+          }, 0)
+          .to(dot, { opacity: 0, duration: 1 }, .8);
       }
     }
 
-    // -----------------------------------------------------------------------------
-    // Helpers outside IIFE (kept as in your page)
-    // -----------------------------------------------------------------------------
-    function supportsBackdropFilter() {
-      try {
-        return (CSS && (CSS.supports('backdrop-filter', 'blur(1px)') ||
-          CSS.supports('-webkit-backdrop-filter', 'blur(1px)')));
-      } catch {
-        return false;
-      }
+    function burst(q = 80, minA = -95, maxA = -35) {
+      particles(emitter, q, 0, 0, minA, maxA);
+      gsap.fromTo(sup, { scale: .96 }, { scale: 1, duration: .25, ease: 'elastic.out(1,.6)' });
     }
 
-    function tuneForAndroid() {
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const dm = (navigator.deviceMemory || 8);
-      const rs = document.documentElement.style;
+    sup.addEventListener('click', () => burst());
+    sup.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); burst(); }
+    });
 
-      if (isAndroid || dm <= 4) {
-        rs.setProperty('--layers', isAndroid ? '5' : '4');
-        rs.setProperty('--blur-max', isAndroid ? '14' : '12');
-        rs.setProperty('--saturate', '1');
-      }
+    if (!prefersReducedMotion && matchMedia('(pointer:fine)').matches) {
+      let last = 0; const CD = 700;
+      sup.addEventListener('mouseenter', () => {
+        const now = performance.now();
+        if (now - last < CD) return;
+        last = now; burst(28, -100, -60);
+      });
+    }
 
-      if (matchMedia('(max-width:480px)').matches) {
-        rs.setProperty('--layers', '4');
-        rs.setProperty('--blur-max', '12');
-      }
+    if (prefersReducedMotion) return;
 
-      if (!supportsBackdropFilter()) {
-        document.querySelector('.blur')?.classList.add('no-bf');
+    let firedAuto = false;
+    const auto = () => { if (!firedAuto) { firedAuto = true; burst(54, -100, -35); } };
+
+    if (typeof ScrollTrigger !== 'undefined') {
+      const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
+      ScrollTrigger.create({ trigger: triggerEl, start: 'top 65%', once: true, onEnter: auto });
+    }
+
+    const isSupInView = () => {
+      const r = sup.getBoundingClientRect();
+      return r.top < innerHeight * 0.65 && r.bottom > 0;
+    };
+    if (location.hash === '#about' || isSupInView()) setTimeout(auto, 400);
+  }
+
+  function initDeadJump() {
+    const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
+    const sections = Array.from(document.querySelectorAll('main > section'));
+    const nextSection = () => sections[0] && sections[0].id !== 'about' ? sections[0] : sections[1] || sections[0];
+
+    function jump() {
+      const t = nextSection();
+      if (!t) return;
+      const top = t.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    }
+    cands.forEach(el => {
+      el.setAttribute('role', 'link');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', 'Jump to next section');
+      el.addEventListener('click', (e) => { e.preventDefault(); jump(); });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(); }
+      });
+    });
+  }
+
+  function initBackToTop() {
+    const el = document.querySelector('.scroll-downs');
+    if (!el) return;
+    const toTop = (e) => {
+      e.preventDefault();
+      window.lenis ? window.lenis.scrollTo(0, { duration: 1 }) : window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    el.addEventListener('click', toTop);
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toTop(e); });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Case study timing overrides
+  // ---------------------------------------------------------------------------
+  function tuneCaseStudyTiming() {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const isMobile = () => mq.matches;
+
+    function setTiming(grid, { endDesk, endMob, scrubDesk, scrubMob, mode }) {
+      if (mode) grid.dataset.mode = mode;
+      if (endDesk) grid.dataset.endDesktop = endDesk;
+      if (endMob) grid.dataset.endMobile = endMob;
+      if (scrubDesk != null) grid.dataset.scrubDesktop = scrubDesk;
+      if (scrubMob != null) grid.dataset.scrubMobile = scrubMob;
+    }
+
+    function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
+      const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
+      const tilesOverMin = Math.max(0, tiles - minTiles);
+      const hasCaption = !!(grid.closest('section')?.querySelector('.content__title, .grid-head'));
+      const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop) +
+        tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop) +
+        (hasCaption ? (isMobile() ? (captionBoostVH.mobile || 0) : (captionBoostVH.desktop || 0)) : 0);
+      const px = Math.round(window.innerHeight * (totalVH / 100));
+      return `+=${px}`;
+    }
+
+    document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 120, mobile: 90 },
+        perTileVH: { desktop: 10, mobile: 7 },
+        captionBoostVH: { desktop: 12, mobile: 8 }
+      });
+      setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
+    });
+
+    document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 150, mobile: 110 },
+        perTileVH: { desktop: 6, mobile: 4 }
+      });
+      setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
+    });
+
+    document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 135, mobile: 95 },
+        perTileVH: { desktop: 8, mobile: 6 },
+        captionBoostVH: { desktop: 10, mobile: 6 }
+      });
+      setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.40, scrubMob: 0.28 });
+    });
+
+    document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 160, mobile: 110 },
+        perTileVH: { desktop: 5.5, mobile: 4.5 }
+      });
+      setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.50, scrubMob: 0.35 });
+    });
+  }
+
+  // ===========================================================================
+  // CONTENT MODEL
+  // ===========================================================================
+  const CONTENT = {
+    header: {
+      title: 'UX is dead↴',
+      logo: "ZCKGRT",
+      subline: "DIGITAL EXPERIENCE DESIGNER",
+      links: [
+        { label: 'FAQ', href: 'https://zackgort.com/faq' },
+        { label: 'Résumé', href: 'https://zackgort.com/resume' },
+        { label: 'LinkedIn', href: 'https://linkedin.com/in/zackgort' }
+      ],
+      tags: [
+        { label: "#About", href: "#about" },
+        { label: "#Work", href: "#work", settle: "end" },
+        { label: "#Product", href: "#fintech", settle: "end" },
+        { label: "#Ecommerce", href: "#ecommerce", settle: "end" },
+        { label: "#Connect", href: "#contact", settle: "end" }
+      ]
+    },
+    about: {
+      heading: "¡Viva la XP!",
+      sup: "experience",
+      byline: "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"user is kind of implied, no?\"><span>User</span></span> Experience Designer",
+      copy: [
+        "I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function.",
+        "I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.",
+        "Now, as for design. I design those experiences :)"
+      ],
+      note: "— Disclaimer: <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"I found a gsap library that intrigued me, read the documentation, decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS for efficiency, added ad hoc functionality + features, included idiosyncratic interactive 'easter eggs', and splashed on some visual fluff for good measure.\"><span>I didn't use AI to build this website. </span></span>",
+    },
+    skills: {
+      cols: [
+        {
+          heading: "#SPECIALIZATIONS",
+          items: [
+            "User Experience Design",
+            "Visual Interface Design",
+            "Accessibility Compliance",
+            "UX Research & Strategy",
+            "+"
+          ]
+        },
+        {
+          heading: "#TOOLS",
+          items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"]
+        },
+        {
+          heading: "CURRENTLY",
+          items: ["AI + Creative Coding", "Design Systems & Workflows", "+"]
+        }
+      ]
+    },
+    workSelect: {
+      captionTitle: "select works",
+      tiles: [
+        "https://i.ibb.co/c3vLP47/image-445-min.png",
+        "https://i.ibb.co/jJD2YPJ/image-438-min.png",
+        "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/x8Jy9P1f/11.webp"
+      ],
+      cards: [
+        { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓", settle: "end" },
+        { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓", settle: "end" },
+        { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
+      ]
+    },
+    brandsGrid: {
+      title: "#design",
+      images: [
+        "https://i.ibb.co/yBgB52s8/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp",
+        "https://i.ibb.co/QdmJdXh/AM-wire.jpg",
+        "https://i.ibb.co/Q9KH8n3/image-401-min.png",
+        "https://i.ibb.co/0spCQB3/image-7-Copy.png",
+        "https://i.ibb.co/ZG6v0p5/image-10.png",
+
+        "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
+        "https://i.ibb.co/cX4QjFf/Screenshot-20230217-102232.png",
+        "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
+        "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
+        "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
+
+        "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
+        "https://i.ibb.co/4Z3457T5/1-t-Yd-DX2-Ql-VLw-XI7gm3ev-MLw.webp",
+        "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
+        "https://i.ibb.co/X5NHxCV/image-414-min.png",
+        "https://i.ibb.co/0VmJ708g/work3.webp",
+
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
+        "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp",
+
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
+        "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
+        "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
+        "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
+
+        "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
+        "https://i.ibb.co/Jrb2Npd/image-020.png",
+        "https://i.ibb.co/68t5b9S/Mask-group-7-min.png",
+        "https://i.ibb.co/pfvstSt/3.jpg",
+        "https://i.ibb.co/Xtk8Cqp/Mask-group-4-min.png",
+      ],
+    },
+    agencyGrid: {
+      title: "#agencylife",
+      images: [
+        "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
+        "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
+        "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
+
+        "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
+        "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
+
+        "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
+
+        "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
+        "https://i.ibb.co/c3vLP47/image-445-min.png",
+        "https://i.ibb.co/RymyPtP/image-443-min.png",
+        "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+      ],
+    },
+    fintech: {
+      heroImages: [
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png"
+      ],
+      heroCaption: { title: " ", subtitle: " " },
+      process: {
+        client: "BNY Mellon — Pershing X",
+        agency: "Publicis Sapient",
+        role: [
+          "Senior User Experience Designer, Product Design Lead",
+        ],
+        details: [
+          ["Problem", "Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."],
+          ["Constraints", "SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."],
+          ["Role & Team", "Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."],
+          ["Research", "Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/FJNG1jC/14.jpg",
+        "https://i.ibb.co/fxjgcYD/18.png",
+        "https://i.ibb.co/gtQLYJQ/17.jpg",
+        "https://i.ibb.co/Fgxcqj0/16.jpg",
+        "https://i.ibb.co/dcXH5fn/13.jpg"
+      ],
+      insight: [
+        ["Deep Dive", "No Artificial Intelligence Here"]
+      ],
+      insightAside: "This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.",
+      stack: [
+        ["https://i.ibb.co/XkM2hn8n/bny1.png", "BNY 1"],
+        ["https://i.ibb.co/vvMZmq94/bny2.png", "BNY 2"],
+        ["https://i.ibb.co/xS49C07B/bny3.png", "BNY 3"],
+        ["https://i.ibb.co/wZY2bhKF/bny4.png", "BNY 4"],
+        ["https://i.ibb.co/HGv7ymj/4.jpg", "Account Opening"]
+      ]
+    },
+    ecommerce: {
+      heroImages: [
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/gZ58PKyk/4.webp"
+      ],
+      heroCaption: { title: " ", subtitle: " " },
+      process: {
+        client: "General Nutrition Centers (GNC)",
+        agency: "Elva Design Group",
+        titleLines: ["This is the Whey"],
+        role: [
+          "Senior User Experience Designer (IA/flows). Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics.",
+          "Tight cadence, top-tier design + strategy, weekly exec reviews."
+        ],
+        details: [
+          ["Problem", "GNC asked us to shake things up; providing them with a modern e-commerce solution."],
+          ["Scope", "We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
+          ["Heavy lift. Huge Gains.", "Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
+          ["If the bar ain't bending, you're just pretending", "Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/gZ58PKyk/4.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/Y7pGqJ69/5.webp",
+        "https://i.ibb.co/99h2bQMh/6.webp",
+        "https://i.ibb.co/yB4RwkTf/7.webp",
+        "https://i.ibb.co/7N2rDqrN/8.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp"
+      ],
+      insight: [
+        ["Outcome", "if the bar ain't bending, you’re just pretending:  The result helped GNC reclaim ~$500M in annual revenue."]
+      ],
+      insightAside: "More context: we accelerated releases with a simplified stack + shared components, aligned PLP/PDP taxonomy to search intent, and tuned mobile performance and loyalty hooks—so the gains were durable, not just cosmetic.",
+      stack: [
+        ["https://i.ibb.co/cSQCgNQY/work1.webp", "Homepage concept"],
+        ["https://i.ibb.co/spHgPH6N/1.webp", "PLP & filter system"],
+        ["https://i.ibb.co/ynjWYqv8/2.webp", "Subscription bundle flows"],
+        ["https://i.ibb.co/cXg5Phdc/3.webp", "PDP content blocks"],
+        ["https://i.ibb.co/gZ58PKyk/4.webp", "Cart & checkout refinements"],
+        ["https://i.ibb.co/Y7pGqJ69/5.webp", "Landing template variants"],
+        ["https://i.ibb.co/99h2bQMh/6.webp", "Mobile flows"],
+        ["https://i.ibb.co/yB4RwkTf/7.webp", "Guides & programs"]
+      ]
+    },
+    contact: {
+      blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
+      email: "zack@reasonably.cc",
+      linkedin: "https://www.linkedin.com/in/zackgort/"
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // SKILL IMAGE MAP + helper (used by hover reveal)
+  // ---------------------------------------------------------------------------
+  const SKILL_IMG = {
+    "User Experience Design": "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
+    "Visual Interface Design": "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+    "Accessibility Compliance": "https://i.ibb.co/Z69xjMQY/tiktok-cat.gif",
+    "UX Research & Strategy": "https://i.ibb.co/pdc51pC/S1-Final-Homepage-Homepage-Narrative-Example.png",
+    "Figma, Adobe CS": "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
+    "HTML/CSS/Js": "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
+    "Pen & Paper": "https://i.ibb.co/Z2tsks1/image-434-min.png",
+    "Whiteboard": "https://i.ibb.co/ZW3j6T1/Photo-Selects-Sketch-Prep-1-1-Houghton-Nav.jpg",
+    "AI + Creative Coding": "https://i.ibb.co/RCnjfFv/6105c90759377c59c854a562-ZAX02142.jpg",
+    "Design Systems & Workflows": "https://i.ibb.co/McRbkzq/640cdd0717d12bcf72882e0f-6106ecd46ed1ff579fd6ed81-ZAX02288.jpg"
+  };
+  const imgFor = (label) => SKILL_IMG[label] || "https://i.ibb.co/cSQCgNQY/work1.webp";
+
+  // ---------------------------------------------------------------------------
+  // RENDERER
+  // ---------------------------------------------------------------------------
+  function renderApp() {
+    const app = $('#app');
+    if (!app) return;
+    app.innerHTML = '';
+
+    // HEADER / FRAME
+    const header = el('header', 'frame');
+    header.innerHTML = `
+      <h1 class="frame__title">
+        <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
+      </h1>
+      <div class="frame__subline type-tiny">
+        <span>${CONTENT.header.subline}</span>
+        <nav class="frame__links flex-line">
+          ${CONTENT.header.links.map((l) => {
+            const href = l.href || '#';
+            const isInternal = href.startsWith('#') || href.startsWith('/');
+            const attrs = [
+              `href="${href}"`,
+              !isInternal ? 'target="_blank" rel="noopener"' : '',
+              l.tip ? 'class="nav-tip"' : '',
+              l.tip ? `data-tip="${l.tip}"` : '',
+              l.tip ? `title="${l.tip}"` : ''
+            ].filter(Boolean).join(' ');
+            return `<a ${attrs}>${l.label}</a>`;
+          }).join('')}
+        </nav>
+      </div>
+      <nav class="frame__tags flex-line type-tiny">
+        ${CONTENT.header.tags.map(t => `<a href="${t.href}" ${t.settle?`data-settle="${t.settle}"`:''}>${t.label}</a>`).join('')}
+      </nav>
+      <span class="frame__logo">${CONTENT.header.logo}</span>
+    `;
+    app.appendChild(header);
+
+    // ABOUT (hero)
+    const about = el('section', 'content content--padded');
+    about.id = 'about';
+    about.innerHTML = `
+      <h3 class="heading-chant">
+        ${CONTENT.about.heading}
+        <sup class="confetti-sup" role="button" tabindex="0" aria-label="${CONTENT.about.sup} (tap for confetti)">
+          ${CONTENT.about.sup}
+          <span class="emitter" aria-hidden="true"></span>
+        </sup>
+      </h3>
+      <p class="type-tiny right end">${CONTENT.about.byline}</p>
+    `;
+    app.appendChild(about);
+
+    // ABOUT — content (separate section)
+    const aboutContent = el('section', 'content content--padded');
+    aboutContent.id = 'about-content';
+
+    const aboutCopyHTML = (CONTENT.about.copy || [])
+      .map(p => `<p>${p}</p>`)
+      .join('');
+
+    aboutContent.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+      <div class="content__text">
+        ${aboutCopyHTML}
+      </div>
+      ${CONTENT.about.note
+        ? `<p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">${CONTENT.about.note}</p>`
+        : '' }
+    `;
+    app.appendChild(aboutContent);
+
+    // SKILLS (items rendered as fx-2 hoverable/tappable links with data-img)
+    const skills = el('section', 'content content--padded');
+    skills.id = 'skills';
+    skills.innerHTML = `
+      <div class="trio-grid">
+        ${CONTENT.skills.cols.map(col => `
+          <div class="trio-col">
+            <h4 class="type-tiny">${col.heading}</h4>
+            ${col.items.map(t => `
+              <a class="content__text skills-link" data-fx="2" data-img="${imgFor(t)}" href="#" role="link" aria-label="${t}" onclick="return false;">
+                <span>${t}</span>
+              </a>
+            `).join('')}
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(skills);
+
+    // WORK SELECT
+    const work = el('section', 'content content--padded');
+    work.id = 'work';
+    work.innerHTML = `
+      <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
+      <div class="grid grid--columns grid--spaced" data-grid-second>
+        ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+        ${CONTENT.workSelect.cards.map(c => `
+          <div class="grid__item work-card">
+            <h4 class="type-tiny">
+              <a class="title-link"
+                 href="${c.href}"
+                 ${c.ext ? 'target="_blank" rel="noopener noreferrer"' : ''}
+                 ${c.settle ? `data-settle="${c.settle}"` : ''}>
+                 ${c.title}
+              </a>
+            </h4>
+            <p>${c.glyph || ''}</p>
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(work);
+
+    // BRANDS GRID
+    const brands = el('section', 'content content--padded content--full');
+    brands.id = 'brands-grid';
+    brands.innerHTML = `
+      <div class="grid-head">
+        <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
+      </div>
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      ${CONTENT.brandsGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.brandsGrid.names.join(' • ')}</p>` : ''}
+    `;
+    app.appendChild(brands);
+
+    // AGENCY GRID
+    const agency = el('section', 'content content--padded content--full');
+    agency.id = 'brands-grid-2';
+    agency.innerHTML = `
+      <div class="grid-head">
+        <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
+      </div>
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      ${CONTENT.agencyGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.agencyGrid.names.join(' • ')}</p>` : ''}
+    `;
+    app.appendChild(agency);
+
+    // FINTECH — HERO
+    const finHero = el('section', 'content content--padded content--full');
+    finHero.id = 'fintech';
+    finHero.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.fintech.heroImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.fintech.heroCaption.title}</h2>
+        <p class="type-tiny right end">${CONTENT.fintech.heroCaption.subtitle}</p>
+      </div>
+    `;
+    app.appendChild(finHero);
+
+    // FINTECH — PROCESS
+    const finProc = el('section', 'content content--padded');
+    finProc.id = 'fintech-process';
+    const finIntro = `
+      <section class="project project--intro">
+        <span class="project__label project__label--name">Client</span>
+        <span class="project__name">${CONTENT.fintech.process.client}</span>
+
+        <span class="project__label project__label--date">Agency</span>
+        <span class="project__date">${CONTENT.fintech.process.agency}</span>
+
+        <h2 class="project__title"><span class="project__title-line">design systems, dashboards, data, & due diligence. </span></h2>
+
+        <div class="project__mission content__text">
+          <p>
+            <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+              Role
+            </span>
+            ${CONTENT.fintech.process.role[0]}
+          </p>
+          ${CONTENT.fintech.process.role.slice(1).map(p=>`<p>${p}</p>`).join('')}
+        </div>
+      </section>`;
+
+    const finDetails = CONTENT.fintech.process.details.map(([label, text], i) => `
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    finProc.innerHTML = finIntro + finDetails;
+    app.appendChild(finProc);
+
+    // FINTECH — DISCOVERY
+    const finDisc = el('section', 'content content--full content--cutoff');
+    finDisc.id = 'fintech-discovery';
+    finDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>`;
+    app.appendChild(finDisc);
+
+    // FINTECH — INSIGHT
+    const finInsight = el('section', 'content content--padded');
+    finInsight.id = 'fintech-insight';
+    const finInsightParas = CONTENT.fintech.insight.map(([label, text]) => `
+      <p>
+        <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+          ${label}
+        </span>
+        ${text}
+      </p>
+    `).join('');
+    finInsight.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+      <div class="content__text">
+        ${finInsightParas}
+      </div>
+    `;
+    if (CONTENT.fintech.insightAside) {
+      const aside = el('p', 'type-tiny right end insight-aside');
+      aside.textContent = CONTENT.fintech.insightAside;
+      finInsight.querySelector('.content__text').appendChild(aside);
+    }
+    app.appendChild(finInsight);
+
+    // FINTECH — STACK
+    const finStack = el('section', 'content content--full stacked-section');
+    finStack.id = 'fintech-stack';
+    finStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(finStack);
+
+    // ECOM — HERO
+    const ecoHero = el('section', 'content content--padded content--full');
+    ecoHero.id = 'ecommerce';
+    ecoHero.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.ecommerce.heroImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.ecommerce.heroCaption.title}</h2>
+        <p class="type-tiny right end">${CONTENT.ecommerce.heroCaption.subtitle}</p>
+      </div>`;
+    app.appendChild(ecoHero);
+
+    // ECOM — PROCESS
+    const ecoProc = el('section', 'content content--padded');
+    ecoProc.id = 'ecommerce-process';
+    const ecoIntro = `
+      <section class="project project--intro">
+        <span class="project__label project__label--name">Client</span>
+        <span class="project__name">${CONTENT.ecommerce.process.client}</span>
+
+        <span class="project__label project__label--date">Agency</span>
+        <span class="project__date">${CONTENT.ecommerce.process.agency}</span>
+
+        <h2 class="project__title">
+          ${CONTENT.ecommerce.process.titleLines?.map(t=>`<span class="project__title-line">${t}</span>`).join('') || ''}
+        </h2>
+
+        <div class="project__mission content__text">
+          <p>
+            <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+              Role
+            </span>
+            ${CONTENT.ecommerce.process.role[0] || ''}
+          </p>
+          ${(CONTENT.ecommerce.process.role || []).slice(1).map(p=>`<p>${p}</p>`).join('')}
+        </div>
+      </section>`;
+
+    const ecoDetails = CONTENT.ecommerce.process.details.map(([label, text], i) => `
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    ecoProc.innerHTML = ecoIntro + ecoDetails;
+    app.appendChild(ecoProc);
+
+    // ECOM — DISCOVERY
+    const ecoDisc = el('section', 'content content--full content--cutoff');
+    ecoDisc.id = 'ecommerce-discovery';
+    ecoDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.ecommerce.discoveryImages.map(src => `<div class="grid__img" style="background-image:url(${src})"></div>`).join('')}
+      </div>`;
+    app.appendChild(ecoDisc);
+
+    // ECOM — INSIGHT
+    const ecoInsight = el('section', 'content content--padded');
+    ecoInsight.id = 'ecommerce-insight';
+    const ecoInsightParas = CONTENT.ecommerce.insight.map(([label, text]) => `
+      <p>
+        <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+          ${label}
+        </span>
+        ${text}
+      </p>
+    `).join('');
+    ecoInsight.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+      <div class="content__text">
+        ${ecoInsightParas}
+      </div>
+    `;
+    if (CONTENT.ecommerce.insightAside) {
+      const aside = el('p', 'type-tiny right end insight-aside');
+      aside.textContent = CONTENT.ecommerce.insightAside;
+      ecoInsight.querySelector('.content__text').appendChild(aside);
+    }
+    app.appendChild(ecoInsight);
+
+    // ECOM — STACK
+    const ecoStack = el('section', 'content content--full stacked-section');
+    ecoStack.id = 'ecommerce-stack';
+    ecoStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(ecoStack);
+
+    // CONTACT
+    const contact = el('section', 'content content--padded');
+    contact.id = 'contact';
+    contact.innerHTML = `
+      <h4 class="type-tiny">CONTACT</h4>
+      <p class="content__text">${CONTENT.contact.blurb}</p>`;
+    app.appendChild(contact);
+
+    // FOOTER
+    const footer = el('footer', 'page-footer type-tiny');
+    footer.innerHTML = `
+      <span>Hey, nice to see you down here!</span>
+      <span><a href="mailto:${CONTENT.contact.email}">${CONTENT.contact.email}</a></span>
+      <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
+    app.appendChild(footer);
+
+    // Scroll-to-top widget
+    const s = el('div', 'scroll-downs');
+    s.setAttribute('role', 'button');
+    s.setAttribute('tabindex', '0');
+    s.setAttribute('aria-label', 'Back to top');
+    s.innerHTML = `<div class="mousey"><div class="scroller"></div></div>`;
+    app.appendChild(s);
+  }
+
+  // ---------------------------------------------------------------------------
+  // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)
+  // ---------------------------------------------------------------------------
+  function initSkillsHoverReveal() {
+    let root = document.getElementById('hoverReveal');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'hoverReveal';
+      root.className = 'hover-reveal';
+      root.setAttribute('aria-hidden', 'true');
+      root.style.opacity = '0';
+      root.innerHTML = `
+        <div class="hover-reveal__inner">
+          <div class="hover-reveal__deco"></div>
+          <div class="hover-reveal__img"></div>
+        </div>`;
+      document.body.appendChild(root);
+    }
+    const imgBox = root.querySelector('.hover-reveal__img');
+
+    const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
+
+    // Smooth follow (desktop); on mobile we position directly
+    const follow = { x: innerWidth / 2, y: innerHeight / 2 };
+    const pos = { x: follow.x, y: follow.y };
+    const lerp = (a, b, t) => a + (b - a) * t;
+    let raf;
+
+    const PREVIEW_MARGIN = 16;
+    function positionRootAt(x, y) {
+      const rect = root.getBoundingClientRect();
+      const w = rect.width  || 220;
+      const h = rect.height || 160;
+
+      let tx = x + PREVIEW_MARGIN;
+      let ty = y - PREVIEW_MARGIN;
+
+      tx = Math.min(Math.max(8, tx), innerWidth  - w - 8);
+      ty = Math.min(Math.max(h + 8, ty), innerHeight - 8);
+
+      gsap.set(root, { x: tx, y: ty, xPercent: 0, yPercent: -100 });
+    }
+
+    const tick = () => {
+      pos.x = lerp(pos.x, follow.x, 0.16);
+      pos.y = lerp(pos.y, follow.y, 0.16);
+      positionRootAt(pos.x, pos.y);
+      raf = requestAnimationFrame(tick);
+    };
+
+    const preload = (url) => new Promise((res, rej) => {
+      imgBox.style.backgroundImage = `url(${url})`;
+      const img = new Image();
+      img.onload = () => res();
+      img.onerror = rej;
+      img.src = url;
+    });
+
+    let inTl, outTl;
+    const killTL = () => { inTl && inTl.kill(); outTl && outTl.kill(); inTl = outTl = null; };
+
+    const showFx2 = () => {
+      killTL();
+      gsap.set(root, { autoAlpha: 1, scale: 1, rotation: 0 });
+      inTl = gsap.timeline()
+        .fromTo(root, { rotation: -6, yPercent: -92, scale: 0.92 }, { rotation: 0, yPercent: -100, scale: 1, duration: 0.6, ease: 'power3.out' }, 0)
+        .fromTo(imgBox, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: 'power2.out' }, 0);
+    };
+    const hide = () => {
+      killTL();
+      outTl = gsap.to(root, { autoAlpha: 0, scale: 0.98, rotation: -1, duration: 0.28, ease: 'power2.out' });
+    };
+
+    const skills = document.getElementById('skills');
+    if (!skills) return;
+
+    let token = 0;
+
+    if (!isTouch) {
+      raf = requestAnimationFrame(tick);
+      addEventListener('pointermove', e => { follow.x = e.clientX; follow.y = e.clientY; }, { passive: true });
+
+      skills.addEventListener('pointerenter', (e) => {
+        const a = e.target.closest('.skills-link[data-img]');
+        if (!a) return;
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+        preload(url).then(() => { if (myToken === token) showFx2(); }).catch(() => {});
+      }, true);
+
+      skills.addEventListener('pointerleave', (e) => { if (e.target.closest('.skills-link')) hide(); }, true);
+
+      skills.addEventListener('focusin', (e) => {
+        const a = e.target.closest('.skills-link[data-img]');
+        if (!a) return;
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+        preload(url).then(() => { if (myToken === token) showFx2(); }).catch(() => {});
+      });
+      skills.addEventListener('focusout', (e) => { if (e.target.closest('.skills-link')) hide(); });
+
+    } else {
+      let open = null;
+      let lastDown = { x: innerWidth / 2, y: innerHeight / 2 };
+
+      skills.addEventListener('pointerdown', (e) => {
+        const a = e.target.closest('.skills-link');
+        if (!a) return;
+        lastDown = { x: e.clientX, y: e.clientY };
+      }, true);
+
+      skills.addEventListener('click', (e) => {
+        const a = e.target.closest('.skills-link[data-img]');
+        if (!a) return;
+        e.preventDefault();
+
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+
+        const rect = a.getBoundingClientRect();
+        const x = lastDown.x || (rect.left + rect.width / 2);
+        const y = lastDown.y || (rect.top + rect.height / 2);
+        positionRootAt(x, y);
+
+        if (open === a) { hide(); open = null; return; }
+
+        preload(url).then(() => {
+          if (myToken !== token) return;
+          showFx2();
+          open = a;
+        }).catch(() => {});
+      }, true);
+
+      document.addEventListener('click', (e) => { if (open && !e.target.closest('.skills-link')) { hide(); open = null; } });
+      addEventListener('scroll', () => { if (open) { hide(); open = null; } }, { passive: true });
+      addEventListener('resize', () => { if (open) { hide(); open = null; } }, { passive: true });
+      addEventListener('orientationchange', () => { if (open) { hide(); open = null; } }, { passive: true });
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Perf & platform helpers (moved inside so they can see local funcs)
+  // ---------------------------------------------------------------------------
+  function initVisibilityPerfGuards() {
+    document.addEventListener('visibilitychange', () => {
+      const hidden = document.hidden;
+      if (hidden) {
+        try { if (window.lenis) window.lenis.stop(); } catch {}
+        try { gsap.ticker.sleep(); } catch {}
+      } else {
+        try { if (window.lenis) window.lenis.start(); } catch {}
+        try {
+          gsap.ticker.wake();
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
+        } catch {}
       }
-    } 
-    </script>
+    }, { passive: true });
+
+    const doPreload = () => {
+      try { preloadImages(); } catch {}
+    };
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(doPreload, { timeout: 1500 });
+    } else {
+      setTimeout(doPreload, 120);
+    }
+  }
+
+  function supportsBackdropFilter() {
+    try {
+      return (CSS && (CSS.supports('backdrop-filter', 'blur(1px)') ||
+        CSS.supports('-webkit-backdrop-filter', 'blur(1px)')));
+    } catch {
+      return false;
+    }
+  }
+
+  function tuneForAndroid() {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const dm = (navigator.deviceMemory || 8);
+    const rs = document.documentElement.style;
+
+    if (isAndroid || dm <= 4) {
+      rs.setProperty('--layers', isAndroid ? '5' : '4');
+      rs.setProperty('--blur-max', isAndroid ? '14' : '12');
+      rs.setProperty('--saturate', '1');
+    }
+
+    if (matchMedia('(max-width:480px)').matches) {
+      rs.setProperty('--layers', '4');
+      rs.setProperty('--blur-max', '12');
+    }
+
+    if (!supportsBackdropFilter()) {
+      document.querySelector('.blur')?.classList.add('no-bf');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // BOOT
+  // ---------------------------------------------------------------------------
+  async function start() {
+    renderApp();
+    initVisibilityPerfGuards();
+    tuneForAndroid();
+    initBlurOverlayVisibility();
+    fixMobileBlurResume();
+
+    initSmooth();
+    enableHashScroll();
+
+    a11yifyGridImages();
+    tuneCaseStudyTiming();
+
+    animateHeader();
+    animateGrids();
+    animateProcess();
+    animateStacks();
+    initCursor();
+    initConfetti();
+    initDeadJump();
+    initBackToTop();
+
+    initSkillsHoverReveal();
+
+    try { await preloadImages(); } catch (e) {}
+    document.body.classList.remove('loading');
+
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+
+  // Run AFTER all deferred vendor scripts are ready.
+  window.addEventListener('load', () => { start(); }, { once: true });
+
+})();
+
+</script>
   </body>
 </html>

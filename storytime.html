@@ -1698,6 +1698,61 @@ section.content:has(.grid[data-grid-ninth]) {
     /* JS positions it; keep as fixed with the defaults already in your CSS */
   }
 }
+
+
+/* Mobile tooltip margins + safe-area handling */
+@media (max-width: 768px){
+  /* Tunables */
+  :root {
+    --tip-side: clamp(12px, 4vw, 24px);      /* min side margin */
+    --tip-max: 480px;                         /* hard max width */
+    --tip-gap: 10px;                          /* gap from trigger */
+    --tip-bottom-pad: 12px;                   /* breathing room at bottom */
+  }
+
+  .blackout.tip::after{
+    /* place below trigger on mobile */
+    top: calc(100% + var(--tip-gap));
+    bottom: auto;
+    left: 50%; right: auto;
+    transform: translate(-50%, 4px);
+
+    /* width = viewport minus safe margins + safe-area insets */
+    width: min(
+      var(--tip-max),
+      calc(
+        100vw
+        - (2 * var(--tip-side))
+        - env(safe-area-inset-left, 0px)
+        - env(safe-area-inset-right, 0px)
+      )
+    );
+
+    /* readable + scrollable if copy runs long */
+    font-size: 16px;
+    line-height: 1.45;
+    text-align: left;
+    max-height: calc(90vh - var(--tip-bottom-pad) - env(safe-area-inset-bottom, 0px));
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable both-edges;
+    border-radius: 12px;
+    padding: .75rem 1rem;
+  }
+
+  .blackout.tip:hover::after,
+  .blackout.tip:focus-visible::after {
+    transform: translate(-50%, 0);
+  }
+
+  /* center the arrow with the bubble */
+  .blackout.tip::before{
+    top: 100%; bottom: auto;
+    left: 50%; right: auto;
+    transform: translate(-50%, -2px) rotate(45deg);
+  }
+}
+
 </style>
   </head>
 
@@ -2501,141 +2556,102 @@ section.content:has(.grid[data-grid-ninth]) {
         "https://i.ibb.co/Ct9DZd9/image-442-min.png",
       ],
     },
-fintech: {
-  heroImages: [
-    "https://i.ibb.co/XkM2hn8n/bny1.png",
-    "https://i.ibb.co/vvMZmq94/bny2.png",
-    "https://i.ibb.co/xS49C07B/bny3.png",
-    "https://i.ibb.co/wZY2bhKF/bny4.png",
-    "https://i.ibb.co/vvMZmq94/bny2.png"
-  ],
-  heroCaption: { title: " ", subtitle: " " },
-  process: {
-    client: "BNY Mellon — Pershing X",
-    agency: "Publicis Sapient",
-    role: [
-      "Senior Product Designer (IA/flows). I own the map: where data lives, how it moves, and how fast you get from intention to action."
-    ],
-    details: [
-      [
-        "Problem",
-        "Advisors were juggling 6–10 tools for a single task. Context died in copy/paste purgatory. Critical states hid in legacy UI. Decisions slowed; risk didn’t."
+    fintech: {
+      heroImages: [
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png"
       ],
-      [
-        "Constraints",
-        "Regulated world: SEC/FINRA audit trails, strict permissioning, mixed custodial feeds, live prices. Density must stay readable or nothing ships."
+      heroCaption: { title: " ", subtitle: " " },
+      process: {
+        client: "BNY Mellon — Pershing X",
+        agency: "Publicis Sapient",
+        role: [
+          "Senior User Experience Designer, Product Design Lead",
+        ],
+        details: [
+          ["Problem", "Advisors were playing tool-switch roulette—6–10 apps per task. Context died in handoffs, legacy UI hid critical states, and portfolio actions slowed while risk crept up."],
+          ["Constraints", "SEC/FINRA audit trails, gnarly permissioning, heterogeneous custodial feeds. High-density data and live prices mean cognitive load has to stay low or nothing ships."],
+          ["Role & Team", "Lead Product Designer {IA/flows}. Partnered with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops."],
+          ["Research", "Shadowed 12 advisors. Mapped task graphs—onboarding → maintenance → rebalance → review. Tree tests to settle navigation and quick actions. Notes. Lots of notes."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/FJNG1jC/14.jpg",
+        "https://i.ibb.co/fxjgcYD/18.png",
+        "https://i.ibb.co/gtQLYJQ/17.jpg",
+        "https://i.ibb.co/Fgxcqj0/16.jpg",
+        "https://i.ibb.co/dcXH5fn/13.jpg"
       ],
-      [
-        "Role & Team",
-        "Lead Product Designer partnering with PM, Tech Lead, Data Eng, Design Ops, Compliance, plus two designers. Weekly ride-alongs with advisors and ops to keep us honest."
+      insight: [
+        ["Deep Dive", "No Artificial Intelligence Here"]
       ],
-      [
-        "Research",
-        "Shadowed 12 advisors. Mapped the work: onboard → maintain → rebalance → review. Tree tests to settle nav and quick actions. We cut clicks where it mattered."
+      insightAside: "This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.",
+      stack: [
+        ["https://i.ibb.co/XkM2hn8n/bny1.png", "BNY 1"],
+        ["https://i.ibb.co/vvMZmq94/bny2.png", "BNY 2"],
+        ["https://i.ibb.co/xS49C07B/bny3.png", "BNY 3"],
+        ["https://i.ibb.co/wZY2bhKF/bny4.png", "BNY 4"],
+        ["https://i.ibb.co/HGv7ymj/4.jpg", "Account Opening"]
       ]
-    ]
-  },
-  discoveryImages: [
-    "https://i.ibb.co/wZY2bhKF/bny4.png",
-    "https://i.ibb.co/xS49C07B/bny3.png",
-    "https://i.ibb.co/vvMZmq94/bny2.png",
-    "https://i.ibb.co/XkM2hn8n/bny1.png",
-    "https://i.ibb.co/FJNG1jC/14.jpg",
-    "https://i.ibb.co/fxjgcYD/18.png",
-    "https://i.ibb.co/gtQLYJQ/17.jpg",
-    "https://i.ibb.co/Fgxcqj0/16.jpg",
-    "https://i.ibb.co/dcXH5fn/13.jpg"
-  ],
-  insight: [
-    [
-      "Deep Dive",
-      "No AI cape here—just systems thinking. We decomposed legacy apps, normalized states, and rebuilt flows so portfolio actions stay in context and under control."
-    ]
-  ],
-  insightAside:
-    "Timeline: 2023–2024. Zero generative anything. The lift was human: read the data, label the states, align the flows, and ship a modern console that reduces risk while speeding common tasks.",
-  stack: [
-    ["https://i.ibb.co/XkM2hn8n/bny1.png", "BNY 1"],
-    ["https://i.ibb.co/vvMZmq94/bny2.png", "BNY 2"],
-    ["https://i.ibb.co/xS49C07B/bny3.png", "BNY 3"],
-    ["https://i.ibb.co/wZY2bhKF/bny4.png", "BNY 4"],
-    ["https://i.ibb.co/HGv7ymj/4.jpg", "Account Opening"]
-  ]
-},
-
-ecommerce: {
-  heroImages: [
-    "https://i.ibb.co/cSQCgNQY/work1.webp",
-    "https://i.ibb.co/spHgPH6N/1.webp",
-    "https://i.ibb.co/ynjWYqv8/2.webp",
-    "https://i.ibb.co/cXg5Phdc/3.webp",
-    "https://i.ibb.co/gZ58PKyk/4.webp"
-  ],
-  heroCaption: { title: " ", subtitle: " " },
-  process: {
-    client: "General Nutrition Centers (GNC)",
-    agency: "Elva Design Group",
-    titleLines: ["This is the Whey"],
-    role: [
-      "Senior UX (IA/flows). Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics.",
-      "Tight cadence, shared components, weekly exec readouts. We moved fast without breaking the cart."
-    ],
-    details: [
-      [
-        "Problem",
-        "GNC needed a storefront that converts on mobile, respects search intent, and holds up during promo spikes."
+    },
+    ecommerce: {
+      heroImages: [
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/gZ58PKyk/4.webp"
       ],
-      [
-        "Scope",
-        "Market scan + on-site analytics to see real behavior. Shopify pragmatism to ship sooner. A lean design system so PLP/PDP/Cart stay consistent and cheap to evolve."
+      heroCaption: { title: " ", subtitle: " " },
+      process: {
+        client: "General Nutrition Centers (GNC)",
+        agency: "Elva Design Group",
+        titleLines: ["This is the Whey"],
+        role: [
+          "Senior User Experience Designer (IA/flows). Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics.",
+          "Tight cadence, top-tier design + strategy, weekly exec reviews."
+        ],
+        details: [
+          ["Problem", "GNC asked us to shake things up; providing them with a modern e-commerce solution."],
+          ["Scope", "We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
+          ["Heavy lift. Huge Gains.", "Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
+          ["If the bar ain't bending, you're just pretending", "Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/gZ58PKyk/4.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/Y7pGqJ69/5.webp",
+        "https://i.ibb.co/99h2bQMh/6.webp",
+        "https://i.ibb.co/yB4RwkTf/7.webp",
+        "https://i.ibb.co/7N2rDqrN/8.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp"
       ],
-      [
-        "Heavy lift. Huge gains.",
-        "Owned IA and flows. Simplified taxonomy, aligned filters to how people actually shop, tuned performance so pages feel instant—especially on low-end phones."
+      insight: [
+        ["Outcome", "if the bar ain't bending, you’re just pretending:  The result helped GNC reclaim ~$500M in annual revenue."]
       ],
-      [
-        "If the bar ain't bending, you're just pretending",
-        "Quant + qual, card sorts + tree tests to de-confuse categories, wire/proto loops to prove features. We cut friction where money leaks."
+      insightAside: "More context: we accelerated releases with a simplified stack + shared components, aligned PLP/PDP taxonomy to search intent, and tuned mobile performance and loyalty hooks—so the gains were durable, not just cosmetic.",
+      stack: [
+        ["https://i.ibb.co/cSQCgNQY/work1.webp", "Homepage concept"],
+        ["https://i.ibb.co/spHgPH6N/1.webp", "PLP & filter system"],
+        ["https://i.ibb.co/ynjWYqv8/2.webp", "Subscription bundle flows"],
+        ["https://i.ibb.co/cXg5Phdc/3.webp", "PDP content blocks"],
+        ["https://i.ibb.co/gZ58PKyk/4.webp", "Cart & checkout refinements"],
+        ["https://i.ibb.co/Y7pGqJ69/5.webp", "Landing template variants"],
+        ["https://i.ibb.co/99h2bQMh/6.webp", "Mobile flows"],
+        ["https://i.ibb.co/yB4RwkTf/7.webp", "Guides & programs"]
       ]
-    ]
-  },
-  discoveryImages: [
-    "https://i.ibb.co/gZ58PKyk/4.webp",
-    "https://i.ibb.co/cXg5Phdc/3.webp",
-    "https://i.ibb.co/ynjWYqv8/2.webp",
-    "https://i.ibb.co/spHgPH6N/1.webp",
-    "https://i.ibb.co/Y7pGqJ69/5.webp",
-    "https://i.ibb.co/99h2bQMh/6.webp",
-    "https://i.ibb.co/yB4RwkTf/7.webp",
-    "https://i.ibb.co/7N2rDqrN/8.webp",
-    "https://i.ibb.co/rft2bf0T/9.webp",
-    "https://i.ibb.co/vx76zjgf/10.webp"
-  ],
-  insight: [
-    [
-      "Outcome",
-      "Impact: roughly ~$500M annual revenue reclaimed—by aligning taxonomy to intent, trimming seconds off mobile paths, and making loyalty a nudge, not a chore."
-    ]
-  ],
-  insightAside:
-    "Why it sticks: simplified stack, shared components, intent-driven filters, and mobile-first performance. Gains weren’t cosmetic—they reduced abandonment and survived promos.",
-  stack: [
-    ["https://i.ibb.co/cSQCgNQY/work1.webp", "live prototype"],
-    ["https://i.ibb.co/spHgPH6N/1.webp", "Audit & Analysis"],
-    ["https://i.ibb.co/ynjWYqv8/2.webp", "Notes, handwritten"],
-    ["https://i.ibb.co/cXg5Phdc/3.webp", "Mobile wireframes"],
-    ["https://i.ibb.co/gZ58PKyk/4.webp", "Mobile experience"],
-    ["https://i.ibb.co/99h2bQMh/6.webp", "Desktop experience"],
-    ["https://i.ibb.co/Y7pGqJ69/5.webp", "Mobile flows"],
-    ["https://i.ibb.co/yB4RwkTf/7.webp", "Guides & programs"],
-
-    ["https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp", "Guides & programs"],
-    ["https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp", "Guides & programs"],
-    ["https://i.ibb.co/rft2bf0T/9.webp", "Desktop Home"],
-    ["https://i.ibb.co/vx76zjgf/10.webp", "Desktop Nav"],
-  ]
-},
-
+    },
     contact: {
       blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
       email: "zack@reasonably.cc",
@@ -3238,6 +3254,7 @@ ecommerce: {
   window.addEventListener('load', () => { start(); }, { once: true });
 
 })();
+
 
 
 </script>

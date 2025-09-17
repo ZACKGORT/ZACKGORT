@@ -2216,11 +2216,13 @@ section.content:has(.grid[data-grid-ninth]) {
       gsap.fromTo(sup, { scale: .96 }, { scale: 1, duration: .25, ease: 'elastic.out(1,.6)' });
     }
 
+    // Click / keyboard
     sup.addEventListener('click', () => burst());
     sup.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); burst(); }
     });
 
+    // Subtle hover tease on fine pointers
     if (!prefersReducedMotion && matchMedia('(pointer:fine)').matches) {
       let last = 0; const CD = 700;
       sup.addEventListener('mouseenter', () => {
@@ -2232,14 +2234,29 @@ section.content:has(.grid[data-grid-ninth]) {
 
     if (prefersReducedMotion) return;
 
-    let firedAuto = false;
-    const auto = () => { if (!firedAuto) { firedAuto = true; burst(54, -100, -35); } };
+    // Repeatable auto-fire whenever the section is entered (down or up),
+    // with a small cooldown to avoid spam.
+    let lastAuto = 0;
+    const AUTO_CD = 800; // ms
+    const auto = () => {
+      const now = performance.now();
+      if (now - lastAuto < AUTO_CD) return;
+      lastAuto = now;
+      burst(54, -100, -35);
+    };
 
+    // Fire on scroll enters (both directions)
     if (typeof ScrollTrigger !== 'undefined') {
       const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
-      ScrollTrigger.create({ trigger: triggerEl, start: 'top 65%', once: true, onEnter: auto });
+      ScrollTrigger.create({
+        trigger: triggerEl,
+        start: 'top 65%',
+        onEnter: auto,
+        onEnterBack: auto
+      });
     }
 
+    // Optional: if we land mid-section or with #about, pop once shortly after load
     const isSupInView = () => {
       const r = sup.getBoundingClientRect();
       return r.top < innerHeight * 0.65 && r.bottom > 0;
@@ -2341,9 +2358,9 @@ section.content:has(.grid[data-grid-ninth]) {
     });
   }
 
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   // CONTENT MODEL
-  // ===========================================================================
+  // ---------------------------------------------------------------------------
   const CONTENT = {
     header: {
       title: 'UX is dead↴',
@@ -2481,45 +2498,43 @@ section.content:has(.grid[data-grid-ninth]) {
         client: "BNY Mellon — Pershing X",
         agency: "Publicis Sapient",
         role: [
-    "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
-    "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
-
+          "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
+          "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
         ],
-  details: [
-    [
-      "Problem",
-      "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. That slowed planning, portfolio work, and account management."
-    ],
-    [
-      "Vision",
-      "Build Wove: an industry-first platform that connects a client’s full financial picture and the tools advisors use—so work flows across modules without re-entry."
-    ],
-    [
-      "Scope",
-      "Advanced data reporting/analytics, financial plan building, flexible billing, and cross-custodian trading & rebalancing—all within a single, data-driven platform."
-    ],
-    [
-      "Investment Tools",
-      "Access to direct indexing, including BNY Mellon Precision Direct Indexing S&P 500®, enabling customized strategies while seeking to match index performance."
-    ],
-    [
-      "Experience Strategy",
-      "Go beyond integrations to design interconnected experiences—planning → portfolio building → account management as one continuous, low-friction journey."
-    ],
-    [
-      "Constraints",
-      "SEC/FINRA auditability, enterprise security/scale, heterogeneous custodians, and high-density data—while keeping cognitive load low so advisors move faster."
-    ],
-    [
-      "My Contributions",
-      "Information architecture, task/flow mapping, cross-module navigation, and component patterns that allow data to persist across steps (no re-entry)."
-    ],
-    [
-      "Outcome",
-      "Wove debuted with the power, scale, and security of BNY Mellon behind it, enabling advisors to be more productive and serve more clients."
-    ]
-  ]
-
+        details: [
+          [
+            "Problem",
+            "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. That slowed planning, portfolio work, and account management."
+          ],
+          [
+            "Vision",
+            "Build Wove: an industry-first platform that connects a client’s full financial picture and the tools advisors use—so work flows across modules without re-entry."
+          ],
+          [
+            "Scope",
+            "Advanced data reporting/analytics, financial plan building, flexible billing, and cross-custodian trading & rebalancing—all within a single, data-driven platform."
+          ],
+          [
+            "Investment Tools",
+            "Access to direct indexing, including BNY Mellon Precision Direct Indexing S&P 500®, enabling customized strategies while seeking to match index performance."
+          ],
+          [
+            "Experience Strategy",
+            "Go beyond integrations to design interconnected experiences—planning → portfolio building → account management as one continuous, low-friction journey."
+          ],
+          [
+            "Constraints",
+            "SEC/FINRA auditability, enterprise security/scale, heterogeneous custodians, and high-density data—while keeping cognitive load low so advisors move faster."
+          ],
+          [
+            "My Contributions",
+            "Information architecture, task/flow mapping, cross-module navigation, and component patterns that allow data to persist across steps (no re-entry)."
+          ],
+          [
+            "Outcome",
+            "Wove debuted with the power, scale, and security of BNY Mellon behind it, enabling advisors to be more productive and serve more clients."
+          ]
+        ]
       },
       discoveryImages: [
         "https://i.ibb.co/wZY2bhKF/bny4.png",
@@ -2584,21 +2599,20 @@ section.content:has(.grid[data-grid-ninth]) {
       ],
       insightAside: "if the bar ain't bending, you’re just pretending.",
       stack: [
-  ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],        
-  ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
-  ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
-  ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],    
-  ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
+        ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],        
+        ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
+        ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
+        ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],    
+        ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
 
-  ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
-  ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
-  ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
+        ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
+        ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
+        ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
 
-  ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],    
-  ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
-  ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
-  ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"],
-
+        ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],    
+        ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
+        ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
+        ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"],
       ]
     },
     contact: {
@@ -2968,40 +2982,6 @@ section.content:has(.grid[data-grid-ninth]) {
     app.appendChild(s);
   }
 
-
-
-
-
-  (function(){
-  function setTop(el){
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--tip-top', r.bottom + 'px');
-  }
-  function handleOpen(el){ setTop(el); }
-
-  // Open on hover/focus
-  document.addEventListener('pointerenter', e => {
-    const t = e.target.closest('.blackout.tip.tip--full');
-    if (t) handleOpen(t);
-  }, true);
-  document.addEventListener('focusin', e => {
-    const t = e.target.closest('.blackout.tip.tip--full');
-    if (t) handleOpen(t);
-  });
-
-  // Keep aligned if layout/viewport changes while open
-  const refresh = () => {
-    document.querySelectorAll('.blackout.tip.tip--full:hover, .blackout.tip.tip--full:focus-within')
-      .forEach(setTop);
-  };
-  addEventListener('scroll', refresh, {passive:true});
-  addEventListener('resize', refresh, {passive:true});
-  addEventListener('orientationchange', refresh, {passive:true});
-})();
-
-
-
-
   // ---------------------------------------------------------------------------
   // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)
   // ---------------------------------------------------------------------------
@@ -3201,9 +3181,34 @@ section.content:has(.grid[data-grid-ninth]) {
   }
 
   // ---------------------------------------------------------------------------
+  // CSS override injection for confetti sup (pink + underline by default)
+  // ---------------------------------------------------------------------------
+  function injectConfettiStyles() {
+    const css = `
+      .heading-chant .confetti-sup{
+        color: var(--brand-pink);
+        text-decoration: underline;
+        text-decoration-color: currentColor;
+        text-decoration-thickness: .08em;
+        text-underline-offset: .12em;
+      }
+      .heading-chant .confetti-sup:hover,
+      .heading-chant .confetti-sup:active,
+      .heading-chant .confetti-sup:focus-visible{
+        color: #fff;
+        text-decoration: none;
+      }`;
+    const s = document.createElement('style');
+    s.setAttribute('data-injected', 'confetti-sup-style');
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  // ---------------------------------------------------------------------------
   // BOOT
   // ---------------------------------------------------------------------------
   async function start() {
+    injectConfettiStyles();
     renderApp();
     initVisibilityPerfGuards();
     tuneForAndroid();
@@ -3237,9 +3242,6 @@ section.content:has(.grid[data-grid-ninth]) {
   window.addEventListener('load', () => { start(); }, { once: true });
 
 })();
-
-
-
 </script>
   </body>
 </html>

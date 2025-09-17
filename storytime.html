@@ -51,7 +51,7 @@
     />
 
     <style>
-            /* =========================================================
+/* =========================================================
                TOKENS / RESET
                ========================================================= */
             *,*::before,*::after {
@@ -345,6 +345,8 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
   vertical-align:baseline;
   transform:translateY(-.6em);
   letter-spacing:.04em;
+  color:var(--color-text-alt);
+  vertical-align:baseline;
 }
 
 
@@ -1700,58 +1702,6 @@ section.content:has(.grid[data-grid-ninth]) {
 }
 
 
-/* Mobile tooltip margins + safe-area handling */
-@media (max-width: 768px){
-  /* Tunables */
-  :root {
-    --tip-side: clamp(12px, 4vw, 24px);      /* min side margin */
-    --tip-max: 480px;                         /* hard max width */
-    --tip-gap: 10px;                          /* gap from trigger */
-    --tip-bottom-pad: 12px;                   /* breathing room at bottom */
-  }
-
-  .blackout.tip::after{
-    /* place below trigger on mobile */
-    top: calc(100% + var(--tip-gap));
-    bottom: auto;
-    left: 50%; right: auto;
-    transform: translate(-50%, 4px);
-
-    /* width = viewport minus safe margins + safe-area insets */
-    width: min(
-      var(--tip-max),
-      calc(
-        100vw
-        - (2 * var(--tip-side))
-        - env(safe-area-inset-left, 0px)
-        - env(safe-area-inset-right, 0px)
-      )
-    );
-
-    /* readable + scrollable if copy runs long */
-    font-size: 16px;
-    line-height: 1.45;
-    text-align: left;
-    max-height: calc(90vh - var(--tip-bottom-pad) - env(safe-area-inset-bottom, 0px));
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable both-edges;
-    border-radius: 12px;
-    padding: .75rem 1rem;
-  }
-
-  .blackout.tip:hover::after,
-  .blackout.tip:focus-visible::after {
-    transform: translate(-50%, 0);
-  }
-
-  /* center the arrow with the bubble */
-  .blackout.tip::before{
-    top: 100%; bottom: auto;
-    left: 50%; right: auto;
-    transform: translate(-50%, -2px) rotate(45deg);
-  }
-}
 
 </style>
   </head>
@@ -2422,8 +2372,8 @@ section.content:has(.grid[data-grid-ninth]) {
 
     document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
       const end = calcEndPx(grid, {
-        baseVH: { desktop: 160, mobile: 110 },
-        perTileVH: { desktop: 5.5, mobile: 4.5 }
+        baseVH: { desktop: 175, mobile: 120 },
+        perTileVH: { desktop: 6, mobile: 4.5 }
       });
       setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.50, scrubMob: 0.35 });
     });
@@ -2615,41 +2565,47 @@ section.content:has(.grid[data-grid-ninth]) {
         agency: "Elva Design Group",
         titleLines: ["This is the Whey"],
         role: [
-          "Senior User Experience Designer (IA/flows). Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics.",
-          "Tight cadence, top-tier design + strategy, weekly exec reviews."
+          "Senior User Experience Designer"
         ],
         details: [
-          ["Problem", "GNC asked us to shake things up; providing them with a modern e-commerce solution."],
-          ["Scope", "We dove deep into GNC's analytics, backed by our expertise with the Shopify platform, and supported by a top-tier design and strategy team. From market research, to Q&Q user data, to wireframe feature prototyping, brought to life via a well-considered e-commerce design system."],
-          ["Heavy lift. Huge Gains.", "Lead UX {IA/flows}. Paired with PM, Tech Lead, Shopify devs, Content, Merch, and Analytics. Tight cadence, top-tier design + strategy, weekly exec reviews."],
-          ["If the bar ain't bending, you're just pretending", "Market scans and on-site analytics, Q&Q user data, card sorts + tree tests to lock taxonomy, and wire/proto loops to vet feature bets. Notes. Lots of notes."]
+          ["Problem", "As part of a total overhaul and overcoming a recent bankruptcy, GNC asked us to shake things up; providing them with a modern and modular e-commerce solution through a ground-up build on the Shopify platform."],
+          ["Scope", "{We} dove deep into GNC's e-commerce ecosystem. From market research, to [client-supplied] user data, to wireframe feature prototyping; we built a modular component-based design system optimized for continued optimization."],
+          ["Heavy lift. Huge Gains.", "Lead UX {IA/UI Prototypes/Design Systems}. Paired with PM, Dev Lead, Design Team and Client-Side Stakeholders. 12-week engagement meant tight cadence, fast-on-our-feet design + strategy, and daily weekly exec reviews."],
+          ["What We Shipped", "{We} introduced a modern mobile-first navigation schema and retail taxonomy strategy that separated GNC not just from its competition, but all in the e-retail space."]
         ]
       },
       discoveryImages: [
         "https://i.ibb.co/gZ58PKyk/4.webp",
-        "https://i.ibb.co/cXg5Phdc/3.webp",
         "https://i.ibb.co/ynjWYqv8/2.webp",
         "https://i.ibb.co/spHgPH6N/1.webp",
         "https://i.ibb.co/Y7pGqJ69/5.webp",
         "https://i.ibb.co/99h2bQMh/6.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",        
         "https://i.ibb.co/yB4RwkTf/7.webp",
         "https://i.ibb.co/7N2rDqrN/8.webp",
         "https://i.ibb.co/rft2bf0T/9.webp",
-        "https://i.ibb.co/vx76zjgf/10.webp"
+        "https://i.ibb.co/vx76zjgf/10.webp",
       ],
       insight: [
-        ["Outcome", "if the bar ain't bending, you’re just pretending:  The result helped GNC reclaim ~$500M in annual revenue."]
+        ["Outcome", "The result helped GNC reclaim ~$500M in annual revenue."]
       ],
-      insightAside: "More context: we accelerated releases with a simplified stack + shared components, aligned PLP/PDP taxonomy to search intent, and tuned mobile performance and loyalty hooks—so the gains were durable, not just cosmetic.",
+      insightAside: "if the bar ain't bending, you’re just pretending.",
       stack: [
-        ["https://i.ibb.co/cSQCgNQY/work1.webp", "Homepage concept"],
-        ["https://i.ibb.co/spHgPH6N/1.webp", "PLP & filter system"],
-        ["https://i.ibb.co/ynjWYqv8/2.webp", "Subscription bundle flows"],
-        ["https://i.ibb.co/cXg5Phdc/3.webp", "PDP content blocks"],
-        ["https://i.ibb.co/gZ58PKyk/4.webp", "Cart & checkout refinements"],
-        ["https://i.ibb.co/Y7pGqJ69/5.webp", "Landing template variants"],
-        ["https://i.ibb.co/99h2bQMh/6.webp", "Mobile flows"],
-        ["https://i.ibb.co/yB4RwkTf/7.webp", "Guides & programs"]
+  ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],        
+  ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
+  ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
+  ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],    
+  ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
+
+  ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
+  ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
+  ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
+
+  ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],    
+  ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
+  ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
+  ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"],
+
       ]
     },
     contact: {

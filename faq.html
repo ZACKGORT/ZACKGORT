@@ -85,6 +85,7 @@ main{counter-reset:section;}
 .frame__demos{display:flex;gap:1rem;}
 .frame__demos span{opacity:.7;}
 
+/* ---- HERO stays centered ---- */
 .intro{height:100vh;display:grid;place-items:center;text-align:center;}
 .intro__title{display:grid;place-items:center;margin:0;line-height:.9;font-weight:300;}
 .intro__title-pre{
@@ -104,22 +105,30 @@ main{counter-reset:section;}
 }
 .intro__info::after{content:'';position:absolute;left:50%;width:1px;height:2rem;background:#fff;top:100%;}
 
-.content{display:flex;flex-direction:column;width:100vw;position:relative;padding:var(--page-padding);}
+/* ---- CONTENT: left-align blocks + justify text ---- */
+.content{
+  display:flex;flex-direction:column;width:100vw;position:relative;padding:var(--page-padding);
+  align-items:flex-start; /* ensure titles/blocks start on the left */
+}
 .content:last-child{padding-bottom:40vh;}
 .content p{
-  max-width:860px;margin:1.1rem auto;font-size:1.05rem;line-height:1.55;font-weight:600;opacity:.95;
+  max-width:860px;
+  margin:1.1rem 0;            /* remove auto-centering */
+  font-size:1.05rem;line-height:1.55;font-weight:600;opacity:.95;
   font-family:"Instrument Sans",sans-serif;
+  text-align:justify;          /* full justification */
+  text-justify:inter-word;
 }
 .content__title{
-  font-size:9.6vw;line-height:.85;counter-increment:section;text-align:center;display:grid;gap:1.1rem;
+  font-size:9.6vw;line-height:.85;counter-increment:section;display:grid;gap:1.1rem;
   font-family:"Instrument Sans",sans-serif;
+  text-align:left;             /* left-align headings */
 }
-.content__title--left{text-align:left;}
 .content__title::before{
   content:'.' counter(section);
   font-weight:700;
   font-family:"Instrument Sans",sans-serif;
-  display:block;font-size:1rem;margin-bottom:10vh;text-align:center;opacity:.8;
+  display:block;font-size:1rem;margin-bottom:10vh;text-align:left;opacity:.8;
 }
 .font-upper{text-transform:uppercase;}
 
@@ -165,10 +174,10 @@ main{counter-reset:section;}
 
     <div class="intro">
       <h1 class="intro__title">
-        <span class="intro__title-pre">FU</span>
-        <span class="intro__title-sub">"FAQ for you", silly goose :)</span>
+        <span class="intro__title-pre">FAQ</span>
+        <span class="intro__title-sub"> </span>
       </h1>
-      <span class="intro__info">Scroll for Q&A</span>
+      <span class="intro__info">Scroll<br>for Q&A</span>
     </div>
 
     <!-- === ALL TITLES USE EFFECT #28 === -->
@@ -290,6 +299,7 @@ main{counter-reset:section;}
       <p>Email: <a class="line" href="mailto:zack@reasonably.cc">zack@reasonably.cc</a></p>
     </div>
 
+    <!-- Back to top stays centered (hero style) -->
     <div class="intro"><p><a class="line" href="#top">Back to top</a></p></div>
   </main>
 

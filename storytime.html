@@ -3393,14 +3393,30 @@ function initSmooth() {
           const lerp = (a, b, t) => a + (b - a) * t;
           let raf;
 
-          function positionRootAt(x, y) {
-            gsap.set(root, {
-              x,
-              y,
-              xPercent: -50,
-              yPercent: -50
-            });
-          }
+// Put preview top-right of the pointer (bottom-left corner at the pointer)
+const PREVIEW_MARGIN = 16; // px
+
+function positionRootAt(x, y) {
+  const rect = root.getBoundingClientRect();
+  const w = rect.width  || 220;
+  const h = rect.height || 160;
+
+  // Anchor point (bottom-left) slightly to the right and above the cursor
+  let tx = x + PREVIEW_MARGIN;
+  let ty = y - PREVIEW_MARGIN;
+
+  // Keep it on-screen
+  tx = Math.min(Math.max(8, tx), innerWidth  - w - 8);
+  ty = Math.min(Math.max(h + 8, ty), innerHeight - 8);
+
+  gsap.set(root, {
+    x: tx,
+    y: ty,
+    xPercent: 0,    // left edge aligns to tx
+    yPercent: -100, // bottom edge aligns to ty (so box sits above)
+  });
+}
+
 
           const tick = () => {
             pos.x = lerp(pos.x, follow.x, 0.16);

@@ -1149,26 +1149,21 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 
 /* Viewport-fixed, full-width bubble (pair with JS that sets --tip-top) */
 .blackout.tip.tip--full::after {
-  position: fixed;
-  top: calc(var(--tip-top, 0px) + 10px);
-  right: var(--padR);
-  width: auto;
-  max-width: none;
-  box-sizing: border-box;
-  transform: translateY(4px);
+  position: absolute !important;
+  top: calc(100% + 10px) !important;
+  left: 50% !important;
+  right: auto !important;
+  margin-right: 1em;
+  transform: translate(-50%, 0) !important;
+  width: min(320px, calc(100vw - (var(--padL) + var(--padR)))) !important;
+  max-width: calc(100vw - (var(--padL) + var(--padR))) !important;
 }
-.blackout.tip.tip--full:hover::after,
-.blackout.tip.tip--full:focus-visible::after {
-  opacity: 1;
-  transform: translateY(0);
-}
-/* Arrow for fixed variant */
 .blackout.tip.tip--full::before {
-  position: fixed;
-  top: calc(var(--tip-top, 0px) + 2px);
-  right: calc(var(--padR) + 12px);
-  left: auto;
-  transform: rotate(45deg);
+  position: absolute !important;
+  top: 100% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translate(-50%, -2px) rotate(45deg) !important;
 }
 
 /* Mobile tuning */

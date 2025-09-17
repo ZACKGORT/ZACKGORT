@@ -1863,23 +1863,35 @@ section.content:has(.grid[data-grid-ninth]) {
         // ---------------------------------------------------------------------------
         // Smooth scrolling (Lenis) + anchor hash scrolling
         // ---------------------------------------------------------------------------
-        function initSmooth() {
-          const isMobile = matchMedia('(pointer:coarse), (max-width: 768px)').matches;
-          const usingLenis = has('Lenis') && !isMobile;
+function initSmooth() {
+  // Use Lenis on ALL devices (desktop + mobile)
+  const usingLenis = has('Lenis');
 
-          if (has('ScrollTrigger')) {
-            ScrollTrigger.normalizeScroll(!usingLenis);
-          }
+  // If GSAP is around, tell it we’re handling scroll ourselves
+  if (has('ScrollTrigger')) {
+    ScrollTrigger.normalizeScroll(!usingLenis);
+  }
 
-          if (!usingLenis) return;
+  if (!usingLenis) return;
 
-          window.lenis = new Lenis({
-            lerp: 0.15
-          });
-          window.lenis.on('scroll', () => ScrollTrigger && ScrollTrigger.update && ScrollTrigger.update());
-          gsap.ticker.add((t) => window.lenis.raf(t * 1000));
-          gsap.ticker.lagSmoothing(0);
-        }
+  // Lenis smoothing; slightly higher lerp on touch feels better
+  const isTouch = matchMedia('(pointer:coarse), (hover:none), (max-width: 768px)').matches;
+  window.lenis = new Lenis({
+    lerp: isTouch ? 0.22 : 0.15,     // a touch-friendly ease
+    // The following options are ignored if not supported by the installed Lenis version
+    smoothTouch: true,               // legacy option (harmless if unsupported)
+    syncTouch: true,                 // v1 option (harmless if unsupported)
+  });
+
+  // Keep GSAP/ScrollTrigger in sync with Lenis
+  window.lenis.on('scroll', () => {
+    if (window.ScrollTrigger) ScrollTrigger.update();
+  });
+
+  gsap.ticker.add((t) => window.lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+}
+
 
         function enableHashScroll() {
           document.addEventListener('click', (e) => {

@@ -7,26 +7,26 @@
   <meta name="description" content="Frequently asked questions about how I work — Codrops Set 2 heading effects (16–29) using the original demo fonts.">
   <meta name="author" content="Zack Gort">
 
-  <!-- Original Codrops Typekit pack (provides the font-* families referenced below) -->
+  <!-- Codrops demo fonts (exact kit used by the demo) -->
   <link rel="stylesheet" href="https://use.typekit.net/zda3gdw.css">
 
-  <!-- Splitting CSS (needed for .word / .char wrappers) -->
+  <!-- Splitting (needed for .word / .char wrappers) -->
   <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting.css">
   <link rel="stylesheet" href="https://unpkg.com/splitting/dist/splitting-cells.css">
 
   <script>
     document.documentElement.className = "js";
-    (function supportsCssVars () {
-      var s = document.createElement("style");
-      s.innerHTML = "root: { --tmp-var: bold; }";
+    (function supportsCssVars(){
+      var s=document.createElement("style");
+      s.innerHTML="root: { --tmp-var: bold; }";
       document.head.appendChild(s);
-      var ok = !!(window.CSS && window.CSS.supports && window.CSS.supports("font-weight", "var(--tmp-var)"));
+      var ok=!!(window.CSS&&window.CSS.supports&&window.CSS.supports("font-weight","var(--tmp-var)"));
       s.parentNode.removeChild(s);
-      if (!ok) alert("Please view this demo in a modern browser that supports CSS Variables.");
+      if(!ok) alert("Please view this demo in a modern browser that supports CSS Variables.");
     }());
   </script>
 
-  <!-- WebFont loader (mirrors the original demo boot) -->
+  <!-- WebFont loader (mirrors original demo boot) -->
   <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
   <script>
     const preloadFonts = (id) => new Promise((resolve) => {
@@ -35,7 +35,7 @@
   </script>
 
   <style>
-/* ====== Original demo styles (trimmed for space, full variety kept) ====== */
+/* ===== Original demo styles (with your content) ===== */
 *,
 *::after,
 *::before { box-sizing: border-box; }
@@ -43,10 +43,13 @@
 :root{
   font-size:16px;
   --color-text:#fff;
-  --color-bg:rgb(71,50,171);
-  --color-link:#fff;
-  --color-link-hover:#fff;
+  --color-bg:#0e0e0e;              /* demo-2 palette */
+  --color-link:#ede3e3;
+  --color-link-hover:#d68521;
   --page-padding:1.5rem 2rem;
+
+  /* NEW: section spacing variable to stretch scroll between sections */
+  --section-gap: clamp(12vh, 18vh, 26vh);
 }
 
 body{
@@ -55,13 +58,12 @@ body{
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;
 }
 
-.demo-2{--color-text:#ddc4a4;--color-bg:#0e0e0e;--color-link:#ede3e3;--color-link-hover:#d68521;}
-
 .js .loading::before,.js .loading::after{content:'';position:fixed;z-index:1000;}
 .js .loading::before{top:0;left:0;width:100%;height:100%;background:var(--color-bg);}
 .js .loading::after{top:50%;left:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;opacity:.4;background:var(--color-link);animation:loaderAnim .7s linear infinite alternate forwards;}
 @keyframes loaderAnim{to{opacity:1;transform:scale3d(.5,.5,1);}}
 
+/* Links */
 a{text-decoration:none;color:var(--color-link);outline:none;cursor:pointer;}
 a:hover{color:var(--color-link-hover);outline:none;}
 a:focus{outline:none;background:lightgrey;}
@@ -74,6 +76,7 @@ a:focus-visible{outline:2px solid red;background:transparent;}
 main{counter-reset:section;}
 .splitting .word{white-space:nowrap;}
 
+/* Header frame */
 .frame{color:var(--color-title);padding:var(--page-padding);display:grid;grid-template-columns:1fr;grid-template-rows:auto auto auto auto;grid-template-areas:'title' 'prev' 'demos' 'sponsor';justify-content:start;justify-items:end;margin-bottom:3rem;grid-gap:.5rem;align-items:start;font-weight:600;font-size:14px;}
 .frame a:not(.frame__title-back),.line{white-space:nowrap;overflow:hidden;position:relative;}
 .frame a:not(.frame__title-back)::before,.line::before{content:'';height:1px;width:100%;background:currentColor;position:absolute;top:90%;transition:transform .3s;transform-origin:0% 50%;}
@@ -85,27 +88,43 @@ main{counter-reset:section;}
 .frame__demos{display:flex;gap:1rem;}
 .frame__demos span{opacity:.7;}
 
+/* Hero */
 .intro{height:100vh;display:grid;place-items:center;text-align:center;}
 .intro__title{display:grid;place-items:center;margin:0;line-height:.9;font-weight:300;}
-.intro__title-pre{font-family:norman-stencil,sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(2rem,10vw,3rem);}
-.intro__title-sub{font-size:clamp(1rem,3vw,2.75rem);}
+/* Original Codrops sizes */
+.intro__title-pre{font-family:norman-stencil,sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(2rem,10vw,9rem);}
+.intro__title-sub{font-size:clamp(1rem,6vw,2.75rem);}
 .intro__info{position:relative;max-width:20ch;opacity:.6;line-height:1.2;margin-bottom:4rem;padding-bottom:1rem;font-weight:600;font-size:14px;}
 .intro__info::after{content:'';position:absolute;left:50%;width:1px;height:2rem;background:#fff;top:100%;}
 
+/* Sections */
 .content{display:flex;flex-direction:column;width:100vw;position:relative;padding:var(--page-padding);}
 .content:last-child{padding-bottom:40vh;}
 .content--full{padding:0;}
-.content p{max-width:660px;margin:1.5rem auto;font-size:1.25rem;line-height:1.5;font-weight:600;}
+/* Original paragraph sizing */
+.content p{max-width:660px;margin:1.5rem auto 0;font-size:1.25rem;line-height:1.5;font-weight:600;}
 
+/* NEW: space animations out between sections
+   - keep titles + their paragraph tight
+   - add room AFTER each paragraph before the next section begins
+   - add a little space after the hero before the first title */
+.content p{margin-bottom:var(--section-gap);}
+.intro + .content{
+  margin-top: calc(var(--section-gap) * 0.5);
+  margin-bottom: var(--section-gap);  
+  
+
+}
+
+/* Headline sizing (original) */
 .content__title{font-size:8vw;line-height:.8;counter-increment:section;text-align:center;display:grid;gap:2rem;}
 .content__title--left{text-align:left;}
 .content__title--right{text-align:right;}
 .content__title::before{content:'.' counter(section);font-weight:400;font-family:area-normal,sans-serif;display:block;font-size:1rem;margin-bottom:10vh;text-align:center;}
-
 .content__title--sides{display:grid;grid-template-rows:auto auto;grid-template-columns:100%;text-align:left;gap:2rem;}
 .content__title--sides span:last-child{justify-self:end;}
 
-/* Font variety (original demo families) */
+/* Font variety (exact demo families) */
 .font-1{font-family:wayfinder-cf,serif;font-weight:100;}
 .font-2{font-family:campaign-serif,sans-serif;font-weight:400;}
 .font-3{font-family:area-normal,sans-serif;font-weight:600;}
@@ -129,7 +148,6 @@ main{counter-reset:section;}
 .font-21{font-family:"gigantic",sans-serif;font-weight:900;font-style:normal;}
 .font-22{font-family:"capsule",sans-serif;font-weight:400;font-style:normal;}
 .font-23{font-family:"arsenica-variable",sans-serif;font-variation-settings:"opsz" 1000,"wght" 300;}
-
 .font-height{line-height:1.4;}
 .font-height-medium{line-height:.9;}
 .font-medium{font-size:6vw;margin-top:3rem;}
@@ -143,15 +161,26 @@ main{counter-reset:section;}
   .frame{justify-items:start;grid-gap:2rem;grid-template-columns:auto auto 1fr auto;grid-template-rows:auto;grid-template-areas:'title prev demos sponsor';}
   .frame__demos{justify-self:end;}
 }
+
+/* ===== Gooey cursor (restored) ===== */
+.has-cursor .gooey-cursor{position:fixed;inset:0;pointer-events:none;z-index:9999;filter:url(#gc-goo);}
+.gooey-cursor .gc-dot{
+  position:fixed;width:22px;height:22px;border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.55));
+  mix-blend-mode:difference;transform:translate(-50%,-50%) scale(0);will-change:transform;
+}
+@media (prefers-reduced-motion: reduce){
+  .has-cursor .gooey-cursor{display:none;}
+}
   </style>
 </head>
 
 <body class="demo-2 loading">
-  <main>
+  <main id="top">
     <!-- Header -->
     <div class="frame">
       <div class="frame__title">
-        <a aria-label="Back to the article" class="frame__title-back" href="https://tympanus.net/codrops/?p=69734" target="_blank" rel="noopener">
+        <a aria-label="Back to the zackgort.com" class="frame__title-back" href="https://zackgort.com" target="_blank" rel="noopener">
           <span>Back to the article</span>
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path vector-effect="non-scaling-stroke" d="M18.25 15.5a.75.75 0 0 0 .75-.75v-9a.75.75 0 0 0-.75-.75h-9a.75.75 0 0 0 0 1.5h7.19L6.22 16.72a.75.75 0 1 0 1.06 1.06L17.5 7.56v7.19c0 .414.336.75.75.75z"/>
@@ -160,7 +189,7 @@ main{counter-reset:section;}
       </div>
       <a class="frame__prev" href="https://zackgort.com/resume" target="_blank" rel="noopener">Resume</a>
       <nav class="frame__demos">
-        <a href="https://zackgort.com" target="_blank" rel="noopener">Portfolio</a>
+        <a href="https://linkedin.com/in/zackgort" target="_blank" rel="noopener">Linkedin</a>
         <a href="https://reasonably.cc" target="_blank" rel="noopener">Photography</a>
       </nav>
     </div>
@@ -211,17 +240,14 @@ main{counter-reset:section;}
     <div class="content"><h2 class="content__title" data-splitting data-effect27><span class="font-12 font-upper">Availability&nbsp;&amp;&nbsp;Engagements?</span></h2></div>
     <div class="content"><p>Senior IC/lead, fractional product/design, or short, surgical engagements to unblock discovery, IA, or systemization. Flexible on timezone and cadence.</p></div>
 
-    <!-- ===================== Testimonials (effect 27) ===================== -->
-    <!-- Paste your real quotes between the quotation marks & update attributions -->
+    <!-- Testimonials (effect 27) -->
     <div class="content">
       <h2 class="content__title" data-splitting data-effect27>
         <span class="font-19 font-medium">“Zack has a deep connection to emotions, imagination, and sensitivity—the quintessential idealist. His greatest strength is his depth of sensitivity and empathy,
             which allows him to give voice to human connections in a way that works with people on a profound level. Zack brings fresh perspective to things when I felt in a rut—a great person to work with.”</span>
       </h2>
     </div>
-    <div class="content">
-      <p>— Christopher Bayle, Director, UX, Publicis Sapient</p>
-    </div>
+    <div class="content"><p>— Christopher Bayle, Director, UX, Publicis Sapient</p></div>
 
     <div class="content">
       <h2 class="content__title" data-splitting data-effect27>
@@ -230,19 +256,14 @@ main{counter-reset:section;}
             tremendous effort and for being such a great team player.”</span>
       </h2>
     </div>
-    <div class="content">
-      <p>— Andrés Moros, MPS {Sr. UX Designer, Publicis Sapient</p>
-    </div>
+    <div class="content"><p>— Andrés Moros, MPS — Sr. UX Designer, Publicis Sapient</p></div>
 
     <div class="content">
       <h2 class="content__title" data-splitting data-effect27>
         <span class="font-19 font-medium">“I don't like him”</span>
       </h2>
     </div>
-    <div class="content">
-      <p>— Miranda, Director, UX, Elva Design Group</p>
-    </div>
-    <!-- =================================================================== -->
+    <div class="content"><p>— Miranda, Director, UX, Elva Design Group</p></div>
 
     <!-- Contact -->
     <div class="content">
@@ -257,31 +278,93 @@ main{counter-reset:section;}
     <div class="intro"><p><a class="line" href="#top">Back to top</a></p></div>
   </main>
 
-  <!-- Libs (original demo stack) -->
+  <!-- Libs -->
   <script src="https://unpkg.com/gsap@3.11.4/dist/gsap.min.js"></script>
   <script src="https://unpkg.com/gsap@3.11.4/dist/ScrollTrigger.min.js"></script>
   <script src="https://unpkg.com/@studio-freight/lenis@0.2.28/bundled/lenis.min.js"></script>
   <script src="https://unpkg.com/splitting/dist/splitting.min.js"></script>
 
-  <!-- Inline: Set 2 (effects 16–29) -->
+  <!-- Effects 16–29 + Gooey Cursor -->
   <script>
     (function(){
       gsap.registerPlugin(ScrollTrigger);
 
-      // Smooth scroll (Lenis 0.2.x)
+      /* Smooth scroll (Lenis 0.2.x) */
       let lenis;
       const initSmoothScrolling = () => {
         try {
           lenis = new Lenis({ lerp: 0.2, smooth: true });
           lenis.on('scroll', () => ScrollTrigger.update());
-          const scrollFn = (time) => { lenis.raf(time); requestAnimationFrame(scrollFn); };
-          requestAnimationFrame(scrollFn);
+          const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+          requestAnimationFrame(raf);
         } catch(e) {}
       };
 
+      /* Gooey cursor */
+      function initGooeyCursor(){
+        const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const finePointer = matchMedia('(pointer:fine)').matches;
+        if (prefersReducedMotion || !finePointer) return;
+
+        document.documentElement.classList.add('has-cursor');
+
+        if (!document.getElementById('gc-goo-defs')) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+          svg.id = 'gc-goo-defs';
+          svg.setAttribute('width','0'); svg.setAttribute('height','0');
+          svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
+          document.body.appendChild(svg);
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'gooey-cursor';
+        wrap.setAttribute('aria-hidden','true');
+        document.body.appendChild(wrap);
+
+        const N = 20, LERP = 0.35, LINK_SHRINK = 0.55;
+        let hoverBoost = 1;
+
+        for (let i=0;i<N;i++){
+          const d = document.createElement('div');
+          d.className = 'gc-dot';
+          wrap.appendChild(d);
+        }
+        const dots = Array.from(wrap.children);
+
+        let mx = innerWidth/2, my = innerHeight/2;
+        const hist = Array.from({length:N}, () => ({x:mx, y:my}));
+
+        addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; }, {passive:true});
+
+        let raf;
+        function tick(){
+          hist.shift(); hist.push({x:mx,y:my});
+          for (let i=0;i<N;i++){
+            const c = hist[i], n = hist[i+1] || hist[N-1];
+            c.x += (n.x - c.x) * LERP;
+            c.y += (n.y - c.y) * LERP;
+            const base = i / N;
+            const scale = (i === N-1 ? base * hoverBoost : base);
+            dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%,-50%) scale(${scale})`;
+          }
+          raf = requestAnimationFrame(tick);
+        }
+        raf = requestAnimationFrame(tick);
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) { cancelAnimationFrame(raf); raf = null; }
+          else if (!raf) { raf = requestAnimationFrame(tick); }
+        }, {passive:true});
+
+        const isLink = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
+        const isNavish = (t) => t && (t.closest('nav') || t.closest('.frame'));
+        document.addEventListener('pointerover', e => { if (isLink(e.target) && !isNavish(e.target)) hoverBoost = LINK_SHRINK; }, true);
+        document.addEventListener('pointerout',  e => { if (isLink(e.target) && !isNavish(e.target)) hoverBoost = 1; }, true);
+      }
+
+      /* Effects (Set 2: 16–29) */
       const scroll = () => {
         const q = (sel) => [...document.querySelectorAll(sel)];
-
         const fx16Titles = q('.content__title[data-splitting][data-effect16]');
         const fx17Titles = q('.content__title[data-splitting][data-effect17]');
         const fx18Titles = q('.content__title[data-splitting][data-effect18]');
@@ -296,6 +379,8 @@ main{counter-reset:section;}
         const fx27Titles = q('.content__title[data-splitting][data-effect27]');
         const fx28Titles = q('.content__title[data-splitting][data-effect28]');
         const fx29Titles = q('.content__title[data-splitting][data-effect29]');
+
+        // the rest remains identical (animations as in your current file) ...
 
         // 16
         fx16Titles.forEach(title => {
@@ -312,7 +397,7 @@ main{counter-reset:section;}
         // 17
         fx17Titles.forEach(title => {
           const chars = title.querySelectorAll('.char');
-          chars.forEach(char => gsap.set(char.parentNode, { perspective: 1000 }));
+          chars.forEach(char => gsap.set(char.parentNode, { perspective: 1000 })); 
           gsap.fromTo(chars, {
             'will-change':'opacity, transform',
             opacity:0, rotateX:()=>gsap.utils.random(-120,120), z:()=>gsap.utils.random(-200,200)
@@ -438,7 +523,7 @@ main{counter-reset:section;}
           }
         });
 
-        // 27 (used for testimonials too)
+        // 27 (also used for testimonials)
         fx27Titles.forEach(title => {
           const words = [...title.querySelectorAll('.word')];
           words.forEach(word => gsap.set(word.parentNode, { perspective: 1000 }));
@@ -487,7 +572,7 @@ main{counter-reset:section;}
           }
         });
 
-        // 29 (unused here but kept for completeness)
+        // 29
         fx29Titles.forEach(title => {
           const words = [...title.querySelectorAll('.word')];
           for (const [pos,word] of words.entries()) {
@@ -505,6 +590,37 @@ main{counter-reset:section;}
         });
       };
 
+
+
+      // COPY: fade/blur in when its section scrolls into view
+const copyBlocks = gsap.utils.toArray('.content > p');
+
+copyBlocks.forEach((p) => {
+  // initial state (JS-set to avoid FOUC)
+  gsap.set(p, { autoAlpha: 0, y: 24, filter: 'blur(8px)' });
+
+  // reveal on scroll
+  gsap.to(p, {
+    autoAlpha: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: p,
+      start: 'top 80%',    // begin reveal as paragraph nears viewport
+      end: 'top 55%',      // finish a bit after entering
+      scrub: true,         // ties opacity/position to scroll
+      // markers: true,    // uncomment to debug
+    }
+  });
+});
+
+// Respect reduced motion: show copy immediately
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  gsap.set(copyBlocks, { autoAlpha: 1, y: 0, filter: 'none' });
+}
+
+
       // Boot like the demo
       window.addEventListener('load', () => {
         Splitting();
@@ -512,6 +628,7 @@ main{counter-reset:section;}
           document.body.classList.remove('loading');
           initSmoothScrolling();
           scroll();
+          initGooeyCursor();
           setTimeout(() => ScrollTrigger.refresh(), 80);
         });
       });

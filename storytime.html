@@ -1059,165 +1059,127 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
   backdrop-filter:none !important;
 }
 
+/* =========================
+   Blackout tooltip (unified)
+   ========================= */
+:root { --z-tooltip: 40000; }
 
-/* Blackout tooltip */
+/* Base blackout style */
 .blackout {
-  color:transparent;
-  background:#fff;
-  padding:0 .15em;
-  border-radius:2px;
-  -webkit-box-decoration-break:clone;
-  box-decoration-break:clone;
+  color: transparent;
+  background: #fff;
+  padding: 0 .15em;
+  border-radius: 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
+
+/* Trigger */
 .blackout.tip {
-  position:relative;
-  cursor:help;
-  
+  position: relative;
+  cursor: help;
 }
+
+/* Bubble (same on desktop & mobile) */
 .blackout.tip::after {
-  content:attr(data-tip);
-  position:absolute;
-  bottom:100%;
-  right:0;
-  transform:translateY(-6px);
-  background:rgba(0,0,0,0);
-  color:#fff;
-  padding:.45rem .55rem;
-  border-radius:0;
-  width:min(360px,80vw);
-  font-size:1.2em;
-  line-height:1.2;
-  letter-spacing:.02em;
-  text-transform:none;
-  white-space:normal;
-  box-shadow:0 6px 18px rgba(0,0,0,0);
-  opacity:0;
-  pointer-events:none;
-  z-index:10005;
-  transition:opacity .15s ease,transform .15s ease;
-}
-.blackout.tip::before {
-  content:"";
-  position:absolute;
-  bottom:calc(100% - 2px);
-  right:.6rem;
-  width:8px;
-  height:8px;
-  background: #000;                 /* match the backing */
-  z-index: calc(var(--z-tooltip) + 1) !important;
-  transform:translateY(50%) rotate(45deg);
-  opacity:0;
-  transition:opacity .15s ease;
-}
-.blackout.tip:hover::after,.blackout.tip:focus-visible::after {
-  opacity:1;
-  transform:translateY(auto);
-}
-.blackout.tip:hover::before,.blackout.tip:focus-visible::before {
-  opacity:1;
-}
-/* Blur redaction variant */
-.blackout.blackout--blur {
-  /* override base blackout */
-color:inherit;
-  /* keep text visible under blur */
-background:rgba(0,0,0,0);
-  /* “solid tape” look */
-
--webkit-box-decoration-break:clone;
-  box-decoration-break:clone;
-  position:relative;
-}
-/* Only blur the inner span,so we can toggle it */
-.blackout.blackout--blur > span {
-  display:inline-block;
-  filter:blur(var(--blur-amt,4px));
-  transition:filter .18s ease;
-}
-/* Hover = reduce blur */
-.blackout.blackout--blur:hover > span {
-  --blur-amt:0.5px;
-}
-/* When JS marks it as revealed (on selection) remove blur */
-.blackout.blackout--blur[data-reveal="1"] > span,.blackout.blackout--blur:focus-within > span {
-  --blur-amt:0;
-}
-/* Optional:nicer selection colors */
-.blackout.blackout--blur > span::selection {
-  background:rgba(255,255,255,.25);
-  color:inherit;
-}
-
-
-/* === SIMPLE TOOLTIP FIX (black backing • above all • mobile placement) === */
-:root { --z-tooltip: 40000; } /* higher than blur(10000) + any UI */
-
-/* base */
-.blackout.tip { position: relative; }
-
-/* bubble */
-.blackout.tip::after{
   content: attr(data-tip);
   position: absolute;
-  bottom: calc(100% + 8px);   /* sits above trigger on desktop */
-  right: 0;
-  background: rgba(0,0,0,.85);/* solid black backing */
+  top: calc(100% + 10px);             /* below the trigger */
+  left: 50%;
+  transform: translate(-50%, 4px);    /* centered under trigger */
+  background: rgba(0,0,0,.85);        /* solid black backing */
   color: #fff;
-  padding: .6rem .75rem;
-  border-radius: 10px;
-  width: min(360px, 80vw);
-  font-size: 1rem;
-  line-height: 1.4;
+  padding: .85rem 1rem;
+  border-radius: 0px;
+  /* viewport-safe width with safe-area insets */
+  --padL: max(12px, env(safe-area-inset-left, 0px));
+  --padR: max(12px, env(safe-area-inset-right, 0px));
+  max-width: calc(100vw - (var(--padL) + var(--padR)));
+  width: min(420px, calc(100vw - (var(--padL) + var(--padR))));
+  text-align: left;                   /* left-aligned text */
+  line-height: 1.45;
   white-space: normal;
   box-shadow: 0 12px 28px rgba(0,0,0,.45);
   opacity: 0;
-  transform: translateY(4px);
   pointer-events: none;
   z-index: var(--z-tooltip);
   transition: opacity .18s ease, transform .18s ease;
 }
 
-/* arrow */
-.blackout.tip::before{
+/* Arrow */
+.blackout.tip::before {
   content: "";
   position: absolute;
-  bottom: calc(100% + 4px);
-  right: 12px;
+  top: 100%;
+  left: 50%;
   width: 10px; height: 10px;
   background: rgba(0,0,0,1);
-  transform: rotate(45deg);
+  transform: translate(-50%, -2px) rotate(45deg);
   opacity: 0;
-  z-index: var(--z-tooltip);
+  z-index: calc(var(--z-tooltip) + 1);
   transition: opacity .18s ease;
 }
 
-/* show on hover/focus */
+/* Show on hover/focus */
 .blackout.tip:hover::after,
-.blackout.tip:focus-visible::after { opacity: 1; transform: translateY(0); }
+.blackout.tip:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 .blackout.tip:hover::before,
 .blackout.tip:focus-visible::before { opacity: 1; }
 
-/* Mobile: center it below the trigger, bigger type */
-@media (max-width: 768px){
-  .blackout.tip::after{
-    top: calc(100% + 10px);
-    bottom: auto;
-    left: 50%; right: auto;
-    transform: translate(-50%, 4px);
-    width: min(92vw, 420px);
-    font-size: 16px;
-    line-height: 1.45;
-    text-align: left;
-  }
-  .blackout.tip:hover::after,
-  .blackout.tip:focus-visible::after { transform: translate(-50%, 0); }
-
-  .blackout.tip::before{
-    top: 100%; bottom: auto;
-    left: 50%; right: auto;
-    transform: translate(-50%, -2px) rotate(45deg);
-  }
+/* Blur redaction variant (unchanged) */
+.blackout.blackout--blur {
+  color: inherit;
+  background: rgba(0,0,0,0);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  position: relative;
 }
+.blackout.blackout--blur > span {
+  display: inline-block;
+  filter: blur(var(--blur-amt,4px));
+  transition: filter .18s ease;
+}
+.blackout.blackout--blur:hover > span { --blur-amt: .5px; }
+.blackout.blackout--blur[data-reveal="1"] > span,
+.blackout.blackout--blur:focus-within > span { --blur-amt: 0; }
+.blackout.blackout--blur > span::selection {
+  background: rgba(255,255,255,.25);
+  color: inherit;
+}
+/* Gutters already defined in your base rule:
+   --padL: max(12px, env(safe-area-inset-left, 0px));
+   --padR: max(12px, env(safe-area-inset-right, 0px));
+*/
+
+/* Full-width / viewport-safe tooltip */
+.blackout.tip.tip--full::after{
+  position: fixed;                          /* key: anchor to viewport */
+  top: calc(var(--tip-top, 0px) + 10px);    /* set via JS on open */
+  left: var(--padL);
+  right: var(--padR);
+  width: auto;
+  max-width: none;                          /* insets define width */
+  box-sizing: border-box;                   /* padding inside width */
+  transform: translateY(4px);               /* only Y-animate */
+}
+
+/* Animate in for the fixed variant */
+.blackout.tip.tip--full:hover::after,
+.blackout.tip.tip--full:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Arrow for fixed variant (optional) */
+.blackout.tip.tip--full::before{
+  position: fixed;
+  top: calc(var(--tip-top, 0px) + 2px);
+  right: calc(var(--padR) + 12px);
+  left: auto;
+  transform: rotate(45deg);
+}
+
+
 
 /* =========================================================
                QUERY GROUP — MEDIA & FEATURE QUERIES
@@ -3005,6 +2967,40 @@ section.content:has(.grid[data-grid-ninth]) {
     s.innerHTML = `<div class="mousey"><div class="scroller"></div></div>`;
     app.appendChild(s);
   }
+
+
+
+
+
+  (function(){
+  function setTop(el){
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--tip-top', r.bottom + 'px');
+  }
+  function handleOpen(el){ setTop(el); }
+
+  // Open on hover/focus
+  document.addEventListener('pointerenter', e => {
+    const t = e.target.closest('.blackout.tip.tip--full');
+    if (t) handleOpen(t);
+  }, true);
+  document.addEventListener('focusin', e => {
+    const t = e.target.closest('.blackout.tip.tip--full');
+    if (t) handleOpen(t);
+  });
+
+  // Keep aligned if layout/viewport changes while open
+  const refresh = () => {
+    document.querySelectorAll('.blackout.tip.tip--full:hover, .blackout.tip.tip--full:focus-within')
+      .forEach(setTop);
+  };
+  addEventListener('scroll', refresh, {passive:true});
+  addEventListener('resize', refresh, {passive:true});
+  addEventListener('orientationchange', refresh, {passive:true});
+})();
+
+
+
 
   // ---------------------------------------------------------------------------
   // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)

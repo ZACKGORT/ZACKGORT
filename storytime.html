@@ -8,7 +8,7 @@
     <!-- Meta / social -->
     <meta
       name="description"
-      content="Zack Gort — product/UX designer. Case studies: Pershing X (BNY Mellon), GNC, more."
+      content="Zack Gort — product/UX designer. Case studies: #fintech #ecommerce #designsystems #etc"
     />
     <meta property="og:title" content="UX is dead — Zack Gort" />
     <meta
@@ -1062,9 +1062,12 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 /* =========================
    Blackout tooltip (unified)
    ========================= */
-:root { --z-tooltip: 40000; }
+/* =========================
+   Bubble tooltip (blackout)
+   ========================= */
+   :root { --z-tooltip: 40000; }
 
-/* Base blackout style */
+/* Redaction base */
 .blackout {
   color: transparent;
   background: #fff;
@@ -1080,23 +1083,22 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
   cursor: help;
 }
 
-/* Bubble (same on desktop & mobile) */
+/* Bubble */
 .blackout.tip::after {
   content: attr(data-tip);
   position: absolute;
-  top: calc(100% + 10px);             /* below the trigger */
+  top: calc(100% + 10px);
   left: 50%;
-  transform: translate(-50%, 4px);    /* centered under trigger */
-  background: rgba(0,0,0,.85);        /* solid black backing */
+  transform: translate(-50%, 4px);
+  background: rgba(0,0,0,.85);
   color: #fff;
   padding: .85rem 1rem;
-  border-radius: 0px;
-  /* viewport-safe width with safe-area insets */
+  border-radius: 0;
   --padL: max(12px, env(safe-area-inset-left, 0px));
   --padR: max(12px, env(safe-area-inset-right, 0px));
   max-width: calc(100vw - (var(--padL) + var(--padR)));
   width: min(420px, calc(100vw - (var(--padL) + var(--padR))));
-  text-align: left;                   /* left-aligned text */
+  text-align: left;
   line-height: 1.45;
   white-space: normal;
   box-shadow: 0 12px 28px rgba(0,0,0,.45);
@@ -1126,12 +1128,10 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
 .blackout.tip:hover::before,
 .blackout.tip:focus-visible::before { opacity: 1; }
 
-/* Blur redaction variant (unchanged) */
+/* Blur-redaction variant (kept) */
 .blackout.blackout--blur {
   color: inherit;
   background: rgba(0,0,0,0);
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
   position: relative;
 }
 .blackout.blackout--blur > span {
@@ -1146,38 +1146,60 @@ nav a::after,.frame__links a::after,.frame__tags a::after {
   background: rgba(255,255,255,.25);
   color: inherit;
 }
-/* Gutters already defined in your base rule:
-   --padL: max(12px, env(safe-area-inset-left, 0px));
-   --padR: max(12px, env(safe-area-inset-right, 0px));
-*/
 
-/* Full-width / viewport-safe tooltip */
-.blackout.tip.tip--full::after{
-  position: fixed;                          /* key: anchor to viewport */
-  top: calc(var(--tip-top, 0px) + 10px);    /* set via JS on open */
-
+/* Viewport-fixed, full-width bubble (pair with JS that sets --tip-top) */
+.blackout.tip.tip--full::after {
+  position: fixed;
+  top: calc(var(--tip-top, 0px) + 10px);
   right: var(--padR);
   width: auto;
-  max-width: none;                          /* insets define width */
-  box-sizing: border-box;                   /* padding inside width */
-  transform: translateY(4px);               /* only Y-animate */
+  max-width: none;
+  box-sizing: border-box;
+  transform: translateY(4px);
 }
-
-/* Animate in for the fixed variant */
 .blackout.tip.tip--full:hover::after,
 .blackout.tip.tip--full:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
 }
-
-/* Arrow for fixed variant (optional) */
-.blackout.tip.tip--full::before{
+/* Arrow for fixed variant */
+.blackout.tip.tip--full::before {
   position: fixed;
   top: calc(var(--tip-top, 0px) + 2px);
   right: calc(var(--padR) + 12px);
   left: auto;
   transform: rotate(45deg);
 }
+
+/* Mobile tuning */
+@media (max-width: 768px) {
+  .blackout.tip::after {
+    top: calc(100% + 10px);
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, 0);
+    width: min(92vw, 420px);
+    padding: .6rem .75rem;
+    font-size: 16px;
+    line-height: 1.45;
+    text-align: left;
+    white-space: normal;
+  }
+  .blackout.tip::before {
+    top: 100%;
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -2px) rotate(45deg);
+  }
+  .blackout.tip:hover::after,
+  .blackout.tip:focus-visible::after {
+    transform: translate(-50%, 4px);
+  }
+}
+
+
 
 
 
@@ -2178,91 +2200,84 @@ section.content:has(.grid[data-grid-ninth]) {
   }
 
   function initConfetti() {
-    const sup = document.querySelector('.heading-chant .confetti-sup');
-    if (!sup) return;
+  const sup = document.querySelector('.heading-chant .confetti-sup');
+  if (!sup) return;
 
-    const emitter = sup.querySelector('span.emitter');
-    const physicsAvailable = !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
-    if (!physicsAvailable) return;
+  const emitter = sup.querySelector('span.emitter');
+  const physicsAvailable = !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
+  if (!physicsAvailable) return;
 
-    function particles(parent, qty, x, y, minA, maxA) {
-      const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
-      for (let i = 0; i < qty; i++) {
-        const angle = gsap.utils.random(minA, maxA);
-        const velocity = gsap.utils.random(70, 140);
-        const dot = document.createElement('div');
-        dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
-        parent.appendChild(dot);
+  function particles(parent, qty, x, y, minA, maxA) {
+    const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
+    for (let i = 0; i < qty; i++) {
+      const angle = gsap.utils.random(minA, maxA);
+      const velocity = gsap.utils.random(70, 140);
+      const dot = document.createElement('div');
+      dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
+      parent.appendChild(dot);
 
-        gsap.set(dot, {
-          opacity: 0, x, y,
-          scale: gsap.utils.random(.4, .8),
-          rotation: gsap.utils.random(0, 360)
-        });
-        gsap.timeline({ onComplete: () => dot.remove() })
-          .to(dot, { opacity: 1, duration: .06 }, 0)
-          .to(dot, {
-            duration: 1.8,
-            rotationX: `-=${gsap.utils.random(720,1440)}`,
-            rotationZ: `+=${gsap.utils.random(720,1440)}`,
-            physics2D: { angle, velocity, gravity: 120 }
-          }, 0)
-          .to(dot, { opacity: 0, duration: 1 }, .8);
-      }
+      gsap.set(dot, { opacity: 0, x, y, scale: gsap.utils.random(.4, .8), rotation: gsap.utils.random(0, 360) });
+      gsap.timeline({ onComplete: () => dot.remove() })
+        .to(dot, { opacity: 1, duration: .06 }, 0)
+        .to(dot, {
+          duration: 1.8,
+          rotationX: `-=${gsap.utils.random(720,1440)}`,
+          rotationZ: `+=${gsap.utils.random(720,1440)}`,
+          physics2D: { angle, velocity, gravity: 120 }
+        }, 0)
+        .to(dot, { opacity: 0, duration: 1 }, .8);
     }
+  }
 
-    function burst(q = 80, minA = -95, maxA = -35) {
-      particles(emitter, q, 0, 0, minA, maxA);
-      gsap.fromTo(sup, { scale: .96 }, { scale: 1, duration: .25, ease: 'elastic.out(1,.6)' });
-    }
+  function burst(q = 80, minA = -95, maxA = -35) {
+    particles(emitter, q, 0, 0, minA, maxA);
+    gsap.fromTo(sup, { scale: .96 }, { scale: 1, duration: .25, ease: 'elastic.out(1,.6)' });
+  }
 
-    // Click / keyboard
-    sup.addEventListener('click', () => burst());
-    sup.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); burst(); }
-    });
-
-    // Subtle hover tease on fine pointers
-    if (!prefersReducedMotion && matchMedia('(pointer:fine)').matches) {
-      let last = 0; const CD = 700;
-      sup.addEventListener('mouseenter', () => {
-        const now = performance.now();
-        if (now - last < CD) return;
-        last = now; burst(28, -100, -60);
-      });
-    }
-
-    if (prefersReducedMotion) return;
-
-    // Repeatable auto-fire whenever the section is entered (down or up),
-    // with a small cooldown to avoid spam.
-    let lastAuto = 0;
-    const AUTO_CD = 800; // ms
-    const auto = () => {
+  // Click / keyboard / hover (unchanged)
+  sup.addEventListener('click', () => burst());
+  sup.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); burst(); }
+  });
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(pointer:fine)').matches) {
+    let last = 0; const CD = 700;
+    sup.addEventListener('mouseenter', () => {
       const now = performance.now();
-      if (now - lastAuto < AUTO_CD) return;
-      lastAuto = now;
+      if (now - last < CD) return;
+      last = now; burst(28, -100, -60);
+    });
+  }
+
+  // 🔁 Fire whenever #about scrolls into view (both directions), with cooldown
+  if (typeof ScrollTrigger !== 'undefined' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const aboutEl = document.getElementById('about') || sup.closest('section') || sup;
+    let lastBurst = 0;
+    const COOLDOWN = 1200; // ms
+
+    const maybeBurst = () => {
+      const now = performance.now();
+      if (now - lastBurst < COOLDOWN) return;
+      lastBurst = now;
       burst(54, -100, -35);
     };
 
-    // Fire on scroll enters (both directions)
-    if (typeof ScrollTrigger !== 'undefined') {
-      const triggerEl = document.getElementById('about') || sup.closest('section') || sup;
-      ScrollTrigger.create({
-        trigger: triggerEl,
-        start: 'top 65%',
-        onEnter: auto,
-        onEnterBack: auto
-      });
-    }
+    ScrollTrigger.create({
+      trigger: aboutEl,
+      start: 'top 80%',
+      end: 'bottom top',
+      onEnter: maybeBurst,
+      onEnterBack: maybeBurst,
+      // no 'once'; we want it every time you re-enter
+    });
 
-    // Optional: if we land mid-section or with #about, pop once shortly after load
-    const isSupInView = () => {
-      const r = sup.getBoundingClientRect();
-      return r.top < innerHeight * 0.65 && r.bottom > 0;
-    };
-    if (location.hash === '#about' || isSupInView()) setTimeout(auto, 400);
+    // If the page loads with the intro already in view, pop one
+    const r = aboutEl.getBoundingClientRect();
+    if (r.top < innerHeight * 0.8 && r.bottom > 0) {
+      setTimeout(maybeBurst, 350);
+    }
   }
+}
+
 
   function initDeadJump() {
     const cands = Array.from(document.querySelectorAll('.frame__title,.ux-dead-jump'));
@@ -2358,9 +2373,9 @@ section.content:has(.grid[data-grid-ninth]) {
     });
   }
 
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
   // CONTENT MODEL
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
   const CONTENT = {
     header: {
       title: 'UX is dead↴',
@@ -2498,43 +2513,45 @@ section.content:has(.grid[data-grid-ninth]) {
         client: "BNY Mellon — Pershing X",
         agency: "Publicis Sapient",
         role: [
-          "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
-          "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
+    "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
+    "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
+
         ],
-        details: [
-          [
-            "Problem",
-            "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. That slowed planning, portfolio work, and account management."
-          ],
-          [
-            "Vision",
-            "Build Wove: an industry-first platform that connects a client’s full financial picture and the tools advisors use—so work flows across modules without re-entry."
-          ],
-          [
-            "Scope",
-            "Advanced data reporting/analytics, financial plan building, flexible billing, and cross-custodian trading & rebalancing—all within a single, data-driven platform."
-          ],
-          [
-            "Investment Tools",
-            "Access to direct indexing, including BNY Mellon Precision Direct Indexing S&P 500®, enabling customized strategies while seeking to match index performance."
-          ],
-          [
-            "Experience Strategy",
-            "Go beyond integrations to design interconnected experiences—planning → portfolio building → account management as one continuous, low-friction journey."
-          ],
-          [
-            "Constraints",
-            "SEC/FINRA auditability, enterprise security/scale, heterogeneous custodians, and high-density data—while keeping cognitive load low so advisors move faster."
-          ],
-          [
-            "My Contributions",
-            "Information architecture, task/flow mapping, cross-module navigation, and component patterns that allow data to persist across steps (no re-entry)."
-          ],
-          [
-            "Outcome",
-            "Wove debuted with the power, scale, and security of BNY Mellon behind it, enabling advisors to be more productive and serve more clients."
-          ]
-        ]
+  details: [
+    [
+      "Problem",
+      "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. That slowed planning, portfolio work, and account management."
+    ],
+    [
+      "Vision",
+      "Build Wove: an industry-first platform that connects a client’s full financial picture and the tools advisors use—so work flows across modules without re-entry."
+    ],
+    [
+      "Scope",
+      "Advanced data reporting/analytics, financial plan building, flexible billing, and cross-custodian trading & rebalancing—all within a single, data-driven platform."
+    ],
+    [
+      "Investment Tools",
+      "Access to direct indexing, including BNY Mellon Precision Direct Indexing S&P 500®, enabling customized strategies while seeking to match index performance."
+    ],
+    [
+      "Experience Strategy",
+      "Go beyond integrations to design interconnected experiences—planning → portfolio building → account management as one continuous, low-friction journey."
+    ],
+    [
+      "Constraints",
+      "SEC/FINRA auditability, enterprise security/scale, heterogeneous custodians, and high-density data—while keeping cognitive load low so advisors move faster."
+    ],
+    [
+      "My Contributions",
+      "Information architecture, task/flow mapping, cross-module navigation, and component patterns that allow data to persist across steps (no re-entry)."
+    ],
+    [
+      "Outcome",
+      "Wove debuted with the power, scale, and security of BNY Mellon behind it, enabling advisors to be more productive and serve more clients."
+    ]
+  ]
+
       },
       discoveryImages: [
         "https://i.ibb.co/wZY2bhKF/bny4.png",
@@ -2599,20 +2616,21 @@ section.content:has(.grid[data-grid-ninth]) {
       ],
       insightAside: "if the bar ain't bending, you’re just pretending.",
       stack: [
-        ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],        
-        ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
-        ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
-        ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],    
-        ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
+  ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],        
+  ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
+  ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
+  ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],    
+  ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
 
-        ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
-        ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
-        ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
+  ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
+  ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
+  ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
 
-        ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],    
-        ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
-        ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
-        ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"],
+  ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],    
+  ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
+  ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
+  ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"],
+
       ]
     },
     contact: {
@@ -3181,34 +3199,9 @@ section.content:has(.grid[data-grid-ninth]) {
   }
 
   // ---------------------------------------------------------------------------
-  // CSS override injection for confetti sup (pink + underline by default)
-  // ---------------------------------------------------------------------------
-  function injectConfettiStyles() {
-    const css = `
-      .heading-chant .confetti-sup{
-        color: var(--brand-pink);
-        text-decoration: underline;
-        text-decoration-color: currentColor;
-        text-decoration-thickness: .08em;
-        text-underline-offset: .12em;
-      }
-      .heading-chant .confetti-sup:hover,
-      .heading-chant .confetti-sup:active,
-      .heading-chant .confetti-sup:focus-visible{
-        color: #fff;
-        text-decoration: none;
-      }`;
-    const s = document.createElement('style');
-    s.setAttribute('data-injected', 'confetti-sup-style');
-    s.textContent = css;
-    document.head.appendChild(s);
-  }
-
-  // ---------------------------------------------------------------------------
   // BOOT
   // ---------------------------------------------------------------------------
   async function start() {
-    injectConfettiStyles();
     renderApp();
     initVisibilityPerfGuards();
     tuneForAndroid();
@@ -3242,6 +3235,9 @@ section.content:has(.grid[data-grid-ninth]) {
   window.addEventListener('load', () => { start(); }, { once: true });
 
 })();
+
+
+
 </script>
   </body>
 </html>

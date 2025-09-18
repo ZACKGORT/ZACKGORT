@@ -544,6 +544,43 @@ main {
 		justify-self: end;
 	}
 }
+
+
+
+/* Breathing room before animated headings */
+:root{
+  --breather-y: clamp(8vh, 12vw, 16vh);
+  --breather-y-mobile: clamp(12vh, 20vw, 24vh);
+  --breather-y-testimonial: clamp(16vh, 28vw, 32vh);
+}
+
+/* Any .content that contains a title gets pre-padding */
+.content.has-title { padding-top: var(--breather-y); }
+
+@media (max-width: 768px){
+  .content.has-title { padding-top: var(--breather-y-mobile); }
+}
+
+/* Testimonials get even more room up front */
+.content.has-title--testimonial { padding-top: var(--breather-y-testimonial); }
+
+
+/* Smaller testimonial headlines (effect 27 only) */
+.content__title[data-effect27] { gap: 1.25rem; }
+
+.content__title[data-effect27] .font-medium {
+  font-size: clamp(1rem, 4.2vw, 1.9rem);
+  line-height: 1.25;
+  font-weight: 600; /* keep your weight */
+}
+
+/* Extra control on very small screens */
+@media (max-width: 480px) {
+  .content__title[data-effect27] .font-medium {
+    font-size: clamp(0.95rem, 4vw, 1.6rem);
+  }
+}
+
   </style>
 </head>
 
@@ -965,29 +1002,19 @@ main {
           }
         });
     
-        /* 27 (testimonials too) */
-        fx27Titles.forEach(title => {
-          const words = [...title.querySelectorAll('.word')];
-          words.forEach(w => gsap.set(w.parentNode, { perspective: 1000 }));
-          gsap.fromTo(words, {
-            'will-change':'opacity, transform',
-            z:()=>gsap.utils.random(420,780),
-            opacity:0,
-            xPercent:()=>gsap.utils.random(-60,60),
-            yPercent:()=>gsap.utils.random(-6,6),
-            rotationX:()=>gsap.utils.random(-70,70)
+/* 27 (testimonials too) — extended scroll space */
+fx27Titles.forEach(title => {
+  const chars = title.querySelectorAll('.char');
+          chars.forEach(c => gsap.set(c.parentNode, { perspective: 1000 }));
+          gsap.fromTo(chars, {
+            'will-change':'opacity, transform', transformOrigin:'50% 0%',
+            opacity:0, rotationX:-90, z:-150
           }, {
-            ease:'expo', opacity:1, rotationX:0, rotationY:0, xPercent:0, yPercent:0, z:0,
-            scrollTrigger:{
-              trigger:title,
-              start:'center center',
-              end: C.pinOK ? '+=300%' : '+=140%',
-              scrub:C.scrubLong,
-              pin: C.pinOK ? title.parentNode : false
-            },
-            stagger:{ each:0.006, from:'random' }
+            ease:'power1', opacity:1, rotationX:0, z:0, stagger:C.stagMd,
+            scrollTrigger:{ trigger:title, start:C.centerStart, end:C.centerEnd, scrub:C.scrub }
           });
         });
+
     
         /* 28 */
         fx28Titles.forEach(title => {
@@ -1042,6 +1069,33 @@ main {
       // (no timing change needed)
     
       /* ===== Boot ===== */
+
+
+      function addBreathers(){
+    document.querySelectorAll('.content__title[data-splitting]').forEach(title => {
+      const wrap = title.parentNode; // the .content wrapper
+      wrap.classList.add('has-title');
+      if (title.hasAttribute('data-effect27')) {
+        wrap.classList.add('has-title--testimonial');
+      }
+    });
+  }
+
+  // In your existing load boot:
+  // ...
+  window.addEventListener('load', () => {
+    Splitting();
+    preloadFonts('cvn8slu').then(() => {
+      document.body.classList.remove('loading');
+      addBreathers();              // <-- add this line
+      initSmoothScrolling();
+      scroll();
+      initGooeyCursor();
+      setTimeout(() => ScrollTrigger.refresh(), 80);
+    });
+  });
+
+
       window.addEventListener('load', () => {
         Splitting();
         preloadFonts('cvn8slu').then(() => {

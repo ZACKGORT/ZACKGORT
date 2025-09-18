@@ -8,12 +8,12 @@
     <!-- Meta / social -->
     <meta
       name="description"
-      content="Zack Gort — I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function."
+      content="Zack Gort — product/UX designer. Case studies: #fintech #ecommerce #designsystems #etc"
     />
     <meta property="og:title" content="UX is dead — Zack Gort" />
     <meta
       property="og:description"
-      content="I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function."
+      content="Design systems, data refactors, and ecommerce that moves the needle."
     />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://i.ibb.co/cSQCgNQY/work1.webp" />
@@ -23,29 +23,16 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
     integrity="sha384-…" crossorigin="anonymous" defer></script>
 
-
     <!-- GSAP core + plugins (deferred) -->
     <script src="https://unpkg.com/gsap@3/dist/gsap.min.js" defer></script>
-    <script
-      src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"
-      defer
-    ></script>
-    <script
-      src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js"
-      defer
-    ></script>
+    <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js" defer></script>
+    <script src="https://unpkg.com/gsap@3/dist/Physics2DPlugin.min.js" defer></script>
 
     <!-- ImagesLoaded (deferred) -->
-    <script
-      src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"
-      defer
-    ></script>
+    <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js" defer></script>
 
     <!-- Lenis smooth scroll (deferred) -->
-    <script
-      src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js"
-      defer
-    ></script>
+    <script src="https://unpkg.com/@studio-freight/lenis/dist/lenis.min.js" defer></script>
 
     <!-- Fonts (deduped preconnect + combined family request) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -85,9 +72,8 @@
         --cursor-size:28px;
         /* Blur overlay */
         --layers:1; /* from 5 */
-        --blur-max:24; /* 12–18px looks “moderate” but is cheap(ish) */
-        --mask-stop:35; /* ~35vh coverage at the bottom */
-      
+        --blur-max:24;
+        --mask-stop:35;
         /* Panel palette */
         --cs-accent:#f4d35e;
         --cs-deep:#000;
@@ -102,7 +88,6 @@
         --z-footer:10020;
         --z-ui: 10050;
         --z-tooltip: 40000;
-        /* ↑ footer above blur */
       }
       html,body { width:100%; overflow-x:hidden; }
       html { font-size:var(--fs-body); }
@@ -113,7 +98,7 @@
         font-family:var(--font-sans);
         font-variation-settings:"slnt" 0,"wdth" 100,"wght" 450,"INKT" 0;
         font-weight:450;
-        line-height:1.5; /* readability boost */
+        line-height:1.5;
         -webkit-font-smoothing:antialiased;
         -moz-osx-font-smoothing:grayscale;
       }
@@ -133,6 +118,7 @@
       a:focus:not(:focus-visible){ outline:none; }
       a:focus-visible { outline:2px solid var(--brand-pink); outline-offset:2px; }
       a.no-underline::after { display:none; }
+
       /* Skip link */
       .skip-link {
         position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden;
@@ -141,15 +127,13 @@
         position:fixed; left:12px; top:12px; width:auto; height:auto; background:#000; color:#fff;
         padding:.5rem .75rem; border-radius:6px; z-index:10005;
       }
-      /* Nav/Frame links keep their own style */
+
+      /* Nav/Frame links (enable underline-on-hover, keep color white on hover) */
       nav a,.frame__links a,.frame__tags a { color:var(--color-link); text-transform:uppercase; }
-      nav a:hover,nav a:focus-visible,.frame__links a:hover,.frame__links a:focus-visible,.frame__tags a:hover,.frame__tags a:focus-visible { color:var(--color-link); }
-      nav a::after,.frame__links a::after,.frame__tags a::after { display:none !important; content:none !important; }
+      nav a:hover,nav a:focus-visible,
+      .frame__links a:hover,.frame__links a:focus-visible,
+      .frame__tags a:hover,.frame__tags a:focus-visible { color:var(--color-link); }
       nav a:focus-visible,.frame__links a:focus-visible,.frame__tags a:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
-
-      /* Underline on hover for header nav + tags */
-.frame__links a:hover,.frame__tags a:hover,nav a:hover {text-decoration: underline;text-decoration-thickness: 2px;text-underline-offset: 3px;}
-
       
       /* Microtype */
       .cdawrap,.page-footer,.project__label { font-size:var(--fs-xxs); text-transform:uppercase; letter-spacing:.06em; font-weight:400; color:var(--color-label); }
@@ -299,26 +283,7 @@
         padding:var(--page-padding); display:grid; width:100%; grid-row-gap:1rem; grid-column-gap:2rem; justify-items:start; margin-top:40vh;
         grid-template-columns:auto; justify-content:space-between; position:relative; z-index:var(--z-footer);
       }
-      
-      /* Scroll indicator */
-      .scroll-downs{
-        position:fixed; left:50%; transform:translateX(-50%) scale(.5); transform-origin:50% 100%;
-        bottom:clamp(40px,10vh,60px); width:34px; height:55px; z-index:20000; pointer-events:auto; cursor:pointer;
-        filter:drop-shadow(0 2px 8px rgba(0,0,0,.35));
-      }
-      .mousey{ width:3px; padding:10px 15px; height:35px; border:2px solid #fff; border-radius:25px; opacity:.75; box-sizing:content-box; }
-      .scroller{ width:3px; height:10px; border-radius:25%; background-color:#fff; animation:scroll 2.2s cubic-bezier(.15,.41,.69,.94) infinite; }
-      @keyframes scroll { 0%{opacity:0} 10%{transform:translateY(0);opacity:1} 100%{transform:translateY(15px);opacity:0} }
-      .panel[aria-hidden="false"] ~ .scroll-downs{ opacity:0; visibility:hidden; }
-      .scroll-downs::after{
-        content:"Back to top"; position:absolute; left:50%; bottom:100%; transform:translate(-50%,-8px);
-        font-size:var(--fs-xxs); letter-spacing:.08em; text-transform:uppercase; color:#fff; background:rgba(0,0,0,.65);
-        padding:.35rem .5rem; border-radius:6px; opacity:0; pointer-events:none; white-space:nowrap;
-        transition:opacity .2s ease,transform .2s ease; filter:drop-shadow(0 2px 8px rgba(0,0,0,.35));
-      }
-      .scroll-downs:hover::after{ opacity:.95; transform:translate(-50%,-12px); }
-      .scroll-downs:focus-visible{ outline:2px solid #fff; outline-offset:4px; }
-      
+
       /* Bottom blur overlay */
       .blur{ position:fixed; inset:0; z-index:var(--z-blur); pointer-events:none; opacity:0; transition:opacity .35s ease; }
       .blur.is-visible{ opacity:1; }
@@ -364,7 +329,7 @@
         font-size:.35em; line-height:0; margin-left:.3ch; letter-spacing:.04em; color:var(--color-text-alt); vertical-align:baseline; transform:translateY(-.6em);
       }
       
-      /* Blackout tooltip + blur variant (unchanged) */
+      /* Blackout tooltip + blur variant */
       .blackout{ color: transparent; background: #fff; padding: 0 .15em; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
       .blackout.tip{ position: relative; cursor: help; }
       .blackout.tip::after{
@@ -415,27 +380,20 @@
         #work .grid__item{ padding:.75rem; }
         #work .grid__item h4{ font-size:.85rem; }
         .ar-wide,.ar-narrow,.ar-rect{ aspect-ratio:auto; }
-      
         section.content:has(.grid[data-grid-ninth]){ margin-bottom: clamp(6rem, 18vh, 22rem); }
         @supports not (selector(:has(*))){ .grid[data-grid-ninth]{ margin-bottom: clamp(6rem, 18vh, 22rem); } }
         .grid-caption{ position: relative; z-index: 2; }
-      
         .project{ margin:12vh auto; grid-column-gap:1.25rem; }
         .project__title{ font-size:clamp(1.8rem,11vw,3.2rem); margin:6vh 0 4vh; }
         .project--details p{ max-width:none; }
         [id$="-process"]{ grid-template-columns:1fr; gap:1.25rem; }
         .intro__info{ bottom:16px; font-size:10px; opacity:.65; }
-      
         .page-footer{ grid-template-columns:1fr; gap:.5rem; margin-top:20vh; }
-      
         .stacked-img img{ width:100%; height:auto !important; object-fit:contain !important; object-position:center; }
-      
         #fintech-discovery .grid.grid--zoomed{ grid-template-columns:repeat(2,1fr); grid-template-rows:auto; }
-      
         .blackout.tip::after{ top:calc(100% + 10px); left:50%; transform:translate(-50%,0); width:min(92vw,420px); padding:.6rem .75rem; font-size:16px; line-height:1.45; text-align:left; white-space:normal; }
         .blackout.tip::before{ top:100%; left:50%; transform:translate(-50%,-2px) rotate(45deg); }
         .blackout.tip:hover::after,.blackout.tip:focus-visible::after{ transform:translate(-50%,4px); }
-      
         .frame__links{ gap:.25rem .6rem; }
         .frame__links a{ padding:.2rem .45rem; }
       }
@@ -560,9 +518,47 @@
       /* Tiny caption below galleries */
       .grid-caption{ margin:2rem auto 0; text-align:center; opacity:.85; max-width:1100px; }
 
-
-      
-          </style>
+      /* ======= NEW: Scroll progress (replaces .scroll-downs) ======= */
+      .navigation{
+        position:fixed;
+        left:50%;
+        bottom:clamp(40px,10vh,60px);
+        transform:translateX(-50%);
+        display:flex;
+        align-items:center;
+        gap:1.25rem;
+        z-index:var(--z-ui);
+        user-select:none;
+        mix-blend-mode:normal;
+      }
+      .nav-text{
+        font-size:var(--fs-xxs);
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        opacity:.85;
+        white-space:nowrap;
+      }
+      .nav-progress{
+        width:180px;
+        height:2px;
+        background:rgba(255,255,255,.25);
+        position:relative;
+        overflow:hidden;
+        border-radius:2px;
+      }
+      .nav-progress-fill{
+        position:absolute;inset:0 100% 0 0;
+        background:var(--color-text);
+        transform-origin:left center;
+        transform:scaleX(0);
+        will-change:transform;
+        transition:transform .08s linear;
+      }
+      @media (max-width: 768px){
+        .navigation{ bottom:1.25rem; }
+        .nav-progress{ width:64vw; max-width:360px; }
+      }
+    </style>
   </head>
 
   <body class="loading">
@@ -586,7 +582,6 @@
           } else {
             gsap.registerPlugin(ScrollTrigger);
           }
-          // normalizeScroll handled in initSmooth() to avoid Lenis race
         }
       
         const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -729,52 +724,51 @@
         }
       
         function enableHashScroll() {
-  document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
+          document.addEventListener('click', (e) => {
+            const a = e.target.closest('a[href^="#"]');
+            if (!a) return;
 
-    const id = a.getAttribute('href');
-    if (!id || id.length < 2) return;
+            const id = a.getAttribute('href');
+            if (!id || id.length < 2) return;
 
-    const target = document.querySelector(id);
-    if (!target) return;
+            const target = document.querySelector(id);
+            if (!target) return;
 
-    e.preventDefault();
+            e.preventDefault();
 
-    const settle = a.dataset.settle;
+            const settle = a.dataset.settle;
 
-    const focusTarget = () => {
-      target.setAttribute('tabindex', '-1');
-      setTimeout(() => target.focus({ preventScroll: true }), 0);
-    };
+            const focusTarget = () => {
+              target.setAttribute('tabindex', '-1');
+              setTimeout(() => target.focus({ preventScroll: true }), 0);
+            };
 
-    // If caller wants to scroll to the end of a pinned section, do that
-    if (settle === 'end' && window.ScrollTrigger) {
-      const st = ScrollTrigger.getAll().find(st =>
-        st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
-      );
-      if (st && isFinite(st.end)) {
-        const y = st.end + 2;
-        if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
-        else window.scrollTo({ top: y, behavior: 'smooth' });
+            // If caller wants to scroll to the end of a pinned section, do that
+            if (settle === 'end' && window.ScrollTrigger) {
+              const st = ScrollTrigger.getAll().find(st =>
+                st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
+              );
+              if (st && isFinite(st.end)) {
+                const y = st.end + 2;
+                if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
+                else window.scrollTo({ top: y, behavior: 'smooth' });
 
-        focusTarget();
-        // 🔑 Don’t write the hash
-        clearSlug();
-        return;
-      }
-    }
+                focusTarget();
+                // 🔑 Don’t write the hash
+                clearSlug();
+                return;
+              }
+            }
 
-    // Regular smooth scroll path
-    const y = target.getBoundingClientRect().top + window.pageYOffset;
-    window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
+            // Regular smooth scroll path
+            const y = target.getBoundingClientRect().top + window.pageYOffset;
+            window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
 
-    focusTarget();
-    // 🔑 Don’t write the hash
-    clearSlug();
-  });
-}
-
+            focusTarget();
+            // 🔑 Don’t write the hash
+            clearSlug();
+          });
+        }
       
         // ---------------------------------------------------------------------------
         // Utilities
@@ -1027,7 +1021,7 @@
         }
       
         // ---------------------------------------------------------------------------
-        // Cursor + Confetti + UX jump + back-to-top
+        // Cursor + Confetti + UX jump
         // ---------------------------------------------------------------------------
         function initCursor() {
           if (!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
@@ -1205,17 +1199,6 @@
           });
         }
       
-        function initBackToTop() {
-          const el = document.querySelector('.scroll-downs');
-          if (!el) return;
-          const toTop = (e) => {
-            e.preventDefault();
-            window.lenis ? window.lenis.scrollTo(0, { duration: 1 }) : window.scrollTo({ top: 0, behavior: 'smooth' });
-          };
-          el.addEventListener('click', toTop);
-          el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toTop(e); });
-        }
-      
         // ---------------------------------------------------------------------------
         // Case study timing overrides
         // ---------------------------------------------------------------------------
@@ -1277,9 +1260,7 @@
           });
         }
       
-        // ===========================================================================
-        // CONTENT MODEL
-        // ===========================================================================
+        // =========================================================================== CONTENT MODEL (unchanged)
         const CONTENT = {
           header: {
             title: 'UX is dead.',
@@ -1861,14 +1842,42 @@
             <span><a href="mailto:${CONTENT.contact.email}">${CONTENT.contact.email}</a></span>
             <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
           app.appendChild(footer);
-      
-          // Scroll-to-top widget
-          const s = el('div', 'scroll-downs');
-          s.setAttribute('role', 'button');
-          s.setAttribute('tabindex', '0');
-          s.setAttribute('aria-label', 'Back to top');
-          s.innerHTML = `<div class="mousey"><div class="scroller"></div></div>`;
-          app.appendChild(s);
+        }
+
+        // --- NEW: Scroll progress (replaces old back-to-top mouse) ---
+        function mountScrollProgress(){
+          const nav = document.createElement('div');
+          nav.className = 'navigation';
+          nav.setAttribute('aria-hidden','true');
+          nav.innerHTML = `
+            <div class="nav-text">Scroll</div>
+            <div class="nav-progress" aria-label="Scroll progress">
+              <div class="nav-progress-fill" id="progressFill"></div>
+            </div>
+            <div class="nav-text" id="progressText">0%</div>
+          `;
+          document.body.appendChild(nav);
+
+          const fill = nav.querySelector('#progressFill');
+          const text = nav.querySelector('#progressText');
+
+          const getMaxScroll = () =>
+            Math.max(0, document.documentElement.scrollHeight - document.documentElement.clientHeight);
+
+          const update = () => {
+            const max = getMaxScroll();
+            const y = window.scrollY || document.documentElement.scrollTop || 0;
+            const p = max ? (y / max) : 0;
+            const pct = Math.min(100, Math.max(0, Math.round(p * 100)));
+            fill.style.transform = `scaleX(${p})`;
+            text.textContent = `${pct}%`;
+          };
+
+          update();
+          addEventListener('scroll', update, { passive:true });
+          addEventListener('resize', update);
+          addEventListener('orientationchange', update);
+          if (document.fonts?.ready) document.fonts.ready.then(update);
         }
       
         // ---------------------------------------------------------------------------
@@ -2129,7 +2138,9 @@
           initCursor();
           initConfetti();
           initDeadJump();
-          initBackToTop();
+
+          // NEW: mount scroll progress UI
+          mountScrollProgress();
       
           initSkillsHoverReveal();
       
@@ -2144,18 +2155,14 @@
       
       })();
 
-
       // Keep URL clean (no #hash)
-const clearSlug = () => {
-  try {
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-  } catch {}
-};
-
-// If someone lands on /#about (shared link etc.), remove the hash but keep scroll
-if (location.hash) clearSlug();
-
-
-          </script>
+      const clearSlug = () => {
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch {}
+      };
+      // If someone lands on /#about (shared link etc.), remove the hash but keep scroll
+      if (location.hash) clearSlug();
+    </script>
   </body>
 </html>

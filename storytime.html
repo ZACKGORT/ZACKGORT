@@ -1812,6 +1812,8 @@ section.content:has(.grid[data-grid-ninth]) {
       }
     }
 
+    
+
     window.addEventListener('visibilitychange', () => {
       document.hidden ? hardOff(true) : setTimeout(update, 60);
     }, { passive: true });
@@ -2512,41 +2514,24 @@ section.content:has(.grid[data-grid-ninth]) {
     "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
 
         ],
-  details: [
-    [
-      "Problem",
-      "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. That slowed planning, portfolio work, and account management."
-    ],
-    [
-      "Vision",
-      "Build Wove: an industry-first platform that connects a client’s full financial picture and the tools advisors use—so work flows across modules without re-entry."
-    ],
-    [
-      "Scope",
-      "Advanced data reporting/analytics, financial plan building, flexible billing, and cross-custodian trading & rebalancing—all within a single, data-driven platform."
-    ],
-    [
-      "Investment Tools",
-      "Access to direct indexing, including BNY Mellon Precision Direct Indexing S&P 500®, enabling customized strategies while seeking to match index performance."
-    ],
-    [
-      "Experience Strategy",
-      "Go beyond integrations to design interconnected experiences—planning → portfolio building → account management as one continuous, low-friction journey."
-    ],
-    [
-      "Constraints",
-      "SEC/FINRA auditability, enterprise security/scale, heterogeneous custodians, and high-density data—while keeping cognitive load low so advisors move faster."
-    ],
-    [
-      "My Contributions",
-      "Information architecture, task/flow mapping, cross-module navigation, and component patterns that allow data to persist across steps (no re-entry)."
-    ],
-    [
-      "Outcome",
-      "Wove debuted with the power, scale, and security of BNY Mellon behind it, enabling advisors to be more productive and serve more clients."
-    ]
+        details: [
+  [
+    "Problem",
+    "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard"
+  ],
+  [
+    "Vision",
+    "Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry."
+  ],
+  [
+    "My Contributions",
+    "Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry)."
+  ],
+  [
+    "Outcome",
+    "Wove launched with BNY Mellon power, scale, and security, helping advisors work faster and serve more clients."
   ]
-
+]
       },
       discoveryImages: [
         "https://i.ibb.co/wZY2bhKF/bny4.png",
@@ -3013,6 +2998,16 @@ section.content:has(.grid[data-grid-ninth]) {
         </div>`;
       document.body.appendChild(root);
     }
+// add near the top of initSkillsHoverReveal()
+let isVisible = false;
+const cancelHover = () => {
+  if (isTouch) return;        // mobile branch already handles this
+  if (isVisible) { token++;   // invalidate any in-flight preload
+    hide();
+  }
+};
+
+
     const imgBox = root.querySelector('.hover-reveal__img');
 
     const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
@@ -3057,16 +3052,21 @@ section.content:has(.grid[data-grid-ninth]) {
     const killTL = () => { inTl && inTl.kill(); outTl && outTl.kill(); inTl = outTl = null; };
 
     const showFx2 = () => {
-      killTL();
-      gsap.set(root, { autoAlpha: 1, scale: 1, rotation: 0 });
-      inTl = gsap.timeline()
-        .fromTo(root, { rotation: -6, yPercent: -92, scale: 0.92 }, { rotation: 0, yPercent: -100, scale: 1, duration: 0.6, ease: 'power3.out' }, 0)
-        .fromTo(imgBox, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: 'power2.out' }, 0);
-    };
-    const hide = () => {
-      killTL();
-      outTl = gsap.to(root, { autoAlpha: 0, scale: 0.98, rotation: -1, duration: 0.28, ease: 'power2.out' });
-    };
+  killTL();
+  isVisible = true;
+  gsap.set(root, { autoAlpha: 1, scale: 1, rotation: 0 });
+  inTl = gsap.timeline()
+    .fromTo(root, { rotation: -6, yPercent: -92, scale: 0.92 }, { rotation: 0, yPercent: -100, scale: 1, duration: 0.6, ease: 'power3.out' }, 0)
+    .fromTo(imgBox, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: 'power2.out' }, 0);
+};
+
+const hide = () => {
+  killTL();
+  outTl = gsap.to(root, {
+    autoAlpha: 0, scale: 0.98, rotation: -1, duration: 0.28, ease: 'power2.out',
+    onComplete: () => { isVisible = false; }
+  });
+};
 
     const skills = document.getElementById('skills');
     if (!skills) return;
@@ -3127,6 +3127,23 @@ section.content:has(.grid[data-grid-ninth]) {
           open = a;
         }).catch(() => {});
       }, true);
+
+
+      // hide preview while the page is being scrolled or a gesture starts
+['scroll', 'wheel', 'touchstart', 'pointerdown', 'resize', 'orientationchange']
+  .forEach(evt => addEventListener(evt, cancelHover, { passive: true }));
+
+// if a skills link gets mouse-pressed, don’t leave it focused (prevents sticky styles)
+skills.addEventListener('pointerdown', (e) => {
+  const a = e.target.closest('.skills-link');
+  if (a) a.blur();
+}, true);
+
+// also hide when the skills section leaves the viewport
+const io = new IntersectionObserver(([entry]) => {
+  if (!entry.isIntersecting) cancelHover();
+}, { threshold: 0 });
+io.observe(skills);
 
       document.addEventListener('click', (e) => { if (open && !e.target.closest('.skills-link')) { hide(); open = null; } });
       addEventListener('scroll', () => { if (open) { hide(); open = null; } }, { passive: true });

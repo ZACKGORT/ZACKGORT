@@ -146,6 +146,10 @@
       nav a:hover,nav a:focus-visible,.frame__links a:hover,.frame__links a:focus-visible,.frame__tags a:hover,.frame__tags a:focus-visible { color:var(--color-link); }
       nav a::after,.frame__links a::after,.frame__tags a::after { display:none !important; content:none !important; }
       nav a:focus-visible,.frame__links a:focus-visible,.frame__tags a:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+
+      /* Underline on hover for header nav + tags */
+.frame__links a:hover,.frame__tags a:hover,nav a:hover {text-decoration: underline;text-decoration-thickness: 2px;text-underline-offset: 3px;}
+
       
       /* Microtype */
       .cdawrap,.page-footer,.project__label { font-size:var(--fs-xxs); text-transform:uppercase; letter-spacing:.06em; font-weight:400; color:var(--color-label); }
@@ -557,10 +561,7 @@
       .grid-caption{ margin:2rem auto 0; text-align:center; opacity:.85; max-width:1100px; }
 
 
-      /* Hide the section slug strip & sluggy grid headers */
-.frame__tags { display: none !important; }
-
-
+      
           </style>
   </head>
 
@@ -728,40 +729,52 @@
         }
       
         function enableHashScroll() {
-          document.addEventListener('click', (e) => {
-            const a = e.target.closest('a[href^="#"]');
-            if (!a) return;
-            const id = a.getAttribute('href');
-            if (!id || id.length < 2) return;
-            const target = document.querySelector(id);
-            if (!target) return;
-            e.preventDefault();
-      
-            const settle = a.dataset.settle;
-            const focusTarget = () => {
-              target.setAttribute('tabindex', '-1');
-              setTimeout(() => target.focus({ preventScroll: true }), 0);
-            };
-      
-            if (settle === 'end' && window.ScrollTrigger) {
-              const st = ScrollTrigger.getAll().find(st =>
-                st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
-              );
-              if (st && isFinite(st.end)) {
-                const y = st.end + 2;
-                if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
-                else window.scrollTo({ top: y, behavior: 'smooth' });
-                focusTarget();
-                history.pushState(null, '', id);
-                return;
-              }
-            }
-            const y = target.getBoundingClientRect().top + window.pageYOffset;
-            window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
-            focusTarget();
-            history.pushState(null, '', id);
-          });
-        }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+
+    const id = a.getAttribute('href');
+    if (!id || id.length < 2) return;
+
+    const target = document.querySelector(id);
+    if (!target) return;
+
+    e.preventDefault();
+
+    const settle = a.dataset.settle;
+
+    const focusTarget = () => {
+      target.setAttribute('tabindex', '-1');
+      setTimeout(() => target.focus({ preventScroll: true }), 0);
+    };
+
+    // If caller wants to scroll to the end of a pinned section, do that
+    if (settle === 'end' && window.ScrollTrigger) {
+      const st = ScrollTrigger.getAll().find(st =>
+        st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
+      );
+      if (st && isFinite(st.end)) {
+        const y = st.end + 2;
+        if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
+        else window.scrollTo({ top: y, behavior: 'smooth' });
+
+        focusTarget();
+        // 🔑 Don’t write the hash
+        clearSlug();
+        return;
+      }
+    }
+
+    // Regular smooth scroll path
+    const y = target.getBoundingClientRect().top + window.pageYOffset;
+    window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
+
+    focusTarget();
+    // 🔑 Don’t write the hash
+    clearSlug();
+  });
+}
+
       
         // ---------------------------------------------------------------------------
         // Utilities
@@ -2130,6 +2143,19 @@
         window.addEventListener('load', () => { start(); }, { once: true });
       
       })();
+
+
+      // Keep URL clean (no #hash)
+const clearSlug = () => {
+  try {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  } catch {}
+};
+
+// If someone lands on /#about (shared link etc.), remove the hash but keep scroll
+if (location.hash) clearSlug();
+
+
           </script>
   </body>
 </html>

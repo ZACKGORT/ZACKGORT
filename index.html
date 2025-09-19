@@ -518,46 +518,53 @@
       /* Tiny caption below galleries */
       .grid-caption{ margin:2rem auto 0; text-align:center; opacity:.85; max-width:1100px; }
 
-      /* ======= NEW: Scroll progress (replaces .scroll-downs) ======= */
-      .navigation{
-        position:fixed;
-        left:50%;
-        bottom:clamp(40px,10vh,60px);
-        transform:translateX(-50%);
-        display:flex;
-        align-items:center;
-        gap:1.25rem;
-        z-index:var(--z-ui);
-        user-select:none;
-        mix-blend-mode:normal;
-      }
-      .nav-text{
-        font-size:var(--fs-xxs);
-        text-transform:uppercase;
-        letter-spacing:.08em;
-        opacity:.85;
-        white-space:nowrap;
-      }
-      .nav-progress{
-        width:180px;
-        height:2px;
-        background:rgba(255,255,255,.25);
-        position:relative;
-        overflow:hidden;
-        border-radius:2px;
-      }
-      .nav-progress-fill{
-        position:absolute;inset:0 100% 0 0;
-        background:var(--color-text);
-        transform-origin:left center;
-        transform:scaleX(0);
-        will-change:transform;
-        transition:transform .08s linear;
-      }
-      @media (max-width: 768px){
-        .navigation{ bottom:1.25rem; }
-        .nav-progress{ width:64vw; max-width:360px; }
-      }
+/* Scroll progress UI */
+.navigation{
+  position:fixed;
+  left:50%;
+  bottom:clamp(40px,10vh,60px);
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:1.25rem;
+  /* Ensure footer can appear above this */
+  z-index:10000; /* footer uses 10020 in your vars */
+  user-select:none;
+  mix-blend-mode:normal;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.navigation.is-hidden{
+  opacity:0;
+  pointer-events:none;
+  transform:translateX(-50%) translateY(6px);
+}
+.nav-text{
+  font-size:var(--fs-xxs,12px);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  opacity:.85;
+  white-space:nowrap;
+}
+.nav-progress{
+  width:6em;
+  height:2px;
+  background:rgba(255,255,255,.25);
+  position:relative;
+  overflow:hidden;
+  border-radius:2px;
+}
+.nav-progress-fill{
+  position:absolute; inset:0 100% 0 0;
+  background:var(--color-text,#f5f3ee);
+  transform-origin:left center;
+  transform:scaleX(0);
+  will-change:transform;
+}
+@media (max-width: 768px){
+  .navigation{ bottom:1.25rem; }
+  .nav-progress{ width:64vw; max-width:360px; }
+}
+
     </style>
   </head>
 
@@ -566,1603 +573,1618 @@
     <main id="app"></main>
     <div class="blur"></div>
     <script>
-      /* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
-      (function () {
-        'use strict';
-      
-        // ---------------------------------------------------------------------------
-        // Boot flags / vendor detection
-        // ---------------------------------------------------------------------------
-        document.documentElement.classList.add('js');
-        const has = (k) => typeof window[k] !== 'undefined';
-      
-        if (has('ScrollTrigger')) {
-          if (has('Physics2DPlugin')) {
-            gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
-          } else {
-            gsap.registerPlugin(ScrollTrigger);
-          }
-        }
-      
-        const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      
-        // ---------------------------------------------------------------------------
-        // Tiny DOM helpers
-        // ---------------------------------------------------------------------------
-        const $ = (s, r = document) => r.querySelector(s);
-        const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-        const el = (tag, cls, html) => {
-          const n = document.createElement(tag);
-          if (cls) n.className = cls;
-          if (html != null) n.innerHTML = html;
-          return n;
-        };
-      
-        // ---------------------------------------------------------------------------
-        // Bottom blur overlay layers + visibility rules
-        // ---------------------------------------------------------------------------
-        function buildBlurLayers(blur) {
-          const cs = getComputedStyle(document.documentElement);
-          const layers = +cs.getPropertyValue('--layers')?.trim() || 5;
-          const blurMax = +cs.getPropertyValue('--blur-max')?.trim() || 40;
-          const stopMax = +cs.getPropertyValue('--mask-stop')?.trim() || 15;
-      
-          let html = '';
-          for (let i = 1; i <= layers; i++) {
-            const t = i / layers;
-            const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
-            const stop = Math.sin(t * Math.PI / 2) * stopMax;
-            const topVh = (100 - stop).toFixed(3);
-            html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
-          }
-          blur.innerHTML = html;
-        }
-      
-        function initBlurOverlayVisibility() {
-          let blur = document.querySelector('.blur');
-          if (!blur) {
-            blur = document.createElement('div');
-            blur.className = 'blur';
-            document.body.appendChild(blur);
-          }
-          if (!blur.children.length) buildBlurLayers(blur);
-      
-          const header = document.querySelector('.frame');
-      
-          const show = () => blur.classList.add('is-visible');
-          const hide = () => blur.classList.remove('is-visible');
-      
-          if (header) {
-            const ioHeader = new IntersectionObserver(
-              ([e]) => e.isIntersecting ? hide() : show(), {
-                threshold: 0,
-                rootMargin: '0px 0px -60px 0px'
-              }
-            );
-            ioHeader.observe(header);
-          }
-      
-          if (header && header.getBoundingClientRect().bottom <= 0) show();
-      
-          window.addEventListener('resize', () => buildBlurLayers(blur), { passive: true });
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Mobile/Android blur resiliency
-        // ---------------------------------------------------------------------------
-        function fixMobileBlurResume() {
-          const blur = document.querySelector('.blur');
-          const header = document.querySelector('.frame');
-      
-          const isAndroid = /Android/i.test(navigator.userAgent);
-          let resumes = 0;
-          const degradeKey = 'bfDegraded';
-          let degraded = localStorage.getItem(degradeKey) === '1';
-      
-          function rebuildChildren() { if (blur) buildBlurLayers(blur); }
-          function hardOff(on) { if (blur) blur.classList.toggle('bf-off', !!on); }
-      
-          function update() {
-            if (!blur || !header) return;
-            hardOff(true);
-            rebuildChildren();
-      
-            blur.classList.add('bf-reset');
-            void blur.offsetHeight;
-      
-            const shouldShow = header.getBoundingClientRect().bottom <= 0;
-            blur.classList.toggle('is-visible', shouldShow);
-      
-            requestAnimationFrame(() => {
-              blur.classList.remove('bf-reset');
-              hardOff(false);
-              if (window.ScrollTrigger) ScrollTrigger.refresh();
-            });
-      
-            resumes++;
-            if (!degraded && isAndroid && resumes >= 2) {
-              degraded = true;
-              localStorage.setItem(degradeKey, '1');
-              blur.classList.add('no-bf');
-            }
-          }
-      
-          window.addEventListener('visibilitychange', () => {
-            document.hidden ? hardOff(true) : setTimeout(update, 60);
-          }, { passive: true });
-      
-          window.addEventListener('pagehide', () => hardOff(true), { passive: true });
-          window.addEventListener('pageshow', () => setTimeout(update, 0), { passive: true });
-          window.addEventListener('focus', () => setTimeout(update, 60), { passive: true });
-          window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive: true });
-          window.addEventListener('resize', () => setTimeout(update, 60), { passive: true });
-      
-          update();
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Smooth scrolling (Lenis) + anchor hash scrolling
-        // ---------------------------------------------------------------------------
-        function initSmooth() {
-          const usingLenis = has('Lenis');
-      
-          if (has('ScrollTrigger')) {
-            ScrollTrigger.normalizeScroll(!usingLenis);
-          }
-          if (!usingLenis) return;
-      
-          const isTouch = matchMedia('(pointer:coarse), (hover:none), (max-width: 768px)').matches;
-          window.lenis = new Lenis({
-            lerp: isTouch ? 0.22 : 0.15,
-            smoothTouch: true,
-            syncTouch: true,
-          });
-      
-          window.lenis.on('scroll', () => { if (window.ScrollTrigger) ScrollTrigger.update(); });
-          gsap.ticker.add((t) => window.lenis.raf(t * 1000));
-          gsap.ticker.lagSmoothing(0);
-        }
-      
-        function enableHashScroll() {
-          document.addEventListener('click', (e) => {
-            const a = e.target.closest('a[href^="#"]');
-            if (!a) return;
+/* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
+(function () {
+  'use strict';
 
-            const id = a.getAttribute('href');
-            if (!id || id.length < 2) return;
+  // ---------------------------------------------------------------------------
+  // Boot flags / vendor detection
+  // ---------------------------------------------------------------------------
+  document.documentElement.classList.add('js');
+  const has = (k) => typeof window[k] !== 'undefined';
 
-            const target = document.querySelector(id);
-            if (!target) return;
+  if (has('ScrollTrigger')) {
+    if (has('Physics2DPlugin')) {
+      gsap.registerPlugin(ScrollTrigger, Physics2DPlugin);
+    } else {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+  }
 
-            e.preventDefault();
+  const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            const settle = a.dataset.settle;
+  // ---------------------------------------------------------------------------
+  // Tiny DOM helpers
+  // ---------------------------------------------------------------------------
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
 
-            const focusTarget = () => {
-              target.setAttribute('tabindex', '-1');
-              setTimeout(() => target.focus({ preventScroll: true }), 0);
-            };
+  // ---------------------------------------------------------------------------
+  // Bottom blur overlay layers + visibility rules
+  // ---------------------------------------------------------------------------
+  function buildBlurLayers(blur) {
+    const cs = getComputedStyle(document.documentElement);
+    const layers = +cs.getPropertyValue('--layers')?.trim() || 5;
+    const blurMax = +cs.getPropertyValue('--blur-max')?.trim() || 40;
+    const stopMax = +cs.getPropertyValue('--mask-stop')?.trim() || 15;
 
-            // If caller wants to scroll to the end of a pinned section, do that
-            if (settle === 'end' && window.ScrollTrigger) {
-              const st = ScrollTrigger.getAll().find(st =>
-                st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
-              );
-              if (st && isFinite(st.end)) {
-                const y = st.end + 2;
-                if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
-                else window.scrollTo({ top: y, behavior: 'smooth' });
+    let html = '';
+    for (let i = 1; i <= layers; i++) {
+      const t = i / layers;
+      const blurPx = Math.sin((1 - t) * Math.PI / 2) * blurMax;
+      const stop = Math.sin(t * Math.PI / 2) * stopMax;
+      const topVh = (100 - stop).toFixed(3);
+      html += `<div style="--i:${i}; --blur:${blurPx.toFixed(3)}px; --top:${topVh}vh"></div>`;
+    }
+    blur.innerHTML = html;
+  }
 
-                focusTarget();
-                // 🔑 Don’t write the hash
-                clearSlug();
-                return;
-              }
-            }
+  function initBlurOverlayVisibility() {
+    let blur = document.querySelector('.blur');
+    if (!blur) {
+      blur = document.createElement('div');
+      blur.className = 'blur';
+      document.body.appendChild(blur);
+    }
+    if (!blur.children.length) buildBlurLayers(blur);
 
-            // Regular smooth scroll path
-            const y = target.getBoundingClientRect().top + window.pageYOffset;
-            window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
+    const header = document.querySelector('.frame');
 
-            focusTarget();
-            // 🔑 Don’t write the hash
-            clearSlug();
-          });
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Utilities
-        // ---------------------------------------------------------------------------
-        // Preload only real <img> tags (avoid background images)
-        const preloadImages = (sel = 'img') =>
-          new Promise(res => imagesLoaded(document.querySelectorAll(sel), res));
-      
-        function a11yifyGridImages() {
-          document.querySelectorAll('.grid__img').forEach(el => {
-            el.setAttribute('role', 'img');
-            const url = el.dataset.bg || (el.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-            const name = url.split('/').pop()?.split('.')[0] || '';
-            el.setAttribute('aria-label', name.replace(/[-_]/g, ' ').trim() || 'Gallery image');
-          });
-        }
-      
-        // Lazy set background images for grid tiles
-        function initLazyBackgrounds() {
-          const els = document.querySelectorAll('.grid__img[data-bg]');
-          if (!els.length) return;
-      
-          const io = new IntersectionObserver((entries) => {
-            entries.forEach(e => {
-              if (!e.isIntersecting) return;
-              const el = e.target;
-              const url = el.dataset.bg;
-              if (url) {
-                el.style.backgroundImage = `url(${url})`;
-                el.removeAttribute('data-bg');
-              }
-              io.unobserve(el);
-            });
-          }, { rootMargin: '200px' });
-      
-          els.forEach(el => io.observe(el));
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Animations
-        // ---------------------------------------------------------------------------
-        function animateHeader() {
-          const frame = document.querySelector('.frame');
-          const title = frame?.querySelector('.frame__title');
-          if (!frame || !title) return;
-      
-          if (prefersReducedMotion) {
-            gsap.from(frame, {
-              autoAlpha: 0,
-              duration: .6,
-              ease: 'power1.out',
-              scrollTrigger: { trigger: frame, start: 'top 95%' }
-            });
-            return;
-          }
-      
-          gsap.timeline({
-            defaults: { ease: 'none' },
-            scrollTrigger: {
-              trigger: frame,
-              start: 'top top',
-              end: 'bottom top',
-              scrub: true,
-              invalidateOnRefresh: true
-            }
-          })
-          .to(frame, { opacity: 0.38, yPercent: 14 }, 0)
-          .to(title, { xPercent: -80 }, 0);
-        }
-      
-        function animateGrids() {
-          const mq = matchMedia('(max-width:768px)');
-          const isMobile = () => mq.matches;
-      
-          const modes = {
-            second: { endDesk: '+=250%', endMob: '+=140%', scrubDesk: .5, scrubMob: .25 },
-            fifth:  { endDesk: '+=250%', endMob: '+=150%', scrubDesk: .3, scrubMob: .2  },
-            sixth:  { endDesk: '+=180%', endMob: '+=120%', scrubDesk: .6, scrubMob: .4  },
-            ninth:  { endDesk: '+=210%', endMob: '+=130%', scrubDesk: .45, scrubMob: .32 }
-          };
-      
-          function defaultEndPx(mode, grid) {
-            const count = grid.querySelectorAll('.grid__img').length || 6;
-            const section = grid.closest('section') || grid.parentNode;
-            const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
-            const cfg = ({
-              second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
-              fifth:  { base:{d:240,m:150}, per:{d:8, m:5}, cap:{d:10,m:6} },
-              sixth:  { base:{d:180,m:120}, per:{d:6, m:4}, cap:{d:10,m:6} },
-              ninth:  { base:{d:210,m:130}, per:{d:6, m:4}, cap:{d:12,m:8} }
-            })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
-      
-            const tilesOverMin = Math.max(0, count - 4);
-            const vh = (isMobile() ? cfg.base.m : cfg.base.d) +
-                       tilesOverMin * (isMobile() ? cfg.per.m : cfg.per.d) +
-                       (hasCaption ? (isMobile() ? cfg.cap.m : cfg.cap.d) : 0);
-            return `+=${Math.round(window.innerHeight * (vh/100))}`;
-          }
-          const parseScrub = (v, fb) => {
-            if (v == null || v === '') return fb;
-            if (v === 'true') return true;
-            if (v === 'false') return false;
-            const n = parseFloat(v);
-            return isNaN(n) ? fb : n;
-          };
-      
-          const pinType    = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
-          const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
-      
-          const grids = [...document.querySelectorAll(
-            '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
-          )];
-      
-          grids.forEach(grid => {
-            const imgs  = grid.querySelectorAll('.grid__img');
-            const items = grid.querySelectorAll('.grid__item');
-            if (!imgs.length && !items.length) return;
-      
-            const section = grid.closest('section') || grid.parentNode;
-            const defaultMode =
-              grid.hasAttribute('data-grid-second') ? 'second' :
-              grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
-              grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
-      
-            const d = grid.dataset;
-            const mode = d.mode || defaultMode;
-      
-            const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
-      
-            const base = modes[mode] || modes.ninth;
-            const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
-            const scrub = parseScrub(isMobile() ? d.scrubMobile : d.scrubDesktop, fallbackScrub);
-      
-            const tl = gsap.timeline({
-              defaults: { ease: (mode === 'sixth' ? 'none' : 'power3') },
-              scrollTrigger: {
-                trigger: section,
-                start: 'top top',
-                end,
-                pin: section,
-                pinType,
-                pinReparent: true,
-                scrub,
-                anticipatePin: anticipate,
-                pinSpacing: true,
-                invalidateOnRefresh: true
-              }
-            });
-      
-            if (mode === 'second') {
-              const mid = Math.floor(imgs.length / 2);
-              tl.from(imgs, {
-                stagger: { amount: .3, from: 'center' },
-                y: () => innerHeight,
-                transformOrigin: '50% 0%',
-                rotation: (i) => (i < mid ? -1 : 1) * Math.abs(i - mid) * (matchMedia('(max-width:768px)').matches ? 1.5 : 3)
-              }).from(items, {
-                stagger: { amount: .3, from: 'center' },
-                yPercent: 100,
-                autoAlpha: 0
-              }, 0);
-            }
-      
-            if (mode === 'fifth') {
-              tl.set(grid, { perspective: 1000 }).from(imgs, {
-                stagger: { amount: .4, from: 'random', grid: [4, 9] },
-                y: () => innerHeight,
-                rotationX: matchMedia('(max-width:768px)').matches ? -40 : -70,
-                transformOrigin: '50% 0%',
-                z: matchMedia('(max-width:768px)').matches ? -450 : -900,
-                autoAlpha: 0
-              });
-            }
-            if (mode === 'sixth') {
-              tl.from(imgs, {
-                stagger: { amount: .25, from: 'edges', grid: [3, 3] },
-                scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
-                autoAlpha: 0
-              }).from(grid, {
-                scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
-                skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
-              }, 0);
-            }
-            if (mode === 'ninth') {
-              tl.from(imgs, {
-                transformOrigin: '100% -450%',
-                stagger: .07,
-                scaleX: 1.02,
-                skewX: matchMedia('(max-width:768px)').matches ? 7 : 15,
-                xPercent: matchMedia('(max-width:768px)').matches ? 18 : 50,
-                rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
-                autoAlpha: 0
-              });
-              const headCap   = section.querySelector('.content__title, .grid-head');
-              const bottomCap = section.querySelector('.grid-caption');
-              if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
-              if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
-            }
-          });
-        }
-      
-        function animateProcess() {
-          document.querySelectorAll('[id$="-process"]').forEach(process => {
-            const intro = process.querySelector('.project--intro');
-            const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
-            if (prefersReducedMotion) {
-              intro && gsap.from(intro, {
-                autoAlpha: 0, y: 16, duration: .35,
-                scrollTrigger: { trigger: intro, start: 'top 90%' }
-              });
-              details.length && gsap.from(details, {
-                autoAlpha: 0, y: 14, duration: .3, stagger: .08,
-                scrollTrigger: { trigger: process, start: 'top 85%' }
-              });
-              return;
-            }
-            intro && gsap.from(intro, {
-              autoAlpha: 0, y: 24, duration: .6, ease: 'power2.out',
-              scrollTrigger: { trigger: intro, start: 'top 80%' }
-            });
-            details.length && gsap.from(details, {
-              autoAlpha: 0, y: 30, duration: .5, ease: 'power2.out', stagger: .12,
-              scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%' }
-            });
-          });
-        }
-      
-        function animateStacks() {
-          document.querySelectorAll('.stacked-section [data-stack]').forEach(section => {
-            const frames = section.querySelectorAll('.stacked-img');
-            if (prefersReducedMotion) {
-              gsap.from(frames, {
-                autoAlpha: 0, y: 20, duration: .4, stagger: .08, ease: 'power1.out',
-                scrollTrigger: { trigger: section, start: 'top 85%' }
-              });
-              return;
-            }
-            frames.forEach(el => {
-              gsap.from(el, {
-                autoAlpha: 0, y: 36, duration: .7, ease: 'power2.out',
-                scrollTrigger: { trigger: el, start: 'top 85%' }
-              });
-              const img = el.querySelector('img');
-              img && gsap.to(img, {
-                yPercent: -8, ease: 'none',
-                scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true }
-              });
-            });
-          });
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Cursor + Confetti + UX jump
-        // ---------------------------------------------------------------------------
-        function initCursor() {
-          if (!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
-          document.documentElement.classList.add('has-cursor');
-      
-          if (!document.getElementById('gc-goo-defs')) {
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.id = 'gc-goo-defs';
-            svg.setAttribute('width', '0');
-            svg.setAttribute('height', '0');
-            svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
-            document.body.appendChild(svg);
-          }
-      
-          document.querySelectorAll('.gooey-cursor').forEach(n => n.remove());
-          const wrap = document.createElement('div');
-          wrap.className = 'gooey-cursor';
-          wrap.setAttribute('aria-hidden', 'true');
-          document.body.appendChild(wrap);
-      
-          const N = 20;
-          const LERP = .35;
-          const LINK_SHRINK = 0.55;
-          let hoverBoost = 1;
-      
-          for (let i = 0; i < N; i++) {
-            const d = document.createElement('div');
-            d.className = 'gc-dot';
-            wrap.appendChild(d);
-          }
-          const dots = Array.from(wrap.children);
-      
-          let mx = innerWidth / 2,
-              my = innerHeight / 2;
-          const hist = Array.from({ length: N }, () => ({ x: mx, y: my }));
-      
-          addEventListener('pointermove', (e) => {
-            mx = e.clientX; my = e.clientY;
-          }, { passive: true });
-      
-          let cursorRAF;
-      
-          function tick() {
-            hist.shift();
-            hist.push({ x: mx, y: my });
-            for (let i = 0; i < N; i++) {
-              const c = hist[i], n = hist[i + 1] || hist[N - 1];
-              c.x += (n.x - c.x) * LERP;
-              c.y += (n.y - c.y) * LERP;
-      
-              const base = i / N;
-              const scale = (i === N - 1) ? base * hoverBoost : base;
-      
-              dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
-            }
-            cursorRAF = requestAnimationFrame(tick);
-          }
-          cursorRAF = requestAnimationFrame(tick);
-      
-          document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-              if (cursorRAF) cancelAnimationFrame(cursorRAF);
-              cursorRAF = null;
-            } else {
-              cursorRAF = requestAnimationFrame(tick);
-            }
-          }, { passive: true });
-      
-          const isLink = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
-          const isNavLink = (t) => t && (t.closest('nav') || t.closest('.frame__links') || t.closest('.frame__tags'));
-      
-          document.addEventListener('pointerover', (e) => {
-            if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = LINK_SHRINK;
-          }, true);
-      
-          document.addEventListener('pointerout', (e) => {
-            if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = 1;
-          }, true);
-        }
-      
-        function initConfetti() {
-          const sup = document.querySelector('.heading-chant .confetti-sup');
-          if (!sup) return;
-      
-          const emitter = sup.querySelector('span.emitter');
-          const physicsAvailable = !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
-          if (!physicsAvailable) return;
-      
-          function particles(parent, qty, x, y, minA, maxA) {
-            const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
-            for (let i = 0; i < qty; i++) {
-              const angle = gsap.utils.random(minA, maxA);
-              const velocity = gsap.utils.random(70, 140);
-              const dot = document.createElement('div');
-              dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
-              parent.appendChild(dot);
-      
-              gsap.set(dot, { opacity: 0, x, y, scale: gsap.utils.random(.4, .8), rotation: gsap.utils.random(0, 360) });
-              gsap.timeline({ onComplete: () => dot.remove() })
-                .to(dot, { opacity: 1, duration: .06 }, 0)
-                .to(dot, {
-                  duration: 1.8,
-                  rotationX: `-=${gsap.utils.random(720,1440)}`,
-                  rotationZ: `+=${gsap.utils.random(720,1440)}`,
-                  physics2D: { angle, velocity, gravity: 120 }
-                }, 0)
-                .to(dot, { opacity: 0, duration: 1 }, .8);
-            }
-          }
-      
-          function burst(q = 80, minA = -95, maxA = -35) {
-            particles(emitter, q, 0, 0, minA, maxA);
-            gsap.fromTo(sup, { scale: .96 }, { scale: 1, duration: .25, ease: 'elastic.out(1,.6)' });
-          }
-      
-          // Click / keyboard / hover
-          sup.addEventListener('click', () => burst());
-          sup.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); burst(); }
-          });
-          if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(pointer:fine)').matches) {
-            let last = 0; const CD = 700;
-            sup.addEventListener('mouseenter', () => {
-              const now = performance.now();
-              if (now - last < CD) return;
-              last = now; burst(28, -100, -60);
-            });
-          }
-      
-          // Fire when #about enters view (with cooldown)
-          if (typeof ScrollTrigger !== 'undefined' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            const aboutEl = document.getElementById('about') || sup.closest('section') || sup;
-            let lastBurst = 0;
-            const COOLDOWN = 1200;
-      
-            const maybeBurst = () => {
-              const now = performance.now();
-              if (now - lastBurst < COOLDOWN) return;
-              lastBurst = now;
-              burst(54, -100, -35);
-            };
-      
-            ScrollTrigger.create({
-              trigger: aboutEl,
-              start: 'top 80%',
-              end: 'bottom top',
-              onEnter: maybeBurst,
-              onEnterBack: maybeBurst,
-            });
-      
-            const r = aboutEl.getBoundingClientRect();
-            if (r.top < innerHeight * 0.8 && r.bottom > 0) {
-              setTimeout(maybeBurst, 350);
-            }
-          }
-        }
-      
-        // Only attach to the actual anchor (avoid double semantics)
-        function initDeadJump() {
-          const link = document.querySelector('.frame__title .ux-dead-jump');
-          const sections = Array.from(document.querySelectorAll('main > section'));
-          const nextSection = () => sections[0] && sections[0].id !== 'about' ? sections[0] : sections[1] || sections[0];
-      
-          function jump(e) {
-            e?.preventDefault?.();
-            const t = nextSection();
-            if (!t) return;
-            const top = t.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-          }
-          if (!link) return;
-          link.addEventListener('click', jump);
-          link.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') jump(e);
-          });
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Case study timing overrides
-        // ---------------------------------------------------------------------------
-        function tuneCaseStudyTiming() {
-          const mq = window.matchMedia('(max-width: 768px)');
-          const isMobile = () => mq.matches;
-      
-          function setTiming(grid, { endDesk, endMob, scrubDesk, scrubMob, mode }) {
-            if (mode) grid.dataset.mode = mode;
-            if (endDesk) grid.dataset.endDesktop = endDesk;
-            if (endMob) grid.dataset.endMobile = endMob;
-            if (scrubDesk != null) grid.dataset.scrubDesktop = scrubDesk;
-            if (scrubMob != null) grid.dataset.scrubMobile = scrubMob;
-          }
-      
-          function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
-            const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
-            const tilesOverMin = Math.max(0, tiles - minTiles);
-            const hasCaption = !!(grid.closest('section')?.querySelector('.content__title, .grid-head'));
-            const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop) +
-              tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop) +
-              (hasCaption ? (isMobile() ? (captionBoostVH.mobile || 0) : (captionBoostVH.desktop || 0)) : 0);
-            const px = Math.round(window.innerHeight * (totalVH / 100));
-            return `+=${px}`;
-          }
-      
-          document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: { desktop: 120, mobile: 90 },
-              perTileVH: { desktop: 10, mobile: 7 },
-              captionBoostVH: { desktop: 12, mobile: 8 }
-            });
-            setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
-          });
-      
-          document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: { desktop: 150, mobile: 110 },
-              perTileVH: { desktop: 6, mobile: 4 }
-            });
-            setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
-          });
-      
-          document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: { desktop: 135, mobile: 95 },
-              perTileVH: { desktop: 8, mobile: 6 },
-              captionBoostVH: { desktop: 10, mobile: 6 }
-            });
-            setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.40, scrubMob: 0.28 });
-          });
-      
-          document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
-            const end = calcEndPx(grid, {
-              baseVH: { desktop: 175, mobile: 120 },
-              perTileVH: { desktop: 6, mobile: 4.5 }
-            });
-            setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.50, scrubMob: 0.35 });
-          });
-        }
-      
-        // =========================================================================== CONTENT MODEL (unchanged)
-        const CONTENT = {
-          header: {
-            title: 'UX is dead.',
-            logo: "ZCKGRT",
-            subline: "DIGITAL EXPERIENCE DESIGNER",
-            links: [
-              { label: 'FAQ', href: 'https://zackgort.com/faq' },
-              { label: 'Résumé', href: 'https://zackgort.com/resume' },
-              { label: 'LinkedIn', href: 'https://linkedin.com/in/zackgort' }
-            ],
-            tags: [
-              { label: "#About", href: "#about" },
-              { label: "#Work", href: "#work", settle: "end" },
-              { label: "#Product", href: "#fintech", settle: "end" },
-              { label: "#Ecommerce", href: "#ecommerce", settle: "end" },
-              { label: "#Connect", href: "#contact", settle: "end" }
-            ]
-          },
-          about: {
-            heading: "¡Viva la XP!",
-            sup: "experience",
-            byline: "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"user is kind of implied, no?\"><span>User</span></span> Experience Designer",
-            copy: [
-              "I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function.",
-              "I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.",
-              "Now, as for design. I design those experiences :)"
-            ],
-            note: "— Disclaimer: <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"I found a gsap library that intrigued me, read the documentation, decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS for efficiency, added ad hoc functionality + features, included idiosyncratic interactive 'easter eggs', and splashed on some visual fluff for good measure.\"><span>I didn't use AI to build this website. </span></span>",
-          },
-          skills: {
-            cols: [
-              {
-                heading: "#SPECIALIZATIONS",
-                items: [
-                  "User Experience Design",
-                  "Visual Interface Design",
-                  "Accessibility Compliance",
-                  "UX Research & Strategy",
-                  "+"
-                ]
-              },
-              {
-                heading: "#TOOLS",
-                items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"]
-              },
-              {
-                heading: "CURRENTLY",
-                items: ["AI + Creative Coding", "Design Systems & Workflows", "+"]
-              }
-            ]
-          },
-          workSelect: {
-            captionTitle: "select works",
-            tiles: [
-              "https://i.ibb.co/c3vLP47/image-445-min.png",
-              "https://i.ibb.co/jJD2YPJ/image-438-min.png",
-              "https://i.ibb.co/Ct9DZd9/image-442-min.png",
-              "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-              "https://i.ibb.co/x8Jy9P1f/11.webp"
-            ],
-            cards: [
-              { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓", settle: "end" },
-              { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓", settle: "end" },
-              { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
-            ]
-          },
-          brandsGrid: {
-            title: "#design",
-            images: [
-              "https://i.ibb.co/yBgB52s8/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp",
-              "https://i.ibb.co/QdmJdXh/AM-wire.jpg",
-              "https://i.ibb.co/Q9KH8n3/image-401-min.png",
-              "https://i.ibb.co/0spCQB3/image-7-Copy.png",
-              "https://i.ibb.co/ZG6v0p5/image-10.png",
-      
-              "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
-              "https://i.ibb.co/cX4QjFf/Screenshot-20230217-102232.png",
-              "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
-              "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
-              "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
-      
-              "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
-              "https://i.ibb.co/4Z3457T5/1-t-Yd-DX2-Ql-VLw-XI7gm3ev-MLw.webp",
-              "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
-              "https://i.ibb.co/X5NHxCV/image-414-min.png",
-              "https://i.ibb.co/0VmJ708g/work3.webp",
-      
-              "https://i.ibb.co/cSQCgNQY/work1.webp",
-              "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
-              "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
-              "https://i.ibb.co/rft2bf0T/9.webp",
-              "https://i.ibb.co/vx76zjgf/10.webp",
-      
-              "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-              "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
-              "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
-              "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
-              "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
-      
-              "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
-              "https://i.ibb.co/Jrb2Npd/image-020.png",
-              "https://i.ibb.co/68t5b9S/Mask-group-7-min.png",
-              "https://i.ibb.co/pfvstSt/3.jpg",
-              "https://i.ibb.co/Xtk8Cqp/Mask-group-4-min.png"
-            ],
-          },
-          agencyGrid: {
-            title: "#agencylife",
-            images: [
-              "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
-              "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
-              "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
-      
-              "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
-              "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
-      
-              "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
-      
-              "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
-              "https://i.ibb.co/c3vLP47/image-445-min.png",
-              "https://i.ibb.co/RymyPtP/image-443-min.png",
-              "https://i.ibb.co/Ct9DZd9/image-442-min.png"
-            ],
-          },
-          fintech: {
-            heroImages: [
-              "https://i.ibb.co/XkM2hn8n/bny1.png",
-              "https://i.ibb.co/vvMZmq94/bny2.png",
-              "https://i.ibb.co/xS49C07B/bny3.png",
-              "https://i.ibb.co/wZY2bhKF/bny4.png",
-              "https://i.ibb.co/vvMZmq94/bny2.png"
-            ],
-            heroCaption: { title: " ", subtitle: " " },
-            process: {
-              client: "BNY Mellon — Pershing X",
-              agency: "Publicis Sapient",
-              role: [
-                "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
-                "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
-              ],
-              details: [
-                ["Problem", "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard"],
-                ["Vision", "Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry."],
-                ["My Contributions", "Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry)."],
-                ["Outcome", "Wove launched with BNY Mellon power, scale, and security, helping advisors work faster and serve more clients."]
-              ]
-            },
-            discoveryImages: [
-              "https://i.ibb.co/wZY2bhKF/bny4.png",
-              "https://i.ibb.co/xS49C07B/bny3.png",
-              "https://i.ibb.co/vvMZmq94/bny2.png",
-              "https://i.ibb.co/XkM2hn8n/bny1.png",
-              "https://i.ibb.co/FJNG1jC/14.jpg",
-              "https://i.ibb.co/fxjgcYD/18.png",
-              "https://i.ibb.co/gtQLYJQ/17.jpg",
-              "https://i.ibb.co/Fgxcqj0/16.jpg",
-              "https://i.ibb.co/dcXH5fn/13.jpg"
-            ],
-            insight: [
-              ["Deep Dive", "No Artificial Intelligence Here"]
-            ],
-            insightAside: "This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.",
-            stack: [
-              ["https://i.ibb.co/XkM2hn8n/bny1.png", "BNY 1"],
-              ["https://i.ibb.co/vvMZmq94/bny2.png", "BNY 2"],
-              ["https://i.ibb.co/xS49C07B/bny3.png", "BNY 3"],
-              ["https://i.ibb.co/wZY2bhKF/bny4.png", "BNY 4"],
-              ["https://i.ibb.co/HGv7ymj/4.jpg", "Account Opening"]
-            ]
-          },
-          ecommerce: {
-            heroImages: [
-              "https://i.ibb.co/cSQCgNQY/work1.webp",
-              "https://i.ibb.co/spHgPH6N/1.webp",
-              "https://i.ibb.co/ynjWYqv8/2.webp",
-              "https://i.ibb.co/cXg5Phdc/3.webp",
-              "https://i.ibb.co/gZ58PKyk/4.webp"
-            ],
-            heroCaption: { title: " ", subtitle: " " },
-            process: {
-              client: "General Nutrition Centers (GNC)",
-              agency: "Elva Design Group",
-              titleLines: ["This is the Whey"],
-              role: [
-                "Senior User Experience Designer"
-              ],
-              details: [
-                ["Problem", "As part of a total overhaul and overcoming a recent bankruptcy, GNC asked us to shake things up; providing them with a modern and modular e-commerce solution through a ground-up build on the Shopify platform."],
-                ["Scope", "{We} dove deep into GNC's e-commerce ecosystem. From market research, to [client-supplied] user data, to wireframe feature prototyping; we built a modular component-based design system optimized for continued optimization."],
-                ["Heavy lift. Huge Gains.", "Lead UX {IA/UI Prototypes/Design Systems}. Paired with PM, Dev Lead, Design Team and Client-Side Stakeholders. 12-week engagement meant tight cadence, fast-on-our-feet design + strategy, and daily weekly exec reviews."],
-                ["What We Shipped", "{We} introduced a modern mobile-first navigation schema and retail taxonomy strategy that separated GNC not just from its competition, but all in the e-retail space."]
-              ]
-            },
-            discoveryImages: [
-              "https://i.ibb.co/gZ58PKyk/4.webp",
-              "https://i.ibb.co/ynjWYqv8/2.webp",
-              "https://i.ibb.co/spHgPH6N/1.webp",
-              "https://i.ibb.co/Y7pGqJ69/5.webp",
-              "https://i.ibb.co/99h2bQMh/6.webp",
-              "https://i.ibb.co/cXg5Phdc/3.webp",
-              "https://i.ibb.co/yB4RwkTf/7.webp",
-              "https://i.ibb.co/7N2rDqrN/8.webp",
-              "https://i.ibb.co/rft2bf0T/9.webp",
-              "https://i.ibb.co/vx76zjgf/10.webp"
-            ],
-            insight: [
-              ["Outcome", "The result helped GNC reclaim ~$500M in annual revenue."]
-            ],
-            insightAside: "if the bar ain't bending, you’re just pretending.",
-            stack: [
-              ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],
-              ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
-              ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
-              ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],
-              ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
-              ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
-              ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
-              ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
-              ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],
-              ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
-              ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
-              ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"]
-            ]
-          },
-          contact: {
-            blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
-            email: "zack@reasonably.cc",
-            linkedin: "https://www.linkedin.com/in/zackgort/"
-          }
-        };
-      
-        // ---------------------------------------------------------------------------
-        // SKILL IMAGE MAP + helper (used by hover reveal)
-        // ---------------------------------------------------------------------------
-        const SKILL_IMG = {
-          "User Experience Design": "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
-          "Visual Interface Design": "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
-          "Accessibility Compliance": "https://i.ibb.co/Z69xjMQY/tiktok-cat.gif",
-          "UX Research & Strategy": "https://i.ibb.co/pdc51pC/S1-Final-Homepage-Homepage-Narrative-Example.png",
-          "Figma, Adobe CS": "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
-          "HTML/CSS/Js": "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
-          "Pen & Paper": "https://i.ibb.co/Z2tsks1/image-434-min.png",
-          "Whiteboard": "https://i.ibb.co/ZW3j6T1/Photo-Selects-Sketch-Prep-1-1-Houghton-Nav.jpg",
-          "AI + Creative Coding": "https://i.ibb.co/RCnjfFv/6105c90759377c59c854a562-ZAX02142.jpg",
-          "Design Systems & Workflows": "https://i.ibb.co/McRbkzq/640cdd0717d12bcf72882e0f-6106ecd46ed1ff579fd6ed81-ZAX02288.jpg"
-        };
-        const imgFor = (label) => SKILL_IMG[label] || "https://i.ibb.co/cSQCgNQY/work1.webp";
-      
-        // ---------------------------------------------------------------------------
-        // RENDERER
-        // ---------------------------------------------------------------------------
-        function renderApp() {
-          const app = $('#app');
-          if (!app) return;
-          app.innerHTML = '';
-      
-          // HEADER / FRAME
-          const header = el('header', 'frame');
-          header.innerHTML = `
-            <h1 class="frame__title">
-              <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
-            </h1>
-            <div class="frame__subline type-tiny">
-              <span>${CONTENT.header.subline}</span>
-              <nav class="frame__links flex-line">
-                ${CONTENT.header.links.map((l) => {
-                  const href = l.href || '#';
-                  const isInternal = href.startsWith('#') || href.startsWith('/');
-                  const attrs = [
-                    `href="${href}"`,
-                    !isInternal ? 'target="_blank" rel="noopener"' : '',
-                    l.tip ? 'class="nav-tip"' : '',
-                    l.tip ? `data-tip="${l.tip}"` : '',
-                    l.tip ? `title="${l.tip}"` : ''
-                  ].filter(Boolean).join(' ');
-                  return `<a ${attrs}>${l.label}</a>`;
-                }).join('')}
-              </nav>
-            </div>
-            <nav class="frame__tags flex-line type-tiny">
-              ${CONTENT.header.tags.map(t => `<a href="${t.href}" ${t.settle?`data-settle="${t.settle}"`:''}>${t.label}</a>`).join('')}
-            </nav>
-            <span class="frame__logo">${CONTENT.header.logo}</span>
-          `;
-          app.appendChild(header);
-      
-          // ABOUT (hero)
-          const about = el('section', 'content content--padded');
-          about.id = 'about';
-          about.innerHTML = `
-            <h3 class="heading-chant">
-              ${CONTENT.about.heading}
-              <sup class="confetti-sup" role="button" tabindex="0" aria-label="${CONTENT.about.sup} (tap for confetti)">
-                ${CONTENT.about.sup}
-                <span class="emitter" aria-hidden="true"></span>
-              </sup>
-            </h3>
-            <p class="type-tiny right end">${CONTENT.about.byline}</p>
-          `;
-          app.appendChild(about);
-      
-          // ABOUT — content
-          const aboutContent = el('section', 'content content--padded');
-          aboutContent.id = 'about-content';
-      
-          const aboutCopyHTML = (CONTENT.about.copy || [])
-            .map(p => `<p>${p}</p>`)
-            .join('');
-      
-          aboutContent.innerHTML = `
-            <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-            <div class="content__text">
-              ${aboutCopyHTML}
-            </div>
-            ${CONTENT.about.note
-              ? `<p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">${CONTENT.about.note}</p>`
-              : '' }
-          `;
-          app.appendChild(aboutContent);
-      
-          // SKILLS
-          const skills = el('section', 'content content--padded');
-          skills.id = 'skills';
-          skills.innerHTML = `
-            <div class="trio-grid">
-              ${CONTENT.skills.cols.map(col => `
-                <div class="trio-col">
-                  <h4 class="type-tiny">${col.heading}</h4>
-                  ${col.items.map(t => `
-                    <a class="content__text skills-link" data-fx="2" data-img="${imgFor(t)}" href="#" role="link" aria-label="${t}" onclick="return false;">
-                      <span>${t}</span>
-                    </a>
-                  `).join('')}
-                </div>`).join('')}
-            </div>
-          `;
-          app.appendChild(skills);
-      
-          // WORK SELECT
-          const work = el('section', 'content content--padded');
-          work.id = 'work';
-          work.innerHTML = `
-            <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
-            <div class="grid grid--columns grid--spaced" data-grid-second>
-              ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-              ${CONTENT.workSelect.cards.map(c => `
-                <div class="grid__item work-card">
-                  <h4 class="type-tiny">
-                    <a class="title-link"
-                       href="${c.href}"
-                       ${c.ext ? 'target="_blank" rel="noopener noreferrer"' : ''}
-                       ${c.settle ? `data-settle="${c.settle}"` : ''}>
-                       ${c.title}
-                    </a>
-                  </h4>
-                  <p>${c.glyph || ''}</p>
-                </div>`).join('')}
-            </div>
-          `;
-          app.appendChild(work);
-      
-          // BRANDS GRID
-          const brands = el('section', 'content content--padded content--full');
-          brands.id = 'brands-grid';
-          brands.innerHTML = `
-            <div class="grid-head">
-              <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
-            </div>
-            <div class="grid grid--columns grid--spaced" data-grid-ninth>
-              ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-            </div>
-            ${CONTENT.brandsGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.brandsGrid.names.join(' • ')}</p>` : ''}
-          `;
-          app.appendChild(brands);
-      
-          // AGENCY GRID
-          const agency = el('section', 'content content--padded content--full');
-          agency.id = 'brands-grid-2';
-          agency.innerHTML = `
-            <div class="grid-head">
-              <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
-            </div>
-            <div class="grid grid--columns grid--spaced" data-grid-ninth>
-              ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-            </div>
-            ${CONTENT.agencyGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.agencyGrid.names.join(' • ')}</p>` : ''}
-          `;
-          app.appendChild(agency);
-      
-          // FINTECH — HERO
-          const finHero = el('section', 'content content--padded content--full');
-          finHero.id = 'fintech';
-          finHero.innerHTML = `
-            <div class="grid grid--columns grid--spaced" data-grid-ninth>
-              ${CONTENT.fintech.heroImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-            </div>
-            <div class="content__title">
-              <h2 class="content__title-main">${CONTENT.fintech.heroCaption.title}</h2>
-              <p class="type-tiny right end">${CONTENT.fintech.heroCaption.subtitle}</p>
-            </div>
-          `;
-          app.appendChild(finHero);
-      
-          // FINTECH — PROCESS
-          const finProc = el('section', 'content content--padded');
-          finProc.id = 'fintech-process';
-          const finIntro = `
-            <section class="project project--intro">
-              <span class="project__label project__label--name">Client</span>
-              <span class="project__name">${CONTENT.fintech.process.client}</span>
-      
-              <span class="project__label project__label--date">Agency</span>
-              <span class="project__date">${CONTENT.fintech.process.agency}</span>
-      
-              <h2 class="project__title"><span class="project__title-line">design systems, dashboards, data, & due diligence. </span></h2>
-      
-              <div class="project__mission content__text">
-                <p>
-                  <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                    Role
-                  </span>
-                  ${CONTENT.fintech.process.role[0]}
-                </p>
-                ${CONTENT.fintech.process.role.slice(1).map(p=>`<p>${p}</p>`).join('')}
-              </div>
-            </section>`;
-      
-          const finDetails = CONTENT.fintech.process.details.map(([label, text], i) => `
-            <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-              <span class="project__label project__label--default">${label}</span>
-              <p>${text}</p>
-            </section>`).join('');
-          finProc.innerHTML = finIntro + finDetails;
-          app.appendChild(finProc);
-      
-          // FINTECH — DISCOVERY
-          const finDisc = el('section', 'content content--full content--cutoff');
-          finDisc.id = 'fintech-discovery';
-          finDisc.innerHTML = `
-            <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-              ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-            </div>`;
-          app.appendChild(finDisc);
-      
-          // FINTECH — INSIGHT
-          const finInsight = el('section', 'content content--padded');
-          finInsight.id = 'fintech-insight';
-          const finInsightParas = CONTENT.fintech.insight.map(([label, text]) => `
-            <p>
-              <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                ${label}
-              </span>
-              ${text}
-            </p>
-          `).join('');
-          finInsight.innerHTML = `
-            <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-            <div class="content__text">
-              ${finInsightParas}
-            </div>
-          `;
-          if (CONTENT.fintech.insightAside) {
-            const aside = el('p', 'type-tiny right end insight-aside');
-            aside.textContent = CONTENT.fintech.insightAside;
-            finInsight.querySelector('.content__text').appendChild(aside);
-          }
-          app.appendChild(finInsight);
-      
-          // FINTECH — STACK
-          const finStack = el('section', 'content content--full stacked-section');
-          finStack.id = 'fintech-stack';
-          finStack.innerHTML = `
-            <div class="stacked-gallery" data-stack>
-              ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
-            </div>`;
-          app.appendChild(finStack);
-      
-          // ECOM — HERO
-          const ecoHero = el('section', 'content content--padded content--full');
-          ecoHero.id = 'ecommerce';
-          ecoHero.innerHTML = `
-            <div class="grid grid--columns grid--spaced" data-grid-ninth>
-              ${CONTENT.ecommerce.heroImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-            </div>
-            <div class="content__title">
-              <h2 class="content__title-main">${CONTENT.ecommerce.heroCaption.title}</h2>
-              <p class="type-tiny right end">${CONTENT.ecommerce.heroCaption.subtitle}</p>
-            </div>`;
-          app.appendChild(ecoHero);
-      
-          // ECOM — PROCESS
-          const ecoProc = el('section', 'content content--padded');
-          ecoProc.id = 'ecommerce-process';
-          const ecoIntro = `
-            <section class="project project--intro">
-              <span class="project__label project__label--name">Client</span>
-              <span class="project__name">${CONTENT.ecommerce.process.client}</span>
-      
-              <span class="project__label project__label--date">Agency</span>
-              <span class="project__date">${CONTENT.ecommerce.process.agency}</span>
-      
-              <h2 class="project__title">
-                ${CONTENT.ecommerce.process.titleLines?.map(t=>`<span class="project__title-line">${t}</span>`).join('') || ''}
-              </h2>
-      
-              <div class="project__mission content__text">
-                <p>
-                  <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                    Role
-                  </span>
-                  ${CONTENT.ecommerce.process.role[0] || ''}
-                </p>
-                ${(CONTENT.ecommerce.process.role || []).slice(1).map(p=>`<p>${p}</p>`).join('')}
-              </div>
-            </section>`;
-      
-          const ecoDetails = CONTENT.ecommerce.process.details.map(([label, text], i) => `
-            <section class="project project--details ${i%2===0?'project--left':'project--right'}">
-              <span class="project__label project__label--default">${label}</span>
-              <p>${text}</p>
-            </section>`).join('');
-          ecoProc.innerHTML = ecoIntro + ecoDetails;
-          app.appendChild(ecoProc);
-      
-          // ECOM — DISCOVERY
-          const ecoDisc = el('section', 'content content--full content--cutoff');
-          ecoDisc.id = 'ecommerce-discovery';
-          ecoDisc.innerHTML = `
-            <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
-              ${CONTENT.ecommerce.discoveryImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
-            </div>`;
-          app.appendChild(ecoDisc);
-      
-          // ECOM — INSIGHT
-          const ecoInsight = el('section', 'content content--padded');
-          ecoInsight.id = 'ecommerce-insight';
-          const ecoInsightParas = CONTENT.ecommerce.insight.map(([label, text]) => `
-            <p>
-              <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
-                ${label}
-              </span>
-              ${text}
-            </p>
-          `).join('');
-          ecoInsight.innerHTML = `
-            <div class="content__title" style="margin:.25rem 0 .5rem"></div>
-            <div class="content__text">
-              ${ecoInsightParas}
-            </div>
-          `;
-          if (CONTENT.ecommerce.insightAside) {
-            const aside = el('p', 'type-tiny right end insight-aside');
-            aside.textContent = CONTENT.ecommerce.insightAside;
-            ecoInsight.querySelector('.content__text').appendChild(aside);
-          }
-          app.appendChild(ecoInsight);
-      
-          // ECOM — STACK
-          const ecoStack = el('section', 'content content--full stacked-section');
-          ecoStack.id = 'ecommerce-stack';
-          ecoStack.innerHTML = `
-            <div class="stacked-gallery" data-stack>
-              ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
-            </div>`;
-          app.appendChild(ecoStack);
-      
-          // CONTACT
-          const contact = el('section', 'content content--padded');
-          contact.id = 'contact';
-          contact.innerHTML = `
-            <h4 class="type-tiny">CONTACT</h4>
-            <p class="content__text">${CONTENT.contact.blurb}</p>`;
-          app.appendChild(contact);
-      
-          // FOOTER
-          const footer = el('footer', 'page-footer type-tiny');
-          footer.innerHTML = `
-            <span>Hey, nice to see you down here!</span>
-            <span><a href="mailto:${CONTENT.contact.email}">${CONTENT.contact.email}</a></span>
-            <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
-          app.appendChild(footer);
-        }
+    const show = () => blur.classList.add('is-visible');
+    const hide = () => blur.classList.remove('is-visible');
 
-        // --- NEW: Scroll progress (replaces old back-to-top mouse) ---
-        function mountScrollProgress(){
-          const nav = document.createElement('div');
-          nav.className = 'navigation';
-          nav.setAttribute('aria-hidden','true');
-          nav.innerHTML = `
-            <div class="nav-text">Scroll</div>
-            <div class="nav-progress" aria-label="Scroll progress">
-              <div class="nav-progress-fill" id="progressFill"></div>
-            </div>
-            <div class="nav-text" id="progressText">0%</div>
-          `;
-          document.body.appendChild(nav);
-
-          const fill = nav.querySelector('#progressFill');
-          const text = nav.querySelector('#progressText');
-
-          const getMaxScroll = () =>
-            Math.max(0, document.documentElement.scrollHeight - document.documentElement.clientHeight);
-
-          const update = () => {
-            const max = getMaxScroll();
-            const y = window.scrollY || document.documentElement.scrollTop || 0;
-            const p = max ? (y / max) : 0;
-            const pct = Math.min(100, Math.max(0, Math.round(p * 100)));
-            fill.style.transform = `scaleX(${p})`;
-            text.textContent = `${pct}%`;
-          };
-
-          update();
-          addEventListener('scroll', update, { passive:true });
-          addEventListener('resize', update);
-          addEventListener('orientationchange', update);
-          if (document.fonts?.ready) document.fonts.ready.then(update);
+    if (header) {
+      const ioHeader = new IntersectionObserver(
+        ([e]) => e.isIntersecting ? hide() : show(), {
+          threshold: 0,
+          rootMargin: '0px 0px -60px 0px'
         }
-      
-        // ---------------------------------------------------------------------------
-        // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)
-        // ---------------------------------------------------------------------------
-        function initSkillsHoverReveal() {
-          let root = document.getElementById('hoverReveal');
-          if (!root) {
-            root = document.createElement('div');
-            root.id = 'hoverReveal';
-            root.className = 'hover-reveal';
-            root.setAttribute('aria-hidden', 'true');
-            root.style.opacity = '0';
-            root.innerHTML = `
-              <div class="hover-reveal__inner">
-                <div class="hover-reveal__deco"></div>
-                <div class="hover-reveal__img"></div>
-              </div>`;
-            document.body.appendChild(root);
-          }
-      
-          const imgBox = root.querySelector('.hover-reveal__img');
-      
-          // detect first so helpers can use it
-          const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
-      
-          // state & token for preload race-cancel
-          let isVisible = false;
-          let token = 0;
-      
-          // Smooth follow (desktop); on mobile we position directly
-          const follow = { x: innerWidth / 2, y: innerHeight / 2 };
-          const pos = { x: follow.x, y: follow.y };
-          const lerp = (a, b, t) => a + (b - a) * t;
-          let raf;
-      
-          const PREVIEW_MARGIN = 16;
-          function positionRootAt(x, y) {
-            const rect = root.getBoundingClientRect();
-            const w = rect.width  || 220;
-            const h = rect.height || 160;
-      
-            let tx = x + PREVIEW_MARGIN;
-            let ty = y - PREVIEW_MARGIN;
-      
-            tx = Math.min(Math.max(8, tx), innerWidth  - w - 8);
-            ty = Math.min(Math.max(h + 8, ty), innerHeight - 8);
-      
-            gsap.set(root, { x: tx, y: ty, xPercent: 0, yPercent: -100 });
-          }
-      
-          const tick = () => {
-            pos.x = lerp(pos.x, follow.x, 0.16);
-            pos.y = lerp(pos.y, follow.y, 0.16);
-            positionRootAt(pos.x, pos.y);
-            raf = requestAnimationFrame(tick);
-          };
-      
-          const preload = (url) => new Promise((res, rej) => {
-            imgBox.style.backgroundImage = `url(${url})`;
-            const img = new Image();
-            img.onload = () => res();
-            img.onerror = rej;
-            img.src = url;
-          });
-      
-          let inTl, outTl;
-          const killTL = () => { inTl && inTl.kill(); outTl && outTl.kill(); inTl = outTl = null; };
-      
-          const showFx2 = () => {
-            killTL();
-            isVisible = true;
-            gsap.set(root, { autoAlpha: 1, scale: 1, rotation: 0 });
-            inTl = gsap.timeline()
-              .fromTo(root, { rotation: -6, yPercent: -92, scale: 0.92 }, { rotation: 0, yPercent: -100, scale: 1, duration: 0.6, ease: 'power3.out' }, 0)
-              .fromTo(imgBox, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: 'power2.out' }, 0);
-          };
-      
-          const hide = () => {
-            killTL();
-            outTl = gsap.to(root, {
-              autoAlpha: 0, scale: 0.98, rotation: -1, duration: 0.28, ease: 'power2.out',
-              onComplete: () => { isVisible = false; }
-            });
-          };
-      
-          const cancelHover = () => {
-            if (isTouch) return;
-            if (isVisible) { token++; hide(); }
-          };
-      
-          const skills = document.getElementById('skills');
-          if (!skills) return;
-      
-          if (!isTouch) {
-            raf = requestAnimationFrame(tick);
-            addEventListener('pointermove', e => { follow.x = e.clientX; follow.y = e.clientY; }, { passive: true });
-      
-            skills.addEventListener('pointerenter', (e) => {
-              const a = e.target.closest('.skills-link[data-img]');
-              if (!a) return;
-              const url = a.getAttribute('data-img');
-              const myToken = ++token;
-              preload(url).then(() => { if (myToken === token) showFx2(); }).catch(() => {});
-            }, true);
-      
-            skills.addEventListener('pointerleave', (e) => { if (e.target.closest('.skills-link')) hide(); }, true);
-      
-            skills.addEventListener('focusin', (e) => {
-              const a = e.target.closest('.skills-link[data-img]');
-              if (!a) return;
-              const r = a.getBoundingClientRect();
-              positionRootAt(r.left + r.width/2, r.top + r.height/2);
-              const url = a.getAttribute('data-img');
-              const myToken = ++token;
-              preload(url).then(() => { if (myToken === token) showFx2(); }).catch(() => {});
-            });
-            skills.addEventListener('focusout', (e) => { if (e.target.closest('.skills-link')) hide(); });
-      
-            // global cancellers
-            ['scroll','wheel','touchstart','pointerdown','resize','orientationchange'].forEach(evt =>
-              addEventListener(evt, cancelHover, { passive: true })
-            );
-      
-          } else {
-            let open = null;
-            let lastDown = { x: innerWidth / 2, y: innerHeight / 2 };
-      
-            skills.addEventListener('pointerdown', (e) => {
-              const a = e.target.closest('.skills-link');
-              if (!a) return;
-              lastDown = { x: e.clientX, y: e.clientY };
-            }, true);
-      
-            skills.addEventListener('click', (e) => {
-              const a = e.target.closest('.skills-link[data-img]');
-              if (!a) return;
-              e.preventDefault();
-      
-              const url = a.getAttribute('data-img');
-              const myToken = ++token;
-      
-              const rect = a.getBoundingClientRect();
-              const x = lastDown.x || (rect.left + rect.width / 2);
-              const y = lastDown.y || (rect.top + rect.height / 2);
-              positionRootAt(x, y);
-      
-              if (open === a) { hide(); open = null; return; }
-      
-              preload(url).then(() => {
-                if (myToken !== token) return;
-                showFx2();
-                open = a;
-              }).catch(() => {});
-            }, true);
-      
-            // hide preview on scroll/gesture
-            const mobileCancel = () => { if (open) { hide(); open = null; } };
-            ['scroll','wheel','touchstart','pointerdown','resize','orientationchange'].forEach(evt =>
-              addEventListener(evt, mobileCancel, { passive: true })
-            );
-      
-            // also hide when section leaves viewport
-            const io = new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) mobileCancel(); }, { threshold: 0 });
-            io.observe(skills);
-      
-            // prevent sticky focus styles on press
-            skills.addEventListener('pointerdown', (e) => {
-              const a = e.target.closest('.skills-link');
-              if (a) a.blur();
-            }, true);
-      
-            document.addEventListener('click', (e) => { if (open && !e.target.closest('.skills-link')) mobileCancel(); });
-          }
-        }
-      
-        // ---------------------------------------------------------------------------
-        // Perf & platform helpers
-        // ---------------------------------------------------------------------------
-        function initVisibilityPerfGuards() {
-          document.addEventListener('visibilitychange', () => {
-            const hidden = document.hidden;
-            if (hidden) {
-              try { if (window.lenis) window.lenis.stop(); } catch {}
-              try { gsap.ticker.sleep(); } catch {}
-            } else {
-              try { if (window.lenis) window.lenis.start(); } catch {}
-              try {
-                gsap.ticker.wake();
-                if (window.ScrollTrigger) ScrollTrigger.refresh();
-              } catch {}
-            }
-          }, { passive: true });
-      
-          const doPreload = () => {
-            try { preloadImages('img'); } catch {}
-          };
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(doPreload, { timeout: 1500 });
-          } else {
-            setTimeout(doPreload, 120);
-          }
-        }
-      
-        function supportsBackdropFilter() {
-          try {
-            return (CSS && (CSS.supports('backdrop-filter', 'blur(1px)') ||
-              CSS.supports('-webkit-backdrop-filter', 'blur(1px)')));
-          } catch {
-            return false;
-          }
-        }
-      
-        function tuneForAndroid() {
-          const isAndroid = /Android/i.test(navigator.userAgent);
-          const dm = (navigator.deviceMemory || 8);
-          const rs = document.documentElement.style;
-      
-          if (isAndroid || dm <= 4) {
-            rs.setProperty('--layers', isAndroid ? '5' : '4');
-            rs.setProperty('--blur-max', isAndroid ? '14' : '12');
-            rs.setProperty('--saturate', '1');
-          }
-      
-          if (matchMedia('(max-width:480px)').matches) {
-            rs.setProperty('--layers', '4');
-            rs.setProperty('--blur-max', '12');
-          }
-      
-          if (!supportsBackdropFilter()) {
-            document.querySelector('.blur')?.classList.add('no-bf');
-          }
-        }
-      
-        // ---------------------------------------------------------------------------
-        // BOOT
-        // ---------------------------------------------------------------------------
-        async function start() {
-          renderApp();
-          initVisibilityPerfGuards();
-          tuneForAndroid();
-          initBlurOverlayVisibility();
-          fixMobileBlurResume();
-      
-          initSmooth();
-          enableHashScroll();
-      
-          // a11y + lazy bg setup
-          a11yifyGridImages();
-          initLazyBackgrounds();
-      
-          tuneCaseStudyTiming();
-      
-          animateHeader();
-          animateGrids();
-          animateProcess();
-          animateStacks();
-          initCursor();
-          initConfetti();
-          initDeadJump();
+      );
+      ioHeader.observe(header);
+    }
 
-          // NEW: mount scroll progress UI
-          mountScrollProgress();
-      
-          initSkillsHoverReveal();
-      
-          try { await preloadImages('img'); } catch (e) {}
-          document.body.classList.remove('loading');
-      
-          if (window.ScrollTrigger) ScrollTrigger.refresh();
-        }
-      
-        // Run AFTER all deferred vendor scripts are ready.
-        window.addEventListener('load', () => { start(); }, { once: true });
-      
-      })();
+    if (header && header.getBoundingClientRect().bottom <= 0) show();
 
-      // Keep URL clean (no #hash)
-      const clearSlug = () => {
-        try {
-          history.replaceState(null, '', window.location.pathname + window.location.search);
-        } catch {}
+    window.addEventListener('resize', () => buildBlurLayers(blur), { passive: true });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mobile/Android blur resiliency
+  // ---------------------------------------------------------------------------
+  function fixMobileBlurResume() {
+    const blur = document.querySelector('.blur');
+    const header = document.querySelector('.frame');
+
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    let resumes = 0;
+    const degradeKey = 'bfDegraded';
+    let degraded = localStorage.getItem(degradeKey) === '1';
+
+    function rebuildChildren() { if (blur) buildBlurLayers(blur); }
+    function hardOff(on) { if (blur) blur.classList.toggle('bf-off', !!on); }
+
+    function update() {
+      if (!blur || !header) return;
+      hardOff(true);
+      rebuildChildren();
+
+      blur.classList.add('bf-reset');
+      void blur.offsetHeight;
+
+      const shouldShow = header.getBoundingClientRect().bottom <= 0;
+      blur.classList.toggle('is-visible', shouldShow);
+
+      requestAnimationFrame(() => {
+        blur.classList.remove('bf-reset');
+        hardOff(false);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      });
+
+      resumes++;
+      if (!degraded && isAndroid && resumes >= 2) {
+        degraded = true;
+        localStorage.setItem(degradeKey, '1');
+        blur.classList.add('no-bf');
+      }
+    }
+
+    window.addEventListener('visibilitychange', () => {
+      document.hidden ? hardOff(true) : setTimeout(update, 60);
+    }, { passive: true });
+
+    window.addEventListener('pagehide', () => hardOff(true), { passive: true });
+    window.addEventListener('pageshow', () => setTimeout(update, 0), { passive: true });
+    window.addEventListener('focus', () => setTimeout(update, 60), { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(update, 120), { passive: true });
+    window.addEventListener('resize', () => setTimeout(update, 60), { passive: true });
+
+    update();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Smooth scrolling (Lenis) + anchor hash scrolling
+  // ---------------------------------------------------------------------------
+  function initSmooth() {
+    const usingLenis = has('Lenis');
+
+    if (has('ScrollTrigger')) {
+      ScrollTrigger.normalizeScroll(!usingLenis);
+    }
+    if (!usingLenis) return;
+
+    const isTouch = matchMedia('(pointer:coarse), (hover:none), (max-width: 768px)').matches;
+    window.lenis = new Lenis({
+      lerp: isTouch ? 0.22 : 0.15,
+      smoothTouch: true,
+      syncTouch: true,
+    });
+
+    window.lenis.on('scroll', () => { if (window.ScrollTrigger) ScrollTrigger.update(); });
+    gsap.ticker.add((t) => window.lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  function enableHashScroll() {
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+
+      const id = a.getAttribute('href');
+      if (!id || id.length < 2) return;
+
+      const target = document.querySelector(id);
+      if (!target) return;
+
+      e.preventDefault();
+
+      const settle = a.dataset.settle;
+
+      const focusTarget = () => {
+        target.setAttribute('tabindex', '-1');
+        setTimeout(() => target.focus({ preventScroll: true }), 0);
       };
-      // If someone lands on /#about (shared link etc.), remove the hash but keep scroll
-      if (location.hash) clearSlug();
+
+      // If caller wants to scroll to the end of a pinned section, do that
+      if (settle === 'end' && window.ScrollTrigger) {
+        const st = ScrollTrigger.getAll().find(st =>
+          st && (st.pin === target || st.trigger === target || target.contains(st.pin) || target.contains(st.trigger))
+        );
+        if (st && isFinite(st.end)) {
+          const y = st.end + 2;
+          if (window.lenis) window.lenis.scrollTo(y, { duration: 1.1 });
+          else window.scrollTo({ top: y, behavior: 'smooth' });
+
+          focusTarget();
+          // 🔑 Don’t write the hash
+          clearSlug();
+          return;
+        }
+      }
+
+      // Regular smooth scroll path
+      const y = target.getBoundingClientRect().top + window.pageYOffset;
+      window.lenis ? window.lenis.scrollTo(y, { duration: 1 }) : window.scrollTo({ top: y, behavior: 'smooth' });
+
+      focusTarget();
+      // 🔑 Don’t write the hash
+      clearSlug();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Utilities
+  // ---------------------------------------------------------------------------
+  const preloadImages = (sel = 'img') =>
+    new Promise(res => imagesLoaded(document.querySelectorAll(sel), res));
+
+  function a11yifyGridImages() {
+    document.querySelectorAll('.grid__img').forEach(el => {
+      el.setAttribute('role', 'img');
+      const url = el.dataset.bg || (el.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+      const name = url.split('/').pop()?.split('.')[0] || '';
+      el.setAttribute('aria-label', name.replace(/[-_]/g, ' ').trim() || 'Gallery image');
+    });
+  }
+
+  function initLazyBackgrounds() {
+    const els = document.querySelectorAll('.grid__img[data-bg]');
+    if (!els.length) return;
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const url = el.dataset.bg;
+        if (url) {
+          el.style.backgroundImage = `url(${url})`;
+          el.removeAttribute('data-bg');
+        }
+        io.unobserve(el);
+      });
+    }, { rootMargin: '200px' });
+
+    els.forEach(el => io.observe(el));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Animations
+  // ---------------------------------------------------------------------------
+  function animateHeader() {
+    const frame = document.querySelector('.frame');
+    const title = frame?.querySelector('.frame__title');
+    if (!frame || !title) return;
+
+    if (prefersReducedMotion) {
+      gsap.from(frame, {
+        autoAlpha: 0,
+        duration: .6,
+        ease: 'power1.out',
+        scrollTrigger: { trigger: frame, start: 'top 95%' }
+      });
+      return;
+    }
+
+    gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: frame,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        invalidateOnRefresh: true
+      }
+    })
+    .to(frame, { opacity: 0.38, yPercent: 14 }, 0)
+    .to(title, { xPercent: -80 }, 0);
+  }
+
+  function animateGrids() {
+    const mq = matchMedia('(max-width:768px)');
+    const isMobile = () => mq.matches;
+
+    const modes = {
+      second: { endDesk: '+=250%', endMob: '+=140%', scrubDesk: .5, scrubMob: .25 },
+      fifth:  { endDesk: '+=250%', endMob: '+=150%', scrubDesk: .3, scrubMob: .2  },
+      sixth:  { endDesk: '+=180%', endMob: '+=120%', scrubDesk: .6, scrubMob: .4  },
+      ninth:  { endDesk: '+=210%', endMob: '+=130%', scrubDesk: .45, scrubMob: .32 }
+    };
+
+    function defaultEndPx(mode, grid) {
+      const count = grid.querySelectorAll('.grid__img').length || 6;
+      const section = grid.closest('section') || grid.parentNode;
+      const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
+      const cfg = ({
+        second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+        fifth:  { base:{d:240,m:150}, per:{d:8, m:5}, cap:{d:10,m:6} },
+        sixth:  { base:{d:180,m:120}, per:{d:6, m:4}, cap:{d:10,m:6} },
+        ninth:  { base:{d:210,m:130}, per:{d:6, m:4}, cap:{d:12,m:8} }
+      })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
+
+      const tilesOverMin = Math.max(0, count - 4);
+      const vh = (isMobile() ? cfg.base.m : cfg.base.d) +
+                 tilesOverMin * (isMobile() ? cfg.per.m : cfg.per.d) +
+                 (hasCaption ? (isMobile() ? cfg.cap.m : cfg.cap.d) : 0);
+      return `+=${Math.round(window.innerHeight * (vh/100))}`;
+    }
+    const parseScrub = (v, fb) => {
+      if (v == null || v === '') return fb;
+      if (v === 'true') return true;
+      if (v === 'false') return false;
+      const n = parseFloat(v);
+      return isNaN(n) ? fb : n;
+    };
+
+    const pinType    = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
+    const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
+
+    const grids = [...document.querySelectorAll(
+      '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+    )];
+
+    grids.forEach(grid => {
+      const imgs  = grid.querySelectorAll('.grid__img');
+      const items = grid.querySelectorAll('.grid__item');
+      if (!imgs.length && !items.length) return;
+
+      const section = grid.closest('section') || grid.parentNode;
+      const defaultMode =
+        grid.hasAttribute('data-grid-second') ? 'second' :
+        grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+        grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+
+      const d = grid.dataset;
+      const mode = d.mode || defaultMode;
+
+      const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+
+      const base = modes[mode] || modes.ninth;
+      const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+      const scrub = parseScrub(isMobile() ? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+
+      const tl = gsap.timeline({
+        defaults: { ease: (mode === 'sixth' ? 'none' : 'power3') },
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end,
+          pin: section,
+          pinType,
+          pinReparent: true,
+          scrub,
+          anticipatePin: anticipate,
+          pinSpacing: true,
+          invalidateOnRefresh: true
+        }
+      });
+
+      if (mode === 'second') {
+        const mid = Math.floor(imgs.length / 2);
+        tl.from(imgs, {
+          stagger: { amount: .3, from: 'center' },
+          y: () => innerHeight,
+          transformOrigin: '50% 0%',
+          rotation: (i) => (i < mid ? -1 : 1) * Math.abs(i - mid) * (matchMedia('(max-width:768px)').matches ? 1.5 : 3)
+        }).from(items, {
+          stagger: { amount: .3, from: 'center' },
+          yPercent: 100,
+          autoAlpha: 0
+        }, 0);
+      }
+
+      if (mode === 'fifth') {
+        tl.set(grid, { perspective: 1000 }).from(imgs, {
+          stagger: { amount: .4, from: 'random', grid: [4, 9] },
+          y: () => innerHeight,
+          rotationX: matchMedia('(max-width:768px)').matches ? -40 : -70,
+          transformOrigin: '50% 0%',
+          z: matchMedia('(max-width:768px)').matches ? -450 : -900,
+          autoAlpha: 0
+        });
+      }
+      if (mode === 'sixth') {
+        tl.from(imgs, {
+          stagger: { amount: .25, from: 'edges', grid: [3, 3] },
+          scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
+          autoAlpha: 0
+        }).from(grid, {
+          scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
+          skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
+        }, 0);
+      }
+      if (mode === 'ninth') {
+        tl.from(imgs, {
+          transformOrigin: '100% -450%',
+          stagger: .07,
+          scaleX: 1.02,
+          skewX: matchMedia('(max-width:768px)').matches ? 7 : 15,
+          xPercent: matchMedia('(max-width:768px)').matches ? 18 : 50,
+          rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
+          autoAlpha: 0
+        });
+        const headCap   = section.querySelector('.content__title, .grid-head');
+        const bottomCap = section.querySelector('.grid-caption');
+        if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
+        if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
+      }
+    });
+  }
+
+  function animateProcess() {
+    document.querySelectorAll('[id$="-process"]').forEach(process => {
+      const intro = process.querySelector('.project--intro');
+      const details = gsap.utils.toArray(process.querySelectorAll('.project--details'));
+      if (prefersReducedMotion) {
+        intro && gsap.from(intro, {
+          autoAlpha: 0, y: 16, duration: .35,
+          scrollTrigger: { trigger: intro, start: 'top 90%' }
+        });
+        details.length && gsap.from(details, {
+          autoAlpha: 0, y: 14, duration: .3, stagger: .08,
+          scrollTrigger: { trigger: process, start: 'top 85%' }
+        });
+        return;
+      }
+      intro && gsap.from(intro, {
+        autoAlpha: 0, y: 24, duration: .6, ease: 'power2.out',
+        scrollTrigger: { trigger: intro, start: 'top 80%' }
+      });
+      details.length && gsap.from(details, {
+        autoAlpha: 0, y: 30, duration: .5, ease: 'power2.out', stagger: .12,
+        scrollTrigger: { trigger: process, start: 'top 75%', end: 'bottom 30%' }
+      });
+    });
+  }
+
+  function animateStacks() {
+    document.querySelectorAll('.stacked-section [data-stack]').forEach(section => {
+      const frames = section.querySelectorAll('.stacked-img');
+      if (prefersReducedMotion) {
+        gsap.from(frames, {
+          autoAlpha: 0, y: 20, duration: .4, stagger: .08, ease: 'power1.out',
+          scrollTrigger: { trigger: section, start: 'top 85%' }
+        });
+        return;
+      }
+      frames.forEach(el => {
+        gsap.from(el, {
+          autoAlpha: 0, y: 36, duration: .7, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 85%' }
+        });
+        const img = el.querySelector('img');
+        img && gsap.to(img, {
+          yPercent: -8, ease: 'none',
+          scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true }
+        });
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cursor + Confetti + UX jump
+  // ---------------------------------------------------------------------------
+  function initCursor() {
+    if (!matchMedia('(pointer:fine)').matches || prefersReducedMotion) return;
+    document.documentElement.classList.add('has-cursor');
+
+    if (!document.getElementById('gc-goo-defs')) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.id = 'gc-goo-defs';
+      svg.setAttribute('width', '0');
+      svg.setAttribute('height', '0');
+      svg.innerHTML = `<defs><filter id="gc-goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/><feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo"/><feBlend in="SourceGraphic" in2="goo"/></filter></defs>`;
+      document.body.appendChild(svg);
+    }
+
+    document.querySelectorAll('.gooey-cursor').forEach(n => n.remove());
+    const wrap = document.createElement('div');
+    wrap.className = 'gooey-cursor';
+    wrap.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(wrap);
+
+    const N = 20;
+    const LERP = .35;
+    const LINK_SHRINK = 0.55;
+    let hoverBoost = 1;
+
+    for (let i = 0; i < N; i++) {
+      const d = document.createElement('div');
+      d.className = 'gc-dot';
+      wrap.appendChild(d);
+    }
+    const dots = Array.from(wrap.children);
+
+    let mx = innerWidth / 2,
+        my = innerHeight / 2;
+    const hist = Array.from({ length: N }, () => ({ x: mx, y: my }));
+
+    addEventListener('pointermove', (e) => {
+      mx = e.clientX; my = e.clientY;
+    }, { passive: true });
+
+    let cursorRAF;
+
+    function tick() {
+      hist.shift();
+      hist.push({ x: mx, y: my });
+      for (let i = 0; i < N; i++) {
+        const c = hist[i], n = hist[i + 1] || hist[N - 1];
+        c.x += (n.x - c.x) * LERP;
+        c.y += (n.y - c.y) * LERP;
+
+        const base = i / N;
+        const scale = (i === N - 1) ? base * hoverBoost : base;
+
+        dots[i].style.transform = `translate(${c.x}px, ${c.y}px) translate(-50%, -50%) scale(${scale})`;
+      }
+      cursorRAF = requestAnimationFrame(tick);
+    }
+    cursorRAF = requestAnimationFrame(tick);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (cursorRAF) cancelAnimationFrame(cursorRAF);
+        cursorRAF = null;
+      } else {
+        cursorRAF = requestAnimationFrame(tick);
+      }
+    }, { passive: true });
+
+    const isLink = (t) => t && (t.closest('a[href]') || t.closest('[role="link"]'));
+    const isNavLink = (t) => t && (t.closest('nav') || t.closest('.frame__links') || t.closest('.frame__tags'));
+
+    document.addEventListener('pointerover', (e) => {
+      if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = LINK_SHRINK;
+    }, true);
+
+    document.addEventListener('pointerout', (e) => {
+      if (isLink(e.target) && !isNavLink(e.target)) hoverBoost = 1;
+    }, true);
+  }
+
+  function initConfetti() {
+    const sup = document.querySelector('.heading-chant .confetti-sup');
+    if (!sup) return;
+
+    const emitter = sup.querySelector('span.emitter');
+    const physicsAvailable = !!(window.Physics2DPlugin || (gsap.plugins && gsap.plugins.Physics2DPlugin));
+    if (!physicsAvailable) return;
+
+    function particles(parent, qty, x, y, minA, maxA) {
+      const colors = ['#FFFF04', '#EA4C89', '#892AB8', '#4AF2FD'];
+      for (let i = 0; i < qty; i++) {
+        const angle = gsap.utils.random(minA, maxA);
+        const velocity = gsap.utils.random(70, 140);
+        const dot = document.createElement('div');
+        dot.style.setProperty('--b', colors[(Math.random() * colors.length) | 0]);
+        parent.appendChild(dot);
+
+        gsap.set(dot, { opacity: 0, x, y, scale: gsap.utils.random(.4, .8), rotation: gsap.utils.random(0, 360) });
+        gsap.timeline({ onComplete: () => dot.remove() })
+          .to(dot, { opacity: 1, duration: .06 }, 0)
+          .to(dot, {
+            duration: 1.8,
+            rotationX: `-=${gsap.utils.random(720,1440)}`,
+            rotationZ: `+=${gsap.utils.random(720,1440)}`,
+            physics2D: { angle, velocity, gravity: 120 }
+          }, 0)
+          .to(dot, { opacity: 0, duration: 1 }, .8);
+      }
+    }
+
+    function burst(q = 80, minA = -95, maxA = -35) {
+      particles(emitter, q, 0, 0, minA, maxA);
+      gsap.fromTo(sup, { scale: .96 }, { scale: 1, duration: .25, ease: 'elastic.out(1,.6)' });
+    }
+
+    // Click / keyboard / hover
+    sup.addEventListener('click', () => burst());
+    sup.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); burst(); }
+    });
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(pointer:fine)').matches) {
+      let last = 0; const CD = 700;
+      sup.addEventListener('mouseenter', () => {
+        const now = performance.now();
+        if (now - last < CD) return;
+        last = now; burst(28, -100, -60);
+      });
+    }
+
+    // Fire when #about enters view (with cooldown)
+    if (typeof ScrollTrigger !== 'undefined' && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const aboutEl = document.getElementById('about') || sup.closest('section') || sup;
+      let lastBurst = 0;
+      const COOLDOWN = 1200;
+
+      const maybeBurst = () => {
+        const now = performance.now();
+        if (now - lastBurst < COOLDOWN) return;
+        lastBurst = now;
+        burst(54, -100, -35);
+      };
+
+      ScrollTrigger.create({
+        trigger: aboutEl,
+        start: 'top 80%',
+        end: 'bottom top',
+        onEnter: maybeBurst,
+        onEnterBack: maybeBurst,
+      });
+
+      const r = aboutEl.getBoundingClientRect();
+      if (r.top < innerHeight * 0.8 && r.bottom > 0) {
+        setTimeout(maybeBurst, 350);
+      }
+    }
+  }
+
+  // Only attach to the actual anchor (avoid double semantics)
+  function initDeadJump() {
+    const link = document.querySelector('.frame__title .ux-dead-jump');
+    const sections = Array.from(document.querySelectorAll('main > section'));
+    const nextSection = () => sections[0] && sections[0].id !== 'about' ? sections[0] : sections[1] || sections[0];
+
+    function jump(e) {
+      e?.preventDefault?.();
+      const t = nextSection();
+      if (!t) return;
+      const top = t.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    }
+    if (!link) return;
+    link.addEventListener('click', jump);
+    link.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') jump(e);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Case study timing overrides
+  // ---------------------------------------------------------------------------
+  function tuneCaseStudyTiming() {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const isMobile = () => mq.matches;
+
+    function setTiming(grid, { endDesk, endMob, scrubDesk, scrubMob, mode }) {
+      if (mode) grid.dataset.mode = mode;
+      if (endDesk) grid.dataset.endDesktop = endDesk;
+      if (endMob) grid.dataset.endMobile = endMob;
+      if (scrubDesk != null) grid.dataset.scrubDesktop = scrubDesk;
+      if (scrubMob != null) grid.dataset.scrubMobile = scrubMob;
+    }
+
+    function calcEndPx(grid, { baseVH, perTileVH, minTiles = 4, captionBoostVH = 0 }) {
+      const tiles = grid.querySelectorAll('.grid__img').length || minTiles;
+      const tilesOverMin = Math.max(0, tiles - minTiles);
+      const hasCaption = !!(grid.closest('section')?.querySelector('.content__title, .grid-head'));
+      const totalVH = (isMobile() ? baseVH.mobile : baseVH.desktop) +
+        tilesOverMin * (isMobile() ? perTileVH.mobile : perTileVH.desktop) +
+        (hasCaption ? (isMobile() ? (captionBoostVH.mobile || 0) : (captionBoostVH.desktop || 0)) : 0);
+      const px = Math.round(window.innerHeight * (totalVH / 100));
+      return `+=${px}`;
+    }
+
+    document.querySelectorAll('#fintech [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 120, mobile: 90 },
+        perTileVH: { desktop: 10, mobile: 7 },
+        captionBoostVH: { desktop: 12, mobile: 8 }
+      });
+      setTiming(grid, { mode: 'sixth', endDesk: end, endMob: end, scrubDesk: 0.55, scrubMob: 0.38 });
+    });
+
+    document.querySelectorAll('#fintech-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 150, mobile: 110 },
+        perTileVH: { desktop: 6, mobile: 4 }
+      });
+      setTiming(grid, { mode: 'ninth', endDesk: end, endMob: end, scrubDesk: 0.45, scrubMob: 0.32 });
+    });
+
+    document.querySelectorAll('#ecommerce [data-grid-ninth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 135, mobile: 95 },
+        perTileVH: { desktop: 8, mobile: 6 },
+        captionBoostVH: { desktop: 10, mobile: 6 }
+      });
+      setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.40, scrubMob: 0.28 });
+    });
+
+    document.querySelectorAll('#ecommerce-discovery [data-grid-sixth]').forEach(grid => {
+      const end = calcEndPx(grid, {
+        baseVH: { desktop: 175, mobile: 120 },
+        perTileVH: { desktop: 6, mobile: 4.5 }
+      });
+      setTiming(grid, { endDesk: end, endMob: end, scrubDesk: 0.50, scrubMob: 0.35 });
+    });
+  }
+
+  // =========================================================================== CONTENT MODEL (unchanged)
+  const CONTENT = {
+    header: {
+      title: 'UX is dead.',
+      logo: "ZCKGRT",
+      subline: "DIGITAL EXPERIENCE DESIGNER",
+      links: [
+        { label: 'FAQ', href: 'https://zackgort.com/faq' },
+        { label: 'Résumé', href: 'https://zackgort.com/resume' },
+        { label: 'LinkedIn', href: 'https://linkedin.com/in/zackgort' }
+      ],
+      tags: [
+        { label: "#About", href: "#about" },
+        { label: "#Work", href: "#work", settle: "end" },
+        { label: "#Product", href: "#fintech", settle: "end" },
+        { label: "#Ecommerce", href: "#ecommerce", settle: "end" },
+        { label: "#Connect", href: "#contact", settle: "end" }
+      ]
+    },
+    about: {
+      heading: "¡Viva la XP!",
+      sup: "experience",
+      byline: "— Zack Gort, Senior <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"user is kind of implied, no?\"><span>User</span></span> Experience Designer",
+      copy: [
+        "I think. I make. I think about design and data as systems. I think about business requirements and better ways to build. I think about form and function.",
+        "I make things too. I've made websites for people to find money. I've made websites for people to spend money. I've made websites for people to invest money.",
+        "Now, as for design. I design those experiences :)"
+      ],
+      note: "— Disclaimer: <span class=\"blackout blackout--blur tip tip--full\" tabindex=\"0\" data-tip=\"I found a gsap library that intrigued me, read the documentation, decided I saw a potential fit for the type of story I wished to tell, stripped the demo down, rebuilt it in JS for efficiency, added ad hoc functionality + features, included idiosyncratic interactive 'easter eggs', and splashed on some visual fluff for good measure.\"><span>I didn't use AI to build this website. </span></span>",
+    },
+    skills: {
+      cols: [
+        {
+          heading: "#SPECIALIZATIONS",
+          items: [
+            "User Experience Design",
+            "Visual Interface Design",
+            "Accessibility Compliance",
+            "UX Research & Strategy",
+            "+"
+          ]
+        },
+        {
+          heading: "#TOOLS",
+          items: ["Figma, Adobe CS", "HTML/CSS/Js", "Pen & Paper", "Whiteboard", "+"]
+        },
+        {
+          heading: "CURRENTLY",
+          items: ["AI + Creative Coding", "Design Systems & Workflows", "+"]
+        }
+      ]
+    },
+    workSelect: {
+      captionTitle: "select works",
+      tiles: [
+        "https://i.ibb.co/c3vLP47/image-445-min.png",
+        "https://i.ibb.co/jJD2YPJ/image-438-min.png",
+        "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/x8Jy9P1f/11.webp"
+      ],
+      cards: [
+        { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓", settle: "end" },
+        { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓", settle: "end" },
+        { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
+      ]
+    },
+    brandsGrid: {
+      title: "#design",
+      images: [
+        "https://i.ibb.co/yBgB52s8/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp",
+        "https://i.ibb.co/QdmJdXh/AM-wire.jpg",
+        "https://i.ibb.co/Q9KH8n3/image-401-min.png",
+        "https://i.ibb.co/0spCQB3/image-7-Copy.png",
+        "https://i.ibb.co/ZG6v0p5/image-10.png",
+
+        "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
+        "https://i.ibb.co/cX4QjFf/Screenshot-20230217-102232.png",
+        "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
+        "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
+        "https://i.ibb.co/HTRJDL9w/tiktok2.webp",
+
+        "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
+        "https://i.ibb.co/4Z3457T5/1-t-Yd-DX2-Ql-VLw-XI7gm3ev-MLw.webp",
+        "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
+        "https://i.ibb.co/X5NHxCV/image-414-min.png",
+        "https://i.ibb.co/0VmJ708g/work3.webp",
+
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
+        "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp",
+
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
+        "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
+        "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
+        "https://i.ibb.co/VYshD42V/1-P4-Gyqav-HMmzp-A-Ehqy9g-w.webp",
+
+        "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
+        "https://i.ibb.co/Jrb2Npd/image-020.png",
+        "https://i.ibb.co/68t5b9S/Mask-group-7-min.png",
+        "https://i.ibb.co/pfvstSt/3.jpg",
+        "https://i.ibb.co/Xtk8Cqp/Mask-group-4-min.png"
+      ],
+    },
+    agencyGrid: {
+      title: "#agencylife",
+      images: [
+        "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
+        "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
+        "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
+
+        "https://i.ibb.co/GQM6jmpJ/1-1gjr-Eff-Bio-JYo-EAv-MWHf-KQ.webp",
+        "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
+
+        "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
+
+        "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
+        "https://i.ibb.co/c3vLP47/image-445-min.png",
+        "https://i.ibb.co/RymyPtP/image-443-min.png",
+        "https://i.ibb.co/Ct9DZd9/image-442-min.png"
+      ],
+    },
+    fintech: {
+      heroImages: [
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png"
+      ],
+      heroCaption: { title: " ", subtitle: " " },
+      process: {
+        client: "BNY Mellon — Pershing X",
+        agency: "Publicis Sapient",
+        role: [
+          "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
+          "Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys."
+        ],
+        details: [
+          ["Problem", "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard"],
+          ["Vision", "Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry."],
+          ["My Contributions", "Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry)."],
+          ["Outcome", "Wove launched with BNY Mellon power, scale, and security, helping advisors work faster and serve more clients."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/FJNG1jC/14.jpg",
+        "https://i.ibb.co/fxjgcYD/18.png",
+        "https://i.ibb.co/gtQLYJQ/17.jpg",
+        "https://i.ibb.co/Fgxcqj0/16.jpg",
+        "https://i.ibb.co/dcXH5fn/13.jpg"
+      ],
+      insight: [
+        ["Deep Dive", "No Artificial Intelligence Here"]
+      ],
+      insightAside: "This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.",
+      stack: [
+        ["https://i.ibb.co/XkM2hn8n/bny1.png", "BNY 1"],
+        ["https://i.ibb.co/vvMZmq94/bny2.png", "BNY 2"],
+        ["https://i.ibb.co/xS49C07B/bny3.png", "BNY 3"],
+        ["https://i.ibb.co/wZY2bhKF/bny4.png", "BNY 4"],
+        ["https://i.ibb.co/HGv7ymj/4.jpg", "Account Opening"]
+      ]
+    },
+    ecommerce: {
+      heroImages: [
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/gZ58PKyk/4.webp"
+      ],
+      heroCaption: { title: " ", subtitle: " " },
+      process: {
+        client: "General Nutrition Centers (GNC)",
+        agency: "Elva Design Group",
+        titleLines: ["This is the Whey"],
+        role: [
+          "Senior User Experience Designer"
+        ],
+        details: [
+          ["Problem", "As part of a total overhaul and overcoming a recent bankruptcy, GNC asked us to shake things up; providing them with a modern and modular e-commerce solution through a ground-up build on the Shopify platform."],
+          ["Scope", "{We} dove deep into GNC's e-commerce ecosystem. From market research, to [client-supplied] user data, to wireframe feature prototyping; we built a modular component-based design system optimized for continued optimization."],
+          ["Heavy lift. Huge Gains.", "Lead UX {IA/UI Prototypes/Design Systems}. Paired with PM, Dev Lead, Design Team and Client-Side Stakeholders. 12-week engagement meant tight cadence, fast-on-our-feet design + strategy, and daily weekly exec reviews."],
+          ["What We Shipped", "{We} introduced a modern mobile-first navigation schema and retail taxonomy strategy that separated GNC not just from its competition, but all in the e-retail space."]
+        ]
+      },
+      discoveryImages: [
+        "https://i.ibb.co/gZ58PKyk/4.webp",
+        "https://i.ibb.co/ynjWYqv8/2.webp",
+        "https://i.ibb.co/spHgPH6N/1.webp",
+        "https://i.ibb.co/Y7pGqJ69/5.webp",
+        "https://i.ibb.co/99h2bQMh/6.webp",
+        "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/yB4RwkTf/7.webp",
+        "https://i.ibb.co/7N2rDqrN/8.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp"
+      ],
+      insight: [
+        ["Outcome", "The result helped GNC reclaim ~$500M in annual revenue."]
+      ],
+      insightAside: "if the bar ain't bending, you’re just pretending.",
+      stack: [
+        ["https://i.ibb.co/ynjWYqv8/2.webp",  "notes"],
+        ["https://i.ibb.co/spHgPH6N/1.webp",  "research"],
+        ["https://i.ibb.co/cXg5Phdc/3.webp",  "mobile commerce"],
+        ["https://i.ibb.co/99h2bQMh/6.webp",  "product detail page"],
+        ["https://i.ibb.co/gZ58PKyk/4.webp",  "mobile product detail"],
+        ["https://i.ibb.co/Y7pGqJ69/5.webp",  "consumer engagement"],
+        ["https://i.ibb.co/yB4RwkTf/7.webp",  "rewards program"],
+        ["https://i.ibb.co/cSQCgNQY/work1.webp", "handheld"],
+        ["https://i.ibb.co/pBMMxY1Z/11.webp", "mobile overview"],
+        ["https://i.ibb.co/7N2rDqrN/8.webp",  "mobile closeup"],
+        ["https://i.ibb.co/vx76zjgf/10.webp", "desktop navigation"],
+        ["https://i.ibb.co/rft2bf0T/9.webp",  "desktop homepage"]
+      ]
+    },
+    contact: {
+      blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
+      email: "zack@reasonably.cc",
+      linkedin: "https://www.linkedin.com/in/zackgort/"
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // SKILL IMAGE MAP + helper (used by hover reveal)
+  // ---------------------------------------------------------------------------
+  const SKILL_IMG = {
+    "User Experience Design": "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
+    "Visual Interface Design": "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+    "Accessibility Compliance": "https://i.ibb.co/Z69xjMQY/tiktok-cat.gif",
+    "UX Research & Strategy": "https://i.ibb.co/pdc51pC/S1-Final-Homepage-Homepage-Narrative-Example.png",
+    "Figma, Adobe CS": "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
+    "HTML/CSS/Js": "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
+    "Pen & Paper": "https://i.ibb.co/Z2tsks1/image-434-min.png",
+    "Whiteboard": "https://i.ibb.co/ZW3j6T1/Photo-Selects-Sketch-Prep-1-1-Houghton-Nav.jpg",
+    "AI + Creative Coding": "https://i.ibb.co/RCnjfFv/6105c90759377c59c854a562-ZAX02142.jpg",
+    "Design Systems & Workflows": "https://i.ibb.co/McRbkzq/640cdd0717d12bcf72882e0f-6106ecd46ed1ff579fd6ed81-ZAX02288.jpg"
+  };
+  const imgFor = (label) => SKILL_IMG[label] || "https://i.ibb.co/cSQCgNQY/work1.webp";
+
+  // ---------------------------------------------------------------------------
+  // RENDERER
+  // ---------------------------------------------------------------------------
+  function renderApp() {
+    const app = $('#app');
+    if (!app) return;
+    app.innerHTML = '';
+
+    // HEADER / FRAME
+    const header = el('header', 'frame');
+    header.innerHTML = `
+      <h1 class="frame__title">
+        <a class="ux-dead-jump" href="#about" aria-label="Jump to About">${CONTENT.header.title}</a>
+      </h1>
+      <div class="frame__subline type-tiny">
+        <span>${CONTENT.header.subline}</span>
+        <nav class="frame__links flex-line">
+          ${CONTENT.header.links.map((l) => {
+            const href = l.href || '#';
+            const isInternal = href.startsWith('#') || href.startsWith('/');
+            const attrs = [
+              `href="${href}"`,
+              !isInternal ? 'target="_blank" rel="noopener"' : '',
+              l.tip ? 'class="nav-tip"' : '',
+              l.tip ? `data-tip="${l.tip}"` : '',
+              l.tip ? `title="${l.tip}"` : ''
+            ].filter(Boolean).join(' ');
+            return `<a ${attrs}>${l.label}</a>`;
+          }).join('')}
+        </nav>
+      </div>
+      <nav class="frame__tags flex-line type-tiny">
+        ${CONTENT.header.tags.map(t => `<a href="${t.href}" ${t.settle?`data-settle="${t.settle}"`:''}>${t.label}</a>`).join('')}
+      </nav>
+      <span class="frame__logo">${CONTENT.header.logo}</span>
+    `;
+    app.appendChild(header);
+
+    // ABOUT (hero)
+    const about = el('section', 'content content--padded');
+    about.id = 'about';
+    about.innerHTML = `
+      <h3 class="heading-chant">
+        ${CONTENT.about.heading}
+        <sup class="confetti-sup" role="button" tabindex="0" aria-label="${CONTENT.about.sup} (tap for confetti)">
+          ${CONTENT.about.sup}
+          <span class="emitter" aria-hidden="true"></span>
+        </sup>
+      </h3>
+      <p class="type-tiny right end">${CONTENT.about.byline}</p>
+    `;
+    app.appendChild(about);
+
+    // ABOUT — content
+    const aboutContent = el('section', 'content content--padded');
+    aboutContent.id = 'about-content';
+
+    const aboutCopyHTML = (CONTENT.about.copy || [])
+      .map(p => `<p>${p}</p>`)
+      .join('');
+
+    aboutContent.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+      <div class="content__text">
+        ${aboutCopyHTML}
+      </div>
+      ${CONTENT.about.note
+        ? `<p class="type-tiny right end" style="margin-top:.5rem; opacity:.85;">${CONTENT.about.note}</p>`
+        : '' }
+    `;
+    app.appendChild(aboutContent);
+
+    // SKILLS
+    const skills = el('section', 'content content--padded');
+    skills.id = 'skills';
+    skills.innerHTML = `
+      <div class="trio-grid">
+        ${CONTENT.skills.cols.map(col => `
+          <div class="trio-col">
+            <h4 class="type-tiny">${col.heading}</h4>
+            ${col.items.map(t => `
+              <a class="content__text skills-link" data-fx="2" data-img="${imgFor(t)}" href="#" role="link" aria-label="${t}" onclick="return false;">
+                <span>${t}</span>
+              </a>
+            `).join('')}
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(skills);
+
+    // WORK SELECT
+    const work = el('section', 'content content--padded');
+    work.id = 'work';
+    work.innerHTML = `
+      <h2 class="content__title-main">${CONTENT.workSelect.captionTitle}</h2>
+      <div class="grid grid--columns grid--spaced" data-grid-second>
+        ${CONTENT.workSelect.tiles.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+        ${CONTENT.workSelect.cards.map(c => `
+          <div class="grid__item work-card">
+            <h4 class="type-tiny">
+              <a class="title-link"
+                 href="${c.href}"
+                 ${c.ext ? 'target="_blank" rel="noopener noreferrer"' : ''}
+                 ${c.settle ? `data-settle="${c.settle}"` : ''}>
+                 ${c.title}
+              </a>
+            </h4>
+            <p>${c.glyph || ''}</p>
+          </div>`).join('')}
+      </div>
+    `;
+    app.appendChild(work);
+
+    // BRANDS GRID
+    const brands = el('section', 'content content--padded content--full');
+    brands.id = 'brands-grid';
+    brands.innerHTML = `
+      <div class="grid-head">
+        <div class="grid-head__title type-tiny">${CONTENT.brandsGrid.title}</div>
+      </div>
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.brandsGrid.images.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+      </div>
+      ${CONTENT.brandsGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.brandsGrid.names.join(' • ')}</p>` : ''}
+    `;
+    app.appendChild(brands);
+
+    // AGENCY GRID
+    const agency = el('section', 'content content--padded content--full');
+    agency.id = 'brands-grid-2';
+    agency.innerHTML = `
+      <div class="grid-head">
+        <div class="grid-head__title type-tiny">${CONTENT.agencyGrid.title}</div>
+      </div>
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.agencyGrid.images.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+      </div>
+      ${CONTENT.agencyGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.agencyGrid.names.join(' • ')}</p>` : ''}
+    `;
+    app.appendChild(agency);
+
+    // FINTECH — HERO
+    const finHero = el('section', 'content content--padded content--full');
+    finHero.id = 'fintech';
+    finHero.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.fintech.heroImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.fintech.heroCaption.title}</h2>
+        <p class="type-tiny right end">${CONTENT.fintech.heroCaption.subtitle}</p>
+      </div>
+    `;
+    app.appendChild(finHero);
+
+    // FINTECH — PROCESS
+    const finProc = el('section', 'content content--padded');
+    finProc.id = 'fintech-process';
+    const finIntro = `
+      <section class="project project--intro">
+        <span class="project__label project__label--name">Client</span>
+        <span class="project__name">${CONTENT.fintech.process.client}</span>
+
+        <span class="project__label project__label--date">Agency</span>
+        <span class="project__date">${CONTENT.fintech.process.agency}</span>
+
+        <h2 class="project__title"><span class="project__title-line">design systems, dashboards, data, & due diligence. </span></h2>
+
+        <div class="project__mission content__text">
+          <p>
+            <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+              Role
+            </span>
+            ${CONTENT.fintech.process.role[0]}
+          </p>
+          ${CONTENT.fintech.process.role.slice(1).map(p=>`<p>${p}</p>`).join('')}
+        </div>
+      </section>`;
+
+    const finDetails = CONTENT.fintech.process.details.map(([label, text], i) => `
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    finProc.innerHTML = finIntro + finDetails;
+    app.appendChild(finProc);
+
+    // FINTECH — DISCOVERY
+    const finDisc = el('section', 'content content--full content--cutoff');
+    finDisc.id = 'fintech-discovery';
+    finDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.fintech.discoveryImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+      </div>`;
+    app.appendChild(finDisc);
+
+    // FINTECH — INSIGHT
+    const finInsight = el('section', 'content content--padded');
+    finInsight.id = 'fintech-insight';
+    const finInsightParas = CONTENT.fintech.insight.map(([label, text]) => `
+      <p>
+        <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+          ${label}
+        </span>
+        ${text}
+      </p>
+    `).join('');
+    finInsight.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+      <div class="content__text">
+        ${finInsightParas}
+      </div>
+    `;
+    if (CONTENT.fintech.insightAside) {
+      const aside = el('p', 'type-tiny right end insight-aside');
+      aside.textContent = CONTENT.fintech.insightAside;
+      finInsight.querySelector('.content__text').appendChild(aside);
+    }
+    app.appendChild(finInsight);
+
+    // FINTECH — STACK
+    const finStack = el('section', 'content content--full stacked-section');
+    finStack.id = 'fintech-stack';
+    finStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.fintech.stack.map(([src,alt]) => `<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(finStack);
+
+    // ECOM — HERO
+    const ecoHero = el('section', 'content content--padded content--full');
+    ecoHero.id = 'ecommerce';
+    ecoHero.innerHTML = `
+      <div class="grid grid--columns grid--spaced" data-grid-ninth>
+        ${CONTENT.ecommerce.heroImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+      </div>
+      <div class="content__title">
+        <h2 class="content__title-main">${CONTENT.ecommerce.heroCaption.title}</h2>
+        <p class="type-tiny right end">${CONTENT.ecommerce.heroCaption.subtitle}</p>
+      </div>`;
+    app.appendChild(ecoHero);
+
+    // ECOM — PROCESS
+    const ecoProc = el('section', 'content content--padded');
+    ecoProc.id = 'ecommerce-process';
+    const ecoIntro = `
+      <section class="project project--intro">
+        <span class="project__label project__label--name">Client</span>
+        <span class="project__name">${CONTENT.ecommerce.process.client}</span>
+
+        <span class="project__label project__label--date">Agency</span>
+        <span class="project__date">${CONTENT.ecommerce.process.agency}</span>
+
+        <h2 class="project__title">
+          ${CONTENT.ecommerce.process.titleLines?.map(t=>`<span class="project__title-line">${t}</span>`).join('') || ''}
+        </h2>
+
+        <div class="project__mission content__text">
+          <p>
+            <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+              Role
+            </span>
+            ${CONTENT.ecommerce.process.role[0] || ''}
+          </p>
+          ${(CONTENT.ecommerce.process.role || []).slice(1).map(p=>`<p>${p}</p>`).join('')}
+        </div>
+      </section>`;
+
+    const ecoDetails = CONTENT.ecommerce.process.details.map(([label, text], i) => `
+      <section class="project project--details ${i%2===0?'project--left':'project--right'}">
+        <span class="project__label project__label--default">${label}</span>
+        <p>${text}</p>
+      </section>`).join('');
+    ecoProc.innerHTML = ecoIntro + ecoDetails;
+    app.appendChild(ecoProc);
+
+    // ECOM — DISCOVERY
+    const ecoDisc = el('section', 'content content--full content--cutoff');
+    ecoDisc.id = 'ecommerce-discovery';
+    ecoDisc.innerHTML = `
+      <div class="grid grid--spaced grid--zoomed" data-grid-sixth>
+        ${CONTENT.ecommerce.discoveryImages.map(src => `<div class="grid__img" data-bg="${src}"></div>`).join('')}
+      </div>`;
+    app.appendChild(ecoDisc);
+
+    // ECOM — INSIGHT
+    const ecoInsight = el('section', 'content content--padded');
+    ecoInsight.id = 'ecommerce-insight';
+    const ecoInsightParas = CONTENT.ecommerce.insight.map(([label, text]) => `
+      <p>
+        <span class="type-tiny" style="display:block; letter-spacing:.06em; text-transform:uppercase; opacity:.85; margin-bottom:.25rem;">
+          ${label}
+        </span>
+        ${text}
+      </p>
+    `).join('');
+    ecoInsight.innerHTML = `
+      <div class="content__title" style="margin:.25rem 0 .5rem"></div>
+      <div class="content__text">
+        ${ecoInsightParas}
+      </div>
+    `;
+    if (CONTENT.ecommerce.insightAside) {
+      const aside = el('p', 'type-tiny right end insight-aside');
+      aside.textContent = CONTENT.ecommerce.insightAside;
+      ecoInsight.querySelector('.content__text').appendChild(aside);
+    }
+    app.appendChild(ecoInsight);
+
+    // ECOM — STACK
+    const ecoStack = el('section', 'content content--full stacked-section');
+    ecoStack.id = 'ecommerce-stack';
+    ecoStack.innerHTML = `
+      <div class="stacked-gallery" data-stack>
+        ${CONTENT.ecommerce.stack.map(([src,alt])=>`<figure class="stacked-img"><img loading="lazy" decoding="async" fetchpriority="low" src="${src}" alt="${alt}"></figure>`).join('')}
+      </div>`;
+    app.appendChild(ecoStack);
+
+    // CONTACT
+    const contact = el('section', 'content content--padded');
+    contact.id = 'contact';
+    contact.innerHTML = `
+      <h4 class="type-tiny">CONTACT</h4>
+      <p class="content__text">${CONTENT.contact.blurb}</p>`;
+    app.appendChild(contact);
+
+    // FOOTER (email → Back to top)
+    const footer = el('footer', 'page-footer type-tiny');
+    footer.innerHTML = `
+      <span>Hey, nice to see you down here!</span>
+      <span><a href="#" class="no-underline" id="backToTop">Back to top</a></span>
+      <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
+    app.appendChild(footer);
+
+    // Hook Back-to-top smooth scroll
+    footer.querySelector('#backToTop')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window.lenis) window.lenis.scrollTo(0, { duration: 1 });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // --- NEW: Scroll progress (bar + % counter; hides near footer; smooth GSAP tween) ---
+  function mountScrollProgress(){
+    const nav = document.createElement('div');
+    nav.className = 'navigation';
+    nav.setAttribute('aria-hidden','true');
+    nav.innerHTML = `
+      <div class="nav-text">Scroll</div>
+      <div class="nav-progress" aria-label="Scroll progress">
+        <div class="nav-progress-fill" id="progressFill"></div>
+      </div>
+      <div class="nav-text" id="progressText">0%</div>
+    `;
+    document.body.appendChild(nav);
+
+    const fill = nav.querySelector('#progressFill');
+    const text = nav.querySelector('#progressText');
+
+    const getMaxScroll = () =>
+      Math.max(0, document.documentElement.scrollHeight - document.documentElement.clientHeight);
+
+    let last = -1;
+    const update = () => {
+      const max = getMaxScroll();
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      const p = max ? (y / max) : 0;
+      const pct = Math.min(100, Math.max(0, Math.round(p * 100)));
+
+      if (pct !== last) {
+        // Smooth bar tween to keep in sync with the numeric %.
+        gsap.to(fill, { scaleX: p, transformOrigin: 'left center', overwrite: 'auto', duration: 0.12, ease: 'none' });
+        text.textContent = `${pct}%`;
+        last = pct;
+      }
+    };
+
+    update();
+    addEventListener('scroll', update, { passive:true });
+    addEventListener('resize', update);
+    addEventListener('orientationchange', update);
+    if (document.fonts?.ready) document.fonts.ready.then(update);
+
+    // Avoid interfering with footer: fade/hide when footer enters viewport
+    const footer = document.querySelector('.page-footer');
+    if (footer && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(([entry]) => {
+        // hide when any part of footer is visible
+        nav.classList.toggle('is-hidden', entry.isIntersecting);
+      }, { root: null, threshold: 0, rootMargin: '0px 0px -10% 0px' });
+      io.observe(footer);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // SKILLS fx-2 HOVER / TAP REVEAL (desktop hover + mobile tap)
+  // ---------------------------------------------------------------------------
+  function initSkillsHoverReveal() {
+    let root = document.getElementById('hoverReveal');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'hoverReveal';
+      root.className = 'hover-reveal';
+      root.setAttribute('aria-hidden', 'true');
+      root.style.opacity = '0';
+      root.innerHTML = `
+        <div class="hover-reveal__inner">
+          <div class="hover-reveal__deco"></div>
+          <div class="hover-reveal__img"></div>
+        </div>`;
+      document.body.appendChild(root);
+    }
+
+    const imgBox = root.querySelector('.hover-reveal__img');
+
+    const isTouch = matchMedia('(hover:none), (pointer:coarse)').matches;
+
+    let isVisible = false;
+    let token = 0;
+
+    const follow = { x: innerWidth / 2, y: innerHeight / 2 };
+    const pos = { x: follow.x, y: follow.y };
+    const lerp = (a, b, t) => a + (b - a) * t;
+    let raf;
+
+    const PREVIEW_MARGIN = 16;
+    function positionRootAt(x, y) {
+      const rect = root.getBoundingClientRect();
+      const w = rect.width  || 220;
+      const h = rect.height || 160;
+
+      let tx = x + PREVIEW_MARGIN;
+      let ty = y - PREVIEW_MARGIN;
+
+      tx = Math.min(Math.max(8, tx), innerWidth  - w - 8);
+      ty = Math.min(Math.max(h + 8, ty), innerHeight - 8);
+
+      gsap.set(root, { x: tx, y: ty, xPercent: 0, yPercent: -100 });
+    }
+
+    const tick = () => {
+      pos.x = lerp(pos.x, follow.x, 0.16);
+      pos.y = lerp(pos.y, follow.y, 0.16);
+      positionRootAt(pos.x, pos.y);
+      raf = requestAnimationFrame(tick);
+    };
+
+    const preload = (url) => new Promise((res, rej) => {
+      imgBox.style.backgroundImage = `url(${url})`;
+      const img = new Image();
+      img.onload = () => res();
+      img.onerror = rej;
+      img.src = url;
+    });
+
+    let inTl, outTl;
+    const killTL = () => { inTl && inTl.kill(); outTl && outTl.kill(); inTl = outTl = null; };
+
+    const showFx2 = () => {
+      killTL();
+      isVisible = true;
+      gsap.set(root, { autoAlpha: 1, scale: 1, rotation: 0 });
+      inTl = gsap.timeline()
+        .fromTo(root, { rotation: -6, yPercent: -92, scale: 0.92 }, { rotation: 0, yPercent: -100, scale: 1, duration: 0.6, ease: 'power3.out' }, 0)
+        .fromTo(imgBox, { scale: 1.04 }, { scale: 1, duration: 0.5, ease: 'power2.out' }, 0);
+    };
+
+    const hide = () => {
+      killTL();
+      outTl = gsap.to(root, {
+        autoAlpha: 0, scale: 0.98, rotation: -1, duration: 0.28, ease: 'power2.out',
+        onComplete: () => { isVisible = false; }
+      });
+    };
+
+    const cancelHover = () => {
+      if (isTouch) return;
+      if (isVisible) { token++; hide(); }
+    };
+
+    const skills = document.getElementById('skills');
+    if (!skills) return;
+
+    if (!isTouch) {
+      raf = requestAnimationFrame(tick);
+      addEventListener('pointermove', e => { follow.x = e.clientX; follow.y = e.clientY; }, { passive: true });
+
+      skills.addEventListener('pointerenter', (e) => {
+        const a = e.target.closest('.skills-link[data-img]');
+        if (!a) return;
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+        preload(url).then(() => { if (myToken === token) showFx2(); }).catch(() => {});
+      }, true);
+
+      skills.addEventListener('pointerleave', (e) => { if (e.target.closest('.skills-link')) hide(); }, true);
+
+      skills.addEventListener('focusin', (e) => {
+        const a = e.target.closest('.skills-link[data-img]');
+        if (!a) return;
+        const r = a.getBoundingClientRect();
+        positionRootAt(r.left + r.width/2, r.top + r.height/2);
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+        preload(url).then(() => { if (myToken === token) showFx2(); }).catch(() => {});
+      });
+      skills.addEventListener('focusout', (e) => { if (e.target.closest('.skills-link')) hide(); });
+
+      ['scroll','wheel','touchstart','pointerdown','resize','orientationchange'].forEach(evt =>
+        addEventListener(evt, cancelHover, { passive: true })
+      );
+
+    } else {
+      let open = null;
+      let lastDown = { x: innerWidth / 2, y: innerHeight / 2 };
+
+      skills.addEventListener('pointerdown', (e) => {
+        const a = e.target.closest('.skills-link');
+        if (!a) return;
+        lastDown = { x: e.clientX, y: e.clientY };
+      }, true);
+
+      skills.addEventListener('click', (e) => {
+        const a = e.target.closest('.skills-link[data-img]');
+        if (!a) return;
+        e.preventDefault();
+
+        const url = a.getAttribute('data-img');
+        const myToken = ++token;
+
+        const rect = a.getBoundingClientRect();
+        const x = lastDown.x || (rect.left + rect.width / 2);
+        const y = lastDown.y || (rect.top + rect.height / 2);
+        positionRootAt(x, y);
+
+        if (open === a) { hide(); open = null; return; }
+
+        preload(url).then(() => {
+          if (myToken !== token) return;
+          showFx2();
+          open = a;
+        }).catch(() => {});
+      }, true);
+
+      const mobileCancel = () => { if (open) { hide(); open = null; } };
+      ['scroll','wheel','touchstart','pointerdown','resize','orientationchange'].forEach(evt =>
+        addEventListener(evt, mobileCancel, { passive: true })
+      );
+
+      const io = new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) mobileCancel(); }, { threshold: 0 });
+      io.observe(skills);
+
+      skills.addEventListener('pointerdown', (e) => {
+        const a = e.target.closest('.skills-link');
+        if (a) a.blur();
+      }, true);
+
+      document.addEventListener('click', (e) => { if (open && !e.target.closest('.skills-link')) mobileCancel(); });
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Perf & platform helpers
+  // ---------------------------------------------------------------------------
+  function initVisibilityPerfGuards() {
+    document.addEventListener('visibilitychange', () => {
+      const hidden = document.hidden;
+      if (hidden) {
+        try { if (window.lenis) window.lenis.stop(); } catch {}
+        try { gsap.ticker.sleep(); } catch {}
+      } else {
+        try { if (window.lenis) window.lenis.start(); } catch {}
+        try {
+          gsap.ticker.wake();
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
+        } catch {}
+      }
+    }, { passive: true });
+
+    const doPreload = () => {
+      try { preloadImages('img'); } catch {}
+    };
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(doPreload, { timeout: 1500 });
+    } else {
+      setTimeout(doPreload, 120);
+    }
+  }
+
+  function supportsBackdropFilter() {
+    try {
+      return (CSS && (CSS.supports('backdrop-filter', 'blur(1px)') ||
+        CSS.supports('-webkit-backdrop-filter', 'blur(1px)')));
+    } catch {
+      return false;
+    }
+  }
+
+  function tuneForAndroid() {
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const dm = (navigator.deviceMemory || 8);
+    const rs = document.documentElement.style;
+
+    if (isAndroid || dm <= 4) {
+      rs.setProperty('--layers', isAndroid ? '5' : '4');
+      rs.setProperty('--blur-max', isAndroid ? '14' : '12');
+      rs.setProperty('--saturate', '1');
+    }
+
+    if (matchMedia('(max-width:480px)').matches) {
+      rs.setProperty('--layers', '4');
+      rs.setProperty('--blur-max', '12');
+    }
+
+    if (!supportsBackdropFilter()) {
+      document.querySelector('.blur')?.classList.add('no-bf');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // BOOT
+  // ---------------------------------------------------------------------------
+  async function start() {
+    renderApp();
+    initVisibilityPerfGuards();
+    tuneForAndroid();
+    initBlurOverlayVisibility();
+    fixMobileBlurResume();
+
+    initSmooth();
+    enableHashScroll();
+
+    // a11y + lazy bg setup
+    a11yifyGridImages();
+    initLazyBackgrounds();
+
+    tuneCaseStudyTiming();
+
+    animateHeader();
+    animateGrids();
+    animateProcess();
+    animateStacks();
+    initCursor();
+    initConfetti();
+    initDeadJump();
+
+    // NEW: mount scroll progress UI
+    mountScrollProgress();
+
+    initSkillsHoverReveal();
+
+    try { await preloadImages('img'); } catch (e) {}
+    document.body.classList.remove('loading');
+
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+
+  // Run AFTER all deferred vendor scripts are ready.
+  window.addEventListener('load', () => { start(); }, { once: true });
+
+})();
+
+// Keep URL clean (no #hash)
+const clearSlug = () => {
+  try {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  } catch {}
+};
+// If someone lands on /#about (shared link etc.), remove the hash but keep scroll
+if (location.hash) clearSlug();
+
     </script>
   </body>
 </html>

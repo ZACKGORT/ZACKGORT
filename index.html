@@ -20,8 +20,6 @@
     <meta name="theme-color" content="#0e0d0e" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
-    integrity="sha384-…" crossorigin="anonymous" defer></script>
 
     <!-- GSAP core + plugins (deferred) -->
     <script src="https://unpkg.com/gsap@3/dist/gsap.min.js" defer></script>
@@ -118,7 +116,7 @@
       a:focus:not(:focus-visible){ outline:none; }
       a:focus-visible { outline:2px solid var(--brand-pink); outline-offset:2px; }
       a.no-underline::after { display:none; }
-
+    
       /* Skip link */
       .skip-link {
         position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden;
@@ -127,7 +125,7 @@
         position:fixed; left:12px; top:12px; width:auto; height:auto; background:#000; color:#fff;
         padding:.5rem .75rem; border-radius:6px; z-index:10005;
       }
-
+    
       /* Nav/Frame links (enable underline-on-hover, keep color white on hover) */
       nav a,.frame__links a,.frame__tags a { color:var(--color-link); text-transform:uppercase; }
       nav a:hover,nav a:focus-visible,
@@ -198,6 +196,25 @@
       .grid--small{ grid-template-columns:repeat(9,1fr); grid-auto-rows:1fr; }
       .grid--tiny{ height:60vh; grid-template-columns:repeat(14,1fr); grid-auto-rows:auto; }
       .grid--wide{ grid-template-columns:repeat(5,1fr); grid-template-rows:repeat(4,1fr); }
+    
+    
+      /* Let content sections that have a grid-head reserve a top row for the title */
+      .content--full.has-grid-head{
+        display:grid;
+        grid-template-rows:auto 1fr;
+        grid-template-areas:
+          "head"
+          "main";
+        align-content:start;
+      }
+      .content--full.has-grid-head .grid-head{
+        grid-area: head;
+        align-self:start;
+        position: sticky;
+        top: var(--page-padding);
+        z-index: 2;
+        margin-bottom: .5rem;
+      }
       
       /* Tiles */
       .grid__img,.grid__item{ width:100%; min-height:200px; background-size:cover; background-position:50% 50%; pointer-events:none; will-change:transform; }
@@ -269,8 +286,9 @@
       #fintech-insight .project--details p{ max-width:none; }
       #fintech-insight .project__label{ letter-spacing:.04em; text-transform:uppercase; opacity:.85; }
       
-      /* Fintech discovery width guard */
-      #fintech-discovery .grid.grid--zoomed{
+      /* Discovery grid (BNY + GNC use identical layout) */
+      #fintech-discovery .grid.grid--zoomed,
+      #ecommerce-discovery .grid.grid--zoomed{
         width:100vw; max-width:100vw; margin-inline:auto; gap:var(--grid-gap);
         grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,minmax(0,1fr)); aspect-ratio:auto;
       }
@@ -283,7 +301,7 @@
         padding:var(--page-padding); display:grid; width:100%; grid-row-gap:1rem; grid-column-gap:2rem; justify-items:start; margin-top:40vh;
         grid-template-columns:auto; justify-content:space-between; position:relative; z-index:var(--z-footer);
       }
-
+    
       /* Bottom blur overlay */
       .blur{ position:fixed; inset:0; z-index:var(--z-blur); pointer-events:none; opacity:0; transition:opacity .35s ease; }
       .blur.is-visible{ opacity:1; }
@@ -390,7 +408,12 @@
         .intro__info{ bottom:16px; font-size:10px; opacity:.65; }
         .page-footer{ grid-template-columns:1fr; gap:.5rem; margin-top:20vh; }
         .stacked-img img{ width:100%; height:auto !important; object-fit:contain !important; object-position:center; }
-        #fintech-discovery .grid.grid--zoomed{ grid-template-columns:repeat(2,1fr); grid-template-rows:auto; }
+        /* Discovery grid mobile override (BNY + GNC) */
+        #fintech-discovery .grid.grid--zoomed,
+        #ecommerce-discovery .grid.grid--zoomed{
+          grid-template-columns:repeat(2,1fr);
+          grid-template-rows:auto;
+        }
         .blackout.tip::after{ top:calc(100% + 10px); left:50%; transform:translate(-50%,0); width:min(92vw,420px); padding:.6rem .75rem; font-size:16px; line-height:1.45; text-align:left; white-space:normal; }
         .blackout.tip::before{ top:100%; left:50%; transform:translate(-50%,-2px) rotate(45deg); }
         .blackout.tip:hover::after,.blackout.tip:focus-visible::after{ transform:translate(-50%,4px); }
@@ -517,62 +540,63 @@
       
       /* Tiny caption below galleries */
       .grid-caption{ margin:2rem auto 0; text-align:center; opacity:.85; max-width:1100px; }
-
-/* Scroll progress UI */
-.navigation{
-  position:fixed;
-  left:50%;
-  bottom:clamp(40px,10vh,60px);
-  transform:translateX(-50%);
-  display:flex;
-  align-items:center;
-  gap:1.25rem;
-  /* Ensure footer can appear above this */
-  z-index:10000; /* footer uses 10020 in your vars */
-  user-select:none;
-  mix-blend-mode:normal;
-  transition:opacity .18s ease, transform .18s ease;
-}
-.navigation.is-hidden{
-  opacity:0;
-  pointer-events:none;
-  transform:translateX(-50%) translateY(6px);
-}
-.nav-text{
-  font-size:var(--fs-xxs,12px);
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  opacity:.85;
-  white-space:nowrap;
-}
-.nav-progress{
-  width:6em;
-  height:2px;
-  background:rgba(255,255,255,.25);
-  position:relative;
-  overflow:hidden;
-  border-radius:2px;
-}
-.nav-progress-fill{
-  position:absolute; inset:0 100% 0 0;
-  background:var(--color-text,#f5f3ee);
-  transform-origin:left center;
-  transform:scaleX(0);
-  will-change:transform;
-}
-@media (max-width: 768px){
-  .navigation{ bottom:1.25rem; }
-  .nav-progress{ width:64vw; max-width:360px; }
-}
-
+    
+      /* Scroll progress UI */
+      .navigation{
+        position:fixed;
+        left:50%;
+        bottom:clamp(40px,10vh,60px);
+        transform:translateX(-50%);
+        display:flex;
+        align-items:center;
+        gap:1.25rem;
+        /* Ensure footer can appear above this */
+        z-index:10000; /* footer uses 10020 in your vars */
+        user-select:none;
+        mix-blend-mode:normal;
+        transition:opacity .18s ease, transform .18s ease;
+      }
+      .navigation.is-hidden{
+        opacity:0;
+        pointer-events:none;
+        transform:translateX(-50%) translateY(6px);
+      }
+      .nav-text{
+        font-size:var(--fs-xxs,12px);
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        opacity:.85;
+        white-space:nowrap;
+      }
+      .nav-progress{
+        width:6em;
+        height:2px;
+        background:rgba(255,255,255,.25);
+        position:relative;
+        overflow:hidden;
+        border-radius:2px;
+      }
+      .nav-progress-fill{
+        position:absolute; inset:0 100% 0 0;
+        background:var(--color-text,#f5f3ee);
+        transform-origin:left center;
+        transform:scaleX(0);
+        will-change:transform;
+      }
+      @media (max-width: 768px){
+        .navigation{ bottom:1.25rem; }
+        .nav-progress{ width:64vw; max-width:360px; }
+      }
     </style>
+    
   </head>
 
   <body class="loading">
     <a class="skip-link" href="#about">Skip to content</a>
     <main id="app"></main>
     <div class="blur"></div>
-    <script>
+
+<script>
 /* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
 (function () {
   'use strict';
@@ -845,135 +869,141 @@
   }
 
   function animateGrids() {
-    const mq = matchMedia('(max-width:768px)');
-    const isMobile = () => mq.matches;
+  const mq = matchMedia('(max-width:768px)');
+  const isMobile = () => mq.matches;
 
-    const modes = {
-      second: { endDesk: '+=250%', endMob: '+=140%', scrubDesk: .5, scrubMob: .25 },
-      fifth:  { endDesk: '+=250%', endMob: '+=150%', scrubDesk: .3, scrubMob: .2  },
-      sixth:  { endDesk: '+=180%', endMob: '+=120%', scrubDesk: .6, scrubMob: .4  },
-      ninth:  { endDesk: '+=210%', endMob: '+=130%', scrubDesk: .45, scrubMob: .32 }
-    };
+  const modes = {
+    second: { endDesk: '+=250%', endMob: '+=140%', scrubDesk: .5,  scrubMob: .25 },
+    fifth:  { endDesk: '+=250%', endMob: '+=150%', scrubDesk: .3,  scrubMob: .2  },
+    sixth:  { endDesk: '+=180%', endMob: '+=120%', scrubDesk: .6,  scrubMob: .4  },
+    ninth:  { endDesk: '+=210%', endMob: '+=130%', scrubDesk: .45, scrubMob: .32 }
+  };
 
-    function defaultEndPx(mode, grid) {
-      const count = grid.querySelectorAll('.grid__img').length || 6;
-      const section = grid.closest('section') || grid.parentNode;
-      const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
-      const cfg = ({
-        second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
-        fifth:  { base:{d:240,m:150}, per:{d:8, m:5}, cap:{d:10,m:6} },
-        sixth:  { base:{d:180,m:120}, per:{d:6, m:4}, cap:{d:10,m:6} },
-        ninth:  { base:{d:210,m:130}, per:{d:6, m:4}, cap:{d:12,m:8} }
-      })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
+  function defaultEndPx(mode, grid) {
+    const count = grid.querySelectorAll('.grid__img').length || 6;
+    const section = grid.closest('section') || grid.parentNode;
+    const hasCaption = !!section.querySelector('.content__title, .grid-head, .grid-caption');
+    const cfg = ({
+      second: { base:{d:220,m:140}, per:{d:10,m:7}, cap:{d:12,m:8} },
+      fifth:  { base:{d:240,m:150}, per:{d:8, m:5}, cap:{d:10,m:6} },
+      sixth:  { base:{d:180,m:120}, per:{d:6, m:4}, cap:{d:10,m:6} },
+      ninth:  { base:{d:210,m:130}, per:{d:6, m:4}, cap:{d:12,m:8} }
+    })[mode] || { base:{d:200,m:120}, per:{d:6,m:4}, cap:{d:0,m:0} };
 
-      const tilesOverMin = Math.max(0, count - 4);
-      const vh = (isMobile() ? cfg.base.m : cfg.base.d) +
-                 tilesOverMin * (isMobile() ? cfg.per.m : cfg.per.d) +
-                 (hasCaption ? (isMobile() ? cfg.cap.m : cfg.cap.d) : 0);
-      return `+=${Math.round(window.innerHeight * (vh/100))}`;
-    }
-    const parseScrub = (v, fb) => {
-      if (v == null || v === '') return fb;
-      if (v === 'true') return true;
-      if (v === 'false') return false;
-      const n = parseFloat(v);
-      return isNaN(n) ? fb : n;
-    };
+    const tilesOverMin = Math.max(0, count - 4);
+    const vh = (isMobile() ? cfg.base.m : cfg.base.d) +
+               tilesOverMin * (isMobile() ? cfg.per.m : cfg.per.d) +
+               (hasCaption ? (isMobile() ? cfg.cap.m : cfg.cap.d) : 0);
+    return `+=${Math.round(window.innerHeight * (vh/100))}`;
+  }
+  const parseScrub = (v, fb) => {
+    if (v == null || v === '') return fb;
+    if (v === 'true') return true;
+    if (v === 'false') return false;
+    const n = parseFloat(v);
+    return isNaN(n) ? fb : n;
+  };
 
-    const pinType    = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
-    const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
+  const pinType    = matchMedia('(pointer:coarse), (max-width:768px)').matches ? 'fixed' : 'transform';
+  const anticipate = matchMedia('(pointer:coarse), (max-width:768px)').matches ? .4 : 1.2;
 
-    const grids = [...document.querySelectorAll(
-      '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
-    )];
+  const grids = [...document.querySelectorAll(
+    '[data-grid-second],[data-grid-fifth],[data-grid-sixth],[data-grid-ninth]'
+  )];
 
-    grids.forEach(grid => {
-      const imgs  = grid.querySelectorAll('.grid__img');
-      const items = grid.querySelectorAll('.grid__item');
-      if (!imgs.length && !items.length) return;
+  grids.forEach(grid => {
+    const imgs  = grid.querySelectorAll('.grid__img');
+    const items = grid.querySelectorAll('.grid__item');
+    if (!imgs.length && !items.length) return;
 
-      const section = grid.closest('section') || grid.parentNode;
-      const defaultMode =
-        grid.hasAttribute('data-grid-second') ? 'second' :
-        grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
-        grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
+    const section = grid.closest('section') || grid.parentNode;
+    const hasHead = !!section.querySelector('.grid-head');
 
-      const d = grid.dataset;
-      const mode = d.mode || defaultMode;
+    // ✅ Only pin the grid if the section has a title header; otherwise pin the whole section (old behavior)
+    const pinTarget = hasHead ? grid : section;
 
-      const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
+    const defaultMode =
+      grid.hasAttribute('data-grid-second') ? 'second' :
+      grid.hasAttribute('data-grid-fifth')  ? 'fifth'  :
+      grid.hasAttribute('data-grid-sixth')  ? 'sixth'  : 'ninth';
 
-      const base = modes[mode] || modes.ninth;
-      const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
-      const scrub = parseScrub(isMobile() ? d.scrubMobile : d.scrubDesktop, fallbackScrub);
+    const d = grid.dataset;
+    const mode = d.mode || defaultMode;
 
-      const tl = gsap.timeline({
-        defaults: { ease: (mode === 'sixth' ? 'none' : 'power3') },
-        scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end,
-          pin: section,
-          pinType,
-          pinReparent: true,
-          scrub,
-          anticipatePin: anticipate,
-          pinSpacing: true,
-          invalidateOnRefresh: true
-        }
-      });
+    const end = () => (isMobile() ? d.endMobile : d.endDesktop) || defaultEndPx(mode, grid);
 
-      if (mode === 'second') {
-        const mid = Math.floor(imgs.length / 2);
-        tl.from(imgs, {
-          stagger: { amount: .3, from: 'center' },
-          y: () => innerHeight,
-          transformOrigin: '50% 0%',
-          rotation: (i) => (i < mid ? -1 : 1) * Math.abs(i - mid) * (matchMedia('(max-width:768px)').matches ? 1.5 : 3)
-        }).from(items, {
-          stagger: { amount: .3, from: 'center' },
-          yPercent: 100,
-          autoAlpha: 0
-        }, 0);
-      }
+    const base = modes[mode] || modes.ninth;
+    const fallbackScrub = isMobile() ? base.scrubMob : base.scrubDesk;
+    const scrub = parseScrub(isMobile() ? d.scrubMobile : d.scrubDesktop, fallbackScrub);
 
-      if (mode === 'fifth') {
-        tl.set(grid, { perspective: 1000 }).from(imgs, {
-          stagger: { amount: .4, from: 'random', grid: [4, 9] },
-          y: () => innerHeight,
-          rotationX: matchMedia('(max-width:768px)').matches ? -40 : -70,
-          transformOrigin: '50% 0%',
-          z: matchMedia('(max-width:768px)').matches ? -450 : -900,
-          autoAlpha: 0
-        });
-      }
-      if (mode === 'sixth') {
-        tl.from(imgs, {
-          stagger: { amount: .25, from: 'edges', grid: [3, 3] },
-          scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
-          autoAlpha: 0
-        }).from(grid, {
-          scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
-          skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
-        }, 0);
-      }
-      if (mode === 'ninth') {
-        tl.from(imgs, {
-          transformOrigin: '100% -450%',
-          stagger: .07,
-          scaleX: 1.02,
-          skewX: matchMedia('(max-width:768px)').matches ? 7 : 15,
-          xPercent: matchMedia('(max-width:768px)').matches ? 18 : 50,
-          rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
-          autoAlpha: 0
-        });
-        const headCap   = section.querySelector('.content__title, .grid-head');
-        const bottomCap = section.querySelector('.grid-caption');
-        if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
-        if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
+    const tl = gsap.timeline({
+      defaults: { ease: (mode === 'sixth' ? 'none' : 'power3') },
+      scrollTrigger: {
+        trigger: section,            // start/end based on the section
+        start: 'top top',
+        end,
+        pin: pinTarget,              // 👈 key change
+        pinType,
+        pinReparent: true,
+        scrub,
+        anticipatePin: anticipate,
+        pinSpacing: true,
+        invalidateOnRefresh: true
       }
     });
-  }
+
+    // animations unchanged …
+    if (mode === 'second') {
+      const mid = Math.floor(imgs.length / 2);
+      tl.from(imgs, {
+        stagger: { amount: .3, from: 'center' },
+        y: () => innerHeight,
+        transformOrigin: '50% 0%',
+        rotation: (i) => (i < mid ? -1 : 1) * Math.abs(i - mid) * (matchMedia('(max-width:768px)').matches ? 1.5 : 3)
+      }).from(items, {
+        stagger: { amount: .3, from: 'center' },
+        yPercent: 100,
+        autoAlpha: 0
+      }, 0);
+    }
+    if (mode === 'fifth') {
+      tl.set(grid, { perspective: 1000 }).from(imgs, {
+        stagger: { amount: .4, from: 'random', grid: [4, 9] },
+        y: () => innerHeight,
+        rotationX: matchMedia('(max-width:768px)').matches ? -40 : -70,
+        transformOrigin: '50% 0%',
+        z: matchMedia('(max-width:768px)').matches ? -450 : -900,
+        autoAlpha: 0
+      });
+    }
+    if (mode === 'sixth') {
+      tl.from(imgs, {
+        stagger: { amount: .25, from: 'edges', grid: [3, 3] },
+        scale: matchMedia('(max-width:768px)').matches ? .82 : .7,
+        autoAlpha: 0
+      }).from(grid, {
+        scale: matchMedia('(max-width:768px)').matches ? .92 : .85,
+        skewY: matchMedia('(max-width:768px)').matches ? 1.5 : 3
+      }, 0);
+    }
+    if (mode === 'ninth') {
+      tl.from(imgs, {
+        transformOrigin: '100% -450%',
+        stagger: .07,
+        scaleX: 1.02,
+        skewX: matchMedia('(max-width:768px)').matches ? 7 : 15,
+        xPercent: matchMedia('(max-width:768px)').matches ? 18 : 50,
+        rotation: matchMedia('(max-width:768px)').matches ? -5 : -10,
+        autoAlpha: 0
+      });
+      const headCap   = section.querySelector('.content__title, .grid-head');
+      const bottomCap = section.querySelector('.grid-caption');
+      if (headCap)   tl.from(headCap,   { autoAlpha: 0, yPercent: 30, immediateRender: false }, 0.15);
+      if (bottomCap) tl.from(bottomCap, { autoAlpha: 0, yPercent: 20, immediateRender: false }, 0.35);
+    }
+  });
+}
+
 
   function animateProcess() {
     document.querySelectorAll('[id$="-process"]').forEach(process => {
@@ -1327,7 +1357,7 @@
         "https://i.ibb.co/x8Jy9P1f/11.webp"
       ],
       cards: [
-        { title: "BNY Melon — Pershing X", href: "#fintech", glyph: "↓", settle: "end" },
+        { title: "BNY Mellon — Pershing X", href: "#fintech", glyph: "↓", settle: "end" },
         { title: "General Nutrition Centers {GNC}", href: "#ecommerce", glyph: "↓", settle: "end" },
         { title: "TikTok For Business", href: "https://www.tiktok.com/about?lang=en", ext: true, glyph: "↗" }
       ]
@@ -1400,7 +1430,7 @@
       ],
       heroCaption: { title: " ", subtitle: " " },
       process: {
-        client: "BNY melon — Pershing X",
+        client: "BNY Mellon — Pershing X",
         agency: "Publicis Sapient",
         role: [
           "Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience.",
@@ -1410,7 +1440,7 @@
           ["Problem", "Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard"],
           ["Vision", "Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry."],
           ["My Contributions", "Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry)."],
-          ["Outcome", "Wove launched with BNY melon power, scale, and security, helping advisors work faster and serve more clients."]
+          ["Outcome", "Wove launched with BNY Mellon power, scale, and security, helping advisors work faster and serve more clients."]
         ]
       },
       discoveryImages: [
@@ -1460,16 +1490,18 @@
         ]
       },
       discoveryImages: [
-        "https://i.ibb.co/gZ58PKyk/4.webp",
         "https://i.ibb.co/ynjWYqv8/2.webp",
         "https://i.ibb.co/spHgPH6N/1.webp",
-        "https://i.ibb.co/Y7pGqJ69/5.webp",
-        "https://i.ibb.co/99h2bQMh/6.webp",
         "https://i.ibb.co/cXg5Phdc/3.webp",
+        "https://i.ibb.co/99h2bQMh/6.webp",
+        "https://i.ibb.co/gZ58PKyk/4.webp",
+        "https://i.ibb.co/Y7pGqJ69/5.webp",
         "https://i.ibb.co/yB4RwkTf/7.webp",
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/pBMMxY1Z/11.webp",
         "https://i.ibb.co/7N2rDqrN/8.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp",
         "https://i.ibb.co/rft2bf0T/9.webp",
-        "https://i.ibb.co/vx76zjgf/10.webp"
       ],
       insight: [
         ["Outcome", "The result helped GNC reclaim ~$500M in annual revenue."]
@@ -1627,8 +1659,8 @@
     `;
     app.appendChild(work);
 
-    // BRANDS GRID
-    const brands = el('section', 'content content--padded content--full');
+    // BRANDS GRID (#design) — with sticky title above grid
+    const brands = el('section', 'content content--padded content--full has-grid-head');
     brands.id = 'brands-grid';
     brands.innerHTML = `
       <div class="grid-head">
@@ -1639,10 +1671,10 @@
       </div>
       ${CONTENT.brandsGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.brandsGrid.names.join(' • ')}</p>` : ''}
     `;
-    app.appendChild(brands);
+    app.appendChild(brands); // ✅ append so it renders
 
-    // AGENCY GRID
-    const agency = el('section', 'content content--padded content--full');
+    // AGENCY GRID (#agencylife) — with sticky title above grid
+    const agency = el('section', 'content content--padded content--full has-grid-head');
     agency.id = 'brands-grid-2';
     agency.innerHTML = `
       <div class="grid-head">
@@ -1653,7 +1685,7 @@
       </div>
       ${CONTENT.agencyGrid.names?.length ? `<p class="type-tiny grid-caption">${CONTENT.agencyGrid.names.join(' • ')}</p>` : ''}
     `;
-    app.appendChild(agency);
+    app.appendChild(agency); // ✅ append so it renders
 
     // FINTECH — HERO
     const finHero = el('section', 'content content--padded content--full');
@@ -2184,7 +2216,7 @@ const clearSlug = () => {
 };
 // If someone lands on /#about (shared link etc.), remove the hash but keep scroll
 if (location.hash) clearSlug();
+</script>
 
-    </script>
   </body>
 </html>

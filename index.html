@@ -642,6 +642,27 @@
   .ar-wide, .ar-narrow, .ar-rect{ aspect-ratio: 4 / 3 !important; }
 }
 
+
+
+
+/* Pink underlined link style */
+:root {
+  --brand-pink: #ff8da1; /* or your exact brand pink */
+}
+
+.link-pink-underline {
+  color: var(--brand-pink);
+  text-decoration: underline;
+  text-underline-offset: .12em;
+  text-decoration-thickness: .08em;
+}
+
+.link-pink-underline:hover,
+.link-pink-underline:focus-visible {
+  opacity: .9;
+  text-decoration-thickness: .1em;
+}
+
     </style>
     
   </head>
@@ -1573,7 +1594,7 @@
       ]
     },
     contact: {
-      blurb: "Yeah, so if any creative teams out there are hiring, hmu. zack@reasonably.cc",
+      blurb: "Yeah, so if any creative teams out there are hiring, I'd say the easiest way to connect quickly is on LinkedIn.",
       email: "zack@reasonably.cc",
       linkedin: "https://www.linkedin.com/in/zackgort/"
     }
@@ -1914,21 +1935,26 @@
       </div>`;
     app.appendChild(ecoStack);
 
-    // CONTACT
-    const contact = el('section', 'content content--padded');
-    contact.id = 'contact';
-    contact.innerHTML = `
-      <h4 class="type-tiny">CONTACT</h4>
-      <p class="content__text">${CONTENT.contact.blurb}</p>`;
-    app.appendChild(contact);
+// CONTACT
+const contact = el('section', 'content content--padded');
+contact.id = 'contact';
+contact.innerHTML = `
+  <h4 class="type-tiny">CONTACT</h4>
+  <p class="content__text">
+    Yeah, so if any creative teams out there are hiring, <br>I'd say the easiest way to
+    <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener" class="link-pink-underline">connect quickly on LinkedIn</a>.
+  </p>`;
+app.appendChild(contact);
 
-    // FOOTER (email → Back to top)
-    const footer = el('footer', 'page-footer type-tiny');
-    footer.innerHTML = `
-      <span>Hey, nice to see you down here!</span>
-      <span><a href="#" class="no-underline" id="backToTop">Back to top</a></span>
-      <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
-    app.appendChild(footer);
+
+// FOOTER (email → Back to top)
+const footer = el('footer', 'page-footer type-tiny');
+footer.innerHTML = `
+  <span>Hey, nice to see you down here! <a href="https://reasonably.cc" target="_blank" rel="noopener">Enjoy some photos of mine</a></span>
+  <span><a href="#" class="no-underline" id="backToTop">Back to top</a></span>
+  <a href="${CONTENT.contact.linkedin}" target="_blank" rel="noopener">linkedin.com/in/zackgort</a>`;
+app.appendChild(footer);
+
 
     // Hook Back-to-top smooth scroll
     footer.querySelector('#backToTop')?.addEventListener('click', (e) => {

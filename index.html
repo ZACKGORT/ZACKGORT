@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>UX is dead - Zack Gort, XP Designer</title>
+    <title>UX is dead - Zack Gort</title>
 
     <!-- Meta / social -->
     <meta
@@ -593,6 +593,55 @@
         .navigation{ bottom:1.25rem; }
         .nav-progress{ width:64vw; max-width:360px; }
       }
+
+
+      /* =========================================
+   LARGE+ VIEWPORTS — FULLER 4:3 EVERYWHERE
+   ========================================= */
+@media (min-width: 1024px){
+  /* Core tiles (grids, cards, hero mosaics) */
+  .grid__img,
+  .grid__item{
+    aspect-ratio: 4 / 3;
+    min-height: 0;           /* override earlier min-heights */
+    height: auto;            /* let aspect-ratio drive height from width */
+  }
+
+  /* If you ever wrap inner content */
+  .grid__img-inner{ inset:0; width:100%; height:100%; }
+
+  /* “Zoomed” discovery grids: give them more real estate so the 4:3 gets taller */
+  .grid--zoomed{
+    gap: 2.2rem;
+    grid-template-rows: repeat(3, 72%); /* slightly larger rows so tiles grow */
+  }
+
+  /* Stacked image sections (case-study stacks) */
+  .stacked-img{
+    width: min(1800px, 96vw); /* wider frame → taller 4:3 */
+  }
+  .stacked-img img{
+    width: 100%;
+    height: auto;             /* let aspect ratio control height */
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+/* 2K+ */
+@media (min-width: 1440px){
+  .grid--zoomed{
+    gap: 2.4rem;
+    grid-template-rows: repeat(3, 78%);
+  }
+}
+
+/* Safety: force any ratio helpers to 4:3 on desktop */
+@media (min-width: 1024px){
+  .ar-wide, .ar-narrow, .ar-rect{ aspect-ratio: 4 / 3 !important; }
+}
+
     </style>
     
   </head>
@@ -1337,7 +1386,7 @@
           heading: "#SPECIALIZATIONS",
           items: [
             "User Experience Design",
-            "Visual Interface Design",
+            "Visual Interface Desi  gn",
             "Accessibility Compliance",
             "UX Research & Strategy",
             "+"

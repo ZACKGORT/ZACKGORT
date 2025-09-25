@@ -2076,13 +2076,27 @@ svg {
   <div id="FiddleDigital-Introduces-StringTune">
     <div class="vault">
       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" style="display:none">
-        <!-- keep your <symbol> sprite here -->
+        <!-- symbol sprite kept hidden -->
       </svg>
     </div>
 
+    <!-- Storyline HUD (narrative) -->
+    <div id="storyline" aria-live="polite"
+         style="position:fixed;left:50%;transform:translateX(-50%);top:12px;background:#000;color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;font:12px/1.2 system-ui,monospace;z-index:1000">
+      Start with a point of view.
+    </div>
+
+    <!-- Chapter index (dots) -->
+    <ul id="chapters"
+        style="position:fixed;left:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:1000">
+      <!-- one <li> per .block (filled by JS) -->
+    </ul>
+
     <main class="page home-page" data-v-021d6718>
       <!-- Welcome -->
-      <div class="-w block welcome" data-cursor-tip="Welcome — poke the buttons!" data-v-021d6718 data-v-33216d84 data-v-4f043ceb>
+      <div class="-w block welcome"
+           data-cursor-tip="Start with a point of view."
+           data-v-021d6718 data-v-33216d84 data-v-4f043ceb>
         <div data-v-33216d84>
           <div data-v-33216d84>
             <div class="fdda-l -mm -up" string string-repeat string-offset-top="-20%" data-v-33216d84 data-v-d6e5c8df string-id="string-1"><span data-v-d6e5c8df>Fiddle.Digital</span></div>
@@ -2108,82 +2122,97 @@ svg {
         </div>
       </div>
 
-<!-- Basics -->
-<div class="-w block string-enter" data-cursor-tip="Basics — watch items enter." data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
-  <h6 class="title -tac" data-v-1a9dc9c4>the_product</h6>
+      <!-- Basics -->
+      <div class="-w block string-enter"
+           data-cursor-tip="Define product vs. environment."
+           data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
+        <h6 class="title -tac" data-v-1a9dc9c4>Make it real</h6>
 
-  <!-- 1) Outlined square only (keep inner div for sizing, make it transparent) -->
-  <div class="rel rel-1" data-v-1a9dc9c4>
-    <div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4">
-      <div class="-a-scale-in" data-v-1a9dc9c4 style="background: transparent;"></div>
-    </div>
-    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>"Environment"</p></div>
-  </div>
-
-  <!-- 2) Black square only (remove parent border) -->
-  <div class="rel rel-2" data-v-1a9dc9c4>
-    <div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border: none;">
-      <div class="-a-scale-in" data-v-1a9dc9c4></div>
-    </div>
-    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>"Product"</p></div>
-  </div>
-</div>
-
-
-      <!-- Progress (basic) -->
-      <div class="-w block string-progress" data-cursor-tip="Progress — scroll to fill the squares." data-v-021d6718 data-v-a676084d data-v-4f043ceb>
-        <h6 class="title -tac" data-v-a676084d>/the_point</h6>
-        <div class="rel rel-1" data-v-a676084d>
-          <div class="child" string="progress" data-v-a676084d string-id="string-6"><div data-v-a676084d></div></div>
-          <div class="-m desc" data-v-a676084d>
-            <p data-v-a676084d>Goal: Move product"</p>
-            <p class="-mm" data-progress-of="string-6">0</p>
+        <!-- Outlined square (environment) -->
+        <div class="rel rel-1" data-v-1a9dc9c4>
+          <div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4">
+            <div class="-a-scale-in" data-v-1a9dc9c4 style="background:transparent;"></div>
           </div>
+          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Environment</p></div>
         </div>
 
+        <!-- Filled square (product) -->
+        <div class="rel rel-2" data-v-1a9dc9c4>
+          <div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border:none;">
+            <div class="-a-scale-in" data-v-1a9dc9c4></div>
+          </div>
+          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Product</p></div>
+        </div>
       </div>
 
-      <!-- Advanced Enter / Offsets -->
-      <div class="-w block string-enter" data-cursor-tip="Offsets — tweak when things enter/leave." data-v-021d6718 data-v-675dfa07 data-v-4f043ceb>
+      <!-- Progress -->
+      <div class="-w block string-progress"
+           data-cursor-tip="Momentum is visible."
+           data-v-021d6718 data-v-a676084d data-v-4f043ceb>
+        <h6 class="title -tac" data-v-a676084d>Find pull</h6>
+
+        <div class="rel rel-1" data-v-a676084d>
+          <div class="child" string="progress" data-v-a676084d string-id="string-6"><div data-v-a676084d></div></div>
+
+          <!-- story label that changes with progress -->
+          <div class="-m desc" data-v-a676084d>
+            <p class="-mm" data-progress-of="string-6">0</p>
+            <p class="-mm stage" data-stage-of="string-6" style="margin-top:.25rem">idea</p>
+          </div>
+        </div>
+      </div>
+      <!-- Offsets / tiers -->
+      <div class="-w block string-enter"
+           data-cursor-tip="Not everything ships together."
+           data-v-021d6718 data-v-675dfa07 data-v-4f043ceb>
         <span data-v-675dfa07></span><span data-v-675dfa07></span><span data-v-675dfa07></span>
-        <h6 class="title -tac" data-v-675dfa07>StringTune (Advanced)</h6>
+        <h6 class="title -tac" data-v-675dfa07>Portfolio ladders</h6>
+
         <div class="rel rel-1 -a-p" string string-repeat string-inview="100%" data-v-675dfa07 string-id="string-8">
           <div class="child" data-v-675dfa07><div class="-a-scale-in" data-v-675dfa07></div></div>
-          <div class="-m desc" data-v-675dfa07>
-            <p data-v-675dfa07>string</p><p data-v-675dfa07>string-repeat</p><p data-v-675dfa07>string-inview="100%"</p>
-          </div>
+          <div class="-m desc" data-v-675dfa07><p data-v-675dfa07>#flagship</p></div>
         </div>
+
         <div class="rel rel-2 -a-p" string string-repeat string-offset-top="-25%" string-offset-bottom="-25%" data-v-675dfa07 string-id="string-9">
           <div class="child" data-v-675dfa07><div class="-a-scale-in" data-v-675dfa07></div></div>
-          <div class="-m desc desc-top" data-v-675dfa07>
-            <p data-v-675dfa07>string</p><p data-v-675dfa07>string-repeat</p><p data-v-675dfa07>string-offset-top="-25%"</p><p data-v-675dfa07>string-offset-bottom="-25%"</p>
-          </div>
+          <div class="-m desc desc-top" data-v-675dfa07><p data-v-675dfa07>tier-2</p></div>
         </div>
+
         <div class="rel rel-3 -a-p" string string-repeat string-offset-top="-50%" string-offset-bottom="0%" data-v-675dfa07 string-id="string-10">
           <div class="child" data-v-675dfa07><div class="-a-scale-in" data-v-675dfa07></div></div>
-          <div class="-m desc" data-v-675dfa07>
-            <p data-v-675dfa07>string</p><p data-v-675dfa07>string-repeat</p><p data-v-675dfa07>string-offset-top="-50%"</p><p data-v-675dfa07>string-offset-bottom="0%"</p>
-          </div>
+          <div class="-m desc" data-v-675dfa07><p data-v-675dfa07>tier-3</p></div>
         </div>
+
         <div class="rel rel-4 -a-p" string string-repeat string-offset-top="0%" string-offset-bottom="-50%" data-v-675dfa07 string-id="string-11">
           <div class="child" data-v-675dfa07><div class="-a-scale-in" data-v-675dfa07></div></div>
-          <div class="-m desc desc-top" data-v-675dfa07>
-            <p data-v-675dfa07>string</p><p data-v-675dfa07>string-repeat</p><p data-v-675dfa07>string-offset-top="0%"</p><p data-v-675dfa07>string-offset-bottom="-50%"</p>
-          </div>
+          <div class="-m desc desc-top" data-v-675dfa07><p data-v-675dfa07>tier-4</p></div>
         </div>
       </div>
 
       <!-- Parallax -->
-      <div class="-w block string-parallax" data-cursor-tip="Parallax — gentle depth (desktop)." data-v-021d6718 data-v-05b709a3 data-v-4f043ceb>
-        <h6 class="title -tac" data-v-05b709a3>/StringParallax <span class="-mm" data-v-05b709a3>(Disabled on mobile devices)</span></h6>
-        <div class="rel rel-1" data-v-05b709a3><div class="child" data-v-05b709a3><div string="parallax" string-parallax="0.2" data-v-05b709a3 string-id="string-14"></div></div><div class="-m desc" data-v-05b709a3><p data-v-05b709a3>string-parallax</p></div></div>
-        <div class="rel rel-2" data-v-05b709a3><div class="child" data-v-05b709a3><div string="parallax" string-parallax="0.5" data-v-05b709a3 string-id="string-15"></div></div><div class="-m desc" data-v-05b709a3><p data-v-05b709a3>string-parallax="0.5"</p></div></div>
-        <div class="rel rel-3" data-v-05b709a3><div class="child" data-v-05b709a3><div string="parallax" string-parallax="1" data-v-05b709a3 string-id="string-16"></div></div><div class="-m desc" data-v-05b709a3><p data-v-05b709a3>string-parallax="1"</p></div></div>
+      <div class="-w block string-parallax"
+           data-cursor-tip="Channels run on different clocks."
+           data-v-021d6718 data-v-05b709a3 data-v-4f043ceb>
+        <h6 class="title -tac" data-v-05b709a3>Different speeds <span class="-mm" data-v-05b709a3>(Desktop)</span></h6>
+        <div class="rel rel-1" data-v-05b709a3>
+          <div class="child" data-v-05b709a3><div string="parallax" string-parallax="0.2" data-v-05b709a3 string-id="string-14"></div></div>
+          <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>Burn</p></div>
+        </div>
+        <div class="rel rel-2" data-v-05b709a3>
+          <div class="child" data-v-05b709a3><div string="parallax" string-parallax="0.5" data-v-05b709a3 string-id="string-15"></div></div>
+          <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>Moderate</p></div>
+        </div>
+        <div class="rel rel-3" data-v-05b709a3>
+          <div class="child" data-v-05b709a3><div string="parallax" string-parallax="1" data-v-05b709a3 string-id="string-16"></div></div>
+          <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>Relative</p></div>
+        </div>
       </div>
 
       <!-- Lerp -->
-      <div class="-w block string-lerp" data-cursor-tip="Lerp — scroll inertia value." data-v-021d6718 data-v-270bb328 data-v-4f043ceb>
-        <h6 class="title -tac" data-v-270bb328>/StringLerp</h6>
+      <div class="-w block string-lerp"
+           data-cursor-tip="Attention has inertia."
+           data-v-021d6718 data-v-270bb328 data-v-4f043ceb>
+        <h6 class="title -tac" data-v-270bb328>Hold attention</h6>
         <div class="rel rel-1" data-v-270bb328>
           <div class="child" data-v-270bb328><div string="lerp" data-v-270bb328 string-id="string-17"></div></div>
           <div class="-m desc" data-v-270bb328><p data-v-270bb328>--lerp</p><p class="-mm" data-livelabel="lerp">0</p></div>
@@ -2191,37 +2220,53 @@ svg {
       </div>
 
       <!-- Glide -->
-      <div class="-w block string-glide" data-cursor-tip="Glide — buttery motion (desktop)." data-v-021d6718 data-v-ccb4a0eb data-v-4f043ceb>
-        <h6 class="title -tac" data-v-ccb4a0eb>/StringGlide <span class="-mm" data-v-ccb4a0eb>(Disabled on mobile devices)</span></h6>
+      <div class="-w block string-glide"
+           data-cursor-tip="Trust looks smooth."
+           data-v-021d6718 data-v-ccb4a0eb data-v-4f043ceb>
+        <h6 class="title -tac" data-v-ccb4a0eb>Earn trust <span class="-mm" data-v-ccb4a0eb>(Desktop)</span></h6>
         <div class="rel rel-1" data-v-ccb4a0eb>
           <div class="child" data-v-ccb4a0eb>
             <div string="glide" string-glide="0.25" data-v-ccb4a0eb string-id="string-18a"></div>
           </div>
           <div class="-m desc" data-v-ccb4a0eb><p data-v-ccb4a0eb>string-glide="0.25"</p></div>
         </div>
-        <div class="rel rel-2" data-v-ccb4a0eb><div class="child" data-v-ccb4a0eb><div string="glide" string-glide="0.5" data-v-ccb4a0eb string-id="string-18"></div></div></div>
-        <div class="rel rel-3" data-v-ccb4a0eb><div class="child" data-v-ccb4a0eb><div string="glide" data-v-ccb4a0eb string-id="string-19"></div></div></div>
+        <div class="rel rel-2" data-v-ccb4a0eb>
+          <div class="child" data-v-ccb4a0eb><div string="glide" string-glide="0.5" data-v-ccb4a0eb string-id="string-18"></div></div>
+        </div>
+        <div class="rel rel-3" data-v-ccb4a0eb>
+          <div class="child" data-v-ccb4a0eb><div string="glide" data-v-ccb4a0eb string-id="string-19"></div></div>
+        </div>
       </div>
 
       <!-- Cursor -->
-      <div class="-w block string-cursor" data-cursor-tip="Cursor — small dot mode." string="cursor" string-cursor-class="cursor-1" data-v-021d6718 data-v-05b3939f data-v-4f043ceb string-id="string-20">
-        <h6 class="title -tac" data-v-05b3939f>/StringCursor</h6>
+      <div class="-w block string-cursor"
+           data-cursor-tip="Guide, don’t shove."
+           string="cursor" string-cursor-class="cursor-1"
+           data-v-021d6718 data-v-05b3939f data-v-4f043ceb string-id="string-20">
+        <h6 class="title -tac" data-v-05b3939f>Guide the hand</h6>
       </div>
 
       <!-- Magnetic -->
-      <div class="-w block string-magnetic" data-cursor-tip="Magnetic — ring follows targets." string="cursor" string-cursor-class="cursor-2" data-v-021d6718 data-v-40fb9db4 data-v-4f043ceb string-id="string-21">
-        <h6 class="title -tac" data-v-40fb9db4>/StringMagnetic</h6>
+      <div class="-w block string-magnetic"
+           data-cursor-tip="Bend toward intent."
+           string="cursor" string-cursor-class="cursor-2"
+           data-v-021d6718 data-v-40fb9db4 data-v-4f043ceb string-id="string-21">
+        <h6 class="title -tac" data-v-40fb9db4>Bend, don’t break</h6>
         <div class="rel rel-1 -a-p" data-v-40fb9db4>
-          <div class="child" data-v-40fb9db4><div string="magnetic" string-radius="450" string-strength="0.75" data-v-40fb9db4 string-id="string-22"></div></div>
+          <div class="child" data-v-40fb9db4>
+            <div string="magnetic" string-radius="450" string-strength="0.75" data-v-40fb9db4 string-id="string-22"></div>
+          </div>
           <div class="-m desc" data-v-40fb9db4>
-            <p data-v-40fb9db4>string="magnetic"</p><p data-v-40fb9db4>string-radius="450"</p><p data-v-40fb9db4>string-strength="0.75"</p>
+            <p data-v-40fb9db4>string="magnetic"</p><p data-v-40fb9db4>radius="450"</p><p data-v-40fb9db4>strength="0.75"</p>
           </div>
         </div>
       </div>
 
       <!-- Split -->
-      <div class="-w block string-split" data-cursor-tip="Split — letters animate in." data-v-021d6718 data-v-8129bdd7 data-v-4f043ceb>
-        <h6 class="title -tac" data-v-8129bdd7>/StringSplit</h6>
+      <div class="-w block string-split"
+           data-cursor-tip="Say less, say clearly."
+           data-v-021d6718 data-v-8129bdd7 data-v-4f043ceb>
+        <h6 class="title -tac" data-v-8129bdd7>Say it clearly</h6>
         <div class="text-container" data-v-8129bdd7>
           <p class="-h3 -m-h5" string="split" string-split="word|char[left]" string-repeat data-v-8129bdd7 string-id="string-23">
             Jovial hawks find beauty in a fiddle string while vexing quirky dogs near zigzag paths.
@@ -2236,14 +2281,16 @@ svg {
     <!-- helper UI -->
     <div class="guide-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <span class="offset-bottom -mm"></span>
-    <a class="ko-fi -mm" href="https://buymeacoffee.com/fiddledigital" target="_blank"><svg><use href="#icon-20_ko-fi"></use></svg><span>Support StringTune</span></a>
+    <a class="ko-fi -mm" href="https://buymeacoffee.com/fiddledigital" target="_blank">
+      <svg><use href="#icon-20_ko-fi"></use></svg><span>Support StringTune</span>
+    </a>
     <div class="scroll-options">
       <div class="-mm"><input checked type="checkbox" id="smooth-toggle" value="on"><label for="smooth-toggle">Smooth scroll</label></div>
       <div class="-mm"><input type="checkbox" id="scroll-toggle" value="on"><label for="scroll-toggle">Stop scroll</label></div>
     </div>
 
-    <!-- cursor HUD -->
-    <div class="cursor -mm" string-cursor>
+    <!-- cursor HUD (aria-hidden for a11y) -->
+    <div class="cursor -mm" string-cursor aria-hidden="true">
       <div string-cursor-content="cursor-1" class="cursor-1"></div>
       <div string-cursor-content="cursor-2" class="cursor-2"></div>
       <div class="cursor-tip" aria-hidden="true">Try the cursor →</div>
@@ -2255,446 +2302,411 @@ svg {
   </div>
 
   <script>
-(() => {
-  // ===== Mount guard (idempotent) =====
-  const de = document.documentElement;
-  if (de.__stringTuneMounted) return;
-  de.__stringTuneMounted = true;
-
-  const d = document, w = window, body = d.body;
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-
-  // ---------- utils ----------
-  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-  const lerp  = (a, b, t) => a + (b - a) * t;
-  const toPx  = (v, axis = 'y') => {
-    if (v == null) return 0;
-    const s = String(v).trim();
-    if (s.endsWith('%')) {
-      const n = parseFloat(s) / 100;
-      return (axis === 'y' ? w.innerHeight : w.innerWidth) * n;
-    }
-    return parseFloat(s) || 0;
-  };
-
-  // ---------- Demo box scaler ----------
-  const BOX_SCALE = 1.7;
-  // --- How far things settle ---
-const PROGRESS_MULT     = 1.6;  // progress demos (1 = original)
-const PARALLAX_TRAVEL   = 140;  // px; was ~80
-const LERP_AMP          = 1.2;  // scales --lerp (scale demo)
-const GLIDE_AMP         = 1.35; // scales --glide (glide demo)
-
-
-const applyBoxScale = () => {
-  document.querySelectorAll('.-w .rel').forEach(rel => {
-    const child = rel.querySelector(':scope > .child');
-    if (!child) return;
-
-    const scale = parseFloat(rel.getAttribute('data-box-scale') || BOX_SCALE) || 1;
-    const base = child.clientWidth;
-    const extra = Math.max(0, (scale - 1) * base);
-
-    rel.style.paddingBottom = extra ? `${extra}px` : '';
-    child.style.transformOrigin = 'top left';
-    child.style.transform = scale !== 1 ? `scale(${scale})` : '';
-  });
-};
-
-  // ---------- repeat ----------
-  const setupRepeat = () => {
-    d.querySelectorAll('[data-string-clone]').forEach(n => n.remove());
-    d.querySelectorAll('[string][string-repeat]').forEach(el => {
-      if (el.dataset.stringRepeated === '1') return;
-      const raw = el.getAttribute('string-repeat');
-      const total = raw && raw.trim() !== '' ? Math.max(1, parseInt(raw, 10) || 1) : 1;
-      for (let i = 1; i < total; i++) {
-        const clone = el.cloneNode(true);
-        clone.removeAttribute('string-repeat');
-        clone.setAttribute('data-string-clone', '');
-        el.after(clone);
-      }
-      el.dataset.stringRepeated = '1';
-    });
-  };
-
-  // ---------- split ----------
-  const setupSplit = () => {
-    d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
-      if (el.__split || el.querySelector('.-s-word, .-s-char')) return;
-      const mode   = (el.getAttribute('string-split') || '').toLowerCase();
-      const doWord = mode.includes('word');
-      const doChar = mode.includes('char');
-      const raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
-      const words = raw.length ? raw.split(' ') : [];
-      el.textContent = '';
-      el.classList.add('-splitted');
-      let wordIndex = 0;
-      words.forEach((word, wi) => {
-        const wSpan = document.createElement('span');
-        if (doWord) wSpan.className = '-s-word';
-        if (doChar) {
-          [...word].forEach((c, ci) => {
-            const cSpan = document.createElement('span');
-            cSpan.className = '-s-char';
-            cSpan.style.transitionDelay = (wordIndex * 0.02 + ci * 0.01) + 's';
-            cSpan.textContent = c;
-            wSpan.appendChild(cSpan);
-          });
-        } else {
-          wSpan.textContent = word;
+    (() => {
+      const de = document.documentElement;
+      if (de.__stringTuneMounted) return;
+      de.__stringTuneMounted = true;
+    
+      const d = document, w = window, body = d.body;
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+      const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+      const lerp=(a,b,t)=>a+(b-a)*t;
+      const toPx=(v,axis='y')=>{
+        if(v==null)return 0;
+        const s=String(v).trim();
+        if(s.endsWith('%')){
+          const n=parseFloat(s)/100;
+          return (axis==='y'?w.innerHeight:w.innerWidth)*n;
         }
-        el.appendChild(wSpan);
-        if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
-        wordIndex++;
-      });
-      el.__split = true;
-    });
-  };
-
-  // ---------- in-view ----------
-  const setupInView = () => {
-    const makeObserver = (el) => {
-      const topOffset    = toPx(el.getAttribute('string-offset-top')    ?? '-10%', 'y');
-      const bottomOffset = toPx(el.getAttribute('string-offset-bottom') ?? '-10%', 'y');
-      const tv = (el.getAttribute('string-inview') || '').trim();
-      const threshold = tv.endsWith('%') ? clamp(parseFloat(tv) / 100, 0, 1) : 0;
-      const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
-      return new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
-          if (ok) el.classList.add('-inview');
-          else if (entry.intersectionRatio === 0) el.classList.remove('-inview');
+        return parseFloat(s)||0;
+      };
+    
+      // Tuning
+      const BOX_SCALE=1.7;
+      const PROGRESS_MULT=1.6;
+      const PARALLAX_TRAVEL=prefersReduced?0:140;
+      const LERP_AMP=prefersReduced?0:1.2;
+      const GLIDE_AMP=prefersReduced?0:1.35;
+    
+      // Scale demo boxes without changing visual layout
+      const applyBoxScale=()=>{
+        document.querySelectorAll('.-w .rel').forEach(rel=>{
+          const child=rel.querySelector(':scope > .child'); if(!child) return;
+          const scale=parseFloat(rel.getAttribute('data-box-scale')||BOX_SCALE)||1;
+          const base=child.clientWidth; const extra=Math.max(0,(scale-1)*base);
+          rel.style.paddingBottom = extra ? `${extra}px` : '';
+          child.style.transformOrigin='top left';
+          child.style.transform = scale!==1 ? `scale(${scale})` : '';
         });
-      }, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
-    };
-    d.querySelectorAll('[string]').forEach(el => {
-      if (!el.__io) (el.__io = makeObserver(el)).observe(el);
-    });
-  };
-
-  // ---------- progress ----------
-  const progressEls = [];
-  const collectProgressEls = () => {
-    progressEls.length = 0;
-    progressEls.push(...d.querySelectorAll('[string="progress"]'));
-  };
-
-  const computeProgress = (el, rect, vh) => {
-    const enterEdge = (el.getAttribute('string-enter-el') || 'bottom').toLowerCase();
-    const exitEdge  = (el.getAttribute('string-exit-el')  || 'top').toLowerCase();
-
-    const topOffset    = toPx(el.getAttribute('string-offset-top')    ?? '-10%', 'y');
-    const bottomOffset = toPx(el.getAttribute('string-offset-bottom') ?? '-10%', 'y');
-
-    const viewTop    = 0 + topOffset;
-    const viewBottom = vh + bottomOffset;
-
-    const enterRef = (enterEdge === 'top') ? viewTop : viewBottom;
-    const exitRef  = (exitEdge  === 'top') ? viewTop : viewBottom;
-
-    const edgePosTop    = rect.top;
-    const edgePosBottom = rect.bottom;
-
-    let p;
-
-    if (enterEdge === exitEdge) {
-      const h = Math.max(1, rect.height);
-      if (enterEdge === 'top') {
-        p = (enterRef - edgePosTop) / h;      // top hits line → 0, bottom hits line → 1
-      } else {
-        p = (edgePosBottom - enterRef) / h;   // bottom hits line → 0, top hits line → 1
-      }
-    } else {
-      const startPos = (enterEdge === 'top') ? edgePosTop : edgePosBottom;
-      const endPos   = (exitEdge  === 'top') ? edgePosTop : edgePosBottom;
-
-      const A = startPos - enterRef; // 0 at enter
-      const B = endPos   - exitRef;  // 0 at exit
-      const span = A - B;
-
-      if (Math.abs(span) < 2) {
-        p = el.__lastProgress ?? 0; // freeze if ill-conditioned
-      } else {
-        p = A / span;               // 0 → 1 from enter to exit
-      }
-
-      if (A > 0 && B > 0) p = 0; // before enter
-      if (A < 0 && B < 0) p = 1; // past exit
-    }
-
-    p = Number.isFinite(p) ? Math.max(0, Math.min(1, p)) : 0;
-    el.__lastProgress = p;
-    return p;
-  };
-
-  const updateProgress = () => {
-    const vh = w.innerHeight;
-    for (const el of progressEls) {
-      const rect = el.getBoundingClientRect();
-      const p = computeProgress(el, rect, vh);
-      el.style.setProperty('--progress', p.toFixed(4));
-      const id = el.getAttribute('string-id') || el.id;
-      if (id) {
-        d.querySelectorAll(`[data-progress-of="${id}"]`)
-          .forEach(n => (n.textContent = Math.round(p * 100)));
-      }
-    }
-  };
-
-  // ---------- parallax (disabled on mobile) ----------
-  let parallaxEls = [];
-  const collectParallaxEls = () => {
-    parallaxEls = isMobile ? [] :
-      [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
-      .map(el => ({ el, factor: parseFloat(el.getAttribute('string-parallax') || '0.5') || 0.5 }));
-  };
-  const parallaxTick = () => {
-  if (!parallaxEls.length) return;
-  const wh = w.innerHeight, maxTravel = PARALLAX_TRAVEL; // was 80
-  parallaxEls.forEach(({ el, factor }) => {
-    const r = el.getBoundingClientRect();
-    const center = r.top + r.height / 2 - wh / 2;
-    const t = clamp(center / wh, -1, 1);
-    el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
-  });
-};
-
-
-  // ---------- lerp / glide ----------
-  let lastY = w.scrollY || w.pageYOffset;
-  let lerpVal = 0, glideVal = 0;
-  let glideEls = [];
-  const collectGlideEls = () => {
-    glideEls = isMobile ? [] :
-      [...d.querySelectorAll('[string="glide"]')]
-      .map(el => ({ el, k: parseFloat(el.getAttribute('string-glide') || '0.35') || 0.35, y: 0 }));
-  };
-  const smoothTick = () => {
-  const y = w.scrollY || w.pageYOffset;
-  const delta = y - lastY;
-  lastY = y;
-
-  lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
-  glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
-
-  // amplify the CSS variables we expose
-  document.documentElement.style.setProperty('--lerp',  (lerpVal  * LERP_AMP ).toFixed(2));
-  document.documentElement.style.setProperty('--glide', (glideVal * GLIDE_AMP).toFixed(2));
-
-  glideEls.forEach(g => {
-    g.y = lerp(g.y, glideVal * g.k, 0.12);
-    g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
-  });
-};
-
-
-  // ---------- cursor HUD & magnetic ----------
-  const cursorRoot = d.querySelector('.cursor[string-cursor]');
-
-  // Tooltip threshold based on StringCursor block
-  let tipsStartY = Infinity;
-  const computeTipsStart = () => {
-    const sec = d.querySelector('.string-cursor');
-    tipsStartY = sec ? (sec.getBoundingClientRect().top + (w.scrollY || w.pageYOffset)) : Infinity;
-    if (cursorRoot) {
-      const sy = w.scrollY || w.pageYOffset;
-      cursorRoot.classList.toggle('-tips', sy >= tipsStartY);
-    }
-  };
-  computeTipsStart();
-  w.addEventListener('resize', computeTipsStart, { passive: true });
-  w.addEventListener('orientationchange', computeTipsStart, { passive: true });
-
-  // Section-aware tooltip helpers
-  const DEFAULT_TIP = "Try the cursor →";
-  const findTipForNode = (node) => {
-    while (node && node !== d.body) {
-      if (node.classList && node.classList.contains('block') && node.hasAttribute('data-cursor-tip')) {
-        return node.getAttribute('data-cursor-tip') || DEFAULT_TIP;
-      }
-      node = node.parentElement;
-    }
-    return null;
-  };
-  const getSectionTipAt = (x, y) => {
-    const el = d.elementFromPoint(x, y);
-    return el ? (findTipForNode(el) || DEFAULT_TIP) : DEFAULT_TIP;
-  };
-  let _lastTip = "";
-
-  let cx = 0, cy = 0;
-  const setupCursor = () => {
-    const tipEl = cursorRoot ? cursorRoot.querySelector('.cursor-tip') : null;
-
-    w.addEventListener('mousemove', e => {
-      cx = e.clientX; cy = e.clientY;
-      if (cursorRoot) cursorRoot.style.transform = `translate3d(${cx + 16}px, ${cy + 8}px, 0)`;
-      // pick cursor style from ancestry
-      let node = e.target, mode = 'cursor-1';
-      while (node && node !== d.body) {
-        if (node.hasAttribute('string-cursor-class')) { mode = node.getAttribute('string-cursor-class'); break; }
-        node = node.parentElement;
-      }
-      if (cursorRoot) {
-        cursorRoot.classList.toggle('cursor-1', mode === 'cursor-1');
-        cursorRoot.classList.toggle('cursor-2', mode === 'cursor-2');
-      }
-      // update tooltip from hovered section
-      if (tipEl) {
-        const tip = findTipForNode(e.target) || DEFAULT_TIP;
-        if (tip !== _lastTip) { tipEl.textContent = tip; _lastTip = tip; }
-      }
-    }, { passive: true });
-
-    w.addEventListener('mousedown', () => cursorRoot && cursorRoot.classList.add('-down'));
-    w.addEventListener('mouseup',   () => cursorRoot && cursorRoot.classList.remove('-down'));
-    w.addEventListener('mouseleave',() => cursorRoot && cursorRoot.classList.add('-hide'));
-    w.addEventListener('mouseenter',() => cursorRoot && cursorRoot.classList.remove('-hide'));
-
-    // initial tip (center of viewport)
-    if (tipEl) {
-      const initTip = getSectionTipAt(w.innerWidth / 2, w.innerHeight / 2);
-      tipEl.textContent = initTip; _lastTip = initTip;
-    }
-  };
-
-  let magneticEls = [];
-  const collectMagneticEls = () => {
-    magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
-      el,
-      r: parseFloat(el.getAttribute('string-radius') || '300') || 300,
-      s: parseFloat(el.getAttribute('string-strength') || '0.5') || 0.5,
-      ox: 0, oy: 0
-    }));
-  };
-  const magneticTick = () => {
-    magneticEls.forEach(m => {
-      const rect = m.el.getBoundingClientRect();
-      const ex = rect.left + rect.width / 2;
-      const ey = rect.top  + rect.height / 2;
-      const dx = cx - ex, dy = cy - ey;
-      const dist = Math.hypot(dx, dy);
-      const t = clamp(1 - dist / m.r, 0, 1);
-      const tx = dx * m.s * t * 0.35;
-      const ty = dy * m.s * t * 0.35;
-      m.ox = lerp(m.ox, tx, 0.15);
-      m.oy = lerp(m.oy, ty, 0.15);
-      m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
-    });
-  };
-
-  // ---------- UI toggles ----------
-  const setupUI = () => {
-    const smoothToggle = d.getElementById('smooth-toggle');
-    const stopToggle   = d.getElementById('scroll-toggle');
-    const applySmooth = () => {
-      de.style.scrollBehavior = (smoothToggle && smoothToggle.checked) ? 'smooth' : 'auto';
-    };
-    const applyStop = () => {
-      if (stopToggle && stopToggle.checked) { body.style.overflow = 'hidden'; body.style.height = '100vh'; }
-      else { body.style.overflow = ''; body.style.height = ''; }
-    };
-    smoothToggle && (smoothToggle.onchange = applySmooth);
-    stopToggle   && (stopToggle.onchange   = applyStop);
-    applySmooth(); applyStop();
-    w.addEventListener('keydown', e => {
-      if ((e.key || '').toLowerCase() === 'g') de.classList.toggle('-guidelines');
-    });
-  };
-
-  // ---------- perf HUD ----------
-  const setupPerfHUD = () => {
-    const fpsNode = d.getElementById('fps');
-    const dirNode = d.getElementById('scroll-dir');
-    let lastT = performance.now(), frames = 0, accum = 0, lastScrollY = w.scrollY;
-    const perfTick = (t) => {
-      const dt = t - lastT; lastT = t; frames++; accum += dt;
-      if (accum > 500) {
-        const fps = Math.round(frames * 1000 / accum);
-        if (fpsNode) fpsNode.textContent = `FPS: ${fps}`;
-        frames = 0; accum = 0;
-      }
-      const sy = w.scrollY;
-      const dir = sy > lastScrollY ? '↓' : (sy < lastScrollY ? '↑' : '•');
-      if (dirNode) dirNode.textContent = `Scroll ${dir}  y:${sy}`;
-      lastScrollY = sy;
-      w.requestAnimationFrame(perfTick);
-    };
-    w.requestAnimationFrame(perfTick);
-  };
-
-  // ---------- bootstrap ----------
-  const init = () => {
-    setupRepeat();
-    setupSplit();
-    setupInView();
-    collectProgressEls();
-    collectParallaxEls();
-    collectGlideEls();
-    setupCursor();
-    collectMagneticEls();
-    setupUI();
-    setupPerfHUD();
-    applyBoxScale();
-
-
-    document.documentElement.style.setProperty('--progress-mult', PROGRESS_MULT);
-
-
-    // ensure initial tooltip visibility
-    if (cursorRoot) {
-      const sy = w.scrollY || w.pageYOffset;
-      cursorRoot.classList.toggle('-tips', sy >= tipsStartY);
-    }
-
-    // one layout pass
-    requestAnimationFrame(() => { w.dispatchEvent(new Event('scroll')); });
-
-    const tick = () => {
-      updateProgress();
-      parallaxTick();
-      smoothTick();
-      magneticTick();
-
-      // Toggle cursor tooltip visibility & section-aware message while scrolling
-      if (cursorRoot) {
-        const sy = w.scrollY || w.pageYOffset;
-        cursorRoot.classList.toggle('-tips', sy >= tipsStartY);
-        const tipEl = cursorRoot.querySelector('.cursor-tip');
-        if (tipEl) {
-          const centerTip = getSectionTipAt(w.innerWidth / 2, w.innerHeight / 2);
-          if (_lastTip !== centerTip && !cursorRoot.classList.contains('-hide')) {
-            tipEl.textContent = centerTip; _lastTip = centerTip;
+      };
+    
+      // repeat
+      const setupRepeat=()=>{
+        d.querySelectorAll('[data-string-clone]').forEach(n=>n.remove());
+        d.querySelectorAll('[string][string-repeat]').forEach(el=>{
+          if(el.dataset.stringRepeated==='1') return;
+          const raw=el.getAttribute('string-repeat');
+          const total=raw && raw.trim()!=='' ? Math.max(1, parseInt(raw,10)||1) : 1;
+          for(let i=1;i<total;i++){
+            const clone=el.cloneNode(true);
+            clone.removeAttribute('string-repeat');
+            clone.setAttribute('data-string-clone','');
+            el.after(clone);
+          }
+          el.dataset.stringRepeated='1';
+        });
+      };
+    
+      // split
+      const setupSplit=()=>{
+        d.querySelectorAll('[string="split"],[string][string-split]').forEach(el=>{
+          if(el.__split || el.querySelector('.-s-word, .-s-char')) return;
+          const mode=(el.getAttribute('string-split')||'').toLowerCase();
+          const doWord=mode.includes('word'); const doChar=mode.includes('char');
+          const raw=(el.textContent||'').replace(/\s+/g,' ').trim();
+          const words=raw.length?raw.split(' '):[];
+          el.textContent=''; el.classList.add('-splitted');
+          let wi=0;
+          words.forEach((word,i)=>{
+            const wSpan=document.createElement('span'); if(doWord) wSpan.className='-s-word';
+            if(doChar){
+              [...word].forEach((c,ci)=>{
+                const cSpan=document.createElement('span');
+                cSpan.className='-s-char';
+                cSpan.style.transitionDelay=(wi*0.02+ci*0.01)+'s';
+                cSpan.textContent=c; wSpan.appendChild(cSpan);
+              });
+            } else { wSpan.textContent=word; }
+            el.appendChild(wSpan);
+            if(i<words.length-1) el.appendChild(document.createTextNode(' '));
+            wi++;
+          });
+          el.__split=true;
+        });
+      };
+    
+      // in-view
+      const setupInView=()=>{
+        const makeObserver=(el)=>{
+          const topOffset=toPx(el.getAttribute('string-offset-top')??'-10%','y');
+          const bottomOffset=toPx(el.getAttribute('string-offset-bottom')??'-10%','y');
+          const tv=(el.getAttribute('string-inview')||'').trim();
+          const threshold=tv.endsWith('%')?clamp(parseFloat(tv)/100,0,1):0;
+          const rootMargin=`${topOffset}px 0px ${bottomOffset}px 0px`;
+          return new IntersectionObserver((entries)=>{
+            entries.forEach(entry=>{
+              const ok=entry.isIntersecting && entry.intersectionRatio>=threshold;
+              if(ok) el.classList.add('-inview');
+              else if(entry.intersectionRatio===0) el.classList.remove('-inview');
+            });
+          },{root:null,rootMargin,threshold:[0,threshold||0,1]});
+        };
+        d.querySelectorAll('.block').forEach(el=>{ if(!el.__io) (el.__io=makeObserver(el)).observe(el); });
+        d.querySelectorAll('[string]').forEach(el=>{ if(!el.__io) (el.__io=makeObserver(el)).observe(el); });
+      };
+    
+      // progress
+      const progressEls=[];
+      const collectProgressEls=()=>{ progressEls.length=0; progressEls.push(...d.querySelectorAll('[string="progress"]')); };
+      const computeProgress=(el,rect,vh)=>{
+        const enterEdge=(el.getAttribute('string-enter-el')||'bottom').toLowerCase();
+        const exitEdge =(el.getAttribute('string-exit-el') ||'top').toLowerCase();
+        const topOffset=toPx(el.getAttribute('string-offset-top')??'-10%','y');
+        const bottomOffset=toPx(el.getAttribute('string-offset-bottom')??'-10%','y');
+        const viewTop=0+topOffset, viewBottom=vh+bottomOffset;
+        const enterRef=(enterEdge==='top')?viewTop:viewBottom;
+        const exitRef =(exitEdge ==='top')?viewTop:viewBottom;
+        const edgeTop=rect.top, edgeBottom=rect.bottom;
+        let p;
+        if(enterEdge===exitEdge){
+          const h=Math.max(1,rect.height);
+          if(enterEdge==='top') p=(enterRef - edgeTop)/h;
+          else p=(edgeBottom - enterRef)/h;
+        } else {
+          const startPos=(enterEdge==='top')?edgeTop:edgeBottom;
+          const endPos  =(exitEdge ==='top')?edgeTop:edgeBottom;
+          const A=startPos - enterRef;
+          const B=endPos   - exitRef;
+          const span=A-B;
+          p = Math.abs(span)<2 ? (el.__lastProgress??0) : A/span;
+          if(A>0&&B>0) p=0;
+          if(A<0&&B<0) p=1;
+        }
+        p = Number.isFinite(p)? clamp(p,0,1) : 0;
+        el.__lastProgress=p; return p;
+      };
+      const updateProgress=()=>{
+        const vh=w.innerHeight;
+        for(const el of progressEls){
+          const rect=el.getBoundingClientRect();
+          const p=computeProgress(el,rect,vh);
+          const out=p*PROGRESS_MULT; // keep your feel
+          el.style.setProperty('--progress', clamp(out,0,1).toFixed(4));
+          const id=el.getAttribute('string-id')||el.id;
+          if(id){
+            d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(n=>n.textContent=Math.round(p*100));
+            // stage label
+            d.querySelectorAll(`[data-stage-of="${id}"]`).forEach(n=>{
+              let label='idea';
+              const v=p*100;
+              if(v>=100) label='on the shelf';
+              else if(v>=75) label='launch';
+              else if(v>=50) label='beta';
+              else if(v>=25) label='prototype';
+              n.textContent=label;
+            });
           }
         }
-      }
+      };
+    
+      // parallax (desktop)
+      let parallaxEls=[];
+      const collectParallaxEls=()=>{
+        parallaxEls = (isMobile||prefersReduced) ? [] :
+          [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
+          .map(el=>({el,factor:parseFloat(el.getAttribute('string-parallax')||'0.5')||0.5}));
+      };
+      const parallaxTick=()=>{
+        if(!parallaxEls.length) return;
+        const wh=w.innerHeight, maxTravel=PARALLAX_TRAVEL;
+        parallaxEls.forEach(({el,factor})=>{
+          const r=el.getBoundingClientRect();
+          const center=r.top + r.height/2 - wh/2;
+          const t=clamp(center/wh,-1,1);
+          el.style.transform=`translate3d(0, ${(-t*factor*maxTravel).toFixed(2)}px, 0)`;
+        });
+      };
+    
+      // lerp / glide
+      let lastY=w.scrollY||w.pageYOffset;
+      let lerpVal=0, glideVal=0;
+      let glideEls=[];
+      const collectGlideEls=()=>{
+        glideEls = (isMobile||prefersReduced) ? [] :
+          [...d.querySelectorAll('[string="glide"]')]
+            .map(el=>({el,k:parseFloat(el.getAttribute('string-glide')||'0.35')||0.35,y:0}));
+      };
+      const smoothTick=()=>{
+        const y=w.scrollY||w.pageYOffset;
+        const delta=y-lastY; lastY=y;
+        lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+        glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
+        document.documentElement.style.setProperty('--lerp',  (lerpVal  * LERP_AMP).toFixed(2));
+        document.documentElement.style.setProperty('--glide', (glideVal * GLIDE_AMP).toFixed(2));
+        glideEls.forEach(g=>{
+          g.y = lerp(g.y, glideVal * g.k, 0.12);
+          g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
+        });
+      };
+    
+      // cursor + magnetic
+      const cursorRoot=d.querySelector('.cursor[string-cursor]');
+      let tipsStartY=Infinity;
+      const computeTipsStart=()=>{
+        const sec=d.querySelector('.string-cursor');
+        tipsStartY = sec ? (sec.getBoundingClientRect().top + (w.scrollY||w.pageYOffset)) : Infinity;
+        if(cursorRoot){
+          const sy=w.scrollY||w.pageYOffset;
+          cursorRoot.classList.toggle('-tips', sy>=tipsStartY);
+        }
+      };
+      computeTipsStart();
+      w.addEventListener('resize',computeTipsStart,{passive:true});
+      w.addEventListener('orientationchange',computeTipsStart,{passive:true});
+    
+      const DEFAULT_TIP="Try the cursor →";
+      const findTipForNode=(node)=>{
+        while(node && node!==d.body){
+          if(node.classList && node.classList.contains('block') && node.hasAttribute('data-cursor-tip')){
+            return node.getAttribute('data-cursor-tip')||DEFAULT_TIP;
+          }
+          node=node.parentElement;
+        }
+        return null;
+      };
+      const getSectionTipAt=(x,y)=>{
+        const el=d.elementFromPoint(x,y);
+        return el ? (findTipForNode(el)||DEFAULT_TIP) : DEFAULT_TIP;
+      };
+    
+      let _lastTip="";
+      let cx=0, cy=0;
+      const setupCursor=()=>{
+        if(!cursorRoot) return;
+        const tipEl=cursorRoot.querySelector('.cursor-tip');
+    
+        w.addEventListener('mousemove', e=>{
+          cx=e.clientX; cy=e.clientY;
+          cursorRoot.style.transform=`translate3d(${cx+16}px, ${cy+8}px, 0)`;
+          let node=e.target, mode='cursor-1';
+          while(node && node!==d.body){
+            if(node.hasAttribute('string-cursor-class')){ mode=node.getAttribute('string-cursor-class'); break; }
+            node=node.parentElement;
+          }
+          cursorRoot.classList.toggle('cursor-1', mode==='cursor-1');
+          cursorRoot.classList.toggle('cursor-2', mode==='cursor-2');
+          if(tipEl){
+            const tip=findTipForNode(e.target)||DEFAULT_TIP;
+            if(tip!==_lastTip){ tipEl.textContent=tip; _lastTip=tip; }
+          }
+        }, {passive:true});
+    
+        w.addEventListener('mousedown', ()=>cursorRoot.classList.add('-down'));
+        w.addEventListener('mouseup',   ()=>cursorRoot.classList.remove('-down'));
+        w.addEventListener('mouseleave',()=>cursorRoot.classList.add('-hide'));
+        w.addEventListener('mouseenter',()=>cursorRoot.classList.remove('-hide'));
+    
+        if(tipEl){
+          const initTip=getSectionTipAt(w.innerWidth/2, w.innerHeight/2);
+          tipEl.textContent=initTip; _lastTip=initTip;
+        }
+      };
+    
+      let magneticEls=[];
+      const collectMagneticEls=()=>{
+        magneticEls=[...d.querySelectorAll('[string="magnetic"]')].map(el=>({
+          el,
+          r:parseFloat(el.getAttribute('string-radius')||'300')||300,
+          s:parseFloat(el.getAttribute('string-strength')||'0.5')||0.5,
+          ox:0, oy:0
+        }));
+      };
+      const magneticTick=()=>{
+        magneticEls.forEach(m=>{
+          const rect=m.el.getBoundingClientRect();
+          const ex=rect.left+rect.width/2, ey=rect.top+rect.height/2;
+          const dx=cx-ex, dy=cy-ey;
+          const dist=Math.hypot(dx,dy);
+          const t=clamp(1 - dist/m.r, 0, 1);
+          const tx=dx*m.s*t*0.35, ty=dy*m.s*t*0.35;
+          m.ox=lerp(m.ox,tx,0.15); m.oy=lerp(m.oy,ty,0.15);
+          m.el.style.transform=`translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
+        });
+      };
+    
+      // UI toggles
+      const setupUI=()=>{
+        const smoothToggle=d.getElementById('smooth-toggle');
+        const stopToggle  =d.getElementById('scroll-toggle');
+        const applySmooth=()=>{ de.style.scrollBehavior=(smoothToggle && smoothToggle.checked)?'smooth':'auto'; };
+        const applyStop  =()=>{ if(stopToggle && stopToggle.checked){ body.style.overflow='hidden'; body.style.height='100vh'; } else { body.style.overflow=''; body.style.height=''; } };
+        smoothToggle && (smoothToggle.onchange=applySmooth);
+        stopToggle   && (stopToggle.onchange=applyStop);
+        applySmooth(); applyStop();
+        w.addEventListener('keydown', e=>{ if((e.key||'').toLowerCase()==='g') de.classList.toggle('-guidelines'); });
+      };
+    
+      // Perf HUD
+      const setupPerfHUD=()=>{
+        const fpsNode=d.getElementById('fps');
+        const dirNode=d.getElementById('scroll-dir');
+        let lastT=performance.now(), frames=0, accum=0, lastScrollY=w.scrollY;
+        const perfTick=(t)=>{
+          const dt=t-lastT; lastT=t; frames++; accum+=dt;
+          if(accum>500){
+            const fps=Math.round(frames*1000/accum);
+            if(fpsNode) fpsNode.textContent=`FPS: ${fps}`;
+            frames=0; accum=0;
+          }
+          const sy=w.scrollY;
+          const dir=sy>lastScrollY?'↓':(sy<lastScrollY?'↑':'•');
+          if(dirNode) dirNode.textContent=`Scroll ${dir}  y:${sy}`;
+          lastScrollY=sy;
+          w.requestAnimationFrame(perfTick);
+        };
+        w.requestAnimationFrame(perfTick);
+      };
+    
+      // ---------- Narrative HUD & Chapters ----------
+      const storyline = d.getElementById('storyline');
+      const chapterUL = d.getElementById('chapters');
+      const chapterBlocks = [...d.querySelectorAll('.page .block')];
+    
 
-
-      w.requestAnimationFrame(tick);
-    };
-    w.requestAnimationFrame(tick);
-
-    let resizeRAF = 0;
-    const onResize = () => {
-      cancelAnimationFrame(resizeRAF);
-      resizeRAF = requestAnimationFrame(() => {
+      // Observer to update storyline text & chapter dot
+      (() => {
+        const blocks = chapterBlocks;
+        if (!storyline || !blocks.length) return;
+        const io = new IntersectionObserver((ents)=>{
+          // choose most visible
+          const vis = ents.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio - a.intersectionRatio)[0];
+          if(!vis) return;
+          const el = vis.target;
+          const tip = el.getAttribute('data-cursor-tip') || storyline.textContent;
+          storyline.textContent = tip;
+          const idx = blocks.indexOf(el);
+          if (idx >= 0) setChapterActive(idx);
+        }, { root:null, threshold:[0, .25, .5, .75, 1] });
+        blocks.forEach(b=>io.observe(b));
+      })();
+    
+      // ---------- bootstrap ----------
+      const init=()=>{
+        setupRepeat();
+        setupSplit();
+        setupInView();
+        collectProgressEls();
         collectParallaxEls();
         collectGlideEls();
+        setupCursor();
         collectMagneticEls();
+        setupUI();
+        setupPerfHUD();
         applyBoxScale();
-        updateProgress();
-        computeTipsStart();
-      });
-    };
-    w.addEventListener('resize', onResize, { passive: true });
-    w.addEventListener('orientationchange', onResize, { passive: true });
-  };
-
-  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init, { once: true });
-  else init();
-})();
-  </script>
-</body>
-
-</html>
+    
+        document.documentElement.style.setProperty('--progress-mult', PROGRESS_MULT);
+    
+        if(cursorRoot){
+          const sy=w.scrollY||w.pageYOffset;
+          cursorRoot.classList.toggle('-tips', sy>=tipsStartY);
+        }
+    
+        requestAnimationFrame(()=>{ w.dispatchEvent(new Event('scroll')); });
+    
+        const tick=()=>{
+          updateProgress();
+          parallaxTick();
+          smoothTick();
+          magneticTick();
+    
+          if(cursorRoot){
+            const sy=w.scrollY||w.pageYOffset;
+            cursorRoot.classList.toggle('-tips', sy>=tipsStartY);
+            const tipEl=cursorRoot.querySelector('.cursor-tip');
+            if(tipEl){
+              const el=d.elementFromPoint(w.innerWidth/2, w.innerHeight/2);
+              const centerTip = el ? (findTipForNode(el)||DEFAULT_TIP) : DEFAULT_TIP;
+              if(centerTip!==_lastTip && !cursorRoot.classList.contains('-hide')){
+                tipEl.textContent=centerTip; _lastTip=centerTip;
+              }
+            }
+          }
+          w.requestAnimationFrame(tick);
+        };
+        w.requestAnimationFrame(tick);
+    
+        let resizeRAF=0;
+        const onResize=()=>{
+          cancelAnimationFrame(resizeRAF);
+          resizeRAF=requestAnimationFrame(()=>{
+            collectParallaxEls();
+            collectGlideEls();
+            collectMagneticEls();
+            applyBoxScale();
+            updateProgress();
+            computeTipsStart();
+          });
+        };
+        w.addEventListener('resize',onResize,{passive:true});
+        w.addEventListener('orientationchange',onResize,{passive:true});
+      };
+    
+      if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init, { once:true });
+      else init();
+    })();
+      </script>
+    </body>
+    </html>
+    

@@ -10,6 +10,7 @@
 
 :root {
 	--g-margin: 0;
+  --progress-mult: .8;
 }
 
 .guide-grid {
@@ -2107,15 +2108,27 @@ svg {
         </div>
       </div>
 
-      <!-- Basics -->
-      <div class="-w block string-enter" data-cursor-tip="Basics — watch items enter." data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
-        <h6 class="title -tac" data-v-1a9dc9c4>StringTune (Basics)</h6>
-        <div class="rel rel-1" data-v-1a9dc9c4>
-          <div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4"><div class="-a-scale-in" data-v-1a9dc9c4></div></div>
-          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>string</p></div>
-        </div>
+<!-- Basics -->
+<div class="-w block string-enter" data-cursor-tip="Basics — watch items enter." data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
+  <h6 class="title -tac" data-v-1a9dc9c4>Product (Basics)</h6>
 
-      </div>
+  <!-- 1) Outlined square only (keep inner div for sizing, make it transparent) -->
+  <div class="rel rel-1" data-v-1a9dc9c4>
+    <div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4">
+      <div class="-a-scale-in" data-v-1a9dc9c4 style="background: transparent;"></div>
+    </div>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>"Environment"</p></div>
+  </div>
+
+  <!-- 2) Black square only (remove parent border) -->
+  <div class="rel rel-2" data-v-1a9dc9c4>
+    <div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border: none;">
+      <div class="-a-scale-in" data-v-1a9dc9c4></div>
+    </div>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>"Product"</p></div>
+  </div>
+</div>
+
 
       <!-- Progress (basic) -->
       <div class="-w block string-progress" data-cursor-tip="Progress — scroll to fill the squares." data-v-021d6718 data-v-a676084d data-v-4f043ceb>
@@ -2127,14 +2140,7 @@ svg {
             <p class="-mm" data-progress-of="string-6">0</p>
           </div>
         </div>
-        <div class="rel rel-2" data-v-a676084d>
-          <div class="child" string="progress" string-id="element-id" data-v-a676084d><div data-v-a676084d></div></div>
-          <div class="-m desc" data-v-a676084d>
-            <p data-v-a676084d>string="progress"</p>
-            <p data-v-a676084d>string-id="element-id"</p>
-            <p class="-mm" data-progress-of="element-id">0</p>
-          </div>
-        </div>
+
       </div>
 
       <!-- Advanced Enter / Offsets -->
@@ -2272,18 +2278,28 @@ svg {
   };
 
   // ---------- Demo box scaler ----------
-  const BOX_SCALE = 1;
-  const applyBoxScale = () => {
-    d.querySelectorAll('.-w .rel').forEach(rel => {
-      const child = rel.querySelector(':scope > .child');
-      if (!child) return;
-      const base = child.clientWidth;
-      const extra = Math.max(0, (BOX_SCALE - 1) * base);
-      rel.style.paddingBottom = extra ? `${extra}px` : '';
-      child.style.transformOrigin = 'top left';
-      child.style.transform = BOX_SCALE !== 1 ? `scale(${BOX_SCALE})` : '';
-    });
-  };
+  const BOX_SCALE = 1.7;
+  // --- How far things settle ---
+const PROGRESS_MULT     = 1.6;  // progress demos (1 = original)
+const PARALLAX_TRAVEL   = 140;  // px; was ~80
+const LERP_AMP          = 1.2;  // scales --lerp (scale demo)
+const GLIDE_AMP         = 1.35; // scales --glide (glide demo)
+
+
+const applyBoxScale = () => {
+  document.querySelectorAll('.-w .rel').forEach(rel => {
+    const child = rel.querySelector(':scope > .child');
+    if (!child) return;
+
+    const scale = parseFloat(rel.getAttribute('data-box-scale') || BOX_SCALE) || 1;
+    const base = child.clientWidth;
+    const extra = Math.max(0, (scale - 1) * base);
+
+    rel.style.paddingBottom = extra ? `${extra}px` : '';
+    child.style.transformOrigin = 'top left';
+    child.style.transform = scale !== 1 ? `scale(${scale})` : '';
+  });
+};
 
   // ---------- repeat ----------
   const setupRepeat = () => {
@@ -2434,15 +2450,16 @@ svg {
       .map(el => ({ el, factor: parseFloat(el.getAttribute('string-parallax') || '0.5') || 0.5 }));
   };
   const parallaxTick = () => {
-    if (!parallaxEls.length) return;
-    const wh = w.innerHeight, maxTravel = 80;
-    parallaxEls.forEach(({ el, factor }) => {
-      const r = el.getBoundingClientRect();
-      const center = r.top + r.height / 2 - wh / 2;
-      const t = clamp(center / wh, -1, 1);
-      el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
-    });
-  };
+  if (!parallaxEls.length) return;
+  const wh = w.innerHeight, maxTravel = PARALLAX_TRAVEL; // was 80
+  parallaxEls.forEach(({ el, factor }) => {
+    const r = el.getBoundingClientRect();
+    const center = r.top + r.height / 2 - wh / 2;
+    const t = clamp(center / wh, -1, 1);
+    el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
+  });
+};
+
 
   // ---------- lerp / glide ----------
   let lastY = w.scrollY || w.pageYOffset;
@@ -2454,19 +2471,23 @@ svg {
       .map(el => ({ el, k: parseFloat(el.getAttribute('string-glide') || '0.35') || 0.35, y: 0 }));
   };
   const smoothTick = () => {
-    const y = w.scrollY || w.pageYOffset;
-    const delta = y - lastY;
-    lastY = y;
-    lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
-    de.style.setProperty('--lerp', lerpVal.toFixed(2));
-    d.querySelectorAll('[data-livelabel="lerp"]').forEach(n => (n.textContent = lerpVal.toFixed(1)));
-    glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
-    de.style.setProperty('--glide', glideVal.toFixed(2));
-    glideEls.forEach(g => {
-      g.y = lerp(g.y, glideVal * g.k, 0.12);
-      g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
-    });
-  };
+  const y = w.scrollY || w.pageYOffset;
+  const delta = y - lastY;
+  lastY = y;
+
+  lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+  glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
+
+  // amplify the CSS variables we expose
+  document.documentElement.style.setProperty('--lerp',  (lerpVal  * LERP_AMP ).toFixed(2));
+  document.documentElement.style.setProperty('--glide', (glideVal * GLIDE_AMP).toFixed(2));
+
+  glideEls.forEach(g => {
+    g.y = lerp(g.y, glideVal * g.k, 0.12);
+    g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
+  });
+};
+
 
   // ---------- cursor HUD & magnetic ----------
   const cursorRoot = d.querySelector('.cursor[string-cursor]');
@@ -2616,6 +2637,10 @@ svg {
     setupUI();
     setupPerfHUD();
     applyBoxScale();
+
+
+    document.documentElement.style.setProperty('--progress-mult', PROGRESS_MULT);
+
 
     // ensure initial tooltip visibility
     if (cursorRoot) {

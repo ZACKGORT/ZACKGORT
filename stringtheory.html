@@ -12,6 +12,9 @@
 	--g-margin: 0;
   --progress-mult: .8;
   --block-pink: #ff8da1; 
+  --section-vh: 120; /* make every section ~20% taller than viewport */
+}
+
 }
 
 .guide-grid {
@@ -1539,12 +1542,13 @@ html, body, a, button { cursor: none; }
 }
 
 .block {
-	background-color: var(--c-grey);
-	border-block-start: 1px solid var(--c-white);
-	box-sizing: border-box;
-	height: calc(var(--vh, 1vh) * 100);
-	min-height: 480px;
+  background-color: var(--c-grey);
+  border-block-start: 1px solid var(--c-white);
+  box-sizing: border-box;
+  height: calc(var(--vh, 1vh) * var(--section-vh, 100));
+  min-height: 560px; /* optional: bump small-screen floor */
 }
+
 
 .block .title {
 	--width: 14;

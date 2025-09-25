@@ -11,6 +11,7 @@
 :root {
 	--g-margin: 0;
   --progress-mult: .8;
+  --block-pink: #ff8da1; 
 }
 
 .guide-grid {
@@ -976,6 +977,7 @@ a {
 	flex-direction: row;
 	flex-wrap: nowrap;
 	justify-content: center;
+  color: #FF8DA1
 	overflow: hidden;
 	width: 100%;
 }
@@ -1126,6 +1128,8 @@ html.-loaded body {
 .page {
 	min-height: calc(var(--vh, 1vh) * 100);
 }
+
+
 
 section {
 	position: relative;
@@ -2063,11 +2067,58 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
 	grid-row-end: calc(var(--top, 1) + var(--height, 1));
 	grid-row-start: var(--top, 1);
 }
-/* Start Project Wallace extracted inline styles */
-svg {
-	display: none;
+
+
+/* ===========================
+   STRING PROGRESS (fixed math)
+   - Compensates for parent box scale
+   - Travel > 1 cell with --travel
+   =========================== */
+
+/* Match your JS BOX_SCALE (= 1.7) so CSS can compensate */
+.block.string-progress { --box-scale: 1; --travel: 1; } /* tweak --travel 1.2–1.8 */
+
+/* Place boxes side-by-side and layer correctly */
+.block.string-progress .rel { padding-bottom: 0 !important; }
+.block.string-progress .rel > .child { transform: none !important; }
+
+
+/* Keep the right cell empty and non-moving */
+.block.string-progress .rel-2[data-v-a676084d] .child > div[data-v-a676084d]{
+  background: transparent !important;
+  transform: none !important;
 }
-/** End Project Wallace extracted inline styles */
+
+/* Moving pink square stays on top */
+.block.string-progress .rel-1[data-v-a676084d] .child { position: relative; z-index: 2; }
+.block.string-progress .rel-1[data-v-a676084d] .child > div[data-v-a676084d]{
+  position: relative; z-index: 3;
+
+  /*
+    Correct distance with scale compensation:
+    - Parent .child is scaled by S (BOX_SCALE).
+    - Visual hop = (width*S) + (gap) + (2px borders*S).
+    - Child’s local translate is divided by S:
+        T = ((100%*S) + gap + (2px*S)) / S
+          = 100% + (gap / S) + 2px
+  */
+  transform:
+    translate3d(
+      calc(
+        var(--progress)
+        * (
+            100%
+          + calc(var(--g-gap) / var(--box-scale, 1))
+          + 2px
+        )
+        * var(--travel, 1)
+      ),
+      0, 0
+    )
+    rotate(calc(var(--progress) * 90deg))
+    !important;
+}
+
 
 </style>  
 </head>
@@ -2102,7 +2153,7 @@ svg {
             <div class="fdda-l -mm -up" string string-repeat string-offset-top="-20%" data-v-33216d84 data-v-d6e5c8df string-id="string-2"><span data-v-d6e5c8df>StringTune</span></div>
             <div class="fdda-l -mm -up" string string-repeat string-offset-top="-20%" data-v-33216d84 data-v-d6e5c8df string-id="string-3"><span data-v-d6e5c8df>v: 1.1.27</span></div>
           </div>
-          <h1 class="-tac -m-h3" data-v-33216d84>{u r product.}</h1>
+          <h1 class="-tac -m-h3" data-v-33216d84>You are {the} product</h1>
           <div data-v-33216d84>
             <a aria-label title href="https://tune.fiddle.digital/" target="_self" class="button -p -a-3" data-v-065f1151>
               <span class="basic" data-v-065f1151><span data-v-065f1151>Documentation</span></span>
@@ -2129,37 +2180,51 @@ svg {
 
         <!-- Outlined square (environment) -->
         <div class="rel rel-1" data-v-1a9dc9c4>
-          <div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4">
-            <div class="-a-scale-in" data-v-1a9dc9c4 style="background:transparent;"></div>
+          <div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border:none;">
+            <div class="-a-scale-in" data-v-1a9dc9c4 style="background-color:#FF8DA1;"></div>
           </div>
-          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>A Place</p></div>
+          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Product</p></div>
         </div>
 
         <!-- Filled square (product) -->
         <div class="rel rel-2" data-v-1a9dc9c4>
-          <div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border:none;">
-            <div class="-a-scale-in" data-v-1a9dc9c4></div>
+          <div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4">
+            <div class="-a-scale-in" data-v-1a9dc9c4 style="background:transparent;"></div>
           </div>
-          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>A Purpose</p></div>
+          <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Environment</p></div>          
+         
         </div>
       </div>
 
-      <!-- Progress -->
-      <div class="-w block string-progress"
-           data-cursor-tip="Momentum is visible."
-           data-v-021d6718 data-v-a676084d data-v-4f043ceb>
-        <h6 class="title -tac" data-v-a676084d>objective_Move-Product</h6>
+<!-- Progress -->
+<div class="-w block string-progress"
+     data-cursor-tip="Momentum is visible."
+     data-v-021d6718 data-v-a676084d data-v-4f043ceb>
+  <h6 class="title -tac" data-v-a676084d>find_Product-Fit</h6>
 
-        <div class="rel rel-1" data-v-a676084d>
-          <div class="child" string="progress" data-v-a676084d string-id="string-6"><div data-v-a676084d></div></div>
+  <!-- LEFT outlined box + moving pink fill -->
+  <div class="rel rel-1" data-v-a676084d>
+    <div class="child" string="progress" data-v-a676084d string-id="string-6">
+      <!-- This div is the moving “filled” square -->
+      <div data-v-a676084d style="background-color:#FF8DA1;"></div>
+    </div>
 
-          <!-- story label that changes with progress -->
-          <div class="-m desc" data-v-a676084d>
-            <p class="-mm" data-progress-of="string-6">0</p>
-            <p class="-mm stage" data-stage-of="string-6" style="margin-top:.25rem">idea</p>
-          </div>
-        </div>
-      </div>
+    <div class="-m desc" data-v-a676084d>
+      <p class="-mm" data-progress-of="string-6">0</p>
+      <p class="-mm stage" data-stage-of="string-6" style="margin-top:.25rem">idea</p>
+    </div>
+  </div>
+
+  <!-- RIGHT outlined box (transparent inside) -->
+  <div class="rel rel-2" data-v-a676084d style="--left:7; z-index:1;">
+    <div class="child" data-v-a676084d>
+      <div data-v-a676084d style="background:transparent;"></div>
+    </div>
+  </div>
+</div>
+
+
+
       <!-- Offsets / tiers -->
       <div class="-w block string-enter"
            data-cursor-tip="Not everything ships together."
@@ -2168,7 +2233,7 @@ svg {
         <h6 class="title -tac" data-v-675dfa07>the_99%</h6>
 
         <div class="rel rel-1 -a-p" string string-repeat string-inview="100%" data-v-675dfa07 string-id="string-8">
-          <div class="child" data-v-675dfa07><div class="-a-scale-in" data-v-675dfa07></div></div>
+          <div class="child" data-v-675dfa07><div class="-a-scale-in" data-v-675dfa07 style="background-color:#FF8DA1;"></div></div>
           <div class="-m desc" data-v-675dfa07><p data-v-675dfa07>You</p></div>
         </div>
 
@@ -2214,7 +2279,7 @@ svg {
         <h6 class="title -tac" data-v-270bb328>Generation_ME</h6>
         <div class="rel rel-1" data-v-270bb328>
           <div class="child" data-v-270bb328><div string="lerp" data-v-270bb328 string-id="string-17"></div></div>
-          <div class="-m desc" data-v-270bb328><p data-v-270bb328>--lerp</p><p class="-mm" data-livelabel="lerp">0</p></div>
+          <div class="-m desc" data-v-270bb328><p data-v-270bb328>human-centered <br>soon self-centered</p><p class="-mm" data-livelabel="lerp">0</p></div>
         </div>
       </div>
 
@@ -2281,12 +2346,9 @@ svg {
     <div class="guide-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <span class="offset-bottom -mm"></span>
     <a class="ko-fi -mm" href="https://buymeacoffee.com/fiddledigital" target="_blank">
-      <svg><use href="#icon-20_ko-fi"></use></svg><span>Support StringTune</span>
+      <svg><use href="#icon-20_ko-fi"></use></svg><span>Buy me a coffee</span>
     </a>
-    <div class="scroll-options">
-      <div class="-mm"><input checked type="checkbox" id="smooth-toggle" value="on"><label for="smooth-toggle">Smooth scroll</label></div>
-      <div class="-mm"><input type="checkbox" id="scroll-toggle" value="on"><label for="scroll-toggle">Stop scroll</label></div>
-    </div>
+
 
     <!-- cursor HUD (aria-hidden for a11y) -->
     <div class="cursor -mm" string-cursor aria-hidden="true">

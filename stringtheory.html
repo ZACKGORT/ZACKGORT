@@ -1550,12 +1550,40 @@ html, body, a, button { cursor: none; }
 }
 
 
-.block .title {
-	--width: 14;
-	align-self: self-start;
-	margin-top: var(--h4);
-	z-index: 10;
+.block .title{
+  --width: var(--g-columns);      /* span all columns */
+  grid-column: 1 / -1;            /* explicit full-span */
+  justify-self: stretch;          /* stretch inside its grid area */
+  width: 100%;
+  align-self: self-start;
+  margin-top: var(--h4);
+  z-index: 10;
 }
+
+.block .title.-bleed{
+  margin-left:  calc(-1 * var(--g-margin));
+  margin-right: calc(-1 * var(--g-margin));
+  padding-inline: var(--g-margin); /* keeps text off the exact edge */
+}
+
+/* Make section titles span the full grid */
+.-w[data-v-4f043ceb] > .title {
+  grid-column: 1 / -1 !important;   /* full width of the grid */
+  --left: 1;
+  --width: var(--g-columns);
+  justify-self: stretch;
+  width: 100%;
+  max-width: none;                   /* in case something else capped it */
+}
+
+
+/* Optional: bleed past the grid gutters */
+.-w[data-v-4f043ceb] > .title.-bleed {
+  margin-left:  calc(-1 * var(--g-margin));
+  margin-right: calc(-1 * var(--g-margin));
+  padding-inline: var(--g-margin);
+}
+
 
 .-w {
 	align-items: center;

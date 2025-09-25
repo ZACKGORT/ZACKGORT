@@ -2283,168 +2283,383 @@ svg {
 
 
 
-
   <script>
     (() => {
-      const d=document,w=window,de=d.documentElement,body=d.body;
-      const isMobile=/Mobi|Android/i.test(navigator.userAgent);
-      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-      const lerp=(a,b,t)=>a+(b-a)*t;
-      const toPx=(v,axis='y')=>{
-        if(v==null)return 0;
-        const s=String(v);
-        if(s.endsWith('%')){const n=parseFloat(s)/100;return(axis==='y'?w.innerHeight:w.innerWidth)*n;}
-        return parseFloat(s);
+      // ===== Mount guard (idempotent) =====
+      const de = document.documentElement;
+      if (de.__stringTuneMounted) return;
+      de.__stringTuneMounted = true;
+    
+      const d = document, w = window, body = d.body;
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    
+      // ---------- utils ----------
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+      const lerp  = (a, b, t) => a + (b - a) * t;
+      const toPx  = (v, axis = 'y') => {
+        if (v == null) return 0;
+        const s = String(v).trim();
+        if (s.endsWith('%')) {
+          const n = parseFloat(s) / 100;
+          return (axis === 'y' ? w.innerHeight : w.innerWidth) * n;
+        }
+        return parseFloat(s) || 0;
       };
-  
-// repeat (explicit count; default = 1 => no extra copies)
-document.querySelectorAll('[string][string-repeat]').forEach(el => {
-  if (el.__repeated) return;
-  const total = Math.max(1, parseInt(el.getAttribute('string-repeat'), 10) || 1); // total wanted including original
-  for (let i = 1; i < total; i++) {
-    const clone = el.cloneNode(true);
-    clone.removeAttribute('string-repeat'); // avoid recursive repeats
-    el.after(clone);
-  }
-  // keep the attribute only if you want to query it later; otherwise remove:
-  // el.removeAttribute('string-repeat');
-  el.__repeated = true;
-});
-
-  
-      // split
-      [...d.querySelectorAll('[string="split"],[string][string-split]')].forEach(el=>{
-        if(el.__split)return;
-        const mode=(el.getAttribute('string-split')||'').toLowerCase();
-        const doWord=mode.includes('word'), doChar=mode.includes('char');
-        const txt=(el.textContent||'').replace(/\s+/g,' ').trim();
-        el.textContent=''; el.classList.add('-splitted');
-        let charIndex=0;
-        txt.split(' ').forEach((word,wi)=>{
-          const wSpan=d.createElement('span'); if(doWord) wSpan.className='-s-word';
-          if(doChar){
-            [...word].forEach((c,ci)=>{
-              const cSpan=d.createElement('span');
-              cSpan.className='-s-char';
-              cSpan.style.transitionDelay=(wi*0.02+ci*0.01)+'s';
-              cSpan.textContent=c;
-              wSpan.appendChild(cSpan);
-              charIndex++;
-            });
-          }else{ wSpan.textContent=word; }
-          el.appendChild(wSpan); el.appendChild(d.createTextNode(' '));
+    
+      // ---------- Demo box scaler (visual scale + layout compensation) ----------
+      // We scale the wrapper `.child` for visuals, and pad its parent `.rel`
+      // so the layout height matches the scaled size (keeps captions outside).
+      const BOX_SCALE = 2; // change factor here
+      const applyBoxScale = () => {
+        d.querySelectorAll('.-w .rel').forEach(rel => {
+          const child = rel.querySelector(':scope > .child');
+          if (!child) return;
+    
+          // Base square size is the wrapper's layout width (height comes from inner 100% padding)
+          const base = child.clientWidth; // layout value (unaffected by transforms)
+          const extra = Math.max(0, (BOX_SCALE - 1) * base);
+    
+          // Layout compensation so `.desc` (top:100%) sits below the *visually* scaled box
+          rel.style.paddingBottom = extra ? `${extra}px` : '';
+    
+          // Visual scale (does NOT affect layout)
+          child.style.transformOrigin = 'top left';
+          child.style.transform = BOX_SCALE !== 1 ? `scale(${BOX_SCALE})` : '';
+          // If browser supports individual transform props, we could use child.style.scale,
+          // but a single transform string keeps things predictable alongside inner transforms.
         });
-        el.__split=true;
-      });
-  
-      // inview
-      const makeObserver=(el)=>{
-        const topOffset=toPx(el.getAttribute('string-offset-top')??'-10%','y');
-        const bottomOffset=toPx(el.getAttribute('string-offset-bottom')??'-10%','y');
-        const rootMargin=`${topOffset}px 0px ${bottomOffset}px 0px`;
-        const tv=el.getAttribute('string-inview');
-        const threshold=tv&&String(tv).endsWith('%')?clamp(parseFloat(tv)/100,0,1):0;
-        return new IntersectionObserver((entries)=>{
-          entries.forEach(entry=>{
-            if(entry.isIntersecting&&entry.intersectionRatio>=threshold) el.classList.add('-inview');
-            else if(entry.intersectionRatio===0) el.classList.remove('-inview');
+      };
+    
+      // ---------- repeat (explicit only; default = 1/no clone) ----------
+      const setupRepeat = () => {
+        // purge clones from an earlier init/hot-reload
+        d.querySelectorAll('[data-string-clone]').forEach(n => n.remove());
+    
+        d.querySelectorAll('[string][string-repeat]').forEach(el => {
+          if (el.dataset.stringRepeated === '1') return;
+          const raw = el.getAttribute('string-repeat');
+          const total = raw && raw.trim() !== '' ? Math.max(1, parseInt(raw, 10) || 1) : 1;
+    
+          for (let i = 1; i < total; i++) {
+            const clone = el.cloneNode(true);
+            clone.removeAttribute('string-repeat');      // avoid recursive repeats
+            clone.setAttribute('data-string-clone', ''); // mark for purge
+            el.after(clone);
+          }
+          el.dataset.stringRepeated = '1';
+        });
+      };
+    
+      // ---------- split (word/char) ----------
+      const setupSplit = () => {
+        d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
+          // guard: already split or contains prior split spans
+          if (el.__split || el.querySelector('.-s-word, .-s-char')) return;
+    
+          const mode   = (el.getAttribute('string-split') || '').toLowerCase();
+          const doWord = mode.includes('word');
+          const doChar = mode.includes('char');
+    
+          const raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
+          const words = raw.length ? raw.split(' ') : [];
+          el.textContent = '';
+          el.classList.add('-splitted');
+    
+          let wordIndex = 0;
+          words.forEach((word, wi) => {
+            const wSpan = d.createElement('span');
+            if (doWord) wSpan.className = '-s-word';
+    
+            if (doChar) {
+              [...word].forEach((c, ci) => {
+                const cSpan = d.createElement('span');
+                cSpan.className = '-s-char';
+                cSpan.style.transitionDelay = (wordIndex * 0.02 + ci * 0.01) + 's';
+                cSpan.textContent = c;
+                wSpan.appendChild(cSpan);
+              });
+            } else {
+              wSpan.textContent = word;
+            }
+    
+            el.appendChild(wSpan);
+            if (wi < words.length - 1) el.appendChild(d.createTextNode(' ')); // keep natural spacing
+            wordIndex++;
           });
-        },{root:null,rootMargin,threshold:[0,threshold,1]});
-      };
-      [...d.querySelectorAll('[string]')].forEach(el=>{ if(!el.__io)(el.__io=makeObserver(el)).observe(el); });
-  
-      // progress
-      const progressEls=[...d.querySelectorAll('[string="progress"],[string][string-id]')];
-      const updateProgress=()=>{
-        progressEls.forEach(el=>{
-          const rect=el.getBoundingClientRect();
-          const enterEdge=(el.getAttribute('string-enter-el')||'bottom').toLowerCase();
-          const exitEdge=(el.getAttribute('string-exit-el')||'top').toLowerCase();
-          const topOffset=toPx(el.getAttribute('string-offset-top')??'-10%','y');
-          const bottomOffset=toPx(el.getAttribute('string-offset-bottom')??'-10%','y');
-          const viewTop=0+topOffset, viewBottom=w.innerHeight+bottomOffset;
-          const enterRef=enterEdge==='top'?viewTop:viewBottom;
-          const start=enterRef-rect.top;
-          const total=rect.height+Math.abs(viewBottom-viewTop);
-          const prog=clamp(start/total,0,1);
-          el.style.setProperty('--progress',prog.toFixed(4));
-          const id=el.getAttribute('string-id')||el.id;
-          if(id){ d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(s=>s.textContent=Math.round(prog*100)); }
+    
+          el.__split = true;
         });
       };
-  
-      // parallax
-      const parallaxEls=isMobile?[]:[...d.querySelectorAll('[string="parallax"],[string-parallax]')].map(el=>({el,factor:parseFloat(el.getAttribute('string-parallax')||'0.5')||0.5}));
-      const parallaxTick=()=>{
-        const wh=w.innerHeight;
-        parallaxEls.forEach(({el,factor})=>{
-          const r=el.getBoundingClientRect();
-          const center=r.top+r.height/2-wh/2;
-          const t=clamp(center/wh,-1,1);
-          el.style.transform=`translate3d(0,${(-t*factor*80).toFixed(2)}px,0)`;
+    
+      // ---------- in-view (IntersectionObserver) ----------
+      const setupInView = () => {
+        const makeObserver = (el) => {
+          const topOffset    = toPx(el.getAttribute('string-offset-top')    ?? '-10%', 'y');
+          const bottomOffset = toPx(el.getAttribute('string-offset-bottom') ?? '-10%', 'y');
+          const tv = (el.getAttribute('string-inview') || '').trim();
+          const threshold = tv.endsWith('%') ? clamp(parseFloat(tv) / 100, 0, 1) : 0;
+          const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
+    
+          return new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
+              if (ok) el.classList.add('-inview');
+              else if (entry.intersectionRatio === 0) el.classList.remove('-inview');
+            });
+          }, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
+        };
+    
+        d.querySelectorAll('[string]').forEach(el => {
+          if (!el.__io) (el.__io = makeObserver(el)).observe(el);
         });
       };
-  
-      // lerp/glide
-      let lastY=w.scrollY||w.pageYOffset, lerpVal=0, glideVal=0;
-      const glideEls=isMobile?[]:[...d.querySelectorAll('[string="glide"]')].map(el=>({el,k:parseFloat(el.getAttribute('string-glide')||'0.35')||0.35,y:0}));
-      const smoothTick=()=>{
-        const y=w.scrollY||w.pageYOffset, delta=y-lastY; lastY=y;
-        lerpVal=clamp(lerp(lerpVal,Math.abs(delta),0.15),0,200);
-        de.style.setProperty('--lerp',lerpVal.toFixed(2));
-        d.querySelectorAll('[data-livelabel="lerp"]').forEach(n=>n.textContent=lerpVal.toFixed(1));
-        glideVal=lerp(glideVal,0,0.075)+delta*0.02;
-        de.style.setProperty('--glide',glideVal.toFixed(2));
-        glideEls.forEach(g=>{ g.y=lerp(g.y,glideVal*g.k,0.12); g.el.style.transform=`translate3d(0,${g.y.toFixed(2)}px,0)`; });
+    
+      // ---------- progress (robust across enter/exit edges + offsets) ----------
+      const progressEls = [];
+      const collectProgressEls = () => {
+        progressEls.length = 0;
+        progressEls.push(...d.querySelectorAll('[string="progress"]'));
       };
-  
-      // cursor & magnetic
-      const cursorRoot=d.querySelector('.cursor[string-cursor]'); let cx=0,cy=0;
-      w.addEventListener('mousemove',e=>{
-        cx=e.clientX; cy=e.clientY;
-        if(cursorRoot) cursorRoot.style.transform=`translate3d(${cx+16}px,${cy+8}px,0)`;
-        let node=e.target,mode='cursor-1';
-        while(node&&node!==document.body){ if(node.hasAttribute('string-cursor-class')){mode=node.getAttribute('string-cursor-class');break;} node=node.parentElement; }
-        if(cursorRoot){ cursorRoot.classList.toggle('cursor-1',mode==='cursor-1'); cursorRoot.classList.toggle('cursor-2',mode==='cursor-2'); }
-      },{passive:true});
-  
-      const magneticEls=[...d.querySelectorAll('[string="magnetic"]')].map(el=>({el,r:parseFloat(el.getAttribute('string-radius')||'300')||300,s:parseFloat(el.getAttribute('string-strength')||'0.5')||0.5,ox:0,oy:0}));
-      const magneticTick=()=>{
-        magneticEls.forEach(m=>{
-          const rect=m.el.getBoundingClientRect(), ex=rect.left+rect.width/2, ey=rect.top+rect.height/2;
-          const dx=cx-ex, dy=cy-ey, dist=Math.hypot(dx,dy), t=clamp(1-dist/m.r,0,1);
-          const tx=dx*m.s*t*0.35, ty=dy*m.s*t*0.35;
-          m.ox=lerp(m.ox,tx,0.15); m.oy=lerp(m.oy,ty,0.15);
-          m.el.style.transform=`translate3d(${m.ox.toFixed(2)}px,${m.oy.toFixed(2)}px,0)`;
+    
+      const updateProgress = () => {
+        const vh = w.innerHeight;
+    
+        for (const el of progressEls) {
+          const rect = el.getBoundingClientRect();
+          const enterEdge = (el.getAttribute('string-enter-el') || 'bottom').toLowerCase(); // 'top' | 'bottom'
+          const exitEdge  = (el.getAttribute('string-exit-el')  || 'top').toLowerCase();     // 'top' | 'bottom'
+    
+          const topOffset    = toPx(el.getAttribute('string-offset-top')    ?? '-10%', 'y');
+          const bottomOffset = toPx(el.getAttribute('string-offset-bottom') ?? '-10%', 'y');
+    
+          // viewport ref lines (offsets applied)
+          const viewTop    = 0 + topOffset;
+          const viewBottom = vh + bottomOffset;
+    
+          const enterRef = (enterEdge === 'top') ? viewTop : viewBottom;
+          const exitRef  = (exitEdge  === 'top') ? viewTop : viewBottom;
+    
+          // element edge positions to compare against refs
+          const enterPos = (enterEdge === 'top') ? rect.top : rect.bottom;
+          const exitPos  = (exitEdge  === 'top') ? rect.top : rect.bottom;
+    
+          // distances (0 at "enter"/"exit")
+          const startDist = enterPos - enterRef;
+          const endDist   = exitPos  - exitRef;
+    
+          // Normalize along the signed interval [startDist → endDist]
+          let denom = (startDist - endDist);
+          if (Math.abs(denom) < 1e-6) denom = (denom >= 0 ? 1 : -1) * 1e-6; // guard same-edge zero span
+    
+          let prog = startDist / denom;
+    
+          // Harden bounds to avoid micro oscillation near 0/1
+          if (startDist > 0 && endDist > 0) prog = 0; // entirely before enter line
+          if (startDist < 0 && endDist < 0) prog = 1; // entirely past exit line
+    
+          if (!Number.isFinite(prog)) prog = 0;
+          prog = clamp(prog, 0, 1);
+    
+          el.style.setProperty('--progress', prog.toFixed(4));
+    
+          const id = el.getAttribute('string-id') || el.id;
+          if (id) {
+            d.querySelectorAll(`[data-progress-of="${id}"]`)
+              .forEach(n => (n.textContent = Math.round(prog * 100)));
+          }
+        }
+      };
+    
+      // ---------- parallax (disabled on mobile) ----------
+      let parallaxEls = [];
+      const collectParallaxEls = () => {
+        parallaxEls = isMobile ? [] :
+          [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
+          .map(el => ({ el, factor: parseFloat(el.getAttribute('string-parallax') || '0.5') || 0.5 }));
+      };
+      const parallaxTick = () => {
+        if (!parallaxEls.length) return;
+        const wh = w.innerHeight, maxTravel = 80;
+        parallaxEls.forEach(({ el, factor }) => {
+          const r = el.getBoundingClientRect();
+          const center = r.top + r.height / 2 - wh / 2;
+          const t = clamp(center / wh, -1, 1);
+          el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
         });
       };
-  
-      // UI toggles
-      const smoothToggle=d.getElementById('smooth-toggle');
-      const stopToggle=d.getElementById('scroll-toggle');
-      const applySmooth=()=>{ de.style.scrollBehavior=smoothToggle&&smoothToggle.checked?'smooth':'auto'; };
-      const applyStop=()=>{ if(stopToggle&&stopToggle.checked){ body.style.overflow='hidden'; body.style.height='100vh'; } else { body.style.overflow=''; body.style.height=''; } };
-      smoothToggle&&(smoothToggle.onchange=applySmooth);
-      stopToggle&&(stopToggle.onchange=applyStop);
-      applySmooth(); applyStop();
-      w.addEventListener('keydown',e=>{ if((e.key||'').toLowerCase()==='g') de.classList.toggle('-guidelines'); });
-  
-      // perf HUD
-      const fpsNode=d.getElementById('fps'), dirNode=d.getElementById('scroll-dir');
-      let lastT=performance.now(), frames=0, accum=0, lastScrollY=w.scrollY;
-      const perfTick=(t)=>{
-        const dt=t-lastT; lastT=t; frames++; accum+=dt;
-        if(accum>500){ const fps=Math.round(frames*1000/accum); fpsNode&&(fpsNode.textContent=`FPS: ${fps}`); frames=0; accum=0; }
-        const sy=w.scrollY, dir=sy>lastScrollY?'↓':(sy<lastScrollY?'↑':'•'); dirNode&&(dirNode.textContent=`Scroll ${dir}  y:${sy}`); lastScrollY=sy;
+    
+      // ---------- lerp / glide ----------
+      let lastY = w.scrollY || w.pageYOffset;
+      let lerpVal = 0, glideVal = 0;
+      let glideEls = [];
+      const collectGlideEls = () => {
+        glideEls = isMobile ? [] :
+          [...d.querySelectorAll('[string="glide"]')]
+          .map(el => ({ el, k: parseFloat(el.getAttribute('string-glide') || '0.35') || 0.35, y: 0 }));
+      };
+      const smoothTick = () => {
+        const y = w.scrollY || w.pageYOffset;
+        const delta = y - lastY;
+        lastY = y;
+    
+        lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+        de.style.setProperty('--lerp', lerpVal.toFixed(2));
+        d.querySelectorAll('[data-livelabel="lerp"]').forEach(n => (n.textContent = lerpVal.toFixed(1)));
+    
+        glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
+        de.style.setProperty('--glide', glideVal.toFixed(2));
+        glideEls.forEach(g => {
+          g.y = lerp(g.y, glideVal * g.k, 0.12);
+          g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
+        });
+      };
+    
+      // ---------- cursor HUD & magnetic ----------
+      const cursorRoot = d.querySelector('.cursor[string-cursor]');
+      let cx = 0, cy = 0;
+    
+      const setupCursor = () => {
+        w.addEventListener('mousemove', e => {
+          cx = e.clientX; cy = e.clientY;
+          if (cursorRoot) cursorRoot.style.transform = `translate3d(${cx + 16}px, ${cy + 8}px, 0)`;
+    
+          let node = e.target, mode = 'cursor-1';
+          while (node && node !== d.body) {
+            if (node.hasAttribute('string-cursor-class')) {
+              mode = node.getAttribute('string-cursor-class');
+              break;
+            }
+            node = node.parentElement;
+          }
+          if (cursorRoot) {
+            cursorRoot.classList.toggle('cursor-1', mode === 'cursor-1');
+            cursorRoot.classList.toggle('cursor-2', mode === 'cursor-2');
+          }
+        }, { passive: true });
+    
+        w.addEventListener('mousedown', () => cursorRoot && cursorRoot.classList.add('-down'));
+        w.addEventListener('mouseup',   () => cursorRoot && cursorRoot.classList.remove('-down'));
+        w.addEventListener('mouseleave',() => cursorRoot && cursorRoot.classList.add('-hide'));
+        w.addEventListener('mouseenter',() => cursorRoot && cursorRoot.classList.remove('-hide'));
+      };
+    
+      let magneticEls = [];
+      const collectMagneticEls = () => {
+        magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
+          el,
+          r: parseFloat(el.getAttribute('string-radius') || '300') || 300,
+          s: parseFloat(el.getAttribute('string-strength') || '0.5') || 0.5,
+          ox: 0, oy: 0
+        }));
+      };
+      const magneticTick = () => {
+        magneticEls.forEach(m => {
+          const rect = m.el.getBoundingClientRect();
+          const ex = rect.left + rect.width / 2;
+          const ey = rect.top  + rect.height / 2;
+          const dx = cx - ex, dy = cy - ey;
+          const dist = Math.hypot(dx, dy);
+          const t = clamp(1 - dist / m.r, 0, 1);
+          const tx = dx * m.s * t * 0.35;
+          const ty = dy * m.s * t * 0.35;
+          m.ox = lerp(m.ox, tx, 0.15);
+          m.oy = lerp(m.oy, ty, 0.15);
+          m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
+        });
+      };
+    
+      // ---------- UI toggles ----------
+      const setupUI = () => {
+        const smoothToggle = d.getElementById('smooth-toggle');
+        const stopToggle   = d.getElementById('scroll-toggle');
+    
+        const applySmooth = () => {
+          de.style.scrollBehavior = (smoothToggle && smoothToggle.checked) ? 'smooth' : 'auto';
+        };
+        const applyStop = () => {
+          if (stopToggle && stopToggle.checked) { body.style.overflow = 'hidden'; body.style.height = '100vh'; }
+          else { body.style.overflow = ''; body.style.height = ''; }
+        };
+    
+        smoothToggle && (smoothToggle.onchange = applySmooth);
+        stopToggle   && (stopToggle.onchange   = applyStop);
+        applySmooth(); applyStop();
+    
+        w.addEventListener('keydown', e => {
+          if ((e.key || '').toLowerCase() === 'g') de.classList.toggle('-guidelines');
+        });
+      };
+    
+      // ---------- perf HUD ----------
+      const setupPerfHUD = () => {
+        const fpsNode = d.getElementById('fps');
+        const dirNode = d.getElementById('scroll-dir');
+        let lastT = performance.now(), frames = 0, accum = 0, lastScrollY = w.scrollY;
+    
+        const perfTick = (t) => {
+          const dt = t - lastT; lastT = t; frames++; accum += dt;
+          if (accum > 500) {
+            const fps = Math.round(frames * 1000 / accum);
+            if (fpsNode) fpsNode.textContent = `FPS: ${fps}`;
+            frames = 0; accum = 0;
+          }
+          const sy = w.scrollY;
+          const dir = sy > lastScrollY ? '↓' : (sy < lastScrollY ? '↑' : '•');
+          if (dirNode) dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+          lastScrollY = sy;
+          w.requestAnimationFrame(perfTick);
+        };
         w.requestAnimationFrame(perfTick);
       };
-      w.requestAnimationFrame(perfTick);
-  
-      // main loop
-      const tick=()=>{ updateProgress(); parallaxTick(); smoothTick(); magneticTick(); w.requestAnimationFrame(tick); };
-      w.requestAnimationFrame(tick);
+    
+      // ---------- bootstrap ----------
+      const init = () => {
+        setupRepeat();           // 1) handle clones (explicit only)
+        setupSplit();            // 2) decorate text
+        setupInView();           // 3) observers
+        collectProgressEls();    // 4) cache progress targets
+        collectParallaxEls();    // 5) parallax list
+        collectGlideEls();       // 6) glide list
+        setupCursor();           // 7) custom cursor
+        collectMagneticEls();    // 8) magnetic list
+        setupUI();               // 9) toggles
+        setupPerfHUD();          // 10) perf overlay
+        applyBoxScale();         // 11) double the demo boxes (with layout padding)
+    
+        // one-frame nudge so first paints are correct
+        requestAnimationFrame(() => { w.dispatchEvent(new Event('scroll')); });
+    
+        // main loop
+        const tick = () => {
+          updateProgress();
+          parallaxTick();
+          smoothTick();
+          magneticTick();
+          w.requestAnimationFrame(tick);
+        };
+        w.requestAnimationFrame(tick);
+    
+        // recalc on resize/orientation
+        let resizeRAF = 0;
+        const onResize = () => {
+          cancelAnimationFrame(resizeRAF);
+          resizeRAF = requestAnimationFrame(() => {
+            collectParallaxEls();
+            collectGlideEls();
+            collectMagneticEls();
+            applyBoxScale();  // recompute padding using current width
+            updateProgress();
+          });
+        };
+        w.addEventListener('resize', onResize, { passive: true });
+        w.addEventListener('orientationchange', onResize, { passive: true });
+      };
+    
+      if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', init, { once: true });
+      else init();
     })();
     </script>
+    
   </body>
   </html>
   

@@ -1235,6 +1235,18 @@ html.-loaded.-ready .-a-scale-in.-inview {
 	transition-delay: calc(var(--char-start) / 10 * .3s + .3s);
 }
 
+
+/* Fallback space between words for browsers without flex gap on inline-flex */
+.-splitted .-s-space { display:inline-block; width:.25em; }
+
+/* Prefer gap when supported, and hide fallback spacers */
+@supports (gap: 1em) {
+  .-splitted { gap:.25em; }       /* you already have this — ok to keep/duplicate */
+  .-splitted .-s-space { display:none; }
+}
+
+
+
 html.-loaded.-ready .-st {
 	visibility: visible;
 }

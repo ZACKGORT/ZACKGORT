@@ -1357,7 +1357,7 @@ div[data-position]::after {
 
 .offset-bottom,
 .offset-top {
-	background-color: rgba(var(--c-black-rgb), .4);
+	background-color: rgba(var(	--c-white-rgb), .4);
 	display: block;
 	height: calc(var(--vh, 1vh) * 10);
 	left: 0;
@@ -1366,6 +1366,7 @@ div[data-position]::after {
 	width: 100%;
 	z-index: 100;
 }
+
 
 .offset-bottom::after,
 .offset-top::after {
@@ -1378,6 +1379,8 @@ div[data-position]::after {
 	padding: 5px 8px;
 	position: absolute;
 }
+
+
 
 .offset-top {
 	top: 0;
@@ -1392,10 +1395,20 @@ div[data-position]::after {
 	bottom: 0;
 }
 
-.offset-bottom::after {
-	content: "Offset bottom: -10%";
-	top: 0;
+/* --- overrides: hide bottom label + add blur to the bottom offset --- */
+.offset-bottom::after{
+  content: none !important;   /* removes "Offset bottom: -10%" */
+  display: none !important;
 }
+
+/* ensure the bottom overlay actually blurs what's behind it */
+.offset-bottom{
+  background-color: rgba(var(	--c-white-rgb), 0.30) !important; /* keep it translucent */
+  -webkit-backdrop-filter: blur(12px) saturate(115%) !important;
+  backdrop-filter: blur(4px) saturate(150%) !important;
+  will-change: backdrop-filter;
+}
+
 
 .ko-fi {
 	align-items: center;
@@ -2198,7 +2211,7 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
 .offset-top,
 .offset-bottom{
   /* keep them translucent and add blur */
-  background-color: rgba(var(--c-black-rgb), 0.30);
+  background-color: rgba(var(	--c-white-rgb), 0.30);
   -webkit-backdrop-filter: blur(10px) saturate(115%);
   backdrop-filter: blur(10px) saturate(115%);
 }
@@ -2722,27 +2735,36 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
         /* ===== UI toggles (trimmed) ===== */
         const setupUI=()=>{ /* no-op; preserved hooks */ };
       
-        /* ===== perf HUD ===== */
-        const setupPerfHUD=()=>{
-          const fpsNode=d.getElementById('fps');
-          const dirNode=d.getElementById('scroll-dir');
-          let lastT=performance.now(), frames=0, accum=0, lastScrollY=w.scrollY;
-          const perfTick=(t)=>{
-            const dt=t-lastT; lastT=t; frames++; accum+=dt;
-            if(accum>500){
-              const fps=Math.round(frames*1000/accum);
-              if(fpsNode) fpsNode.textContent=`FPS: ${fps}`;
-              frames=0; accum=0;
-            }
-            const sy=w.scrollY;
-            const dir=sy>lastScrollY?'↓':(sy<lastScrollY?'↑':'•');
-            if(dirNode) dirNode.textContent=`Scroll ${dir}  y:${sy}`;
-            lastScrollY=sy;
-            w.requestAnimationFrame(perfTick);
-          };
-          w.requestAnimationFrame(perfTick);
-        };
-      
+/* ===== perf HUD ===== */
+const setupPerfHUD = () => {
+  const fpsNode = d.getElementById('fps');
+  const dirNode = d.getElementById('scroll-dir');
+
+  const getScrollY = () => Math.round(w.scrollY || w.pageYOffset || 0);
+
+  let lastT = performance.now(), frames = 0, accum = 0;
+  let lastScrollY = getScrollY();
+
+  const perfTick = (t) => {
+    const dt = t - lastT; lastT = t; frames++; accum += dt;
+
+    if (accum > 500) {
+      const fps = Math.round((frames * 1000) / accum);
+      if (fpsNode) fpsNode.textContent = `FPS: ${fps}`;
+      frames = 0; accum = 0;
+    }
+
+    const sy = getScrollY(); // rounded scroll position
+    const dir = sy > lastScrollY ? '↓' : (sy < lastScrollY ? '↑' : '•');
+    if (dirNode) dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+    lastScrollY = sy;
+
+    w.requestAnimationFrame(perfTick);
+  };
+
+  w.requestAnimationFrame(perfTick);
+};
+
         /* ===== Narrative HUD & Chapters (BESPOKE + FADE) ===== */
         const storyline   = d.getElementById('storyline');
         const chapterBlocks = [...d.querySelectorAll('.page .block')];

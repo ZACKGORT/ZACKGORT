@@ -2679,16 +2679,24 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     <div id="scroll-dir" data-dir="-" data-val="0" style="position:fixed;bottom:10px;left:10px;background-color:#000;color:#fff;border:1px solid rgba(255,255,255,.2);padding:5px 8px;font-size:12px;font-family:monospace;z-index:1000;pointer-events:none"></div>
 
     <script>
-(() => {
-  const de = document.documentElement, d = document, w = window, body = d.body;
+/*!
+ * String Tune — Demo Runtime (standalone JS)
+ * - Hides cursor tooltip while scrolling; fades in after you "settle" on a section.
+ * - Preserves repeat/split/inview/progress/parallax/lerp-glide/magnetic/storyline/perf HUD.
+ * Drop this into a separate .js file and include it at the end of <body>.
+ */
+ (() => {
+  const de = document.documentElement, d = document, w = window;
   if (de.__stringTuneMounted) return;
   de.__stringTuneMounted = true;
 
+  // --------- Utilities ---------
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReduced = w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const lerp = (a, b, t) => a + (b - a) * t;
+
   const toPx = (v, axis = 'y') => {
     if (v == null) return 0;
     const s = String(v).trim();
@@ -2699,26 +2707,28 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     return parseFloat(s) || 0;
   };
 
-  // Tuning
-  const BOX_SCALE = 1.7;
-  const PROGRESS_MULT = 1.6;
+  // --------- Tunables (mirrors your inline constants) ---------
+  const BOX_SCALE = 1.7;               // visual size of demo squares (does not change layout)
+  const PROGRESS_MULT = 1.6;           // scales progress mapping to feel snappier
   const PARALLAX_TRAVEL = prefersReduced ? 0 : 140;
   const LERP_AMP = prefersReduced ? 0 : 1.2;
   const GLIDE_AMP = prefersReduced ? 0 : 1.35;
 
-  // Scale demo boxes without changing layout
+  // --------- Scale demo boxes without layout shift ---------
   const applyBoxScale = () => {
     document.querySelectorAll('.-w .rel').forEach(rel => {
-      const child = rel.querySelector(':scope > .child'); if (!child) return;
+      const child = rel.querySelector(':scope > .child');
+      if (!child) return;
       const scale = parseFloat(rel.getAttribute('data-box-scale') || BOX_SCALE) || 1;
-      const base = child.clientWidth; const extra = Math.max(0, (scale - 1) * base);
+      const base = child.clientWidth;
+      const extra = Math.max(0, (scale - 1) * base);
       rel.style.paddingBottom = extra ? `${extra}px` : '';
       child.style.transformOrigin = 'top left';
       child.style.transform = scale !== 1 ? `scale(${scale})` : '';
     });
   };
 
-  /* ===== repeat ===== */
+  // --------- string="repeat" ---------
   const setupRepeat = () => {
     d.querySelectorAll('[data-string-clone]').forEach(n => n.remove());
     d.querySelectorAll('[string][string-repeat]').forEach(el => {
@@ -2735,35 +2745,45 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     });
   };
 
-  /* ===== split ===== */
+  // --------- string="split" ---------
   const setupSplit = () => {
     d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
       if (el.__split || el.querySelector('.-s-word, .-s-char')) return;
       const mode = (el.getAttribute('string-split') || '').toLowerCase();
-      const doWord = mode.includes('word'); const doChar = mode.includes('char');
+      const doWord = mode.includes('word');
+      const doChar = mode.includes('char');
       const raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
       const words = raw.length ? raw.split(' ') : [];
-      el.textContent = ''; el.classList.add('-splitted');
+      el.textContent = '';
+      el.classList.add('-splitted');
+
       let wi = 0;
       words.forEach((word, i) => {
-        const wSpan = document.createElement('span'); if (doWord) wSpan.className = '-s-word';
+        const wSpan = d.createElement('span');
+        if (doWord) wSpan.className = '-s-word';
+
         if (doChar) {
           [...word].forEach((c, ci) => {
-            const cSpan = document.createElement('span');
+            const cSpan = d.createElement('span');
             cSpan.className = '-s-char';
             cSpan.style.transitionDelay = (wi * 0.02 + ci * 0.01) + 's';
-            cSpan.textContent = c; wSpan.appendChild(cSpan);
+            cSpan.textContent = c;
+            wSpan.appendChild(cSpan);
           });
-        } else { wSpan.textContent = word; }
+        } else {
+          wSpan.textContent = word;
+        }
+
         el.appendChild(wSpan);
-        if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+        if (i < words.length - 1) el.appendChild(d.createTextNode(' '));
         wi++;
       });
+
       el.__split = true;
     });
   };
 
-  /* ===== in-view ===== */
+  // --------- In-View (sections and elements) ---------
   const setupInView = () => {
     const makeObserver = (el) => {
       const topOffset = toPx(el.getAttribute('string-offset-top') ?? '-10%', 'y');
@@ -2779,22 +2799,34 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
         });
       }, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
     };
+
     d.querySelectorAll('.block').forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
     d.querySelectorAll('[string]').forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
   };
 
-  /* ===== progress ===== */
+  // --------- Progress ---------
   const progressEls = [];
-  const collectProgressEls = () => { progressEls.length = 0; progressEls.push(...d.querySelectorAll('[string="progress"]')); };
+  const collectProgressEls = () => {
+    progressEls.length = 0;
+    progressEls.push(...d.querySelectorAll('[string="progress"]'));
+  };
+
   const computeProgress = (el, rect, vh) => {
     const enterEdge = (el.getAttribute('string-enter-el') || 'bottom').toLowerCase();
     const exitEdge = (el.getAttribute('string-exit-el') || 'top').toLowerCase();
+
     const topOffset = toPx(el.getAttribute('string-offset-top') ?? '-10%', 'y');
     const bottomOffset = toPx(el.getAttribute('string-offset-bottom') ?? '-10%', 'y');
-    const viewTop = 0 + topOffset, viewBottom = vh + bottomOffset;
+
+    const viewTop = 0 + topOffset;
+    const viewBottom = vh + bottomOffset;
+
     const enterRef = (enterEdge === 'top') ? viewTop : viewBottom;
     const exitRef = (exitEdge === 'top') ? viewTop : viewBottom;
-    const edgeTop = rect.top, edgeBottom = rect.bottom;
+
+    const edgeTop = rect.top;
+    const edgeBottom = rect.bottom;
+
     let p;
     if (enterEdge === exitEdge) {
       const h = Math.max(1, rect.height);
@@ -2811,8 +2843,10 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
       if (A < 0 && B < 0) p = 1;
     }
     p = Number.isFinite(p) ? clamp(p, 0, 1) : 0;
-    el.__lastProgress = p; return p;
+    el.__lastProgress = p;
+    return p;
   };
+
   const updateProgress = () => {
     const vh = w.innerHeight;
     for (const el of progressEls) {
@@ -2820,11 +2854,13 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
       const p = computeProgress(el, rect, vh);
       const out = p * PROGRESS_MULT;
       el.style.setProperty('--progress', clamp(out, 0, 1).toFixed(4));
+
       const id = el.getAttribute('string-id') || el.id;
       if (id) {
         d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(n => n.textContent = Math.round(p * 100));
         d.querySelectorAll(`[data-stage-of="${id}"]`).forEach(n => {
-          let label = 'idea'; const v = p * 100;
+          let label = 'idea';
+          const v = p * 100;
           if (v >= 100) label = 'on the shelf';
           else if (v >= 75) label = 'launch';
           else if (v >= 50) label = 'beta';
@@ -2835,16 +2871,18 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     }
   };
 
-  /* ===== parallax ===== */
+  // --------- Parallax ---------
   let parallaxEls = [];
   const collectParallaxEls = () => {
     parallaxEls = (isMobile || prefersReduced) ? [] :
       [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
         .map(el => ({ el, factor: parseFloat(el.getAttribute('string-parallax') || '0.5') || 0.5 }));
   };
+
   const parallaxTick = () => {
     if (!parallaxEls.length) return;
-    const wh = w.innerHeight, maxTravel = PARALLAX_TRAVEL;
+    const wh = w.innerHeight;
+    const maxTravel = PARALLAX_TRAVEL;
     parallaxEls.forEach(({ el, factor }) => {
       const r = el.getBoundingClientRect();
       const center = r.top + r.height / 2 - wh / 2;
@@ -2853,63 +2891,51 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     });
   };
 
-  /* ===== lerp / glide ===== */
+  // --------- Lerp / Glide ---------
   let lastY = w.scrollY || w.pageYOffset;
   let lerpVal = 0, glideVal = 0;
   let glideEls = [];
+
   const collectGlideEls = () => {
     glideEls = (isMobile || prefersReduced) ? [] :
       [...d.querySelectorAll('[string="glide"]')]
         .map(el => ({ el, k: parseFloat(el.getAttribute('string-glide') || '0.35') || 0.35, y: 0 }));
   };
+
   const smoothTick = () => {
     const y = w.scrollY || w.pageYOffset;
-    const delta = y - lastY; lastY = y;
+    const delta = y - lastY;
+    lastY = y;
+
     lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
     glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
-    document.documentElement.style.setProperty('--lerp', (lerpVal * LERP_AMP).toFixed(2));
-    document.documentElement.style.setProperty('--glide', (glideVal * GLIDE_AMP).toFixed(2));
+
+    de.style.setProperty('--lerp', (lerpVal * LERP_AMP).toFixed(2));
+    de.style.setProperty('--glide', (glideVal * GLIDE_AMP).toFixed(2));
+
     glideEls.forEach(g => {
       g.y = lerp(g.y, glideVal * g.k, 0.12);
       g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
     });
   };
 
-  /* ===== cursor + magnetic ===== */
+  // --------- Cursor, Tooltip (debounced), Magnetic ---------
   const cursorRoot = d.querySelector('.cursor[string-cursor]');
-  let tipsStartY = Infinity;
-	const computeTipsStart = () => {
-  tipsStartY = 0; // tips are allowed everywhere
-  if (cursorRoot) {
-    const sy = w.scrollY || w.pageYOffset;
-    cursorRoot.classList.toggle('-tips', sy >= tipsStartY);
-  }
-};
+  const DEFAULT_TIP = 'Try the cursor →';
 
-  computeTipsStart();
-  w.addEventListener('resize', computeTipsStart, { passive: true });
-  w.addEventListener('orientationchange', computeTipsStart, { passive: true });
-
-  const DEFAULT_TIP = "Try the cursor →";
-  const findTipForNode = (node) => {
-    while (node && node !== d.body) {
-      if (node.classList && node.classList.contains('block') && node.hasAttribute('data-cursor-tip')) {
-        return node.getAttribute('data-cursor-tip') || DEFAULT_TIP;
-      }
-      node = node.parentElement;
-    }
-    return null;
-  };
-
-  let _lastTip = "";
   let cx = 0, cy = 0;
+  let magneticEls = [];
+
   const setupCursor = () => {
     if (!cursorRoot) return;
+
     const tipEl = cursorRoot.querySelector('.cursor-tip');
 
     w.addEventListener('mousemove', e => {
       cx = e.clientX; cy = e.clientY;
       cursorRoot.style.transform = `translate3d(${cx + 16}px, ${cy + 8}px, 0)`;
+
+      // Toggle small/large cursor shapes per block’s requested class
       let node = e.target, mode = 'cursor-1';
       while (node && node !== d.body) {
         if (node.hasAttribute('string-cursor-class')) { mode = node.getAttribute('string-cursor-class'); break; }
@@ -2917,24 +2943,16 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
       }
       cursorRoot.classList.toggle('cursor-1', mode === 'cursor-1');
       cursorRoot.classList.toggle('cursor-2', mode === 'cursor-2');
-      if (tipEl) {
-        const tip = findTipForNode(e.target) || DEFAULT_TIP;
-        if (tip !== _lastTip) { tipEl.textContent = tip; _lastTip = tip; }
-      }
     }, { passive: true });
 
     w.addEventListener('mousedown', () => cursorRoot.classList.add('-down'));
-    w.addEventListener('mouseup', () => cursorRoot.classList.remove('-down'));
-    w.addEventListener('mouseleave', () => cursorRoot.classList.add('-hide'));
-    w.addEventListener('mouseenter', () => cursorRoot.classList.remove('-hide'));
+    w.addEventListener('mouseup',   () => cursorRoot.classList.remove('-down'));
+    w.addEventListener('mouseleave',() => cursorRoot.classList.add('-hide'));
+    w.addEventListener('mouseenter',() => cursorRoot.classList.remove('-hide'));
 
-    if (tipEl) {
-      tipEl.textContent = DEFAULT_TIP;
-      _lastTip = DEFAULT_TIP;
-    }
+    if (tipEl) tipEl.textContent = DEFAULT_TIP;
   };
 
-  let magneticEls = [];
   const collectMagneticEls = () => {
     magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
       el,
@@ -2943,6 +2961,7 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
       ox: 0, oy: 0
     }));
   };
+
   const magneticTick = () => {
     magneticEls.forEach(m => {
       const rect = m.el.getBoundingClientRect();
@@ -2951,15 +2970,57 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
       const dist = Math.hypot(dx, dy);
       const t = clamp(1 - dist / m.r, 0, 1);
       const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
-      m.ox = lerp(m.ox, tx, 0.15); m.oy = lerp(m.oy, ty, 0.15);
+      m.ox = lerp(m.ox, tx, 0.15);
+      m.oy = lerp(m.oy, ty, 0.15);
       m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
     });
   };
 
-  /* ===== UI toggles (trimmed) ===== */
-  const setupUI = () => { /* no-op; preserved hooks */ };
+  // Debounced tooltip visibility: hidden while scrolling, fades in after settled
+  const TIP_DELAY = 400; // ms after scrolling stops
+  let tipTimer = 0;
+  let activeBlock = null;
 
-  /* ===== perf HUD ===== */
+  const hideTipNow = () => { if (cursorRoot) cursorRoot.classList.remove('-tips'); };
+
+  const sectionHeading = (block) => {
+    if (!block) return '';
+    const h = block.querySelector('h1,h2,h3,h4,h5,h6');
+    if (!h) return '';
+    for (const node of h.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const t = (node.nodeValue || '').trim();
+        if (t) return t;
+      }
+    }
+    return (h.textContent || '').trim();
+  };
+
+  const storyFor = (block) =>
+    (block?.getAttribute('data-storyline'))
+    || (block?.getAttribute('data-cursor-tip'))
+    || sectionHeading(block)
+    || DEFAULT_TIP;
+
+  const showTipIfSettled = () => {
+    if (!cursorRoot) return;
+    const tipEl = cursorRoot.querySelector('.cursor-tip');
+    const msg = storyFor(activeBlock);
+    if (tipEl) tipEl.textContent = msg;
+    cursorRoot.classList.add('-tips'); // fade in via CSS
+  };
+
+  const onUserScroll = () => {
+    hideTipNow();                    // hide immediately during motion
+    clearTimeout(tipTimer);
+    tipTimer = setTimeout(showTipIfSettled, TIP_DELAY);  // show after scroll settles
+  };
+
+  w.addEventListener('scroll', onUserScroll, { passive: true });
+  w.addEventListener('wheel', onUserScroll, { passive: true });
+  w.addEventListener('touchmove', onUserScroll, { passive: true });
+
+  // --------- Perf HUD (FPS + Scroll dir) ---------
   const setupPerfHUD = () => {
     const fpsNode = d.getElementById('fps');
     const dirNode = d.getElementById('scroll-dir');
@@ -2978,7 +3039,7 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
         frames = 0; accum = 0;
       }
 
-      const sy = getScrollY(); // rounded scroll position
+      const sy = getScrollY();
       const dir = sy > lastScrollY ? '↓' : (sy < lastScrollY ? '↑' : '•');
       if (dirNode) dirNode.textContent = `Scroll ${dir}  y:${sy}`;
       lastScrollY = sy;
@@ -2989,11 +3050,11 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     w.requestAnimationFrame(perfTick);
   };
 
-  /* ===== Narrative HUD & Chapters (BESPOKE + FADE) ===== */
-  const storyline = d.getElementById('storyline');
+  // --------- Storyline HUD (updates text + remembers active section) ---------
+  const storylineEl = d.getElementById('storyline');
   const chapterBlocks = [...d.querySelectorAll('.page .block')];
 
-  const getHeading = (block) => {
+  const getHeadingText = (block) => {
     const h = block.querySelector('h1,h2,h3,h4,h5,h6');
     if (!h) return '';
     for (const node of h.childNodes) {
@@ -3005,51 +3066,30 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before {
     return (h.textContent || '').trim();
   };
 
-
-
-// Observe blocks that define a tip
-function setupTipObserver(){
-  if (!cursorRoot) return;
-
-  const tipBlocks = [...document.querySelectorAll('.page .block[data-cursor-tip]')];
-  if (!tipBlocks.length) return;
-
-  // Show as soon as ~8% of a tip-block is on screen
-  const io = new IntersectionObserver((entries) => {
-    // Is any tip section currently visible enough?
-    const anyVisible = entries.some(e => e.isIntersecting && e.intersectionRatio >= 0.08);
-    cursorRoot.classList.toggle('-tips', anyVisible);
-  }, { threshold: [0.01, 0.08, 0.25, 0.5, 0.75, 1] });
-
-  tipBlocks.forEach(b => io.observe(b));
-}
-
-  // Prefer explicit bespoke message, then cursor tip, then heading
-  const getStoryForBlock =
-    (block) =>
-      block.getAttribute('data-storyline')
-      || block.getAttribute('data-cursor-tip')
-      || getHeading(block)
-      || '';
+  const getStoryForBlock = (block) =>
+    block.getAttribute('data-storyline')
+    || block.getAttribute('data-cursor-tip')
+    || getHeadingText(block)
+    || '';
 
   let currentStory = '';
   const updateStoryline = (next) => {
-    if (!storyline || !next || next === currentStory) return;
+    if (!storylineEl || !next || next === currentStory) return;
     currentStory = next;
-    storyline.classList.add('-fade');          // fade out
+    storylineEl.classList.add('-fade');        // fade out (CSS handles transition)
     setTimeout(() => {
-      storyline.textContent = currentStory;    // swap
+      storylineEl.textContent = currentStory;  // swap text
       requestAnimationFrame(() => {
-        storyline.classList.remove('-fade');   // fade in
+        storylineEl.classList.remove('-fade'); // fade in
       });
     }, 180);
   };
 
-  (() => {
-    if (!storyline || !chapterBlocks.length) return;
+  const setupStorylineObserver = () => {
+    if (!storylineEl || !chapterBlocks.length) return;
 
-    // init label
-    updateStoryline(getStoryForBlock(chapterBlocks[0]) || storyline.textContent);
+    // Initial text
+    updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
 
     const io = new IntersectionObserver((entries) => {
       const vis = entries
@@ -3058,13 +3098,17 @@ function setupTipObserver(){
       if (!vis) return;
 
       const el = vis.target;
+      activeBlock = el; // <-- critical for tooltip content
       updateStoryline(getStoryForBlock(el));
     }, { root: null, threshold: [0, .25, .5, .75, 1] });
 
     chapterBlocks.forEach(b => io.observe(b));
-  })();
+  };
 
-  /* ===== bootstrap ===== */
+  // --------- UI (hook left for future toggles) ---------
+  const setupUI = () => { /* no-op; keep hook for future controls */ };
+
+  // --------- Bootstrap ---------
   const init = () => {
     setupRepeat();
     setupSplit();
@@ -3073,35 +3117,29 @@ function setupTipObserver(){
     collectParallaxEls();
     collectGlideEls();
     setupCursor();
-		setupTipObserver();  // <-- add this
     collectMagneticEls();
     setupUI();
     setupPerfHUD();
     applyBoxScale();
+    setupStorylineObserver();
 
-    document.documentElement.style.setProperty('--progress-mult', PROGRESS_MULT);
+    // reflect current multiplier on :root for CSS that reads it
+    de.style.setProperty('--progress-mult', PROGRESS_MULT);
 
-    if (cursorRoot) {
-      const sy = w.scrollY || w.pageYOffset;
-      cursorRoot.classList.toggle('-tips', sy >= tipsStartY);
-    }
-
+    // first-frame update
     requestAnimationFrame(() => { w.dispatchEvent(new Event('scroll')); });
 
+    // main RAF loop
     const tick = () => {
       updateProgress();
       parallaxTick();
       smoothTick();
       magneticTick();
-
-      if (cursorRoot) {
-        const sy = w.scrollY || w.pageYOffset;
-        cursorRoot.classList.toggle('-tips', sy >= tipsStartY);
-      }
       w.requestAnimationFrame(tick);
     };
     w.requestAnimationFrame(tick);
 
+    // responsive collectors
     let resizeRAF = 0;
     const onResize = () => {
       cancelAnimationFrame(resizeRAF);

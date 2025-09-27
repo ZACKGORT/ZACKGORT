@@ -1236,6 +1236,27 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
   text-decoration-thickness: .04em;
 }
 
+.block.string-split.-wordwall .text-container > .wall-wrap > span{
+  display:block; margin-top: var(--m);
+  font-size: var(--mm); letter-spacing: normal; opacity:.85;
+}
+
+
+/* Default (touch/mobile): no fading on hover */
+.-wordwall .wall-wrap:hover li,
+.-wordwall .wall li:hover{
+  opacity: 1;
+  transform: none;
+}
+
+/* Enable fade only on hover-capable, fine-pointer devices (desktops/laptops) */
+@media (hover: hover) and (pointer: fine){
+  .-wordwall .wall-wrap:hover li{ opacity: .2; }
+  .-wordwall .wall li:hover{
+    opacity: 1;
+    transform: translateX(.02em);
+  }
+}
 
 </style>  
 </head>
@@ -1409,7 +1430,7 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
 
     <div class="wall-wrap">
       <!-- Capabilities -->
-      <span class="-m"><strong>My toolbox</strong></span>
+      <span class="-m group-label"><strong>MY TOOLBOX</strong></span>
       <ul class="wall">
         <li tabindex="0">Design systems for speed, consistency, and scale (tokens → components → docs).</li>
         <li tabindex="0">Data &amp; dashboards: structure signal, reduce noise, make decisions obvious.</li>
@@ -1420,7 +1441,7 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
       </ul>
 
       <!-- Recent impact -->
-      <span class="-m"><strong>What I've Shipped</strong></span>
+      <span class="-m group-label"><strong>PACKAGES SHIPPED</strong></span>
       <ul class="wall">
         <li tabindex="0"><strong>BNY Mellon</strong> — Financial Product UX; shipped a modular design system across an evolving platform.</li>
         <li tabindex="0"><strong>TikTok For Business</strong> — Research &amp; Strategy for consumer B2B content and brand activation; data migration to a headless CMS (Contentful).</li>

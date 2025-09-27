@@ -1175,6 +1175,68 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
 }
 
 
+
+/* ===== Word Wall hover/fade (cross-list) ===== */
+.block.string-split.-wordwall{
+  --section-vh: 100;
+  min-height: 0;
+  display: grid;
+  align-items: center;
+}
+
+.block.string-split.-wordwall .text-container{
+  --left: 1;
+  --width: var(--g-columns);
+  max-width: none;
+}
+
+/* keep labels small and unaffected */
+.block.string-split.-wordwall .text-container > .wall-wrap > span{
+  display: block;
+  margin-top: var(--m);
+  font-size: var(--mm);
+  letter-spacing: normal;
+  opacity: .85;
+}
+
+/* lists act as one wall */
+.block.string-split.-wordwall .wall{
+  display: grid;
+  gap: .15em;
+  margin-top: .5em;
+}
+
+/* big, crisp lines */
+.block.string-split.-wordwall .wall li{
+  font-size: clamp(.8rem, 3.5vw, .8rem);
+  line-height: 1.8em;
+  font-weight: 400;
+  color: var(--c-black);
+  opacity: 1;
+  transition: opacity .18s var(--f-smooth), transform .18s var(--f-smooth);
+  will-change: opacity, transform;
+  outline: none; /* for focus styling below */
+}
+
+/* dim everyone when the group is hovered */
+.block.string-split.-wordwall .wall-wrap:hover li{ opacity: .3; }
+/* …except the hovered line */
+.block.string-split.-wordwall .wall li:hover{
+  opacity: 1;
+  transform: translateX(.02em);
+}
+
+/* keyboard/touch accessibility */
+.block.string-split.-wordwall .wall-wrap:focus-within li{ opacity: .2; }
+.block.string-split.-wordwall .wall li:focus-visible{
+  opacity: 1;
+  transform: translateX(.02em);
+  /* optional visible focus cue */
+  text-decoration: underline;
+  text-decoration-thickness: .04em;
+}
+
+
 </style>  
 </head>
 <body class="-fiddle-digital">
@@ -1231,11 +1293,11 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
 		 <h6 class="title -tac" data-v-8129bdd7>Design 101</h6>
 		 <div class="text-container" data-v-8129bdd7 style="--left:2; --width:12;">
 			 <p class="-h3 -m-h5" string="split" string-split="word|char[left]" string-repeat data-v-8129bdd7 string-id="string-23">
-				 Simple. Clean. Intentional.
+				Like a box of chocolates
 			 </p>
-			 <span class="-m" data-v-8129bdd7>Look, I'm not here to bullsh*t with you. We 'designers' are not engineers; we are not scientists; we are not creating things that will remembered in 20 years; 50 years; or a century from now. No one is building the great pyramids with DIV containers.</span>
+			 <span class="-m" data-v-8129bdd7>Look, I'm not here to bullsh*t with you. We 'designers' are not engineers; we are not scientists; we are not creating things that will remembered in 20 years; 50 years; or a century from now. No one is building the great pyramids with DIV containers. All said, we just like making things that "delight".</span>
 
-			 <span class="-m" data-v-8129bdd7>At the end of the day, we are all just trying to sell sh*t in an interesting way. And since our monkey-brains are fascinated by bright colors and fast-intake content, we have evolved from a species that once 'thought outside of the box', whom now are [beholden to the box].</span>
+			 <span class="-m" data-v-8129bdd7>But, at the end of the day, we all need to sell sh*t, so it behooves us to do so in an interesting way. And since our monkey-brains are fascinated by bright colors and fast-intake content, we have evolved from a species that once 'thought outside of the box', whom now are [beholden to the box].</span>
 		 </div>
 	 </div>
 
@@ -1332,46 +1394,41 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
 		</div>
 
 
-<!-- Split 2 (text only) — BULLET VERSION -->
-<div class="-w block string-split"
+<!-- Split 2 (text only) — WORD WALL -->
+<div class="-w block string-split -wordwall"
      string="cursor" string-cursor-class="cursor-1"
      data-storyline="Say less, say clearly."
-     data-cursor-tip="Say less, say clearly."
-     data-v-021d6718 data-v-8129bdd7 data-v-4f043ceb>
+     data-cursor-tip="Say less, say clearly.">
 
-  <h6 class="title -tac" data-v-8129bdd7>Let's unbox this:</h6>
+  <h6 class="title -tac">Let's unbox this:</h6>
 
-  <div class="text-container" data-v-8129bdd7 style="--left:2; --width:12;">
-    <p class="-h3 -m-h5"
-       string="split"
-       string-split="word|char[left]"
-       string-repeat
-       data-v-8129bdd7
-       string-id="string-23">
+  <div class="text-container" style="--left:2; --width:12;">
+    <p class="-h3 -m-h5" string="split" string-split="word|char[left]" string-repeat string-id="string-23">
       What's in the box?
     </p>
 
-    <!-- Capabilities -->
-    <span class="-m" data-v-8129bdd7><strong>My toolbox</strong></span>
-    <ul class="-m" data-v-8129bdd7>
-      <li>Design systems for speed, consistency, and scale (tokens → components → docs).</li>
-      <li>Data & dashboards: structure signal, reduce noise, make decisions obvious.</li>
-      <li>End-to-end UX: discovery → framing → prototyping → validation → dev-ready specs.</li>
-      <li>Stakeholder alignment: crisp narratives, visual proofs, and clear tradeoffs.</li>
-      <li>Shipping culture: cut scope responsibly, protect momentum, measure outcomes.</li>
-      <li>Tool fluency: fast in modern product stacks (React, Tailwind, Figma, FigJam).</li>
-    </ul>
+    <div class="wall-wrap">
+      <!-- Capabilities -->
+      <span class="-m"><strong>My toolbox</strong></span>
+      <ul class="wall">
+        <li tabindex="0">Design systems for speed, consistency, and scale (tokens → components → docs).</li>
+        <li tabindex="0">Data &amp; dashboards: structure signal, reduce noise, make decisions obvious.</li>
+        <li tabindex="0">End-to-end UX: discovery → framing → prototyping → validation → dev-ready specs.</li>
+        <li tabindex="0">Stakeholder alignment: crisp narratives, visual proofs, and clear tradeoffs.</li>
+        <li tabindex="0">Shipping culture: cut scope responsibly, protect momentum, measure outcomes.</li>
+        <li tabindex="0">Tool fluency: fast in modern product stacks (React, Tailwind, Figma, FigJam).</li>
+      </ul>
 
-    <!-- Recent impact -->
-    <span class="-m" data-v-8129bdd7><strong>What I've Shipped</strong></span>
-    <ul class="-m" data-v-8129bdd7>
-
-      <li><strong>BNY Melon</strong> — Financial Product UX; shipped a modular design system across an evolving platform.</li>
-      <li><strong>TikTok For Business</strong> — Research & Strategy for consumer B2B content and brand-activation; add data migration into headless environment {Contentful} </li>
-      <li><strong>General Nutrition Centers</strong> — Discovery, Ressearch, UX prototyping and visual design via the Shopify e-commerce platform.</li>
-			<li><strong>iOS</strong> — Built and shipped an MVP iOS social video sharing app; leveraging lean UX in an agile environment.</li>
-			<li><strong>.EDU</strong> — WCAG-compliant interactive design systems & information architecture {+ content strategy, creative copywriting}</li>
-    </ul>
+      <!-- Recent impact -->
+      <span class="-m"><strong>What I've Shipped</strong></span>
+      <ul class="wall">
+        <li tabindex="0"><strong>BNY Mellon</strong> — Financial Product UX; shipped a modular design system across an evolving platform.</li>
+        <li tabindex="0"><strong>TikTok For Business</strong> — Research &amp; Strategy for consumer B2B content and brand activation; data migration to a headless CMS (Contentful).</li>
+        <li tabindex="0"><strong>General Nutrition Centers</strong> — Discovery, research, UX prototyping and visual design on Shopify.</li>
+        <li tabindex="0"><strong>iOS</strong> — Built and shipped an MVP social video sharing app; lean UX in an agile environment.</li>
+        <li tabindex="0"><strong>.EDU</strong> — WCAG-compliant interactive design systems &amp; IA (+ content strategy, creative copy).</li>
+      </ul>
+    </div>
   </div>
 </div>
 
@@ -1474,7 +1531,7 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
 		</div>
 
 		<!-- Split 3 (text only) -->
-		<div class="-w block string-split"
+		<div class="-w block string-split -wordwall"
 				 string="cursor" string-cursor-class="cursor-1"
 				 data-storyline="Say less, say clearly."
 				 data-cursor-tip="Say less, say clearly."

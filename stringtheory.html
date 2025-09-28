@@ -2057,6 +2057,31 @@ data-cursor-tip="Click, hold, and fling.">
   const world = new RAPIER.World({ x: 0, y: 0 });
   const queue = new RAPIER.EventQueue(true);
 
+
+
+	// load canvas-confetti (ESM) and make a helper to aim at canvas coords
+const { default: confetti } = await import("https://esm.run/canvas-confetti@1");
+
+function burstAtCanvas(xPx, yPx, opts = {}) {
+  // xPx/yPx are in CANVAS pixel space (device pixels)
+  // convert to viewport 0..1 for confetti origin
+  const rect = canvas.getBoundingClientRect();
+  const clientX = rect.left + (xPx / DPR);
+  const clientY = rect.top  + (yPx / DPR);
+
+  return confetti({
+    particleCount: 160,
+    spread: 70,
+    startVelocity: 55,
+    ticks: 200,
+    scalar: 0.9,
+    origin: {
+      x: clientX / window.innerWidth,
+      y: clientY / window.innerHeight
+    },
+    ...opts
+  });
+}
   /* ---------- bounds (collidable walls) ---------- */
   let walls = [];
   const wallHandles = new Set();
@@ -2373,6 +2398,7 @@ function hideGoal(){ goal.visible = false; }
 		if (checkGoal()) {
   hideGoal();
   current.wear = 0;
+	burstAtCanvas(goal.cx, goal.cy);
   makeBoxCollider();          // snap back to square immediately
   body.setAngularDamping(0.04); // restore baseline spin damping for square
   // keep momentum: do not zero lin/ang velocity

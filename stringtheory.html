@@ -343,6 +343,8 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before { co
   font: 14px/1.3 system-ui, ui-sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
   text-align: center; white-space: normal; word-break: break-word;
 }
+
+
 @media (min-width:1024px) { .storyline-hud { font-size: 12px; } }
 
 /* Tooltips */
@@ -2031,72 +2033,57 @@ data-cursor-tip="Click, hold, and fling.">
 })();
 </script>
 
+
+
+
+
 <script>
 (async function initRapierPlayground(){
   const stageBlock = document.querySelector(".block.string-rapier");
   const canvas = document.getElementById("rapier-canvas");
   if (!stageBlock || !canvas) return;
 
+  /* ===== Canvas sizing ===== */
   const ctx = canvas.getContext("2d");
   const DPR = Math.max(1, window.devicePixelRatio || 1);
-
   function fitCanvas(){
     const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
-    canvas.width = Math.floor(r.width * DPR);
+    canvas.width  = Math.floor(r.width * DPR);
     canvas.height = Math.floor(r.height * DPR);
-    canvas.style.width = r.width + "px";
+    canvas.style.width  = r.width + "px";
     canvas.style.height = r.height + "px";
   }
   fitCanvas();
   window.addEventListener("resize", fitCanvas, { passive: true });
 
+  /* ===== Libs ===== */
   const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
   await RAPIER.init();
+  const { RigidBodyType, ActiveEvents } = RAPIER;
 
+  // Confetti (no React)
+  const confettiMod = await import("https://esm.run/canvas-confetti@1");
+  const confetti = confettiMod.default || confettiMod;
+
+  /* ===== World ===== */
   const DROP_G = 2400;
-  const world = new RAPIER.World({ x: 0, y: 0 });
-  const queue = new RAPIER.EventQueue(true);
+  const world  = new RAPIER.World({ x: 0, y: 0 });
+  const queue  = new RAPIER.EventQueue(true);
 
-
-
-	// load canvas-confetti (ESM) and make a helper to aim at canvas coords
-const { default: confetti } = await import("https://esm.run/canvas-confetti@1");
-
-function burstAtCanvas(xPx, yPx, opts = {}) {
-  // xPx/yPx are in CANVAS pixel space (device pixels)
-  // convert to viewport 0..1 for confetti origin
-  const rect = canvas.getBoundingClientRect();
-  const clientX = rect.left + (xPx / DPR);
-  const clientY = rect.top  + (yPx / DPR);
-
-  return confetti({
-    particleCount: 160,
-    spread: 70,
-    startVelocity: 55,
-    ticks: 200,
-    scalar: 0.9,
-    origin: {
-      x: clientX / window.innerWidth,
-      y: clientY / window.innerHeight
-    },
-    ...opts
-  });
-}
-  /* ---------- bounds (collidable walls) ---------- */
+  /* ===== Bounds (walls) ===== */
   let walls = [];
   const wallHandles = new Set();
   function rebuildWalls(){
     walls.forEach(({ rb, co }) => { world.removeCollider(co, true); world.removeRigidBody(rb); });
-    walls.length = 0;
-    wallHandles.clear();
+    walls.length = 0; wallHandles.clear();
 
     const W = canvas.width, H = canvas.height;
     const t = Math.max(20 * DPR, 12 * DPR);
     const defs = [
-      { x: -t/2,  y: H/2,  w: t/2,  h: H/2 },   // left
-      { x: W+t/2, y: H/2,  w: t/2,  h: H/2 },   // right
-      { x: W/2,   y: -t/2, w: W/2,  h: t/2 },   // top
-      { x: W/2,   y: H+t/2,w: W/2,  h: t/2 }    // bottom
+      { x: -t/2,  y: H/2,  w: t/2,  h: H/2 },    // left
+      { x: W+t/2, y: H/2,  w: t/2,  h: H/2 },    // right
+      { x: W/2,   y: -t/2, w: W/2,  h: t/2 },    // top
+      { x: W/2,   y: H+t/2,w: W/2,  h: t/2 }     // bottom
     ];
     defs.forEach(({x,y,w,h})=>{
       const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x, y));
@@ -2104,7 +2091,7 @@ function burstAtCanvas(xPx, yPx, opts = {}) {
         RAPIER.ColliderDesc.cuboid(w, h)
           .setRestitution(0.6)
           .setFriction(0.25)
-          .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
+          .setActiveEvents(ActiveEvents.COLLISION_EVENTS),
         rb
       );
       walls.push({ rb, co });
@@ -2126,7 +2113,7 @@ function burstAtCanvas(xPx, yPx, opts = {}) {
     }, true);
   }, { passive: true });
 
-  /* ---------- morphing body ---------- */
+  /* ===== Main body (morphs square → circle by wear) ===== */
   const size   = Math.min(canvas.width, canvas.height) * 0.12;
   const start  = { x: canvas.width * 0.5, y: canvas.height * 0.35 };
   const current = {
@@ -2149,7 +2136,7 @@ function burstAtCanvas(xPx, yPx, opts = {}) {
       RAPIER.ColliderDesc.cuboid(current.half, current.half)
         .setRestitution(0.72)
         .setFriction(0.25)
-        .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
+        .setActiveEvents(ActiveEvents.COLLISION_EVENTS),
       body
     );
     current.isBall = false;
@@ -2160,16 +2147,16 @@ function burstAtCanvas(xPx, yPx, opts = {}) {
       RAPIER.ColliderDesc.ball(current.half * 0.98)
         .setRestitution(0.72)
         .setFriction(0.25)
-        .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
+        .setActiveEvents(ActiveEvents.COLLISION_EVENTS),
       body
     );
     current.isBall = true;
   }
   makeBoxCollider();
 
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
-  /* ---------- drop observer (re-armable) ---------- */
+  /* ===== Section gravity (re-arm when re-entered) ===== */
   let hasDropped = false;
   let dropObserver = null;
   function armDropObserver(){
@@ -2189,59 +2176,47 @@ function burstAtCanvas(xPx, yPx, opts = {}) {
   }
   armDropObserver();
 
-
-// ---------- goal “spawn box” (centered) ----------
-const goal = {
-  visible: false,
-  side: size * 1.1, // slightly larger than the ball for friendly catches
-  get half(){ return this.side / 2; },
-  // always center it in the current canvas
-  get cx(){ return canvas.width  * 0.5; },
-  get cy(){ return canvas.height * 0.5; },
-  get x(){ return this.cx - this.half; },
-  get y(){ return this.cy - this.half; }
-};
-
-function showGoal(){ goal.visible = true; }
-function hideGoal(){ goal.visible = false; }
-
-
+  /* ===== Circular goal (appears when you morph) ===== */
+  const goal = {
+    visible: false,
+    // ~40% larger than the ball; tweak to make shots easier/harder
+    get radius(){ return current.half * 1.4; },
+    get cx(){ return canvas.width  * 0.5; },
+    get cy(){ return canvas.height * 0.5; }
+  };
   function showGoal(){ goal.visible = true; }
   function hideGoal(){ goal.visible = false; }
 
   function resetSection(){
-    // visuals
     hideGoal();
-    // physics state
     current.wear = 0;
-    makeBoxCollider();
+    makeBoxCollider();                         // back to square immediately
     body.setTranslation({ x: start.x, y: start.y }, true);
     body.setLinvel({ x: 0, y: 0 }, true);
     body.setAngvel(0, true);
     body.setAngularDamping(0.04);
-    // gravity re-arms
     hasDropped = false;
-    world.gravity = { x: 0, y: 0 };
+    world.gravity = { x: 0, y: 0 };           // re-arm the drop
     armDropObserver();
   }
 
-  /* ---------- wear & morph ---------- */
+  /* ===== Wear & morph logic ===== */
   function addWear(amount){
     const before = current.wear;
     current.wear = clamp(current.wear + amount, 0, 1);
     if (!current.isBall && current.wear >= 0.85) {
       makeBallCollider();  // morph to true circle
-      showGoal();          // spawn the goal where it all began
+      showGoal();          // reveal target
     }
     // spins a bit freer as it rounds
     const spinEase = 0.04 + current.wear * 0.06;
     body.setAngularDamping(spinEase);
   }
 
-  /* ---------- pointer interactions ---------- */
+  /* ===== Pointer interactions (KINEMATIC while dragging) ===== */
   let dragging = false;
   let lastPt = null;
-  let lastV = { x: 0, y: 0 };
+  let lastV  = { x: 0, y: 0 };
   let grabOffset = null;
 
   function eventPos(e){
@@ -2253,6 +2228,10 @@ function hideGoal(){ goal.visible = false; }
   }
   function pointInside(pt){
     const c = body.translation();
+    if (current.isBall){
+      const dx = pt.x - c.x, dy = pt.y - c.y;
+      return (dx*dx + dy*dy) <= (current.half * current.half);
+    }
     return (pt.x >= c.x - current.half && pt.x <= c.x + current.half &&
             pt.y >= c.y - current.half && pt.y <= c.y + current.half);
   }
@@ -2261,58 +2240,82 @@ function hideGoal(){ goal.visible = false; }
     const pt = eventPos(e);
     if (!pointInside(pt)) return;
     e.preventDefault();
-    dragging = true; lastPt = pt; lastV = { x: 0, y: 0 };
+
+    dragging = true;
+    lastPt = pt;
+    lastV  = { x: 0, y: 0 };
     stageBlock.classList.add("-grabbing");
+
     const c = body.translation();
     grabOffset = { x: pt.x - c.x, y: pt.y - c.y };
+
+    // go kinematic so gravity/contacts don’t tug it away mid-drag
+    if (body.setGravityScale) body.setGravityScale(0, true);
     body.setAngvel(0, true);
+    body.setLinvel({ x: 0, y: 0 }, true);
+    body.setBodyType(RigidBodyType.KinematicPositionBased, true);
+    body.wakeUp();
+
+    if (e.target?.setPointerCapture && e.pointerId != null) {
+      try { e.target.setPointerCapture(e.pointerId); } catch {}
+    }
   }
 
   function onMove(e){
+    const pt = eventPos(e);
+
     if (!dragging){
-      const pt = eventPos(e);
       stageBlock.classList.toggle("-grab", pointInside(pt));
       return;
     }
-    const pt = eventPos(e);
+
     const dt = 1/60;
     lastV = { x: (pt.x - lastPt.x)/dt, y: (pt.y - lastPt.y)/dt };
     lastPt = pt;
 
     const targetCenter = { x: pt.x - grabOffset.x, y: pt.y - grabOffset.y };
-    body.setLinvel({ x: 0, y: 0 }, true);
+    // drive kinematic body directly
+    body.setNextKinematicTranslation(targetCenter);
     body.setAngvel(0, true);
-    body.setTranslation(targetCenter, true);
   }
 
-  function onUp(){
+  function onUp(e){
     if (!dragging) return;
     dragging = false;
     stageBlock.classList.remove("-grabbing");
 
-    // throw strength → wear
-    const linSpeed = Math.hypot(lastV.x, lastV.y);
-    const angBonus = Math.abs(body.angvel()) * current.half;
-    const throwMetric = linSpeed + angBonus;
-    addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
-
-    // release velocities (clamped)
-    const clampV = (v, m) => Math.max(-m, Math.min(m, v));
-    const maxSpeed = 3200 * DPR;
-
-    // spin from off-center grab: ω ∝ (r × v) / I
+    // throw metrics
     const r = grabOffset || { x: 0, y: 0 };
     const mass = body.mass ? body.mass() : 1;
     const s = current.half * 2;
     const I = Math.max(1e-6, (mass * s * s) / 6);
     const cross = r.x * lastV.y - r.y * lastV.x;
-    let omega = (mass * cross) / I;
     const MAX_SPIN = 18;
+    let omega = (mass * cross) / I;
     omega = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, omega));
 
+    // restore dynamic + gravity
+    body.setBodyType(RigidBodyType.Dynamic, true);
+    if (body.setGravityScale) body.setGravityScale(1, true);
+    body.wakeUp();
+
+    // release velocities (clamped)
+    const maxSpeed = 3200 * DPR;
+    const clampV = (v, m) => Math.max(-m, Math.min(m, v));
     body.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, true);
     body.setAngvel(omega, true);
+
+    // wear from throw
+    const linSpeed  = Math.hypot(lastV.x, lastV.y);
+    const angBonus  = Math.abs(omega) * current.half;
+    const throwMetric = linSpeed + angBonus;
+    addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
+
     grabOffset = null;
+
+    if (e?.target?.releasePointerCapture && e.pointerId != null) {
+      try { e.target.releasePointerCapture(e.pointerId); } catch {}
+    }
   }
 
   const area = stageBlock.querySelector(".rapier-stage");
@@ -2324,7 +2327,7 @@ function hideGoal(){ goal.visible = false; }
   window.addEventListener("touchend", onUp);
   window.addEventListener("touchcancel", onUp);
 
-  /* ---------- wear on wall hits ---------- */
+  /* ===== Wear on wall hits ===== */
   function handleCollisionEvent(h1, h2, started){
     if (!started) return;
     const isSelf = (h) => current.collider && h === current.collider.handle;
@@ -2337,13 +2340,12 @@ function hideGoal(){ goal.visible = false; }
     addWear(clamp(speed / (6000 * DPR), 0.003, 0.035));
   }
 
-  /* ---------- pink affordance when grabby ---------- */
+  /* ===== Visual helpers ===== */
   function pinkBgTick(){
     const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
     stageBlock.classList.toggle("-bg-pink", hoverish);
   }
 
-  /* ---------- draw helpers ---------- */
   function roundedRectPath(cx, cy, half, r){
     const x = cx - half, y = cy - half, w = half*2, h = half*2;
     const rr = clamp(r, 0, half);
@@ -2360,33 +2362,52 @@ function hideGoal(){ goal.visible = false; }
     ctx.arcTo(x, y, x + rr, y, rr);
   }
 
-  /* ---------- goal test (ball fully inside) ---------- */
-	function checkGoal(){
-  // Trigger as soon as the circle *touches* the goal square (AABB)
-  if (!goal.visible || !current.isBall) return false;
+  /* ===== Circular goal test (tolerant) =====
+     Counts as a goal when the ball's center is within (R - r + slack).
+     slack ≈ 60% of the ball radius → fairly easy to score. */
+  function checkGoal(){
+    if (!goal.visible || !current.isBall) return false;
 
-  const p = body.translation();
-  const r = current.half;
+    const p = body.translation();
+    const r = current.half;       // ball radius
+    const R = goal.radius;        // goal radius
 
-  const left   = goal.x;
-  const top    = goal.y;
-  const right  = goal.x + goal.side;
-  const bottom = goal.y + goal.side;
+    const dx = p.x - goal.cx;
+    const dy = p.y - goal.cy;
+    const dist = Math.hypot(dx, dy);
 
-  // Clamp circle center to the square to find closest point
-  const cx = Math.max(left, Math.min(p.x, right));
-  const cy = Math.max(top,  Math.min(p.y, bottom));
+    const EPS   = 2 * DPR;        // pixel tolerance
+    const slack = 0.6 * r;        // forgiving margin
 
-  const dx = p.x - cx;
-  const dy = p.y - cy;
+    return dist <= (R - r + slack + EPS);
+  }
 
-  // Touch/overlap when distance to closest point <= radius
-  return (dx*dx + dy*dy) <= r*r;
-}
+  /* ===== Main loop ===== */
+  function drawGoal(root){
+    if (!goal.visible) return;
+    ctx.save();
+    const black = (root.getPropertyValue("--c-black") || "#101214").trim();
 
+    // dotted circular outline
+    ctx.setLineDash([2 * DPR, 4 * DPR]);
+    ctx.lineWidth = 1 * DPR;
+    ctx.strokeStyle = black;
+    ctx.beginPath();
+    ctx.arc(goal.cx, goal.cy, goal.radius - 0.5 * DPR, 0, Math.PI * 2);
+    ctx.stroke();
 
+    // label
+    ctx.setLineDash([]);
+    ctx.fillStyle = black;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const px = Math.max(10, Math.round(goal.radius * 0.42));
+    const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
+    ctx.font = `${px}px ${fontStack}`;
+    ctx.fillText("AIM", goal.cx, goal.cy);
+    ctx.restore();
+  }
 
-  /* ---------- main loop ---------- */
   let lastTime = performance.now();
   function tick(now){
     const dt = Math.min(1/30, (now - lastTime) / 1000);
@@ -2395,15 +2416,11 @@ function hideGoal(){ goal.visible = false; }
     world.step(queue);
     queue.drainCollisionEvents(handleCollisionEvent);
 
-		if (checkGoal()) {
-  hideGoal();
-  current.wear = 0;
-	burstAtCanvas(goal.cx, goal.cy);
-  makeBoxCollider();          // snap back to square immediately
-  body.setAngularDamping(0.04); // restore baseline spin damping for square
-  // keep momentum: do not zero lin/ang velocity
-}
-
+    // SCORE!
+    if (checkGoal()) {
+      confetti({ particleCount: 160, spread: 70, origin: { y: 0.35 } });
+      resetSection();
+    }
 
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
@@ -2417,39 +2434,15 @@ function hideGoal(){ goal.visible = false; }
     ctx.strokeRect(0.5*DPR, 0.5*DPR, W - 1*DPR, H - 1*DPR);
     ctx.restore();
 
-// draw goal (if visible) — stays visible until resetSection()
-if (goal.visible){
-  ctx.save();
+    // goal
+    drawGoal(getComputedStyle(document.documentElement));
 
-  const root = getComputedStyle(document.documentElement);
-  const black = (root.getPropertyValue("--c-black") || "#101214").trim();
-
-  // dotted black outline
-  ctx.setLineDash([2 * DPR, 4 * DPR]);   // small dots
-  ctx.lineWidth = 1 * DPR;
-  ctx.strokeStyle = black;
-  ctx.strokeRect(goal.x + 0.5 * DPR, goal.y + 0.5 * DPR, goal.side - 1 * DPR, goal.side - 1 * DPR);
-
-  // "AIM HERE" label
-  ctx.setLineDash([]);                   // don’t dot the text
-  ctx.fillStyle = black;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  // scale type to box size (roughly 18% of side)
-  const px = Math.max(5, Math.round(goal.side * 0.18));
-  const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
-  ctx.font = `${px}px ${fontStack}`;
-  ctx.fillText("AIM HERE", goal.cx, goal.cy);
-
-  ctx.restore();
-}
-
-
-    // draw morphing body
+    // morphing body
     const p = body.translation();
     const a = body.rotation();
-    const fill = (root.getPropertyValue("--c-black") || "#101214").trim();
-    const stroke = `rgba(${root.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
+    const root2 = getComputedStyle(document.documentElement);
+    const fill = (root2.getPropertyValue("--c-black") || "#101214").trim();
+    const stroke = `rgba(${root2.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
 
     ctx.save();
     ctx.translate(p.x, p.y);
@@ -2476,6 +2469,7 @@ if (goal.visible){
   requestAnimationFrame(tick);
 })();
 </script>
+
 
 
 		</body>

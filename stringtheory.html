@@ -738,7 +738,7 @@ div[data-fps]::after, div[data-position]::after {
 .scroll-options div label { padding-left: var(--mm); }
 
 /* Custom Cursor HUD */
-html, body, a, button { cursor: none; }
+html.-ready, html.-ready body, html.-ready a, html.-ready button { cursor: none; }
 
 .cursor {
   left: 0; pointer-events: none; position: fixed; top: 0;
@@ -836,8 +836,10 @@ svg { fill: var(--c-black); aspect-ratio: 1 / 1; width: 100%; }
   /* grid gap & page margins scale gently with viewport */
   --g-gap: clamp(.16rem, 0.4vw, .28rem);
   --g-margin: clamp(.6rem, 2.4vw, 2rem);
-  --section-vh: var(--section-vh, 110);
 }
+
+:root { --section-vh: 110; }
+
 
 /* 1) Grid column system by breakpoint (keeps proportions) */
 .-w[data-v-4f043ceb] {
@@ -1056,6 +1058,35 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
   border:1px solid rgba(255,255,255,.2);z-index:1000;pointer-events:none
 }
 
+
+
+/* ===== Rapier playground (full-bleed canvas inside the block) ===== */
+.block.string-rapier {
+  --section-vh: 100;
+  position: relative;
+  overflow: hidden;
+}
+
+.block.string-rapier .rapier-stage {
+  position: absolute;
+  inset: 0;
+  /* keep a subtle dashed frame vibe like your .childs */
+  box-shadow: inset 0 0 0 1px rgba(var(--c-black-rgb), .15);
+}
+
+.block.string-rapier canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The “box” rendered style parity (fill black, outline like others) */
+.block.string-rapier.-bg-pink { background: var(--block-pink); transition: background .25s var(--f-smooth); }
+
+/* cursor affordance when over the box */
+.block.string-rapier.-grab { cursor: grab; }
+.block.string-rapier.-grabbing { cursor: grabbing; }
+
 </style>  
 </head>
 <body class="-fiddle-digital">
@@ -1229,8 +1260,8 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 
     <div class="wall-wrap">
       <p class="wall-source">
-        The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in th`e name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.
-        My money's in that office, right? If she start giving me some bullshit about it ain't there, and we got to go someplace else and get it, I'm gonna shoot you in the head then and there. Then I'm gonna shoot that bitch in the kneecaps, find out where my goddamn money is. She gonna tell me too. Hey, look at me when I'm talking to you, motherfucker. You listen: we go in there, and that nigga Winston or anybody else is in there, you the first motherfucker to get shot. You understand?
+        The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men. Blessed is he who, in the name of charity and good will, shepherds the weak through the valley of darkness, for he is truly his brother's keeper and the finder of lost children. And I will strike down upon thee with great vengeance and furious anger those who would attempt to poison and destroy My brothers. And you will know My name is the Lord when I lay My vengeance upon thee.
+        My money's in that office, right? If she start giving me some bullshit about it ain't there, and we got to go someplace else and get it, I'm gonna shoot you in the head then and there. Then I'm gonna shoot that bitch in the kneecaps, find out where my goddamn money is. She gonna tell me too. Hey, look at me when I'm talking to you, motherfucker. You listen: we go in there, and that bleep Winston or anybody else is in there, you the first motherfucker to get shot. You understand?
       </p>
     </div>
   </div>
@@ -1342,7 +1373,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				 data-cursor-tip="Say less, say clearly."
 				 data-v-021d6718 data-v-8129bdd7 data-v-4f043ceb>
 
-			<h6 class="title -tac" data-v-8129bdd7>What have we learned?</h6>
+				 <h6 class="title -tac" data-v-40fb9db4>Product producer</h6>
 			<div class="text-container" data-v-8129bdd7 style="--left:2; --width:12;">
 				<p class="-h3 -m-h5" string="split" string-split="word|char[left]" string-repeat data-v-8129bdd7 string-id="string-23">
 					Proudly be that 0.0000000001%.
@@ -1350,6 +1381,23 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				<span class="-m" data-v-8129bdd7>We are not the user.<br>We are the product.<br>Ship or be shipped.</span>
 			</div>
 		</div>
+
+
+
+
+		<!-- Rapier Physics Playground -->
+<div class="-w block string-rapier"
+string="cursor" string-cursor-class="cursor-1"
+data-storyline="Throw me."
+data-cursor-tip="Click, hold, and fling.">
+
+<h6 class="title -tac" data-v-270bb328>Product owner <span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
+
+<!-- full-bleed canvas inside this block -->
+<div class="rapier-stage" aria-label="Rapier physics stage">
+<canvas id="rapier-canvas"></canvas>
+</div>
+</div>
 
 	</main>
 
@@ -1373,736 +1421,813 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 	<div id="scroll-dir" data-dir="-" data-val="0" style="position:fixed;bottom:10px;left:10px;background-color:#000;color:#fff;border:1px solid rgba(255,255,255,.2);padding:5px 8px;font-size:12px;font-family:monospace;z-index:1000;pointer-events:none"></div>
 
 
-	<script>
-	/*!
-	 * String Tune — Demo Runtime (consolidated JS)
-	 * - Cursor-owned tooltips (hover, focus, touch)
-	 * - repeat / split / inview / progress / parallax / lerp+glide / magnetic
-	 * - storyline HUD + perf HUD
-	 * - word-wall non-interactive builder (click/keyboard toggle)
-	 *
-	 * Drop this single file after your HTML markup. It auto-initializes on DOMContentLoaded.
-	 */
-	(() => {
-		const d = document, de = d.documentElement, w = window;
-		if (de.__stringTuneMounted) return; // guard against double-mount
-		de.__stringTuneMounted = true;
-	
-		// ---------- Utilities ----------
-		const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-		const prefersReduced = (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
-		const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-		const lerp  = (a, b, t) => a + (b - a) * t;
-	
-		// Convert %, px, numbers → px (axis used for %)
-		const toPx = (v, axis = "y") => {
-			if (v == null) return 0;
-			const s = String(v).trim();
-			if (s.endsWith("%")) {
-				const n = parseFloat(s) / 100;
-				return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
-			}
-			return parseFloat(s) || 0;
-		};
-	
-		// ---------- Tunables ----------
-		const BOX_SCALE       = .8;                    // Visual scale of demo squares (no layout change)
-		const PROGRESS_MULT   = .9;                    // Feels snappier than linear
-		const PARALLAX_TRAVEL = prefersReduced ? 0 : 140;
-		const LERP_AMP        = prefersReduced ? 0 : 1.2;
-		const GLIDE_AMP       = prefersReduced ? 0 : 1.35;
-	
-		// Expose progress multiplier to CSS consumers
-		de.style.setProperty("--progress-mult", PROGRESS_MULT.toString());
-	
-		// ---------- Scale demo boxes without layout shift ----------
-		function applyBoxScale() {
-			d.querySelectorAll(".-w .rel").forEach(rel => {
-				const child = rel.querySelector(":scope > .child");
-				if (!child) return;
-				const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
-				const base = child.clientWidth;
-				const extra = Math.max(0, (scale - 1) * base);
-				rel.style.paddingBottom = extra ? `${extra}px` : "";
-				child.style.transformOrigin = "top left";
-				child.style.transform = scale !== 1 ? `scale(${scale})` : "";
-			});
-		}
-	
-		// ---------- string="repeat" ----------
-		function setupRepeat() {
-			d.querySelectorAll("[data-string-clone]").forEach(n => n.remove());
-			d.querySelectorAll("[string][string-repeat]").forEach(el => {
-				if (el.dataset.stringRepeated === "1") return;
-				const raw = el.getAttribute("string-repeat");
-				const total = raw && raw.trim() !== "" ? Math.max(1, parseInt(raw, 10) || 1) : 1;
-				for (let i = 1; i < total; i++) {
-					const clone = el.cloneNode(true);
-					clone.removeAttribute("string-repeat");
-					clone.setAttribute("data-string-clone", "");
-					el.after(clone);
-				}
-				el.dataset.stringRepeated = "1";
-			});
-		}
-	
-		// ---------- string="split" ----------
-		function setupSplit() {
-			d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
-				if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
-				const mode = (el.getAttribute("string-split") || "").toLowerCase();
-				const doWord = mode.includes("word");
-				const doChar = mode.includes("char");
-	
-				const rawText = (el.textContent || "").replace(/\s+/g, " ").trim();
-				const words = rawText.length ? rawText.split(" ") : [];
-				el.textContent = "";
-				el.classList.add("-splitted");
-	
-				let wordIndex = 0;
-				words.forEach((wrd, i) => {
-					const wSpan = d.createElement("span");
-					if (doWord) wSpan.className = "-s-word";
-	
-					if (doChar) {
-						[...wrd].forEach((ch, ci) => {
-							const cSpan = d.createElement("span");
-							cSpan.className = "-s-char";
-							cSpan.style.transitionDelay = (wordIndex * 0.02 + ci * 0.01) + "s";
-							cSpan.textContent = ch;
-							wSpan.appendChild(cSpan);
-						});
-					} else {
-						wSpan.textContent = wrd;
-					}
-	
-					el.appendChild(wSpan);
-					if (i < words.length - 1) el.appendChild(d.createTextNode(" "));
-					wordIndex++;
-				});
-	
-				el.__split = true;
-			});
-		}
-	
-		// ---------- In-View (blocks & [string] nodes) ----------
-		function setupInView() {
-			const makeObserver = (el) => {
-				const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
-				const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
-				const tv = (el.getAttribute("string-inview") || "").trim();
-				const threshold = tv.endsWith("%") ? clamp(parseFloat(tv) / 100, 0, 1) : 0;
-				const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
-	
-				return new IntersectionObserver((entries) => {
-					entries.forEach(entry => {
-						const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
-						if (ok) el.classList.add("-inview");
-						else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
-					});
-				}, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
-			};
-	
-			d.querySelectorAll(".block").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-			d.querySelectorAll("[string]").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-		}
-	
-		// ---------- Progress ----------
-		const progressEls = [];
-		function collectProgressEls() {
-			progressEls.length = 0;
-			progressEls.push(...d.querySelectorAll('[string="progress"]'));
-		}
-	
-		function computeProgress(el, rect, vh) {
-			const enterEdge  = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
-			const exitEdge   = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
-			const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
-			const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
-	
-			const viewTop = 0 + topOffset;
-			const viewBot = vh + bottomOffset;
-	
-			const enterRef = (enterEdge === "top") ? viewTop : viewBot;
-			const exitRef  = (exitEdge  === "top") ? viewTop : viewBot;
-	
-			const edgeTop = rect.top;
-			const edgeBot = rect.bottom;
-	
-			let p;
-			if (enterEdge === exitEdge) {
-				const h = Math.max(1, rect.height);
-				if (enterEdge === "top") p = (enterRef - edgeTop) / h;
-				else                     p = (edgeBot  - enterRef) / h;
-			} else {
-				const startPos = (enterEdge === "top") ? edgeTop : edgeBot;
-				const endPos   = (exitEdge  === "top") ? edgeTop : edgeBot;
-				const A = startPos - enterRef;
-				const B = endPos   - exitRef;
-				const span = A - B;
-				p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
-				if (A > 0 && B > 0) p = 0;
-				if (A < 0 && B < 0) p = 1;
-			}
-	
-			p = Number.isFinite(p) ? clamp(p, 0, 1) : 0;
-			el.__lastProgress = p;
-			return p;
-		}
-	
-		function updateProgress() {
-			const vh = w.innerHeight;
-			for (const el of progressEls) {
-				const rect = el.getBoundingClientRect();
-				const p = computeProgress(el, rect, vh);
-				const out = p * PROGRESS_MULT;
-				el.style.setProperty("--progress", clamp(out, 0, 1).toFixed(4));
-	
-				const id = el.getAttribute("string-id") || el.id;
-				if (id) {
-					d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(n => n.textContent = Math.round(p * 100));
-					d.querySelectorAll(`[data-stage-of="${id}"]`).forEach(n => {
-						const v = p * 100;
-						let label = "Ship it";
-						if (v >= 100) label = "SOLD!";
-						else if (v >= 75) label = "cya byeeeeee!";
-						else if (v >= 50) label = "cya byeeeeee!";
-						else if (v >= 25) label = "cya byeeeeee!";
-						n.textContent = label;
-					});
-				}
-			}
-		}
-	
-		// ---------- Lerp (progress-based) ----------
-		let lerpEls = [];
-		function collectLerpEls() {
-			lerpEls = [...document.querySelectorAll('[string="lerp"]')];
-		}
-	
-		function updateLerpProgress() {
-			const vh = window.innerHeight;
-			for (const el of lerpEls) {
-				const rect = el.getBoundingClientRect();
-				const p = computeProgress(el, rect, vh);
-				el.style.setProperty('--lerp-progress', p.toFixed(4));
-	
-				document.querySelectorAll('[data-livelabel="lerp"]').forEach(n => {
-					n.textContent = Math.round(p * 100);
-				});
-			}
-		}
-	
-		// ---------- Parallax ----------
-		let parallaxEls = [];
-		function collectParallaxEls() {
-			parallaxEls = (isMobile || prefersReduced) ? [] :
-				[...d.querySelectorAll('[string="parallax"],[string-parallax]')]
-					.map(el => ({ el, factor: parseFloat(el.getAttribute("string-parallax") || "0.5") || 0.5 }));
-		}
-		function parallaxTick() {
-			if (!parallaxEls.length) return;
-			const wh = w.innerHeight;
-			const maxTravel = PARALLAX_TRAVEL;
-			parallaxEls.forEach(({ el, factor }) => {
-				const r = el.getBoundingClientRect();
-				const center = r.top + r.height / 2 - wh / 2;
-				const t = clamp(center / wh, -1, 1);
-				el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
-			});
-		}
-	
-		// ---------- Lerp + Glide ----------
-		let lastY = w.scrollY || w.pageYOffset;
-		let lerpVal = 0, glideVal = 0;
-		let glideEls = [];
-		function collectGlideEls() {
-			glideEls = (isMobile || prefersReduced) ? [] :
-				[...d.querySelectorAll('[string="glide"]')]
-					.map(el => ({ el, k: parseFloat(el.getAttribute("string-glide") || "0.35") || 0.35, y: 0 }));
-		}
-		function smoothTick() {
-			const y = w.scrollY || w.pageYOffset;
-			const delta = y - lastY;
-			lastY = y;
-	
-			lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
-			glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
-	
-			de.style.setProperty("--lerp",  (lerpVal  * LERP_AMP).toFixed(2));
-			de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
-	
-			glideEls.forEach(g => {
-				g.y = lerp(g.y, glideVal * g.k, 0.12);
-				g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
-			});
-		}
-	
-		// ---------- Cursor HUD ----------
-		const cursorRoot = d.querySelector('.cursor[string-cursor]');
-		const tipEl = cursorRoot?.querySelector('.cursor-tip');
-		const DEFAULT_TIP = "Try the cursor →";
-		let cx = 0, cy = 0;
-	
-		function setupCursor() {
-			if (!cursorRoot) return;
-	
-			// mouse movement + cursor mode
-			w.addEventListener("mousemove", e => {
-				cx = e.clientX; cy = e.clientY;
-				cursorRoot.style.transform = `translate3d(${cx - 7}px, ${cy - 7}px, 0)`;
-	
-				// find nearest ancestor that declares a cursor class
-				let node = e.target, mode = "cursor-1";
-				while (node && node !== d.body) {
-					if (node.hasAttribute("string-cursor-class")) {
-						mode = node.getAttribute("string-cursor-class");
-						break;
-					}
-					node = node.parentElement;
-				}
-				cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
-				cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
-			}, { passive: true });
-	
-			// press/hover states
-			w.addEventListener("mousedown", () => cursorRoot.classList.add("-down"));
-			w.addEventListener("mouseup",   () => cursorRoot.classList.remove("-down"));
-			w.addEventListener("mouseleave",() => cursorRoot.classList.add("-hide"));
-			w.addEventListener("mouseenter",() => cursorRoot.classList.remove("-hide"));
-	
-			if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
-	
-			// Use cursor bubble for tooltips → hide native ::after bubbles
-			de.classList.add("-cursor-tooltips");
-		}
-	
-		// ---------- Unified tooltip controller (tooltips only) ----------
-		const TIP_DELAY = 450;
-		const TOUCH_HIDE_DELAY = 600;
-		let tipTimer = null;
-		let touchLiftTimer = null;
-		let hoverTip = ""; // current hovered/focused tooltip only
-	
-		function setTip(msg) {
-			if (!cursorRoot || !tipEl) return;
-			if (msg && msg.trim()) {
-				tipEl.textContent = msg;
-				cursorRoot.classList.add("-tips");
-			} else {
-				cursorRoot.classList.remove("-tips");
-			}
-		}
-		function hideTip() { cursorRoot?.classList.remove("-tips"); }
-	
-		// Hover / focus (delegated)
-		d.addEventListener("mouseover", (e) => {
-			const t = e.target?.closest?.("[data-tooltip]");
-			if (!t) return;
-			hoverTip = t.getAttribute("data-tooltip") || "";
-			setTip(hoverTip);
-		}, true);
-	
-		d.addEventListener("mouseout", (e) => {
-			const from = e.target?.closest?.("[data-tooltip]");
-			if (!from) return;
-			const to = e.relatedTarget?.closest?.("[data-tooltip]");
-			if (to === from) return;
-			hoverTip = "";
-			setTip(""); // hide when not on a tooltip element
-		}, true);
-	
-		d.addEventListener("focusin", (e) => {
-			const t = e.target?.closest?.("[data-tooltip]");
-			if (!t) return;
-			hoverTip = t.getAttribute("data-tooltip") || "";
-			setTip(hoverTip);
-		});
-		d.addEventListener("focusout", (e) => {
-			const t = e.target?.closest?.("[data-tooltip]");
-			if (!t) return;
-			hoverTip = "";
-			setTip("");
-		});
-	
-		// Hide during scroll, only restore if still hovering a tooltip
-		function onUserScroll() {
-			hideTip();
-			clearTimeout(tipTimer);
-			tipTimer = setTimeout(() => {
-				if (hoverTip) setTip(hoverTip);
-			}, TIP_DELAY);
-		}
-		w.addEventListener("scroll", onUserScroll, { passive: true });
-		w.addEventListener("wheel", onUserScroll,  { passive: true });
-		w.addEventListener("touchmove", onUserScroll, { passive: true });
-	
-		// Touch: show tooltip under finger; hide after finger lifts
-		function updateCursorPosTouch(touch) {
-			if (!cursorRoot || !touch) return;
-			cursorRoot.style.transform =
-				`translate3d(${touch.clientX + 16}px, ${touch.clientY + 8}px, 0)`;
-		}
-		d.addEventListener("touchstart", (e) => {
-			cursorRoot?.classList.add("-down");
-			const primary = e.touches && e.touches[0];
-			if (primary) updateCursorPosTouch(primary);
-			const t = e.target?.closest?.("[data-tooltip]");
-			hoverTip = t?.getAttribute("data-tooltip") || "";
-			setTip(hoverTip);
-			clearTimeout(touchLiftTimer);
-		}, { passive: true });
-	
-		d.addEventListener("touchmove", (e) => {
-			const primary = e.touches && e.touches[0];
-			if (primary) updateCursorPosTouch(primary);
-		}, { passive: true });
-	
-		function endTouch() {
-			cursorRoot?.classList.remove("-down");
-			clearTimeout(touchLiftTimer);
-			touchLiftTimer = setTimeout(() => {
-				hoverTip = "";
-				setTip(""); // hide after a short delay
-			}, TOUCH_HIDE_DELAY);
-		}
-		d.addEventListener("touchend", endTouch, { passive: true });
-		d.addEventListener("touchcancel", endTouch, { passive: true });
-	
-		// ---------- Magnetic ----------
-		let magneticEls = [];
-		function collectMagneticEls() {
-			magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
-				el,
-				r: parseFloat(el.getAttribute("string-radius") || "300") || 300,
-				s: parseFloat(el.getAttribute("string-strength") || "0.5") || 0.5,
-				ox: 0, oy: 0
-			}));
-		}
-		function magneticTick() {
-			magneticEls.forEach(m => {
-				const rect = m.el.getBoundingClientRect();
-				const ex = rect.left + rect.width / 2, ey = rect.top + rect.height / 2;
-				const dx = cx - ex, dy = cy - ey;
-				const dist = Math.hypot(dx, dy);
-				const t = clamp(1 - dist / m.r, 0, 1);
-				const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
-				m.ox = lerp(m.ox, tx, 0.15);
-				m.oy = lerp(m.oy, ty, 0.15);
-				m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
-			});
-		}
-	
-// --- Magnetic grid builder (compact wrapper; center tile active) ---
-function buildMagneticGrid(block, cols = 3, rows = 3, activeCol, activeRow) {
-  if (!block) return;
+<!-- String Tune runtime -->
+<script>
+(() => {
+  const d = document, de = d.documentElement, w = window;
+  if (de.__stringTuneMounted) return;
+  de.__stringTuneMounted = true;
+  de.classList.add("-ready"); // gate cursor-hiding & “ready” styles
 
-  // mark so CSS can hide legacy content
-  block.classList.add('-gridified');
+  // ---------- utils ----------
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const prefersReduced = (w.matchMedia && w.matchMedia("(prefers-reduced-motion: reduce)").matches) || false;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp  = (a, b, t) => a + (b - a) * t;
+  const toPx = (v, axis = "y") => {
+    if (v == null) return 0;
+    const s = String(v).trim();
+    if (s.endsWith("%")) {
+      const n = parseFloat(s) / 100;
+      return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
+    }
+    return parseFloat(s) || 0;
+  };
 
-  // find an existing magnetic node to reuse its id (avoids duplicates)
-  const legacyMag = block.querySelector(':scope > .rel [string="magnetic"]');
-  const legacyId = legacyMag?.getAttribute('string-id') || 'string-22-grid';
+  // ---------- tunables ----------
+  const BOX_SCALE       = .8;
+  const PROGRESS_MULT   = .9;
+  const PARALLAX_TRAVEL = prefersReduced ? 0 : 140;
+  const LERP_AMP        = prefersReduced ? 0 : 1.2;
+  const GLIDE_AMP       = prefersReduced ? 0 : 1.35;
+  de.style.setProperty("--progress-mult", PROGRESS_MULT.toString());
 
-  // optional: remove the legacy square entirely (prevents second magnetic)
-  const legacyRel = block.querySelector(':scope > .rel');
-  if (legacyRel) legacyRel.remove();
+  // ---------- scale demo boxes without layout shift ----------
+  function applyBoxScale() {
+    d.querySelectorAll(".-w .rel").forEach(rel => {
+      const child = rel.querySelector(":scope > .child");
+      if (!child) return;
+      const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
+      const base = child.clientWidth;
+      const extra = Math.max(0, (scale - 1) * base);
+      rel.style.paddingBottom = extra ? `${extra}px` : "";
+      child.style.transformOrigin = "top left";
+      child.style.transform = scale !== 1 ? `scale(${scale})` : "";
+    });
+  }
 
-  // clear any previous grid we injected
-  block.querySelectorAll('.mag-grid').forEach(n => n.remove());
-
-  // defaults
-  if (activeCol == null) activeCol = Math.ceil(cols / 2);
-  if (activeRow == null) activeRow = Math.ceil(rows / 2);
-
-  // create wrapper
-  const wrap = document.createElement('div');
-  wrap.className = 'mag-grid';
-
-  for (let r = 1; r <= rows; r++) {
-    for (let c = 1; c <= cols; c++) {
-      const rel = document.createElement('div');
-      rel.className = 'rel tile';
-
-      const child = document.createElement('div');
-      child.className = 'child';
-
-      const box = document.createElement('div');
-      box.setAttribute('data-v-40fb9db4', '');
-
-      if (c === activeCol && r === activeRow) {
-        rel.classList.add('-active');
-        box.setAttribute('string', 'magnetic');
-        box.setAttribute('string-radius', '650');
-        box.setAttribute('string-strength', '0.95');
-        box.setAttribute('string-id', legacyId); // ← reuse id, no duplicate
-
-        rel.addEventListener('mouseenter', () => block.classList.add('-bg-pink'));
-        rel.addEventListener('mouseleave', () => block.classList.remove('-bg-pink'));
+  // ---------- string="repeat" ----------
+  function setupRepeat() {
+    d.querySelectorAll("[data-string-clone]").forEach(n => n.remove());
+    d.querySelectorAll("[string][string-repeat]").forEach(el => {
+      if (el.dataset.stringRepeated === "1") return;
+      const raw = el.getAttribute("string-repeat");
+      const total = raw && raw.trim() !== "" ? Math.max(1, parseInt(raw, 10) || 1) : 1;
+      for (let i = 1; i < total; i++) {
+        const clone = el.cloneNode(true);
+        clone.removeAttribute("string-repeat");
+        clone.setAttribute("data-string-clone", "");
+        el.after(clone);
       }
-
-      child.appendChild(box);
-      rel.appendChild(child);
-      wrap.appendChild(rel);
-    }
+      el.dataset.stringRepeated = "1";
+    });
   }
 
-  block.appendChild(wrap);
-}
+  // ---------- string="split" ----------
+  function setupSplit() {
+    d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
+      if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
+      const mode = (el.getAttribute("string-split") || "").toLowerCase();
+      const doWord = mode.includes("word");
+      const doChar = mode.includes("char");
 
+      const rawText = (el.textContent || "").replace(/\s+/g, " ").trim();
+      const words = rawText.length ? rawText.split(" ") : [];
+      el.textContent = "";
+      el.classList.add("-splitted");
 
-// --- Lerp grid builder (single row; center tile hosts the existing lerp node) ---
-function buildLerpGrid(block, cols = 3, activeCol) {
-  if (!block) return;
+      let wordIndex = 0;
+      words.forEach((wrd, i) => {
+        const wSpan = d.createElement("span");
+        if (doWord) wSpan.className = "-s-word";
 
-  // find the existing lerp box (the one with string="lerp")
-  const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
-  // find its outer .rel to hide later (no duplicates)
-  const legacyRel = legacyBox?.closest('.rel');
+        if (doChar) {
+          [...wrd].forEach((ch, ci) => {
+            const cSpan = d.createElement("span");
+            cSpan.className = "-s-char";
+            cSpan.style.transitionDelay = (wordIndex * 0.02 + ci * 0.01) + "s";
+            cSpan.textContent = ch;
+            wSpan.appendChild(cSpan);
+          });
+        } else {
+          wSpan.textContent = wrd;
+        }
 
-  // keep original id so progress labels keep working
-  const legacyId = legacyBox?.getAttribute('string-id') || 'string-17';
+        el.appendChild(wSpan);
+        if (i < words.length - 1) el.appendChild(d.createTextNode(" "));
+        wordIndex++;
+      });
 
-  // make (or replace) a grid wrapper
-  block.querySelectorAll('.lerp-grid').forEach(n => n.remove());
-  const wrap = document.createElement('div');
-  wrap.className = 'lerp-grid';
+      el.__split = true;
+    });
+  }
 
-  if (activeCol == null) activeCol = Math.ceil(cols / 2);
+  // ---------- in-view ----------
+  function setupInView() {
+    const makeObserver = (el) => {
+      const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
+      const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
+      const tv = (el.getAttribute("string-inview") || "").trim();
+      const threshold = tv.endsWith("%") ? clamp(parseFloat(tv) / 100, 0, 1) : 0;
+      const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
 
-  for (let c = 1; c <= cols; c++) {
-    const rel = document.createElement('div');
-    rel.className = 'rel tile';
-    const child = document.createElement('div'); child.className = 'child';
+      return new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
+          if (ok) el.classList.add("-inview");
+          else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
+        });
+      }, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
+    };
 
-    if (c === activeCol && legacyBox) {
-      // move the real lerp node into the center tile (preserves all behavior)
-      rel.classList.add('-active');
-      legacyBox.setAttribute('string-id', legacyId);
-      child.appendChild(legacyBox);
+    d.querySelectorAll(".block").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+    d.querySelectorAll("[string]").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+  }
+
+  // ---------- progress ----------
+  const progressEls = [];
+  function collectProgressEls() {
+    progressEls.length = 0;
+    progressEls.push(...d.querySelectorAll('[string="progress"]'));
+  }
+  function computeProgress(el, rect, vh) {
+    const enterEdge  = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
+    const exitEdge   = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
+    const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
+    const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
+
+    const viewTop = 0 + topOffset;
+    const viewBot = vh + bottomOffset;
+
+    const enterRef = (enterEdge === "top") ? viewTop : viewBot;
+    const exitRef  = (exitEdge  === "top") ? viewTop : viewBot;
+
+    const edgeTop = rect.top;
+    const edgeBot = rect.bottom;
+
+    let p;
+    if (enterEdge === exitEdge) {
+      const h = Math.max(1, rect.height);
+      if (enterEdge === "top") p = (enterRef - edgeTop) / h;
+      else                     p = (edgeBot  - enterRef) / h;
     } else {
-      // create hollow placeholder boxes (styled hollow via CSS)
-      const hollow = document.createElement('div');
-      hollow.setAttribute('data-v-270bb328', '');
-      child.appendChild(hollow);
+      const startPos = (enterEdge === "top") ? edgeTop : edgeBot;
+      const endPos   = (exitEdge  === "top") ? edgeTop : edgeBot;
+      const A = startPos - enterRef;
+      const B = endPos   - exitRef;
+      const span = A - B;
+      p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
+      if (A > 0 && B > 0) p = 0;
+      if (A < 0 && B < 0) p = 1;
     }
 
-    rel.appendChild(child);
-    wrap.appendChild(rel);
+    p = Number.isFinite(p) ? clamp(p, 0, 1) : 0;
+    el.__lastProgress = p;
+    return p;
+  }
+  function updateProgress() {
+    const vh = w.innerHeight;
+    for (const el of progressEls) {
+      const rect = el.getBoundingClientRect();
+      const p = computeProgress(el, rect, vh);
+      const out = p * PROGRESS_MULT;
+      el.style.setProperty("--progress", clamp(out, 0, 1).toFixed(4));
+
+      const id = el.getAttribute("string-id") || el.id;
+      if (id) {
+        d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(n => n.textContent = Math.round(p * 100));
+        d.querySelectorAll(`[data-stage-of="${id}"]`).forEach(n => {
+          const v = p * 100;
+          let label = "Ship it";
+          if (v >= 100) label = "SOLD!";
+          else if (v >= 75) label = "cya byeeeeee!";
+          else if (v >= 50) label = "cya byeeeeee!";
+          else if (v >= 25) label = "cya byeeeeee!";
+          n.textContent = label;
+        });
+      }
+    }
   }
 
-  block.appendChild(wrap);
-  block.classList.add('-gridified');
+  // ---------- lerp ----------
+  let lerpEls = [];
+  function collectLerpEls() { lerpEls = [...d.querySelectorAll('[string="lerp"]')]; }
+  function updateLerpProgress() {
+    const vh = w.innerHeight;
+    for (const el of lerpEls) {
+      const rect = el.getBoundingClientRect();
+      const p = computeProgress(el, rect, vh);
+      el.style.setProperty("--lerp-progress", p.toFixed(4));
+      d.querySelectorAll('[data-livelabel="lerp"]').forEach(n => { n.textContent = Math.round(p * 100); });
+    }
+  }
 
-  // hide the old container if it still exists (we moved its child out)
-  if (legacyRel) legacyRel.style.display = 'none';
+  // ---------- parallax ----------
+  let parallaxEls = [];
+  function collectParallaxEls() {
+    parallaxEls = (isMobile || prefersReduced) ? [] :
+      [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
+        .map(el => ({ el, factor: parseFloat(el.getAttribute("string-parallax") || "0.5") || 0.5 }));
+  }
+  function parallaxTick() {
+    if (!parallaxEls.length) return;
+    const wh = w.innerHeight;
+    const maxTravel = PARALLAX_TRAVEL;
+    parallaxEls.forEach(({ el, factor }) => {
+      const r = el.getBoundingClientRect();
+      const center = r.top + r.height / 2 - wh / 2;
+      const t = clamp(center / wh, -1, 1);
+      el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
+    });
+  }
+
+  // ---------- glide ----------
+  let lastY = w.scrollY || w.pageYOffset;
+  let lerpVal = 0, glideVal = 0;
+  let glideEls = [];
+  function collectGlideEls() {
+    glideEls = (isMobile || prefersReduced) ? [] :
+      [...d.querySelectorAll('[string="glide"]')]
+        .map(el => ({ el, k: parseFloat(el.getAttribute("string-glide") || "0.35") || 0.35, y: 0 }));
+  }
+  function smoothTick() {
+    const y = w.scrollY || w.pageYOffset;
+    const delta = y - lastY;
+    lastY = y;
+
+    lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+    glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
+
+    de.style.setProperty("--lerp",  (lerpVal  * LERP_AMP).toFixed(2));
+    de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
+
+    glideEls.forEach(g => {
+      g.y = lerp(g.y, glideVal * g.k, 0.12);
+      g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
+    });
+  }
+
+  // ---------- cursor HUD + unified tooltips ----------
+  const cursorRoot = d.querySelector('.cursor[string-cursor]');
+  const tipEl = cursorRoot?.querySelector('.cursor-tip');
+  const DEFAULT_TIP = "Try the cursor →";
+  let cx = 0, cy = 0, hoverTip = "";
+  function setTip(msg) {
+    if (!cursorRoot || !tipEl) return;
+    if (msg && msg.trim()) { tipEl.textContent = msg; cursorRoot.classList.add("-tips"); }
+    else { cursorRoot.classList.remove("-tips"); }
+  }
+  function hideTip() { cursorRoot?.classList.remove("-tips"); }
+  function setupCursor() {
+    if (!cursorRoot) return;
+    w.addEventListener("mousemove", e => {
+      cx = e.clientX; cy = e.clientY;
+      cursorRoot.style.transform = `translate3d(${cx - 7}px, ${cy - 7}px, 0)`;
+      let node = e.target, mode = "cursor-1";
+      while (node && node !== d.body) {
+        if (node.hasAttribute("string-cursor-class")) { mode = node.getAttribute("string-cursor-class"); break; }
+        node = node.parentElement;
+      }
+      cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
+      cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
+    }, { passive: true });
+    w.addEventListener("mousedown", () => cursorRoot.classList.add("-down"));
+    w.addEventListener("mouseup",   () => cursorRoot.classList.remove("-down"));
+    w.addEventListener("mouseleave",() => cursorRoot.classList.add("-hide"));
+    w.addEventListener("mouseenter",() => cursorRoot.classList.remove("-hide"));
+    if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
+    de.classList.add("-cursor-tooltips");
+  }
+  const TIP_DELAY = 450, TOUCH_HIDE_DELAY = 600;
+  let tipTimer = null, touchLiftTimer = null;
+  d.addEventListener("mouseover", (e) => {
+    const t = e.target?.closest?.("[data-tooltip]"); if (!t) return;
+    hoverTip = t.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+  }, true);
+  d.addEventListener("mouseout", (e) => {
+    const from = e.target?.closest?.("[data-tooltip]"); if (!from) return;
+    const to = e.relatedTarget?.closest?.("[data-tooltip]"); if (to === from) return;
+    hoverTip = ""; setTip("");
+  }, true);
+  d.addEventListener("focusin", (e) => {
+    const t = e.target?.closest?.("[data-tooltip]"); if (!t) return;
+    hoverTip = t.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+  });
+  d.addEventListener("focusout", () => { hoverTip = ""; setTip(""); });
+  function onUserScroll() {
+    hideTip(); clearTimeout(tipTimer);
+    tipTimer = setTimeout(() => { if (hoverTip) setTip(hoverTip); }, TIP_DELAY);
+  }
+  w.addEventListener("scroll", onUserScroll, { passive: true });
+  w.addEventListener("wheel", onUserScroll,  { passive: true });
+  w.addEventListener("touchmove", onUserScroll, { passive: true });
+  function updateCursorPosTouch(touch) {
+    if (!cursorRoot || !touch) return;
+    cursorRoot.style.transform = `translate3d(${touch.clientX + 16}px, ${touch.clientY + 8}px, 0)`;
+  }
+  d.addEventListener("touchstart", (e) => {
+    cursorRoot?.classList.add("-down");
+    const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
+    const el = e.target?.closest?.("[data-tooltip]");
+    hoverTip = el?.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+    clearTimeout(touchLiftTimer);
+  }, { passive: true });
+  d.addEventListener("touchmove", (e) => { const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t); }, { passive: true });
+  function endTouch() {
+    cursorRoot?.classList.remove("-down");
+    clearTimeout(touchLiftTimer);
+    touchLiftTimer = setTimeout(() => { hoverTip = ""; setTip(""); }, TOUCH_HIDE_DELAY);
+  }
+  d.addEventListener("touchend", endTouch, { passive: true });
+  d.addEventListener("touchcancel", endTouch, { passive: true });
+
+  // ---------- magnetic ----------
+  let magneticEls = [];
+  function collectMagneticEls() {
+    magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
+      el, r: parseFloat(el.getAttribute("string-radius") || "300") || 300,
+      s: parseFloat(el.getAttribute("string-strength") || "0.5") || 0.5,
+      ox: 0, oy: 0
+    }));
+  }
+  function magneticTick() {
+    magneticEls.forEach(m => {
+      const rect = m.el.getBoundingClientRect();
+      const ex = rect.left + rect.width / 2, ey = rect.top + rect.height / 2;
+      const dx = cx - ex, dy = cy - ey;
+      const dist = Math.hypot(dx, dy);
+      const t = clamp(1 - dist / m.r, 0, 1);
+      const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
+      m.ox = lerp(m.ox, tx, 0.15);
+      m.oy = lerp(m.oy, ty, 0.15);
+      m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
+    });
+  }
+
+  // ---------- grid builders ----------
+  function buildMagneticGrid(block, cols = 3, rows = 3, activeCol, activeRow) {
+    if (!block) return;
+    block.classList.add("-gridified");
+    const legacyMag = block.querySelector(':scope > .rel [string="magnetic"]');
+    const legacyId = legacyMag?.getAttribute("string-id") || "string-22-grid";
+    const legacyRel = block.querySelector(":scope > .rel");
+    if (legacyRel) legacyRel.remove();
+    block.querySelectorAll(".mag-grid").forEach(n => n.remove());
+
+    if (activeCol == null) activeCol = Math.ceil(cols / 2);
+    if (activeRow == null) activeRow = Math.ceil(rows / 2);
+
+    const wrap = d.createElement("div");
+    wrap.className = "mag-grid";
+
+    for (let r = 1; r <= rows; r++) {
+      for (let c = 1; c <= cols; c++) {
+        const rel = d.createElement("div"); rel.className = "rel tile";
+        const child = d.createElement("div"); child.className = "child";
+        const box = d.createElement("div"); box.setAttribute("data-v-40fb9db4", "");
+        if (c === activeCol && r === activeRow) {
+          rel.classList.add("-active");
+          box.setAttribute("string", "magnetic");
+          box.setAttribute("string-radius", "650");
+          box.setAttribute("string-strength", "0.95");
+          box.setAttribute("string-id", legacyId);
+          rel.addEventListener("mouseenter", () => block.classList.add("-bg-pink"));
+          rel.addEventListener("mouseleave", () => block.classList.remove("-bg-pink"));
+        }
+        child.appendChild(box); rel.appendChild(child); wrap.appendChild(rel);
+      }
+    }
+    block.appendChild(wrap);
+  }
+
+  function buildLerpGrid(block, cols = 3, activeCol) {
+    if (!block) return;
+    const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
+    const legacyRel = legacyBox?.closest(".rel");
+    const legacyId = legacyBox?.getAttribute("string-id") || "string-17";
+    block.querySelectorAll(".lerp-grid").forEach(n => n.remove());
+    const wrap = d.createElement("div"); wrap.className = "lerp-grid";
+    if (activeCol == null) activeCol = Math.ceil(cols / 2);
+
+    for (let c = 1; c <= cols; c++) {
+      const rel = d.createElement("div"); rel.className = "rel tile";
+      const child = d.createElement("div"); child.className = "child";
+      if (c === activeCol && legacyBox) {
+        rel.classList.add("-active");
+        legacyBox.setAttribute("string-id", legacyId);
+        child.appendChild(legacyBox);
+      } else {
+        const hollow = d.createElement("div");
+        hollow.setAttribute("data-v-270bb328", "");
+        child.appendChild(hollow);
+      }
+      rel.appendChild(child); wrap.appendChild(rel);
+    }
+    block.appendChild(wrap);
+    block.classList.add("-gridified");
+    if (legacyRel) legacyRel.style.display = "none";
+  }
+
+  // ---------- perf HUD ----------
+  function setupPerfHUD() {
+    const fpsNode = d.getElementById("fps");
+    const dirNode = d.getElementById("scroll-dir");
+    if (!fpsNode && !dirNode) return;
+    const getScrollY = () => Math.round(w.scrollY || w.pageYOffset || 0);
+    let lastT = performance.now(), frames = 0, accum = 0;
+    let lastScrollY = getScrollY();
+    const perfTick = (t) => {
+      const dt = t - lastT; lastT = t; frames++; accum += dt;
+      if (accum > 500 && fpsNode) {
+        const fps = Math.round((frames * 1000) / accum);
+        fpsNode.textContent = `FPS: ${fps}`; frames = 0; accum = 0;
+      }
+      const sy = getScrollY();
+      if (dirNode) {
+        const dir = sy > lastScrollY ? "↓" : (sy < lastScrollY ? "↑" : "•");
+        dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+      }
+      lastScrollY = sy;
+      w.requestAnimationFrame(perfTick);
+    };
+    w.requestAnimationFrame(perfTick);
+  }
+
+  // ---------- storyline HUD ----------
+  function getHeadingText(block) {
+    if (!block) return "";
+    const h = block.querySelector("h1,h2,h3,h4,h5,h6");
+    if (!h) return "";
+    for (const node of h.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const t = (node.nodeValue || "").trim();
+        if (t) return t;
+      }
+    }
+    return (h.textContent || "").trim();
+  }
+  function getStoryForBlock(block) {
+    if (!block) return "";
+    return block.getAttribute("data-storyline")
+        || block.getAttribute("data-cursor-tip")
+        || getHeadingText(block)
+        || "";
+  }
+  const storylineEl = d.getElementById("storyline");
+  const chapterBlocks = [...d.querySelectorAll(".page .block")];
+  let currentStoryText = "";
+  function updateStoryline(next) {
+    if (!storylineEl || !next || next === currentStoryText) return;
+    currentStoryText = next;
+    storylineEl.textContent = currentStoryText;
+  }
+  function setupStorylineObserver() {
+    if (!storylineEl || !chapterBlocks.length) return;
+    updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
+    const io = new IntersectionObserver((entries) => {
+      const vis = entries.filter(e => e.isIntersecting)
+                         .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!vis) return;
+      updateStoryline(getStoryForBlock(vis.target));
+    }, { root: null, threshold: [0, .25, .5, .75, 1] });
+    chapterBlocks.forEach(b => io.observe(b));
+  }
+
+  // ---------- word wall ----------
+  function wireInteractions(wallEl) {
+    wallEl.addEventListener("click", (e) => {
+      const t = e.target.closest(".wall-sentence"); if (!t) return;
+      const on = t.getAttribute("aria-pressed") === "true";
+      t.setAttribute("aria-pressed", String(!on));
+      t.classList.toggle("active", !on);
+    });
+    wallEl.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const t = e.target.closest(".wall-sentence"); if (!t) return;
+      e.preventDefault();
+      const on = t.getAttribute("aria-pressed") === "true";
+      t.setAttribute("aria-pressed", String(!on));
+      t.classList.toggle("active", !on);
+    });
+  }
+  function buildInlineWall(wrap) {
+    const existingWall = wrap.querySelector(".wall");
+    const srcP = existingWall?.querySelector("p") || wrap.querySelector("p");
+    const sourceText = (srcP?.textContent || existingWall?.textContent || wrap.textContent || "").trim();
+    wrap.innerHTML = "";
+    const wall = d.createElement("div"); wall.className = "wall";
+
+    const splitRegex = /(?<=[.!?])\s+(?=["“'‘`A-Z0-9])/g;
+    const fallbackSplit = (text) =>
+      text.replace(/([.!?])(\s+)/g, "$1|").split("|").map(s => s.trim()).filter(Boolean);
+
+    let sentences = [];
+    if (sourceText) {
+      try { sentences = sourceText.replace(/\s+/g, " ").split(splitRegex).map(s => s.trim()).filter(Boolean); }
+      catch { sentences = fallbackSplit(sourceText.replace(/\s+/g, " ")); }
+    }
+    sentences.forEach((s) => {
+      const span = d.createElement("span");
+      span.className = "wall-sentence";
+      span.textContent = s;
+      span.setAttribute("role", "button");
+      span.setAttribute("tabindex", "0");
+      span.setAttribute("aria-pressed", "false");
+      wall.appendChild(span);
+    });
+
+    wrap.appendChild(wall);
+    wireInteractions(wall);
+  }
+  function initWordWalls() { d.querySelectorAll('.block.string-split.-wordwall .wall-wrap').forEach(buildInlineWall); }
+
+  // ---------- bootstrap ----------
+  function init() {
+    setupRepeat();
+    setupSplit();
+    setupInView();
+    collectProgressEls();
+    collectParallaxEls();
+    collectGlideEls();
+    collectLerpEls();
+    setupCursor();
+    initWordWalls();
+
+    // grids
+    const magneticBlock = d.querySelector('.block.string-magnetic[data-v-40fb9db4]');
+    if (magneticBlock) buildMagneticGrid(magneticBlock, 3, 3, 2, 2);
+    const lerpBlock = d.querySelector('.block.string-lerp[data-v-270bb328]');
+    if (lerpBlock) buildLerpGrid(lerpBlock, 3, 2);
+
+    collectMagneticEls();
+    setupPerfHUD();
+    applyBoxScale();
+    setupStorylineObserver();
+
+    const chapterBlocks = [...d.querySelectorAll(".page .block")];
+    const storylineEl = d.getElementById("storyline");
+    const firstStory = chapterBlocks[0] ? getStoryForBlock(chapterBlocks[0]) : null;
+    if (firstStory || storylineEl?.textContent) setTip(firstStory || storylineEl.textContent || "Try the cursor →");
+
+    requestAnimationFrame(() => { w.dispatchEvent(new Event("scroll")); });
+
+    // RAF loop
+    const tick = () => {
+      updateProgress();
+      updateLerpProgress();
+      parallaxTick();
+      smoothTick();
+      magneticTick();
+      w.requestAnimationFrame(tick);
+    };
+    w.requestAnimationFrame(tick);
+
+    // responsive collectors
+    let resizeRAF = 0;
+    const onResize = () => {
+      cancelAnimationFrame(resizeRAF);
+      resizeRAF = requestAnimationFrame(() => {
+        collectParallaxEls();
+        collectGlideEls();
+        collectMagneticEls();
+        collectLerpEls();
+        applyBoxScale();
+        updateProgress();
+        updateLerpProgress();
+      });
+    };
+    w.addEventListener("resize", onResize, { passive: true });
+    w.addEventListener("orientationchange", onResize, { passive: true });
+  }
+
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", init, { once: true });
+  else init();
+})();
+</script>
+
+<!-- Rapier playground (separate block) -->
+<script>
+(async function initRapierPlayground(){
+  const stageBlock = document.querySelector(".block.string-rapier");
+  const canvas = document.getElementById("rapier-canvas");
+  if (!stageBlock || !canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const DPR = Math.max(1, window.devicePixelRatio || 1);
+  function fitCanvas(){
+    const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
+    canvas.width = Math.floor(r.width * DPR);
+    canvas.height = Math.floor(r.height * DPR);
+    canvas.style.width = r.width + "px";
+    canvas.style.height = r.height + "px";
+  }
+  fitCanvas();
+  window.addEventListener("resize", fitCanvas, { passive: true });
+
+	const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
+await RAPIER.init();
+
+  const gravity = { x: 0, y: 2400 };
+  const world = new RAPIER.World(gravity);
+
+  let walls = [];
+  function rebuildWalls(){
+    walls.forEach(c => { world.removeCollider(c, false); });
+    walls.length = 0;
+
+    const W = canvas.width, H = canvas.height;
+    const t = Math.max(20 * DPR, 12 * DPR);
+    const defs = [
+      { x: -t/2,  y: H/2,  w: t/2,  h: H/2 },   // left
+      { x: W+t/2, y: H/2,  w: t/2,  h: H/2 },   // right
+      { x: W/2,   y: -t/2, w: W/2,  h: t/2 },   // top
+      { x: W/2,   y: H+t/2,w: W/2,  h: t/2 }    // bottom
+    ];
+    defs.forEach(({x,y,w,h})=>{
+      const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x, y));
+      const co = world.createCollider(
+        RAPIER.ColliderDesc.cuboid(w, h).setRestitution(0.6).setFriction(0.25),
+        rb
+      );
+      walls.push(co);
+    });
+  }
+  rebuildWalls();
+  window.addEventListener("resize", () => {
+    fitCanvas();
+    rebuildWalls();
+    if (boxBody) {
+      const W = canvas.width, H = canvas.height;
+      const p = boxBody.translation();
+      boxBody.setTranslation({ x: Math.min(Math.max(p.x, 80*DPR), W-80*DPR),
+                               y: Math.min(Math.max(p.y, 80*DPR), H-80*DPR) }, true);
+    }
+  }, { passive: true });
+
+  const side = Math.min(canvas.width, canvas.height) * 0.12;
+  const half = side / 2;
+  const start = { x: canvas.width * 0.5, y: canvas.height * 0.35 };
+
+  const boxBody = world.createRigidBody(
+    RAPIER.RigidBodyDesc.dynamic()
+      .setTranslation(start.x, start.y)
+      .setLinearDamping(0.04)
+      .setAngularDamping(0.04)
+  );
+  world.createCollider(
+    RAPIER.ColliderDesc.cuboid(half, half)
+      .setRestitution(0.72)
+      .setFriction(0.25),
+    boxBody
+  );
+
+  let dragging = false;
+  let lastPt = null;
+  let lastV = { x: 0, y: 0 };
+	let grabLocal = null;   // <— NEW: pointer-to-center offset captured at mousedown
+	let grabWorld = null;   // <— NEW: same in world coords at the moment of grab
+
+  function eventPos(e){
+    if (e.touches && e.touches[0]) {
+      const t = e.touches[0];
+      return { x: (t.clientX * DPR), y: (t.clientY * DPR) };
+    }
+    return { x: (e.clientX * DPR), y: (e.clientY * DPR) };
+  }
+  function pointInsideBox(pt){
+    const c = boxBody.translation();
+    return (pt.x >= c.x - half && pt.x <= c.x + half && pt.y >= c.y - half && pt.y <= c.y + half);
+  }
+	function onDown(e){
+  const pt = eventPos(e);
+  if (!pointInsideBox(pt)) return;
+  e.preventDefault();
+  dragging = true; lastPt = pt; lastV = { x: 0, y: 0 };
+
+  stageBlock.classList.add("-grabbing");
+
+  // zero spin while dragging
+  boxBody.setAngvel(0, true);
+
+  // NEW: remember where we grabbed the body (offset from its center, in world coords)
+  const c = boxBody.translation();
+  grabWorld = { x: pt.x - c.x, y: pt.y - c.y };
+  grabLocal = { ...grabWorld }; // world == local because body frame = world at grab time
 }
 
+function onMove(e){
+  if (!dragging) {
+    const pt = eventPos(e);
+    stageBlock.classList.toggle("-grab", pointInsideBox(pt));
+    return;
+  }
+  const pt = eventPos(e);
 
-		// ---------- Perf HUD ----------
-		function setupPerfHUD() {
-			const fpsNode = d.getElementById("fps");
-			const dirNode = d.getElementById("scroll-dir");
-			if (!fpsNode && !dirNode) return;
-	
-			const getScrollY = () => Math.round(w.scrollY || w.pageYOffset || 0);
-			let lastT = performance.now(), frames = 0, accum = 0;
-			let lastScrollY = getScrollY();
-	
-			const perfTick = (t) => {
-				const dt = t - lastT; lastT = t; frames++; accum += dt;
-	
-				if (accum > 500 && fpsNode) {
-					const fps = Math.round((frames * 1000) / accum);
-					fpsNode.textContent = `FPS: ${fps}`;
-					frames = 0; accum = 0;
-				}
-	
-				const sy = getScrollY();
-				if (dirNode) {
-					const dir = sy > lastScrollY ? "↓" : (sy < lastScrollY ? "↑" : "•");
-					dirNode.textContent = `Scroll ${dir}  y:${sy}`;
-				}
-				lastScrollY = sy;
-	
-				w.requestAnimationFrame(perfTick);
-			};
-			w.requestAnimationFrame(perfTick);
-		}
-	
-		// ---------- Story helpers + HUD ----------
-		function getHeadingText(block) {
-			if (!block) return "";
-			const h = block.querySelector("h1,h2,h3,h4,h5,h6");
-			if (!h) return "";
-			for (const node of h.childNodes) {
-				if (node.nodeType === Node.TEXT_NODE) {
-					const t = (node.nodeValue || "").trim();
-					if (t) return t;
-				}
-			}
-			return (h.textContent || "").trim();
-		}
-		function getStoryForBlock(block) {
-			if (!block) return "";
-			return block.getAttribute("data-storyline")
-					|| block.getAttribute("data-cursor-tip")
-					|| getHeadingText(block)
-					|| "";
-		}
-	
-		const storylineEl = d.getElementById("storyline");
-		const chapterBlocks = [...d.querySelectorAll(".page .block")];
-		let currentStoryText = "";
-		let activeBlock = null;
-	
-		function updateStoryline(next) {
-			if (!storylineEl || !next || next === currentStoryText) return;
-			currentStoryText = next;
-			storylineEl.textContent = currentStoryText;
-		}
-	
-		function setupStorylineObserver() {
-			if (!storylineEl || !chapterBlocks.length) return;
-	
-			updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
-	
-			const io = new IntersectionObserver((entries) => {
-				const vis = entries
-					.filter(e => e.isIntersecting)
-					.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-				if (!vis) return;
-				const el = vis.target;
-				activeBlock = el;
-				updateStoryline(getStoryForBlock(el));
-			}, { root: null, threshold: [0, .25, .5, .75, 1] });
-	
-			chapterBlocks.forEach(b => io.observe(b));
-		}
-	
-		// ---------- Word Wall (non-interactive builder + interactions) ----------
-		function buildInlineWall(wrap) {
-			const existingWall = wrap.querySelector('.wall');
-			const srcP = existingWall?.querySelector('p') || wrap.querySelector('p');
-			const sourceText = (srcP?.textContent || existingWall?.textContent || wrap.textContent || '').trim();
-	
-			wrap.innerHTML = '';
-	
-			const wall = d.createElement('div');
-			wall.className = 'wall';
-	
-			const splitRegex = /(?<=[.!?])\s+(?=["“'‘`A-Z0-9])/g;
-			const fallbackSplit = (text) =>
-				text.replace(/([.!?])(\s+)/g, '$1|')
-						.split('|')
-						.map(s => s.trim())
-						.filter(Boolean);
-	
-			let sentences = [];
-			if (sourceText) {
-				try { sentences = sourceText.replace(/\s+/g, ' ').split(splitRegex).map(s => s.trim()).filter(Boolean); }
-				catch { sentences = fallbackSplit(sourceText.replace(/\s+/g, ' ')); }
-			}
-	
-			sentences.forEach((s) => {
-				const span = d.createElement('span');
-				span.className = 'wall-sentence';
-				span.textContent = s;
-				span.setAttribute('role', 'button');
-				span.setAttribute('tabindex', '0');
-				span.setAttribute('aria-pressed', 'false');
-				wall.appendChild(span);
-			});
-	
-			wrap.appendChild(wall);
-			wireInteractions(wall); // attach handlers once built
-		}
-	
-		function wireInteractions(wallEl) {
-			wallEl.addEventListener('click', (e) => {
-				const t = e.target.closest('.wall-sentence'); if (!t) return;
-				const on = t.getAttribute('aria-pressed') === 'true';
-				t.setAttribute('aria-pressed', String(!on));
-				t.classList.toggle('active', !on);
-			});
-			wallEl.addEventListener('keydown', (e) => {
-				if (e.key !== 'Enter' && e.key !== ' ') return;
-				const t = e.target.closest('.wall-sentence'); if (!t) return;
-				e.preventDefault();
-				const on = t.getAttribute('aria-pressed') === 'true';
-				t.setAttribute('aria-pressed', String(!on));
-				t.classList.toggle('active', !on);
-			});
-		}
-	
-		function initWordWalls() {
-			d.querySelectorAll('.block.string-split.-wordwall .wall-wrap').forEach(buildInlineWall);
-		}
-	
-		// ---------- Bootstrap ----------
-		function init() {
-			setupRepeat();
-			setupSplit();
-			setupInView();
-			collectProgressEls();
-			collectParallaxEls();
-			collectGlideEls();
-			collectLerpEls();
-			setupCursor();
-			initWordWalls();
-	
-			// 🔽 Build the magnetic grid (center tile active)
-			const magneticBlock = d.querySelector('.block.string-magnetic[data-v-40fb9db4]');
-			if (magneticBlock) buildMagneticGrid(magneticBlock, 3, 3, 2, 2);
+  // estimate release velocity (your existing logic)
+  const dt = 1/60;
+  lastV = { x: (pt.x - lastPt.x)/dt, y: (pt.y - lastPt.y)/dt };
+  lastPt = pt;
 
-			// NEW: Lerp → build 3×1 row, center active (reusing existing lerp node)
-			const lerpBlock = d.querySelector('.block.string-lerp[data-v-270bb328]');
-			if (lerpBlock) buildLerpGrid(lerpBlock, 3, 2);
+  // While dragging: keep the grabbed point under the cursor.
+  // Instead of snapping the center to pt, move center to pt - grab offset.
+  const newCenter = { x: pt.x - grabWorld.x, y: pt.y - grabWorld.y };
+
+  boxBody.setLinvel({ x: 0, y: 0 }, true);
+  boxBody.setAngvel(0, true);
+  boxBody.setTranslation(newCenter, true);
+}
+
+function onUp(){
+  if (!dragging) return;
+  dragging = false;
+  stageBlock.classList.remove("-grabbing");
+
+  // === Compute spin from where you grabbed it ===
+  // r = vector from center to grab point (world coords at release)
+  const r = grabWorld || { x: 0, y: 0 };
+
+  // J ~ m * Δv; we’ll use velocity as a proxy and let Rapier’s mass scale it
+  const mass = boxBody.mass ? boxBody.mass() : 1;
+
+  // Square’s moment of inertia about center: I = (m * s^2) / 6
+  const s = side; // already defined above as the square’s world-space side length
+  const I = Math.max(1e-6, (mass * s * s) / 6);
+
+  // 2D cross product r × J (use velocity as impulse proxy): τ_impulse = r_x * v_y − r_y * v_x
+  const cross = r.x * lastV.y - r.y * lastV.x;
+
+  // Δω = (r × J) / I ; scale by mass because J ~ m*v
+  let omega = (mass * cross) / I;
+
+  // Clamp spin so it feels nice and won’t explode on high-DPI fast flicks
+  const MAX_SPIN = 18; // rad/s cap; tune to taste
+  omega = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, omega));
+
+  // Linear velocity same as your current fling (with your clamp)
+  const clampV = (v, m) => Math.max(-m, Math.min(m, v));
+  const maxSpeed = 3200 * DPR;
+
+  boxBody.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, true);
+  boxBody.setAngvel(omega, true);
+
+  // clear grab memory
+  grabLocal = null;
+  grabWorld = null;
+}
+
+  const area = stageBlock.querySelector(".rapier-stage");
+  area.addEventListener("mousedown", onDown);
+  area.addEventListener("mousemove", onMove);
+  window.addEventListener("mouseup", onUp);
+  area.addEventListener("touchstart", onDown, { passive: false });
+  area.addEventListener("touchmove", onMove, { passive: false });
+  window.addEventListener("touchend", onUp);
+  window.addEventListener("touchcancel", onUp);
+
+  function pinkBgTick(){
+    const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
+    stageBlock.classList.toggle("-bg-pink", hoverish);
+  }
+
+  let lastTime = performance.now();
+  function tick(now){
+    const dt = Math.min(1/30, (now - lastTime) / 1000);
+    lastTime = now;
+    world.step();
+
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.save();
+    ctx.setLineDash([6*DPR, 6*DPR]);
+    ctx.lineWidth = 1 * DPR;
+    const root = getComputedStyle(document.documentElement);
+    ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-black-rgb") || "16,18,20"}, .35)`;
+    ctx.strokeRect(0.5*DPR, 0.5*DPR, W - 1*DPR, H - 1*DPR);
+    ctx.restore();
+
+    const p = boxBody.translation();
+    const a = boxBody.rotation();
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(a);
+    ctx.fillStyle = root.getPropertyValue("--c-black") || "#101214";
+    ctx.fillRect(-half, -half, side, side);
+    ctx.setLineDash([4*DPR, 4*DPR]);
+    ctx.lineWidth = 1 * DPR;
+    ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
+    ctx.strokeRect(-half + 0.5*DPR, -half + 0.5*DPR, side - 1*DPR, side - 1*DPR);
+    ctx.restore();
+
+    pinkBgTick();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+
 	
-			collectMagneticEls();   // after building the grid
-			setupPerfHUD();
-			applyBoxScale();
-			setupStorylineObserver();
-	
-			// Ensure cursor tip shows immediately (confirms tooltip wiring)
-			setTip(getStoryForBlock(chapterBlocks[0]) || storylineEl?.textContent || "Try the cursor →");
-	
-			// First-frame sync
-			requestAnimationFrame(() => { w.dispatchEvent(new Event("scroll")); });
-	
-			// RAF loop
-			const tick = () => {
-				updateProgress();
-				updateLerpProgress();
-				parallaxTick();
-				smoothTick();
-				magneticTick();
-				w.requestAnimationFrame(tick);
-			};
-			w.requestAnimationFrame(tick);
-	
-			// Responsive collectors
-			let resizeRAF = 0;
-			const onResize = () => {
-				cancelAnimationFrame(resizeRAF);
-				resizeRAF = requestAnimationFrame(() => {
-					collectParallaxEls();
-					collectGlideEls();
-					collectMagneticEls();
-					collectLerpEls();
-					applyBoxScale();
-					updateProgress();
-					updateLerpProgress();
-				});
-			};
-			w.addEventListener("resize", onResize, { passive: true });
-			w.addEventListener("orientationchange", onResize, { passive: true });
-		}
-	
-		if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", init, { once: true });
-		else init();
-	})();
-	</script>
-	
+})();
+</script>
+
 		</body>
 		</html>

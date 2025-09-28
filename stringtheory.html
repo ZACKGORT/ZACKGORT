@@ -425,7 +425,7 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
   text-decoration: underline; text-decoration-thickness: .04em;
 }/* CSS Variables & Root Configuration */
 :root {
-  --g-margin: 0; --progress-mult: .8; --block-pink: #ff8da1; --section-vh: 110;
+  --g-margin: 0; --progress-mult: .8; --block-pink: #ff8da1; --section-vh: 90;
   --type-step: 1.333; --body-font-size: 1rem; --body-line-height: 1.2; --p: 1rem;
   --m: calc(var(--p) / var(--type-step)); --mm: calc(var(--m) / var(--type-step));
   --h6: calc(var(--p) * var(--type-step)); --h5: calc(var(--h6) * var(--type-step));
@@ -447,6 +447,22 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
 
 @media (max-width: 768px) { :root { --section-vh: 60; } }
 @media (min-width: 1024px) { :root { --g-columns: 14; --columns: 14; --g-margin: calc(var(--g-gap) * 4); } }
+
+/* Base */
+:root { --section-vh: 90; }
+
+/* Fluidly ramp 90 → 60 as width goes 720px → 360px */
+@media (max-width: 720px) {
+  :root {
+    --section-vh: clamp(60,
+      calc(90 - 30 * (720px - 100vw) / 360),
+      90);
+  }
+}
+@supports (height: 100dvh) {
+  .block { height: calc(var(--section-vh) * 1dvh); } /* avoids iOS URL bar jumps */
+}
+
 
 /* Font Faces */
 @font-face {
@@ -842,9 +858,21 @@ svg { fill: var(--c-black); aspect-ratio: 1 / 1; width: 100%; }
 
 /* 0) Core rhythm & gutters (fluid, clamped) */
 :root {
-  /* grid gap & page margins scale gently with viewport */
-  --g-gap: clamp(.16rem, 0.4vw, .28rem);
-  --g-margin: clamp(.6rem, 2.4vw, 2rem);
+  --p: calc(1rem * var(--ui));
+  --m: calc(var(--p) / var(--type-step));
+  --mm: calc(var(--m) / var(--type-step));
+  --h6: calc(var(--p) * var(--type-step));
+  --h5: calc(var(--h6) * var(--type-step));
+  --h4: calc(var(--h5) * var(--type-step));
+  --h3: calc(var(--h4) * var(--type-step));
+  --h2: calc(var(--h3) * var(--type-step));
+  --h1: calc(var(--h2) * var(--type-step));
+  --large: clamp(var(--p),
+                 calc(var(--h1) * var(--type-step) * var(--type-step)),
+                 9.3vw);
+  /* gutters & margins scale too */
+  --g-gap: calc(clamp(.16rem, 0.4vw, .28rem) * var(--ui));
+  --g-margin: calc(var(--g-gap) * 2);
 }
 
 :root { --section-vh: 110; }

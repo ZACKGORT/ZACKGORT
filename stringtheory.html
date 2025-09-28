@@ -1070,6 +1070,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
   --section-vh: 100;
   position: relative;
   overflow: hidden;
+
 }
 
 .block.string-rapier .rapier-stage {
@@ -1077,12 +1078,14 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
   inset: 0;
   /* keep a subtle dashed frame vibe like your .childs */
   box-shadow: inset 0 0 0 1px rgba(var(--c-black-rgb), .15);
+
 }
 
 .block.string-rapier canvas {
   display: block;
   width: 100%;
   height: 100%;
+		z-index: 1000000;
 }
 
 /* The “box” rendered style parity (fill black, outline like others) */
@@ -1400,7 +1403,10 @@ data-cursor-tip="Click, hold, and fling.">
 
 <!-- full-bleed canvas inside this block -->
 <div class="rapier-stage" aria-label="Rapier physics stage">
-<canvas id="rapier-canvas"></canvas>
+<canvas id="rapier-canvas"><button class="spawn-btn -mm" type="button" aria-label="Add a box">
++ Add a box
+</button>
+</canvas>
 </div>
 </div>
 
@@ -2016,7 +2022,6 @@ data-cursor-tip="Click, hold, and fling.">
 })();
 </script>
 
-<!-- Rapier playground (separate block) -->
 <script>
 (async function initRapierPlayground(){
   const stageBlock = document.querySelector(".block.string-rapier");
@@ -2025,6 +2030,7 @@ data-cursor-tip="Click, hold, and fling.">
 
   const ctx = canvas.getContext("2d");
   const DPR = Math.max(1, window.devicePixelRatio || 1);
+
   function fitCanvas(){
     const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
     canvas.width = Math.floor(r.width * DPR);
@@ -2035,16 +2041,20 @@ data-cursor-tip="Click, hold, and fling.">
   fitCanvas();
   window.addEventListener("resize", fitCanvas, { passive: true });
 
-	const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
-await RAPIER.init();
+  const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
+  await RAPIER.init();
 
-const DROP_G = 2400;
-const world = new RAPIER.World({ x: 0, y: 0 }); // no gravity until in-view
+  const DROP_G = 2400;
+  const world = new RAPIER.World({ x: 0, y: 0 });
+  const queue = new RAPIER.EventQueue(true);
 
+  /* ---------- bounds (collidable walls) ---------- */
   let walls = [];
+  const wallHandles = new Set();
   function rebuildWalls(){
-    walls.forEach(c => { world.removeCollider(c, false); });
+    walls.forEach(({ rb, co }) => { world.removeCollider(co, true); world.removeRigidBody(rb); });
     walls.length = 0;
+    wallHandles.clear();
 
     const W = canvas.width, H = canvas.height;
     const t = Math.max(20 * DPR, 12 * DPR);
@@ -2057,63 +2067,140 @@ const world = new RAPIER.World({ x: 0, y: 0 }); // no gravity until in-view
     defs.forEach(({x,y,w,h})=>{
       const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x, y));
       const co = world.createCollider(
-        RAPIER.ColliderDesc.cuboid(w, h).setRestitution(0.6).setFriction(0.25),
+        RAPIER.ColliderDesc.cuboid(w, h)
+          .setRestitution(0.6)
+          .setFriction(0.25)
+          .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
         rb
       );
-      walls.push(co);
+      walls.push({ rb, co });
+      wallHandles.add(co.handle);
     });
   }
   rebuildWalls();
+
   window.addEventListener("resize", () => {
     fitCanvas();
     rebuildWalls();
-    if (boxBody) {
-      const W = canvas.width, H = canvas.height;
-      const p = boxBody.translation();
-      boxBody.setTranslation({ x: Math.min(Math.max(p.x, 80*DPR), W-80*DPR),
-                               y: Math.min(Math.max(p.y, 80*DPR), H-80*DPR) }, true);
-    }
+    // keep body in bounds after resize
+    const W = canvas.width, H = canvas.height;
+    const p = body.translation();
+    const m = current.half + 2*DPR;
+    body.setTranslation({
+      x: Math.min(Math.max(p.x, m), W - m),
+      y: Math.min(Math.max(p.y, m), H - m)
+    }, true);
   }, { passive: true });
 
-	// Drop only when the rapier section is in view
-let hasDropped = false;
-const io = new IntersectionObserver(
-  (entries) => {
-    const e = entries[0];
-    if (!hasDropped && e.isIntersecting && e.intersectionRatio > 0.35) {
-      world.gravity = { x: 0, y: DROP_G };
-      boxBody.wakeUp();                  // make sure the body isn’t sleeping
-      hasDropped = true;
-      io.disconnect();                   // one-and-done
-    }
-  },
-  { root: null, threshold: [0, 0.35, 0.6] }
-);
-io.observe(stageBlock);
+  /* ---------- morphing body ---------- */
+  const size   = Math.min(canvas.width, canvas.height) * 0.12;
+  const start  = { x: canvas.width * 0.5, y: canvas.height * 0.35 };
+  const current = {
+    half: size / 2,
+    wear: 0,
+    isBall: false,
+    collider: null
+  };
 
-
-  const side = Math.min(canvas.width, canvas.height) * 0.12;
-  const half = side / 2;
-  const start = { x: canvas.width * 0.5, y: canvas.height * 0.35 };
-
-  const boxBody = world.createRigidBody(
+  const body = world.createRigidBody(
     RAPIER.RigidBodyDesc.dynamic()
       .setTranslation(start.x, start.y)
       .setLinearDamping(0.04)
       .setAngularDamping(0.04)
   );
-  world.createCollider(
-    RAPIER.ColliderDesc.cuboid(half, half)
-      .setRestitution(0.72)
-      .setFriction(0.25),
-    boxBody
-  );
 
+  function makeBoxCollider(){
+    if (current.collider) world.removeCollider(current.collider, true);
+    current.collider = world.createCollider(
+      RAPIER.ColliderDesc.cuboid(current.half, current.half)
+        .setRestitution(0.72)
+        .setFriction(0.25)
+        .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
+      body
+    );
+    current.isBall = false;
+  }
+  function makeBallCollider(){
+    if (current.collider) world.removeCollider(current.collider, true);
+    current.collider = world.createCollider(
+      RAPIER.ColliderDesc.ball(current.half * 0.98)
+        .setRestitution(0.72)
+        .setFriction(0.25)
+        .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS),
+      body
+    );
+    current.isBall = true;
+  }
+  makeBoxCollider();
+
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  /* ---------- drop observer (re-armable) ---------- */
+  let hasDropped = false;
+  let dropObserver = null;
+  function armDropObserver(){
+    if (dropObserver) dropObserver.disconnect();
+    dropObserver = new IntersectionObserver(
+      (entries) => {
+        const e = entries[0];
+        if (!hasDropped && e.isIntersecting && e.intersectionRatio > 0.35) {
+          world.gravity = { x: 0, y: DROP_G };
+          body.wakeUp();
+          hasDropped = true;
+        }
+      },
+      { root: null, threshold: [0, 0.35, 0.6] }
+    );
+    dropObserver.observe(stageBlock);
+  }
+  armDropObserver();
+
+  /* ---------- goal “spawn box” & reset logic ---------- */
+  const goal = {
+    visible: false,
+    side: size * 1.1, // a touch bigger than the original for nice UX
+    get half(){ return this.side / 2; },
+    get x(){ return start.x - this.half; },
+    get y(){ return start.y - this.half; }
+  };
+
+  function showGoal(){ goal.visible = true; }
+  function hideGoal(){ goal.visible = false; }
+
+  function resetSection(){
+    // visuals
+    hideGoal();
+    // physics state
+    current.wear = 0;
+    makeBoxCollider();
+    body.setTranslation({ x: start.x, y: start.y }, true);
+    body.setLinvel({ x: 0, y: 0 }, true);
+    body.setAngvel(0, true);
+    body.setAngularDamping(0.04);
+    // gravity re-arms
+    hasDropped = false;
+    world.gravity = { x: 0, y: 0 };
+    armDropObserver();
+  }
+
+  /* ---------- wear & morph ---------- */
+  function addWear(amount){
+    const before = current.wear;
+    current.wear = clamp(current.wear + amount, 0, 1);
+    if (!current.isBall && current.wear >= 0.85) {
+      makeBallCollider();  // morph to true circle
+      showGoal();          // spawn the goal where it all began
+    }
+    // spins a bit freer as it rounds
+    const spinEase = 0.04 + current.wear * 0.06;
+    body.setAngularDamping(spinEase);
+  }
+
+  /* ---------- pointer interactions ---------- */
   let dragging = false;
   let lastPt = null;
   let lastV = { x: 0, y: 0 };
-	let grabLocal = null;   // <— NEW: pointer-to-center offset captured at mousedown
-	let grabWorld = null;   // <— NEW: same in world coords at the moment of grab
+  let grabOffset = null;
 
   function eventPos(e){
     if (e.touches && e.touches[0]) {
@@ -2122,86 +2209,69 @@ io.observe(stageBlock);
     }
     return { x: (e.clientX * DPR), y: (e.clientY * DPR) };
   }
-  function pointInsideBox(pt){
-    const c = boxBody.translation();
-    return (pt.x >= c.x - half && pt.x <= c.x + half && pt.y >= c.y - half && pt.y <= c.y + half);
+  function pointInside(pt){
+    const c = body.translation();
+    return (pt.x >= c.x - current.half && pt.x <= c.x + current.half &&
+            pt.y >= c.y - current.half && pt.y <= c.y + current.half);
   }
-function onDown(e){
-  const pt = eventPos(e);
-  if (!pointInsideBox(pt)) return;
-  e.preventDefault();
-  dragging = true; lastPt = pt; lastV = { x: 0, y: 0 };
 
-  stageBlock.classList.add("-grabbing");
-
-  // zero spin while dragging
-  boxBody.setAngvel(1, true);
-
-  // NEW: remember where we grabbed the body (offset from its center, in world coords)
-  const c = boxBody.translation();
-  grabWorld = { x: pt.x - c.x, y: pt.y - c.y };
-  grabLocal = { ...grabWorld }; // world == local because body frame = world at grab time
-}
-
-function onMove(e){
-  if (!dragging) {
+  function onDown(e){
     const pt = eventPos(e);
-    stageBlock.classList.toggle("-grab", pointInsideBox(pt));
-    return;
+    if (!pointInside(pt)) return;
+    e.preventDefault();
+    dragging = true; lastPt = pt; lastV = { x: 0, y: 0 };
+    stageBlock.classList.add("-grabbing");
+    const c = body.translation();
+    grabOffset = { x: pt.x - c.x, y: pt.y - c.y };
+    body.setAngvel(0, true);
   }
-  const pt = eventPos(e);
 
-  // estimate release velocity (your existing logic)
-  const dt = 1/60;
-  lastV = { x: (pt.x - lastPt.x)/dt, y: (pt.y - lastPt.y)/dt };
-  lastPt = pt;
+  function onMove(e){
+    if (!dragging){
+      const pt = eventPos(e);
+      stageBlock.classList.toggle("-grab", pointInside(pt));
+      return;
+    }
+    const pt = eventPos(e);
+    const dt = 1/60;
+    lastV = { x: (pt.x - lastPt.x)/dt, y: (pt.y - lastPt.y)/dt };
+    lastPt = pt;
 
-  // While dragging: keep the grabbed point under the cursor.
-  // Instead of snapping the center to pt, move center to pt - grab offset.
-  const newCenter = { x: pt.x - grabWorld.x, y: pt.y - grabWorld.y };
+    const targetCenter = { x: pt.x - grabOffset.x, y: pt.y - grabOffset.y };
+    body.setLinvel({ x: 0, y: 0 }, true);
+    body.setAngvel(0, true);
+    body.setTranslation(targetCenter, true);
+  }
 
-  boxBody.setLinvel({ x: 0, y: 0 }, true);
-  boxBody.setAngvel(0, true);
-  boxBody.setTranslation(newCenter, true);
-}
+  function onUp(){
+    if (!dragging) return;
+    dragging = false;
+    stageBlock.classList.remove("-grabbing");
 
-function onUp(){
-  if (!dragging) return;
-  dragging = false;
-  stageBlock.classList.remove("-grabbing");
+    // throw strength → wear
+    const linSpeed = Math.hypot(lastV.x, lastV.y);
+    const angBonus = Math.abs(body.angvel()) * current.half;
+    const throwMetric = linSpeed + angBonus;
+    addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
 
-  // === Compute spin from where you grabbed it ===
-  // r = vector from center to grab point (world coords at release)
-  const r = grabWorld || { x: 0, y: 0 };
+    // release velocities (clamped)
+    const clampV = (v, m) => Math.max(-m, Math.min(m, v));
+    const maxSpeed = 3200 * DPR;
 
-  // J ~ m * Δv; we’ll use velocity as a proxy and let Rapier’s mass scale it
-  const mass = boxBody.mass ? boxBody.mass() : 1;
+    // spin from off-center grab: ω ∝ (r × v) / I
+    const r = grabOffset || { x: 0, y: 0 };
+    const mass = body.mass ? body.mass() : 1;
+    const s = current.half * 2;
+    const I = Math.max(1e-6, (mass * s * s) / 6);
+    const cross = r.x * lastV.y - r.y * lastV.x;
+    let omega = (mass * cross) / I;
+    const MAX_SPIN = 18;
+    omega = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, omega));
 
-  // Square’s moment of inertia about center: I = (m * s^2) / 6
-  const s = side; // already defined above as the square’s world-space side length
-  const I = Math.max(1e-6, (mass * s * s) / 6);
-
-  // 2D cross product r × J (use velocity as impulse proxy): τ_impulse = r_x * v_y − r_y * v_x
-  const cross = r.x * lastV.y - r.y * lastV.x;
-
-  // Δω = (r × J) / I ; scale by mass because J ~ m*v
-  let omega = (mass * cross) / I;
-
-  // Clamp spin so it feels nice and won’t explode on high-DPI fast flicks
-  const MAX_SPIN = 18; // rad/s cap; tune to taste
-  omega = Math.max(-MAX_SPIN, Math.min(MAX_SPIN, omega));
-
-  // Linear velocity same as your current fling (with your clamp)
-  const clampV = (v, m) => Math.max(-m, Math.min(m, v));
-  const maxSpeed = 3200 * DPR;
-
-  boxBody.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, true);
-  boxBody.setAngvel(omega, true);
-
-  // clear grab memory
-  grabLocal = null;
-  grabWorld = null;
-}
+    body.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, true);
+    body.setAngvel(omega, true);
+    grabOffset = null;
+  }
 
   const area = stageBlock.querySelector(".rapier-stage");
   area.addEventListener("mousedown", onDown);
@@ -2212,20 +2282,69 @@ function onUp(){
   window.addEventListener("touchend", onUp);
   window.addEventListener("touchcancel", onUp);
 
+  /* ---------- wear on wall hits ---------- */
+  function handleCollisionEvent(h1, h2, started){
+    if (!started) return;
+    const isSelf = (h) => current.collider && h === current.collider.handle;
+    const aIsSelf = isSelf(h1) || isSelf(h2);
+    const other   = isSelf(h1) ? h2 : (isSelf(h2) ? h1 : null);
+    if (!aIsSelf || !wallHandles.has(other)) return;
+
+    const v = body.linvel();
+    const speed = Math.hypot(v.x, v.y) + Math.abs(body.angvel()) * current.half;
+    addWear(clamp(speed / (6000 * DPR), 0.003, 0.035));
+  }
+
+  /* ---------- pink affordance when grabby ---------- */
   function pinkBgTick(){
     const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
     stageBlock.classList.toggle("-bg-pink", hoverish);
   }
 
+  /* ---------- draw helpers ---------- */
+  function roundedRectPath(cx, cy, half, r){
+    const x = cx - half, y = cy - half, w = half*2, h = half*2;
+    const rr = clamp(r, 0, half);
+    if (rr < 0.5){ ctx.beginPath(); ctx.rect(x, y, w, h); return; }
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.arcTo(x + w, y, x + w, y + rr, rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+    ctx.lineTo(x + rr, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rr, rr);
+    ctx.lineTo(x, y + rr);
+    ctx.arcTo(x, y, x + rr, y, rr);
+  }
+
+  /* ---------- goal test (ball fully inside) ---------- */
+  function checkGoal(){
+    if (!goal.visible || !current.isBall) return false;
+    const p = body.translation();
+    const r = current.half;
+    const left = goal.x, top = goal.y, right = goal.x + goal.side, bottom = goal.y + goal.side;
+    // require the entire circle to be inside the goal square
+    return (p.x - r > left && p.x + r < right && p.y - r > top && p.y + r < bottom);
+  }
+
+  /* ---------- main loop ---------- */
   let lastTime = performance.now();
   function tick(now){
     const dt = Math.min(1/30, (now - lastTime) / 1000);
     lastTime = now;
-    world.step();
+
+    world.step(queue);
+    queue.drainCollisionEvents(handleCollisionEvent);
+
+    if (checkGoal()) {
+      resetSection();
+    }
 
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
 
+    // dashed stage frame
     ctx.save();
     ctx.setLineDash([6*DPR, 6*DPR]);
     ctx.lineWidth = 1 * DPR;
@@ -2234,28 +2353,49 @@ function onUp(){
     ctx.strokeRect(0.5*DPR, 0.5*DPR, W - 1*DPR, H - 1*DPR);
     ctx.restore();
 
-    const p = boxBody.translation();
-    const a = boxBody.rotation();
+    // draw goal (if visible)
+    if (goal.visible){
+      ctx.save();
+      const pink = root.getPropertyValue("--block-pink")?.trim() || "#ff8da1";
+      ctx.setLineDash([8*DPR, 6*DPR]);
+      ctx.lineWidth = 2 * DPR;
+      ctx.strokeStyle = pink;
+      ctx.strokeRect(goal.x + 0.5*DPR, goal.y + 0.5*DPR, goal.side - 1*DPR, goal.side - 1*DPR);
+      ctx.restore();
+    }
+
+    // draw morphing body
+    const p = body.translation();
+    const a = body.rotation();
+    const fill = (root.getPropertyValue("--c-black") || "#101214").trim();
+    const stroke = `rgba(${root.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
+
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(a);
-    ctx.fillStyle = root.getPropertyValue("--c-black") || "#101214";
-    ctx.fillRect(-half, -half, side, side);
+    ctx.fillStyle = fill;
     ctx.setLineDash([4*DPR, 4*DPR]);
     ctx.lineWidth = 1 * DPR;
-    ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
-    ctx.strokeRect(-half + 0.5*DPR, -half + 0.5*DPR, side - 1*DPR, side - 1*DPR);
+    ctx.strokeStyle = stroke;
+
+    if (current.isBall){
+      ctx.beginPath();
+      ctx.arc(0, 0, current.half, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+    } else {
+      const radius = current.wear * current.half; // 0 → half
+      roundedRectPath(0, 0, current.half, radius);
+      ctx.fill(); ctx.stroke();
+    }
     ctx.restore();
 
     pinkBgTick();
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-
-
-	
 })();
 </script>
+
 
 		</body>
 		</html>

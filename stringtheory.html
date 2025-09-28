@@ -1064,36 +1064,37 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 }
 
 
-
 /* ===== Rapier playground (full-bleed canvas inside the block) ===== */
-.block.string-rapier {
-  --section-vh: 100;
+.block.string-rapier{
+  --section-vh: 90;                 /* trims height vs. full screen */
   position: relative;
   overflow: hidden;
-
+  /* use a real clamp (previous min=max=3rem made it always 3rem) */
+  padding-bottom: clamp(0.75rem, 2.5vh, 2rem);
 }
 
-.block.string-rapier .rapier-stage {
+/* full-bleed stage, but below the canvas in stacking */
+.block.string-rapier .rapier-stage{
   position: absolute;
   inset: 0;
-  /* keep a subtle dashed frame vibe like your .childs */
   box-shadow: inset 0 0 0 1px rgba(var(--c-black-rgb), .15);
-
+  z-index: 1;                       /* create a local stacking context */
 }
 
-.block.string-rapier canvas {
+/* canvas must be positioned for z-index to apply */
+.block.string-rapier canvas{
+  position: relative;               /* <-- required for z-index */
   display: block;
   width: 100%;
   height: 100%;
-		z-index: 1000000;
+  z-index: 1000000;                 /* on top of all block children */
+  pointer-events: auto;             /* keep interactions on */
 }
 
-/* The “box” rendered style parity (fill black, outline like others) */
-.block.string-rapier.-bg-pink { background: var(--block-pink); transition: background .25s var(--f-smooth); }
-
-/* cursor affordance when over the box */
-.block.string-rapier.-grab { cursor: grab; }
-.block.string-rapier.-grabbing { cursor: grabbing; }
+/* Visual states */
+.block.string-rapier.-bg-pink{ background: var(--block-pink); transition: background .25s var(--f-smooth); }
+.block.string-rapier.-grab{ cursor: grab; }
+.block.string-rapier.-grabbing{ cursor: grabbing; }
 
 </style>  
 </head>
@@ -1409,6 +1410,14 @@ data-cursor-tip="Click, hold, and fling.">
 </canvas>
 </div>
 </div>
+
+
+<!-- Short empty footer spacer -->
+<footer aria-hidden="true"
+        style="height:clamp(100px,4vh,100px);
+               padding-bottom:env(safe-area-inset-bottom,0px);">
+</footer>
+
 
 	</main>
 
@@ -2155,14 +2164,22 @@ data-cursor-tip="Click, hold, and fling.">
   }
   armDropObserver();
 
-  /* ---------- goal “spawn box” & reset logic ---------- */
-  const goal = {
-    visible: false,
-    side: size * 1.1, // a touch bigger than the original for nice UX
-    get half(){ return this.side / 2; },
-    get x(){ return start.x - this.half; },
-    get y(){ return start.y - this.half; }
-  };
+
+// ---------- goal “spawn box” (centered) ----------
+const goal = {
+  visible: false,
+  side: size * 1.1, // slightly larger than the ball for friendly catches
+  get half(){ return this.side / 2; },
+  // always center it in the current canvas
+  get cx(){ return canvas.width  * 0.5; },
+  get cy(){ return canvas.height * 0.5; },
+  get x(){ return this.cx - this.half; },
+  get y(){ return this.cy - this.half; }
+};
+
+function showGoal(){ goal.visible = true; }
+function hideGoal(){ goal.visible = false; }
+
 
   function showGoal(){ goal.visible = true; }
   function hideGoal(){ goal.visible = false; }

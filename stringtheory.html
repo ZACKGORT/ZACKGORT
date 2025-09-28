@@ -218,13 +218,11 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before { co
 /* Storyline HUD */
 .storyline-hud {
   position: fixed; left: 0; right: 0;
-  bottom: calc(var(--vh, 1vh) * 10 + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--vh, .50vh) * 10 + env(safe-area-inset-bottom, 0px));
   z-index: 1000; width: 100vw; max-width: 100vw; box-sizing: border-box;
-  background: white;
-  -webkit-backdrop-filter: blur(12px) saturate(120%);
-  backdrop-filter: blur(12px) saturate(120%);
-  border-top: 1px solid rgba(255,255,255,.2);
+  background: none;
   border-bottom: 1px solid rgba(255,255,255,.08);
+	border-radius: 10px;
   padding: 10px 16px;
   font: 14px/1.3 system-ui, ui-sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
   text-align: center; white-space: normal; word-break: break-word;
@@ -1167,29 +1165,11 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 }
 .block.string-magnetic .rel { --width: 1; --height: 1; } /* one cell per tile */
 
-/* Top-left logo chip — matches #fps / #scroll-dir */
-#logo-zckgrt {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
-  left: calc(env(safe-area-inset-left, 0px) + 10px);
-  background-color: #000;
-  color: #fff;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-family: monospace;
-  border: 1px solid rgba(255,255,255,.2);
-  z-index: 1000;
-  pointer-events: none; /* behave like the HUD blocks */
-}
 
 </style>  
 </head>
-
 <body class="-fiddle-digital">
 <div id="FiddleDigital-Introduces-StringTune">
-
-<div id="logo-zckgrt">ZCKGRT</div>
-
 	<div class="vault">
 		<svg version="1.1" xmlns="http://www.w3.org/2000/svg" style="display:none"></svg>
 	</div>
@@ -1499,697 +1479,691 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 	<div id="scroll-dir" data-dir="-" data-val="0" style="position:fixed;bottom:10px;left:10px;background-color:#000;color:#fff;border:1px solid rgba(255,255,255,.2);padding:5px 8px;font-size:12px;font-family:monospace;z-index:1000;pointer-events:none"></div>
 
 
-<script>
 
-/*!
- * String Tune — Demo Runtime (standalone JS)
- * - Cursor-owned tooltips (hover, focus, touch)
- * - repeat / split / inview / progress / parallax / lerp+glide / magnetic
- * - storyline HUD + perf HUD
- *
- * Drop this file after your HTML markup. It auto-initializes on DOMContentLoaded.
- */
- (() => {
-  const d = document, de = d.documentElement, w = window;
-  if (de.__stringTuneMounted) return; // guard against double-mount
-  de.__stringTuneMounted = true;
-
-  // ---------- Utilities ----------
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-  const prefersReduced =
-    (w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
-
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const lerp  = (a, b, t) => a + (b - a) * t;
-
-  // Convert %, px, numbers → px (axis used for %)
-  const toPx = (v, axis = "y") => {
-    if (v == null) return 0;
-    const s = String(v).trim();
-    if (s.endsWith("%")) {
-      const n = parseFloat(s) / 100;
-      return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
-    }
-    return parseFloat(s) || 0;
-  };
-
-  // ---------- Tunables ----------
-  const BOX_SCALE        = 1;                     // Visual scale of demo squares (no layout change)
-  const PROGRESS_MULT    = 1;                     // Feels snappier than linear
-  const PARALLAX_TRAVEL  = prefersReduced ? 0 : 140;
-  const LERP_AMP         = prefersReduced ? 0 : 1.2;
-  const GLIDE_AMP        = prefersReduced ? 0 : 1.35;
-
-  // Expose progress multiplier to CSS consumers
-  de.style.setProperty("--progress-mult", PROGRESS_MULT.toString());
-
-  // ---------- Scale demo boxes without layout shift ----------
-  function applyBoxScale() {
-    d.querySelectorAll(".-w .rel").forEach(rel => {
-      const child = rel.querySelector(":scope > .child");
-      if (!child) return;
-      const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
-      const base = child.clientWidth;
-      const extra = Math.max(0, (scale - 1) * base);
-      rel.style.paddingBottom = extra ? `${extra}px` : "";
-      child.style.transformOrigin = "top left";
-      child.style.transform = scale !== 1 ? `scale(${scale})` : "";
-    });
-  }
-
-  // ---------- string="repeat" ----------
-  function setupRepeat() {
-    d.querySelectorAll("[data-string-clone]").forEach(n => n.remove());
-    d.querySelectorAll("[string][string-repeat]").forEach(el => {
-      if (el.dataset.stringRepeated === "1") return;
-      const raw = el.getAttribute("string-repeat");
-      const total = raw && raw.trim() !== "" ? Math.max(1, parseInt(raw, 10) || 1) : 1;
-      for (let i = 1; i < total; i++) {
-        const clone = el.cloneNode(true);
-        clone.removeAttribute("string-repeat");
-        clone.setAttribute("data-string-clone", "");
-        el.after(clone);
-      }
-      el.dataset.stringRepeated = "1";
-    });
-  }
-
-  // ---------- string="split" ----------
-  function setupSplit() {
-    d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
-      if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
-      const mode = (el.getAttribute("string-split") || "").toLowerCase();
-      const doWord = mode.includes("word");
-      const doChar = mode.includes("char");
-
-      const rawText = (el.textContent || "").replace(/\s+/g, " ").trim();
-      const words = rawText.length ? rawText.split(" ") : [];
-      el.textContent = "";
-      el.classList.add("-splitted");
-
-      let wordIndex = 0;
-      words.forEach((wrd, i) => {
-        const wSpan = d.createElement("span");
-        if (doWord) wSpan.className = "-s-word";
-
-        if (doChar) {
-          [...wrd].forEach((ch, ci) => {
-            const cSpan = d.createElement("span");
-            cSpan.className = "-s-char";
-            cSpan.style.transitionDelay = (wordIndex * 0.02 + ci * 0.01) + "s";
-            cSpan.textContent = ch;
-            wSpan.appendChild(cSpan);
-          });
-        } else {
-          wSpan.textContent = wrd;
-        }
-
-        el.appendChild(wSpan);
-        if (i < words.length - 1) el.appendChild(d.createTextNode(" "));
-        wordIndex++;
-      });
-
-      el.__split = true;
-    });
-  }
-
-  // ---------- In-View (blocks & [string] nodes) ----------
-  function setupInView() {
-    const makeObserver = (el) => {
-      const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
-      const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
-      const tv = (el.getAttribute("string-inview") || "").trim();
-      const threshold = tv.endsWith("%") ? clamp(parseFloat(tv) / 100, 0, 1) : 0;
-      const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
-
-      return new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
-          if (ok) el.classList.add("-inview");
-          else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
-        });
-      }, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
-    };
-
-    d.querySelectorAll(".block").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-    d.querySelectorAll("[string]").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-  }
-  // ---------- Progress ----------
-  const progressEls = [];
-  function collectProgressEls() {
-    progressEls.length = 0;
-    progressEls.push(...d.querySelectorAll('[string="progress"]'));
-  }
-
-	// ---------- Lerp (progress-based) ----------
-let lerpEls = [];
-function collectLerpEls() {
-  // any element with string="lerp" will get a --lerp-progress var (0→1)
-  lerpEls = [...document.querySelectorAll('[string="lerp"]')];
-}
-
-
-  function computeProgress(el, rect, vh) {
-    const enterEdge  = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
-    const exitEdge   = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
-    const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
-    const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
-
-    const viewTop = 0 + topOffset;
-    const viewBot = vh + bottomOffset;
-
-    const enterRef = (enterEdge === "top") ? viewTop : viewBot;
-    const exitRef  = (exitEdge  === "top") ? viewTop : viewBot;
-
-    const edgeTop = rect.top;
-    const edgeBot = rect.bottom;
-
-    let p;
-    if (enterEdge === exitEdge) {
-      const h = Math.max(1, rect.height);
-      if (enterEdge === "top") p = (enterRef - edgeTop) / h;
-      else                     p = (edgeBot  - enterRef) / h;
-    } else {
-      const startPos = (enterEdge === "top") ? edgeTop : edgeBot;
-      const endPos   = (exitEdge  === "top") ? edgeTop : edgeBot;
-      const A = startPos - enterRef;
-      const B = endPos   - exitRef;
-      const span = A - B;
-      p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
-      if (A > 0 && B > 0) p = 0;
-      if (A < 0 && B < 0) p = 1;
-    }
-
-    p = Number.isFinite(p) ? clamp(p, 0, 1) : 0;
-    el.__lastProgress = p;
-    return p;
-  }
-
-  function updateProgress() {
-    const vh = w.innerHeight;
-    for (const el of progressEls) {
-      const rect = el.getBoundingClientRect();
-      const p = computeProgress(el, rect, vh);
-      const out = p * PROGRESS_MULT;
-      el.style.setProperty("--progress", clamp(out, 0, 1).toFixed(4));
-
-      const id = el.getAttribute("string-id") || el.id;
-      if (id) {
-        d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(n => n.textContent = Math.round(p * 100));
-        d.querySelectorAll(`[data-stage-of="${id}"]`).forEach(n => {
-          const v = p * 100;
-          let label = "Ship it";
-          if (v >= 100) label = "SOLD!";
-          else if (v >= 75) label = "cya byeeeeee!";
-          else if (v >= 50) label = "cya byeeeeee!";
-          else if (v >= 25) label = "cya byeeeeee!";
-          n.textContent = label;
-        });
-      }
-    }
-  }
-
-	function updateLerpProgress() {
-  const vh = window.innerHeight;
-  for (const el of lerpEls) {
-    const rect = el.getBoundingClientRect();
-    // compute section progress 0→1 using the same math as string="progress"
-    const p = computeProgress(el, rect, vh);
-    el.style.setProperty('--lerp-progress', p.toFixed(4));
-
-    // (optional) update a live label if present
-    document.querySelectorAll('[data-livelabel="lerp"]').forEach(n => {
-      n.textContent = Math.round(p * 100);
-    });
-  }
-}
-
-
-  // ---------- Parallax ----------
-  let parallaxEls = [];
-  function collectParallaxEls() {
-    parallaxEls = (isMobile || prefersReduced) ? [] :
-      [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
-        .map(el => ({ el, factor: parseFloat(el.getAttribute("string-parallax") || "0.5") || 0.5 }));
-  }
-  function parallaxTick() {
-    if (!parallaxEls.length) return;
-    const wh = w.innerHeight;
-    const maxTravel = PARALLAX_TRAVEL;
-    parallaxEls.forEach(({ el, factor }) => {
-      const r = el.getBoundingClientRect();
-      const center = r.top + r.height / 2 - wh / 2;
-      const t = clamp(center / wh, -1, 1);
-      el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
-    });
-  }
-
-  // ---------- Lerp + Glide ----------
-  let lastY = w.scrollY || w.pageYOffset;
-  let lerpVal = 0, glideVal = 0;
-  let glideEls = [];
-
-  function collectGlideEls() {
-    glideEls = (isMobile || prefersReduced) ? [] :
-      [...d.querySelectorAll('[string="glide"]')]
-        .map(el => ({ el, k: parseFloat(el.getAttribute("string-glide") || "0.35") || 0.35, y: 0 }));
-  }
-
-  function smoothTick() {
-    const y = w.scrollY || w.pageYOffset;
-    const delta = y - lastY;
-    lastY = y;
-
-    lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
-    glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
-
-    de.style.setProperty("--lerp",  (lerpVal  * LERP_AMP).toFixed(2));
-    de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
-
-    glideEls.forEach(g => {
-      g.y = lerp(g.y, glideVal * g.k, 0.12);
-      g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
-    });
-  }
-  // ---------- Cursor HUD ----------
-  const cursorRoot = d.querySelector('.cursor[string-cursor]');
-  const tipEl = cursorRoot?.querySelector('.cursor-tip');
-  const DEFAULT_TIP = "Try the cursor →";
-  let cx = 0, cy = 0;
-
-  function setupCursor() {
-    if (!cursorRoot) return;
-
-    // mouse movement + cursor mode
-    w.addEventListener("mousemove", e => {
-      cx = e.clientX; cy = e.clientY;
-      cursorRoot.style.transform = `translate3d(${cx - 7}px, ${cy - 7}px, 0)`;
-
-      // find nearest ancestor that declares a cursor class
-      let node = e.target, mode = "cursor-1";
-      while (node && node !== d.body) {
-        if (node.hasAttribute("string-cursor-class")) {
-          mode = node.getAttribute("string-cursor-class");
-          break;
-        }
-        node = node.parentElement;
-      }
-      cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
-      cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
-    }, { passive: true });
-
-    // press/hover states
-    w.addEventListener("mousedown", () => cursorRoot.classList.add("-down"));
-    w.addEventListener("mouseup",   () => cursorRoot.classList.remove("-down"));
-    w.addEventListener("mouseleave",() => cursorRoot.classList.add("-hide"));
-    w.addEventListener("mouseenter",() => cursorRoot.classList.remove("-hide"));
-
-    if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
-
-    // Use cursor bubble for tooltips → hide native ::after bubbles
-    de.classList.add("-cursor-tooltips");
-  }
-
-// ---------- Unified tooltip controller (tooltips only) ----------
-const TIP_DELAY = 450;
-const TOUCH_HIDE_DELAY = 600;
-let tipTimer = null;
-let touchLiftTimer = null;
-let hoverTip = ""; // current hovered/focused tooltip only
-
-function setTip(msg) {
-  if (!cursorRoot || !tipEl) return;
-  if (msg && msg.trim()) {
-    tipEl.textContent = msg;
-    cursorRoot.classList.add("-tips");
-  } else {
-    cursorRoot.classList.remove("-tips");
-  }
-}
-function hideTip() { cursorRoot?.classList.remove("-tips"); }
-
-// Hover / focus (delegated)
-document.addEventListener("mouseover", (e) => {
-  const t = e.target?.closest?.("[data-tooltip]");
-  if (!t) return;
-  hoverTip = t.getAttribute("data-tooltip") || "";
-  setTip(hoverTip);
-}, true);
-
-document.addEventListener("mouseout", (e) => {
-  const from = e.target?.closest?.("[data-tooltip]");
-  if (!from) return;
-  const to = e.relatedTarget?.closest?.("[data-tooltip]");
-  if (to === from) return;
-  hoverTip = "";
-  setTip(""); // hide when not on a tooltip element
-}, true);
-
-document.addEventListener("focusin", (e) => {
-  const t = e.target?.closest?.("[data-tooltip]");
-  if (!t) return;
-  hoverTip = t.getAttribute("data-tooltip") || "";
-  setTip(hoverTip);
-});
-document.addEventListener("focusout", (e) => {
-  const t = e.target?.closest?.("[data-tooltip]");
-  if (!t) return;
-  hoverTip = "";
-  setTip("");
-});
-
-// Hide during scroll, only restore if still hovering a tooltip
-function onUserScroll() {
-  hideTip();
-  clearTimeout(tipTimer);
-  tipTimer = setTimeout(() => {
-    if (hoverTip) setTip(hoverTip);
-  }, TIP_DELAY);
-}
-window.addEventListener("scroll", onUserScroll, { passive: true });
-window.addEventListener("wheel", onUserScroll,  { passive: true });
-window.addEventListener("touchmove", onUserScroll, { passive: true });
-
-// Touch: show tooltip under finger; hide after finger lifts
-function updateCursorPosTouch(touch) {
-  if (!cursorRoot || !touch) return;
-  cursorRoot.style.transform =
-    `translate3d(${touch.clientX + 16}px, ${touch.clientY + 8}px, 0)`;
-}
-document.addEventListener("touchstart", (e) => {
-  cursorRoot?.classList.add("-down");
-  const primary = e.touches && e.touches[0];
-  if (primary) updateCursorPosTouch(primary);
-  const t = e.target?.closest?.("[data-tooltip]");
-  hoverTip = t?.getAttribute("data-tooltip") || "";
-  setTip(hoverTip);
-  clearTimeout(touchLiftTimer);
-}, { passive: true });
-
-document.addEventListener("touchmove", (e) => {
-  const primary = e.touches && e.touches[0];
-  if (primary) updateCursorPosTouch(primary);
-}, { passive: true });
-
-function endTouch() {
-  cursorRoot?.classList.remove("-down");
-  clearTimeout(touchLiftTimer);
-  touchLiftTimer = setTimeout(() => {
-    hoverTip = "";
-    setTip(""); // hide after a short delay
-  }, TOUCH_HIDE_DELAY);
-}
-document.addEventListener("touchend", endTouch, { passive: true });
-document.addEventListener("touchcancel", endTouch, { passive: true });
-
-
-
-  // ---------- Magnetic ----------
-  let magneticEls = [];
-  function collectMagneticEls() {
-    magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
-      el,
-      r: parseFloat(el.getAttribute("string-radius") || "300") || 300,
-      s: parseFloat(el.getAttribute("string-strength") || "0.5") || 0.5,
-      ox: 0, oy: 0
-    }));
-  }
-  function magneticTick() {
-    magneticEls.forEach(m => {
-      const rect = m.el.getBoundingClientRect();
-      const ex = rect.left + rect.width / 2, ey = rect.top + rect.height / 2;
-      const dx = cx - ex, dy = cy - ey;
-      const dist = Math.hypot(dx, dy);
-      const t = clamp(1 - dist / m.r, 0, 1);
-      const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
-      m.ox = lerp(m.ox, tx, 0.15);
-      m.oy = lerp(m.oy, ty, 0.15);
-      m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
-    });
-  }
-
-  // ---------- Perf HUD ----------
-  function setupPerfHUD() {
-    const fpsNode = d.getElementById("fps");
-    const dirNode = d.getElementById("scroll-dir");
-    if (!fpsNode && !dirNode) return;
-
-    const getScrollY = () => Math.round(w.scrollY || w.pageYOffset || 0);
-    let lastT = performance.now(), frames = 0, accum = 0;
-    let lastScrollY = getScrollY();
-
-    const perfTick = (t) => {
-      const dt = t - lastT; lastT = t; frames++; accum += dt;
-
-      if (accum > 500 && fpsNode) {
-        const fps = Math.round((frames * 1000) / accum);
-        fpsNode.textContent = `FPS: ${fps}`;
-        frames = 0; accum = 0;
-      }
-
-      const sy = getScrollY();
-      if (dirNode) {
-        const dir = sy > lastScrollY ? "↓" : (sy < lastScrollY ? "↑" : "•");
-        dirNode.textContent = `Scroll ${dir}  y:${sy}`;
-      }
-      lastScrollY = sy;
-
-      w.requestAnimationFrame(perfTick);
-    };
-    w.requestAnimationFrame(perfTick);
-  }
-
-  // ---------- Story helpers ----------
-  function getHeadingText(block) {
-    if (!block) return "";
-    const h = block.querySelector("h1,h2,h3,h4,h5,h6");
-    if (!h) return "";
-    for (const node of h.childNodes) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const t = (node.nodeValue || "").trim();
-        if (t) return t;
-      }
-    }
-    return (h.textContent || "").trim();
-  }
-  function getStoryForBlock(block) {
-    if (!block) return "";
-    return block.getAttribute("data-storyline")
-        || block.getAttribute("data-cursor-tip")
-        || getHeadingText(block)
-        || "";
-  }
-
-  // ---------- Storyline HUD ----------
-  const storylineEl = d.getElementById("storyline");
-  const chapterBlocks = [...d.querySelectorAll(".page .block")];
-  let currentStoryText = "";
-
-  function updateStoryline(next) {
-    if (!storylineEl || !next || next === currentStoryText) return;
-    currentStoryText = next;
-    storylineEl.textContent = currentStoryText;
-  }
-
-  function setupStorylineObserver() {
-    if (!storylineEl || !chapterBlocks.length) return;
-
-    updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
-
-    const io = new IntersectionObserver((entries) => {
-      const vis = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!vis) return;
-      const el = vis.target;
-      activeBlock = el;                 // also used by tooltip system
-      updateStoryline(getStoryForBlock(el));
-
-    }, { root: null, threshold: [0, .25, .5, .75, 1] });
-
-    chapterBlocks.forEach(b => io.observe(b));
-  }
-
-  // ---------- Bootstrap ----------
-function init() {
-  setupRepeat();
-  setupSplit();
-  setupInView();
-  collectProgressEls();
-  collectParallaxEls();
-  collectGlideEls();
-  collectLerpEls();
-  setupCursor();
-
-  // 🔽 Build the magnetic 5×5 grid (center active)
-  const magneticBlock = document.querySelector('.block.string-magnetic[data-v-40fb9db4]');
-  if (magneticBlock) buildMagneticGrid(magneticBlock, 5, 5, 3, 3);
-
-  collectMagneticEls();   // after building the grid
-  setupPerfHUD();
-  applyBoxScale();
-  setupStorylineObserver();
-
-    // Ensure cursor tip shows immediately (confirms tooltip wiring)
-    setTip(getStoryForBlock(chapterBlocks[0]) || storylineEl?.textContent || "Try the cursor →");
-
-    // First-frame sync
-    requestAnimationFrame(() => { w.dispatchEvent(new Event("scroll")); });
-
-    // RAF loop
-    const tick = () => {
-      updateProgress();
-			updateLerpProgress(); 			
-      parallaxTick();
-      smoothTick();
-      magneticTick();
-      w.requestAnimationFrame(tick);
-    };
-    w.requestAnimationFrame(tick);
-
-    // Responsive collectors
-    let resizeRAF = 0;
-    const onResize = () => {
-      cancelAnimationFrame(resizeRAF);
-      resizeRAF = requestAnimationFrame(() => {
-        collectParallaxEls();
-        collectGlideEls();
-        collectMagneticEls();
-				collectLerpEls(); 
-        applyBoxScale();
-        updateProgress();
-				updateLerpProgress(); 
-      });
-    };
-    w.addEventListener("resize", onResize, { passive: true });
-    w.addEventListener("orientationchange", onResize, { passive: true });
-  }
-
-  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", init, { once: true });
-  else init();
-})();
-</script>
-
-<script>
-// REPLACE the existing buildInlineWall with this version
-function buildInlineWall(wrap) {
-  // 1) Read source text FIRST (from existing .wall <p>, or any <p>, or the wrap)
-  const existingWall = wrap.querySelector('.wall');
-  const srcP = existingWall?.querySelector('p') || wrap.querySelector('p');
-  const sourceText = (srcP?.textContent || existingWall?.textContent || wrap.textContent || '').trim();
-
-  // 2) Clear previous content AFTER we've captured the text
-  wrap.innerHTML = '';
-
-  // 3) Build the inline wall
-  const wall = document.createElement('div');
-  wall.className = 'wall';
-
-  const splitRegex = /(?<=[.!?])\s+(?=["“'‘`A-Z0-9])/g;
-  const fallbackSplit = (text) =>
-    text.replace(/([.!?])(\s+)/g, '$1|')
-        .split('|')
-        .map(s => s.trim())
-        .filter(Boolean);
-
-  let sentences = [];
-  if (sourceText) {
-    try { sentences = sourceText.replace(/\s+/g, ' ').split(splitRegex).map(s => s.trim()).filter(Boolean); }
-    catch { sentences = fallbackSplit(sourceText.replace(/\s+/g, ' ')); }
-  }
-
-  sentences.forEach((s, i) => {
-    const span = document.createElement('span');
-    span.className = 'wall-sentence';
-    span.textContent = s;
-    span.setAttribute('role', 'button');
-    span.setAttribute('tabindex', '0');
-    span.setAttribute('aria-pressed', 'false');
-    span.dataset.sentenceIndex = String(i);
-    wall.appendChild(span);
-  });
-
-  wrap.appendChild(wall);
-  wireInteractions(wall); // uses your existing handler
-}
-</script>
-<script>
-function wireInteractions(wallEl) {
-  // Click / keyboard toggles "active" (for touch + a11y)
-  wallEl.addEventListener('click', (e) => {
-    const t = e.target.closest('.wall-sentence'); if (!t) return;
-    const on = t.getAttribute('aria-pressed') === 'true';
-    t.setAttribute('aria-pressed', String(!on));
-    t.classList.toggle('active', !on);
-  });
-  wallEl.addEventListener('keydown', (e) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    const t = e.target.closest('.wall-sentence'); if (!t) return;
-    e.preventDefault();
-    const on = t.getAttribute('aria-pressed') === 'true';
-    t.setAttribute('aria-pressed', String(!on));
-    t.classList.toggle('active', !on);
-  });
-}
-
-// Build walls on load (and rebuild if needed)
-function initWordWalls() {
-  document.querySelectorAll('.block.string-split.-wordwall .wall-wrap')
-    .forEach(buildInlineWall);
-}
-
-// If your big IIFE runs before this, DOM may already be ready:
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initWordWalls, { once: true });
-} else {
-  initWordWalls();
-}
-</script>
-<script>
-// --- Magnetic grid builder (5×5, center tile active) ---
-function buildMagneticGrid(block, cols = 5, rows = 5, activeCol = 3, activeRow = 3) {
-  if (!block) return;
-
-  // Ensure this block uses a 5×5 internal grid and equal gaps
-  block.style.setProperty('--g-columns', String(cols));
-  block.style.setProperty('--rows', String(rows));
-
-  // Remove existing tiles only (keep the title)
-  block.querySelectorAll(':scope > .rel').forEach(n => n.remove());
-
-  // Create tiles
-  for (let r = 1; r <= rows; r++) {
-    for (let c = 1; c <= cols; c++) {
-      const rel = document.createElement('div');
-      rel.className = 'rel tile';
-      rel.style.setProperty('--left',  String(c));
-      rel.style.setProperty('--top',   String(r));
-      rel.style.setProperty('--width', '1');
-      rel.style.setProperty('--height','1');
-
-      const child = document.createElement('div');
-      child.className = 'child';
-
-      const box = document.createElement('div');
-      box.setAttribute('data-v-40fb9db4', ''); // keep existing styles
-
-      if (c === activeCol && r === activeRow) {
-        rel.classList.add('-active');
-        box.setAttribute('string', 'magnetic');
-        box.setAttribute('string-radius', '450');
-        box.setAttribute('string-strength', '0.75');
-        box.setAttribute('string-id', 'string-22'); // reuse your id
-      } else {
-        box.style.background = 'transparent';
-      }
-
-      child.appendChild(box);
-      rel.appendChild(child);
-      block.appendChild(rel);
-    }
-  }
-}
-</script>
-
-	</body>
-	</html>
+	<script>
+
+	/*!
+	 * String Tune — Demo Runtime (standalone JS)
+	 * - Cursor-owned tooltips (hover, focus, touch)
+	 * - repeat / split / inview / progress / parallax / lerp+glide / magnetic
+	 * - storyline HUD + perf HUD
+	 *
+	 * Drop this file after your HTML markup. It auto-initializes on DOMContentLoaded.
+	 */
+	 (() => {
+		const d = document, de = d.documentElement, w = window;
+		if (de.__stringTuneMounted) return; // guard against double-mount
+		de.__stringTuneMounted = true;
+	
+		// ---------- Utilities ----------
+		const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+		const prefersReduced =
+			(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches) || false;
+	
+		const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+		const lerp  = (a, b, t) => a + (b - a) * t;
+	
+		// Convert %, px, numbers → px (axis used for %)
+		const toPx = (v, axis = "y") => {
+			if (v == null) return 0;
+			const s = String(v).trim();
+			if (s.endsWith("%")) {
+				const n = parseFloat(s) / 100;
+				return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
+			}
+			return parseFloat(s) || 0;
+		};
+	
+		// ---------- Tunables ----------
+		const BOX_SCALE        = 1;                     // Visual scale of demo squares (no layout change)
+		const PROGRESS_MULT    = 1;                     // Feels snappier than linear
+		const PARALLAX_TRAVEL  = prefersReduced ? 0 : 140;
+		const LERP_AMP         = prefersReduced ? 0 : 1.2;
+		const GLIDE_AMP        = prefersReduced ? 0 : 1.35;
+	
+		// Expose progress multiplier to CSS consumers
+		de.style.setProperty("--progress-mult", PROGRESS_MULT.toString());
+	
+		// ---------- Scale demo boxes without layout shift ----------
+		function applyBoxScale() {
+			d.querySelectorAll(".-w .rel").forEach(rel => {
+				const child = rel.querySelector(":scope > .child");
+				if (!child) return;
+				const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
+				const base = child.clientWidth;
+				const extra = Math.max(0, (scale - 1) * base);
+				rel.style.paddingBottom = extra ? `${extra}px` : "";
+				child.style.transformOrigin = "top left";
+				child.style.transform = scale !== 1 ? `scale(${scale})` : "";
+			});
+		}
+	
+		// ---------- string="repeat" ----------
+		function setupRepeat() {
+			d.querySelectorAll("[data-string-clone]").forEach(n => n.remove());
+			d.querySelectorAll("[string][string-repeat]").forEach(el => {
+				if (el.dataset.stringRepeated === "1") return;
+				const raw = el.getAttribute("string-repeat");
+				const total = raw && raw.trim() !== "" ? Math.max(1, parseInt(raw, 10) || 1) : 1;
+				for (let i = 1; i < total; i++) {
+					const clone = el.cloneNode(true);
+					clone.removeAttribute("string-repeat");
+					clone.setAttribute("data-string-clone", "");
+					el.after(clone);
+				}
+				el.dataset.stringRepeated = "1";
+			});
+		}
+	
+		// ---------- string="split" ----------
+		function setupSplit() {
+			d.querySelectorAll('[string="split"],[string][string-split]').forEach(el => {
+				if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
+				const mode = (el.getAttribute("string-split") || "").toLowerCase();
+				const doWord = mode.includes("word");
+				const doChar = mode.includes("char");
+	
+				const rawText = (el.textContent || "").replace(/\s+/g, " ").trim();
+				const words = rawText.length ? rawText.split(" ") : [];
+				el.textContent = "";
+				el.classList.add("-splitted");
+	
+				let wordIndex = 0;
+				words.forEach((wrd, i) => {
+					const wSpan = d.createElement("span");
+					if (doWord) wSpan.className = "-s-word";
+	
+					if (doChar) {
+						[...wrd].forEach((ch, ci) => {
+							const cSpan = d.createElement("span");
+							cSpan.className = "-s-char";
+							cSpan.style.transitionDelay = (wordIndex * 0.02 + ci * 0.01) + "s";
+							cSpan.textContent = ch;
+							wSpan.appendChild(cSpan);
+						});
+					} else {
+						wSpan.textContent = wrd;
+					}
+	
+					el.appendChild(wSpan);
+					if (i < words.length - 1) el.appendChild(d.createTextNode(" "));
+					wordIndex++;
+				});
+	
+				el.__split = true;
+			});
+		}
+	
+		// ---------- In-View (blocks & [string] nodes) ----------
+		function setupInView() {
+			const makeObserver = (el) => {
+				const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
+				const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
+				const tv = (el.getAttribute("string-inview") || "").trim();
+				const threshold = tv.endsWith("%") ? clamp(parseFloat(tv) / 100, 0, 1) : 0;
+				const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
+	
+				return new IntersectionObserver((entries) => {
+					entries.forEach(entry => {
+						const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
+						if (ok) el.classList.add("-inview");
+						else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
+					});
+				}, { root: null, rootMargin, threshold: [0, threshold || 0, 1] });
+			};
+	
+			d.querySelectorAll(".block").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+			d.querySelectorAll("[string]").forEach(el => { if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+		}
+		// ---------- Progress ----------
+		const progressEls = [];
+		function collectProgressEls() {
+			progressEls.length = 0;
+			progressEls.push(...d.querySelectorAll('[string="progress"]'));
+		}
+	
+		// ---------- Lerp (progress-based) ----------
+	let lerpEls = [];
+	function collectLerpEls() {
+		// any element with string="lerp" will get a --lerp-progress var (0→1)
+		lerpEls = [...document.querySelectorAll('[string="lerp"]')];
+	}
+	
+	
+		function computeProgress(el, rect, vh) {
+			const enterEdge  = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
+			const exitEdge   = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
+			const topOffset    = toPx(el.getAttribute("string-offset-top")    ?? "-10%", "y");
+			const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%", "y");
+	
+			const viewTop = 0 + topOffset;
+			const viewBot = vh + bottomOffset;
+	
+			const enterRef = (enterEdge === "top") ? viewTop : viewBot;
+			const exitRef  = (exitEdge  === "top") ? viewTop : viewBot;
+	
+			const edgeTop = rect.top;
+			const edgeBot = rect.bottom;
+	
+			let p;
+			if (enterEdge === exitEdge) {
+				const h = Math.max(1, rect.height);
+				if (enterEdge === "top") p = (enterRef - edgeTop) / h;
+				else                     p = (edgeBot  - enterRef) / h;
+			} else {
+				const startPos = (enterEdge === "top") ? edgeTop : edgeBot;
+				const endPos   = (exitEdge  === "top") ? edgeTop : edgeBot;
+				const A = startPos - enterRef;
+				const B = endPos   - exitRef;
+				const span = A - B;
+				p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
+				if (A > 0 && B > 0) p = 0;
+				if (A < 0 && B < 0) p = 1;
+			}
+	
+			p = Number.isFinite(p) ? clamp(p, 0, 1) : 0;
+			el.__lastProgress = p;
+			return p;
+		}
+	
+		function updateProgress() {
+			const vh = w.innerHeight;
+			for (const el of progressEls) {
+				const rect = el.getBoundingClientRect();
+				const p = computeProgress(el, rect, vh);
+				const out = p * PROGRESS_MULT;
+				el.style.setProperty("--progress", clamp(out, 0, 1).toFixed(4));
+	
+				const id = el.getAttribute("string-id") || el.id;
+				if (id) {
+					d.querySelectorAll(`[data-progress-of="${id}"]`).forEach(n => n.textContent = Math.round(p * 100));
+					d.querySelectorAll(`[data-stage-of="${id}"]`).forEach(n => {
+						const v = p * 100;
+						let label = "Ship it";
+						if (v >= 100) label = "SOLD!";
+						else if (v >= 75) label = "cya byeeeeee!";
+						else if (v >= 50) label = "cya byeeeeee!";
+						else if (v >= 25) label = "cya byeeeeee!";
+						n.textContent = label;
+					});
+				}
+			}
+		}
+	
+		function updateLerpProgress() {
+		const vh = window.innerHeight;
+		for (const el of lerpEls) {
+			const rect = el.getBoundingClientRect();
+			// compute section progress 0→1 using the same math as string="progress"
+			const p = computeProgress(el, rect, vh);
+			el.style.setProperty('--lerp-progress', p.toFixed(4));
+	
+			// (optional) update a live label if present
+			document.querySelectorAll('[data-livelabel="lerp"]').forEach(n => {
+				n.textContent = Math.round(p * 100);
+			});
+		}
+	}
+	
+	
+		// ---------- Parallax ----------
+		let parallaxEls = [];
+		function collectParallaxEls() {
+			parallaxEls = (isMobile || prefersReduced) ? [] :
+				[...d.querySelectorAll('[string="parallax"],[string-parallax]')]
+					.map(el => ({ el, factor: parseFloat(el.getAttribute("string-parallax") || "0.5") || 0.5 }));
+		}
+		function parallaxTick() {
+			if (!parallaxEls.length) return;
+			const wh = w.innerHeight;
+			const maxTravel = PARALLAX_TRAVEL;
+			parallaxEls.forEach(({ el, factor }) => {
+				const r = el.getBoundingClientRect();
+				const center = r.top + r.height / 2 - wh / 2;
+				const t = clamp(center / wh, -1, 1);
+				el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
+			});
+		}
+	
+		// ---------- Lerp + Glide ----------
+		let lastY = w.scrollY || w.pageYOffset;
+		let lerpVal = 0, glideVal = 0;
+		let glideEls = [];
+	
+		function collectGlideEls() {
+			glideEls = (isMobile || prefersReduced) ? [] :
+				[...d.querySelectorAll('[string="glide"]')]
+					.map(el => ({ el, k: parseFloat(el.getAttribute("string-glide") || "0.35") || 0.35, y: 0 }));
+		}
+	
+		function smoothTick() {
+			const y = w.scrollY || w.pageYOffset;
+			const delta = y - lastY;
+			lastY = y;
+	
+			lerpVal  = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+			glideVal = lerp(glideVal, 0, 0.075) + delta * 0.02;
+	
+			de.style.setProperty("--lerp",  (lerpVal  * LERP_AMP).toFixed(2));
+			de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
+	
+			glideEls.forEach(g => {
+				g.y = lerp(g.y, glideVal * g.k, 0.12);
+				g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
+			});
+		}
+		// ---------- Cursor HUD ----------
+		const cursorRoot = d.querySelector('.cursor[string-cursor]');
+		const tipEl = cursorRoot?.querySelector('.cursor-tip');
+		const DEFAULT_TIP = "Try the cursor →";
+		let cx = 0, cy = 0;
+	
+		function setupCursor() {
+			if (!cursorRoot) return;
+	
+			// mouse movement + cursor mode
+			w.addEventListener("mousemove", e => {
+				cx = e.clientX; cy = e.clientY;
+				cursorRoot.style.transform = `translate3d(${cx - 7}px, ${cy - 7}px, 0)`;
+	
+				// find nearest ancestor that declares a cursor class
+				let node = e.target, mode = "cursor-1";
+				while (node && node !== d.body) {
+					if (node.hasAttribute("string-cursor-class")) {
+						mode = node.getAttribute("string-cursor-class");
+						break;
+					}
+					node = node.parentElement;
+				}
+				cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
+				cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
+			}, { passive: true });
+	
+			// press/hover states
+			w.addEventListener("mousedown", () => cursorRoot.classList.add("-down"));
+			w.addEventListener("mouseup",   () => cursorRoot.classList.remove("-down"));
+			w.addEventListener("mouseleave",() => cursorRoot.classList.add("-hide"));
+			w.addEventListener("mouseenter",() => cursorRoot.classList.remove("-hide"));
+	
+			if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
+	
+			// Use cursor bubble for tooltips → hide native ::after bubbles
+			de.classList.add("-cursor-tooltips");
+		}
+	
+	// ---------- Unified tooltip controller (tooltips only) ----------
+	const TIP_DELAY = 450;
+	const TOUCH_HIDE_DELAY = 600;
+	let tipTimer = null;
+	let touchLiftTimer = null;
+	let hoverTip = ""; // current hovered/focused tooltip only
+	
+	function setTip(msg) {
+		if (!cursorRoot || !tipEl) return;
+		if (msg && msg.trim()) {
+			tipEl.textContent = msg;
+			cursorRoot.classList.add("-tips");
+		} else {
+			cursorRoot.classList.remove("-tips");
+		}
+	}
+	function hideTip() { cursorRoot?.classList.remove("-tips"); }
+	
+	// Hover / focus (delegated)
+	document.addEventListener("mouseover", (e) => {
+		const t = e.target?.closest?.("[data-tooltip]");
+		if (!t) return;
+		hoverTip = t.getAttribute("data-tooltip") || "";
+		setTip(hoverTip);
+	}, true);
+	
+	document.addEventListener("mouseout", (e) => {
+		const from = e.target?.closest?.("[data-tooltip]");
+		if (!from) return;
+		const to = e.relatedTarget?.closest?.("[data-tooltip]");
+		if (to === from) return;
+		hoverTip = "";
+		setTip(""); // hide when not on a tooltip element
+	}, true);
+	
+	document.addEventListener("focusin", (e) => {
+		const t = e.target?.closest?.("[data-tooltip]");
+		if (!t) return;
+		hoverTip = t.getAttribute("data-tooltip") || "";
+		setTip(hoverTip);
+	});
+	document.addEventListener("focusout", (e) => {
+		const t = e.target?.closest?.("[data-tooltip]");
+		if (!t) return;
+		hoverTip = "";
+		setTip("");
+	});
+	
+	// Hide during scroll, only restore if still hovering a tooltip
+	function onUserScroll() {
+		hideTip();
+		clearTimeout(tipTimer);
+		tipTimer = setTimeout(() => {
+			if (hoverTip) setTip(hoverTip);
+		}, TIP_DELAY);
+	}
+	window.addEventListener("scroll", onUserScroll, { passive: true });
+	window.addEventListener("wheel", onUserScroll,  { passive: true });
+	window.addEventListener("touchmove", onUserScroll, { passive: true });
+	
+	// Touch: show tooltip under finger; hide after finger lifts
+	function updateCursorPosTouch(touch) {
+		if (!cursorRoot || !touch) return;
+		cursorRoot.style.transform =
+			`translate3d(${touch.clientX + 16}px, ${touch.clientY + 8}px, 0)`;
+	}
+	document.addEventListener("touchstart", (e) => {
+		cursorRoot?.classList.add("-down");
+		const primary = e.touches && e.touches[0];
+		if (primary) updateCursorPosTouch(primary);
+		const t = e.target?.closest?.("[data-tooltip]");
+		hoverTip = t?.getAttribute("data-tooltip") || "";
+		setTip(hoverTip);
+		clearTimeout(touchLiftTimer);
+	}, { passive: true });
+	
+	document.addEventListener("touchmove", (e) => {
+		const primary = e.touches && e.touches[0];
+		if (primary) updateCursorPosTouch(primary);
+	}, { passive: true });
+	
+	function endTouch() {
+		cursorRoot?.classList.remove("-down");
+		clearTimeout(touchLiftTimer);
+		touchLiftTimer = setTimeout(() => {
+			hoverTip = "";
+			setTip(""); // hide after a short delay
+		}, TOUCH_HIDE_DELAY);
+	}
+	document.addEventListener("touchend", endTouch, { passive: true });
+	document.addEventListener("touchcancel", endTouch, { passive: true });
+	
+	
+	
+		// ---------- Magnetic ----------
+		let magneticEls = [];
+		function collectMagneticEls() {
+			magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map(el => ({
+				el,
+				r: parseFloat(el.getAttribute("string-radius") || "300") || 300,
+				s: parseFloat(el.getAttribute("string-strength") || "0.5") || 0.5,
+				ox: 0, oy: 0
+			}));
+		}
+		function magneticTick() {
+			magneticEls.forEach(m => {
+				const rect = m.el.getBoundingClientRect();
+				const ex = rect.left + rect.width / 2, ey = rect.top + rect.height / 2;
+				const dx = cx - ex, dy = cy - ey;
+				const dist = Math.hypot(dx, dy);
+				const t = clamp(1 - dist / m.r, 0, 1);
+				const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
+				m.ox = lerp(m.ox, tx, 0.15);
+				m.oy = lerp(m.oy, ty, 0.15);
+				m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
+			});
+		}
+	
+		// ---------- Perf HUD ----------
+		function setupPerfHUD() {
+			const fpsNode = d.getElementById("fps");
+			const dirNode = d.getElementById("scroll-dir");
+			if (!fpsNode && !dirNode) return;
+	
+			const getScrollY = () => Math.round(w.scrollY || w.pageYOffset || 0);
+			let lastT = performance.now(), frames = 0, accum = 0;
+			let lastScrollY = getScrollY();
+	
+			const perfTick = (t) => {
+				const dt = t - lastT; lastT = t; frames++; accum += dt;
+	
+				if (accum > 500 && fpsNode) {
+					const fps = Math.round((frames * 1000) / accum);
+					fpsNode.textContent = `FPS: ${fps}`;
+					frames = 0; accum = 0;
+				}
+	
+				const sy = getScrollY();
+				if (dirNode) {
+					const dir = sy > lastScrollY ? "↓" : (sy < lastScrollY ? "↑" : "•");
+					dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+				}
+				lastScrollY = sy;
+	
+				w.requestAnimationFrame(perfTick);
+			};
+			w.requestAnimationFrame(perfTick);
+		}
+	
+		// ---------- Story helpers ----------
+		function getHeadingText(block) {
+			if (!block) return "";
+			const h = block.querySelector("h1,h2,h3,h4,h5,h6");
+			if (!h) return "";
+			for (const node of h.childNodes) {
+				if (node.nodeType === Node.TEXT_NODE) {
+					const t = (node.nodeValue || "").trim();
+					if (t) return t;
+				}
+			}
+			return (h.textContent || "").trim();
+		}
+		function getStoryForBlock(block) {
+			if (!block) return "";
+			return block.getAttribute("data-storyline")
+					|| block.getAttribute("data-cursor-tip")
+					|| getHeadingText(block)
+					|| "";
+		}
+	
+		// ---------- Storyline HUD ----------
+		const storylineEl = d.getElementById("storyline");
+		const chapterBlocks = [...d.querySelectorAll(".page .block")];
+		let currentStoryText = "";
+	
+		function updateStoryline(next) {
+			if (!storylineEl || !next || next === currentStoryText) return;
+			currentStoryText = next;
+			storylineEl.textContent = currentStoryText;
+		}
+	
+		function setupStorylineObserver() {
+			if (!storylineEl || !chapterBlocks.length) return;
+	
+			updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
+	
+			const io = new IntersectionObserver((entries) => {
+				const vis = entries
+					.filter(e => e.isIntersecting)
+					.sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+				if (!vis) return;
+				const el = vis.target;
+				activeBlock = el;                 // also used by tooltip system
+				updateStoryline(getStoryForBlock(el));
+	
+			}, { root: null, threshold: [0, .25, .5, .75, 1] });
+	
+			chapterBlocks.forEach(b => io.observe(b));
+		}
+	
+		// ---------- Bootstrap ----------
+	function init() {
+		setupRepeat();
+		setupSplit();
+		setupInView();
+		collectProgressEls();
+		collectParallaxEls();
+		collectGlideEls();
+		collectLerpEls();
+		setupCursor();
+	
+		// 🔽 Build the magnetic 5×5 grid (center active)
+		const magneticBlock = document.querySelector('.block.string-magnetic[data-v-40fb9db4]');
+		if (magneticBlock) buildMagneticGrid(magneticBlock, 5, 5, 3, 3);
+	
+		collectMagneticEls();   // after building the grid
+		setupPerfHUD();
+		applyBoxScale();
+		setupStorylineObserver();
+	
+			// Ensure cursor tip shows immediately (confirms tooltip wiring)
+			setTip(getStoryForBlock(chapterBlocks[0]) || storylineEl?.textContent || "Try the cursor →");
+	
+			// First-frame sync
+			requestAnimationFrame(() => { w.dispatchEvent(new Event("scroll")); });
+	
+			// RAF loop
+			const tick = () => {
+				updateProgress();
+				updateLerpProgress(); 			
+				parallaxTick();
+				smoothTick();
+				magneticTick();
+				w.requestAnimationFrame(tick);
+			};
+			w.requestAnimationFrame(tick);
+	
+			// Responsive collectors
+			let resizeRAF = 0;
+			const onResize = () => {
+				cancelAnimationFrame(resizeRAF);
+				resizeRAF = requestAnimationFrame(() => {
+					collectParallaxEls();
+					collectGlideEls();
+					collectMagneticEls();
+					collectLerpEls(); 
+					applyBoxScale();
+					updateProgress();
+					updateLerpProgress(); 
+				});
+			};
+			w.addEventListener("resize", onResize, { passive: true });
+			w.addEventListener("orientationchange", onResize, { passive: true });
+		}
+	
+		if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", init, { once: true });
+		else init();
+	})();
+	</script>
+	
+	<script>
+	/* NON-INTERACTIVE builder */
+	function buildInlineWall(wrap) {
+		const existingWall = wrap.querySelector('.wall');
+		const srcP = existingWall?.querySelector('p') || wrap.querySelector('p');
+		const sourceText = (srcP?.textContent || existingWall?.textContent || wrap.textContent || '').trim();
+	
+		wrap.innerHTML = '';
+	
+		const wall = document.createElement('div');
+		wall.className = 'wall';
+	
+		const splitRegex = /(?<=[.!?])\s+(?=["“'‘`A-Z0-9])/g;
+		const fallbackSplit = (text) =>
+			text.replace(/([.!?])(\s+)/g, '$1|')
+					.split('|')
+					.map(s => s.trim())
+					.filter(Boolean);
+	
+		let sentences = [];
+		if (sourceText) {
+			try { sentences = sourceText.replace(/\s+/g, ' ').split(splitRegex).map(s => s.trim()).filter(Boolean); }
+			catch { sentences = fallbackSplit(sourceText.replace(/\s+/g, ' ')); }
+		}
+	
+		sentences.forEach((s) => {
+			const span = document.createElement('span');
+			span.className = 'wall-sentence';
+			span.textContent = s;
+			wall.appendChild(span);
+		});
+	
+		wrap.appendChild(wall);
+	}
+	</script>
+	
+	<script>
+	function wireInteractions(wallEl) {
+		// Click / keyboard toggles "active" (for touch + a11y)
+		wallEl.addEventListener('click', (e) => {
+			const t = e.target.closest('.wall-sentence'); if (!t) return;
+			const on = t.getAttribute('aria-pressed') === 'true';
+			t.setAttribute('aria-pressed', String(!on));
+			t.classList.toggle('active', !on);
+		});
+		wallEl.addEventListener('keydown', (e) => {
+			if (e.key !== 'Enter' && e.key !== ' ') return;
+			const t = e.target.closest('.wall-sentence'); if (!t) return;
+			e.preventDefault();
+			const on = t.getAttribute('aria-pressed') === 'true';
+			t.setAttribute('aria-pressed', String(!on));
+			t.classList.toggle('active', !on);
+		});
+	}
+	
+	// Build walls on load (and rebuild if needed)
+	function initWordWalls() {
+		document.querySelectorAll('.block.string-split.-wordwall .wall-wrap')
+			.forEach(buildInlineWall);
+	}
+	
+	// If your big IIFE runs before this, DOM may already be ready:
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initWordWalls, { once: true });
+	} else {
+		initWordWalls();
+	}
+	</script>
+	<script>
+	// --- Magnetic grid builder (5×5, center tile active) ---
+	function buildMagneticGrid(block, cols = 5, rows = 5, activeCol = 3, activeRow = 3) {
+		if (!block) return;
+	
+		// Ensure this block uses a 5×5 internal grid and equal gaps
+		block.style.setProperty('--g-columns', String(cols));
+		block.style.setProperty('--rows', String(rows));
+	
+		// Remove existing tiles only (keep the title)
+		block.querySelectorAll(':scope > .rel').forEach(n => n.remove());
+	
+		// Create tiles
+		for (let r = 1; r <= rows; r++) {
+			for (let c = 1; c <= cols; c++) {
+				const rel = document.createElement('div');
+				rel.className = 'rel tile';
+				rel.style.setProperty('--left',  String(c));
+				rel.style.setProperty('--top',   String(r));
+				rel.style.setProperty('--width', '1');
+				rel.style.setProperty('--height','1');
+	
+				const child = document.createElement('div');
+				child.className = 'child';
+	
+				const box = document.createElement('div');
+				box.setAttribute('data-v-40fb9db4', ''); // keep existing styles
+	
+				if (c === activeCol && r === activeRow) {
+					rel.classList.add('-active');
+					box.setAttribute('string', 'magnetic');
+					box.setAttribute('string-radius', '450');
+					box.setAttribute('string-strength', '0.75');
+					box.setAttribute('string-id', 'string-22'); // reuse your id
+				} else {
+					box.style.background = 'transparent';
+				}
+	
+				child.appendChild(box);
+				rel.appendChild(child);
+				block.appendChild(rel);
+			}
+		}
+	}
+	</script>
+	
+		</body>
+		</html>

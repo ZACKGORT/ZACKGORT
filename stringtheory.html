@@ -918,6 +918,11 @@ svg { fill: var(--c-black); aspect-ratio: 1 / 1; width: 100%; }
   [string="glide"] { transform: none !important; }
 }
 
+/* Exaggerate parallax travel just for this section */
+.block.string-parallax { 
+  --parallax-travel: 360; /* was ~140 in JS; parsed as px */
+}
+
 
 
 /* 9) Word wall — avoid cramped lines on mid/low widths */
@@ -1334,7 +1339,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				 data-cursor-tip="Attention has inertia."
 				 data-v-021d6718 data-v-270bb328 data-v-4f043ceb>
 
-			<h6 class="title -tac" data-v-270bb328>Product owner <span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
+			<h6 class="title -tac" data-v-270bb328>Startup work ethic <span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
 
 			<div class="rel rel-1" data-v-270bb328>
 				<div class="child" data-v-270bb328>
@@ -1354,7 +1359,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				 data-cursor-tip="Bend toward intent."
 				 data-v-021d6718 data-v-40fb9db4 data-v-4f043ceb string-id="string-21">
 
-			<h6 class="title -tac" data-v-40fb9db4>Product producer</h6>
+			<h6 class="title -tac" data-v-40fb9db4>Mult-track alignment</h6>
 
 			<div class="rel rel-1 -a-p" data-v-40fb9db4>
 				<div class="child" data-v-40fb9db4>
@@ -1629,17 +1634,23 @@ data-cursor-tip="Click, hold, and fling.">
       [...d.querySelectorAll('[string="parallax"],[string-parallax]')]
         .map(el => ({ el, factor: parseFloat(el.getAttribute("string-parallax") || "0.5") || 0.5 }));
   }
-  function parallaxTick() {
-    if (!parallaxEls.length) return;
-    const wh = w.innerHeight;
-    const maxTravel = PARALLAX_TRAVEL;
-    parallaxEls.forEach(({ el, factor }) => {
-      const r = el.getBoundingClientRect();
-      const center = r.top + r.height / 2 - wh / 2;
-      const t = clamp(center / wh, -1, 1);
-      el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
-    });
-  }
+	function parallaxTick() {
+  if (!parallaxEls.length) return;
+  const wh = w.innerHeight;
+  parallaxEls.forEach(({ el, factor }) => {
+    const r = el.getBoundingClientRect();
+    const center = r.top + r.height / 2 - wh / 2;
+
+    // NEW: pull a per-element (or inherited) travel value from CSS, fallback to the old constant
+    const cs = getComputedStyle(el);
+    const cssVal = parseFloat(cs.getPropertyValue("--parallax-travel")) || NaN;
+    const maxTravel = Number.isFinite(cssVal) ? cssVal : PARALLAX_TRAVEL; // PARALLAX_TRAVEL is your existing constant
+
+    const t = clamp(center / wh, -1, 1);
+    el.style.transform = `translate3d(0, ${(-t * factor * maxTravel).toFixed(2)}px, 0)`;
+  });
+}
+
 
   // ---------- glide ----------
   let lastY = w.scrollY || w.pageYOffset;
@@ -2098,7 +2109,7 @@ await RAPIER.init();
     const c = boxBody.translation();
     return (pt.x >= c.x - half && pt.x <= c.x + half && pt.y >= c.y - half && pt.y <= c.y + half);
   }
-	function onDown(e){
+function onDown(e){
   const pt = eventPos(e);
   if (!pointInsideBox(pt)) return;
   e.preventDefault();
@@ -2107,7 +2118,7 @@ await RAPIER.init();
   stageBlock.classList.add("-grabbing");
 
   // zero spin while dragging
-  boxBody.setAngvel(0, true);
+  boxBody.setAngvel(1, true);
 
   // NEW: remember where we grabbed the body (offset from its center, in world coords)
   const c = boxBody.translation();

@@ -2336,14 +2336,30 @@ function hideGoal(){ goal.visible = false; }
   }
 
   /* ---------- goal test (ball fully inside) ---------- */
-  function checkGoal(){
-    if (!goal.visible || !current.isBall) return false;
-    const p = body.translation();
-    const r = current.half;
-    const left = goal.x, top = goal.y, right = goal.x + goal.side, bottom = goal.y + goal.side;
-    // require the entire circle to be inside the goal square
-    return (p.x - r > left && p.x + r < right && p.y - r > top && p.y + r < bottom);
-  }
+	function checkGoal(){
+  // Trigger as soon as the circle *touches* the goal square (AABB)
+  if (!goal.visible || !current.isBall) return false;
+
+  const p = body.translation();
+  const r = current.half;
+
+  const left   = goal.x;
+  const top    = goal.y;
+  const right  = goal.x + goal.side;
+  const bottom = goal.y + goal.side;
+
+  // Clamp circle center to the square to find closest point
+  const cx = Math.max(left, Math.min(p.x, right));
+  const cy = Math.max(top,  Math.min(p.y, bottom));
+
+  const dx = p.x - cx;
+  const dy = p.y - cy;
+
+  // Touch/overlap when distance to closest point <= radius
+  return (dx*dx + dy*dy) <= r*r;
+}
+
+
 
   /* ---------- main loop ---------- */
   let lastTime = performance.now();
@@ -2354,9 +2370,14 @@ function hideGoal(){ goal.visible = false; }
     world.step(queue);
     queue.drainCollisionEvents(handleCollisionEvent);
 
-    if (checkGoal()) {
-      resetSection();
-    }
+		if (checkGoal()) {
+  hideGoal();
+  current.wear = 0;
+  makeBoxCollider();          // snap back to square immediately
+  body.setAngularDamping(0.04); // restore baseline spin damping for square
+  // keep momentum: do not zero lin/ang velocity
+}
+
 
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
@@ -2389,7 +2410,7 @@ if (goal.visible){
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   // scale type to box size (roughly 18% of side)
-  const px = Math.max(10, Math.round(goal.side * 0.18));
+  const px = Math.max(5, Math.round(goal.side * 0.18));
   const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
   ctx.font = `${px}px ${fontStack}`;
   ctx.fillText("AIM HERE", goal.cx, goal.cy);

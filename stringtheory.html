@@ -2370,16 +2370,33 @@ function hideGoal(){ goal.visible = false; }
     ctx.strokeRect(0.5*DPR, 0.5*DPR, W - 1*DPR, H - 1*DPR);
     ctx.restore();
 
-    // draw goal (if visible)
-    if (goal.visible){
-      ctx.save();
-      const pink = root.getPropertyValue("--block-pink")?.trim() || "#ff8da1";
-      ctx.setLineDash([8*DPR, 6*DPR]);
-      ctx.lineWidth = 2 * DPR;
-      ctx.strokeStyle = pink;
-      ctx.strokeRect(goal.x + 0.5*DPR, goal.y + 0.5*DPR, goal.side - 1*DPR, goal.side - 1*DPR);
-      ctx.restore();
-    }
+// draw goal (if visible) — stays visible until resetSection()
+if (goal.visible){
+  ctx.save();
+
+  const root = getComputedStyle(document.documentElement);
+  const black = (root.getPropertyValue("--c-black") || "#101214").trim();
+
+  // dotted black outline
+  ctx.setLineDash([2 * DPR, 4 * DPR]);   // small dots
+  ctx.lineWidth = 1 * DPR;
+  ctx.strokeStyle = black;
+  ctx.strokeRect(goal.x + 0.5 * DPR, goal.y + 0.5 * DPR, goal.side - 1 * DPR, goal.side - 1 * DPR);
+
+  // "AIM HERE" label
+  ctx.setLineDash([]);                   // don’t dot the text
+  ctx.fillStyle = black;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  // scale type to box size (roughly 18% of side)
+  const px = Math.max(10, Math.round(goal.side * 0.18));
+  const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
+  ctx.font = `${px}px ${fontStack}`;
+  ctx.fillText("AIM HERE", goal.cx, goal.cy);
+
+  ctx.restore();
+}
+
 
     // draw morphing body
     const p = body.translation();

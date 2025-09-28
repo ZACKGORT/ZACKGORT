@@ -135,6 +135,7 @@ html:not(.-ready) .-t-p .fdda-l span[data-v-d6e5c8df] {
 .-w .rel-2[data-v-05b709a3] { --left:7; }
 .-w .rel-3[data-v-05b709a3] { --left:11; }
 
+
 /* Lerp HUD */
 .-w .rel-1[data-v-270bb328] { --left:7; }
 .-w .rel-1 .child div[data-v-270bb328] {
@@ -153,16 +154,131 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-270bb328]:last-child::before { co
 html.-scroll-back .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before { content: "↑"; }
 html.-scroll-forward .-w .rel-1 .desc p[data-v-ccb4a0eb]:last-child::before { content: "↓"; }
 
-/* Magnetic Block */
-.-w .rel-1[data-v-40fb9db4] { --left:7; }
-.-w .rel-1 .child div[data-v-40fb9db4] {
-  transform: translate3d(calc(var(--magnetic-x) * 1px), calc(var(--magnetic-y) * 1px), 0);
+
+
+
+/* === Lerp grid: 1 row, same sizing model as magnetic === */
+.block.string-lerp{
+  --lerp-cols: 2; /* how many main-grid columns one tile spans */
+
+  /* track math (mirror magnetic) */
+  --_page-w: calc(100vw - (var(--g-margin) * 2));
+  --_tracks: var(--g-columns);
+  --_gaps: calc(var(--_tracks) - 1);
+  --_col-w: calc((var(--_page-w) - (var(--g-gap) * var(--_gaps))) / var(--_tracks));
+
+  --lerp-cell: calc(var(--_col-w) * var(--lerp-cols) + var(--g-gap) * (var(--lerp-cols) - 1));
 }
-@media (max-width: 1024px) { .-w[data-v-40fb9db4] { display:none; } }
-@media (min-width: 1024px) {
-  .-w[data-v-40fb9db4] { transition: background-color 1.2s var(--f-cubic); }
-  .-w[data-v-40fb9db4]:hover { background-color: var(--c-berry); }
+/* Lerp in grid: scale with progress (works in the center active tile) */
+.block.string-lerp .lerp-grid .rel.-active .child [data-v-270bb328][string="lerp"]{
+  --lerp-scale-max: 2;                 /* tweakable max growth */
+  transform-origin: center;
+  transform: translateZ(0)
+             scale(calc(1 + var(--lerp-progress, 0) * var(--lerp-scale-max)));
 }
+
+/* legacy .rel stays hidden only when grid is present */
+.block.string-lerp.-gridified > .rel { display: none !important; }
+
+/* inner wrapper: one row, three columns */
+.block.string-lerp .lerp-grid{
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: center;
+
+  display: grid;
+  grid-template-columns: repeat(3, var(--lerp-cell));
+  grid-auto-rows: var(--lerp-cell);
+  gap: var(--g-gap);
+  padding: clamp(.5rem, 2vmin, 1rem);
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* tiles (match house style) */
+.block.string-lerp .lerp-grid .rel{
+  --left: initial; --top: initial; --width: initial; --height: initial;
+  position: relative;
+  width: var(--lerp-cell);
+  height: var(--lerp-cell);
+  margin: 0;
+}
+.block.string-lerp .lerp-grid .rel > .child{
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--c-black);
+}
+/* filled center tile uses the real lerp node; others are hollow */
+.block.string-lerp .lerp-grid .rel:not(.-active) > .child > [data-v-270bb328]{
+  background: transparent;
+}
+.block.string-lerp .lerp-grid .rel > .child > [data-v-270bb328]{
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background-color: var(--c-black);
+  transform: translateZ(0);
+}
+
+
+
+
+/* === Magnetic grid: match the size of the main magnetic block === */
+.block.string-magnetic{
+  /* how many columns wide your magnetic square is in the main grid */
+  --mag-cols: 2; /* <= set to 1, 2, 3… to match your active block span */
+
+  /* compute one grid track width using your global margins/gaps/columns */
+  --_page-w: calc(100vw - (var(--g-margin) * 2));
+  --_tracks: var(--g-columns);
+  --_gaps: calc(var(--_tracks) - 1);
+  --_col-w: calc( (var(--_page-w) - (var(--g-gap) * var(--_gaps))) / var(--_tracks) );
+
+  /* final tile size = N columns + (N-1) gaps (exactly how .rel squares size) */
+  --mag-cell: calc( var(--_col-w) * var(--mag-cols) + var(--g-gap) * (var(--mag-cols) - 1) );
+
+  transition: background-color .45s var(--f-cubic);
+}
+
+/* inner wrapper stays the same; it will now size from --mag-cell */
+.block.string-magnetic .mag-grid{
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(3, var(--mag-cell));
+  grid-auto-rows: var(--mag-cell);
+  gap: var(--g-gap);
+  padding: clamp(.5rem, 2vmin, 1rem);
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* tiles stay square and inherit the exact same look */
+.block.string-magnetic .mag-grid .rel{
+  --left: initial; --top: initial; --width: initial; --height: initial;
+  position: relative;
+  width: var(--mag-cell);
+  height: var(--mag-cell);
+  margin: 0;
+}
+.block.string-magnetic .mag-grid .rel > .child{
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--c-black);
+}
+.block.string-magnetic .mag-grid .rel > .child > [data-v-40fb9db4]{
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background-color: var(--c-black);
+  transform: translateZ(0);
+}
+.block.string-magnetic .mag-grid .rel:not(.-active) > .child > [data-v-40fb9db4]{
+  background: transparent;
+}
+
+
 
 /* Split Block Text */
 .-w .text-container[data-v-8129bdd7] { --left:2; --width:12; }
@@ -931,16 +1047,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 }
 
 
-/* Magnetic grid: 3×3, equal spacing to container edges */
-.block.string-magnetic{
-  --g-columns: 3;
-  --rows: 3;
-  padding: var(--g-gap);
-  column-gap: var(--g-gap);
-  row-gap: var(--g-gap);
-}
-.block.string-magnetic .rel{ --width:1; --height:1; }
-.block.string-magnetic:hover { background-color: #FF8DA1 !important; }
+
 
 /* 12) Top-left logo chip */
 #logo-zckgrt{
@@ -1299,7 +1406,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 		};
 	
 		// ---------- Tunables ----------
-		const BOX_SCALE       = .9;                    // Visual scale of demo squares (no layout change)
+		const BOX_SCALE       = .8;                    // Visual scale of demo squares (no layout change)
 		const PROGRESS_MULT   = .9;                    // Feels snappier than linear
 		const PARALLAX_TRAVEL = prefersReduced ? 0 : 140;
 		const LERP_AMP        = prefersReduced ? 0 : 1.2;
@@ -1686,49 +1793,112 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 			});
 		}
 	
-		// --- Magnetic grid builder (NxM, center tile active unless specified) ---
-		function buildMagneticGrid(block, cols = 3, rows = 1, activeCol, activeRow) {
-			if (!block) return;
-			if (activeCol == null) activeCol = Math.ceil(cols / 2);
-			if (activeRow == null) activeRow = Math.ceil(rows / 2);
-			block.style.setProperty('--g-columns', String(cols));
-			block.style.setProperty('--rows', String(rows));
-	
-			for (let r = 1; r <= rows; r++) {
-				for (let c = 1; c <= cols; c++) {
-					const rel = d.createElement('div');
-					rel.className = 'rel tile';
-					rel.style.setProperty('--left',  String(c));
-					rel.style.setProperty('--top',   String(r));
-					rel.style.setProperty('--width', '1');
-					rel.style.setProperty('--height','1');
-	
-					const child = d.createElement('div');
-					child.className = 'child';
-	
-					const box = d.createElement('div');
-					box.setAttribute('data-v-40fb9db4', ''); // keep existing styles
-	
-					if (c === activeCol && r === activeRow) {
-						rel.classList.add('-active');
-						box.setAttribute('string', 'magnetic');
-						box.setAttribute('string-radius', '650');
-						box.setAttribute('string-strength', '0.95');
-						box.setAttribute('string-id', 'string-22'); // reuse your id
-						// Example: background change on hover of the active tile
-						rel.addEventListener('mouseenter', () => block.classList.add('-bg-pink'));
-						rel.addEventListener('mouseleave', () => block.classList.remove('-bg-pink'));
-					} else {
-						box.style.background = 'transparent';
-					}
-	
-					child.appendChild(box);
-					rel.appendChild(child);
-					block.appendChild(rel);
-				}
-			}
-		}
-	
+// --- Magnetic grid builder (compact wrapper; center tile active) ---
+function buildMagneticGrid(block, cols = 3, rows = 3, activeCol, activeRow) {
+  if (!block) return;
+
+  // mark so CSS can hide legacy content
+  block.classList.add('-gridified');
+
+  // find an existing magnetic node to reuse its id (avoids duplicates)
+  const legacyMag = block.querySelector(':scope > .rel [string="magnetic"]');
+  const legacyId = legacyMag?.getAttribute('string-id') || 'string-22-grid';
+
+  // optional: remove the legacy square entirely (prevents second magnetic)
+  const legacyRel = block.querySelector(':scope > .rel');
+  if (legacyRel) legacyRel.remove();
+
+  // clear any previous grid we injected
+  block.querySelectorAll('.mag-grid').forEach(n => n.remove());
+
+  // defaults
+  if (activeCol == null) activeCol = Math.ceil(cols / 2);
+  if (activeRow == null) activeRow = Math.ceil(rows / 2);
+
+  // create wrapper
+  const wrap = document.createElement('div');
+  wrap.className = 'mag-grid';
+
+  for (let r = 1; r <= rows; r++) {
+    for (let c = 1; c <= cols; c++) {
+      const rel = document.createElement('div');
+      rel.className = 'rel tile';
+
+      const child = document.createElement('div');
+      child.className = 'child';
+
+      const box = document.createElement('div');
+      box.setAttribute('data-v-40fb9db4', '');
+
+      if (c === activeCol && r === activeRow) {
+        rel.classList.add('-active');
+        box.setAttribute('string', 'magnetic');
+        box.setAttribute('string-radius', '650');
+        box.setAttribute('string-strength', '0.95');
+        box.setAttribute('string-id', legacyId); // ← reuse id, no duplicate
+
+        rel.addEventListener('mouseenter', () => block.classList.add('-bg-pink'));
+        rel.addEventListener('mouseleave', () => block.classList.remove('-bg-pink'));
+      }
+
+      child.appendChild(box);
+      rel.appendChild(child);
+      wrap.appendChild(rel);
+    }
+  }
+
+  block.appendChild(wrap);
+}
+
+
+// --- Lerp grid builder (single row; center tile hosts the existing lerp node) ---
+function buildLerpGrid(block, cols = 3, activeCol) {
+  if (!block) return;
+
+  // find the existing lerp box (the one with string="lerp")
+  const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
+  // find its outer .rel to hide later (no duplicates)
+  const legacyRel = legacyBox?.closest('.rel');
+
+  // keep original id so progress labels keep working
+  const legacyId = legacyBox?.getAttribute('string-id') || 'string-17';
+
+  // make (or replace) a grid wrapper
+  block.querySelectorAll('.lerp-grid').forEach(n => n.remove());
+  const wrap = document.createElement('div');
+  wrap.className = 'lerp-grid';
+
+  if (activeCol == null) activeCol = Math.ceil(cols / 2);
+
+  for (let c = 1; c <= cols; c++) {
+    const rel = document.createElement('div');
+    rel.className = 'rel tile';
+    const child = document.createElement('div'); child.className = 'child';
+
+    if (c === activeCol && legacyBox) {
+      // move the real lerp node into the center tile (preserves all behavior)
+      rel.classList.add('-active');
+      legacyBox.setAttribute('string-id', legacyId);
+      child.appendChild(legacyBox);
+    } else {
+      // create hollow placeholder boxes (styled hollow via CSS)
+      const hollow = document.createElement('div');
+      hollow.setAttribute('data-v-270bb328', '');
+      child.appendChild(hollow);
+    }
+
+    rel.appendChild(child);
+    wrap.appendChild(rel);
+  }
+
+  block.appendChild(wrap);
+  block.classList.add('-gridified');
+
+  // hide the old container if it still exists (we moved its child out)
+  if (legacyRel) legacyRel.style.display = 'none';
+}
+
+
 		// ---------- Perf HUD ----------
 		function setupPerfHUD() {
 			const fpsNode = d.getElementById("fps");
@@ -1884,6 +2054,10 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 			// 🔽 Build the magnetic grid (center tile active)
 			const magneticBlock = d.querySelector('.block.string-magnetic[data-v-40fb9db4]');
 			if (magneticBlock) buildMagneticGrid(magneticBlock, 3, 3, 2, 2);
+
+			// NEW: Lerp → build 3×1 row, center active (reusing existing lerp node)
+			const lerpBlock = d.querySelector('.block.string-lerp[data-v-270bb328]');
+			if (lerpBlock) buildLerpGrid(lerpBlock, 3, 2);
 	
 			collectMagneticEls();   // after building the grid
 			setupPerfHUD();

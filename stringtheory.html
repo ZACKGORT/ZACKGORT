@@ -1396,7 +1396,7 @@ string="cursor" string-cursor-class="cursor-1"
 data-storyline="Throw me."
 data-cursor-tip="Click, hold, and fling.">
 
-<h6 class="title -tac" data-v-270bb328>Product owner <span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
+<h6 class="title -tac" data-v-270bb328>A Throwable Box <span class="-mm" data-v-ccb4a0eb>Play responsibly </span></h6>
 
 <!-- full-bleed canvas inside this block -->
 <div class="rapier-stage" aria-label="Rapier physics stage">
@@ -2038,8 +2038,8 @@ data-cursor-tip="Click, hold, and fling.">
 	const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
 await RAPIER.init();
 
-  const gravity = { x: 0, y: 2400 };
-  const world = new RAPIER.World(gravity);
+const DROP_G = 2400;
+const world = new RAPIER.World({ x: 0, y: 0 }); // no gravity until in-view
 
   let walls = [];
   function rebuildWalls(){
@@ -2074,6 +2074,23 @@ await RAPIER.init();
                                y: Math.min(Math.max(p.y, 80*DPR), H-80*DPR) }, true);
     }
   }, { passive: true });
+
+	// Drop only when the rapier section is in view
+let hasDropped = false;
+const io = new IntersectionObserver(
+  (entries) => {
+    const e = entries[0];
+    if (!hasDropped && e.isIntersecting && e.intersectionRatio > 0.35) {
+      world.gravity = { x: 0, y: DROP_G };
+      boxBody.wakeUp();                  // make sure the body isn’t sleeping
+      hasDropped = true;
+      io.disconnect();                   // one-and-done
+    }
+  },
+  { root: null, threshold: [0, 0.35, 0.6] }
+);
+io.observe(stageBlock);
+
 
   const side = Math.min(canvas.width, canvas.height) * 0.12;
   const half = side / 2;

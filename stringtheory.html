@@ -1156,10 +1156,40 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
   .block.string-split.-wordwall .wall .wall-sentence { transition: none; }
 }
 
+
+/* Magnetic grid: 5×5, equal spacing to container edges */
+.block.string-magnetic {
+  --g-columns: 5;     /* 5 columns inside this block only */
+  --rows: 5;          /* 5 explicit rows so row-gap applies */
+  padding: var(--g-gap);   /* outer edge = internal gap */
+  column-gap: var(--g-gap);
+  row-gap: var(--g-gap);
+}
+.block.string-magnetic .rel { --width: 1; --height: 1; } /* one cell per tile */
+
+/* Top-left logo chip — matches #fps / #scroll-dir */
+#logo-zckgrt {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: calc(env(safe-area-inset-left, 0px) + 10px);
+  background-color: #000;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: monospace;
+  border: 1px solid rgba(255,255,255,.2);
+  z-index: 1000;
+  pointer-events: none; /* behave like the HUD blocks */
+}
+
 </style>  
 </head>
+
 <body class="-fiddle-digital">
 <div id="FiddleDigital-Introduces-StringTune">
+
+<div id="logo-zckgrt">ZCKGRT</div>
+
 	<div class="vault">
 		<svg version="1.1" xmlns="http://www.w3.org/2000/svg" style="display:none"></svg>
 	</div>
@@ -1203,22 +1233,24 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 		</div>
 
 				<!-- Split 1 (text only) -->
-				<div class="-w block string-split"
-				string="cursor" string-cursor-class="cursor-1"
-				data-storyline="Say less, say clearly."
-				data-cursor-tip="Say less, say clearly."
-				data-v-021d6718 data-v-8129bdd7 data-v-4f043ceb>
+		<div class="-w block string-split -wordwall"
+     string="cursor" string-cursor-class="cursor-1"
+     data-storyline="Say less, say clearly."
+     data-cursor-tip="Say less, say clearly.">
+  	<div class="text-container" style="--left:2; --width:12;">
+    <p class="-m -up">Words from the author</p>
 
-		 <h6 class="title -tac" data-v-8129bdd7>Design 101</h6>
-		 <div class="text-container" data-v-8129bdd7 style="--left:2; --width:12;">
-			 <p class="-h3 -m-h5" string="split" string-split="word|char[left]" string-repeat data-v-8129bdd7 string-id="string-23">
-				Like a box of chocolates
-			 </p>
-			 <span class="-m" data-v-8129bdd7>Look, I'm not here to bullsh*t with you. We 'designers' are not engineers; we are not scientists; we are not creating things that will remembered in 20 years; 50 years; or a century from now. No one is building the great pyramids with DIV containers. All said, we just like making things that "delight".</span>
+    <div class="wall-wrap">
+		<p class="wall-source">
+		Look, I'm not here to bullsh*t with you. We 'designers' are not engineers; we are not scientists; we are not creating things that will remembered in 20 years; 50 years; or a century from now. No one is building the great pyramids with DIV containers. All said, we just like making things that "delight". But, at the end of the day, we all need to sell sh*t, so it behooves us to do so in an interesting way. And since our monkey-brains are fascinated by bright colors and fast-intake content, we have evolved from a species that once 'thought outside of the box', whom now are [beholden to the box].
+		</p>
 
-			 <span class="-m" data-v-8129bdd7>But, at the end of the day, we all need to sell sh*t, so it behooves us to do so in an interesting way. And since our monkey-brains are fascinated by bright colors and fast-intake content, we have evolved from a species that once 'thought outside of the box', whom now are [beholden to the box].</span>
-		 </div>
-	 </div>
+		
+    </div>
+  	</div>
+		</div>
+
+
 
 		<!-- Basics -->
 		<div class="-w block string-enter"
@@ -1234,7 +1266,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				<div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border:none;">
 					<div class="-a-scale-in" data-v-1a9dc9c4 data-tooltip="The product block — tangible value"></div>
 				</div>
-				<div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>your product</p></div>
+				<div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>a product</p></div>
 			</div>
 
 			<!-- Environment (TRANSPARENT — no tooltip) -->
@@ -1242,7 +1274,8 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				<div class="child -a-p" string data-v-1a9dc9c4 string-id="string-4">
 					<div class="-a-scale-in" data-v-1a9dc9c4 style="background:transparent;"></div>
 				</div>
-				<div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>a box</p></div>
+				<div class="-a-scale-in" data-v-1a9dc9c4 data-tooltip="The product block — tangible value"></div>				
+				<div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>a space</p></div>
 			</div>
 		</div>
 
@@ -1265,7 +1298,6 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 	<p class="-mm stage" data-stage-of="string-6" style="margin-top:.25rem">idea</p>
 </div>
 </div>
-
 
 			<!-- RIGHT big outlined box (TRANSPARENT — no tooltip) -->
 			<div class="rel rel-1" data-v-a676084d style="--left:9; --width:2; z-index:1;">
@@ -1979,19 +2011,24 @@ document.addEventListener("touchcancel", endTouch, { passive: true });
   }
 
   // ---------- Bootstrap ----------
-  function init() {
-    setupRepeat();
-    setupSplit();
-    setupInView();
-    collectProgressEls();
-    collectParallaxEls();
-    collectGlideEls();
-		collectLerpEls();
-    setupCursor();
-    collectMagneticEls();
-    setupPerfHUD();
-    applyBoxScale();
-    setupStorylineObserver();
+function init() {
+  setupRepeat();
+  setupSplit();
+  setupInView();
+  collectProgressEls();
+  collectParallaxEls();
+  collectGlideEls();
+  collectLerpEls();
+  setupCursor();
+
+  // 🔽 Build the magnetic 5×5 grid (center active)
+  const magneticBlock = document.querySelector('.block.string-magnetic[data-v-40fb9db4]');
+  if (magneticBlock) buildMagneticGrid(magneticBlock, 5, 5, 3, 3);
+
+  collectMagneticEls();   // after building the grid
+  setupPerfHUD();
+  applyBoxScale();
+  setupStorylineObserver();
 
     // Ensure cursor tip shows immediately (confirms tooltip wiring)
     setTip(getStoryForBlock(chapterBlocks[0]) || storylineEl?.textContent || "Try the cursor →");
@@ -2106,6 +2143,51 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initWordWalls, { once: true });
 } else {
   initWordWalls();
+}
+</script>
+<script>
+// --- Magnetic grid builder (5×5, center tile active) ---
+function buildMagneticGrid(block, cols = 5, rows = 5, activeCol = 3, activeRow = 3) {
+  if (!block) return;
+
+  // Ensure this block uses a 5×5 internal grid and equal gaps
+  block.style.setProperty('--g-columns', String(cols));
+  block.style.setProperty('--rows', String(rows));
+
+  // Remove existing tiles only (keep the title)
+  block.querySelectorAll(':scope > .rel').forEach(n => n.remove());
+
+  // Create tiles
+  for (let r = 1; r <= rows; r++) {
+    for (let c = 1; c <= cols; c++) {
+      const rel = document.createElement('div');
+      rel.className = 'rel tile';
+      rel.style.setProperty('--left',  String(c));
+      rel.style.setProperty('--top',   String(r));
+      rel.style.setProperty('--width', '1');
+      rel.style.setProperty('--height','1');
+
+      const child = document.createElement('div');
+      child.className = 'child';
+
+      const box = document.createElement('div');
+      box.setAttribute('data-v-40fb9db4', ''); // keep existing styles
+
+      if (c === activeCol && r === activeRow) {
+        rel.classList.add('-active');
+        box.setAttribute('string', 'magnetic');
+        box.setAttribute('string-radius', '450');
+        box.setAttribute('string-strength', '0.75');
+        box.setAttribute('string-id', 'string-22'); // reuse your id
+      } else {
+        box.style.background = 'transparent';
+      }
+
+      child.appendChild(box);
+      rel.appendChild(child);
+      block.appendChild(rel);
+    }
+  }
 }
 </script>
 

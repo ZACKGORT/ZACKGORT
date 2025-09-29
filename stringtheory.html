@@ -797,6 +797,33 @@ div[data-fps]::after, div[data-position]::after {
 .-splitted .-s-char { will-change: transform, opacity; backface-visibility: hidden; }
 
 
+/* === Wall text size overrides === */
+:root{
+  /* tweak these if you want different min/fluid/max */
+  --wall-sentence-min: 1.4rem;   /* was 1.2rem */
+  --wall-sentence-fluid: 3.2vw;  /* was 2.4vw */
+  --wall-sentence-max: 2.2rem;   /* was 1.2rem max (fixed) */
+  --wall-li-size: 1.35rem;       /* was 1.125rem */
+}
+
+/* Inline sentence chips */
+.block.string-split.-wordwall .wall .wall-sentence{
+  font-size: clamp(var(--wall-sentence-min),
+                   var(--wall-sentence-fluid),
+                   var(--wall-sentence-max));
+}
+
+/* Legacy <li> wall items */
+.block.string-split.-wordwall .wall li{
+  font-size: var(--wall-li-size);
+}
+
+/* Phone tuning (keeps it comfortably big on small screens) */
+@media (max-width: 640px){
+  .block.string-split.-wordwall .wall li{
+    font-size: clamp(1.2rem, 4.6vw, 1.4rem); /* was clamp(.9rem, 3.8vw, 1rem) */
+  }
+}
 
 
 </style>  
@@ -858,10 +885,12 @@ div[data-fps]::after, div[data-position]::after {
     <p class="-m">TL;DR ;)</p>
 
     <div class="wall-wrap">
-  		<p class="wall-source">
+  		<p class="wall-source">{BR}
 	  	Look, I'm not here to bullsh*t with you. We 'designers' are not engineers; we are not architects; we are not scientists. We are not creating things that will remembered in twenty years, fifty years, and certainly not a century from now. Nobody is building the great pyramids with DIV containers. All said, there are two ways to look at this: A - humans have far outpaced evolutionary plans and our technology should celebrate our awesomeness by being "intuitive and delightful"; B - humans are nothing but meat batteries who demand technology not require we use our own energy because we have a concept that is "money". {I digress}
-      {br}
-      At the end of the day, we all need to sell sh*t. {to recharge our meat, clearly} So it behooves us to do so in an interesting way. Well, how do you do things in an interesting way in the modern era? A world where [according to LinkedIn] you can #vibe code a fully ready-to-market app in 10 hours[?]. A world operating in the ethical gray area of generative media[?]. A world where someone like me can create something like this with just a few prompts[?]. FYI YOU CAN'T. I did some exploring, found an obscure JS library on GitHub with free licensing, and read, iterated, and finally found my flow. Also, you should know I crafted this reading experience because a: I digress often b: you aren't going to read all this sh*t, respectfully :)
+      {BR}{BR}{BR}
+      At the end of the day, we all need to sell sh*t. {to recharge our meat, clearly} So it behooves us to do so in an interesting way.
+      {BR}{BR}{BR}
+      Here is what I am selling:
 		  </p>
     </div>
     

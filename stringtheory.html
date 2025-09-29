@@ -400,11 +400,13 @@ html.-cursor-tooltips [data-tooltip]::after { display: none !important; }
   display: grid; gap: .15em; margin-top: .5em;
 }
 .block.string-split.-wordwall .wall li {
-  font-size: clamp(.8rem, 3.5vw, .8rem); line-height: 1.8em; font-weight: 400;
+font-size: 1.125rem;
   color: var(--c-black); opacity: 1;
   transition: opacity .18s var(--f-smooth), transform .18s var(--f-smooth);
   will-change: opacity, transform; outline: none;
 }
+
+
 
 /* Default (no fading on touch/mobile) */
 .-wordwall .wall-wrap:hover li, .-wordwall .wall li:hover {
@@ -1015,6 +1017,25 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 
 
 /* ===== Word Wall — inline sentences, full-viewport (default 100% opacity) ===== */
+/* Only the sentence chips are hit-testable */
+.wall { pointer-events: none; }
+.wall .wall-sentence {
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation; /* prevents 300ms delays / double-tap zoom */
+}
+
+/* Unified fade behavior: when any sentence is active, fade the rest */
+.wall.-has-active .wall-sentence:not(.active) { opacity: .35; }
+
+/* Desktop hover mirrors tap focus */
+.wall .wall-sentence.-over:not(.active) { opacity: .65; }
+
+/* (optional) slightly larger tap target */
+.wall .wall-sentence { padding: .08em .12em; margin: 0 .02em; border-radius: .25em; }
+
+
+
 .block.string-split.-wordwall {
   min-height: 100vh;
   height: 100vh;
@@ -1167,7 +1188,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 					<div class="fdda-l -mm -up" string string-repeat string-offset-top="-20%" data-v-33216d84 data-v-d6e5c8df string-id="string-1"><span data-v-d6e5c8df>E-commerce</span></div>
 					<div class="fdda-l -mm -up" string string-repeat string-offset-top="-20%" data-v-33216d84 data-v-d6e5c8df string-id="string-2"><span data-v-d6e5c8df>Digital Product</span></div>
 				</div>
-				<h1 class="-tac -m-h3" data-v-33216d84>99.9999999999%</h1>
+				<h1 class="-tac -m-h3" data-v-33216d84>99.999999%</h1>
 				<span class="-m" data-v-8129bdd7>... of all websites look like this.</span>
 
 				<div data-v-33216d84>
@@ -1194,12 +1215,12 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
      data-storyline="Say less, say clearly."
      data-cursor-tip="Say less, say clearly.">
   	<div class="text-container" style="--left:2; --width:12;">
-    <p class="-m">... at some point in their lifetime ;)</p>
+    <p class="-m">TL;DR ;)</p>
 
     <div class="wall-wrap">
   		<p class="wall-source">
 	  	Look, I'm not here to bullsh*t with you. We 'designers' are not engineers; we are not architects; we are not scientists. We are not creating things that will remembered in twenty years, fifty years, and certainly not a century from now. Nobody is building the great pyramids with DIV containers. All said, there are two ways to look at this: A - humans have far outpaced evolutionary plans and our technology should celebrate our awesomeness by being "intuitive and delightful"; B - humans are nothing but meat batteries who demand technology not require we use our own energy because we have a concept that is "money". {I digress}
-      
+      {br}
       At the end of the day, we all need to sell sh*t. {to recharge our meat, clearly} So it behooves us to do so in an interesting way. Well, how do you do things in an interesting way in the modern era? A world where [according to LinkedIn] you can #vibe code a fully ready-to-market app in 10 hours[?]. A world operating in the ethical gray area of generative media[?]. A world where someone like me can create something like this with just a few prompts[?]. FYI YOU CAN'T. I did some exploring, found an obscure JS library on GitHub with free licensing, and read, iterated, and finally found my flow. Also, you should know I crafted this reading experience because a: I digress often b: you aren't going to read all this sh*t, respectfully :)
 		  </p>
     </div>
@@ -1224,7 +1245,7 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
   </h6>
 
   <!-- Product (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4>
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:7;">
     <div class="child -a-p" string string-repeat data-v-1a9dc9c4 string-id="string-5" style="border:none;">
       <div class="-a-scale-in" data-v-1a9dc9c4 data-tooltip="The product block — tangible value"></div>
     </div>
@@ -1244,18 +1265,18 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 			<h6 class="title -tac" data-v-a676084d>I make boxes & I move product.<span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
 
 <!-- LEFT big box + moving pink fill (FILLED pink) -->
-<div class="rel rel-1" data-v-a676084d style="--left:4; --width:2; --travel:2.5;">
+<div class="rel rel-1" data-v-a676084d style="--left:2; --width:2; --travel:2.5;">
 <div class="child" string="progress" data-v-a676084d string-id="string-6">
 	<div data-v-a676084d data-tooltip="Progress in motion — idea → prototype → beta → launch → on the shelf"></div>
 </div>
 <div class="-m desc" data-v-a676084d>
 	<p class="-mm" data-progress-of="string-6">0</p>
-	<p class="-mm stage" data-stage-of="string-6" style="margin-top:.25rem">idea</p>
+	<p class="-mm stage" data-stage-of="string-6" style="margin-top:.25rem"></p>
 </div>
 </div>
 
 			<!-- RIGHT big outlined box (TRANSPARENT — no tooltip) -->
-			<div class="rel rel-1" data-v-a676084d style="--left:9; --width:2; z-index:1;">
+			<div class="rel rel-1" data-v-a676084d style="--left:7; --width:2; z-index:1;">
 				<div class="child" data-v-a676084d>
 					<div data-v-a676084d style="background:transparent;"></div>
 				</div>
@@ -1420,11 +1441,15 @@ html:not(.-guidelines) .guide-grid { visibility: hidden; }
 				 data-cursor-tip="Say less, say clearly."
 				 data-v-021d6718 data-v-8129bdd7 data-v-4f043ceb>
 
-				 <h6 class="title -tac" data-v-40fb9db4>Product producer</h6>
+				 <h6 class="title -tac" data-v-40fb9db4>Key takeaway</h6>
 			<div class="text-container" data-v-8129bdd7 style="--left:2; --width:12;">
-				<p class="-h3 -m-h5" string="split" string-split="word|char[left]" string-repeat data-v-8129bdd7 string-id="string-23">
-					Proudly be that 0.0000000001%.
-				</p>
+        <p class="-h3 -m-h5"
+        style="--left:0; --width:var(--grid-cols,14); max-width:none"
+        string="split" string-split="word|char[left]" string-repeat
+        data-v-8129bdd7 string-id="string-23">
+       Proudly be that 0.000001%.
+     </p>
+     
 				<span class="-m" data-v-8129bdd7>We are not the user.<br>We are the product.<br>Ship or be shipped.</span>
 			</div>
 		</div>
@@ -1480,951 +1505,1035 @@ data-cursor-tip="Click, hold, and fling.">
 
 <!-- String Tune runtime -->
 <script>
-  (() => {
-    const d = document, de = d.documentElement, w = window;
-    if (de.__stringTuneMounted) return;
-    de.__stringTuneMounted = !0;
-    de.classList.add("-ready", "-loaded");
-  
-    // ---------- utils ----------
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-    const prefersReduced = (w.matchMedia && w.matchMedia("(prefers-reduced-motion: reduce)")).matches || !1;
-    const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
-    const lerp = (a,b,t)=>a+(b-a)*t;
-    const toPx = (v, axis="y") => {
-      if (v == null) return 0;
-      const s = String(v).trim();
-      if (s.endsWith("%")) {
-        const n = parseFloat(s) / 100;
-        return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
+/*! StringTune – unified desktop/mobile wall interactions, safe sentence split, BR support, and full runtime (parallax/glide/progress/rapier) */
+(() => {
+  const d = document, de = d.documentElement, w = window;
+  if (de.__stringTuneMounted) return;
+  de.__stringTuneMounted = !0;
+  de.classList.add("-ready", "-loaded");
+
+  // -------------------- utils
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  const prefersReduced = (w.matchMedia && w.matchMedia("(prefers-reduced-motion: reduce)")).matches || !1;
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const lerp = (a,b,t)=>a+(b-a)*t;
+  const toPx = (v, axis="y") => {
+    if (v == null) return 0;
+    const s = String(v).trim();
+    if (s.endsWith("%")) {
+      const n = parseFloat(s) / 100;
+      return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
+    }
+    return parseFloat(s) || 0;
+  };
+
+  // -------------------- constants / tuning
+  const BOX_SCALE = 0.8;
+  const PROGRESS_MULT = 0.9;
+  const PARALLAX_TRAVEL = prefersReduced ? 0 : 140;
+  const LERP_AMP = prefersReduced ? 0 : 1.2;
+  const GLIDE_AMP = prefersReduced ? 0 : 1.35;
+  de.style.setProperty("--progress-mult", String(PROGRESS_MULT));
+
+  // -------------------- CSS injection (wall click/hover parity)
+  (function injectStyles(){
+    const css = `
+      .wall{pointer-events:none}
+      .wall .wall-sentence{pointer-events:auto;cursor:pointer;touch-action:manipulation}
+      .wall.-has-active .wall-sentence:not(.active){opacity:.35}
+      .wall .wall-sentence.-over:not(.active){opacity:.65}
+      .wall .wall-sentence{padding:.08em .12em;margin:0 .02em;border-radius:.25em}
+      .wall .wall-br{line-height:0}
+      .wall .wall-br + .wall-sentence{display:inline-block;margin-top:.5em}
+    `;
+    const el = d.createElement("style");
+    el.setAttribute("data-stringtune", "wall");
+    el.textContent = css;
+    d.head.appendChild(el);
+  })();
+
+  // -------------------- layout: box scale
+  function applyBoxScale() {
+    d.querySelectorAll(".-w .rel").forEach((rel) => {
+      const child = rel.querySelector(":scope > .child");
+      if (!child) return;
+      const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
+      const base = child.clientWidth;
+      const extra = Math.max(0, (scale - 1) * base);
+      rel.style.paddingBottom = extra ? `${extra}px` : "";
+      child.style.transformOrigin = "top left";
+      child.style.transform = scale !== 1 ? `scale(${scale})` : "";
+    });
+  }
+
+  // -------------------- [string] repeat/split/inview
+  function setupRepeat() {
+    d.querySelectorAll("[data-string-clone]").forEach((n)=>n.remove());
+    d.querySelectorAll("[string][string-repeat]").forEach((el)=>{
+      if (el.dataset.stringRepeated === "1") return;
+      const raw = el.getAttribute("string-repeat");
+      const total = raw && raw.trim()!=="" ? Math.max(1, parseInt(raw,10) || 1) : 1;
+      for (let i=1;i<total;i++){
+        const clone = el.cloneNode(!0);
+        clone.removeAttribute("string-repeat");
+        clone.setAttribute("data-string-clone","");
+        el.after(clone);
       }
-      return parseFloat(s) || 0;
-    };
-  
-    // ---------- constants/tuning ----------
-    const BOX_SCALE = 0.8;
-    const PROGRESS_MULT = 0.9;
-    const PARALLAX_TRAVEL = prefersReduced ? 0 : 140;
-    const LERP_AMP = prefersReduced ? 0 : 1.2;
-    const GLIDE_AMP = prefersReduced ? 0 : 1.35;
-    de.style.setProperty("--progress-mult", String(PROGRESS_MULT));
-  
-    // ---------- layout: box scale ----------
-    function applyBoxScale() {
-      d.querySelectorAll(".-w .rel").forEach((rel) => {
-        const child = rel.querySelector(":scope > .child");
-        if (!child) return;
-        const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
-        const base = child.clientWidth;
-        const extra = Math.max(0, (scale - 1) * base);
-        rel.style.paddingBottom = extra ? `${extra}px` : "";
-        child.style.transformOrigin = "top left";
-        child.style.transform = scale !== 1 ? `scale(${scale})` : "";
-      });
-    }
-  
-    // ---------- [string] repeat/split/inview ----------
-    function setupRepeat() {
-      d.querySelectorAll("[data-string-clone]").forEach((n)=>n.remove());
-      d.querySelectorAll("[string][string-repeat]").forEach((el)=>{
-        if (el.dataset.stringRepeated === "1") return;
-        const raw = el.getAttribute("string-repeat");
-        const total = raw && raw.trim()!=="" ? Math.max(1, parseInt(raw,10) || 1) : 1;
-        for (let i=1;i<total;i++){
-          const clone = el.cloneNode(!0);
-          clone.removeAttribute("string-repeat");
-          clone.setAttribute("data-string-clone","");
-          el.after(clone);
-        }
-        el.dataset.stringRepeated = "1";
-      });
-    }
-  
-    function setupSplit() {
-      d.querySelectorAll('[string="split"],[string][string-split]').forEach((el)=>{
-        if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
-        const mode = (el.getAttribute("string-split") || "").toLowerCase();
-        const doWord = mode.includes("word");
-        const doChar = mode.includes("char");
-        const rawText = (el.textContent || "").replace(/\s+/g," ").trim();
-        const words = rawText ? rawText.split(" ") : [];
-        el.textContent = "";
-        el.classList.add("-splitted");
-        let wordIndex = 0;
-        words.forEach((wrd,i)=>{
-          const wSpan = d.createElement("span");
-          if (doWord) wSpan.className = "-s-word";
-          if (doChar){
-            [...wrd].forEach((ch,ci)=>{
-              const cSpan = d.createElement("span");
-              cSpan.className = "-s-char";
-              cSpan.style.transitionDelay = (wordIndex*0.02 + ci*0.01) + "s";
-              cSpan.textContent = ch;
-              wSpan.appendChild(cSpan);
-            });
-          } else {
-            wSpan.textContent = wrd;
-          }
-          el.appendChild(wSpan);
-          if (i < words.length-1) el.appendChild(d.createTextNode(" "));
-          wordIndex++;
-        });
-        el.__split = !0;
-      });
-    }
-  
-    function setupInView() {
-      const makeObserver = (el)=>{
-        const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
-        const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
-        const tv = (el.getAttribute("string-inview") || "").trim();
-        const threshold = tv.endsWith("%") ? clamp(parseFloat(tv)/100,0,1) : 0;
-        const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
-        return new IntersectionObserver((entries)=>{
-          entries.forEach((entry)=>{
-            const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
-            if (ok) el.classList.add("-inview");
-            else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
+      el.dataset.stringRepeated = "1";
+    });
+  }
+
+  function setupSplit() {
+    d.querySelectorAll('[string="split"],[string][string-split]').forEach((el)=>{
+      if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
+      const mode = (el.getAttribute("string-split") || "").toLowerCase();
+      const doWord = mode.includes("word");
+      const doChar = mode.includes("char");
+      const rawText = (el.textContent || "").replace(/\s+/g," ").trim();
+      const words = rawText ? rawText.split(" ") : [];
+      el.textContent = "";
+      el.classList.add("-splitted");
+      let wordIndex = 0;
+      words.forEach((wrd,i)=>{
+        const wSpan = d.createElement("span");
+        if (doWord) wSpan.className = "-s-word";
+        if (doChar){
+          [...wrd].forEach((ch,ci)=>{
+            const cSpan = d.createElement("span");
+            cSpan.className = "-s-char";
+            cSpan.style.transitionDelay = (wordIndex*0.02 + ci*0.01) + "s";
+            cSpan.textContent = ch;
+            wSpan.appendChild(cSpan);
           });
-        }, { root:null, rootMargin, threshold:[0, threshold||0, 1] });
-      };
-      d.querySelectorAll(".block").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-      d.querySelectorAll("[string]").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-    }
-  
-    // ---------- progress + lerp ----------
-    const progressEls = [];
-    function collectProgressEls(){ progressEls.length=0; progressEls.push(...d.querySelectorAll('[string="progress"]')); }
-  
-    function computeProgress(el, rect, vh){
-      const enterEdge = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
-      const exitEdge  = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
+        } else {
+          wSpan.textContent = wrd;
+        }
+        el.appendChild(wSpan);
+        if (i < words.length-1) el.appendChild(d.createTextNode(" "));
+        wordIndex++;
+      });
+      el.__split = !0;
+    });
+  }
+
+  function setupInView() {
+    const makeObserver = (el)=>{
       const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
       const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
-      const viewTop = 0 + topOffset, viewBot = vh + bottomOffset;
-      const enterRef = enterEdge === "top" ? viewTop : viewBot;
-      const exitRef  = exitEdge  === "top" ? viewTop : viewBot;
-      const edgeTop = rect.top, edgeBot = rect.bottom;
-      let p;
-      if (enterEdge === exitEdge){
-        const h = Math.max(1, rect.height);
-        p = (enterEdge === "top") ? (enterRef - edgeTop)/h : (edgeBot - enterRef)/h;
-      } else {
-        const startPos = enterEdge === "top" ? edgeTop : edgeBot;
-        const endPos   = exitEdge  === "top" ? edgeTop : edgeBot;
-        const A = startPos - enterRef;
-        const B = endPos   - exitRef;
-        const span = A - B;
-        p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
-        if (A>0 && B>0) p = 0;
-        if (A<0 && B<0) p = 1;
-      }
-      p = Number.isFinite(p) ? clamp(p,0,1) : 0;
-      el.__lastProgress = p;
-      return p;
+      const tv = (el.getAttribute("string-inview") || "").trim();
+      const threshold = tv.endsWith("%") ? clamp(parseFloat(tv)/100,0,1) : 0;
+      const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
+      return new IntersectionObserver((entries)=>{
+        entries.forEach((entry)=>{
+          const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
+          if (ok) el.classList.add("-inview");
+          else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
+        });
+      }, { root:null, rootMargin, threshold:[0, threshold||0, 1] });
+    };
+    d.querySelectorAll(".block").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+    d.querySelectorAll("[string]").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+  }
+
+  // -------------------- progress + lerp
+  const progressEls = [];
+  function collectProgressEls(){ progressEls.length=0; progressEls.push(...d.querySelectorAll('[string="progress"]')); }
+
+  function computeProgress(el, rect, vh){
+    const enterEdge = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
+    const exitEdge  = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
+    const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
+    const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
+    const viewTop = 0 + topOffset, viewBot = vh + bottomOffset;
+    const enterRef = enterEdge === "top" ? viewTop : viewBot;
+    const exitRef  = exitEdge  === "top" ? viewTop : viewBot;
+    const edgeTop = rect.top, edgeBot = rect.bottom;
+    let p;
+    if (enterEdge === exitEdge){
+      const h = Math.max(1, rect.height);
+      p = (enterEdge === "top") ? (enterRef - edgeTop)/h : (edgeBot - enterRef)/h;
+    } else {
+      const startPos = enterEdge === "top" ? edgeTop : edgeBot;
+      const endPos   = exitEdge  === "top" ? edgeTop : edgeBot;
+      const A = startPos - enterRef;
+      const B = endPos   - exitRef;
+      const span = A - B;
+      p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
+      if (A>0 && B>0) p = 0; if (A<0 && B<0) p = 1;
     }
-  
-    function updateProgress(){
-      const vh = w.innerHeight;
-      for (const el of progressEls){
-        const rect = el.getBoundingClientRect();
-        const p = computeProgress(el, rect, vh);
-        const out = clamp(p * PROGRESS_MULT, 0, 1);
-        el.style.setProperty("--progress", out.toFixed(4));
-        const id = el.getAttribute("string-id") || el.id;
-        if (id){
-          d.querySelectorAll(`[data-progress-of="${id}"]`).forEach((n)=> n.textContent = Math.round(p*100));
-          d.querySelectorAll(`[data-stage-of="${id}"]`).forEach((n)=>{
-            const v = p*100;
-            let label = "Ship it";
-            if (v>=100) label="SOLD!";
-            else if (v>=75) label="cya byeeeeee!";
-            else if (v>=50) label="cya byeeeeee!";
-            else if (v>=25) label="cya byeeeeee!";
-            n.textContent = label;
-          });
-        }
-      }
-    }
-  
-    let lerpEls = [];
-    function collectLerpEls(){ lerpEls = [...d.querySelectorAll('[string="lerp"]')]; }
-    function updateLerpProgress(){
-      const vh = w.innerHeight;
-      for (const el of lerpEls){
-        const rect = el.getBoundingClientRect();
-        const p = computeProgress(el, rect, vh);
-        el.style.setProperty("--lerp-progress", p.toFixed(4));
-        d.querySelectorAll('[data-livelabel="lerp"]').forEach((n)=> n.textContent = Math.round(p*100));
-      }
-    }
-  
-    // ---------- parallax + glide ----------
-    let parallaxEls = [];
-    function collectParallaxEls(){
-      parallaxEls = (isMobile || prefersReduced) ? [] :
-        [...d.querySelectorAll('[string="parallax"],[string-parallax]')].map((el)=>({
-          el, factor: parseFloat(el.getAttribute("string-parallax")||"0.5")||0.5
-        }));
-    }
-    function parallaxTick(){
-      if (!parallaxEls.length) return;
-      const wh = w.innerHeight;
-      parallaxEls.forEach(({el,factor})=>{
-        const r = el.getBoundingClientRect();
-        const center = r.top + r.height/2 - wh/2;
-        const cs = getComputedStyle(el);
-        const cssVal = parseFloat(cs.getPropertyValue("--parallax-travel")) || NaN;
-        const maxTravel = Number.isFinite(cssVal) ? cssVal : PARALLAX_TRAVEL;
-        const t = clamp(center/wh, -1, 1);
-        el.style.transform = `translate3d(0, ${(-t*factor*maxTravel).toFixed(2)}px, 0)`;
-      });
-    }
-  
-    let lastY = w.scrollY || w.pageYOffset;
-    let lerpVal = 0, glideVal = 0;
-    let glideEls = [];
-    function collectGlideEls(){
-      glideEls = (isMobile || prefersReduced) ? [] :
-        [...d.querySelectorAll('[string="glide"]')].map((el)=>({ el, k: parseFloat(el.getAttribute("string-glide")||"0.35")||0.35, y:0 }));
-    }
-    function smoothTick(){
-      const y = w.scrollY || w.pageYOffset;
-      const delta = y - lastY;
-      lastY = y;
-      lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
-      glideVal = lerp(glideVal, 0, 0.075) + delta*0.02;
-      de.style.setProperty("--lerp", (lerpVal * LERP_AMP).toFixed(2));
-      de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
-      glideEls.forEach((g)=>{
-        g.y = lerp(g.y, glideVal * g.k, 0.12);
-        g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
-      });
-    }
-  
-    // ---------- cursor + tooltips ----------
-    const cursorRoot = d.querySelector(".cursor[string-cursor]");
-    const tipEl = cursorRoot?.querySelector(".cursor-tip");
-    const DEFAULT_TIP = "Try the cursor →";
-    let cx = 0, cy = 0, hoverTip = "";
-  
-    function setTip(msg){
-      if (!cursorRoot || !tipEl) return;
-      if (msg && msg.trim()){
-        tipEl.textContent = msg;
-        cursorRoot.classList.add("-tips");
-      } else {
-        cursorRoot.classList.remove("-tips");
+    p = Number.isFinite(p) ? clamp(p,0,1) : 0;
+    el.__lastProgress = p;
+    return p;
+  }
+
+  function updateProgress(){
+    const vh = w.innerHeight;
+    for (const el of progressEls){
+      const rect = el.getBoundingClientRect();
+      const p = computeProgress(el, rect, vh);
+      const out = clamp(p * PROGRESS_MULT, 0, 1);
+      el.style.setProperty("--progress", out.toFixed(4));
+      const id = el.getAttribute("string-id") || el.id;
+      if (id){
+        const esc = (w.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/"/g, '\\"');
+        d.querySelectorAll(`[data-progress-of="${esc}"]`).forEach((n)=> n.textContent = Math.round(p*100));
+        d.querySelectorAll(`[data-stage-of="${esc}"]`).forEach((n)=>{
+          const v = p*100;
+          let label = " ";
+          if (v>=100) label=" "; else if (v>=75) label=" "; else if (v>=50) label=" "; else if (v>=25) label=" ";
+          n.textContent = label;
+        });
       }
     }
-    function hideTip(){ cursorRoot?.classList.remove("-tips"); }
-  
-    function setupCursor(){
-      if (!cursorRoot) return;
-      w.addEventListener("mousemove",(e)=>{
-        cx = e.clientX; cy = e.clientY;
-        cursorRoot.style.transform = `translate3d(${cx-7}px, ${cy-7}px, 0)`;
-        let node = e.target, mode = "cursor-1";
-        while (node && node !== d.body){
-          if (node.hasAttribute("string-cursor-class")){ mode = node.getAttribute("string-cursor-class"); break; }
-          node = node.parentElement;
-        }
-        cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
-        cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
-      }, { passive: !0 });
-      w.addEventListener("mousedown", ()=>cursorRoot.classList.add("-down"));
-      w.addEventListener("mouseup", ()=>cursorRoot.classList.remove("-down"));
-      w.addEventListener("mouseleave", ()=>cursorRoot.classList.add("-hide"));
-      w.addEventListener("mouseenter", ()=>cursorRoot.classList.remove("-hide"));
-      if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
-      de.classList.add("-cursor-tooltips");
+  }
+
+  let lerpEls = [];
+  function collectLerpEls(){ lerpEls = [...d.querySelectorAll('[string="lerp"]')]; }
+  function updateLerpProgress(){
+    const vh = w.innerHeight;
+    for (const el of lerpEls){
+      const rect = el.getBoundingClientRect();
+      const p = computeProgress(el, rect, vh);
+      el.style.setProperty("--lerp-progress", p.toFixed(4));
+      d.querySelectorAll('[data-livelabel="lerp"]').forEach((n)=> n.textContent = Math.round(p*100));
     }
-  
-    const TIP_DELAY = 450, TOUCH_HIDE_DELAY = 600;
-    let tipTimer=null, touchLiftTimer=null;
-    d.addEventListener("mouseover",(e)=>{
-      const t = e.target?.closest?.("[data-tooltip]");
-      if (!t) return;
-      hoverTip = t.getAttribute("data-tooltip") || "";
-      setTip(hoverTip);
-    }, !0);
-    d.addEventListener("mouseout",(e)=>{
-      const from = e.target?.closest?.("[data-tooltip]"); if (!from) return;
-      const to = e.relatedTarget?.closest?.("[data-tooltip]"); if (to === from) return;
-      hoverTip = ""; setTip("");
-    }, !0);
-    d.addEventListener("focusin",(e)=>{
-      const t = e.target?.closest?.("[data-tooltip]"); if (!t) return;
-      hoverTip = t.getAttribute("data-tooltip") || ""; setTip(hoverTip);
-    });
-    d.addEventListener("focusout",()=>{ hoverTip=""; setTip(""); });
-  
-    function onUserScroll(){
-      hideTip(); clearTimeout(tipTimer);
-      tipTimer = setTimeout(()=>{ if (hoverTip) setTip(hoverTip); }, TIP_DELAY);
-    }
-    w.addEventListener("scroll", onUserScroll, { passive: !0 });
-    w.addEventListener("wheel", onUserScroll, { passive: !0 });
-    w.addEventListener("touchmove", onUserScroll, { passive: !0 });
-  
-    function updateCursorPosTouch(touch){
-      if (!cursorRoot || !touch) return;
-      cursorRoot.style.transform = `translate3d(${touch.clientX+16}px, ${touch.clientY+8}px, 0)`;
-    }
-    d.addEventListener("touchstart",(e)=>{
-      cursorRoot?.classList.add("-down");
-      const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
-      const el = e.target?.closest?.("[data-tooltip]");
-      hoverTip = el?.getAttribute("data-tooltip") || ""; setTip(hoverTip);
-      clearTimeout(touchLiftTimer);
-    }, { passive: !0 });
-    d.addEventListener("touchmove",(e)=>{
-      const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
-    }, { passive: !0 });
-    function endTouch(){
-      cursorRoot?.classList.remove("-down");
-      clearTimeout(touchLiftTimer);
-      touchLiftTimer = setTimeout(()=>{ hoverTip=""; setTip(""); }, TOUCH_HIDE_DELAY);
-    }
-    d.addEventListener("touchend", endTouch, { passive: !0 });
-    d.addEventListener("touchcancel", endTouch, { passive: !0 });
-  
-    // ---------- magnetic ----------
-    let magneticEls = [];
-    function collectMagneticEls(){
-      magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map((el)=>({
-        el,
-        r: parseFloat(el.getAttribute("string-radius") || "300") || 300,
-        s: parseFloat(el.getAttribute("string-strength") || "0.5") || 0.5,
-        ox:0, oy:0
+  }
+
+  // -------------------- parallax + glide
+  let parallaxEls = [];
+  function collectParallaxEls(){
+    parallaxEls = (isMobile || prefersReduced) ? [] :
+      [...d.querySelectorAll('[string="parallax"],[string-parallax]')].map((el)=>({
+        el, factor: parseFloat(el.getAttribute("string-parallax")||"0.5")||0.5
       }));
-    }
-    function magneticTick(){
-      magneticEls.forEach((m)=>{
-        const rect = m.el.getBoundingClientRect();
-        const ex = rect.left + rect.width/2, ey = rect.top + rect.height/2;
-        const dx = cx - ex, dy = cy - ey;
-        const dist = Math.hypot(dx,dy);
-        const t = clamp(1 - dist/m.r, 0, 1);
-        const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
-        m.ox = lerp(m.ox, tx, 0.15);
-        m.oy = lerp(m.oy, ty, 0.15);
-        m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
-      });
-    }
-  
-    function buildMagneticGrid(block, cols=3, rows=3, activeCol, activeRow){
-      if (!block) return;
-      block.classList.add("-gridified");
-      const legacyMag = block.querySelector(':scope > .rel [string="magnetic"]');
-      const legacyId = legacyMag?.getAttribute("string-id") || "string-22-grid";
-      const legacyRel = block.querySelector(":scope > .rel");
-      if (legacyRel) legacyRel.remove();
-      block.querySelectorAll(".mag-grid").forEach((n)=>n.remove());
-      if (activeCol == null) activeCol = Math.ceil(cols/2);
-      if (activeRow == null) activeRow = Math.ceil(rows/2);
-      const wrap = d.createElement("div");
-      wrap.className = "mag-grid";
-      for (let r=1;r<=rows;r++){
-        for (let c=1;c<=cols;c++){
-          const rel = d.createElement("div"); rel.className = "rel tile";
-          const child = d.createElement("div"); child.className = "child";
-          const box = d.createElement("div"); box.setAttribute("data-v-40fb9db4","");
-          if (c===activeCol && r===activeRow){
-            rel.classList.add("-active");
-            box.setAttribute("string","magnetic");
-            box.setAttribute("string-radius","650");
-            box.setAttribute("string-strength","0.95");
-            box.setAttribute("string-id", legacyId);
-            rel.addEventListener("mouseenter", ()=>block.classList.add("-bg-pink"));
-            rel.addEventListener("mouseleave", ()=>block.classList.remove("-bg-pink"));
-          }
-          child.appendChild(box); rel.appendChild(child); wrap.appendChild(rel);
-        }
+  }
+  function parallaxTick(){
+    if (!parallaxEls.length) return;
+    const wh = w.innerHeight;
+    parallaxEls.forEach(({el,factor})=>{
+      const r = el.getBoundingClientRect();
+      const center = r.top + r.height/2 - wh/2;
+      const cs = getComputedStyle(el);
+      const cssVal = parseFloat(cs.getPropertyValue("--parallax-travel")) || NaN;
+      const maxTravel = Number.isFinite(cssVal) ? cssVal : PARALLAX_TRAVEL;
+      const t = clamp(center/wh, -1, 1);
+      el.style.transform = `translate3d(0, ${(-t*factor*maxTravel).toFixed(2)}px, 0)`;
+    });
+  }
+
+  let lastY = w.scrollY || w.pageYOffset;
+  let lerpVal = 0, glideVal = 0;
+  let glideEls = [];
+  function collectGlideEls(){
+    glideEls = (isMobile || prefersReduced) ? [] :
+      [...d.querySelectorAll('[string="glide"]')].map((el)=>({ el, k: parseFloat(el.getAttribute("string-glide")||"0.35")||0.35, y:0 }));
+  }
+  function smoothTick(){
+    const y = w.scrollY || w.pageYOffset;
+    const delta = y - lastY;
+    lastY = y;
+    lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+    glideVal = lerp(glideVal, 0, 0.075) + delta*0.02;
+    de.style.setProperty("--lerp", (lerpVal * LERP_AMP).toFixed(2));
+    de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
+    glideEls.forEach((g)=>{
+      g.y = lerp(g.y, glideVal * g.k, 0.12);
+      g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
+    });
+  }
+
+  // -------------------- cursor + tooltips
+  const cursorRoot = d.querySelector(".cursor[string-cursor]");
+  const tipEl = cursorRoot?.querySelector(".cursor-tip");
+  const DEFAULT_TIP = "Try the cursor →";
+  let cx = 0, cy = 0, hoverTip = "";
+
+  function setTip(msg){
+    if (!cursorRoot || !tipEl) return;
+    if (msg && msg.trim()){
+      tipEl.textContent = msg;
+      cursorRoot.classList.add("-tips");
+    } else cursorRoot.classList.remove("-tips");
+  }
+  function hideTip(){ cursorRoot?.classList.remove("-tips"); }
+
+  function setupCursor(){
+    if (!cursorRoot) return;
+    w.addEventListener("mousemove",(e)=>{
+      cx = e.clientX; cy = e.clientY;
+      cursorRoot.style.transform = `translate3d(${cx-7}px, ${cy-7}px, 0)`;
+      let node = e.target, mode = "cursor-1";
+      while (node && node !== d.body){
+        if (node.hasAttribute("string-cursor-class")){ mode = node.getAttribute("string-cursor-class"); break; }
+        node = node.parentElement;
       }
-      block.appendChild(wrap);
-    }
-  
-    // ---------- lerp grid ----------
-    function buildLerpGrid(block, cols=3, activeCol){
-      if (!block) return;
-      const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
-      const legacyRel = legacyBox?.closest(".rel");
-      const legacyId = legacyBox?.getAttribute("string-id") || "string-17";
-      block.querySelectorAll(".lerp-grid").forEach((n)=>n.remove());
-      const wrap = d.createElement("div"); wrap.className = "lerp-grid";
-      if (activeCol == null) activeCol = Math.ceil(cols/2);
+      cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
+      cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
+    }, { passive: !0 });
+    w.addEventListener("mousedown", ()=>cursorRoot.classList.add("-down"));
+    w.addEventListener("mouseup", ()=>cursorRoot.classList.remove("-down"));
+    w.addEventListener("mouseleave", ()=>cursorRoot.classList.add("-hide"));
+    w.addEventListener("mouseenter", ()=>cursorRoot.classList.remove("-hide"));
+    if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
+    de.classList.add("-cursor-tooltips");
+  }
+
+  const TIP_DELAY = 450, TOUCH_HIDE_DELAY = 600;
+  let tipTimer=null, touchLiftTimer=null;
+  d.addEventListener("mouseover",(e)=>{
+    const t = e.target?.closest?.("[data-tooltip]");
+    if (!t) return;
+    hoverTip = t.getAttribute("data-tooltip") || "";
+    setTip(hoverTip);
+  }, !0);
+  d.addEventListener("mouseout",(e)=>{
+    const from = e.target?.closest?.("[data-tooltip]"); if (!from) return;
+    const to = e.relatedTarget?.closest?.("[data-tooltip]"); if (to === from) return;
+    hoverTip = ""; setTip("");
+  }, !0);
+  d.addEventListener("focusin",(e)=>{
+    const t = e.target?.closest?.("[data-tooltip]"); if (!t) return;
+    hoverTip = t.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+  });
+  d.addEventListener("focusout",()=>{ hoverTip=""; setTip(""); });
+
+  function onUserScroll(){
+    hideTip(); clearTimeout(tipTimer);
+    tipTimer = setTimeout(()=>{ if (hoverTip) setTip(hoverTip); }, TIP_DELAY);
+  }
+  w.addEventListener("scroll", onUserScroll, { passive: !0 });
+  w.addEventListener("wheel", onUserScroll, { passive: !0 });
+  w.addEventListener("touchmove", onUserScroll, { passive: !0 });
+
+  function updateCursorPosTouch(touch){
+    if (!cursorRoot || !touch) return;
+    cursorRoot.style.transform = `translate3d(${touch.clientX+16}px, ${touch.clientY+8}px, 0)`;
+  }
+  d.addEventListener("touchstart",(e)=>{
+    cursorRoot?.classList.add("-down");
+    const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
+    const el = e.target?.closest?.("[data-tooltip]");
+    hoverTip = el?.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+    clearTimeout(touchLiftTimer);
+  }, { passive: !0 });
+  d.addEventListener("touchmove",(e)=>{
+    const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
+  }, { passive: !0 });
+  function endTouch(){
+    cursorRoot?.classList.remove("-down");
+    clearTimeout(touchLiftTimer);
+    touchLiftTimer = setTimeout(()=>{ hoverTip=""; setTip(""); }, TOUCH_HIDE_DELAY);
+  }
+  d.addEventListener("touchend", endTouch, { passive: !0 });
+  d.addEventListener("touchcancel", endTouch, { passive: !0 });
+
+  // -------------------- magnetic
+  let magneticEls = [];
+  function collectMagneticEls(){
+    magneticEls = [...d.querySelectorAll('[string="magnetic"]')].map((el)=>({
+      el,
+      r: parseFloat(el.getAttribute("string-radius") || "300") || 300,
+      s: parseFloat(el.getAttribute("string-strength") || "0.5") || 0.5,
+      ox:0, oy:0
+    }));
+  }
+  function magneticTick(){
+    magneticEls.forEach((m)=>{
+      const rect = m.el.getBoundingClientRect();
+      const ex = rect.left + rect.width/2, ey = rect.top + rect.height/2;
+      const dx = cx - ex, dy = cy - ey;
+      const dist = Math.hypot(dx,dy);
+      const t = clamp(1 - dist/m.r, 0, 1);
+      const tx = dx * m.s * t * 0.35, ty = dy * m.s * t * 0.35;
+      m.ox = lerp(m.ox, tx, 0.15);
+      m.oy = lerp(m.oy, ty, 0.15);
+      m.el.style.transform = `translate3d(${m.ox.toFixed(2)}px, ${m.oy.toFixed(2)}px, 0)`;
+    });
+  }
+
+  function buildMagneticGrid(block, cols=3, rows=3, activeCol, activeRow){
+    if (!block) return;
+    block.classList.add("-gridified");
+    const legacyMag = block.querySelector(':scope > .rel [string="magnetic"]');
+    const legacyId = legacyMag?.getAttribute("string-id") || "string-22-grid";
+    const legacyRel = block.querySelector(":scope > .rel");
+    if (legacyRel) legacyRel.remove();
+    block.querySelectorAll(".mag-grid").forEach((n)=>n.remove());
+    if (activeCol == null) activeCol = Math.ceil(cols/2);
+    if (activeRow == null) activeRow = Math.ceil(rows/2);
+    const wrap = d.createElement("div");
+    wrap.className = "mag-grid";
+    for (let r=1;r<=rows;r++){
       for (let c=1;c<=cols;c++){
         const rel = d.createElement("div"); rel.className = "rel tile";
         const child = d.createElement("div"); child.className = "child";
-        if (c===activeCol && legacyBox){
+        const box = d.createElement("div"); box.setAttribute("data-v-40fb9db4","");
+        if (c===activeCol && r===activeRow){
           rel.classList.add("-active");
-          legacyBox.setAttribute("string-id", legacyId);
-          child.appendChild(legacyBox);
-        } else {
-          const hollow = d.createElement("div"); hollow.setAttribute("data-v-270bb328","");
-          child.appendChild(hollow);
+          box.setAttribute("string","magnetic");
+          box.setAttribute("string-radius","650");
+          box.setAttribute("string-strength","0.95");
+          box.setAttribute("string-id", legacyId);
+          rel.addEventListener("mouseenter", ()=>block.classList.add("-bg-pink"));
+          rel.addEventListener("mouseleave", ()=>block.classList.remove("-bg-pink"));
         }
-        rel.appendChild(child); wrap.appendChild(rel);
+        child.appendChild(box); rel.appendChild(child); wrap.appendChild(rel);
       }
-      block.appendChild(wrap);
-      block.classList.add("-gridified");
-      if (legacyRel) legacyRel.style.display = "none";
     }
-  
-    // ---------- perf HUD ----------
-    function setupPerfHUD(){
-      const fpsNode = d.getElementById("fps");
-      const dirNode = d.getElementById("scroll-dir");
-      if (!fpsNode && !dirNode) return;
-      const getScrollY = ()=>Math.round(w.scrollY || w.pageYOffset || 0);
-      let lastT = performance.now(), frames=0, accum=0;
-      let lastScrollY = getScrollY();
-      const perfTick = (t)=>{
-        const dt = t - lastT; lastT = t; frames++; accum += dt;
-        if (accum > 500 && fpsNode){
-          const fps = Math.round((frames*1000)/accum);
-          fpsNode.textContent = `FPS: ${fps}`; frames=0; accum=0;
-        }
-        const sy = getScrollY();
-        if (dirNode){
-          const dir = sy > lastScrollY ? "↓" : sy < lastScrollY ? "↑" : "•";
-          dirNode.textContent = `Scroll ${dir}  y:${sy}`;
-        }
-        lastScrollY = sy;
-        w.requestAnimationFrame(perfTick);
-      };
-      w.requestAnimationFrame(perfTick);
-    }
-  
-    // ---------- storyline HUD ----------
-    function getHeadingText(block){
-      if (!block) return "";
-      const h = block.querySelector("h1,h2,h3,h4,h5,h6");
-      if (!h) return "";
-      for (const node of h.childNodes){
-        if (node.nodeType === Node.TEXT_NODE){
-          const t = (node.nodeValue || "").trim();
-          if (t) return t;
-        }
-      }
-      return (h.textContent || "").trim();
-    }
-    function getStoryForBlock(block){
-      if (!block) return "";
-      return block.getAttribute("data-storyline")
-          || block.getAttribute("data-cursor-tip")
-          || getHeadingText(block)
-          || "";
-    }
-    const storylineEl = d.getElementById("storyline");
-    const chapterBlocks = [...d.querySelectorAll(".page .block")];
-    let currentStoryText = "";
-    function updateStoryline(next){
-      if (!storylineEl || !next || next === currentStoryText) return;
-      currentStoryText = next; storylineEl.textContent = currentStoryText;
-    }
-    function setupStorylineObserver(){
-      if (!storylineEl || !chapterBlocks.length) return;
-      updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
-      const io = new IntersectionObserver((entries)=>{
-        const vis = entries.filter((e)=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-        if (!vis) return;
-        updateStoryline(getStoryForBlock(vis.target));
-      }, { root:null, threshold:[0, .25, .5, .75, 1] });
-      chapterBlocks.forEach((b)=>io.observe(b));
-    }
-  
-    // ---------- INLINE WALL: enhanced sentence splitting (., ;, :, ?, !, ], }) ----------
-// Break after . ; : ? ! ] } OR — (em dash).
-// For em dashes, split even if there's no following space.
-const SENTENCE_BREAK = /(?:(?<=[.?!;:\]\}\{}])\s+|(?<=\u2014)\s*)(?=["“'‘`A-Z0-9])/g;
-
-function safeSplitSentences(text) {
-  if (!text) return [];
-  try {
-    return text
-      .replace(/\s+/g, " ")
-      .split(SENTENCE_BREAK)
-      .map(s => s.trim())
-      .filter(Boolean);
-  } catch {
-    // Fallback: include em dash and allow split when next char looks like a new sentence start.
-    return (
-      text
-        .replace(/\s+/g, " ")
-        .match(/[^.?!;:\]\}\{\u2014]+[.?!;:\]\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9]))/g) || []
-    )
-      .map(s => s.trim())
-      .filter(Boolean);
+    block.appendChild(wrap);
   }
-}
 
-    function wireInteractions(wallEl){
-      wallEl.addEventListener("click",(e)=>{
-        const t = e.target.closest(".wall-sentence"); if (!t) return;
-        const on = t.getAttribute("aria-pressed")==="true";
-        t.setAttribute("aria-pressed", String(!on));
-        t.classList.toggle("active", !on);
-      });
-      wallEl.addEventListener("keydown",(e)=>{
-        if (e.key!=="Enter" && e.key!==" ") return;
-        const t = e.target.closest(".wall-sentence"); if (!t) return;
+  // -------------------- lerp grid
+  function buildLerpGrid(block, cols=3, activeCol){
+    if (!block) return;
+    const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
+    const legacyRel = legacyBox?.closest(".rel");
+    const legacyId = legacyBox?.getAttribute("string-id") || "string-17";
+    block.querySelectorAll(".lerp-grid").forEach((n)=>n.remove());
+    const wrap = d.createElement("div"); wrap.className = "lerp-grid";
+    if (activeCol == null) activeCol = Math.ceil(cols/2);
+    for (let c=1;c<=cols;c++){
+      const rel = d.createElement("div"); rel.className = "rel tile";
+      const child = d.createElement("div"); child.className = "child";
+      if (c===activeCol && legacyBox){
+        rel.classList.add("-active");
+        legacyBox.setAttribute("string-id", legacyId);
+        child.appendChild(legacyBox);
+      } else {
+        const hollow = d.createElement("div"); hollow.setAttribute("data-v-270bb328","");
+        child.appendChild(hollow);
+      }
+      rel.appendChild(child); wrap.appendChild(rel);
+    }
+    block.appendChild(wrap);
+    block.classList.add("-gridified");
+    if (legacyRel) legacyRel.style.display = "none";
+  }
+
+  // -------------------- perf HUD
+  function setupPerfHUD(){
+    const fpsNode = d.getElementById("fps");
+    const dirNode = d.getElementById("scroll-dir");
+    if (!fpsNode && !dirNode) return;
+    const getScrollY = ()=>Math.round(w.scrollY || w.pageYOffset || 0);
+    let lastT = performance.now(), frames=0, accum=0;
+    let lastScrollY = getScrollY();
+    const perfTick = (t)=>{
+      const dt = t - lastT; lastT = t; frames++; accum += dt;
+      if (accum > 500 && fpsNode){
+        const fps = Math.round((frames*1000)/accum);
+        fpsNode.textContent = `FPS: ${fps}`; frames=0; accum=0;
+      }
+      const sy = getScrollY();
+      if (dirNode){
+        const dir = sy > lastScrollY ? "↓" : sy < lastScrollY ? "↑" : "•";
+        dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+      }
+      lastScrollY = sy;
+      w.requestAnimationFrame(perfTick);
+    };
+    w.requestAnimationFrame(perfTick);
+  }
+
+  // -------------------- storyline HUD
+  function getHeadingText(block){
+    if (!block) return "";
+    const h = block.querySelector("h1,h2,h3,h4,h5,h6");
+    if (!h) return "";
+    for (const node of h.childNodes){
+      if (node.nodeType === Node.TEXT_NODE){
+        const t = (node.nodeValue || "").trim();
+        if (t) return t;
+      }
+    }
+    return (h.textContent || "").trim();
+  }
+  function getStoryForBlock(block){
+    if (!block) return "";
+    return block.getAttribute("data-storyline")
+        || block.getAttribute("data-cursor-tip")
+        || getHeadingText(block)
+        || "";
+  }
+  const storylineEl = d.getElementById("storyline");
+  const chapterBlocks = [...d.querySelectorAll(".page .block")];
+  let currentStoryText = "";
+  function updateStoryline(next){
+    if (!storylineEl || !next || next === currentStoryText) return;
+    currentStoryText = next; storylineEl.textContent = currentStoryText;
+  }
+  function setupStorylineObserver(){
+    if (!storylineEl || !chapterBlocks.length) return;
+    updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
+    const io = new IntersectionObserver((entries)=>{
+      const vis = entries.filter((e)=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+      if (!vis) return;
+      updateStoryline(getStoryForBlock(vis.target));
+    }, { root:null, threshold:[0, .25, .5, .75, 1] });
+    chapterBlocks.forEach((b)=>io.observe(b));
+  }
+
+  // -------------------- sentence split (em dash + BR-aware) + wall builder
+
+  // BR sentinel & extractor
+  const BR = "⟦BR⟧";
+  function extractTextWithBreaks(fromElOrHTML) {
+    const rawHTML = typeof fromElOrHTML === "string"
+      ? fromElOrHTML
+      : (fromElOrHTML?.innerHTML || "");
+    const marked = rawHTML
+      .replace(/<br\s*\/?>/gi, ` ${BR} `)
+      .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)
+      .replace(/\n{2,}/g, ` ${BR} `)
+      .replace(/\{br\}/gi, ` ${BR} `);
+    return marked.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  // Lookbehind splitter if supported; else fallback.
+  let SENTENCE_BREAK = null;
+  try {
+    // Break after . ; : ? ! ] } (space required), or after em dash (space optional).
+    // Next token may start with quotes, caps, digits, or the BR sentinel "⟦" (U+27E6).
+    SENTENCE_BREAK = new RegExp(
+      '(?:(?<=[.?!;:\\]\\}])\\s+|(?<=\\u2014)\\s*)(?=["“\'‘`A-Z0-9\\u27E6])',
+      'g'
+    );
+  } catch { /* unsupported lookbehind */ }
+
+  function safeSplitSentences(text) {
+    if (!text) return [];
+    const normalized = text.replace(/\s+/g, ' ');
+    if (SENTENCE_BREAK) {
+      return normalized.split(SENTENCE_BREAK).map(s => s.trim()).filter(Boolean);
+    }
+    // Fallback w/o lookbehind; includes em dash; allows BR sentinel at start lookahead.
+    return (
+      normalized.match(/[^.?!;:\]\}\u2014]+[.?!;:\]\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9\u27E6]))/g) || []
+    ).map(s => s.trim()).filter(Boolean);
+  }
+
+  function wireWallInteractions(wallEl) {
+    const SEL = '.wall-sentence';
+
+    function setPressed(el, on) {
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-pressed', String(on));
+      wallEl.classList.toggle('-has-active', wallEl.querySelector(SEL + '.active') !== null);
+    }
+    function clearAll() {
+      wallEl.querySelectorAll(SEL + '.active').forEach(s => setPressed(s, false));
+      wallEl.classList.remove('-has-active');
+    }
+
+    // Hover highlight for mouse/pen only
+    wallEl.addEventListener('pointerenter', e => {
+      const t = e.target.closest(SEL);
+      if (!t || e.pointerType === 'touch') return;
+      t.classList.add('-over');
+    }, true);
+    wallEl.addEventListener('pointerleave', e => {
+      const t = e.target.closest(SEL);
+      if (!t || e.pointerType === 'touch') return;
+      t.classList.remove('-over');
+    }, true);
+
+    // Click/Tap toggles one active (single-select)
+    wallEl.addEventListener('pointerdown', e => {
+      const t = e.target.closest(SEL);
+      if (!t) return;
+      if (e.pointerType === 'touch') e.preventDefault(); // avoid text select
+      const wasOn = t.classList.contains('active');
+      clearAll();
+      setPressed(t, !wasOn);
+    });
+
+    // Keyboard
+    wallEl.addEventListener('keydown', e => {
+      const t = e.target.closest(SEL);
+      if (!t) return;
+      if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        const on = t.getAttribute("aria-pressed")==="true";
-        t.setAttribute("aria-pressed", String(!on));
-        t.classList.toggle("active", !on);
+        const wasOn = t.classList.contains('active');
+        clearAll();
+        setPressed(t, !wasOn);
+      }
+      if (e.key === 'Escape') {
+        clearAll();
+        t.blur();
+      }
+    });
+
+    // Click/tap outside → clear dimming
+    d.addEventListener('pointerdown', e => {
+      if (!wallEl.contains(e.target)) clearAll();
+    });
+  }
+
+  function buildInlineWall(wrap){
+    const existingWall = wrap.querySelector(".wall");
+    const srcP = existingWall?.querySelector("p") || wrap.querySelector("p");
+    const sourceText = extractTextWithBreaks(srcP || existingWall || wrap);
+
+    wrap.innerHTML = "";
+    const wall = d.createElement("div"); wall.className = "wall";
+
+    const sentences = safeSplitSentences(sourceText);
+    const pieces = [];
+    for (const s of sentences) {
+      if (s.includes(BR)) {
+        s.split(BR).forEach((chunk, i) => {
+          if (i > 0) pieces.push(BR);
+          if (chunk.trim()) pieces.push(chunk.trim());
+        });
+      } else pieces.push(s);
+    }
+
+    pieces.forEach((piece) => {
+      if (piece === BR) {
+        const br = d.createElement("br");
+        br.className = "wall-br";
+        wall.appendChild(br);
+        return;
+      }
+      const span = d.createElement("span");
+      span.className = "wall-sentence";
+      span.textContent = piece;
+      span.setAttribute("role","button");
+      span.setAttribute("tabindex","0");
+      span.setAttribute("aria-pressed","false");
+      wall.appendChild(span);
+    });
+
+    wrap.appendChild(wall);
+    wireWallInteractions(wall);
+  }
+
+  function initWordWalls(){
+    d.querySelectorAll(".block.string-split.-wordwall .wall-wrap").forEach(buildInlineWall);
+  }
+
+  // -------------------- Legacy .string-progress helper (compat)
+  (function initLegacyStringProgress(){
+    function viewportProgress(el, start=0.0, end=1.0){
+      const r = el.getBoundingClientRect();
+      const vh = Math.max(1, w.innerHeight || 0);
+      const enter = vh * start, exit = vh * end;
+      const total = (r.height + (enter - exit));
+      if (total <= 0) return 0;
+      const raw = (enter - r.top) / total;
+      return clamp(raw, 0, 1);
+    }
+    const STAGES = [" "," "," "," "," "];
+    const progressBlocks = Array.from(d.querySelectorAll(".block.string-progress"));
+    const items = [];
+    progressBlocks.forEach(block=>{
+      block.style.setProperty("--progress","0");
+      const movers = block.querySelectorAll('.child[string="progress"]');
+      movers.forEach(child=>{
+        const id = child.getAttribute("string-id") || "";
+        const esc = (w.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/"/g,'\\"');
+        const meter = id ? block.querySelector(`[data-progress-of="${esc}"]`) : null;
+        const stage = id ? block.querySelector(`[data-stage-of="${esc}"]`) : null;
+        items.push({ block, anchor: child, meter, stage });
+      });
+    });
+    let ticking = false;
+    function update(){
+      ticking = false;
+      items.forEach(({block, meter, stage})=>{
+        const p = viewportProgress(block, 0.1, 0.9);
+        block.style.setProperty("--progress", p.toFixed(4));
+        if (meter) meter.textContent = Math.round(p*100);
+        if (stage){
+          const idx = Math.min(STAGES.length-1, Math.floor(p*STAGES.length));
+          stage.textContent = STAGES[idx];
+        }
       });
     }
-    function buildInlineWall(wrap){
-      const existingWall = wrap.querySelector(".wall");
-      const srcP = existingWall?.querySelector("p") || wrap.querySelector("p");
-      const sourceText = (srcP?.textContent || existingWall?.textContent || wrap.textContent || "").trim();
-      wrap.innerHTML = "";
-      const wall = d.createElement("div"); wall.className = "wall";
-      const sentences = safeSplitSentences(sourceText);
-      sentences.forEach((s)=>{
-        const span = d.createElement("span");
-        span.className = "wall-sentence";
-        span.textContent = s;
-        span.setAttribute("role","button");
-        span.setAttribute("tabindex","0");
-        span.setAttribute("aria-pressed","false");
-        wall.appendChild(span);
-      });
-      wrap.appendChild(wall);
-      wireInteractions(wall);
+    function onScrollOrResize(){
+      if (!ticking){ ticking = true; requestAnimationFrame(update); }
     }
-    function initWordWalls(){
-      d.querySelectorAll(".block.string-split.-wordwall .wall-wrap").forEach(buildInlineWall);
+    w.addEventListener("scroll", onScrollOrResize, { passive: !0 });
+    w.addEventListener("resize", onScrollOrResize, { passive: !0 });
+    onScrollOrResize();
+  })();
+
+  // -------------------- Rapier physics playground (async)
+  async function initRapierPlayground(){
+    const stageBlock = d.querySelector(".block.string-rapier");
+    const canvas = d.getElementById("rapier-canvas");
+    if (!stageBlock || !canvas) return;
+    const ctx = canvas.getContext("2d");
+    const DPR = Math.max(1, w.devicePixelRatio || 1);
+
+    function fitCanvas(){
+      const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
+      canvas.width = Math.floor(r.width * DPR);
+      canvas.height = Math.floor(r.height * DPR);
+      canvas.style.width = r.width + "px";
+      canvas.style.height = r.height + "px";
     }
-  
-    // ---------- Legacy .string-progress helper (kept for compatibility) ----------
-    (function initLegacyStringProgress(){
-      function viewportProgress(el, start=0.0, end=1.0){
-        const r = el.getBoundingClientRect();
-        const vh = Math.max(1, w.innerHeight || 0);
-        const enter = vh * start, exit = vh * end;
-        const total = (r.height + (enter - exit));
-        if (total <= 0) return 0;
-        const raw = (enter - r.top) / total;
-        return clamp(raw, 0, 1);
-      }
-      const STAGES = ["idea","prototype","beta","launch","on the shelf"];
-      const progressBlocks = Array.from(d.querySelectorAll(".block.string-progress"));
-      const items = [];
-      progressBlocks.forEach(block=>{
-        block.style.setProperty("--progress","0");
-        const movers = block.querySelectorAll('.child[string="progress"]');
-        movers.forEach(child=>{
-          const id = child.getAttribute("string-id") || "";
-          const meter = id ? block.querySelector(`[data-progress-of="${CSS.escape(id)}"]`) : null;
-          const stage = id ? block.querySelector(`[data-stage-of="${CSS.escape(id)}"]`) : null;
-          items.push({ block, anchor: child, meter, stage });
-        });
+    fitCanvas();
+    w.addEventListener("resize", fitCanvas, { passive: !0 });
+
+    const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
+    await RAPIER.init();
+    const { RigidBodyType, ActiveEvents } = RAPIER;
+
+    const confettiMod = await import("https://esm.run/canvas-confetti@1");
+    const confetti = confettiMod.default || confettiMod;
+
+    const DROP_G = 2400;
+    const world = new RAPIER.World({ x: 0, y: 0 });
+    const queue = new RAPIER.EventQueue(!0);
+
+    let walls = [];
+    const wallHandles = new Set();
+    function rebuildWalls(){
+      walls.forEach(({ rb, co })=>{ world.removeCollider(co, !0); world.removeRigidBody(rb); });
+      walls.length = 0; wallHandles.clear();
+      const W = canvas.width, H = canvas.height;
+      const t = Math.max(20*DPR, 12*DPR);
+      const defs = [
+        { x: -t/2,     y: H/2,   w: t/2,   h: H/2 },
+        { x: W+t/2,    y: H/2,   w: t/2,   h: H/2 },
+        { x: W/2,      y: -t/2,  w: W/2,   h: t/2 },
+        { x: W/2,      y: H+t/2, w: W/2,   h: t/2 },
+      ];
+      defs.forEach(({x,y,w,h})=>{
+        const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x,y));
+        const co = world.createCollider(
+          RAPIER.ColliderDesc.cuboid(w,h).setRestitution(0.6).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+          rb
+        );
+        walls.push({ rb, co }); wallHandles.add(co.handle);
       });
-      let ticking = false;
-      function update(){
-        ticking = false;
-        items.forEach(({block, meter, stage})=>{
-          const p = viewportProgress(block, 0.1, 0.9);
-          block.style.setProperty("--progress", p.toFixed(4));
-          if (meter) meter.textContent = Math.round(p*100);
-          if (stage){
-            const idx = Math.min(STAGES.length-1, Math.floor(p*STAGES.length));
-            stage.textContent = STAGES[idx];
-          }
-        });
-      }
-      function onScrollOrResize(){
-        if (!ticking){ ticking = true; requestAnimationFrame(update); }
-      }
-      w.addEventListener("scroll", onScrollOrResize, { passive: !0 });
-      w.addEventListener("resize", onScrollOrResize, { passive: !0 });
-      onScrollOrResize();
-    })();
-  
-    // ---------- Rapier playground (async) ----------
-    async function initRapierPlayground(){
-      const stageBlock = d.querySelector(".block.string-rapier");
-      const canvas = d.getElementById("rapier-canvas");
-      if (!stageBlock || !canvas) return;
-      const ctx = canvas.getContext("2d");
-      const DPR = Math.max(1, w.devicePixelRatio || 1);
-  
-      function fitCanvas(){
-        const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
-        canvas.width = Math.floor(r.width * DPR);
-        canvas.height = Math.floor(r.height * DPR);
-        canvas.style.width = r.width + "px";
-        canvas.style.height = r.height + "px";
-      }
-      fitCanvas();
-      w.addEventListener("resize", fitCanvas, { passive: !0 });
-  
-      const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
-      await RAPIER.init();
-      const { RigidBodyType, ActiveEvents } = RAPIER;
-  
-      const confettiMod = await import("https://esm.run/canvas-confetti@1");
-      const confetti = confettiMod.default || confettiMod;
-  
-      const DROP_G = 2400;
-      const world = new RAPIER.World({ x: 0, y: 0 });
-      const queue = new RAPIER.EventQueue(!0);
-  
-      let walls = [];
-      const wallHandles = new Set();
-      function rebuildWalls(){
-        walls.forEach(({ rb, co })=>{ world.removeCollider(co, !0); world.removeRigidBody(rb); });
-        walls.length = 0; wallHandles.clear();
-        const W = canvas.width, H = canvas.height;
-        const t = Math.max(20*DPR, 12*DPR);
-        const defs = [
-          { x: -t/2,     y: H/2,   w: t/2,   h: H/2 },
-          { x: W+t/2,    y: H/2,   w: t/2,   h: H/2 },
-          { x: W/2,      y: -t/2,  w: W/2,   h: t/2 },
-          { x: W/2,      y: H+t/2, w: W/2,   h: t/2 },
-        ];
-        defs.forEach(({x,y,w,h})=>{
-          const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x,y));
-          const co = world.createCollider(
-            RAPIER.ColliderDesc.cuboid(w,h).setRestitution(0.6).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
-            rb
-          );
-          walls.push({ rb, co }); wallHandles.add(co.handle);
-        });
-      }
-      rebuildWalls();
-  
-      w.addEventListener("resize", ()=>{
-        fitCanvas(); rebuildWalls();
-        const W = canvas.width, H = canvas.height;
-        const p = body.translation();
-        const m = current.half + 2*DPR;
-        body.setTranslation({ x: clamp(p.x, m, W-m), y: clamp(p.y, m, H-m) }, !0);
-      }, { passive: !0 });
-  
-      const size = Math.min(canvas.width, canvas.height) * 0.12;
-      const start = { x: canvas.width*0.5, y: canvas.height*0.35 };
-      const current = { half: size/2, wear: 0, isBall: !1, collider: null };
-      const body = world.createRigidBody(
-        RAPIER.RigidBodyDesc.dynamic()
-          .setTranslation(start.x, start.y)
-          .setLinearDamping(0.04)
-          .setAngularDamping(0.04)
+    }
+    rebuildWalls();
+
+    w.addEventListener("resize", ()=>{
+      fitCanvas(); rebuildWalls();
+      const W = canvas.width, H = canvas.height;
+      const p = body.translation();
+      const m = current.half + 2*DPR;
+      body.setTranslation({ x: clamp(p.x, m, W-m), y: clamp(p.y, m, H-m) }, !0);
+    }, { passive: !0 });
+
+    const size = Math.min(canvas.width, canvas.height) * 0.12;
+    const start = { x: canvas.width*0.5, y: canvas.height*0.35 };
+    const current = { half: size/2, wear: 0, isBall: !1, collider: null };
+    const body = world.createRigidBody(
+      RAPIER.RigidBodyDesc.dynamic()
+        .setTranslation(start.x, start.y)
+        .setLinearDamping(0.04)
+        .setAngularDamping(0.04)
+    );
+
+    function makeBoxCollider(){
+      if (current.collider) world.removeCollider(current.collider, !0);
+      current.collider = world.createCollider(
+        RAPIER.ColliderDesc.cuboid(current.half, current.half)
+          .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+        body
       );
-  
-      function makeBoxCollider(){
-        if (current.collider) world.removeCollider(current.collider, !0);
-        current.collider = world.createCollider(
-          RAPIER.ColliderDesc.cuboid(current.half, current.half)
-            .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
-          body
-        );
-        current.isBall = !1;
-      }
-      function makeBallCollider(){
-        if (current.collider) world.removeCollider(current.collider, !0);
-        current.collider = world.createCollider(
-          RAPIER.ColliderDesc.ball(current.half*0.98)
-            .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
-          body
-        );
-        current.isBall = !0;
-      }
+      current.isBall = !1;
+    }
+    function makeBallCollider(){
+      if (current.collider) world.removeCollider(current.collider, !0);
+      current.collider = world.createCollider(
+        RAPIER.ColliderDesc.ball(current.half*0.98)
+          .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+        body
+      );
+      current.isBall = !0;
+    }
+    makeBoxCollider();
+
+    let hasDropped = !1;
+    let dropObserver = null;
+    function armDropObserver(){
+      if (dropObserver) dropObserver.disconnect();
+      dropObserver = new IntersectionObserver((entries)=>{
+        const e = entries[0];
+        if (!hasDropped && e.isIntersecting && e.intersectionRatio > 0.35){
+          world.gravity = { x:0, y: DROP_G };
+          body.wakeUp();
+          hasDropped = !0;
+        }
+      }, { root:null, threshold:[0, .35, .6] });
+      dropObserver.observe(stageBlock);
+    }
+    armDropObserver();
+
+    const goal = {
+      visible: !1,
+      get radius(){ return current.half * 1.4; },
+      get cx(){ return canvas.width * 0.5; },
+      get cy(){ return canvas.height * 0.5; },
+    };
+    const showGoal = ()=>{ goal.visible = !0; };
+    const hideGoal = ()=>{ goal.visible = !1; };
+
+    function resetSection(){
+      hideGoal();
+      current.wear = 0;
       makeBoxCollider();
-  
-      let hasDropped = !1;
-      let dropObserver = null;
-      function armDropObserver(){
-        if (dropObserver) dropObserver.disconnect();
-        dropObserver = new IntersectionObserver((entries)=>{
-          const e = entries[0];
-          if (!hasDropped && e.isIntersecting && e.intersectionRatio > 0.35){
-            world.gravity = { x:0, y: DROP_G };
-            body.wakeUp();
-            hasDropped = !0;
-          }
-        }, { root:null, threshold:[0, .35, .6] });
-        dropObserver.observe(stageBlock);
-      }
+      body.setTranslation({ x:start.x, y:start.y }, !0);
+      body.setLinvel({ x:0, y:0 }, !0);
+      body.setAngvel(0, !0);
+      body.setAngularDamping(0.04);
+      hasDropped = !1;
+      world.gravity = { x:0, y:0 };
       armDropObserver();
-  
-      const goal = {
-        visible: !1,
-        get radius(){ return current.half * 1.4; },
-        get cx(){ return canvas.width * 0.5; },
-        get cy(){ return canvas.height * 0.5; },
-      };
-      const showGoal = ()=>{ goal.visible = !0; };
-      const hideGoal = ()=>{ goal.visible = !1; };
-  
-      function resetSection(){
-        hideGoal();
-        current.wear = 0;
-        makeBoxCollider();
-        body.setTranslation({ x:start.x, y:start.y }, !0);
-        body.setLinvel({ x:0, y:0 }, !0);
-        body.setAngvel(0, !0);
-        body.setAngularDamping(0.04);
-        hasDropped = !1;
-        world.gravity = { x:0, y:0 };
-        armDropObserver();
+    }
+
+    function addWear(amount){
+      current.wear = clamp(current.wear + amount, 0, 1);
+      if (!current.isBall && current.wear >= 0.85){
+        makeBallCollider(); showGoal();
       }
-  
-      function addWear(amount){
-        const before = current.wear;
-        current.wear = clamp(current.wear + amount, 0, 1);
-        if (!current.isBall && current.wear >= 0.85){
-          makeBallCollider();
-          showGoal();
-        }
-        const spinEase = 0.04 + current.wear * 0.06;
-        body.setAngularDamping(spinEase);
+      const spinEase = 0.04 + current.wear * 0.06;
+      body.setAngularDamping(spinEase);
+    }
+
+    // pointer handling
+    let dragging = !1, lastPt = null, lastV = {x:0,y:0}, grabOffset = null;
+    function eventPos(e){
+      if (e.touches && e.touches[0]){
+        const t = e.touches[0]; return { x: t.clientX * DPR, y: t.clientY * DPR };
       }
-  
-      // pointer handling
-      let dragging = !1, lastPt = null, lastV = {x:0,y:0}, grabOffset = null;
-      function eventPos(e){
-        if (e.touches && e.touches[0]){
-          const t = e.touches[0]; return { x: t.clientX * DPR, y: t.clientY * DPR };
-        }
-        return { x: e.clientX * DPR, y: e.clientY * DPR };
+      return { x: e.clientX * DPR, y: e.clientY * DPR };
+    }
+    function pointInside(pt){
+      const c = body.translation();
+      if (current.isBall){
+        const dx = pt.x - c.x, dy = pt.y - c.y;
+        return dx*dx + dy*dy <= current.half*current.half;
       }
-      function pointInside(pt){
-        const c = body.translation();
-        if (current.isBall){
-          const dx = pt.x - c.x, dy = pt.y - c.y;
-          return dx*dx + dy*dy <= current.half*current.half;
-        }
-        return pt.x >= c.x-current.half && pt.x <= c.x+current.half && pt.y >= c.y-current.half && pt.y <= c.y+current.half;
+      return pt.x >= c.x-current.half && pt.x <= c.x+current.half && pt.y >= c.y-current.half && pt.y <= c.y+current.half;
+    }
+    function onDown(e){
+      const pt = eventPos(e);
+      if (!pointInside(pt)) return;
+      e.preventDefault();
+      dragging = !0; lastPt = pt; lastV = {x:0,y:0};
+      stageBlock.classList.add("-grabbing");
+      const c = body.translation(); grabOffset = { x: pt.x - c.x, y: pt.y - c.y };
+      if (body.setGravityScale) body.setGravityScale(0, !0);
+      body.setAngvel(0, !0); body.setLinvel({x:0,y:0}, !0);
+      body.setBodyType(RigidBodyType.KinematicPositionBased, !0);
+      body.wakeUp();
+      if (e.target?.setPointerCapture && e.pointerId != null){ try{ e.target.setPointerCapture(e.pointerId); }catch{} }
+    }
+    function onMove(e){
+      const pt = eventPos(e);
+      if (!dragging){ stageBlock.classList.toggle("-grab", pointInside(pt)); return; }
+      const dt = 1/60;
+      lastV = { x:(pt.x - lastPt.x)/dt, y:(pt.y - lastPt.y)/dt };
+      lastPt = pt;
+      const targetCenter = { x: pt.x - grabOffset.x, y: pt.y - grabOffset.y };
+      body.setNextKinematicTranslation(targetCenter);
+      body.setAngvel(0, !0);
+    }
+    function onUp(e){
+      if (!dragging) return;
+      dragging = !1; stageBlock.classList.remove("-grabbing");
+      const r = grabOffset || {x:0,y:0};
+      const mass = body.mass ? body.mass() : 1;
+      const s = current.half * 2;
+      const I = Math.max(1e-6, (mass * s * s) / 6);
+      const cross = r.x * lastV.y - r.y * lastV.x;
+      const MAX_SPIN = 18;
+      let omega = (mass * cross) / I;
+      omega = clamp(omega, -MAX_SPIN, MAX_SPIN);
+      body.setBodyType(RigidBodyType.Dynamic, !0);
+      if (body.setGravityScale) body.setGravityScale(1, !0);
+      body.wakeUp();
+      const maxSpeed = 3200 * DPR;
+      const clampV = (v,m)=>clamp(v,-m,m);
+      body.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, !0);
+      body.setAngvel(omega, !0);
+      const linSpeed = Math.hypot(lastV.x, lastV.y);
+      const angBonus = Math.abs(omega) * current.half;
+      const throwMetric = linSpeed + angBonus;
+      addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
+      grabOffset = null;
+      if (e?.target?.releasePointerCapture && e.pointerId != null){ try{ e.target.releasePointerCapture(e.pointerId); }catch{} }
+    }
+
+    const area = stageBlock.querySelector(".rapier-stage");
+    area.addEventListener("mousedown", onDown);
+    area.addEventListener("mousemove", onMove);
+    w.addEventListener("mouseup", onUp);
+    area.addEventListener("touchstart", onDown, { passive: !1 });
+    area.addEventListener("touchmove", onMove, { passive: !1 });
+    w.addEventListener("touchend", onUp);
+    w.addEventListener("touchcancel", onUp);
+
+    function handleCollisionEvent(h1,h2,started){
+      if (!started) return;
+      const isSelf = (h)=> current.collider && h === current.collider.handle;
+      const aIsSelf = isSelf(h1) || isSelf(h2);
+      const other = isSelf(h1) ? h2 : isSelf(h2) ? h1 : null;
+      if (!aIsSelf || !wallHandles.has(other)) return;
+      const v = body.linvel();
+      const speed = Math.hypot(v.x, v.y) + Math.abs(body.angvel()) * current.half;
+      addWear(clamp(speed / (6000 * DPR), 0.003, 0.035));
+    }
+    function pinkBgTick(){
+      const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
+      stageBlock.classList.toggle("-bg-pink", hoverish);
+    }
+
+    function roundedRectPath(cx,cy,half,r){
+      const x = cx - half, y = cy - half, w2 = half*2, h2 = half*2;
+      const rr = clamp(r, 0, half);
+      if (rr < 0.5){ ctx.beginPath(); ctx.rect(x,y,w2,h2); return; }
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.lineTo(x+w2-rr, y); ctx.arcTo(x+w2, y, x+w2, y+rr, rr);
+      ctx.lineTo(x+w2, y+h2-rr); ctx.arcTo(x+w2, y+h2, x+w2-rr, y+h2, rr);
+      ctx.lineTo(x+rr, y+h2); ctx.arcTo(x, y+h2, x, y+h2-rr, rr);
+      ctx.lineTo(x, y+rr); ctx.arcTo(x, y, x+rr, y, rr);
+    }
+
+    function checkGoal(){
+      if (!goal.visible || !current.isBall) return !1;
+      const p = body.translation(); const r = current.half; const R = goal.radius;
+      const dx = p.x - goal.cx, dy = p.y - goal.cy;
+      const dist = Math.hypot(dx,dy);
+      const EPS = 2*DPR, slack = 0.6 * r;
+      return dist <= R - r + slack + EPS;
+    }
+
+    function drawGoal(root){
+      if (!goal.visible) return;
+      ctx.save();
+      const black = (root.getPropertyValue("--c-black") || "#101214").trim();
+      ctx.setLineDash([2*DPR, 4*DPR]);
+      ctx.lineWidth = 1*DPR;
+      ctx.strokeStyle = black;
+      ctx.beginPath();
+      ctx.arc(goal.cx, goal.cy, goal.radius - 0.5*DPR, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = black;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const px = Math.max(10, Math.round(goal.radius * 0.42));
+      const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
+      ctx.font = `${px}px ${fontStack}`;
+      ctx.fillText("AIM", goal.cx, goal.cy);
+      ctx.restore();
+    }
+
+    let lastTime = performance.now();
+    function tick(now){
+      const dt = Math.min(1/30, (now - lastTime)/1000);
+      lastTime = now;
+      world.step(queue);
+      queue.drainCollisionEvents(handleCollisionEvent);
+      if (checkGoal()){
+        confetti({ particleCount: 160, spread: 70, origin: { y: 0.35 } });
+        resetSection();
       }
-      function onDown(e){
-        const pt = eventPos(e);
-        if (!pointInside(pt)) return;
-        e.preventDefault();
-        dragging = !0; lastPt = pt; lastV = {x:0,y:0};
-        stageBlock.classList.add("-grabbing");
-        const c = body.translation(); grabOffset = { x: pt.x - c.x, y: pt.y - c.y };
-        if (body.setGravityScale) body.setGravityScale(0, !0);
-        body.setAngvel(0, !0); body.setLinvel({x:0,y:0}, !0);
-        body.setBodyType(RigidBodyType.KinematicPositionBased, !0);
-        body.wakeUp();
-        if (e.target?.setPointerCapture && e.pointerId != null){ try{ e.target.setPointerCapture(e.pointerId); }catch{} }
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+      ctx.save();
+      ctx.setLineDash([6*DPR, 6*DPR]);
+      ctx.lineWidth = 1*DPR;
+      const root = getComputedStyle(de);
+      ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-black-rgb") || "16,18,20"}, .35)`;
+      ctx.strokeRect(0.5*DPR, 0.5*DPR, W-1*DPR, H-1*DPR);
+      ctx.restore();
+      drawGoal(getComputedStyle(de));
+      const p = body.translation(), a = body.rotation();
+      const root2 = getComputedStyle(de);
+      const fill = (root2.getPropertyValue("--c-black") || "#101214").trim();
+      const stroke = `rgba(${root2.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(a);
+      ctx.fillStyle = fill;
+      ctx.setLineDash([4*DPR, 4*DPR]);
+      ctx.lineWidth = 1*DPR;
+      ctx.strokeStyle = stroke;
+      if (current.isBall){
+        ctx.beginPath(); ctx.arc(0,0,current.half, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      } else {
+        const radius = current.wear * current.half;
+        roundedRectPath(0,0,current.half, radius);
+        ctx.fill(); ctx.stroke();
       }
-      function onMove(e){
-        const pt = eventPos(e);
-        if (!dragging){ stageBlock.classList.toggle("-grab", pointInside(pt)); return; }
-        const dt = 1/60;
-        lastV = { x:(pt.x - lastPt.x)/dt, y:(pt.y - lastPt.y)/dt };
-        lastPt = pt;
-        const targetCenter = { x: pt.x - grabOffset.x, y: pt.y - grabOffset.y };
-        body.setNextKinematicTranslation(targetCenter);
-        body.setAngvel(0, !0);
-      }
-      function onUp(e){
-        if (!dragging) return;
-        dragging = !1; stageBlock.classList.remove("-grabbing");
-        const r = grabOffset || {x:0,y:0};
-        const mass = body.mass ? body.mass() : 1;
-        const s = current.half * 2;
-        const I = Math.max(1e-6, (mass * s * s) / 6);
-        const cross = r.x * lastV.y - r.y * lastV.x;
-        const MAX_SPIN = 18;
-        let omega = (mass * cross) / I;
-        omega = clamp(omega, -MAX_SPIN, MAX_SPIN);
-        body.setBodyType(RigidBodyType.Dynamic, !0);
-        if (body.setGravityScale) body.setGravityScale(1, !0);
-        body.wakeUp();
-        const maxSpeed = 3200 * DPR;
-        const clampV = (v,m)=>clamp(v,-m,m);
-        body.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, !0);
-        body.setAngvel(omega, !0);
-        const linSpeed = Math.hypot(lastV.x, lastV.y);
-        const angBonus = Math.abs(omega) * current.half;
-        const throwMetric = linSpeed + angBonus;
-        addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
-        grabOffset = null;
-        if (e?.target?.releasePointerCapture && e.pointerId != null){ try{ e.target.releasePointerCapture(e.pointerId); }catch{} }
-      }
-  
-      const area = stageBlock.querySelector(".rapier-stage");
-      area.addEventListener("mousedown", onDown);
-      area.addEventListener("mousemove", onMove);
-      w.addEventListener("mouseup", onUp);
-      area.addEventListener("touchstart", onDown, { passive: !1 });
-      area.addEventListener("touchmove", onMove, { passive: !1 });
-      w.addEventListener("touchend", onUp);
-      w.addEventListener("touchcancel", onUp);
-  
-      function handleCollisionEvent(h1,h2,started){
-        if (!started) return;
-        const isSelf = (h)=> current.collider && h === current.collider.handle;
-        const aIsSelf = isSelf(h1) || isSelf(h2);
-        const other = isSelf(h1) ? h2 : isSelf(h2) ? h1 : null;
-        if (!aIsSelf || !wallHandles.has(other)) return;
-        const v = body.linvel();
-        const speed = Math.hypot(v.x, v.y) + Math.abs(body.angvel()) * current.half;
-        addWear(clamp(speed / (6000 * DPR), 0.003, 0.035));
-      }
-      function pinkBgTick(){
-        const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
-        stageBlock.classList.toggle("-bg-pink", hoverish);
-      }
-  
-      function roundedRectPath(cx,cy,half,r){
-        const x = cx - half, y = cy - half, w2 = half*2, h2 = half*2;
-        const rr = clamp(r, 0, half);
-        if (rr < 0.5){ ctx.beginPath(); ctx.rect(x,y,w2,h2); return; }
-        ctx.beginPath();
-        ctx.moveTo(x+rr, y);
-        ctx.lineTo(x+w2-rr, y); ctx.arcTo(x+w2, y, x+w2, y+rr, rr);
-        ctx.lineTo(x+w2, y+h2-rr); ctx.arcTo(x+w2, y+h2, x+w2-rr, y+h2, rr);
-        ctx.lineTo(x+rr, y+h2); ctx.arcTo(x, y+h2, x, y+h2-rr, rr);
-        ctx.lineTo(x, y+rr); ctx.arcTo(x, y, x+rr, y, rr);
-      }
-  
-      function checkGoal(){
-        if (!goal.visible || !current.isBall) return !1;
-        const p = body.translation(); const r = current.half; const R = goal.radius;
-        const dx = p.x - goal.cx, dy = p.y - goal.cy;
-        const dist = Math.hypot(dx,dy);
-        const EPS = 2*DPR, slack = 0.6 * r;
-        return dist <= R - r + slack + EPS;
-      }
-  
-      function drawGoal(root){
-        if (!goal.visible) return;
-        ctx.save();
-        const black = (root.getPropertyValue("--c-black") || "#101214").trim();
-        ctx.setLineDash([2*DPR, 4*DPR]);
-        ctx.lineWidth = 1*DPR;
-        ctx.strokeStyle = black;
-        ctx.beginPath();
-        ctx.arc(goal.cx, goal.cy, goal.radius - 0.5*DPR, 0, Math.PI*2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = black;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const px = Math.max(10, Math.round(goal.radius * 0.42));
-        const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
-        ctx.font = `${px}px ${fontStack}`;
-        ctx.fillText("AIM", goal.cx, goal.cy);
-        ctx.restore();
-      }
-  
-      let lastTime = performance.now();
-      function tick(now){
-        const dt = Math.min(1/30, (now - lastTime)/1000); // dt kept if you extend
-        lastTime = now;
-        world.step(queue);
-        queue.drainCollisionEvents(handleCollisionEvent);
-        if (checkGoal()){
-          confetti({ particleCount: 160, spread: 70, origin: { y: 0.35 } });
-          resetSection();
-        }
-        const W = canvas.width, H = canvas.height;
-        ctx.clearRect(0,0,W,H);
-        ctx.save();
-        ctx.setLineDash([6*DPR, 6*DPR]);
-        ctx.lineWidth = 1*DPR;
-        const root = getComputedStyle(de);
-        ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-black-rgb") || "16,18,20"}, .35)`;
-        ctx.strokeRect(0.5*DPR, 0.5*DPR, W-1*DPR, H-1*DPR);
-        ctx.restore();
-        drawGoal(getComputedStyle(de));
-        const p = body.translation(), a = body.rotation();
-        const root2 = getComputedStyle(de);
-        const fill = (root2.getPropertyValue("--c-black") || "#101214").trim();
-        const stroke = `rgba(${root2.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(a);
-        ctx.fillStyle = fill;
-        ctx.setLineDash([4*DPR, 4*DPR]);
-        ctx.lineWidth = 1*DPR;
-        ctx.strokeStyle = stroke;
-        if (current.isBall){
-          ctx.beginPath(); ctx.arc(0,0,current.half, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-        } else {
-          const radius = current.wear * current.half;
-          roundedRectPath(0,0,current.half, radius);
-          ctx.fill(); ctx.stroke();
-        }
-        ctx.restore();
-        pinkBgTick();
-        requestAnimationFrame(tick);
-      }
+      ctx.restore();
+      pinkBgTick();
       requestAnimationFrame(tick);
     }
-  
-    // ---------- init ----------
-    function init(){
-      setupRepeat();
-      setupSplit();
-      setupInView();
-      collectProgressEls();
-      collectParallaxEls();
-      collectGlideEls();
-      collectLerpEls();
-      setupCursor();
-      initWordWalls();
-  
-      // Build demo grids if present
-      const magneticBlock = d.querySelector('.block.string-magnetic[data-v-40fb9db4]');
-      if (magneticBlock) buildMagneticGrid(magneticBlock, 3, 3, 2, 2);
-      const lerpBlock = d.querySelector('.block.string-lerp[data-v-270bb328]');
-      if (lerpBlock) buildLerpGrid(lerpBlock, 3, 2);
-  
-      collectMagneticEls();
-      setupPerfHUD();
-      applyBoxScale();
-      setupStorylineObserver();
-  
-      const firstStory = chapterBlocks[0] ? getStoryForBlock(chapterBlocks[0]) : null;
-      if (firstStory || storylineEl?.textContent) setTip(firstStory || storylineEl.textContent || "Try the cursor →");
-  
-      // kick a scroll pass
-      requestAnimationFrame(()=>{ w.dispatchEvent(new Event("scroll")); });
-  
-      // RAF loop
-      const tick = ()=>{
+    requestAnimationFrame(tick);
+  }
+
+  // -------------------- init
+  function init(){
+    setupRepeat();
+    setupSplit();
+    setupInView();
+    collectProgressEls();
+    collectParallaxEls();
+    collectGlideEls();
+    collectLerpEls();
+    setupCursor();
+    initWordWalls();
+
+    const magneticBlock = d.querySelector('.block.string-magnetic[data-v-40fb9db4]');
+    if (magneticBlock) buildMagneticGrid(magneticBlock, 3, 3, 2, 2);
+    const lerpBlock = d.querySelector('.block.string-lerp[data-v-270bb328]');
+    if (lerpBlock) buildLerpGrid(lerpBlock, 3, 2);
+
+    collectMagneticEls();
+    setupPerfHUD();
+    applyBoxScale();
+    setupStorylineObserver();
+
+    const firstStory = chapterBlocks[0] ? getStoryForBlock(chapterBlocks[0]) : null;
+    if (firstStory || storylineEl?.textContent) setTip(firstStory || storylineEl.textContent || "Try the cursor →");
+
+    requestAnimationFrame(()=>{ w.dispatchEvent(new Event("scroll")); });
+
+    const tick = ()=>{
+      updateProgress();
+      updateLerpProgress();
+      parallaxTick();
+      smoothTick();
+      magneticTick();
+      w.requestAnimationFrame(tick);
+    };
+    w.requestAnimationFrame(tick);
+
+    let resizeRAF = 0;
+    const onResize = ()=>{
+      cancelAnimationFrame(resizeRAF);
+      resizeRAF = requestAnimationFrame(()=>{
+        collectParallaxEls();
+        collectGlideEls();
+        collectMagneticEls();
+        collectLerpEls();
+        applyBoxScale();
         updateProgress();
         updateLerpProgress();
-        parallaxTick();
-        smoothTick();
-        magneticTick();
-        w.requestAnimationFrame(tick);
-      };
-      w.requestAnimationFrame(tick);
-  
-      // responsive collections
-      let resizeRAF = 0;
-      const onResize = ()=>{
-        cancelAnimationFrame(resizeRAF);
-        resizeRAF = requestAnimationFrame(()=>{
-          collectParallaxEls();
-          collectGlideEls();
-          collectMagneticEls();
-          collectLerpEls();
-          applyBoxScale();
-          updateProgress();
-          updateLerpProgress();
-        });
-      };
-      w.addEventListener("resize", onResize, { passive: !0 });
-      w.addEventListener("orientationchange", onResize, { passive: !0 });
-  
-      // async feature section
-      initRapierPlayground();
-    }
-  
-    if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", init, { once: !0 });
-    else init();
-  
-  })();
+      });
+    };
+    w.addEventListener("resize", onResize, { passive: !0 });
+    w.addEventListener("orientationchange", onResize, { passive: !0 });
+
+    // Async feature
+    initRapierPlayground();
+  }
+
+  if (d.readyState === "loading") d.addEventListener("DOMContentLoaded", init, { once: !0 });
+  else init();
+
+})();
+
   </script>
   
 

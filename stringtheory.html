@@ -825,6 +825,311 @@ div[data-fps]::after, div[data-position]::after {
 }
 
 
+
+
+
+/* PRELOADER ANIMATIONS */
+/* Theme hooks (uses your tokens if present) */
+:root{
+  --pp-hue: var(--hue, 223);
+  --pp-bg: hsl(var(--pp-hue) 90% 90%);
+  --pp-fg: hsl(var(--pp-hue) 90% 10%);
+  --pp-primary: var(--primary, hsl(var(--pp-hue) 90% 50%));
+  --pp-ease-in: cubic-bezier(.32,0,.67,0);
+  --pp-ease-out: cubic-bezier(.33,1,.68,1);
+}
+
+/* Section container matches your block rhythm */
+.ping-pong-section {
+  /* optional subtle gray panel if you want contrast */
+  background: var(--c-gray-100, color-mix(in oklab, var(--c-white, #fff) 92%, #000));
+  border-radius: .5rem;
+  padding: clamp(16px, 4vw, 40px);
+}
+
+/* Centerpiece sizing inside your grid cell */
+.ping-pong-section .child {
+  display: grid;
+  place-items: center;
+  min-block-size: clamp(200px, 36vmin, 420px);
+}
+
+/* SVG box */
+.ping-pong {
+  display: block;
+  inline-size: min(56vmin, 520px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+/* Ball & paddle animation wiring (converted from SCSS) */
+.ping-pong__ball-x,
+.ping-pong__paddle-x,
+.ping-pong__ball-y,
+.ping-pong__paddle-y { transform-box: fill-box; transform-origin: 50% 50%; }
+
+.ping-pong__ball-x { animation: ping-pong-ball-x 1.5s linear infinite; }
+.ping-pong__ball-y { animation: ping-pong-ball-y 1.5s linear infinite; }
+
+.ping-pong__paddle-x {
+  animation: ping-pong-paddle-x 1.5s var(--pp-ease-out) infinite;
+}
+.ping-pong__paddle-y {
+  animation: ping-pong-paddle-y 1.5s linear infinite;
+}
+
+/* Dark theme alignment with your system pref */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pp-bg: hsl(var(--pp-hue) 90% 10%);
+    --pp-fg: hsl(var(--pp-hue) 90% 90%);
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ping-pong__ball-x,
+  .ping-pong__ball-y,
+  .ping-pong__paddle-x,
+  .ping-pong__paddle-y { animation: none !important; }
+}
+
+/* Keyframes (same motion, just CSS variables for easings) */
+@keyframes ping-pong-ball-x {
+  from, to { transform: translate(40px, 80px); }
+  50%     { transform: translate(88px, 80px); }
+}
+@keyframes ping-pong-ball-y {
+  from, 50%, to {
+    animation-timing-function: var(--pp-ease-out);
+    transform: translate(0, 0);
+  }
+  25%, 75% {
+    animation-timing-function: var(--pp-ease-in);
+    transform: translate(0, -68px);
+  }
+}
+@keyframes ping-pong-paddle-x {
+  from, to { transform: translate(36px, 92px) rotate(6deg); }
+  50%     { transform: translate(92px, 92px) rotate(-6deg); }
+}
+@keyframes ping-pong-paddle-y {
+  from, 50%, to {
+    animation-timing-function: var(--pp-ease-out);
+    transform: translate(0, 0);
+  }
+  25%, 75% {
+    animation-timing-function: var(--pp-ease-in);
+    transform: translate(0, 28px);
+  }
+}
+
+
+
+
+
+* {
+	border: 0;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+:root {
+	--hue: 223;
+	--bg: hsl(var(--hue),90%,90%);
+	--fg: hsl(var(--hue),90%,10%);
+	--primary: hsl(var(--hue),90%,50%);
+	--trans-dur: 0.3s;
+	font-size: calc(16px + (24 - 16) * (100vw - 320px) / (2560 - 320));
+}
+
+.pl1,
+.pl2,
+.pl3 {
+	display: block;
+	width: 8em;
+	height: 8em;
+}
+.pl1__g,
+.pl1__rect,
+.pl2__rect,
+.pl2__rect-g,
+.pl3__rect {
+	animation: pl1-a 1.5s cubic-bezier(0.65,0,0.35,1) infinite;
+}
+.pl1__g {
+	transform-origin: 64px 64px;
+}
+.pl1__rect:first-child {
+	animation-name: pl1-b;
+}
+.pl1__rect:nth-child(2) {
+	animation-name: pl1-c;
+}
+.pl2__rect,
+.pl2__rect-g {
+	animation-name: pl2-a;
+}
+.pl2__rect {
+	animation-name: pl2-b;
+}
+.pl2__rect-g .pl2__rect {
+	transform-origin: 20px 128px;
+}
+.pl2__rect-g:first-child,
+.pl2__rect-g:first-child .pl2__rect {
+	animation-delay: -0.25s;
+}
+.pl2__rect-g:nth-child(2),
+.pl2__rect-g:nth-child(2) .pl2__rect {
+	animation-delay: -0.125s;
+}
+.pl2__rect-g:nth-child(2) .pl2__rect {
+	transform-origin: 64px 128px;
+}
+.pl2__rect-g:nth-child(3) .pl2__rect {
+	transform-origin: 108px 128px;
+}
+.pl3__rect {
+	animation-name: pl3;
+}
+.pl3__rect-g {
+	transform-origin: 64px 64px;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: hsl(var(--hue),90%,10%);
+		--fg: hsl(var(--hue),90%,90%);
+	}
+}
+
+/* Animations */
+@keyframes pl1-a {
+	from {
+		transform: rotate(0);
+	}
+	80%,
+	to {
+		animation-timing-function: steps(1,start);
+		transform: rotate(90deg);
+	}
+}
+@keyframes pl1-b {
+	from {
+		animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+		width: 40px;
+		height: 40px;
+	}
+	20% {
+		animation-timing-function: steps(1,start);
+		width: 40px;
+		height: 0;
+	}
+	60% {
+		animation-timing-function: cubic-bezier(0.65,0,0.35,1);
+		width: 0;
+		height: 40px;
+	}
+	80%,
+	to {
+		width: 40px;
+		height: 40px;
+	}
+}
+@keyframes pl1-c {
+	from {
+		animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+		width: 40px;
+		height: 40px;
+		transform: translate(0,48px);
+	}
+	20% {
+		animation-timing-function: cubic-bezier(0.33,1,0.67,1);
+		width: 40px;
+		height: 88px;
+		transform: translate(0,0);
+	}
+	40% {
+		animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+		width: 40px;
+		height: 40px;
+		transform: translate(0,0);
+	}
+	60% {
+		animation-timing-function: cubic-bezier(0.33,1,0.67,1);
+		width: 88px;
+		height: 40px;
+		transform: translate(0,0);
+	}
+	80%,
+	to {
+		width: 40px;
+		height: 40px;
+		transform: translate(48px,0);
+	}
+}
+@keyframes pl2-a {
+	from,
+	25%,
+	66.67%,
+	to  {
+		transform: translateY(0);
+	}
+	50% {
+		animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+		transform: translateY(-80px);
+	}
+}
+@keyframes pl2-b {
+	from,
+	to {
+		animation-timing-function: cubic-bezier(0.33,0,0.67,0);
+		width: 40px;
+		height: 24px;
+		transform: rotate(180deg) translateX(0);
+	}
+	33.33% {
+		animation-timing-function: cubic-bezier(0.33,1,0.67,1);
+		width: 20px;
+		height: 64px;
+		transform: rotate(180deg) translateX(10px);
+	}
+	66.67% {
+		animation-timing-function: cubic-bezier(0.33,1,0.67,1);
+		width: 28px;
+		height: 44px;
+		transform: rotate(180deg) translateX(6px);
+	}
+}
+@keyframes pl3 {
+	from {
+		transform: translate(64px,0);
+		width: 64px;
+		height: 64px;
+	}
+	25% {
+		transform: translate(0,0);
+		width: 128px;
+		height: 32px;
+	}
+	50% {
+		transform: translate(0,0);
+		width: 64px;
+		height: 64px;
+	}
+	75% {
+		transform: translate(0,0);
+		width: 32px;
+		height: 128px;
+	}
+	to {
+		transform: translate(0,64px);
+		width: 64px;
+		height: 64px;
+	}
+}
 </style>  
 </head>
 <body class="-fiddle-digital">
@@ -889,7 +1194,7 @@ div[data-fps]::after, div[data-position]::after {
       {BR}{BR}{BR}
       At the end of the day, we all need to sell sh*t. Every craft takes blood, sweat, and tears {design is no different}; so it behooves us to do so in an interesting way. 
       {BR}{BR}{BR}
-      May the following content share not the results of my craft, but the thought-process behind {my} craftsmanship.
+      Anyways...
 		  </p>
     </div>
     
@@ -957,7 +1262,7 @@ div[data-fps]::after, div[data-position]::after {
 				 data-storyline="As an aside, the reason developers are paid more than designers is because it's more expensive to code a square than to draw one."
 				 data-v-021d6718 data-v-675dfa07 data-v-4f043ceb>
 
-         <h6 class="title -tac" data-v-a676084d>Here is array of boxes <span class="-mm" data-v-ccb4a0eb>Like the 99%, may we enjoy an array of boxes arranged on a figurative e-retail shelf</span></h6>
+         <h6 class="title -tac" data-v-a676084d>Here is a typical array of boxes <span class="-mm" data-v-ccb4a0eb>Like the 99%, may we enjoy an array of boxes arranged on a figurative e-retail shelf</span></h6>
 
 			<div class="rel rel-1 -a-p" string string-repeat string-inview="100%" data-v-675dfa07 string-id="string-8">
 				<div class="child" data-v-675dfa07>
@@ -984,6 +1289,145 @@ div[data-fps]::after, div[data-position]::after {
 				<div class="-m desc desc-top" data-v-675dfa07><p data-v-675dfa07>Box</p></div>
 			</div>
 		</div>
+
+
+
+
+<!-- Basics (Three Blocks) -->
+<div class="-w block string-enter"
+     string="cursor" string-cursor-class="cursor-1"
+     data-storyline="Define product vs. environment."
+     data-cursor-tip="imagine this..."
+     data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
+
+  <h6 class="title -tac" data-v-1a9dc9c4>
+    You could say a box is multi-faceted
+    <span class="-mm" data-v-ccb4a0eb>
+      Boxes that stack and rearrange or flex. <br>Boxes that represent data. <br>Boxes that give access to data. <br>Boxes that are both gatekeepers and gateways. <br>Oh, you get the idea.
+    </span>
+  </h6>
+
+  <!-- Product A (FILLED) -->
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:3;">
+      <!-- PL-1 -->
+      <svg class="pl1" viewBox="0 0 128 128" aria-label="preloader 1">
+        <defs>
+          <linearGradient id="pl-grad-pre-1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#fff" />
+          </linearGradient>
+          <mask id="pl-mask-pre-1">
+            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-1)" />
+          </mask>
+        </defs>
+        <g fill="currentColor">
+          <g class="pl1__g">
+            <g transform="translate(20,20) rotate(0,44,44)">
+              <g class="pl1__rect-g">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+              <g class="pl1__rect-g" transform="rotate(180,44,44)">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+            </g>
+          </g>
+        </g>
+        <g fill="currentColor" mask="url(#pl-mask-pre-1)">
+          <g class="pl1__g">
+            <g transform="translate(20,20) rotate(0,44,44)">
+              <g class="pl1__rect-g">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+              <g class="pl1__rect-g" transform="rotate(180,44,44)">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>your product A</p></div>
+  </div>
+
+  <!-- Product B (FILLED) -->
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:7;">
+      <!-- PL-2 -->
+      <svg class="pl2" viewBox="0 0 128 128" aria-label="preloader 2">
+        <g fill="currentColor">
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="0"  y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="44" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="88" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+        </g>
+        <defs>
+          <linearGradient id="pl-grad-pre-2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#fff" />
+          </linearGradient>
+          <mask id="pl-mask-pre-2">
+            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-2)" />
+          </mask>
+        </defs>
+        <g fill="currentColor" mask="url(#pl-mask-pre-2)">
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="0"  y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="44" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="88" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+        </g>
+      </svg>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>your product B</p></div>
+
+
+    
+  </div>
+
+  
+
+  <!-- Product C (FILLED) -->
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:11;">
+      <!-- PL-3 -->
+      <svg class="pl3" viewBox="0 0 128 128" aria-label="preloader 3">
+        <g fill="currentColor">
+          <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          <g class="pl3__rect-g" transform="scale(-1,-1)">
+            <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          </g>
+        </g>
+        <defs>
+          <linearGradient id="pl-grad-pre-3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#fff" />
+          </linearGradient>
+          <mask id="pl-mask-pre-3">
+            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-3)" />
+          </mask>
+        </defs>
+        <g fill="currentColor" mask="url(#pl-mask-pre-3)">
+          <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          <g class="pl3__rect-g" transform="scale(-1,-1)">
+            <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          </g>
+        </g>
+      </svg>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>your product C</p></div>
+  </div>
+
+</div>
+
+
 
 
 <!-- Split 2 (text only) — WORD WALL -->

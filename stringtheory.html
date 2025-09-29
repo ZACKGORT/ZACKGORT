@@ -1449,11 +1449,10 @@ div[data-fps]::after, div[data-position]::after {
   		<p class="wall-source">{BR}
       I've worked with some notable startups, design studios, design agencies, and technology firms. That journey has shifted how I see, react, and respond; and in today's technological climate, it's forcing me to adapt.   
 {BR}{BR}
-I've worked with some notable startups, design studios, design agencies, and technology firms. That journey has shifted how I see, react, and respond; and in today's technological climate, it's forcing me to adapt.   
+
+      Places I've worked, in order: Turn5 Inc. / Leadnomics / One Sixty Over Ninety / O3 World / WebLinc Workarea / PFSweb Livearea / Huge / Elva Design Group / Code And Theory / Publicis Sapient / Phenom
 {BR}{BR}
-      Places I've worked, in order: Turn5 Inc., Leadnomics, One Sixty Over Ninety, O3 World, WebLinc Workarea, PFSweb Livearea, Huge, Elva Design Group, Code And Theory, Publicis Sapient, Phenom
-{BR}{BR}
-      Brands I've touched, in no particular order: BNY Mellon / TikTok For Business / GNC / YETI / West Marine / Aquasana / Hardinge, Simpson Strong-Tie, Rachel Roy, Century 21, WoodCraft, Paragon Sports, Comcast, Philadelphia Eagles, Power Home Remodeling Group, University of Wisconsin-Madison, Kent State University, Texas A&M University, Merck Animal Health, Charter Communications, The Dana Foundation, Goya
+      Brands I've touched, in no particular order: BNY Mellon, Pershing X / TikTok For Business / GNC / YETI / West Marine / Aquasana / Hardinge / Simpson Strong-Tie / Rachel Roy / Century 21 / WoodCraft / Paragon Sports / Comcast / Philadelphia Eagles / Power Home Remodeling Group / University of Wisconsin-Madison / Kent State University / Texas A&M University / Merck Animal Health / Charter Communications / The Dana Foundation / Goya
 {BR}{BR}{BR} 
       Below shares how I hope to find my fit :)
 		  </p>
@@ -2102,42 +2101,43 @@ data-cursor-tip="Click, hold, and fling.">
 
   // -------------------- sentence split (em dash + BR-aware) + wall builder
 
-  // BR sentinel & extractor
-  const BR = "⟦BR⟧";
-  function extractTextWithBreaks(fromElOrHTML) {
-    const rawHTML = typeof fromElOrHTML === "string"
-      ? fromElOrHTML
-      : (fromElOrHTML?.innerHTML || "");
-    const marked = rawHTML
-      .replace(/<br\s*\/?>/gi, ` ${BR} `)
-      .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)
-      .replace(/\n{2,}/g, ` ${BR} `)
-      .replace(/\{br\}/gi, ` ${BR} `);
-    return marked.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  }
+// BR sentinel & extractor (unchanged)
+const BR = "⟦BR⟧";
+function extractTextWithBreaks(fromElOrHTML) {
+  const rawHTML = typeof fromElOrHTML === "string"
+    ? fromElOrHTML
+    : (fromElOrHTML?.innerHTML || "");
+  const marked = rawHTML
+    .replace(/<br\s*\/?>/gi, ` ${BR} `)
+    .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)
+    .replace(/\n{2,}/g, ` ${BR} `)
+    .replace(/\{br\}/gi, ` ${BR} `);
+  return marked.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
 
-  // Lookbehind splitter if supported; else fallback.
-  let SENTENCE_BREAK = null;
-  try {
-    // Break after . ; : ? ! ] } (space required), or after em dash (space optional).
-    // Next token may start with quotes, caps, digits, or the BR sentinel "⟦" (U+27E6).
-    SENTENCE_BREAK = new RegExp(
-      '(?:(?<=[.?!;:\\]\\}])\\s+|(?<=\\u2014)\\s*)(?=["“\'‘`A-Z0-9\\u27E6])',
-      'g'
-    );
-  } catch { /* unsupported lookbehind */ }
+// Lookbehind splitter if supported; else fallback.
+let SENTENCE_BREAK = null;
+try {
+  // Break after . ; : ? ! ] } / (space required),
+  // or after em dash OR slash (space optional).
+  // Next token may start with quotes, caps, digits, or the BR sentinel "⟦".
+  SENTENCE_BREAK = new RegExp(
+    '(?:(?<=[.?!;:\\/\\]\\}])\\s+|(?<=\\u2014|\\/)\\s*)(?=["“\'‘`A-Z0-9\\u27E6])',
+    'g'
+  );
+} catch { /* unsupported lookbehind */ }
 
-  function safeSplitSentences(text) {
-    if (!text) return [];
-    const normalized = text.replace(/\s+/g, ' ');
-    if (SENTENCE_BREAK) {
-      return normalized.split(SENTENCE_BREAK).map(s => s.trim()).filter(Boolean);
-    }
-    // Fallback w/o lookbehind; includes em dash; allows BR sentinel at start lookahead.
-    return (
-      normalized.match(/[^.?!;:\]\}\u2014]+[.?!;:\]\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9\u27E6]))/g) || []
-    ).map(s => s.trim()).filter(Boolean);
+function safeSplitSentences(text) {
+  if (!text) return [];
+  const normalized = text.replace(/\s+/g, ' ');
+  if (SENTENCE_BREAK) {
+    return normalized.split(SENTENCE_BREAK).map(s => s.trim()).filter(Boolean);
   }
+  // Fallback w/o lookbehind; includes em dash and slash; allows BR sentinel at start lookahead.
+  return (
+    normalized.match(/[^.?!;:\/\]\}\u2014]+[.?!;:\/\]\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9\u27E6]))/g) || []
+  ).map(s => s.trim()).filter(Boolean);
+}
 
   function wireWallInteractions(wallEl) {
     const SEL = '.wall-sentence';

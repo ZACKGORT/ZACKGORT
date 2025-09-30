@@ -546,6 +546,56 @@ html:not(.-guidelines) .guide-grid{ visibility:hidden; }
 
 
 
+/* Tier line (shared base for Glide + Parallax) */
+.block.string-glide .tier,
+.block.string-parallax .tier{
+  grid-column: 1 / -1;
+  position: relative;
+  display: block;
+  height: 0;                         /* border-only line */
+  border-bottom: 2px dashed var(--block-pink);
+  z-index: 2;
+  margin-block: clamp(.5rem, 3vh, 1.5rem);
+}
+
+.block.string-glide .tier::after,
+.block.string-parallax .tier::after{
+  content: attr(data-tier-label);
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 0;               /* anchor at the line */
+  transform: translate(-50%, -50%);   /* centered on the line */
+  padding: .2rem .5rem;
+  white-space: nowrap;
+  line-height: 1;
+  background: var(--block-pink);      /* covers the dashed line under the chip */
+  border: 1px solid rgba(var(--c-white-rgb), .2);
+  color: var(--c-black);
+}
+
+/* Per-section knobs (same exact settings for both) */
+.block.string-glide{
+  --tier-font: calc(var(--mm) * .85); /* smaller text */
+  --tier-nudge-x: -5em;               /* left from center (adjust as needed) */
+
+}
+.block.string-parallax{
+  --tier-font: calc(var(--mm) * .85); /* smaller text */
+  --tier-nudge-x: -5em;               /* left from center (same as Glide) */
+
+}
+
+/* Apply knobs */
+.block.string-glide .tier::after,
+.block.string-parallax .tier::after{
+  font-size: var(--tier-font);
+  transform:
+    translate(
+      calc(-50% + var(--tier-nudge-x)),
+      calc(-50% + var(--tier-nudge-y))
+    );
+}
+
 /* ============================================
    PARALLAX — full CSS (centered row, 12-col, baseline, de-jitter)
    - Filled blocks: exact 150×150 squares
@@ -703,6 +753,76 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-270bb328]:last-child::before{ con
 .block.string-lerp .lerp-grid .rel > .child{ width:100%; height:100%; border:1px dashed var(--c-black); }
 .block.string-lerp .lerp-grid .rel:not(.-active) > .child > [data-v-270bb328]{ background:transparent; }
 .block.string-lerp .lerp-grid .rel > .child > [data-v-270bb328]{ width:100%; height:100%; padding:0; background-color:var(--c-black); transform: translateZ(0); }
+
+/* Allow the shadow to extend beyond the box */
+.block.string-lerp .rel .child{ overflow: visible; }
+
+/* Anchor the shadow to the box */
+.block.string-lerp .rel .child > [data-v-270bb328][string="lerp"]{
+  position: relative;
+  z-index: 1;
+  border-radius: 2px;
+}
+
+/* Directional, depth-aware, *peaked* opacity shadow */
+.block.string-lerp .rel .child > [data-v-270bb328][string="lerp"]::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: inherit;
+  z-index:-1; pointer-events:none;
+  background: rgba(var(--c-black-rgb,16,18,20), 1);
+
+  /* ---- knobs ---- */
+  /* direction vector: 1,1 = down-right; -1,1 = down-left; etc. */
+  --shadow-dir-x: 1;
+  --shadow-dir-y: 1;
+
+  /* offset/blur growth across depth */
+  --offset-min: 0px;     /* no offset at start */
+  --offset-max: 36px;    /* stronger pull by the end */
+  --blur-min:   1px;     /* crisp early */
+  --blur-max:  32px;     /* softer later */
+
+  /* opacity peaks early, then fades */
+  --alpha-peak: .46;     /* max opacity at the “crisp” phase */
+
+  /* “size” growth of the chip (subtle) */
+  --scale-min: 1;
+  --scale-max: 1.3;
+
+  /* ---- depth & shaping (0 → 1) ---- */
+  --d: clamp(var(--lerp-progress, 0), 0, 1);
+
+  /* quick ramp up (0 → 1) over first 30% */
+  --up:   min(1, calc(var(--d) / .30));
+
+  /* fade out portion after 30% (0 → 1 from .30 → 1) */
+  --down: max(0, calc((var(--d) - .30) / .70));
+
+  /* peaked opacity: rise fast, then fall → alpha = peak * up * (1 - down) */
+  --_alpha: calc(var(--alpha-peak) * var(--up) * (1 - var(--down)));
+
+  /* offset/blur/scale all grow with depth */
+  --_offset: calc(var(--offset-min) + (var(--offset-max) - var(--offset-min)) * var(--d));
+  --_blur:   calc(var(--blur-min)   + (var(--blur-max)   - var(--blur-min))   * var(--d));
+  --_scale:  calc(var(--scale-min)  + (var(--scale-max)  - var(--scale-min))  * var(--d));
+
+  /* apply */
+  opacity: var(--_alpha);
+  filter: blur(var(--_blur));
+  transform:
+    translate(
+      calc(var(--_offset) * var(--shadow-dir-x)),
+      calc(var(--_offset) * var(--shadow-dir-y))
+    )
+    scale(var(--_scale));
+  transition:
+    filter .12s linear,
+    opacity .12s linear,
+    transform .12s linear;
+}
+
+
 
 /* Magnetic grid */
 .block.string-magnetic{
@@ -1686,10 +1806,14 @@ html.-short-offsets :root{ --offset-h: 1.25; }
     </span>
   </h6>
 
+
+  <!-- NEW: tier line -->
+  <span class="tier" data-tier-label="Different speeds for different needs"></span>
+
   <!-- col 6 -->
   <div class="rel rel-1" data-v-05b709a3 style="--left:1; --width:1;">
     <div class="child" data-v-05b709a3>
-      <div string="parallax" string-parallax="2" data-v-05b709a3 string-id="string-14" data-tooltip="Fast lane — launch buzz"></div>
+      <div string="parallax" string-parallax="2" data-v-05b709a3 string-id="string-14" data-tooltip="Task-Focused"></div>
     </div>
     <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>IC</p></div>
   </div>
@@ -1697,7 +1821,7 @@ html.-short-offsets :root{ --offset-h: 1.25; }
   <!-- col 9 -->
   <div class="rel rel-2" data-v-05b709a3 style="--left:6; --width:1;">
     <div class="child" data-v-05b709a3>
-      <div string="parallax" string-parallax="4" data-v-05b709a3 string-id="string-15" data-tooltip="Mid lane — steady cadence"></div>
+      <div string="parallax" string-parallax="4" data-v-05b709a3 string-id="string-15" data-tooltip="Project-Focused"></div>
     </div>
     <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>Manager</p></div>
   </div>
@@ -1705,7 +1829,7 @@ html.-short-offsets :root{ --offset-h: 1.25; }
   <!-- col 12 -->
   <div class="rel rel-3" data-v-05b709a3 style="--left:12; --width:1; --box-ratio: 1 / 1;">
     <div class="child" data-v-05b709a3>
-      <div string="parallax" string-parallax="6" data-v-05b709a3 string-id="string-16" data-tooltip="Slow lane — long tail"></div>
+      <div string="parallax" string-parallax="6" data-v-05b709a3 string-id="string-16" data-tooltip="Product-Focused"></div>
     </div>
     <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>PM</p></div>
   </div>
@@ -1714,32 +1838,40 @@ html.-short-offsets :root{ --offset-h: 1.25; }
 
 
 
-		<!-- Glide (FILLED) -->
-		<div class="-w block string-glide"
-				 string="cursor" string-cursor-class="cursor-1"
-				 data-storyline="Trust looks smooth."
-				 data-cursor-tip="Trust looks smooth."
-				 data-v-021d6718 data-v-ccb4a0eb data-v-4f043ceb>
+<!-- Glide (FILLED) -->
+<div class="-w block string-glide"
+     string="cursor" string-cursor-class="cursor-1"
+     data-storyline="Trust looks smooth."
+     data-cursor-tip="Trust looks smooth."
+     data-v-021d6718 data-v-ccb4a0eb data-v-4f043ceb>
 
-			<h6 class="title -tac" data-v-ccb4a0eb>Shake; don't stir. <span class="-mm" data-v-ccb4a0eb>Go ahead and scroll {with rigor} past this section. My point: I am unshakable #hakunamatata</span></h6>
+  <h6 class="title -tac" data-v-ccb4a0eb>
+    #vibe check <span class="-mm" data-v-ccb4a0eb>No longer are roles the set-it-and-forget-it type.</span>
+  </h6>
 
-			<div class="rel rel-1" data-v-ccb4a0eb style="--left:1;">
-				<div class="child" data-v-ccb4a0eb>
-					<div string="glide" string-glide="-25" data-v-ccb4a0eb string-id="string-18a" data-tooltip="Glide: leadership sets the tone"></div>
-				</div>
-				<div class="-m desc" data-v-ccb4a0eb><p data-v-ccb4a0eb>#vibe #aura #bet</p></div>
-			</div>
-			<div class="rel rel-2" data-v-ccb4a0eb style="--left:6;">
-				<div class="child" data-v-ccb4a0eb>
-					<div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18" data-tooltip="Glide: cross-functional alignment"></div>
-				</div>
-			</div>
-			<div class="rel rel-3" data-v-ccb4a0eb style="--left:12;">
-				<div class="child" data-v-ccb4a0eb>
-					<div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18" data-tooltip="Glide: cross-functional alignment"></div>
-				</div>
-			</div>
-		</div>
+  <!-- NEW: tier line -->
+  <span class="tier" data-tier-label="common ground"></span>
+
+  <div class="rel rel-1" data-v-ccb4a0eb style="--left:1;">
+    <div class="child" data-v-ccb4a0eb>
+      <div string="glide" string-glide="-25" data-v-ccb4a0eb string-id="string-18a"></div>
+    </div>
+    <div class="-m desc" data-v-ccb4a0eb><p data-v-ccb4a0eb>#vibe #aura #bet</p></div>
+  </div>
+
+  <div class="rel rel-2" data-v-ccb4a0eb style="--left:6;">
+    <div class="child" data-v-ccb4a0eb>
+      <div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18"></div>
+    </div>
+  </div>
+
+  <div class="rel rel-3" data-v-ccb4a0eb style="--left:12;">
+    <div class="child" data-v-ccb4a0eb>
+      <div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18"></div>
+    </div>
+  </div>
+</div>
+
 
 
 		<!-- Lerp (FILLED) -->

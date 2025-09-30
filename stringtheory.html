@@ -532,42 +532,117 @@ html:not(.-guidelines) .guide-grid{ visibility:hidden; }
 .-w .rel-2[data-v-05b709a3]{ --left:7; }
 .-w .rel-3[data-v-05b709a3]{ --left:11; }
 
-/* Parallax block sizing knobs */
-/* Base sizing for all parallax boxes */
-.block.string-parallax .child > [string="parallax"]{
-  /* defaults (can be overridden per .rel via inline vars) */
-  --box-w: 150px;          /* width knob */
-  --box-ratio: 1 / 1;      /* square by default */
-  inline-size: var(--box-w);
-  aspect-ratio: var(--box-ratio);
-  background: currentColor; /* filled uses current text color */
+
+
+/* ============================================
+   PARALLAX — full CSS (centered row, 12-col, baseline, de-jitter)
+   - Filled blocks: exact 150×150 squares
+   - Empty blocks: taller (outline only)
+   - Vertically centered row with a line behind
+   - Column placement via --left / --width (e.g., 6, 9, 12)
+   ============================================ */
+
+/* Section layout: title on top, stage centered vertically */
+.block.string-parallax.-centered{
+  display: grid;
+  grid-template-rows: auto 1fr;                 /* title, then the stage */
+  row-gap: clamp(12px, 2.5vw, 24px);
+  min-height: clamp(520px, 70vh, 920px);
 }
 
-/* Ensure filled “black” squares are exactly 150x150 */
+/* Stage: 12-col grid, vertical centering, and baseline behind tiles */
+.block.string-parallax .parallax-stage{
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0,1fr));
+  align-items: center;                           /* center items vertically */
+  min-height: clamp(260px, 44vh, 420px);
+  isolation: isolate;                            /* contain compositing (de-jitter) */
+  will-change: contents;
+}
+
+/* Baseline behind the row */
+.block.string-parallax .parallax-stage::before{
+  content:"";
+  position: absolute;
+  left: clamp(8px, 2vw, 24px);
+  right: clamp(8px, 2vw, 24px);
+  top: 50%;
+  height: 1px;                                   /* crisp line */
+  background: rgba(16,18,20,.22);
+  transform: translateY(-0.5px);                 /* snap to pixel grid */
+  z-index: 0;                                    /* behind tiles */
+}
+@supports (translate: 0){
+  .block.string-parallax .parallax-stage::before{ translate: 0 -0.5px; }
+}
+
+/* Place each item via CSS vars: --left (start col) and --width (span) */
+.block.string-parallax .parallax-stage .rel{
+  grid-column: var(--left, 1) / span var(--width, 1);
+  justify-self: start;
+  z-index: 1;                                    /* above baseline */
+}
+
+/* ======================
+   Tile sizing & variants
+   ====================== */
+
+/* Base sizing for all parallax tiles (String Tune hook retained) */
+.block.string-parallax .child > [string="parallax"]{
+  /* size knobs (override per .rel with inline CSS vars if needed) */
+  --box-w: 150px;          /* width */
+  --box-ratio: 1 / 1;      /* square by default */
+
+  display: block;
+  inline-size: var(--box-w);
+  aspect-ratio: var(--box-ratio);
+  box-sizing: border-box;
+  background: currentColor;
+
+  /* De-jitter: layer promotion & rendering hints */
+  will-change: transform;
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  contain: layout paint;
+}
+
+/* FILLED (non-empty): exactly 150×150 black squares */
 .block.string-parallax .rel:not(.-empty) .child > [string="parallax"]{
   --box-w: 150px;
   --box-ratio: 1 / 1;
-  color: var(--c-black, #000); /* make sure they're black */
+  color: var(--c-black, #000);
 }
 
-/* Empty variant: outline only */
+/* EMPTY variant: outline only, no fill */
 .block.string-parallax .rel.-empty .child > [string="parallax"]{
   background: transparent !important;
   outline: max(1px, .12rem) solid currentColor;
+  color: rgba(16,18,20,.9);                      /* outline color */
 }
 
-/* Taller empties */
+/* Taller empties (combine with .-empty) */
 .block.string-parallax .rel.-tall .child > [string="parallax"]{
-  --box-ratio: 2 / 3; /* try 1/2 or 3/5 if you want even taller */
+  --box-ratio: 1 / 2;                            /* taller rectangle */
+  /* try: --box-ratio: 2 / 5; or 1 / 2.2 for different proportions */
 }
 
-/* Label spacing */
-.block.string-parallax .desc{ margin-top: .5rem; text-align: center; }
+/* Labels */
+.block.string-parallax .desc{
+  margin-top: .5rem;
+  text-align: center;
+}
 
-/* Small-screen: keep filled squares 150, let empties compress a bit if needed */
+/* ======================
+   Small-screen tweaks
+   ====================== */
 @media (max-width: 640px){
-  .block.string-parallax .rel:not(.-empty) .child > [string="parallax"]{
-    --box-w: 150px; /* still 150 */
+  /* Keep filled at 150; empties keep ratio but can wrap vertically */
+  .block.string-parallax .child > [string="parallax"]{ --box-w: 150px; }
+
+  /* Slightly taller stage for breathing room */
+  .block.string-parallax .parallax-stage{
+    min-height: clamp(220px, 50vh, 360px);
   }
 }
 
@@ -1397,9 +1472,6 @@ div[data-fps]::after, div[data-position]::after{
         </g>
       </svg>
     <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to convey</p></div>
-
-
-    
   </div>
 
   
@@ -1432,7 +1504,6 @@ div[data-fps]::after, div[data-position]::after{
       </svg>
     <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to move</p></div>
   </div>
-
 </div>
 
 
@@ -1456,6 +1527,138 @@ div[data-fps]::after, div[data-position]::after{
 </div>
 
 
+<!-- Basics (Three Blocks) -->
+<div class="-w block string-enter"
+     string="cursor" string-cursor-class="cursor-1"
+     data-storyline="Define product vs. environment."
+     data-cursor-tip="imagine this..."
+     data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
+
+  <h6 class="title -tac" data-v-1a9dc9c4>
+    Ok, ok, okay... Enough about boxes!
+    <span class="-mm" data-v-ccb4a0eb>
+      Billions of boxes built for businesses brave enough to be bold {basically}.
+    </span>
+  </h6>
+
+  <!-- Product A (FILLED) -->
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:6;">
+      <!-- PL-1 -->
+      <svg class="pl1" viewBox="0 0 128 128" aria-label="preloader 1">
+        <defs>
+          <linearGradient id="pl-grad-pre-1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#fff" />
+          </linearGradient>
+          <mask id="pl-mask-pre-1">
+            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-1)" />
+          </mask>
+        </defs>
+        <g fill="currentColor">
+          <g class="pl1__g">
+            <g transform="translate(20,20) rotate(0,44,44)">
+              <g class="pl1__rect-g">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+              <g class="pl1__rect-g" transform="rotate(180,44,44)">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+            </g>
+          </g>
+        </g>
+        <g fill="currentColor" mask="url(#pl-mask-pre-1)">
+          <g class="pl1__g">
+            <g transform="translate(20,20) rotate(0,44,44)">
+              <g class="pl1__rect-g">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+              <g class="pl1__rect-g" transform="rotate(180,44,44)">
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" />
+                <rect class="pl1__rect" rx="8" ry="8" width="40" height="40" transform="translate(0,48)" />
+              </g>
+            </g>
+          </g>
+        </g>
+      </svg>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to fit</p></div>
+  </div>
+
+  <!-- Product B (FILLED) -->
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:9;">
+      <!-- PL-2 -->
+      <svg class="pl2" viewBox="0 0 128 128" aria-label="preloader 2">
+        <g fill="currentColor">
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="0"  y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="44" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="88" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+        </g>
+        <defs>
+          <linearGradient id="pl-grad-pre-2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#fff" />
+          </linearGradient>
+          <mask id="pl-mask-pre-2">
+            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-2)" />
+          </mask>
+        </defs>
+        <g fill="currentColor" mask="url(#pl-mask-pre-2)">
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="0"  y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="44" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+          <g class="pl2__rect-g">
+            <rect class="pl2__rect" rx="8" ry="8" x="88" y="128" width="40" height="24" transform="rotate(180)" />
+          </g>
+        </g>
+      </svg>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to convey</p></div>
+  </div>
+
+  
+
+  <!-- Product C (FILLED) -->
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:12;">
+      <!-- PL-3 -->
+      <svg class="pl3" viewBox="0 0 128 128" aria-label="preloader 3">
+        <g fill="currentColor">
+          <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          <g class="pl3__rect-g" transform="scale(-1,-1)">
+            <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          </g>
+        </g>
+        <defs>
+          <linearGradient id="pl-grad-pre-3" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#000" />
+            <stop offset="100%" stop-color="#fff" />
+          </linearGradient>
+          <mask id="pl-mask-pre-3">
+            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-3)" />
+          </mask>
+        </defs>
+        <g fill="currentColor" mask="url(#pl-mask-pre-3)">
+          <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          <g class="pl3__rect-g" transform="scale(-1,-1)">
+            <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+          </g>
+        </g>
+      </svg>
+    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to move</p></div>
+  </div>
+</div>
+
+
+
 
 <!-- Parallax (FILLED squares; EMPTY taller) -->
 <div class="-w block string-parallax"
@@ -1468,34 +1671,35 @@ div[data-fps]::after, div[data-position]::after{
     I can go with the flow (I can go)
     <span class="-mm" data-v-05b709a3>
       I've worked with a number of startups, design agencies, and tech firms; <br>
-      all consistently with a high level of impact through varied context.
+      earning my keep as an individual contributor, a manager, and product owner.
     </span>
   </h6>
 
-  <!-- 1) Filled BLACK square (exactly 150x150) -->
-  <div class="rel rel-1 " data-v-05b709a3>
+  <!-- col 6 -->
+  <div class="rel rel-1" data-v-05b709a3 style="--left:6; --width:1;">
     <div class="child" data-v-05b709a3>
       <div string="parallax" string-parallax="2" data-v-05b709a3 string-id="string-14" data-tooltip="Fast lane — launch buzz"></div>
     </div>
-    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>big agency</p></div>
+    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>IC</p></div>
   </div>
 
-  <!-- 2) EMPTY + TALL rectangle -->
-  <div class="rel rel-2" data-v-05b709a3>
+  <!-- col 9 -->
+  <div class="rel rel-2" data-v-05b709a3 style="--left:9; --width:1;">
     <div class="child" data-v-05b709a3>
       <div string="parallax" string-parallax="4" data-v-05b709a3 string-id="string-15" data-tooltip="Mid lane — steady cadence"></div>
     </div>
-    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>small agency</p></div>
+    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>Manager</p></div>
   </div>
 
-  <!-- 3) EMPTY + TALLER rectangle (override ratio inline if you like) -->
-  <div class="rel rel-3" data-v-05b709a3 style="--box-ratio: 1 / 2;">
+  <!-- col 12 -->
+  <div class="rel rel-3" data-v-05b709a3 style="--left:12; --width:1; --box-ratio: 1 / 2;">
     <div class="child" data-v-05b709a3>
-      <div string="parallax" string-parallax="9" data-v-05b709a3 string-id="string-16" data-tooltip="Slow lane — long tail"></div>
+      <div string="parallax" string-parallax="6" data-v-05b709a3 string-id="string-16" data-tooltip="Slow lane — long tail"></div>
     </div>
-    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>startup</p></div>
+    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>PM</p></div>
   </div>
 </div>
+
 
 
 
@@ -1508,18 +1712,18 @@ div[data-fps]::after, div[data-position]::after{
 
 			<h6 class="title -tac" data-v-ccb4a0eb>Shake; don't stir. <span class="-mm" data-v-ccb4a0eb>Go ahead and scroll with rigor past this section.</span></h6>
 
-			<div class="rel rel-1" data-v-ccb4a0eb style="--left:2;">
+			<div class="rel rel-1" data-v-ccb4a0eb style="--left:6;">
 				<div class="child" data-v-ccb4a0eb>
 					<div string="glide" string-glide="-25" data-v-ccb4a0eb string-id="string-18a" data-tooltip="Glide: leadership sets the tone"></div>
 				</div>
 				<div class="-m desc" data-v-ccb4a0eb><p data-v-ccb4a0eb>#vibe #aura #bet</p></div>
 			</div>
-			<div class="rel rel-2" data-v-ccb4a0eb style="--left:5;">
+			<div class="rel rel-2" data-v-ccb4a0eb style="--left:9;">
 				<div class="child" data-v-ccb4a0eb>
 					<div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18" data-tooltip="Glide: cross-functional alignment"></div>
 				</div>
 			</div>
-			<div class="rel rel-3" data-v-ccb4a0eb style="--left:8;">
+			<div class="rel rel-3" data-v-ccb4a0eb style="--left:12;">
 				<div class="child" data-v-ccb4a0eb>
 					<div string="glide" string-glide="30.5" data-v-ccb4a0eb string-id="string-19" data-tooltip="Glide: delivery feels effortless"></div>
 				</div>
@@ -1534,7 +1738,7 @@ div[data-fps]::after, div[data-position]::after{
 				 data-cursor-tip="Attention has inertia."
 				 data-v-021d6718 data-v-270bb328 data-v-4f043ceb>
 
-			<h6 class="title -tac" data-v-270bb328>Less "stand-out" <span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
+			<h6 class="title -tac" data-v-270bb328>Less "stand-out" <span class="-mm" data-v-ccb4a0eb>Suffice to say, I have learned it's not about standing out, <br>as that runs the risk of overshadowing those next to you.</span></h6>
 
 			<div class="rel rel-1" data-v-270bb328>
 				<div class="child" data-v-270bb328>
@@ -1554,7 +1758,7 @@ div[data-fps]::after, div[data-position]::after{
 				 data-cursor-tip="Bend toward intent."
 				 data-v-021d6718 data-v-40fb9db4 data-v-4f043ceb string-id="string-21">
 
-			<h6 class="title -tac" data-v-40fb9db4>More "Stand-up" <span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
+			<h6 class="title -tac" data-v-40fb9db4>More "stand-up" <span class="-mm" data-v-ccb4a0eb>You know, be that wanted presence. Be the one people know they can rely on. <br>It's about being available, but staying in your lane; respecting boundaries.</span></h6>
 
 
 			<div class="rel rel-1 -a-p" data-v-40fb9db4>
@@ -1583,7 +1787,7 @@ div[data-fps]::after, div[data-position]::after{
        Proudly be that 0.000001%.
      </p>
      
-				<span class="-m" data-v-8129bdd7>We are not the user.<br>We are the product.<br>Ship or be shipped.</span>
+				<span class="-m" data-v-8129bdd7>Learn new sh*t.<br>Be your [F'ing] best.<br>[F'ing] do better.</span>
 			</div>
 		</div>
 

@@ -1127,74 +1127,64 @@ div[data-fps]::after, div[data-position]::after{
 
 
 
-/* --- MQ:A ≤640px : phones / small — MOBILE-AS-DESKTOP @ 1.4x --- */
+/* --- MQ:A ≤640px : phones / small — MOBILE-AS-DESKTOP --- */
 @media (max-width:640px){
   :root{
-    /* keep desktop grid; scale the entire token system up */
+    /* keep desktop grid, just smaller */
     --g-columns: 14;
     --columns: 14;
-    --ui: 1.4;                              /* ⬅️ global scale up */
-    --g-gap: clamp(.16rem, 1.2vw, .36rem);  /* breathe a touch more */
-    --g-margin: calc(var(--g-gap) * 2);
-    --section-vh: 68;                       /* still shorter than desktop */
+    --ui: .9;                               /* global type/space scale */
+    --g-gap: clamp(.12rem, 0.9vw, .24rem);  /* tighter gaps */
+    --g-margin: calc(var(--g-gap) * 1.5);   /* tighter side gutters */
+    --section-vh: 68;                       /* shorter sections */
 
-    /* word wall: upscale but keep lines tight */
-    --wall-sentence-min: 1.25rem;
-    --wall-sentence-max: 1.25rem;
-
-    /* tooltip & cursor HUD sizing */
-    --tt-font-size: 12px;
-    --tt-pad-y: 6px;
-    --tt-pad-x: 10px;
-
-    --cursor-tip-font: 13px;
-    --cursor-tip-pad-x: 12px;
-    --cursor-tip-pad-y: 7px;
-    --cursor-tip-x: 18px;
-    --cursor-tip-y: -26px;
+    /* word wall tune so lines don’t balloon */
+    --wall-sentence-min: 1.1rem;
+    --wall-sentence-max: 1.1rem;
   }
 
-  /* preserve 14 tracks on phones */
+  /* keep 14 tracks (don’t collapse to 6) */
   .-w[data-v-4f043ceb]{ grid-template-columns: repeat(14, minmax(0,1fr)); }
 
-  /* text container spans nearly full grid, aligned */
+  /* comfortable text width while preserving grid alignment */
   .-w .text-container{
     --left:1 !important;
     --width: calc(var(--g-columns) - 2) !important;
     max-width:100%;
   }
 
-  /* blocks: shorter but scaled paddings */
+  /* shorter blocks; gentler paddings */
   .block{
-    min-height: 440px;
-    padding-top: clamp(1rem, 3.5vh, 1.6rem);
-    padding-bottom: clamp(1rem, 3.5vh, 1.8rem);
+    min-height: 420px;
+    padding-top: clamp(.75rem, 3vh, 1.2rem);
+    padding-bottom: clamp(.75rem, 3vh, 1.6rem);
   }
 
-  /* bigger preloaders to match 1.4x vibe */
-  .pl1, .pl2, .pl3 { width: 8.5em; height: 8.5em; }
+  /* cursor/tip ergonomics */
+  .cursor{ transform: translate3d(calc(var(--x) * 1px + 8px), calc(var(--y) * 1px + 8px), 0); }
+  .cursor .cursor-tip{ left:36px; font-size:11px; }
+  [data-tooltip]::after{ max-width: min(70vw, 240px); }
 
-  /* ping-pong comfortable size on phones */
-  .ping-pong{ inline-size: min(72vmin, 520px); }
+  /* scale down preloaders & ping-pong a touch */
+  .pl1, .pl2, .pl3 { width: 6.5em; height: 6.5em; }
+  .ping-pong{ inline-size: min(68vmin, 420px); }
 
-  /* parallax stage room */
+  /* Parallax stage breathing room at phone sizes */
   .block.string-parallax .parallax-stage{
-    min-height: clamp(240px, 50vh, 380px);
+    min-height: clamp(220px, 48vh, 360px);
   }
 
-  /* tips and tooltips ergonomics */
-  .cursor{ transform: translate3d(calc(var(--x) * 1px + 10px), calc(var(--y) * 1px + 10px), 0); }
-  .cursor .cursor-tip{ left:40px; }
-  [data-tooltip]::after{ max-width: min(78vw, 360px); }
-
-  /* IMPORTANT: keep FX ON for mobile (if an older rule disables transforms) */
+  /* IMPORTANT: allow transforms/FX on mobile.
+     Remove the original rule that forced:
+       [string="parallax"], [string="glide"] { transform:none !important; }
+     If you can’t remove it, this override restores animations: */
   html.-mobile-desktop [string="parallax"],
   html.-mobile-desktop [string="glide"]{
+    /* Let effect code own transform again */
     transform: translateZ(0) !important;
     will-change: transform;
   }
 }
-
 
 </style>  
 </head>
@@ -1464,7 +1454,7 @@ div[data-fps]::after, div[data-position]::after{
   </h6>
 
   <!-- Product A (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:3;">
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:1;">
       <!-- PL-1 -->
       <svg class="pl1" viewBox="0 0 128 128" aria-label="preloader 1">
         <defs>
@@ -1509,7 +1499,7 @@ div[data-fps]::after, div[data-position]::after{
   </div>
 
   <!-- Product B (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:7;">
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:6;">
       <!-- PL-2 -->
       <svg class="pl2" viewBox="0 0 128 128" aria-label="preloader 2">
         <g fill="currentColor">
@@ -1550,7 +1540,7 @@ div[data-fps]::after, div[data-position]::after{
   
 
   <!-- Product C (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:11;">
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:12;">
       <!-- PL-3 -->
       <svg class="pl3" viewBox="0 0 128 128" aria-label="preloader 3">
         <g fill="currentColor">

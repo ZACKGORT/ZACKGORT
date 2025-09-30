@@ -1925,123 +1925,177 @@ data-cursor-tip="Click, hold, and fling.">
 
   // -------------------- sentence split (em dash + BR-aware) + wall builder
 
-// BR sentinel & extractor (updated)
-const BR = "⟦BR⟧";
-const PUNCTUATION_BREAK_RX = /([;:])(?=(\s|$))/g; // soft break after ; or :
+// -------------------- sentence split (em dash + BR-aware) + wall builder
 
+// Hard break sentinel + author token
+const BR = "⟦BR⟧";
+const BR_TOKEN_RX = /\{\s*br\s*\}/gi; // {BR}, {br}, { br }, etc.
+
+// Soft-break injection after punctuation.
+// Includes '.' but is decimal-safe via lookbehind; fallback uses a simpler rule.
+let PUNCTUATION_BREAK_RX;
+try {
+  // dot not between digits, OR ; :
+  PUNCTUATION_BREAK_RX = new RegExp('((?<!\\d)\\.(?!\\d)|[;:])(?=(\\s|$))', 'g');
+} catch {
+  // No lookbehind support
+  PUNCTUATION_BREAK_RX = /([.;:])(?=(\s|$))/g;
+}
+
+/**
+ * Map HTML and author tokens to BR sentinels, then normalize.
+ * - {BR}, <br>, paragraph seams (</p><p>), double newlines → BR
+ * - Punctuation soft breaks (. ; :) → BR (soft; still a boundary)
+ * - Strip tags, collapse whitespace, de-dupe BRs
+ */
 function extractTextWithBreaks(fromElOrHTML) {
   const rawHTML = typeof fromElOrHTML === "string"
     ? fromElOrHTML
     : (fromElOrHTML?.innerHTML || "");
 
   const marked = rawHTML
-    // existing HTML → BR mappings
-    .replace(/<br\s*\/?>/gi, ` ${BR} `)
-    .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)
-    .replace(/\n{2,}/g, ` ${BR} `)
-    .replace(/\{br\}/gi, ` ${BR} `)
-    // NEW: soft breaks after ; and :
-    .replace(PUNCTUATION_BREAK_RX, `$1 ${BR} `);
+    .replace(/<br\s*\/?>/gi, ` ${BR} `)          // HTML <br>
+    .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)    // paragraph seams
+    .replace(/\n{2,}/g, ` ${BR} `)               // blank lines
+    .replace(BR_TOKEN_RX, ` ${BR} `)             // {BR} author token
+    .replace(PUNCTUATION_BREAK_RX, `$1 ${BR} `); // punctuation soft break
 
-  // strip tags, collapse whitespace, and de-dupe BRs
   return marked
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .replace(new RegExp(`(?:\\s*${BR}\\s*)+`, "g"), ` ${BR} `)
+    .replace(/<[^>]+>/g, " ")                    // strip tags
+    .replace(/\s+/g, " ")                        // collapse whitespace
+    .replace(new RegExp(`(?:\\s*${BR}\\s*)+`, "g"), ` ${BR} `) // de-dupe consecutive BRs
     .trim();
 }
 
-// Lookbehind splitter if supported; else fallback.
+// Lookbehind-capable sentence splitter, else fallback.
+// Break after . ; : ? ! ] } / (space required),
+// or after em dash (—) or slash (/) with optional space.
+// Next token may start with quotes, caps, digits, or the BR sentinel (⟦).
 let SENTENCE_BREAK = null;
 try {
-  // Break after . ; : ? ! ] } / (space required),
-  // or after em dash OR slash (space optional).
-  // Next token may start with quotes, caps, digits, or the BR sentinel "⟦".
   SENTENCE_BREAK = new RegExp(
     '(?:(?<=[.?!;:\\/\\]\\}])\\s+|(?<=\\u2014|\\/)\\s*)(?=["“\'‘`A-Z0-9\\u27E6])',
     'g'
   );
-} catch { /* unsupported lookbehind */ }
+} catch { /* no lookbehind support */ }
 
+/**
+ * BR-first sentence splitting.
+ * If BR is present, we respect author/HTML boundaries and do not
+ * sentence-split inside those segments.
+ */
 function safeSplitSentences(text) {
   if (!text) return [];
   const normalized = text.replace(/\s+/g, ' ').trim();
 
-  // If BR sentinels are present, honor them first (wall logic)
   if (normalized.includes(BR)) {
-    return normalized
-      .split(BR)
-      .map(s => s.trim())
-      .filter(Boolean);
+    return normalized.split(BR).map(s => s.trim()).filter(Boolean);
   }
 
   if (SENTENCE_BREAK) {
     return normalized.split(SENTENCE_BREAK).map(s => s.trim()).filter(Boolean);
   }
 
-  // Fallback w/o lookbehind; includes em dash and slash; allows BR sentinel start lookahead
+  // Fallback (no lookbehind): includes em dash and slash; allows BR lookahead start
   return (
     normalized.match(/[^.?!;:\/\]\}\u2014]+[.?!;:\/\]\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9\u27E6]))/g) || []
   ).map(s => s.trim()).filter(Boolean);
 }
 
+/**
+ * Adds interactivity (hover/click focus) to wall sentences.
+ */
+function wireWallInteractions(wallEl) {
+  const SEL = '.wall-sentence';
 
-  function wireWallInteractions(wallEl) {
-    const SEL = '.wall-sentence';
+  function setPressed(el, on) {
+    el.classList.toggle('active', on);
+    el.setAttribute('aria-pressed', String(on));
+    wallEl.classList.toggle('-has-active', wallEl.querySelector(SEL + '.active') !== null);
+  }
+  function clearAll() {
+    wallEl.querySelectorAll(SEL + '.active').forEach(s => setPressed(s, false));
+    wallEl.classList.remove('-has-active');
+  }
 
-    function setPressed(el, on) {
-      el.classList.toggle('active', on);
-      el.setAttribute('aria-pressed', String(on));
-      wallEl.classList.toggle('-has-active', wallEl.querySelector(SEL + '.active') !== null);
-    }
-    function clearAll() {
-      wallEl.querySelectorAll(SEL + '.active').forEach(s => setPressed(s, false));
-      wallEl.classList.remove('-has-active');
-    }
+  // Hover highlight for mouse/pen only
+  wallEl.addEventListener('pointerenter', e => {
+    const t = e.target.closest(SEL);
+    if (!t || e.pointerType === 'touch') return;
+    t.classList.add('-over');
+  }, true);
+  wallEl.addEventListener('pointerleave', e => {
+    const t = e.target.closest(SEL);
+    if (!t || e.pointerType === 'touch') return;
+    t.classList.remove('-over');
+  }, true);
 
-    // Hover highlight for mouse/pen only
-    wallEl.addEventListener('pointerenter', e => {
-      const t = e.target.closest(SEL);
-      if (!t || e.pointerType === 'touch') return;
-      t.classList.add('-over');
-    }, true);
-    wallEl.addEventListener('pointerleave', e => {
-      const t = e.target.closest(SEL);
-      if (!t || e.pointerType === 'touch') return;
-      t.classList.remove('-over');
-    }, true);
+  // Click/Tap toggles one active (single-select)
+  wallEl.addEventListener('pointerdown', e => {
+    const t = e.target.closest(SEL);
+    if (!t) return;
+    if (e.pointerType === 'touch') e.preventDefault(); // avoid text select
+    const wasOn = t.classList.contains('active');
+    clearAll();
+    setPressed(t, !wasOn);
+  });
 
-    // Click/Tap toggles one active (single-select)
-    wallEl.addEventListener('pointerdown', e => {
-      const t = e.target.closest(SEL);
-      if (!t) return;
-      if (e.pointerType === 'touch') e.preventDefault(); // avoid text select
+  // Keyboard
+  wallEl.addEventListener('keydown', e => {
+    const t = e.target.closest(SEL);
+    if (!t) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
       const wasOn = t.classList.contains('active');
       clearAll();
       setPressed(t, !wasOn);
-    });
+    }
+    if (e.key === 'Escape') {
+      clearAll();
+      t.blur();
+    }
+  });
 
-    // Keyboard
-    wallEl.addEventListener('keydown', e => {
-      const t = e.target.closest(SEL);
-      if (!t) return;
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const wasOn = t.classList.contains('active');
-        clearAll();
-        setPressed(t, !wasOn);
-      }
-      if (e.key === 'Escape') {
-        clearAll();
-        t.blur();
-      }
-    });
+  // Click/tap outside → clear dimming
+  document.addEventListener('pointerdown', e => {
+    if (!wallEl.contains(e.target)) clearAll();
+  });
+}
 
-    // Click/tap outside → clear dimming
-    d.addEventListener('pointerdown', e => {
-      if (!wallEl.contains(e.target)) clearAll();
-    });
-  }
+/**
+ * Build an inline "word wall" from a .wall-wrap container.
+ * Produces spans for sentences and real <br> nodes for BR boundaries.
+ */
+function buildInlineWall(wrap){
+  const existingWall = wrap.querySelector(".wall");
+  const srcP = existingWall?.querySelector("p") || wrap.querySelector("p");
+  const sourceText = extractTextWithBreaks(srcP || existingWall || wrap);
+
+  wrap.innerHTML = "";
+  const wall = document.createElement("div"); wall.className = "wall";
+
+  const sentences = safeSplitSentences(sourceText);
+
+  // Emit spans and real <br> nodes
+  sentences.forEach((seg, idx) => {
+    if (idx > 0) {
+      const br = document.createElement("br");
+      br.className = "wall-br";
+      wall.appendChild(br);
+    }
+    const span = document.createElement("span");
+    span.className = "wall-sentence";
+    span.textContent = seg;
+    span.setAttribute("role","button");
+    span.setAttribute("tabindex","0");
+    span.setAttribute("aria-pressed","false");
+    wall.appendChild(span);
+  });
+
+  wrap.appendChild(wall);
+  wireWallInteractions(wall);
+}
+
 
   function buildInlineWall(wrap){
     const existingWall = wrap.querySelector(".wall");

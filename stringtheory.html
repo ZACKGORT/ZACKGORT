@@ -1123,6 +1123,69 @@ div[data-fps]::after, div[data-position]::after{
 
 
 
+
+
+
+
+/* --- MQ:A ≤640px : phones / small — MOBILE-AS-DESKTOP --- */
+@media (max-width:640px){
+  :root{
+    /* keep desktop grid, just smaller */
+    --g-columns: 14;
+    --columns: 14;
+    --ui: .9;                               /* global type/space scale */
+    --g-gap: clamp(.12rem, 0.9vw, .24rem);  /* tighter gaps */
+    --g-margin: calc(var(--g-gap) * 1.5);   /* tighter side gutters */
+    --section-vh: 68;                       /* shorter sections */
+
+    /* word wall tune so lines don’t balloon */
+    --wall-sentence-min: 1.1rem;
+    --wall-sentence-max: 1.1rem;
+  }
+
+  /* keep 14 tracks (don’t collapse to 6) */
+  .-w[data-v-4f043ceb]{ grid-template-columns: repeat(14, minmax(0,1fr)); }
+
+  /* comfortable text width while preserving grid alignment */
+  .-w .text-container{
+    --left:1 !important;
+    --width: calc(var(--g-columns) - 2) !important;
+    max-width:100%;
+  }
+
+  /* shorter blocks; gentler paddings */
+  .block{
+    min-height: 420px;
+    padding-top: clamp(.75rem, 3vh, 1.2rem);
+    padding-bottom: clamp(.75rem, 3vh, 1.6rem);
+  }
+
+  /* cursor/tip ergonomics */
+  .cursor{ transform: translate3d(calc(var(--x) * 1px + 8px), calc(var(--y) * 1px + 8px), 0); }
+  .cursor .cursor-tip{ left:36px; font-size:11px; }
+  [data-tooltip]::after{ max-width: min(70vw, 240px); }
+
+  /* scale down preloaders & ping-pong a touch */
+  .pl1, .pl2, .pl3 { width: 6.5em; height: 6.5em; }
+  .ping-pong{ inline-size: min(68vmin, 420px); }
+
+  /* Parallax stage breathing room at phone sizes */
+  .block.string-parallax .parallax-stage{
+    min-height: clamp(220px, 48vh, 360px);
+  }
+
+  /* IMPORTANT: allow transforms/FX on mobile.
+     Remove the original rule that forced:
+       [string="parallax"], [string="glide"] { transform:none !important; }
+     If you can’t remove it, this override restores animations: */
+  html.-mobile-desktop [string="parallax"],
+  html.-mobile-desktop [string="glide"]{
+    /* Let effect code own transform again */
+    transform: translateZ(0) !important;
+    will-change: transform;
+  }
+}
+
 </style>  
 </head>
 <body class="-fiddle-digital">
@@ -1391,7 +1454,7 @@ div[data-fps]::after, div[data-position]::after{
   </h6>
 
   <!-- Product A (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:6;">
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:3;">
       <!-- PL-1 -->
       <svg class="pl1" viewBox="0 0 128 128" aria-label="preloader 1">
         <defs>
@@ -1436,7 +1499,7 @@ div[data-fps]::after, div[data-position]::after{
   </div>
 
   <!-- Product B (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:9;">
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:7;">
       <!-- PL-2 -->
       <svg class="pl2" viewBox="0 0 128 128" aria-label="preloader 2">
         <g fill="currentColor">
@@ -1477,7 +1540,7 @@ div[data-fps]::after, div[data-position]::after{
   
 
   <!-- Product C (FILLED) -->
-  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:12;">
+  <div class="rel rel-1" data-v-1a9dc9c4 style="--left:11;">
       <!-- PL-3 -->
       <svg class="pl3" viewBox="0 0 128 128" aria-label="preloader 3">
         <g fill="currentColor">
@@ -1545,7 +1608,7 @@ div[data-fps]::after, div[data-position]::after{
   </h6>
 
   <!-- col 6 -->
-  <div class="rel rel-1" data-v-05b709a3 style="--left:6; --width:1;">
+  <div class="rel rel-1" data-v-05b709a3 style="--left:1; --width:1;">
     <div class="child" data-v-05b709a3>
       <div string="parallax" string-parallax="2" data-v-05b709a3 string-id="string-14" data-tooltip="Fast lane — launch buzz"></div>
     </div>
@@ -1553,7 +1616,7 @@ div[data-fps]::after, div[data-position]::after{
   </div>
 
   <!-- col 9 -->
-  <div class="rel rel-2" data-v-05b709a3 style="--left:9; --width:1;">
+  <div class="rel rel-2" data-v-05b709a3 style="--left:6; --width:1;">
     <div class="child" data-v-05b709a3>
       <div string="parallax" string-parallax="4" data-v-05b709a3 string-id="string-15" data-tooltip="Mid lane — steady cadence"></div>
     </div>
@@ -1561,7 +1624,7 @@ div[data-fps]::after, div[data-position]::after{
   </div>
 
   <!-- col 12 -->
-  <div class="rel rel-3" data-v-05b709a3 style="--left:12; --width:1; --box-ratio: 1 / 2;">
+  <div class="rel rel-3" data-v-05b709a3 style="--left:12; --width:1; --box-ratio: 1 / 1;">
     <div class="child" data-v-05b709a3>
       <div string="parallax" string-parallax="6" data-v-05b709a3 string-id="string-16" data-tooltip="Slow lane — long tail"></div>
     </div>
@@ -1581,20 +1644,20 @@ div[data-fps]::after, div[data-position]::after{
 
 			<h6 class="title -tac" data-v-ccb4a0eb>Shake; don't stir. <span class="-mm" data-v-ccb4a0eb>Go ahead and scroll with rigor past this section. My point, is I am unskakeable #hakunamatata</span></h6>
 
-			<div class="rel rel-1" data-v-ccb4a0eb style="--left:6;">
+			<div class="rel rel-1" data-v-ccb4a0eb style="--left:1;">
 				<div class="child" data-v-ccb4a0eb>
 					<div string="glide" string-glide="-25" data-v-ccb4a0eb string-id="string-18a" data-tooltip="Glide: leadership sets the tone"></div>
 				</div>
 				<div class="-m desc" data-v-ccb4a0eb><p data-v-ccb4a0eb>#vibe #aura #bet</p></div>
 			</div>
-			<div class="rel rel-2" data-v-ccb4a0eb style="--left:9;">
+			<div class="rel rel-2" data-v-ccb4a0eb style="--left:6;">
 				<div class="child" data-v-ccb4a0eb>
 					<div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18" data-tooltip="Glide: cross-functional alignment"></div>
 				</div>
 			</div>
 			<div class="rel rel-3" data-v-ccb4a0eb style="--left:12;">
 				<div class="child" data-v-ccb4a0eb>
-					<div string="glide" string-glide="30.5" data-v-ccb4a0eb string-id="string-19" data-tooltip="Glide: delivery feels effortless"></div>
+					<div string="glide" string-glide="13.5" data-v-ccb4a0eb string-id="string-18" data-tooltip="Glide: cross-functional alignment"></div>
 				</div>
 			</div>
 		</div>

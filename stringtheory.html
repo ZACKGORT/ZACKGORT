@@ -906,26 +906,76 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-270bb328]:last-child::before{ con
 /* ========================================
    10) OVERLAYS / DEBUG CHIPS / OFFSETS
    ======================================== */
-div[data-fps]::after, div[data-position]::after{
-  font-feature-settings:"ss03"; font-family:var(--font-mono); font-size:var(--mm);
-  letter-spacing:normal; line-height: var(--body-line-height);
+
+/* Knob: control overlay height (in vh units). Set to 0 to hide. */
+:root{ --offset-h: 2; } /* was 10; try 2 for “much shorter”, 0 to hide */
+
+div[data-fps]::after,
+div[data-position]::after{
+  font-feature-settings:"ss03";
+  font-family:var(--font-mono);
+  font-size:var(--mm);
+  letter-spacing:normal;
+  line-height: var(--body-line-height);
 }
-.offset-bottom, .offset-top{
-  position:fixed; left:0; width:100%; z-index:100; pointer-events:none;
-  display:block; height: calc(var(--vh,1vh) * 10);
-  background-color: rgba(var(--c-white-rgb), .30);
-  -webkit-backdrop-filter: blur(10px) saturate(115%); backdrop-filter: blur(10px) saturate(115%);
+
+/* Top/Bottom glass overlays */
+.offset-bottom,
+.offset-top{
+  position: fixed;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  pointer-events: none;
+  display: block;
+
+  /* Height driven by knob */
+  height: calc(var(--vh, 2.2vh) * var(--offset-h));
+
+  /* Softer glass by default */
+  background-color: rgba(var(--c-white-rgb), .18);
+  -webkit-backdrop-filter: blur(8px) saturate(110%);
+          backdrop-filter: blur(8px) saturate(110%);
+  border-top: 1px solid rgba(255,255,255,.12);
 }
-.offset-bottom::after, .offset-top::after{
-  position:absolute; left:10px; display:block; padding:5px 8px;
-  background-color: rgba(0,0,0,.65); color:var(--c-white);
-  border:1px solid rgba(255,255,255,.15); content:"";
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+
+/* Labels (debug) */
+.offset-bottom::after,
+.offset-top::after{
+  position: absolute;
+  left: 10px;
+  display: block;
+  padding: 5px 8px;
+  background-color: rgba(0,0,0,.65);
+  color: var(--c-white);
+  border: 1px solid rgba(255,255,255,.15);
+  content: "";
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
 }
-.offset-top{ top:0; }
-.offset-top::after{ bottom:0; content:"Offset top: -10%"; }
-.offset-bottom{ bottom:0; }
-.offset-bottom::after{ content:none !important; display:none !important; }
+
+/* Top overlay */
+.offset-top{ top: 0; }
+.offset-top::after{
+  bottom: 0;
+  content: "Offset top: -10%";
+}
+
+/* Bottom overlay */
+.offset-bottom{ bottom: 0; }
+/* Hide the debug chip on bottom bar by default */
+.offset-bottom::after{ content: none !important; display: none !important; }
+
+/* --- Utility flags ------------------------------------------------------ */
+/* Completely hide overlays without removing DOM */
+:root:has(html.-no-offsets){ --offset-h: 0; }
+html.-no-offsets .offset-bottom,
+html.-no-offsets .offset-top{ display: none !important; }
+
+/* Make them extra short (e.g., for mobile “big mode”) */
+html.-short-offsets :root{ --offset-h: 1.25; }
+
+
 
 /* ===================================================
    11) MEDIA QUERIES (CONSOLIDATED & LABELED)
@@ -1222,8 +1272,8 @@ div[data-fps]::after, div[data-position]::after{
 	<div id="logo-zckgrt">ZCKGRT</div>
 
 
-	<!-- Storyline HUD -->
-	<div id="storyline" class="storyline-hud" aria-live="polite">Scroll, you fools!</div>
+	<!-- Storyline HUD
+	<div id="storyline" class="storyline-hud" aria-live="polite">Scroll, you fools!</div> -->
 
 	<main class="page home-page" data-v-021d6718>
 

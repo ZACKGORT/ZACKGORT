@@ -766,6 +766,30 @@ html.-scroll-forward .-w .rel-1 .desc p[data-v-270bb328]:last-child::before{ con
   text-decoration:underline; text-decoration-thickness:.04em; text-underline-offset:.08em;
 }
 
+/* Tap should behave like hover on touch devices */
+@media (pointer:coarse){
+  .block.string-split.-wordwall .wall{
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Neutralize the persistent 'active/pressed' fade on mobile */
+  .block.string-split.-wordwall .wall:has(.wall-sentence.active) .wall-sentence,
+  .block.string-split.-wordwall .wall:has(.wall-sentence[aria-pressed="true"]) .wall-sentence{
+    opacity: 1;
+  }
+
+  /* Simulate hover while finger is down */
+  .block.string-split.-wordwall .wall.-touching .wall-sentence{
+    opacity: .10;
+  }
+  .block.string-split.-wordwall .wall.-touching .wall-sentence.is-hovered{
+    opacity: 1;
+    background-image: linear-gradient(90deg, rgba(255,141,161,0.06), transparent);
+  }
+}
+
+
+
 /* Legacy <li> wall items (size knob) */
 .block.string-split.-wordwall .wall{ gap:.25em; }
 .block.string-split.-wordwall .wall li{
@@ -2887,6 +2911,33 @@ function buildInlineWall(wrap){
 
   </script>
   
-
+  <script>
+    (function(){
+      const d = document;
+    
+      // Delegate touch to any wall
+      d.addEventListener('touchstart', (e) => {
+        const sentence = e.target.closest('.wall .wall-sentence');
+        const wall = e.target.closest('.wall');
+        if (!wall) return;
+    
+        // Enter "hover" mode for the duration of the touch
+        wall.classList.add('-touching');
+        wall.querySelectorAll('.is-hovered').forEach(n => n.classList.remove('is-hovered'));
+        if (sentence) sentence.classList.add('is-hovered');
+      }, {passive:true});
+    
+      const clearTouch = () => {
+        d.querySelectorAll('.wall.-touching').forEach(wall => {
+          wall.classList.remove('-touching');
+          wall.querySelectorAll('.is-hovered').forEach(n => n.classList.remove('is-hovered'));
+        });
+      };
+    
+      d.addEventListener('touchend', clearTouch, {passive:true});
+      d.addEventListener('touchcancel', clearTouch, {passive:true});
+    })();
+    </script>
+    
 
 </body></html>

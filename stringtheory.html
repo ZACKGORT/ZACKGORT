@@ -921,13 +921,12 @@ div[data-fps]::after, div[data-position]::after{
 
 
 /* --- MONDRIAN --- */
-/* Center this Mondrian section on both axes */
 .block.string-enter.-mond{
   min-height: clamp(520px, 80vh, 1000px);
   display: grid;
-  grid-template-rows: auto 1fr;       /* title on top, canvas area below */
-  justify-items: center;               /* center horizontally */
-  align-items: center;                 /* center the canvas row vertically */
+  grid-template-rows: auto 1fr;    /* title, then canvas area */
+  justify-items: center;           /* center horizontally */
+  align-items: center;             /* center vertically */
   row-gap: clamp(12px, 2.5vw, 24px);
 }
 
@@ -937,16 +936,22 @@ div[data-fps]::after, div[data-position]::after{
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: .75rem;
+  gap: .6rem;
 }
 
-/* Caption */
+/* Mondrian caption (smaller) */
 .mond-caption{
+  margin: .4rem 0 0;
   text-align: center;
-  opacity: .8;
+  font-size: var(--mond-caption-size, clamp(.7rem, .6vw + .6rem, .7rem));
+  line-height: 1.25;
   letter-spacing: .01em;
-  font-size: 0.95em;
+  opacity: .8;
+  color: var(--c-fg, currentColor);
+  max-width: 40ch;
 }
+.block.string-enter.-mond .mond-caption{ opacity: .75; }
+@media (prefers-color-scheme: dark){ .mond-caption{ opacity: .85; } }
 
 /* Mondrian grid — no outer container needed */
 .mond-grid{
@@ -960,7 +965,7 @@ div[data-fps]::after, div[data-position]::after{
   width: min(500px, 65vw);
   aspect-ratio: var(--mond-aspect);
 
-  /* IMPORTANT: no vertical margin so centering works */
+  /* no vertical margin so centering works cleanly */
   margin: 0 auto;
   place-self: center;
 
@@ -988,15 +993,16 @@ div[data-fps]::after, div[data-position]::after{
 .mond-grid .tile.blue{color:var(--mond-blue)}
 .mond-grid .tile.white{color:var(--mond-white)}
 
-/* Accessibility nicety: focus ring on inner box */
+/* focus ring for accessibility */
 .mond-grid .tile:focus-within .-a-scale-in{
   outline: 2px solid rgba(255,255,255,.6);
   outline-offset: -2px;
 }
 
-/* small-screen line weight */
-@media (max-width:640px){ .mond-grid{ --mond-line:5px; width: min(520px, 82vw); } }
-
+/* small-screen tweaks */
+@media (max-width:640px){
+  .mond-grid{ --mond-line:5px; width: min(520px, 82vw); }
+}
 
 </style>  
 </head>
@@ -1111,7 +1117,7 @@ div[data-fps]::after, div[data-position]::after{
      data-v-021d6718 data-v-1a9dc9c4 data-v-4f043ceb>
 
   <h6 class="title -tac" data-v-1a9dc9c4>
-    This is a box. This box is your product.
+    This is a box. This is your product.
     <span class="-mm" data-v-ccb4a0eb>
       A product, whether it's a shoe, a cheesesteak, or an investment portfolio, fits nicely inside a box.
     </span>
@@ -1135,7 +1141,7 @@ div[data-fps]::after, div[data-position]::after{
 				 data-cursor-tip="from here to there"
 				 data-v-021d6718 data-v-a676084d data-v-4f043ceb>
 
-			<h6 class="title -tac" data-v-a676084d>I make boxes & I move product.<span class="-mm" data-v-ccb4a0eb>Expand upon herein</span></h6>
+			<h6 class="title -tac" data-v-a676084d>I make boxes & I move product.<span class="-mm" data-v-ccb4a0eb>Literally, like all I do, as some tend think.</span></h6>
 
 <!-- LEFT big box + moving pink fill (FILLED pink) -->
 <div class="rel rel-1" data-v-a676084d style="--left:2; --width:2; --travel:2.5;">
@@ -1162,7 +1168,7 @@ div[data-fps]::after, div[data-position]::after{
 				 data-storyline="As an aside, the reason developers are paid more than designers is because it's more expensive to code a square than to draw one."
 				 data-v-021d6718 data-v-675dfa07 data-v-4f043ceb>
 
-         <h6 class="title -tac" data-v-a676084d>This is an array of boxes <span class="-mm" data-v-ccb4a0eb>Like the 99%, may we enjoy an array of boxes arranged on a figurative e-retail shelf</span></h6>
+         <h6 class="title -tac" data-v-a676084d>These are familiar boxes. <span class="-mm" data-v-ccb4a0eb>Like the 99.99999%, may we look upon in awe an array of boxes arranged in a familiar way.</span></h6>
 
 			<div class="rel rel-1 -a-p" string string-repeat string-inview="100%" data-v-675dfa07 string-id="string-8" style="--left:2;">
 				<div class="child" data-v-675dfa07>
@@ -1198,50 +1204,50 @@ div[data-fps]::after, div[data-position]::after{
      data-cursor-tip="hover tiles for labels">
 
   <h6 class="title -tac">
-    This is not a Mondrian
-    <span class="-mm">De Stijl study with String Tune boxes</span>
+    These are famous boxes<br>
+    <span class="-mm">#Mondrian is rolling in his grave #sorry #notsorry</span>
   </h6>
 
-  <figure class="mond-figure" data-tooltip="De Stijl study — hover tiles">
+  <figure class="mond-figure" data-tooltip="a void that is a box">
     <div class="mond-grid" aria-label="Mondrian-style composition">
       <!-- RED: upper-left block -->
       <div class="tile red" style="grid-column:1 / span 5; grid-row:1 / span 6;">
         <div class="child -a-p" string string-repeat string-id="mond-1">
-          <div class="-a-scale-in" data-tooltip="red"></div>
+          <div class="-a-scale-in" data-tooltip="a red box"></div>
         </div>
       </div>
 
       <!-- WHITE: upper-right band -->
       <div class="tile white" style="grid-column:6 / span 1; grid-row:1 / span 6;">
         <div class="child -a-p" string string-repeat string-id="mond-2">
-          <div class="-a-scale-in" data-tooltip="white"></div>
+          <div class="-a-scale-in" data-tooltip="a tall white box"></div>
         </div>
       </div>
 
       <!-- YELLOW: bottom-left strip -->
       <div class="tile yellow" style="grid-column:1 / span 3; grid-row:7 / span 3;">
         <div class="child -a-p" string string-repeat string-id="mond-3">
-          <div class="-a-scale-in" data-tooltip="yellow"></div>
+          <div class="-a-scale-in" data-tooltip="a yellow box"></div>
         </div>
       </div>
 
       <!-- WHITE: bottom-center field -->
       <div class="tile white" style="grid-column:4 / span 2; grid-row:7 / span 3;">
         <div class="child -a-p" string string-repeat string-id="mond-4">
-          <div class="-a-scale-in" data-tooltip="white"></div>
+          <div class="-a-scale-in" data-tooltip="a short white box"></div>
         </div>
       </div>
 
       <!-- BLUE: bottom-right square -->
       <div class="tile blue" style="grid-column:6 / span 1; grid-row:7 / span 2;">
         <div class="child -a-p" string string-repeat string-id="mond-5">
-          <div class="-a-scale-in" data-tooltip="blue"></div>
+          <div class="-a-scale-in" data-tooltip="a blue box"></div>
         </div>
       </div>
     </div>
 
     <figcaption class="mond-caption -m">
-      Composition study in primary colors — after Mondrian
+      "Imitation is the sincerest form of flattery that mediocrity can pay to greatness - Oscar Wilde"
     </figcaption>
   </figure>
 </div>

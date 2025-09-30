@@ -918,6 +918,86 @@ div[data-fps]::after, div[data-position]::after{
   .block{ height: calc(var(--section-vh) * 1dvh); }
 }
 
+
+
+/* --- MONDRIAN --- */
+/* Center this Mondrian section on both axes */
+.block.string-enter.-mond{
+  min-height: clamp(520px, 80vh, 1000px);
+  display: grid;
+  grid-template-rows: auto 1fr;       /* title on top, canvas area below */
+  justify-items: center;               /* center horizontally */
+  align-items: center;                 /* center the canvas row vertically */
+  row-gap: clamp(12px, 2.5vw, 24px);
+}
+
+/* Figure groups grid + caption (semantic) */
+.mond-figure{
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: .75rem;
+}
+
+/* Caption */
+.mond-caption{
+  text-align: center;
+  opacity: .8;
+  letter-spacing: .01em;
+  font-size: 0.95em;
+}
+
+/* Mondrian grid — no outer container needed */
+.mond-grid{
+  /* knobs */
+  --mond-line: 6px;
+  --mond-aspect: 4 / 3;
+  --mond-red:#d40920; --mond-yellow:#f7d842; --mond-blue:#1356a2;
+  --mond-white:#f2f2f2; --mond-black:#111;
+
+  /* centered canvas, smaller */
+  width: min(500px, 65vw);
+  aspect-ratio: var(--mond-aspect);
+
+  /* IMPORTANT: no vertical margin so centering works */
+  margin: 0 auto;
+  place-self: center;
+
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: var(--mond-line);
+  background: var(--mond-black);
+  border: var(--mond-line) solid var(--mond-black);
+}
+
+/* tiles fill their grid cells using your String Tune box */
+.mond-grid .tile{ position:relative; --box-radius:0; color:var(--mond-white); }
+.mond-grid .tile > .child{ position:absolute; inset:0; padding:0; }
+.mond-grid .tile > .child > .-a-scale-in{
+  width:100%; height:100%;
+  border:none; border-radius:var(--box-radius);
+  background: currentColor;
+  transform-origin: center;
+}
+
+/* colors */
+.mond-grid .tile.red{color:var(--mond-red)}
+.mond-grid .tile.yellow{color:var(--mond-yellow)}
+.mond-grid .tile.blue{color:var(--mond-blue)}
+.mond-grid .tile.white{color:var(--mond-white)}
+
+/* Accessibility nicety: focus ring on inner box */
+.mond-grid .tile:focus-within .-a-scale-in{
+  outline: 2px solid rgba(255,255,255,.6);
+  outline-offset: -2px;
+}
+
+/* small-screen line weight */
+@media (max-width:640px){ .mond-grid{ --mond-line:5px; width: min(520px, 82vw); } }
+
+
 </style>  
 </head>
 <body class="-fiddle-digital">
@@ -1082,7 +1162,7 @@ div[data-fps]::after, div[data-position]::after{
 				 data-storyline="As an aside, the reason developers are paid more than designers is because it's more expensive to code a square than to draw one."
 				 data-v-021d6718 data-v-675dfa07 data-v-4f043ceb>
 
-         <h6 class="title -tac" data-v-a676084d>Here is a typical array of boxes <span class="-mm" data-v-ccb4a0eb>Like the 99%, may we enjoy an array of boxes arranged on a figurative e-retail shelf</span></h6>
+         <h6 class="title -tac" data-v-a676084d>This is an array of boxes <span class="-mm" data-v-ccb4a0eb>Like the 99%, may we enjoy an array of boxes arranged on a figurative e-retail shelf</span></h6>
 
 			<div class="rel rel-1 -a-p" string string-repeat string-inview="100%" data-v-675dfa07 string-id="string-8" style="--left:2;">
 				<div class="child" data-v-675dfa07>
@@ -1109,6 +1189,64 @@ div[data-fps]::after, div[data-position]::after{
 				<div class="-m desc desc-top" data-v-675dfa07><p data-v-675dfa07>Box</p></div>
 			</div>
 		</div>
+
+
+<!-- Mondrian -->
+<div class="-w block string-enter -mond"
+     string="cursor" string-cursor-class="cursor-1"
+     data-storyline="Primary colors, strict geometry."
+     data-cursor-tip="hover tiles for labels">
+
+  <h6 class="title -tac">
+    This is not a Mondrian
+    <span class="-mm">De Stijl study with String Tune boxes</span>
+  </h6>
+
+  <figure class="mond-figure" data-tooltip="De Stijl study — hover tiles">
+    <div class="mond-grid" aria-label="Mondrian-style composition">
+      <!-- RED: upper-left block -->
+      <div class="tile red" style="grid-column:1 / span 5; grid-row:1 / span 6;">
+        <div class="child -a-p" string string-repeat string-id="mond-1">
+          <div class="-a-scale-in" data-tooltip="red"></div>
+        </div>
+      </div>
+
+      <!-- WHITE: upper-right band -->
+      <div class="tile white" style="grid-column:6 / span 1; grid-row:1 / span 6;">
+        <div class="child -a-p" string string-repeat string-id="mond-2">
+          <div class="-a-scale-in" data-tooltip="white"></div>
+        </div>
+      </div>
+
+      <!-- YELLOW: bottom-left strip -->
+      <div class="tile yellow" style="grid-column:1 / span 3; grid-row:7 / span 3;">
+        <div class="child -a-p" string string-repeat string-id="mond-3">
+          <div class="-a-scale-in" data-tooltip="yellow"></div>
+        </div>
+      </div>
+
+      <!-- WHITE: bottom-center field -->
+      <div class="tile white" style="grid-column:4 / span 2; grid-row:7 / span 3;">
+        <div class="child -a-p" string string-repeat string-id="mond-4">
+          <div class="-a-scale-in" data-tooltip="white"></div>
+        </div>
+      </div>
+
+      <!-- BLUE: bottom-right square -->
+      <div class="tile blue" style="grid-column:6 / span 1; grid-row:7 / span 2;">
+        <div class="child -a-p" string string-repeat string-id="mond-5">
+          <div class="-a-scale-in" data-tooltip="blue"></div>
+        </div>
+      </div>
+    </div>
+
+    <figcaption class="mond-caption -m">
+      Composition study in primary colors — after Mondrian
+    </figcaption>
+  </figure>
+</div>
+
+
 
 
 

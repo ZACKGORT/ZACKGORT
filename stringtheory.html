@@ -532,6 +532,47 @@ html:not(.-guidelines) .guide-grid{ visibility:hidden; }
 .-w .rel-2[data-v-05b709a3]{ --left:7; }
 .-w .rel-3[data-v-05b709a3]{ --left:11; }
 
+/* Parallax block sizing knobs */
+/* Base sizing for all parallax boxes */
+.block.string-parallax .child > [string="parallax"]{
+  /* defaults (can be overridden per .rel via inline vars) */
+  --box-w: 150px;          /* width knob */
+  --box-ratio: 1 / 1;      /* square by default */
+  inline-size: var(--box-w);
+  aspect-ratio: var(--box-ratio);
+  background: currentColor; /* filled uses current text color */
+}
+
+/* Ensure filled “black” squares are exactly 150x150 */
+.block.string-parallax .rel:not(.-empty) .child > [string="parallax"]{
+  --box-w: 150px;
+  --box-ratio: 1 / 1;
+  color: var(--c-black, #000); /* make sure they're black */
+}
+
+/* Empty variant: outline only */
+.block.string-parallax .rel.-empty .child > [string="parallax"]{
+  background: transparent !important;
+  outline: max(1px, .12rem) solid currentColor;
+}
+
+/* Taller empties */
+.block.string-parallax .rel.-tall .child > [string="parallax"]{
+  --box-ratio: 2 / 3; /* try 1/2 or 3/5 if you want even taller */
+}
+
+/* Label spacing */
+.block.string-parallax .desc{ margin-top: .5rem; text-align: center; }
+
+/* Small-screen: keep filled squares 150, let empties compress a bit if needed */
+@media (max-width: 640px){
+  .block.string-parallax .rel:not(.-empty) .child > [string="parallax"]{
+    --box-w: 150px; /* still 150 */
+  }
+}
+
+
+
 /* Glide block */
 .-w .title span[data-v-ccb4a0eb]{ display:block; margin-top:var(--mm); }
 .-w .rel-1[data-v-ccb4a0eb]{ --left:5; }
@@ -1004,6 +1045,9 @@ div[data-fps]::after, div[data-position]::after{
   .mond-grid{ --mond-line:5px; width: min(520px, 82vw); }
 }
 
+
+
+
 </style>  
 </head>
 <body class="-fiddle-digital">
@@ -1413,36 +1457,47 @@ div[data-fps]::after, div[data-position]::after{
 
 
 
-		<!-- Parallax (FILLED) -->
-		<div class="-w block string-parallax"
-				 string="cursor" string-cursor-class="cursor-1"
-				 data-storyline="Channels run on different clocks."
-				 data-cursor-tip="Pepperidge Farm remembers"
-				 data-v-021d6718 data-v-05b709a3 data-v-4f043ceb>
+<!-- Parallax (FILLED squares; EMPTY taller) -->
+<div class="-w block string-parallax"
+     string="cursor" string-cursor-class="cursor-1"
+     data-storyline="Channels run on different clocks."
+     data-cursor-tip="Pepperidge Farm remembers"
+     data-v-021d6718 data-v-05b709a3 data-v-4f043ceb>
 
-			<h6 class="title -tac" data-v-05b709a3>I can go with the flow (I can go)
-				<span class="-mm" data-v-05b709a3>I've worked with a number of startups, design agencies, and tech firms; <br>all consistently with a high level of impact through varied context.</span>
-			</h6>
+  <h6 class="title -tac" data-v-05b709a3>
+    I can go with the flow (I can go)
+    <span class="-mm" data-v-05b709a3>
+      I've worked with a number of startups, design agencies, and tech firms; <br>
+      all consistently with a high level of impact through varied context.
+    </span>
+  </h6>
 
-			<div class="rel rel-1" data-v-05b709a3>
-				<div class="child" data-v-05b709a3>
-					<div string="parallax" string-parallax="1.2" data-v-05b709a3 string-id="string-14" data-tooltip="Fast lane — launch buzz"></div>
-				</div>
-				<div class="-m desc" data-v-05b709a3><p data-v-05b709a3>big agency</p></div>
-			</div>
-			<div class="rel rel-2" data-v-05b709a3>
-				<div class="child" data-v-05b709a3>
-					<div string="parallax" string-parallax="2.5" data-v-05b709a3 string-id="string-15" data-tooltip="Mid lane — steady cadence"></div>
-				</div>
-				<div class="-m desc" data-v-05b709a3><p data-v-05b709a3>small agency</p></div>
-			</div>
-			<div class="rel rel-3" data-v-05b709a3>
-				<div class="child" data-v-05b709a3>
-					<div string="parallax" string-parallax="3" data-v-05b709a3 string-id="string-16" data-tooltip="Slow lane — long tail"></div>
-				</div>
-				<div class="-m desc" data-v-05b709a3><p data-v-05b709a3>startup</p></div>
-			</div>
-		</div>
+  <!-- 1) Filled BLACK square (exactly 150x150) -->
+  <div class="rel rel-1 " data-v-05b709a3>
+    <div class="child" data-v-05b709a3>
+      <div string="parallax" string-parallax="2" data-v-05b709a3 string-id="string-14" data-tooltip="Fast lane — launch buzz"></div>
+    </div>
+    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>big agency</p></div>
+  </div>
+
+  <!-- 2) EMPTY + TALL rectangle -->
+  <div class="rel rel-2" data-v-05b709a3>
+    <div class="child" data-v-05b709a3>
+      <div string="parallax" string-parallax="4" data-v-05b709a3 string-id="string-15" data-tooltip="Mid lane — steady cadence"></div>
+    </div>
+    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>small agency</p></div>
+  </div>
+
+  <!-- 3) EMPTY + TALLER rectangle (override ratio inline if you like) -->
+  <div class="rel rel-3" data-v-05b709a3 style="--box-ratio: 1 / 2;">
+    <div class="child" data-v-05b709a3>
+      <div string="parallax" string-parallax="9" data-v-05b709a3 string-id="string-16" data-tooltip="Slow lane — long tail"></div>
+    </div>
+    <div class="-m desc" data-v-05b709a3><p data-v-05b709a3>startup</p></div>
+  </div>
+</div>
+
+
 
 		<!-- Glide (FILLED) -->
 		<div class="-w block string-glide"

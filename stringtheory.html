@@ -261,13 +261,6 @@ html.-cursor-tooltips [data-tooltip]::after{ display:none; }
   [data-tooltip]::after{ background: rgba(0,0,0,.72); color: var(--c-white); }
 }
 
-/* Cursor HUD tip wrapper (positioned by JS via CSS vars) */
-.cursor .cursor-tip{
-  position: absolute; left: var(--cursor-tip-x); top: var(--cursor-tip-y);
-  transform: translateZ(0);
-  font-size: var(--cursor-tip-font); padding: var(--cursor-tip-pad-y) var(--cursor-tip-pad-x);
-  z-index: 1000;
-}
 
 /* Mobile bubble width nudges handled in MQ:A */
 
@@ -338,14 +331,33 @@ html.-ready, html.-ready body, html.-ready a, html.-ready button{ cursor:none; }
 .cursor .cursor-2{ width:36px; height:36px; background:transparent; border:2px solid #fff; }
 .cursor.-down .cursor-1, .cursor.-down .cursor-2{ transform: translateZ(0) scale(.9); }
 .cursor.-hide{ opacity:0; transition: opacity .15s ease; }
+/* Bubble sits top-right relative to the pointer */
 .cursor .cursor-tip{
-  position:absolute; left:48px; top:0; padding:6px 10px; font-size:12px; line-height:1;
-  border:1px solid rgba(255,255,255,.25); background:#000; color:#fff; border-radius:0;
-  white-space:nowrap; pointer-events:none; transform: translateZ(0) translateY(6px);
-  opacity:0; transition: opacity .25s ease, transform .25s ease;
+  position: absolute;
+  left: 0; top: 0;
+  padding: var(--cursor-tip-pad-y, 6px) var(--cursor-tip-pad-x, 10px);
+  font-size: var(--cursor-tip-font, 12px);
+  line-height: 1;
+  border: 1px solid rgba(255,255,255,.25);
+  background: #000; color: #fff; border-radius: 0;
+  white-space: nowrap; pointer-events: none;
+
+  /* use CSS vars to place bubble */
+  transform: translate3d(var(--cursor-tip-x, 16px), var(--cursor-tip-y, -24px), 0);
+  opacity: 0; transition: opacity .25s ease, transform .25s ease;
 }
-.cursor.-tips > .cursor-tip{ opacity:1; transform: translateZ(0) translateY(0); }
-.cursor.-down > .cursor-tip{ transform: translateZ(0) scale(.96); }
+
+.cursor.-tips > .cursor-tip{
+  opacity: 1;
+  transform: translate3d(var(--cursor-tip-x, 16px), var(--cursor-tip-y, -24px), 0);
+}
+
+.cursor.-down > .cursor-tip{
+  transform:
+    translate3d(var(--cursor-tip-x, 16px), var(--cursor-tip-y, -24px), 0)
+    scale(.96);
+}
+
 
 /* Marquee */
 .-marquee{
@@ -983,7 +995,11 @@ html.-short-offsets :root{ --offset-h: 1.25; }
 
 /* --- MQ:A ≤640px : phones / small --- */
 @media (max-width:640px){
-  :root{ --g-columns: 6; --section-vh: 60; }
+  :root{
+    --cursor-tip-x: 12px;   /* a little closer on phones */
+    --cursor-tip-y: -28px;  /* a touch higher to avoid thumb */
+    --cursor-tip-font: 11px;
+  }
 
   .cursor{ transform: translate3d(calc(var(--x) * 1px + 8px), calc(var(--y) * 1px + 8px), 0); }
   .cursor .cursor-tip{ left:36px; font-size:11px; }
@@ -1280,66 +1296,51 @@ html.-short-offsets :root{ --offset-h: 1.25; }
 
 
 
-
 <!-- Welcome -->
 <div class="-w block welcome"
      string="cursor" string-cursor-class="cursor-1"
      data-storyline="HOT TAKE: Apple has got it all wrong. It's not about shiny shit; it's elegance and sophistication conveyed through absolute minimialistm and profound simplicity"
-     data-cursor-tip="hello!"
-
+     data-cursor-tip="Scroll pls :)"
      tabindex="0"
      data-v-021d6718 data-v-33216d84 data-v-4f043ceb>
 
-  <div data-v-33216d84
-       data-tooltip="Stack container: label chips + headline + subcopy."
-       tabindex="0">
+  <div data-v-33216d84 tabindex="0">
 
-    <div data-v-33216d84
-         data-tooltip="Label chip row: each chip is animated with the small-label component."
-         tabindex="0">
+    <div data-v-33216d84 tabindex="0">
 
       <div class="fdda-l -mm -up"
            string string-repeat string-offset-top="-20%"
            data-v-33216d84 data-v-d6e5c8df string-id="string-3"
-           data-tooltip="Discipline: Web Design"
            tabindex="0">
-        <span data-v-d6e5c8df
-              data-tooltip="Chip text: ‘Web Design’"
-              tabindex="0">Intro_101:</span>
+        <span data-v-d6e5c8df tabindex="0">Intro_101:</span>
       </div>
 
       <div class="fdda-l -mm -up"
            string string-repeat string-offset-top="-20%"
            data-v-33216d84 data-v-d6e5c8df string-id="string-1"
-           data-tooltip="Discipline: UX & UI"
            tabindex="0">
-        <span data-v-d6e5c8df
-              data-tooltip="Chip text: ‘UX & UI’"
-              tabindex="0">Web Design in the Modern Era</span>
+        <span data-v-d6e5c8df tabindex="0">Web Design in the Modern Era</span>
       </div>
+
       <div class="fdda-l -mm -up"
            string string-repeat string-offset-top="-20%"
            data-v-33216d84 data-v-d6e5c8df string-id="string-1"
-           data-tooltip="Discipline: UX & UI"
            tabindex="0">
-        <span data-v-d6e5c8df
-              data-tooltip="Chip text: ‘UX & UI’"
-              tabindex="0">by Zack Gort</span>
+        <span data-v-d6e5c8df tabindex="0">by Zack Gort</span>
       </div>
 
     </div>
 
     <h1 class="-tac -m-h3"
         data-v-33216d84
-        data-tooltip="Hero number: 99.999999% (styled with -m-h3 on mobile)"
         tabindex="0">99.999999%</h1>
 
     <span class="-m"
           data-v-8129bdd7
-          data-tooltip="Kicker: ‘… of all websites look like this.’"
           tabindex="0">... of all websites look like this.</span>
   </div>
 </div>
+
 
 
 				<!-- Split 1 (text only) -->

@@ -2925,35 +2925,49 @@ data-cursor-tip="Click, hold, and fling.">
     
           tree.nodeSize([NY, NX])(xroot);
     
-// Center layout + fit-to-viewport on mobile
+// Center layout + fit-to-viewport with mobile rebalance
 var nodes = xroot.descendants();
 var minX = d3.min(nodes, d=>d.x), maxX = d3.max(nodes, d=>d.x);
 var minY = d3.min(nodes, d=>d.y), maxY = d3.max(nodes, d=>d.y);
-var half  = TILE/2;
+var half = TILE/2;
 
-// content bounds in the tree’s local coords (include tile size)
 var contentW = (maxY - minY) + TILE;
 var contentH = (maxX - minX) + TILE;
 
-// if you only want this on mobile breakpoints:
 var isMobile = window.matchMedia("(max-width: 640px)").matches;
 
-// compute scale that fits content into the stage (<= 1 so desktop stays 1:1)
-var pad = Math.max(12, TILE * 0.25);
-var s   = Math.min(
-  1, // never upscale
-  (W - 2*pad) / Math.max(1, contentW),
-  (H - 2*pad) / Math.max(1, contentH)
+// padding knobs (CSS-overridable)
+var cs = getComputedStyle(host);
+var padBase   = parseFloat(cs.getPropertyValue("--tree-pad") || "") || Math.max(12, TILE * 0.25);
+var padTop    = parseFloat(cs.getPropertyValue("--tree-pad-top") || "") || padBase;
+var padBottom = parseFloat(cs.getPropertyValue("--tree-pad-bottom") || "") || padBase;
+
+// slightly smaller bottom padding on mobile (so it sits higher)
+if (isMobile) padBottom = Math.max(8, padBottom * 0.6);
+
+// fit scale (never upscale)
+var s = Math.min(
+  1,
+  (W - 2*padBase) / Math.max(1, contentW),
+  (H - (padTop + padBottom)) / Math.max(1, contentH)
 );
-if (!isMobile) s = Math.min(1, s); // keep it, but you can force s=1 for non-mobile if you prefer
 
-// place min corner at centered padding in *screen* space
-// NOTE: transform lists apply right-to-left => scale first, then translate.
-var tx = ((W - contentW * s) / 2) - s * (minY - half);
-var ty = ((H - contentH * s) / 2) - s * (minX - half);
+// remaining free space after scaling
+var freeX = Math.max(0, W - contentW * s);
+var freeY = Math.max(0, H - contentH * s - (padTop + padBottom));
 
-// apply transform
+// upward “balance” on mobile: use a fraction of the free vertical space
+var bias = isMobile
+  ? (parseFloat(cs.getPropertyValue("--tree-balance") || "") || 0.25) // 0..1
+  : 0;
+
+// translate so left/top content corner lands at padded, biased position
+// NOTE: transform order is scale then translate (right-to-left in the string)
+var tx = (freeX / 2) - s * (minY - half);
+var ty = (freeY / 2) + padTop - s * (minX - half) - (freeY * bias);
+
 g.attr("transform", "translate(" + tx + "," + ty + ") scale(" + s + ")");
+
 
     
           var link = g.selectAll(".link")

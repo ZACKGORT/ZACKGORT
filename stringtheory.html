@@ -738,43 +738,50 @@
   @keyframes ping-pong-paddle-x{ from,to{ transform: translate(36px, 92px) rotate(6deg); } 50%{ transform: translate(92px, 92px) rotate(-6deg); } }
   @keyframes ping-pong-paddle-y{ from,50%,to{ animation-timing-function: var(--pp-ease-out); transform: translate(0,0); } 25%,75%{ animation-timing-function: var(--pp-ease-in); transform: translate(0,28px); } }
   
-  /* Preloader base sizing & keyframes */
-  .pl1,.pl2,.pl3{ display:block; width:8em; height:8em; }
-  .pl1__g,.pl1__rect,.pl2__rect,.pl2__rect-g,.pl3__rect{ animation: pl1-a 1.5s cubic-bezier(.65,0,.35,1) infinite; }
-  .pl1__g{ transform-origin:64px 64px; }
-  .pl1__rect:first-child{ animation-name: pl1-b; }
-  .pl1__rect:nth-child(2){ animation-name: pl1-c; }
-  .pl2__rect, .pl2__rect-g{ animation-name: pl2-a; }
-  .pl2__rect{ animation-name: pl2-b; }
-  .pl2__rect-g .pl2__rect{ transform-origin: 20px 128px; }
-  .pl2__rect-g:first-child, .pl2__rect-g:first-child .pl2__rect{ animation-delay:-.25s; }
-  .pl2__rect-g:nth-child(2), .pl2__rect-g:nth-child(2) .pl2__rect{ animation-delay:-.125s; }
-  .pl2__rect-g:nth-child(2) .pl2__rect{ transform-origin: 64px 128px; }
-  .pl2__rect-g:nth-child(3) .pl2__rect{ transform-origin: 108px 128px; }
-  .pl3__rect{ animation-name: pl3; }
-  .pl3__rect-g{ transform-origin:64px 64px; }
-  .pl1 rect, .pl2 rect, .pl3 rect{ rx:0; ry:0; shape-rendering:crispEdges; }
-  
-  @keyframes pl1-a{ from{ transform:rotate(0); } 80%,to{ animation-timing-function: steps(1,start); transform: rotate(90deg); } }
-  @keyframes pl1-b{
-    from{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:40px; }
-    20%{ animation-timing-function: steps(1,start); width:40px; height:0; }
-    60%{ animation-timing-function: cubic-bezier(.65,0,.35,1); width:0; height:40px; }
-    80%,to{ width:40px; height:40px; }
-  }
-  @keyframes pl1-c{
-    from{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:40px; transform: translate(0,48px); }
-    20%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:40px; height:88px; transform: translate(0,0); }
-    40%{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:40px; transform: translate(0,0); }
-    60%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:88px; height:40px; transform: translate(0,0); }
-    80%,to{ width:40px; height:40px; transform: translate(48px,0); }
-  }
-  @keyframes pl2-a{ from,25%,66.67%,to{ transform: translateY(0); } 50%{ animation-timing-function: cubic-bezier(.33,0,.67,0); transform: translateY(-80px); } }
-  @keyframes pl2-b{
-    from,to{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:24px; transform: rotate(180deg) translateX(0); }
-    33.33%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:20px; height:64px; transform: rotate(180deg) translateX(10px); }
-    66.67%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:28px; height:44px; transform: rotate(180deg) translateX(6px); }
-  }
+/* Preloader base sizing & keyframes */
+.pl1,.pl2,.pl3{ display:block; width:8em; height:8em; }
+.pl1__g,.pl1__rect,.pl2__rect,.pl2__rect-g,.pl3__rect{ animation: pl1-a 1.5s cubic-bezier(.65,0,.35,1) infinite; }
+.pl1__g{ transform-origin:64px 64px; }
+.pl1__rect:first-child{ animation-name: pl1-b; }
+.pl1__rect:nth-child(2){ animation-name: pl1-c; }
+.pl2__rect, .pl2__rect-g{ animation-name: pl2-a; }
+.pl2__rect{ animation-name: pl2-b; }
+.pl2__rect-g .pl2__rect{ transform-origin: 20px 128px; }
+.pl2__rect-g:first-child, .pl2__rect-g:first-child .pl2__rect{ animation-delay:-.25s; }
+.pl2__rect-g:nth-child(2), .pl2__rect-g:nth-child(2) .pl2__rect{ animation-delay:-.125s; }
+.pl2__rect-g:nth-child(2) .pl2__rect{ transform-origin: 64px 128px; }
+.pl2__rect-g:nth-child(3) .pl2__rect{ transform-origin: 108px 128px; }
+.pl3__rect{ animation-name: pl3; }
+.pl3__rect-g{ transform-origin:64px 64px; }
+.pl1 rect, .pl2 rect, .pl3 rect{ rx:0; ry:0; shape-rendering:crispEdges; }
+
+@keyframes pl1-a{ from{ transform:rotate(0); } 80%,to{ animation-timing-function: steps(1,start); transform: rotate(90deg); } }
+@keyframes pl1-b{
+  from{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:40px; }
+  20%{ animation-timing-function: steps(1,start); width:40px; height:0; }
+  60%{ animation-timing-function: cubic-bezier(.65,0,.35,1); width:0; height:40px; }
+  80%,to{ width:40px; height:40px; }
+}
+@keyframes pl1-c{
+  from{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:40px; transform: translate(0,48px); }
+  20%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:40px; height:88px; transform: translate(0,0); }
+  40%{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:40px; transform: translate(0,0); }
+  60%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:88px; height:40px; transform: translate(0,0); }
+  80%,to{ width:40px; height:40px; transform: translate(48px,0); }
+}
+@keyframes pl2-a{ from,25%,66.67%,to{ transform: translateY(0); } 50%{ animation-timing-function: cubic-bezier(.33,0,.67,0); transform: translateY(-80px); } }
+@keyframes pl2-b{
+  from,to{ animation-timing-function: cubic-bezier(.33,0,.67,0); width:40px; height:24px; transform: rotate(180deg) translateX(0); }
+  33.33%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:20px; height:64px; transform: rotate(180deg) translateX(10px); }
+  66.67%{ animation-timing-function: cubic-bezier(.33,1,.67,1); width:28px; height:44px; transform: rotate(180deg) translateX(6px); }
+}
+@keyframes pl3{
+  from{ transform: translate(64px,0); width:64px; height:64px; }
+  25%{ transform: translate(0,0); width:128px; height:32px; }
+  50%{ transform: translate(0,0); width:64px; height:64px; }
+  75%{ transform: translate(0,0); width:32px; height:128px; }
+  to{ transform: translate(0,64px); width:64px; height:64px; }
+}
   
   /* ========================================
      10) OVERLAYS / DEBUG CHIPS / OFFSETS
@@ -1537,34 +1544,35 @@
 
   
 
+
   <!-- Product C (FILLED) -->
   <div class="rel rel-1" data-v-1a9dc9c4 style="--left:10;">
-      <!-- PL-3 -->
-      <svg class="pl3" viewBox="0 0 128 128" aria-label="preloader 3"data-tooltip="ahh, adaptability">
-        <g fill="currentColor">
+    <!-- PL-3 -->
+    <svg class="pl3" viewBox="0 0 128 128" aria-label="preloader 3"data-tooltip="ahh, adaptability">
+      <g fill="currentColor">
+        <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+        <g class="pl3__rect-g" transform="scale(-1,-1)">
           <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
-          <g class="pl3__rect-g" transform="scale(-1,-1)">
-            <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
-          </g>
         </g>
-        <defs>
-          <linearGradient id="pl-grad-pre-3" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#000" />
-            <stop offset="100%" stop-color="#fff" />
-          </linearGradient>
-          <mask id="pl-mask-pre-3">
-            <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-3)" />
-          </mask>
-        </defs>
-        <g fill="currentColor" mask="url(#pl-mask-pre-3)">
+      </g>
+      <defs>
+        <linearGradient id="pl-grad-pre-3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#000" />
+          <stop offset="100%" stop-color="#fff" />
+        </linearGradient>
+        <mask id="pl-mask-pre-3">
+          <rect x="0" y="0" width="128" height="128" fill="url(#pl-grad-pre-3)" />
+        </mask>
+      </defs>
+      <g fill="currentColor" mask="url(#pl-mask-pre-3)">
+        <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
+        <g class="pl3__rect-g" transform="scale(-1,-1)">
           <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
-          <g class="pl3__rect-g" transform="scale(-1,-1)">
-            <rect class="pl3__rect" rx="8" ry="8" width="64" height="64" transform="translate(64,0)" />
-          </g>
         </g>
-      </svg>
-    <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to move</p></div>
-  </div>
+      </g>
+    </svg>
+  <div class="-m desc" data-v-1a9dc9c4><p data-v-1a9dc9c4>Built to move</p></div>
+</div>
 </div>
 
 

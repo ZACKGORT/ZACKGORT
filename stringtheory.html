@@ -1153,13 +1153,13 @@
 
 /* --- Tiny sitemap text (12px) --- */
 .d3-tree-block .node { font-size: 10px; }        /* covers generic node text */
-.d3-tree-block .node text { font-size: 10px; }   /* explicit for SVG <text> */
+.d3-tree-block .node text { font-size: 12px; }   /* explicit for SVG <text> */
 .d3-tree-block .node-label { font-size: 10px; }  /* if you still render .node-label */
 
 
 
 /* 30% bigger squares */
-.d3-tree-block { --st-node: 40px; } /* 56px * 1.3 ≈ 73px */
+.d3-tree-block { --st-node: 64px; } /* 56px * 1.3 ≈ 73px */
 
 /* Make sure FO + inner wrappers honor the var */
 .d3-tree-block foreignObject,
@@ -1594,11 +1594,14 @@
      string="cursor" string-cursor-class="cursor-1"
      data-storyline="Information maps, revealed by clicks."
      data-cursor-tip="tap nodes to expand/collapse"
-     style="--tree-h: 100vh;">
-  <h6 class="title -tac">
-    Site Map
-    <span class="-mm">Redacted nodes, fluid layout</span>
-  </h6>
+     style="--tree-h: 90vh;">
+     <h6 class="title -tac" data-v-05b709a3><br><br>
+      Behind the boxes:
+      <span class="-mm" data-v-05b709a3>
+        Before the box, comes data. Data that informs; data that instructs, and data opens lanes for innovation.
+      </span>
+    </h6>
+  
 
   <div class="tree-wrap">
     <svg id="d3-tree" role="img" aria-label="Redacted tree diagram"></svg>
@@ -1808,327 +1811,342 @@ data-cursor-tip="Click, hold, and fling.">
 	<div id="fps" style="position:fixed;bottom:10px;right:10px;background-color:#000;color:#fff;padding:4px 8px;font-size:12px;font-family:monospace;border:1px solid rgba(255,255,255,.2);z-index:1000;pointer-events:none">FPS: 60</div>
 	<div id="scroll-dir" data-dir="-" data-val="0" style="position:fixed;bottom:10px;left:10px;background-color:#000;color:#fff;border:1px solid rgba(255,255,255,.2);padding:5px 8px;font-size:12px;font-family:monospace;z-index:1000;pointer-events:none"></div>
 
-<!-- String Tune runtime -->
-<script>
-/*! StringTune – unified desktop/mobile wall interactions, safe sentence split, BR support, and full runtime (parallax/glide/progress/rapier)
-   Mobile enabled: effects now respect prefers-reduced-motion only (no UA gating)
-*/
-(() => {
-  const d = document, de = d.documentElement, w = window;
-  if (de.__stringTuneMounted) return;
-  de.__stringTuneMounted = !0;
-  de.classList.add("-ready", "-loaded");
-
-  // -------------------- capabilities & utils
-  const prefersReduced = (w.matchMedia && w.matchMedia("(prefers-reduced-motion: reduce)")).matches || !1;
-  const allowMotion = !prefersReduced; // ← mobile allowed; only accessibility gates
-  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
-  const lerp = (a,b,t)=>a+(b-a)*t;
-  const toPx = (v, axis="y") => {
-    if (v == null) return 0;
-    const s = String(v).trim();
-    if (s.endsWith("%")) {
-      const n = parseFloat(s) / 100;
-      return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
-    }
-    return parseFloat(s) || 0;
-  };
-
-  // -------------------- constants / tuning
-  const BOX_SCALE = 0.8;
-  const PROGRESS_MULT = 1;
-  const PARALLAX_TRAVEL = allowMotion ? 140 : 0;
-  const LERP_AMP = allowMotion ? 1.2 : 0;
-  const GLIDE_AMP = allowMotion ? 1.35 : 0;
-  de.style.setProperty("--progress-mult", String(PROGRESS_MULT));
-
-  // -------------------- CSS injection (wall click/hover parity)
-  (function injectStyles(){
-    const css = `
-      .wall{pointer-events:none}
-      .wall .wall-sentence{pointer-events:auto;cursor:pointer;touch-action:manipulation}
-      .wall.-has-active .wall-sentence:not(.active){opacity:.35}
-      .wall .wall-sentence.-over:not(.active){opacity:.65}
-      .wall .wall-sentence{padding:.08em .12em;margin:0 .02em;border-radius:.25em}
-      .wall .wall-br{line-height:0}
-      .wall .wall-br + .wall-sentence{display:inline-block;margin-top:.5em}
-    `;
-    const el = d.createElement("style");
-    el.setAttribute("data-stringtune", "wall");
-    el.textContent = css;
-    d.head.appendChild(el);
-  })();
-
-  // -------------------- layout: box scale
-  function applyBoxScale() {
-    d.querySelectorAll(".-w .rel").forEach((rel) => {
-      const child = rel.querySelector(":scope > .child");
-      if (!child) return;
-      const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
-      const base = child.clientWidth;
-      const extra = Math.max(0, (scale - 1) * base);
-      rel.style.paddingBottom = extra ? `${extra}px` : "";
-      child.style.transformOrigin = "top left";
-      child.style.transform = scale !== 1 ? `scale(${scale})` : "";
-    });
-  }
-
-  // -------------------- [string] repeat/split/inview
-  function setupRepeat() {
-    d.querySelectorAll("[data-string-clone]").forEach((n)=>n.remove());
-    d.querySelectorAll("[string][string-repeat]").forEach((el)=>{
-      if (el.dataset.stringRepeated === "1") return;
-      const raw = el.getAttribute("string-repeat");
-      const total = raw && raw.trim()!=="" ? Math.max(1, parseInt(raw,10) || 1) : 1;
-      for (let i=1;i<total;i++){
-        const clone = el.cloneNode(!0);
-        clone.removeAttribute("string-repeat");
-        clone.setAttribute("data-string-clone","");
-        el.after(clone);
-      }
-      el.dataset.stringRepeated = "1";
-    });
-  }
-
-  function setupSplit() {
-    d.querySelectorAll('[string="split"],[string][string-split]').forEach((el)=>{
-      if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
-      const mode = (el.getAttribute("string-split") || "").toLowerCase();
-      const doWord = mode.includes("word");
-      const doChar = mode.includes("char");
-      const rawText = (el.textContent || "").replace(/\s+/g," ").trim();
-      const words = rawText ? rawText.split(" ") : [];
-      el.textContent = "";
-      el.classList.add("-splitted");
-      let wordIndex = 0;
-      words.forEach((wrd,i)=>{
-        const wSpan = d.createElement("span");
-        if (doWord) wSpan.className = "-s-word";
-        if (doChar){
-          [...wrd].forEach((ch,ci)=>{
-            const cSpan = d.createElement("span");
-            cSpan.className = "-s-char";
-            cSpan.style.transitionDelay = (wordIndex*0.02 + ci*0.01) + "s";
-            cSpan.textContent = ch;
-            wSpan.appendChild(cSpan);
-          });
-        } else { wSpan.textContent = wrd; }
-        el.appendChild(wSpan);
-        if (i < words.length-1) el.appendChild(d.createTextNode(" "));
-        wordIndex++;
-      });
-      el.__split = !0;
-    });
-  }
-
-  function setupInView() {
-    const makeObserver = (el)=>{
-      const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
-      const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
-      const tv = (el.getAttribute("string-inview") || "").trim();
-      const threshold = tv.endsWith("%") ? clamp(parseFloat(tv)/100,0,1) : 0;
-      const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
-      return new IntersectionObserver((entries)=>{
-        entries.forEach((entry)=>{
-          const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
-          if (ok) el.classList.add("-inview");
-          else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
+  <script>
+    /*! StringTune – unified desktop/mobile wall interactions, safe sentence split, BR support, and full runtime (parallax/glide/progress/rapier) */
+    (() => {
+      const d = document, de = d.documentElement, w = window;
+      if (de.__stringTuneMounted) return;
+      de.__stringTuneMounted = !0;
+      de.classList.add("-ready", "-loaded");
+    
+      // -------------------- capabilities & utils
+      const prefersReduced = (w.matchMedia && w.matchMedia("(prefers-reduced-motion: reduce)")).matches || !1;
+      const allowMotion = !prefersReduced; // accessibility gate only
+      const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+      const lerp = (a,b,t)=>a+(b-a)*t;
+      const toPx = (v, axis="y") => {
+        if (v == null) return 0;
+        const s = String(v).trim();
+        if (s.endsWith("%")) {
+          const n = parseFloat(s) / 100;
+          return (axis === "y" ? w.innerHeight : w.innerWidth) * n;
+        }
+        return parseFloat(s) || 0;
+      };
+    
+      // -------------------- constants / tuning
+      const BOX_SCALE = 0.8;
+      const PROGRESS_MULT = 1;
+      const PARALLAX_TRAVEL = allowMotion ? 140 : 0;
+      const LERP_AMP = allowMotion ? 1.2 : 0;
+      const GLIDE_AMP = allowMotion ? 1.35 : 0;
+      de.style.setProperty("--progress-mult", String(PROGRESS_MULT));
+    
+      // -------------------- CSS injection (wall click/hover parity) + lerp stability
+      (function injectStyles(){
+        const css = `
+          .wall{pointer-events:none}
+          .wall .wall-sentence{pointer-events:auto;cursor:pointer;touch-action:manipulation}
+          .wall.-has-active .wall-sentence:not(.active){opacity:.35}
+          .wall .wall-sentence.-over:not(.active){opacity:.65}
+          .wall .wall-sentence{padding:.08em .12em;margin:0 .02em;border-radius:.25em}
+          .wall .wall-br{line-height:0}
+          .wall .wall-br + .wall-sentence{display:inline-block;margin-top:.5em}
+          /* Lerp stability guard */
+          [string="lerp"], .lerp-inner {
+            will-change: transform;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            transition: none !important;
+          }
+        `;
+        const el = d.createElement("style");
+        el.setAttribute("data-stringtune", "wall");
+        el.textContent = css;
+        d.head.appendChild(el);
+      })();
+    
+      // -------------------- layout: box scale
+      function applyBoxScale() {
+        d.querySelectorAll(".-w .rel").forEach((rel) => {
+          const child = rel.querySelector(":scope > .child");
+          if (!child) return;
+          const scale = parseFloat(rel.getAttribute("data-box-scale") || BOX_SCALE) || 1;
+          const base = child.clientWidth;
+          const extra = Math.max(0, (scale - 1) * base);
+          rel.style.paddingBottom = extra ? `${extra}px` : "";
+          child.style.transformOrigin = "top left";
+          child.style.transform = scale !== 1 ? `scale(${scale})` : "";
         });
-      }, { root:null, rootMargin, threshold:[0, threshold||0, 1] });
-    };
-    d.querySelectorAll(".block").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-    d.querySelectorAll("[string]").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
-  }
-
-  // -------------------- progress + lerp
-  const progressEls = [];
-  function collectProgressEls(){ progressEls.length=0; progressEls.push(...d.querySelectorAll('[string="progress"]')); }
-
-  function computeProgress(el, rect, vh){
-    const enterEdge = (el.getAttribute("string-enter-el") || "bottom").toLowerCase();
-    const exitEdge  = (el.getAttribute("string-exit-el")  || "top").toLowerCase();
-    const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
-    const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
-    const viewTop = 0 + topOffset, viewBot = vh + bottomOffset;
-    const enterRef = enterEdge === "top" ? viewTop : viewBot;
-    const exitRef  = exitEdge  === "top" ? viewTop : viewBot;
-    const edgeTop = rect.top, edgeBot = rect.bottom;
-    let p;
-    if (enterEdge === exitEdge){
-      const h = Math.max(1, rect.height);
-      p = (enterEdge === "top") ? (enterRef - edgeTop)/h : (edgeBot - enterRef)/h;
-    } else {
-      const startPos = enterEdge === "top" ? edgeTop : edgeBot;
-      const endPos   = exitEdge  === "top" ? edgeTop : edgeBot;
-      const A = startPos - enterRef;
-      const B = endPos   - exitRef;
-      const span = A - B;
-      p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
-      if (A>0 && B>0) p = 0; if (A<0 && B<0) p = 1;
-    }
-    p = Number.isFinite(p) ? clamp(p,0,1) : 0;
-    el.__lastProgress = p;
-    return p;
-  }
-
-  function updateProgress(){
-    const vh = w.innerHeight;
-    for (const el of progressEls){
-      const rect = el.getBoundingClientRect();
-      const p = computeProgress(el, rect, vh);
-      const out = clamp(p * PROGRESS_MULT, 0, 1);
-      el.style.setProperty("--progress", out.toFixed(4));
-      const id = el.getAttribute("string-id") || el.id;
-      if (id){
-        const esc = (w.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/"/g, '\\"');
-        d.querySelectorAll(`[data-progress-of="${esc}"]`).forEach((n)=> n.textContent = Math.round(p*100));
-        d.querySelectorAll(`[data-stage-of="${esc}"]`).forEach((n)=>{ n.textContent = " "; });
       }
-    }
-  }
-
-  let lerpEls = [];
-  function collectLerpEls(){ lerpEls = [...d.querySelectorAll('[string="lerp"]')]; }
-  function updateLerpProgress(){
-    const vh = w.innerHeight;
-    for (const el of lerpEls){
-      const rect = el.getBoundingClientRect();
-      const p = computeProgress(el, rect, vh);
-      el.style.setProperty("--lerp-progress", p.toFixed(4));
-      d.querySelectorAll('[data-livelabel="lerp"]').forEach((n)=> n.textContent = Math.round(p*100));
-    }
-  }
-
-  // -------------------- parallax + glide (mobile enabled)
-  let parallaxEls = [];
-  function collectParallaxEls(){
-    parallaxEls = allowMotion
-      ? [...d.querySelectorAll('[string="parallax"],[string-parallax]')].map((el)=>({
-          el, factor: parseFloat(el.getAttribute("string-parallax")||"0.5")||0.5
-        }))
-      : [];
-  }
-  function parallaxTick(){
-    if (!parallaxEls.length) return;
-    const wh = w.innerHeight;
-    parallaxEls.forEach(({el,factor})=>{
-      const r = el.getBoundingClientRect();
-      const center = r.top + r.height/2 - wh/2;
-      const cs = getComputedStyle(el);
-      const cssVal = parseFloat(cs.getPropertyValue("--parallax-travel")) || NaN;
-      const maxTravel = Number.isFinite(cssVal) ? cssVal : PARALLAX_TRAVEL;
-      const t = clamp(center/wh, -1, 1);
-      el.style.transform = `translate3d(0, ${(-t*factor*maxTravel).toFixed(2)}px, 0)`;
-    });
-  }
-
-  let lastY = w.scrollY || w.pageYOffset;
-  let lerpVal = 0, glideVal = 0;
-  let glideEls = [];
-  function collectGlideEls(){
-    glideEls = allowMotion
-      ? [...d.querySelectorAll('[string="glide"]')].map((el)=>({ el, k: parseFloat(el.getAttribute("string-glide")||"0.35")||0.35, y:0 }))
-      : [];
-  }
-  function smoothTick(){
-    const y = w.scrollY || w.pageYOffset;
-    const delta = y - lastY;
-    lastY = y;
-    lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
-    glideVal = lerp(glideVal, 0, 0.075) + delta*0.02;
-    de.style.setProperty("--lerp", (lerpVal * LERP_AMP).toFixed(2));
-    de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
-    glideEls.forEach((g)=>{
-      g.y = lerp(g.y, glideVal * g.k, 0.12);
-      g.el.style.transform = `translate3d(0, ${g.y.toFixed(2)}px, 0)`;
-    });
-  }
-
-  // -------------------- cursor + tooltips
-  const cursorRoot = d.querySelector(".cursor[string-cursor]");
-  const tipEl = cursorRoot?.querySelector(".cursor-tip");
-  const DEFAULT_TIP = "Try the cursor →";
-  let cx = 0, cy = 0, hoverTip = "";
-
-  function setTip(msg){
-    if (!cursorRoot || !tipEl) return;
-    if (msg && msg.trim()){
-      tipEl.textContent = msg;
-      cursorRoot.classList.add("-tips");
-    } else cursorRoot.classList.remove("-tips");
-  }
-  function hideTip(){ cursorRoot?.classList.remove("-tips"); }
-
-  function setupCursor(){
-    if (!cursorRoot) return;
-    w.addEventListener("mousemove",(e)=>{
-      cx = e.clientX; cy = e.clientY;
-      cursorRoot.style.transform = `translate3d(${cx-7}px, ${cy-7}px, 0)`;
-      let node = e.target, mode = "cursor-1";
-      while (node && node !== d.body){
-        if (node.hasAttribute("string-cursor-class")){ mode = node.getAttribute("string-cursor-class"); break; }
-        node = node.parentElement;
+    
+      // -------------------- [string] repeat/split/inview
+      function setupRepeat() {
+        d.querySelectorAll("[data-string-clone]").forEach((n)=>n.remove());
+        d.querySelectorAll("[string][string-repeat]").forEach((el)=>{
+          if (el.dataset.stringRepeated === "1") return;
+          const raw = el.getAttribute("string-repeat");
+          const total = raw && raw.trim()!=="" ? Math.max(1, parseInt(raw,10) || 1) : 1;
+          for (let i=1;i<total;i++){
+            const clone = el.cloneNode(!0);
+            clone.removeAttribute("string-repeat");
+            clone.setAttribute("data-string-clone","");
+            el.after(clone);
+          }
+          el.dataset.stringRepeated = "1";
+        });
       }
-      cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
-      cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
-    }, { passive: !0 });
-    w.addEventListener("mousedown", ()=>cursorRoot.classList.add("-down"));
-    w.addEventListener("mouseup", ()=>cursorRoot.classList.remove("-down"));
-    w.addEventListener("mouseleave", ()=>cursorRoot.classList.add("-hide"));
-    w.addEventListener("mouseenter", ()=>cursorRoot.classList.remove("-hide"));
-    if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
-    de.classList.add("-cursor-tooltips");
-  }
-
-  const TIP_DELAY = 450, TOUCH_HIDE_DELAY = 600;
-  let tipTimer=null, touchLiftTimer=null;
-  d.addEventListener("mouseover",(e)=>{
-    const t = e.target?.closest?.("[data-tooltip]");
-    if (!t) return;
-    hoverTip = t.getAttribute("data-tooltip") || "";
-    setTip(hoverTip);
-  }, !0);
-  d.addEventListener("mouseout",(e)=>{
-    const from = e.target?.closest?.("[data-tooltip]"); if (!from) return;
-    const to = e.relatedTarget?.closest?.("[data-tooltip]"); if (to === from) return;
-    hoverTip = ""; setTip("");
-  }, !0);
-  d.addEventListener("focusin",(e)=>{
-    const t = e.target?.closest?.("[data-tooltip]"); if (!t) return;
-    hoverTip = t.getAttribute("data-tooltip") || ""; setTip(hoverTip);
-  });
-  d.addEventListener("focusout",()=>{ hoverTip=""; setTip(""); });
-
-  function onUserScroll(){
-    hideTip(); clearTimeout(tipTimer);
-    tipTimer = setTimeout(()=>{ if (hoverTip) setTip(hoverTip); }, TIP_DELAY);
-  }
-  w.addEventListener("scroll", onUserScroll, { passive: !0 });
-  w.addEventListener("wheel", onUserScroll, { passive: !0 });
-  w.addEventListener("touchmove", onUserScroll, { passive: !0 });
-
-  function updateCursorPosTouch(touch){
-    if (!cursorRoot || !touch) return;
-    cursorRoot.style.transform = `translate3d(${touch.clientX+16}px, ${touch.clientY+8}px, 0)`;
-  }
-  d.addEventListener("touchstart",(e)=>{
-    cursorRoot?.classList.add("-down");
-    const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
-    const el = e.target?.closest?.("[data-tooltip]");
-    hoverTip = el?.getAttribute("data-tooltip") || ""; setTip(hoverTip);
-    clearTimeout(touchLiftTimer);
-  }, { passive: !0 });
-  d.addEventListener("touchmove",(e)=>{
-    const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
-  }, { passive: !0 });
-  function endTouch(){
-    cursorRoot?.classList.remove("-down");
-    clearTimeout(touchLiftTimer);
-    touchLiftTimer = setTimeout(()=>{ hoverTip=""; setTip(""); }, TOUCH_HIDE_DELAY);
-  }
-  d.addEventListener("touchend", endTouch, { passive: !0 });
-  d.addEventListener("touchcancel", endTouch, { passive: !0 });
-
+    
+      function setupSplit() {
+        d.querySelectorAll('[string="split"],[string][string-split]').forEach((el)=>{
+          if (el.__split || el.querySelector(".-s-word, .-s-char")) return;
+          const mode = (el.getAttribute("string-split") || "").toUpperCase();
+          const doWord = mode.includes("WORD");
+          const doChar = mode.includes("CHAR");
+          const rawText = (el.textContent || "").replace(/\s+/g," ").trim();
+          const words = rawText ? rawText.split(" ") : [];
+          el.textContent = "";
+          el.classList.add("-splitted");
+          let wordIndex = 0;
+          words.forEach((wrd,i)=>{
+            const wSpan = d.createElement("span");
+            if (doWord) wSpan.className = "-s-word";
+            if (doChar){
+              [...wrd].forEach((ch,ci)=>{
+                const cSpan = d.createElement("span");
+                cSpan.className = "-s-char";
+                cSpan.style.transitionDelay = (wordIndex*0.02 + ci*0.01) + "s";
+                cSpan.textContent = ch;
+                wSpan.appendChild(cSpan);
+              });
+            } else { wSpan.textContent = wrd; }
+            el.appendChild(wSpan);
+            if (i < words.length-1) el.appendChild(d.createTextNode(" "));
+            wordIndex++;
+          });
+          el.__split = !0;
+        });
+      }
+    
+      function setupInView() {
+        const makeObserver = (el)=>{
+          const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
+          const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
+          const tv = (el.getAttribute("string-inview") || "").trim();
+          const threshold = tv.endsWith("%") ? clamp(parseFloat(tv)/100,0,1) : 0;
+          const rootMargin = `${topOffset}px 0px ${bottomOffset}px 0px`;
+          return new IntersectionObserver((entries)=>{
+            entries.forEach((entry)=>{
+              const ok = entry.isIntersecting && entry.intersectionRatio >= threshold;
+              if (ok) el.classList.add("-inview");
+              else if (entry.intersectionRatio === 0) el.classList.remove("-inview");
+            });
+          }, { root:null, rootMargin, threshold:[0, threshold||0, 1] });
+        };
+        d.querySelectorAll(".block").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+        d.querySelectorAll("[string]").forEach((el)=>{ if (!el.__io) (el.__io = makeObserver(el)).observe(el); });
+      }
+    
+      // -------------------- progress + lerp
+      const progressEls = [];
+      function collectProgressEls(){ progressEls.length=0; progressEls.push(...d.querySelectorAll('[string="progress"]')); }
+    
+      function computeProgress(el, rect, vh){
+        const enterEdge = (el.getAttribute("string-enter-el") || "bottom").toUpperCase();
+        const exitEdge  = (el.getAttribute("string-exit-el")  || "top").toUpperCase();
+        const topOffset = toPx(el.getAttribute("string-offset-top") ?? "-10%","y");
+        const bottomOffset = toPx(el.getAttribute("string-offset-bottom") ?? "-10%","y");
+        const viewTop = 0 + topOffset, viewBot = vh + bottomOffset;
+        const enterRef = enterEdge === "TOP" ? viewTop : viewBot;
+        const exitRef  = exitEdge  === "TOP" ? viewTop : viewBot;
+        const edgeTop = rect.top, edgeBot = rect.bottom;
+        let p;
+        if (enterEdge === exitEdge){
+          const h = Math.max(1, rect.height);
+          p = (enterEdge === "TOP") ? (enterRef - edgeTop)/h : (edgeBot - enterRef)/h;
+        } else {
+          const startPos = enterEdge === "TOP" ? edgeTop : edgeBot;
+          const endPos   = exitEdge  === "TOP" ? edgeTop : edgeBot;
+          const A = startPos - enterRef;
+          const B = endPos   - exitRef;
+          const span = A - B;
+          p = Math.abs(span) < 2 ? (el.__lastProgress ?? 0) : A / span;
+          if (A>0 && B>0) p = 0; if (A<0 && B<0) p = 1;
+        }
+        p = Number.isFinite(p) ? clamp(p,0,1) : 0;
+        el.__lastProgress = p;
+        return p;
+      }
+    
+      function updateProgress(){
+        const vh = w.innerHeight;
+        for (const el of progressEls){
+          const rect = el.getBoundingClientRect();
+          const p = computeProgress(el, rect, vh);
+          const out = clamp(p * PROGRESS_MULT, 0, 1);
+          el.style.setProperty("--progress", out.toFixed(4));
+          const id = el.getAttribute("string-id") || el.id;
+          if (id){
+            const esc = (w.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/"/g, '\\"');
+            d.querySelectorAll(`[data-progress-of="${esc}"]`).forEach((n)=> n.textContent = Math.round(p*100));
+            d.querySelectorAll(`[data-stage-of="${esc}"]`).forEach((n)=>{ n.textContent = " "; });
+          }
+        }
+      }
+    
+      let lerpEls = [];
+      function collectLerpEls(){ lerpEls = [...d.querySelectorAll('[string="lerp"]')]; }
+      function updateLerpProgress(){
+        const vh = w.innerHeight;
+        for (const el of lerpEls){
+          const rect = el.getBoundingClientRect();
+          const p = computeProgress(el, rect, vh);
+          const smooth = Math.round(p * 1000) / 1000; // paint in 0.001 steps
+          if (el.__lastPaint !== smooth){
+            el.style.setProperty("--lerp-progress", smooth.toFixed(3));
+            el.__lastPaint = smooth;
+          }
+        }
+      }
+    
+      // -------------------- parallax + glide (mobile enabled)
+      let parallaxEls = [];
+      function collectParallaxEls(){
+        if (!allowMotion){ parallaxEls = []; return; }
+        const all = [...d.querySelectorAll('[string="parallax"],[string-parallax]')];
+        // Exclude any element that is a lerp or inside one
+        parallaxEls = all
+          .filter(el => !el.closest('[string="lerp"]') && !el.querySelector?.('[string="lerp"]'))
+          .map(el => ({ el, factor: parseFloat(el.getAttribute("string-parallax")||"0.5")||0.5 }));
+      }
+    
+      function parallaxTick(){
+        if (!parallaxEls.length) return;
+        const wh = w.innerHeight;
+        parallaxEls.forEach(({el,factor})=>{
+          const r = el.getBoundingClientRect();
+          const center = r.top + r.height/2 - wh/2;
+          const cs = getComputedStyle(el);
+          const cssVal = parseFloat(cs.getPropertyValue("--parallax-travel")) || NaN;
+          const maxTravel = Number.isFinite(cssVal) ? cssVal : PARALLAX_TRAVEL;
+          const t = clamp(center/wh, -1, 1);
+          const y = Math.round(-t*factor*maxTravel); // integer px to avoid shimmer
+          el.style.transform = `translate3d(0, ${y}px, 0)`;
+        });
+      }
+    
+      let lastY = w.scrollY || w.pageYOffset;
+      let lerpVal = 0, glideVal = 0;
+      let glideEls = [];
+      function collectGlideEls(){
+        if (!allowMotion){ glideEls = []; return; }
+        const all = [...d.querySelectorAll('[string="glide"]')];
+        // Exclude any element that is a lerp or inside one
+        glideEls = all
+          .filter(el => !el.closest('[string="lerp"]') && !el.querySelector?.('[string="lerp"]'))
+          .map(el => ({ el, k: parseFloat(el.getAttribute("string-glide")||"0.35")||0.35, y:0 }));
+      }
+    
+      function smoothTick(){
+        const y = w.scrollY || w.pageYOffset;
+        const delta = y - lastY;
+        lastY = y;
+        lerpVal = clamp(lerp(lerpVal, Math.min(200, Math.abs(delta)), 0.15), 0, 200);
+        glideVal = lerp(glideVal, 0, 0.075) + delta*0.02;
+        de.style.setProperty("--lerp", (lerpVal * LERP_AMP).toFixed(2));
+        de.style.setProperty("--glide", (glideVal * GLIDE_AMP).toFixed(2));
+        glideEls.forEach((g)=>{
+          g.y = lerp(g.y, glideVal * g.k, 0.12);
+          const yy = Math.round(g.y); // integer px
+          g.el.style.transform = `translate3d(0, ${yy}px, 0)`;
+        });
+      }
+    
+      // -------------------- cursor + tooltips
+      const cursorRoot = d.querySelector(".cursor[string-cursor]");
+      const tipEl = cursorRoot?.querySelector(".cursor-tip");
+      const DEFAULT_TIP = "Try the cursor →";
+      let cx = 0, cy = 0, hoverTip = "";
+    
+      function setTip(msg){
+        if (!cursorRoot || !tipEl) return;
+        if (msg && msg.trim()){
+          tipEl.textContent = msg;
+          cursorRoot.classList.add("-tips");
+        } else cursorRoot.classList.remove("-tips");
+      }
+      function hideTip(){ cursorRoot?.classList.remove("-tips"); }
+    
+      function setupCursor(){
+        if (!cursorRoot) return;
+        w.addEventListener("mousemove",(e)=>{
+          cx = e.clientX; cy = e.clientY;
+          cursorRoot.style.transform = `translate3d(${cx-7}px, ${cy-7}px, 0)`;
+          let node = e.target, mode = "cursor-1";
+          while (node && node !== d.body){
+            if (node.hasAttribute("string-cursor-class")){ mode = node.getAttribute("string-cursor-class"); break; }
+            node = node.parentElement;
+          }
+          cursorRoot.classList.toggle("cursor-1", mode === "cursor-1");
+          cursorRoot.classList.toggle("cursor-2", mode === "cursor-2");
+        }, { passive: !0 });
+        w.addEventListener("mousedown", ()=>cursorRoot.classList.add("-down"));
+        w.addEventListener("mouseup", ()=>cursorRoot.classList.remove("-down"));
+        w.addEventListener("mouseleave", ()=>cursorRoot.classList.add("-hide"));
+        w.addEventListener("mouseenter", ()=>cursorRoot.classList.remove("-hide"));
+        if (tipEl && !tipEl.textContent) tipEl.textContent = DEFAULT_TIP;
+        de.classList.add("-cursor-tooltips");
+      }
+    
+      const TIP_DELAY = 450, TOUCH_HIDE_DELAY = 600;
+      let tipTimer=null, touchLiftTimer=null;
+      d.addEventListener("mouseover",(e)=>{
+        const t = e.target?.closest?.("[data-tooltip]");
+        if (!t) return;
+        hoverTip = t.getAttribute("data-tooltip") || "";
+        setTip(hoverTip);
+      }, !0);
+      d.addEventListener("mouseout",(e)=>{
+        const from = e.target?.closest?.("[data-tooltip]"); if (!from) return;
+        const to = e.relatedTarget?.closest?.("[data-tooltip]"); if (to === from) return;
+        hoverTip = ""; setTip("");
+      }, !0);
+      d.addEventListener("focusin",(e)=>{
+        const t = e.target?.closest?.("[data-tooltip]"); if (!t) return;
+        hoverTip = t.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+      });
+      d.addEventListener("focusout",()=>{ hoverTip=""; setTip(""); });
+    
+      function onUserScroll(){
+        hideTip(); clearTimeout(tipTimer);
+        tipTimer = setTimeout(()=>{ if (hoverTip) setTip(hoverTip); }, TIP_DELAY);
+      }
+      w.addEventListener("scroll", onUserScroll, { passive: !0 });
+      w.addEventListener("wheel", onUserScroll, { passive: !0 });
+      w.addEventListener("touchmove", onUserScroll, { passive: !0 });
+    
+      function updateCursorPosTouch(touch){
+        if (!cursorRoot || !touch) return;
+        cursorRoot.style.transform = `translate3d(${touch.clientX+16}px, ${touch.clientY+8}px, 0)`;
+      }
+      d.addEventListener("touchstart",(e)=>{
+        cursorRoot?.classList.add("-down");
+        const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
+        const el = e.target?.closest?.("[data-tooltip]");
+        hoverTip = el?.getAttribute("data-tooltip") || ""; setTip(hoverTip);
+        clearTimeout(touchLiftTimer);
+      }, { passive: !0 });
+      d.addEventListener("touchmove",(e)=>{
+        const t = e.touches && e.touches[0]; if (t) updateCursorPosTouch(t);
+      }, { passive: !0 });
+      function endTouch(){
+        cursorRoot?.classList.remove("-down");
+        clearTimeout(touchLiftTimer);
+        touchLiftTimer = setTimeout(()=>{ hoverTip=""; setTip(""); }, TOUCH_HIDE_DELAY);
+      }
+      d.addEventListener("touchend", endTouch, { passive: !0 });
+      d.addEventListener("touchcancel", endTouch, { passive: !0 });
+    
   // -------------------- magnetic
   let magneticEls = [];
   function collectMagneticEls(){
@@ -2184,590 +2202,555 @@ data-cursor-tip="Click, hold, and fling.">
     }
     block.appendChild(wrap);
   }
-
-  // -------------------- lerp grid
-  function buildLerpGrid(block, cols=3, activeCol){
-    if (!block) return;
-    const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
-    const legacyRel = legacyBox?.closest(".rel");
-    const legacyId = legacyBox?.getAttribute("string-id") || "string-17";
-    block.querySelectorAll(".lerp-grid").forEach((n)=>n.remove());
-    const wrap = d.createElement("div"); wrap.className = "lerp-grid";
-    if (activeCol == null) activeCol = Math.ceil(cols/2);
-    for (let c=1;c<=cols;c++){
-      const rel = d.createElement("div"); rel.className = "rel tile";
-      const child = d.createElement("div"); child.className = "child";
-      if (c===activeCol && legacyBox){
-        rel.classList.add("-active");
-        legacyBox.setAttribute("string-id", legacyId);
-        child.appendChild(legacyBox);
-      } else {
-        const hollow = d.createElement("div"); hollow.setAttribute("data-v-270bb328","");
-        child.appendChild(hollow);
+    
+      // -------------------- lerp grid
+      function buildLerpGrid(block, cols=3, activeCol){
+        if (!block) return;
+        const legacyBox = block.querySelector(':scope [string="lerp"][data-v-270bb328]');
+        const legacyRel = legacyBox?.closest(".rel");
+        const legacyId = legacyBox?.getAttribute("string-id") || "string-17";
+        block.querySelectorAll(".lerp-grid").forEach((n)=>n.remove());
+        const wrap = d.createElement("div"); wrap.className = "lerp-grid";
+        if (activeCol == null) activeCol = Math.ceil(cols/2);
+        for (let c=1;c<=cols;c++){
+          const rel = d.createElement("div"); rel.className = "rel tile";
+          const child = d.createElement("div"); child.className = "child";
+          if (c===activeCol && legacyBox){
+            rel.classList.add("-active");
+            legacyBox.setAttribute("string-id", legacyId);
+            child.appendChild(legacyBox);
+          } else {
+            const hollow = d.createElement("div"); hollow.className="lerp-inner"; hollow.setAttribute("data-v-270bb328","");
+            child.appendChild(hollow);
+          }
+          rel.appendChild(child); wrap.appendChild(rel);
+        }
+        block.appendChild(wrap);
+        block.classList.add("-gridified");
+        if (legacyRel) legacyRel.style.display = "none";
       }
-      rel.appendChild(child); wrap.appendChild(rel);
-    }
-    block.appendChild(wrap);
-    block.classList.add("-gridified");
-    if (legacyRel) legacyRel.style.display = "none";
-  }
-
-  // -------------------- perf HUD
-  function setupPerfHUD(){
-    const fpsNode = d.getElementById("fps");
-    const dirNode = d.getElementById("scroll-dir");
-    if (!fpsNode && !dirNode) return;
-    const getScrollY = ()=>Math.round(w.scrollY || w.pageYOffset || 0);
-    let lastT = performance.now(), frames=0, accum=0;
-    let lastScrollY = getScrollY();
-    const perfTick = (t)=>{
-      const dt = t - lastT; lastT = t; frames++; accum += dt;
-      if (accum > 500 && fpsNode){
-        const fps = Math.round((frames*1000)/accum);
-        fpsNode.textContent = `FPS: ${fps}`; frames=0; accum=0;
+    
+      // -------------------- perf HUD
+      function setupPerfHUD(){
+        const fpsNode = d.getElementById("fps");
+        const dirNode = d.getElementById("scroll-dir");
+        if (!fpsNode && !dirNode) return;
+        const getScrollY = ()=>Math.round(w.scrollY || w.pageYOffset || 0);
+        let lastT = performance.now(), frames=0, accum=0;
+        let lastScrollY = getScrollY();
+        const perfTick = (t)=>{
+          const dt = t - lastT; lastT = t; frames++; accum += dt;
+          if (accum > 500 && fpsNode){
+            const fps = Math.round((frames*1000)/accum);
+            fpsNode.textContent = `FPS: ${fps}`; frames=0; accum=0;
+          }
+          const sy = getScrollY();
+          if (dirNode){
+            const dir = sy > lastScrollY ? "↓" : sy < lastScrollY ? "↑" : "•";
+            dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+          }
+          lastScrollY = sy;
+          w.requestAnimationFrame(perfTick);
+        };
+        w.requestAnimationFrame(perfTick);
       }
-      const sy = getScrollY();
-      if (dirNode){
-        const dir = sy > lastScrollY ? "↓" : sy < lastScrollY ? "↑" : "•";
-        dirNode.textContent = `Scroll ${dir}  y:${sy}`;
+    
+      // -------------------- storyline HUD
+      function getHeadingText(block){
+        if (!block) return "";
+        const h = block.querySelector("h1,h2,h3,h4,h5,h6");
+        if (!h) return "";
+        for (const node of h.childNodes){
+          if (node.nodeType === Node.TEXT_NODE){
+            const t = (node.nodeValue || "").trim();
+            if (t) return t;
+          }
+        }
+        return (h.textContent || "").trim();
       }
-      lastScrollY = sy;
-      w.requestAnimationFrame(perfTick);
-    };
-    w.requestAnimationFrame(perfTick);
-  }
-
-  // -------------------- storyline HUD
-  function getHeadingText(block){
-    if (!block) return "";
-    const h = block.querySelector("h1,h2,h3,h4,h5,h6");
-    if (!h) return "";
-    for (const node of h.childNodes){
-      if (node.nodeType === Node.TEXT_NODE){
-        const t = (node.nodeValue || "").trim();
-        if (t) return t;
+      function getStoryForBlock(block){
+        if (!block) return "";
+        return block.getAttribute("data-storyline")
+            || block.getAttribute("data-cursor-tip")
+            || getHeadingText(block)
+            || "";
       }
-    }
-    return (h.textContent || "").trim();
-  }
-  function getStoryForBlock(block){
-    if (!block) return "";
-    return block.getAttribute("data-storyline")
-        || block.getAttribute("data-cursor-tip")
-        || getHeadingText(block)
-        || "";
-  }
-  const storylineEl = d.getElementById("storyline");
-  const chapterBlocks = [...d.querySelectorAll(".page .block")];
-  let currentStoryText = "";
-  function updateStoryline(next){
-    if (!storylineEl || !next || next === currentStoryText) return;
-    currentStoryText = next; storylineEl.textContent = currentStoryText;
-  }
-  function setupStorylineObserver(){
-    if (!storylineEl || !chapterBlocks.length) return;
-    updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
-    const io = new IntersectionObserver((entries)=>{
-      const vis = entries.filter((e)=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
-      if (!vis) return;
-      updateStoryline(getStoryForBlock(vis.target));
-    }, { root:null, threshold:[0, .25, .5, .75, 1] });
-    chapterBlocks.forEach((b)=>io.observe(b));
-  }
-
-  // -------------------- sentence split (em dash + BR-aware) + wall builder
-  const BR = "⟦BR⟧";
-  const BR_TOKEN_RX = /\{\s*br\s*\}/gi;
-  let PUNCTUATION_BREAK_RX;
-  try { PUNCTUATION_BREAK_RX = new RegExp('((?<!\\d)\\.(?!\\d)|[;:])(?=(\\s|$))', 'g'); }
-  catch { PUNCTUATION_BREAK_RX = /([.;:])(?=(\s|$))/g; }
-
-  function extractTextWithBreaks(fromElOrHTML) {
-    const rawHTML = typeof fromElOrHTML === "string"
-      ? fromElOrHTML
-      : (fromElOrHTML?.innerHTML || "");
-
-    const marked = rawHTML
-      .replace(/<br\s*\/?>(?![^]*<\/code>)/gi, ` ${BR} `)
-      .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)
-      .replace(/\n{2,}/g, ` ${BR} `)
-      .replace(BR_TOKEN_RX, ` ${BR} `)
-      .replace(PUNCTUATION_BREAK_RX, `$1 ${BR} `);
-
-    return marked
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .replace(new RegExp(`(?:\\s*${BR}\\s*)+`, "g"), ` ${BR} `)
-      .trim();
-  }
-
-  let SENTENCE_BREAK = null;
-  try {
-    SENTENCE_BREAK = new RegExp(
-      '(?:(?<=[.?!;:\\/\\]\\})\\s+|(?<=\\u2014|\\/)\\s*)(?=["“\'‘`A-Z0-9\\u27E6])',
-      'g'
-    );
-  } catch {}
-
-  function safeSplitSentences(text) {
-    if (!text) return [];
-    const normalized = text.replace(/\s+/g, ' ').trim();
-
-    if (normalized.includes(BR)) {
-      return normalized.split(BR).map(s => s.trim()).filter(Boolean);
-    }
-
-    if (SENTENCE_BREAK) {
-      return normalized.split(SENTENCE_BREAK).map(s => s.trim()).filter(Boolean);
-    }
-
-    return (
-      normalized.match(/[^.?!;:\/\]\\}\u2014]+[.?!;:\/\]\\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9\u27E6]))/g) || []
-    ).map(s => s.trim()).filter(Boolean);
-  }
-
-  function wireWallInteractions(wallEl) {
-    const SEL = '.wall-sentence';
-
-    function setPressed(el, on) {
-      el.classList.toggle('active', on);
-      el.setAttribute('aria-pressed', String(on));
-      wallEl.classList.toggle('-has-active', wallEl.querySelector(SEL + '.active') !== null);
-    }
-    function clearAll() {
-      wallEl.querySelectorAll(SEL + '.active').forEach(s => setPressed(s, false));
-      wallEl.classList.remove('-has-active');
-    }
-
-    wallEl.addEventListener('pointerenter', e => {
-      const t = e.target.closest(SEL);
-      if (!t || e.pointerType === 'touch') return;
-      t.classList.add('-over');
-    }, true);
-    wallEl.addEventListener('pointerleave', e => {
-      const t = e.target.closest(SEL);
-      if (!t || e.pointerType === 'touch') return;
-      t.classList.remove('-over');
-    }, true);
-
-    wallEl.addEventListener('pointerdown', e => {
-      const t = e.target.closest(SEL);
-      if (!t) return;
-      if (e.pointerType === 'touch') e.preventDefault();
-      const wasOn = t.classList.contains('active');
-      clearAll();
-      setPressed(t, !wasOn);
-    });
-
-    wallEl.addEventListener('keydown', e => {
-      const t = e.target.closest(SEL);
-      if (!t) return;
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const wasOn = t.classList.contains('active');
-        clearAll();
-        setPressed(t, !wasOn);
+      const storylineEl = d.getElementById("storyline");
+      const chapterBlocks = [...d.querySelectorAll(".page .block")];
+      let currentStoryText = "";
+      function updateStoryline(next){
+        if (!storylineEl || !next || next === currentStoryText) return;
+        currentStoryText = next; storylineEl.textContent = currentStoryText;
       }
-      if (e.key === 'Escape') {
-        clearAll();
-        t.blur();
+      function setupStorylineObserver(){
+        if (!storylineEl || !chapterBlocks.length) return;
+        updateStoryline(getStoryForBlock(chapterBlocks[0]) || storylineEl.textContent);
+        const io = new IntersectionObserver((entries)=>{
+          const vis = entries.filter((e)=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+          if (!vis) return;
+          updateStoryline(getStoryForBlock(vis.target));
+        }, { root:null, threshold:[0, .25, .5, .75, 1] });
+        chapterBlocks.forEach((b)=>io.observe(b));
       }
-    });
-
-    document.addEventListener('pointerdown', e => {
-      if (!wallEl.contains(e.target)) clearAll();
-    });
-  }
-
-  function buildInlineWall(wrap){
-    const existingWall = wrap.querySelector(".wall");
-    const srcP = existingWall?.querySelector("p") || wrap.querySelector("p");
-    const sourceText = extractTextWithBreaks(srcP || existingWall || wrap);
-
-    wrap.innerHTML = "";
-    const wall = d.createElement("div"); wall.className = "wall";
-
-    const sentences = safeSplitSentences(sourceText);
-    const pieces = [];
-    for (const s of sentences) {
-      if (s.includes(BR)) {
-        s.split(BR).forEach((chunk, i) => {
-          if (i > 0) pieces.push(BR);
-          if (chunk.trim()) pieces.push(chunk.trim());
-        });
-      } else pieces.push(s);
-    }
-
-    pieces.forEach((piece) => {
-      if (piece === BR) {
-        const br = d.createElement("br");
-        br.className = "wall-br";
-        wall.appendChild(br);
-        return;
+    
+      // -------------------- inline word walls
+      const BR = "⟦BR⟧";
+      const BR_TOKEN_RX = /\{\s*br\s*\}/gi;
+      let PUNCTUATION_BREAK_RX;
+      try { PUNCTUATION_BREAK_RX = new RegExp('((?<!\\d)\\.(?!\\d)|[;:])(?=(\\s|$))', 'g'); }
+      catch { PUNCTUATION_BREAK_RX = /([.;:])(?=(\s|$))/g; }
+    
+      function extractTextWithBreaks(fromElOrHTML) {
+        const rawHTML = typeof fromElOrHTML === "string" ? fromElOrHTML : (fromElOrHTML?.innerHTML || "");
+        const marked = rawHTML
+          .replace(/<br\s*\/?>(?![^]*<\/code>)/gi, ` ${BR} `)
+          .replace(/<\/p>\s*<p[^>]*>/gi, ` ${BR} `)
+          .replace(/\n{2,}/g, ` ${BR} `)
+          .replace(BR_TOKEN_RX, ` ${BR} `)
+          .replace(PUNCTUATION_BREAK_RX, `$1 ${BR} `);
+        return marked
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .replace(new RegExp(`(?:\\s*${BR}\\s*)+`, "g"), ` ${BR} `)
+          .trim();
       }
-      const span = d.createElement("span");
-      span.className = "wall-sentence";
-      span.textContent = piece;
-      span.setAttribute("role","button");
-      span.setAttribute("tabindex","0");
-      span.setAttribute("aria-pressed","false");
-      wall.appendChild(span);
-    });
-
-    wrap.appendChild(wall);
-    wireWallInteractions(wall);
-  }
-
-  function initWordWalls(){
-    d.querySelectorAll(".block.string-split.-wordwall .wall-wrap").forEach(buildInlineWall);
-  }
-
-  // -------------------- Legacy .string-progress helper (compat)
-  (function initLegacyStringProgress(){
-    function viewportProgress(el, start=0.0, end=1.0){
-      const r = el.getBoundingClientRect();
-      const vh = Math.max(1, w.innerHeight || 0);
-      const enter = vh * start, exit = vh * end;
-      const total = (r.height + (enter - exit));
-      if (total <= 0) return 0;
-      const raw = (enter - r.top) / total;
-      return clamp(raw, 0, 1);
-    }
-    const STAGES = [" "," "," "," "," "];
-    const progressBlocks = Array.from(d.querySelectorAll(".block.string-progress"));
-    const items = [];
-    progressBlocks.forEach(block=>{
-      block.style.setProperty("--progress","0");
-      const movers = block.querySelectorAll('.child[string="progress"]');
-      movers.forEach(child=>{
-        const id = child.getAttribute("string-id") || "";
-        const esc = (w.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/"/g,'\\"');
-        const meter = id ? block.querySelector(`[data-progress-of="${esc}"]`) : null;
-        const stage = id ? block.querySelector(`[data-stage-of="${esc}"]`) : null;
-        items.push({ block, anchor: child, meter, stage });
-      });
-    });
-    let ticking = false;
-    function update(){
-      ticking = false;
-      items.forEach(({block, meter, stage})=>{
-        const p = viewportProgress(block, 0.1, 0.9);
-        block.style.setProperty("--progress", p.toFixed(4));
-        if (meter) meter.textContent = Math.round(p*100);
-        if (stage){ stage.textContent = " "; }
-      });
-    }
-    function onScrollOrResize(){ if (!ticking){ ticking = true; requestAnimationFrame(update); } }
-    w.addEventListener("scroll", onScrollOrResize, { passive: !0 });
-    w.addEventListener("resize", onScrollOrResize, { passive: !0 });
-    onScrollOrResize();
-  })();
-
-  // -------------------- Rapier physics playground (async) — drop only at absolute bottom
-  async function initRapierPlayground(){
-    const stageBlock = d.querySelector(".block.string-rapier");
-    const canvas = d.getElementById("rapier-canvas");
-    if (!stageBlock || !canvas) return;
-    const ctx = canvas.getContext("2d");
-    const DPR = Math.max(1, w.devicePixelRatio || 1);
-
-    function fitCanvas(){
-      const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
-      canvas.width = Math.floor(r.width * DPR);
-      canvas.height = Math.floor(r.height * DPR);
-      canvas.style.width = r.width + "px";
-      canvas.style.height = r.height + "px";
-    }
-    fitCanvas();
-    w.addEventListener("resize", fitCanvas, { passive: !0 });
-
-    const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
-    await RAPIER.init();
-    const { RigidBodyType, ActiveEvents } = RAPIER;
-
-    const confettiMod = await import("https://esm.run/canvas-confetti@1");
-    const confetti = confettiMod.default || confettiMod;
-
-    const DROP_G = 2400;
-    const world = new RAPIER.World({ x: 0, y: 0 });
-    const queue = new RAPIER.EventQueue(!0);
-
-    let walls = [];
-    const wallHandles = new Set();
-    function rebuildWalls(){
-      walls.forEach(({ rb, co })=>{ world.removeCollider(co, !0); world.removeRigidBody(rb); });
-      walls.length = 0; wallHandles.clear();
-      const W = canvas.width, H = canvas.height;
-      const t = Math.max(20*DPR, 12*DPR);
-      const defs = [
-        { x: -t/2,     y: H/2,   w: t/2,   h: H/2 },
-        { x: W+t/2,    y: H/2,   w: t/2,   h: H/2 },
-        { x: W/2,      y: -t/2,  w: W/2,   h: t/2 },
-        { x: W/2,      y: H+t/2, w: W/2,   h: t/2 },
-      ];
-      defs.forEach(({x,y,w,h})=>{
-        const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x,y));
-        const co = world.createCollider(
-          RAPIER.ColliderDesc.cuboid(w,h).setRestitution(0.6).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
-          rb
+    
+      let SENTENCE_BREAK = null;
+      try {
+        SENTENCE_BREAK = new RegExp(
+          '(?:(?<=[.?!;:\\/\\]\\})\\s+|(?<=\\u2014|\\/)\\s*)(?=["“\'‘`A-Z0-9\\u27E6])',
+          'g'
         );
-        walls.push({ rb, co }); wallHandles.add(co.handle);
-      });
-    }
-    rebuildWalls();
-
-    w.addEventListener("resize", ()=>{
-      fitCanvas(); rebuildWalls();
-      const W = canvas.width, H = canvas.height;
-      const p = body.translation();
-      const m = current.half + 2*DPR;
-      body.setTranslation({ x: clamp(p.x, m, W-m), y: clamp(p.y, m, H-m) }, !0);
-    }, { passive: !0 });
-
-    const size = Math.min(canvas.width, canvas.height) * 0.12;
-    const start = { x: canvas.width*0.5, y: canvas.height*0.35 };
-    const current = { half: size/2, wear: 0, isBall: !1, collider: null };
-    const body = world.createRigidBody(
-      RAPIER.RigidBodyDesc.dynamic()
-        .setTranslation(start.x, start.y)
-        .setLinearDamping(0.04)
-        .setAngularDamping(0.04)
-    );
-
-    function makeBoxCollider(){
-      if (current.collider) world.removeCollider(current.collider, !0);
-      current.collider = world.createCollider(
-        RAPIER.ColliderDesc.cuboid(current.half, current.half)
-          .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
-        body
-      );
-      current.isBall = !1;
-    }
-    function makeBallCollider(){
-      if (current.collider) world.removeCollider(current.collider, !0);
-      current.collider = world.createCollider(
-        RAPIER.ColliderDesc.ball(current.half*0.98)
-          .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
-        body
-      );
-      current.isBall = !0;
-    }
-    makeBoxCollider();
-
-    let hasDropped = !1;
-    function atAbsoluteBottom(){
-      return (w.scrollY + w.innerHeight) >= (d.body.scrollHeight - 1);
-    }
-
-    function tryDrop(){
-      if (hasDropped || !atAbsoluteBottom()) return;
-      world.gravity = { x:0, y: DROP_G };
-      body.wakeUp();
-      hasDropped = !0;
-    }
-
-    const goal = {
-      visible: !1,
-      get radius(){ return current.half * 1.4; },
-      get cx(){ return canvas.width * 0.5; },
-      get cy(){ return canvas.height * 0.5; },
-    };
-    const showGoal = ()=>{ goal.visible = !0; };
-    const hideGoal = ()=>{ goal.visible = !1; };
-
-    function resetSection(){
-      hideGoal();
-      current.wear = 0;
-      makeBoxCollider();
-      body.setTranslation({ x:start.x, y:start.y }, !0);
-      body.setLinvel({ x:0, y:0 }, !0);
-      body.setAngvel(0, !0);
-      body.setAngularDamping(0.04);
-      hasDropped = !1;
-      world.gravity = { x:0, y:0 };
-    }
-
-    function addWear(amount){
-      current.wear = clamp(current.wear + amount, 0, 1);
-      if (!current.isBall && current.wear >= 0.85){
-        makeBallCollider(); showGoal();
+      } catch {}
+    
+      function safeSplitSentences(text) {
+        if (!text) return [];
+        const normalized = text.replace(/\s+/g, ' ').trim();
+        if (normalized.includes(BR)) return normalized.split(BR).map(s => s.trim()).filter(Boolean);
+        if (SENTENCE_BREAK) return normalized.split(SENTENCE_BREAK).map(s => s.trim()).filter(Boolean);
+        return (normalized.match(/[^.?!;:\/\]\\}\u2014]+[.?!;:\/\]\\}\u2014]*(?:\s+|$|(?=["“'‘`A-Z0-9\u27E6]))/g) || [])
+          .map(s => s.trim()).filter(Boolean);
       }
-      const spinEase = 0.04 + current.wear * 0.06;
-      body.setAngularDamping(spinEase);
-    }
-
-    // pointer handling
-    let dragging = !1, lastPt = null, lastV = {x:0,y:0}, grabOffset = null;
-    function eventPos(e){
-      if (e.touches && e.touches[0]){
-        const t = e.touches[0]; return { x: t.clientX * DPR, y: t.clientY * DPR };
+    
+      function wireWallInteractions(wallEl) {
+        const SEL = '.wall-sentence';
+        function setPressed(el, on) {
+          el.classList.toggle('active', on);
+          el.setAttribute('aria-pressed', String(on));
+          wallEl.classList.toggle('-has-active', wallEl.querySelector(SEL + '.active') !== null);
+        }
+        function clearAll() {
+          wallEl.querySelectorAll(SEL + '.active').forEach(s => setPressed(s, false));
+          wallEl.classList.remove('-has-active');
+        }
+        wallEl.addEventListener('pointerenter', e => {
+          const t = e.target.closest(SEL);
+          if (!t || e.pointerType === 'touch') return;
+          t.classList.add('-over');
+        }, true);
+        wallEl.addEventListener('pointerleave', e => {
+          const t = e.target.closest(SEL);
+          if (!t || e.pointerType === 'touch') return;
+          t.classList.remove('-over');
+        }, true);
+        wallEl.addEventListener('pointerdown', e => {
+          const t = e.target.closest(SEL);
+          if (!t) return;
+          if (e.pointerType === 'touch') e.preventDefault();
+          const wasOn = t.classList.contains('active');
+          clearAll(); setPressed(t, !wasOn);
+        });
+        wallEl.addEventListener('keydown', e => {
+          const t = e.target.closest(SEL);
+          if (!t) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const wasOn = t.classList.contains('active');
+            clearAll(); setPressed(t, !wasOn);
+          }
+          if (e.key === 'Escape') { clearAll(); t.blur(); }
+        });
+        document.addEventListener('pointerdown', e => { if (!wallEl.contains(e.target)) clearAll(); });
       }
-      return { x: e.clientX * DPR, y: e.clientY * DPR };
-    }
-    function pointInside(pt){
-      const c = body.translation();
-      if (current.isBall){
-        const dx = pt.x - c.x, dy = pt.y - c.y;
-        return dx*dx + dy*dy <= current.half*current.half;
+    
+      function buildInlineWall(wrap){
+        const existingWall = wrap.querySelector(".wall");
+        const srcP = existingWall?.querySelector("p") || wrap.querySelector("p");
+        const sourceText = extractTextWithBreaks(srcP || existingWall || wrap);
+        wrap.innerHTML = "";
+        const wall = d.createElement("div"); wall.className = "wall";
+        const sentences = safeSplitSentences(sourceText);
+        const pieces = [];
+        for (const s of sentences) {
+          if (s.includes(BR)) {
+            s.split(BR).forEach((chunk, i) => { if (i > 0) pieces.push(BR); if (chunk.trim()) pieces.push(chunk.trim()); });
+          } else pieces.push(s);
+        }
+        pieces.forEach((piece) => {
+          if (piece === BR) {
+            const br = d.createElement("br");
+            br.className = "wall-br";
+            wall.appendChild(br);
+            return;
+          }
+          const span = d.createElement("span");
+          span.className = "wall-sentence";
+          span.textContent = piece;
+          span.setAttribute("role","button");
+          span.setAttribute("tabindex","0");
+          span.setAttribute("aria-pressed","false");
+          wall.appendChild(span);
+        });
+        wrap.appendChild(wall);
+        wireWallInteractions(wall);
       }
-      return pt.x >= c.x-current.half && pt.x <= c.x+current.half && pt.y >= c.y-current.half && pt.y <= c.y+current.half;
-    }
-    function onDown(e){
-      const pt = eventPos(e);
-      if (!pointInside(pt)) return;
-      e.preventDefault();
-      dragging = !0; lastPt = pt; lastV = {x:0,y:0};
-      stageBlock.classList.add("-grabbing");
-      const c = body.translation(); grabOffset = { x: pt.x - c.x, y: pt.y - c.y };
-      if (body.setGravityScale) body.setGravityScale(0, !0);
-      body.setAngvel(0, !0); body.setLinvel({x:0,y:0}, !0);
-      body.setBodyType(RigidBodyType.KinematicPositionBased, !0);
-      body.wakeUp();
-      if (e.target?.setPointerCapture && e.pointerId != null){ try{ e.target.setPointerCapture(e.pointerId); }catch{} }
-    }
-    function onMove(e){
-      const pt = eventPos(e);
-      if (!dragging){ stageBlock.classList.toggle("-grab", pointInside(pt)); return; }
-      const dt = 1/60;
-      lastV = { x:(pt.x - lastPt.x)/dt, y:(pt.y - lastPt.y)/dt };
-      lastPt = pt;
-      const targetCenter = { x: pt.x - grabOffset.x, y: pt.y - grabOffset.y };
-      body.setNextKinematicTranslation(targetCenter);
-      body.setAngvel(0, !0);
-    }
-    function onUp(e){
-      if (!dragging) return;
-      dragging = !1; stageBlock.classList.remove("-grabbing");
-      const r = grabOffset || {x:0,y:0};
-      const mass = body.mass ? body.mass() : 1;
-      const s = current.half * 2;
-      const I = Math.max(1e-6, (mass * s * s) / 6);
-      const cross = r.x * lastV.y - r.y * lastV.x;
-      const MAX_SPIN = 18;
-      let omega = (mass * cross) / I;
-      omega = clamp(omega, -MAX_SPIN, MAX_SPIN);
-      body.setBodyType(RigidBodyType.Dynamic, !0);
-      if (body.setGravityScale) body.setGravityScale(1, !0);
-      body.wakeUp();
-      const maxSpeed = 3200 * DPR;
-      const clampV = (v,m)=>clamp(v,-m,m);
-      body.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, !0);
-      body.setAngvel(omega, !0);
-      const linSpeed = Math.hypot(lastV.x, lastV.y);
-      const angBonus = Math.abs(omega) * current.half;
-      const throwMetric = linSpeed + angBonus;
-      addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
-      grabOffset = null;
-      if (e?.target?.releasePointerCapture && e.pointerId != null){ try{ e.target.releasePointerCapture(e.pointerId); }catch{} }
-    }
-
-    const area = stageBlock.querySelector(".rapier-stage");
-    area.addEventListener("mousedown", onDown);
-    area.addEventListener("mousemove", onMove);
-    w.addEventListener("mouseup", onUp);
-    area.addEventListener("touchstart", onDown, { passive: !1 });
-    area.addEventListener("touchmove", onMove, { passive: !1 });
-    w.addEventListener("touchend", onUp);
-    w.addEventListener("touchcancel", onUp);
-
-    function handleCollisionEvent(h1,h2,started){
-      if (!started) return;
-      const isSelf = (h)=> current.collider && h === current.collider.handle;
-      const aIsSelf = isSelf(h1) || isSelf(h2);
-      const other = isSelf(h1) ? h2 : isSelf(h2) ? h1 : null;
-      if (!aIsSelf || !wallHandles.has(other)) return;
-      const v = body.linvel();
-      const speed = Math.hypot(v.x, v.y) + Math.abs(body.angvel()) * current.half;
-      addWear(clamp(speed / (6000 * DPR), 0.003, 0.035));
-    }
-    function pinkBgTick(){
-      const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
-      stageBlock.classList.toggle("-bg-pink", hoverish);
-    }
-
-    function roundedRectPath(cx,cy,half,r){
-      const x = cx - half, y = cy - half, w2 = half*2, h2 = half*2;
-      const rr = clamp(r, 0, half);
-      if (rr < 0.5){ ctx.beginPath(); ctx.rect(x,y,w2,h2); return; }
-      ctx.beginPath();
-      ctx.moveTo(x+rr, y);
-      ctx.lineTo(x+w2-rr, y); ctx.arcTo(x+w2, y, x+w2, y+rr, rr);
-      ctx.lineTo(x+w2, y+h2-rr); ctx.arcTo(x+w2, y+h2, x+w2-rr, y+h2, rr);
-      ctx.lineTo(x+rr, y+h2); ctx.arcTo(x, y+h2, x, y+h2-rr, rr);
-      ctx.lineTo(x, y+rr); ctx.arcTo(x, y, x+rr, y, rr);
-    }
-
-    function checkGoal(){
-      if (!goal.visible || !current.isBall) return !1;
-      const p = body.translation(); const r = current.half; const R = goal.radius;
-      const dx = p.x - goal.cx, dy = p.y - goal.cy;
-      const dist = Math.hypot(dx,dy);
-      const EPS = 2*DPR, slack = 0.6 * r;
-      return dist <= R - r + slack + EPS;
-    }
-
-    function drawGoal(root){
-      if (!goal.visible) return;
-      ctx.save();
-      const black = (root.getPropertyValue("--c-black") || "#101214").trim();
-      ctx.setLineDash([2*DPR, 4*DPR]);
-      ctx.lineWidth = 1*DPR;
-      ctx.strokeStyle = black;
-      ctx.beginPath();
-      ctx.arc(goal.cx, goal.cy, goal.radius - 0.5*DPR, 0, Math.PI*2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = black;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      const px = Math.max(10, Math.round(goal.radius * 0.42));
-      const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
-      ctx.font = `${px}px ${fontStack}`;
-      ctx.fillText("AIM", goal.cx, goal.cy);
-      ctx.restore();
-    }
-
-    let lastTime = performance.now();
-    function tick(now){
-      const dt = Math.min(1/30, (now - lastTime)/1000);
-      lastTime = now;
-      world.step(queue);
-      queue.drainCollisionEvents(handleCollisionEvent);
-      if (checkGoal()){
-        confetti({ particleCount: 160, spread: 70, origin: { y: 0.35 } });
-        resetSection();
+    
+      function initWordWalls(){
+        d.querySelectorAll(".block.string-split.-wordwall .wall-wrap").forEach(buildInlineWall);
       }
-      tryDrop(); // drop only when at absolute bottom
-      const W = canvas.width, H = canvas.height;
-      ctx.clearRect(0,0,W,H);
-      ctx.save();
-      ctx.setLineDash([6*DPR, 6*DPR]);
-      ctx.lineWidth = 1*DPR;
-      const root = getComputedStyle(de);
-      ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-black-rgb") || "16,18,20"}, .35)`;
-      ctx.strokeRect(0.5*DPR, 0.5*DPR, W-1*DPR, H-1*DPR);
-      ctx.restore();
-      drawGoal(getComputedStyle(de));
-      const p = body.translation(), a = body.rotation();
-      const root2 = getComputedStyle(de);
-      const fill = (root2.getPropertyValue("--c-black") || "#101214").trim();
-      const stroke = `rgba(${root2.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(a);
-      ctx.fillStyle = fill;
-      ctx.setLineDash([4*DPR, 4*DPR]);
-      ctx.lineWidth = 1*DPR;
-      ctx.strokeStyle = stroke;
-      if (current.isBall){ ctx.beginPath(); ctx.arc(0,0,current.half, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }
-      else { const radius = current.wear * current.half; roundedRectPath(0,0,current.half, radius); ctx.fill(); ctx.stroke(); }
-      ctx.restore();
-      pinkBgTick();
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
+    
+      // -------------------- Legacy .string-progress helper (compat)
+      (function initLegacyStringProgress(){
+        function viewportProgress(el, start=0.0, end=1.0){
+          const r = el.getBoundingClientRect();
+          const vh = Math.max(1, w.innerHeight || 0);
+          const enter = vh * start, exit = vh * end;
+          const total = (r.height + (enter - exit));
+          if (total <= 0) return 0;
+          const raw = (enter - r.top) / total;
+          return clamp(raw, 0, 1);
+        }
+        const progressBlocks = Array.from(d.querySelectorAll(".block.string-progress"));
+        const items = [];
+        progressBlocks.forEach(block=>{
+          block.style.setProperty("--progress","0");
+          const movers = block.querySelectorAll('.child[string="progress"]');
+          movers.forEach(child=>{
+            const id = child.getAttribute("string-id") || "";
+            const esc = (w.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/"/g,'\\"');
+            const meter = id ? block.querySelector(`[data-progress-of="${esc}"]`) : null;
+            const stage = id ? block.querySelector(`[data-stage-of="${esc}"]`) : null;
+            items.push({ block, anchor: child, meter, stage });
+          });
+        });
+        let ticking = false;
+        function update(){
+          ticking = false;
+          items.forEach(({block, meter, stage})=>{
+            const p = viewportProgress(block, 0.1, 0.9);
+            block.style.setProperty("--progress", p.toFixed(4));
+            if (meter) meter.textContent = Math.round(p*100);
+            if (stage){ stage.textContent = " "; }
+          });
+        }
+        function onScrollOrResize(){ if (!ticking){ ticking = true; requestAnimationFrame(update); } }
+        w.addEventListener("scroll", onScrollOrResize, { passive: !0 });
+        w.addEventListener("resize", onScrollOrResize, { passive: !0 });
+        onScrollOrResize();
+      })();
 
+
+
+
+
+
+
+      
+    
+      // -------------------- Rapier physics playground (async)
+      async function initRapierPlayground(){
+        const stageBlock = d.querySelector(".block.string-rapier");
+        const canvas = d.getElementById("rapier-canvas");
+        if (!stageBlock || !canvas) return;
+        const ctx = canvas.getContext("2d");
+        const DPR = Math.max(1, w.devicePixelRatio || 1);
+    
+        function fitCanvas(){
+          const r = stageBlock.querySelector(".rapier-stage").getBoundingClientRect();
+          canvas.width = Math.floor(r.width * DPR);
+          canvas.height = Math.floor(r.height * DPR);
+          canvas.style.width = r.width + "px";
+          canvas.style.height = r.height + "px";
+        }
+        fitCanvas();
+        w.addEventListener("resize", fitCanvas, { passive: !0 });
+    
+        const RAPIER = await import("https://cdn.skypack.dev/@dimforge/rapier2d-compat");
+        await RAPIER.init();
+        const { RigidBodyType, ActiveEvents } = RAPIER;
+    
+        const confettiMod = await import("https://esm.run/canvas-confetti@1");
+        const confetti = confettiMod.default || confettiMod;
+    
+        const DROP_G = 2400;
+        const world = new RAPIER.World({ x: 0, y: 0 });
+        const queue = new RAPIER.EventQueue(!0);
+    
+        let walls = [];
+        const wallHandles = new Set();
+        function rebuildWalls(){
+          walls.forEach(({ rb, co })=>{ world.removeCollider(co, !0); world.removeRigidBody(rb); });
+          walls.length = 0; wallHandles.clear();
+          const W = canvas.width, H = canvas.height;
+          const t = Math.max(20*DPR, 12*DPR);
+          const defs = [
+            { x: -t/2,     y: H/2,   w: t/2,   h: H/2 },
+            { x: W+t/2,    y: H/2,   w: t/2,   h: H/2 },
+            { x: W/2,      y: -t/2,  w: W/2,   h: t/2 },
+            { x: W/2,      y: H+t/2, w: W/2,   h: t/2 },
+          ];
+          defs.forEach(({x,y,w,h})=>{
+            const rb = world.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(x,y));
+            const co = world.createCollider(
+              RAPIER.ColliderDesc.cuboid(w,h).setRestitution(0.6).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+              rb
+            );
+            walls.push({ rb, co }); wallHandles.add(co.handle);
+          });
+        }
+        rebuildWalls();
+    
+        w.addEventListener("resize", ()=>{
+          fitCanvas(); rebuildWalls();
+          const W = canvas.width, H = canvas.height;
+          const p = body.translation();
+          const m = current.half + 2*DPR;
+          body.setTranslation({ x: clamp(p.x, m, W-m), y: clamp(p.y, m, H-m) }, !0);
+        }, { passive: !0 });
+    
+        const size = Math.min(canvas.width, canvas.height) * 0.12;
+        const start = { x: canvas.width*0.5, y: canvas.height*0.35 };
+        const current = { half: size/2, wear: 0, isBall: !1, collider: null };
+        const body = world.createRigidBody(
+          RAPIER.RigidBodyDesc.dynamic()
+            .setTranslation(start.x, start.y)
+            .setLinearDamping(0.04)
+            .setAngularDamping(0.04)
+        );
+    
+        function makeBoxCollider(){
+          if (current.collider) world.removeCollider(current.collider, !0);
+          current.collider = world.createCollider(
+            RAPIER.ColliderDesc.cuboid(current.half, current.half)
+              .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+            body
+          );
+          current.isBall = !1;
+        }
+        function makeBallCollider(){
+          if (current.collider) world.removeCollider(current.collider, !0);
+          current.collider = world.createCollider(
+            RAPIER.ColliderDesc.ball(current.half*0.98)
+              .setRestitution(0.72).setFriction(0.25).setActiveEvents(ActiveEvents.COLLISION_EVENTS),
+            body
+          );
+          current.isBall = !0;
+        }
+        makeBoxCollider();
+    
+        let hasDropped = !1;
+        function atAbsoluteBottom(){ return (w.scrollY + w.innerHeight) >= (d.body.scrollHeight - 1); }
+        function tryDrop(){ if (hasDropped || !atAbsoluteBottom()) return; world.gravity = { x:0, y: DROP_G }; body.wakeUp(); hasDropped = !0; }
+    
+        const goal = {
+          visible: !1,
+          get radius(){ return current.half * 1.4; },
+          get cx(){ return canvas.width * 0.5; },
+          get cy(){ return canvas.height * 0.5; },
+        };
+        const showGoal = ()=>{ goal.visible = !0; };
+        const hideGoal = ()=>{ goal.visible = !1; };
+    
+        function resetSection(){
+          hideGoal();
+          current.wear = 0;
+          makeBoxCollider();
+          body.setTranslation({ x:start.x, y:start.y }, !0);
+          body.setLinvel({ x:0, y:0 }, !0);
+          body.setAngvel(0, !0);
+          body.setAngularDamping(0.04);
+          hasDropped = !1;
+          world.gravity = { x:0, y:0 };
+        }
+    
+        function addWear(amount){
+          current.wear = clamp(current.wear + amount, 0, 1);
+          if (!current.isBall && current.wear >= 0.85){
+            makeBallCollider(); showGoal();
+          }
+          const spinEase = 0.04 + current.wear * 0.06;
+          body.setAngularDamping(spinEase);
+        }
+    
+        // pointer handling
+        let dragging = !1, lastPt = null, lastV = {x:0,y:0}, grabOffset = null;
+        function eventPos(e){
+          if (e.touches && e.touches[0]){
+            const t = e.touches[0]; return { x: t.clientX * DPR, y: t.clientY * DPR };
+          }
+          return { x: e.clientX * DPR, y: e.clientY * DPR };
+        }
+        function pointInside(pt){
+          const c = body.translation();
+          if (current.isBall){
+            const dx = pt.x - c.x, dy = pt.y - c.y;
+            return dx*dx + dy*dy <= current.half*current.half;
+          }
+          return pt.x >= c.x-current.half && pt.x <= c.x+current.half && pt.y >= c.y-current.half && pt.y <= c.y+current.half;
+        }
+        function onDown(e){
+          const pt = eventPos(e);
+          if (!pointInside(pt)) return;
+          e.preventDefault();
+          dragging = !0; lastPt = pt; lastV = {x:0,y:0};
+          stageBlock.classList.add("-grabbing");
+          const c = body.translation(); grabOffset = { x: pt.x - c.x, y: pt.y - c.y };
+          if (body.setGravityScale) body.setGravityScale(0, !0);
+          body.setAngvel(0, !0); body.setLinvel({x:0,y:0}, !0);
+          body.setBodyType(RAPIER.RigidBodyType.KinematicPositionBased, !0);
+          body.wakeUp();
+          if (e.target?.setPointerCapture && e.pointerId != null){ try{ e.target.setPointerCapture(e.pointerId); }catch{} }
+        }
+        function onMove(e){
+          const pt = eventPos(e);
+          if (!dragging){ stageBlock.classList.toggle("-grab", pointInside(pt)); return; }
+          const dt = 1/60;
+          lastV = { x:(pt.x - lastPt.x)/dt, y:(pt.y - lastPt.y)/dt };
+          lastPt = pt;
+          const targetCenter = { x: pt.x - grabOffset.x, y: pt.y - grabOffset.y };
+          body.setNextKinematicTranslation(targetCenter);
+          body.setAngvel(0, !0);
+        }
+        function onUp(e){
+          if (!dragging) return;
+          dragging = !1; stageBlock.classList.remove("-grabbing");
+          const r = grabOffset || {x:0,y:0};
+          const mass = body.mass ? body.mass() : 1;
+          const s = current.half * 2;
+          const I = Math.max(1e-6, (mass * s * s) / 6);
+          const cross = r.x * lastV.y - r.y * lastV.x;
+          const MAX_SPIN = 18;
+          let omega = (mass * cross) / I;
+          omega = clamp(omega, -MAX_SPIN, MAX_SPIN);
+          body.setBodyType(RAPIER.RigidBodyType.Dynamic, !0);
+          if (body.setGravityScale) body.setGravityScale(1, !0);
+          body.wakeUp();
+          const maxSpeed = 3200 * DPR;
+          const clampV = (v,m)=>clamp(v,-m,m);
+          body.setLinvel({ x: clampV(lastV.x, maxSpeed), y: clampV(lastV.y, maxSpeed) }, !0);
+          body.setAngvel(omega, !0);
+          const linSpeed = Math.hypot(lastV.x, lastV.y);
+          const angBonus = Math.abs(omega) * current.half;
+          const throwMetric = linSpeed + angBonus;
+          addWear(clamp(throwMetric / (4200 * DPR), 0, 0.08));
+          grabOffset = null;
+          if (e?.target?.releasePointerCapture && e.pointerId != null){ try{ e.target.releasePointerCapture(e.pointerId); }catch{} }
+        }
+    
+        const area = stageBlock.querySelector(".rapier-stage");
+        area.addEventListener("mousedown", onDown);
+        area.addEventListener("mousemove", onMove);
+        w.addEventListener("mouseup", onUp);
+        area.addEventListener("touchstart", onDown, { passive: !1 });
+        area.addEventListener("touchmove", onMove, { passive: !1 });
+        w.addEventListener("touchend", onUp);
+        w.addEventListener("touchcancel", onUp);
+    
+        function handleCollisionEvent(h1,h2,started){
+          if (!started) return;
+          const isSelf = (h)=> current.collider && h === current.collider.handle;
+          const aIsSelf = isSelf(h1) || isSelf(h2);
+          const other = isSelf(h1) ? h2 : isSelf(h2) ? h1 : null;
+          if (!aIsSelf || !wallHandles.has(other)) return;
+          const v = body.linvel();
+          const speed = Math.hypot(v.x, v.y) + Math.abs(body.angvel()) * current.half;
+          addWear(clamp(speed / (6000 * DPR), 0.003, 0.035));
+        }
+        function pinkBgTick(){
+          const hoverish = stageBlock.classList.contains("-grab") || stageBlock.classList.contains("-grabbing");
+          stageBlock.classList.toggle("-bg-pink", hoverish);
+        }
+    
+        function roundedRectPath(cx,cy,half,r){
+          const x = cx - half, y = cy - half, w2 = half*2, h2 = half*2;
+          const rr = clamp(r, 0, half);
+          if (rr < 0.5){ ctx.beginPath(); ctx.rect(x,y,w2,h2); return; }
+          ctx.beginPath();
+          ctx.moveTo(x+rr, y);
+          ctx.lineTo(x+w2-rr, y); ctx.arcTo(x+w2, y, x+w2, y+rr, rr);
+          ctx.lineTo(x+w2, y+h2-rr); ctx.arcTo(x+w2, y+h2, x+w2-rr, y+h2, rr);
+          ctx.lineTo(x+rr, y+h2); ctx.arcTo(x, y+h2, x, y+h2-rr, rr);
+          ctx.lineTo(x, y+rr); ctx.arcTo(x, y, x+rr, y, rr);
+        }
+    
+        function checkGoal(){
+          if (!goal.visible || !current.isBall) return !1;
+          const p = body.translation(); const r = current.half; const R = goal.radius;
+          const dx = p.x - goal.cx, dy = p.y - goal.cy;
+          const dist = Math.hypot(dx,dy);
+          const EPS = 2*DPR, slack = 0.6 * r;
+          return dist <= R - r + slack + EPS;
+        }
+    
+        function drawGoal(root){
+          if (!goal.visible) return;
+          ctx.save();
+          const black = (root.getPropertyValue("--c-black") || "#101214").trim();
+          ctx.setLineDash([2*DPR, 4*DPR]);
+          ctx.lineWidth = 1*DPR;
+          ctx.strokeStyle = black;
+          ctx.beginPath();
+          ctx.arc(goal.cx, goal.cy, goal.radius - 0.5*DPR, 0, Math.PI*2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = black;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const px = Math.max(10, Math.round(goal.radius * 0.42));
+          const fontStack = (root.getPropertyValue("--font") || "system-ui, sans-serif").trim();
+          ctx.font = `${px}px ${fontStack}`;
+          ctx.fillText("AIM", goal.cx, goal.cy);
+          ctx.restore();
+        }
+    
+        let lastTime = performance.now();
+        function tick(now){
+          const dt = Math.min(1/30, (now - lastTime)/1000);
+          lastTime = now;
+          world.step(queue);
+          queue.drainCollisionEvents(handleCollisionEvent);
+          if (checkGoal()){ confetti({ particleCount: 160, spread: 70, origin: { y: 0.35 } }); resetSection(); }
+          tryDrop();
+          const W = canvas.width, H = canvas.height;
+          ctx.clearRect(0,0,W,H);
+          ctx.save();
+          ctx.setLineDash([6*DPR, 6*DPR]);
+          ctx.lineWidth = 1*DPR;
+          const root = getComputedStyle(de);
+          ctx.strokeStyle = `rgba(${root.getPropertyValue("--c-black-rgb") || "16,18,20"}, .35)`;
+          ctx.strokeRect(0.5*DPR, 0.5*DPR, W-1*DPR, H-1*DPR);
+          ctx.restore();
+          drawGoal(getComputedStyle(de));
+          const p = body.translation(), a = body.rotation();
+          const root2 = getComputedStyle(de);
+          const fill = (root2.getPropertyValue("--c-black") || "#101214").trim();
+          const stroke = `rgba(${root2.getPropertyValue("--c-white-rgb") || "255,255,255"}, .1)`;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(a);
+          ctx.fillStyle = fill;
+          ctx.setLineDash([4*DPR, 4*DPR]);
+          ctx.lineWidth = 1*DPR;
+          ctx.strokeStyle = stroke;
+          if (current.isBall){ ctx.beginPath(); ctx.arc(0,0,current.half, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }
+          else { const radius = current.wear * current.half; roundedRectPath(0,0,current.half, radius); ctx.fill(); ctx.stroke(); }
+          ctx.restore();
+          pinkBgTick();
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    
   // -------------------- init
   function init(){
     setupRepeat();
@@ -2829,228 +2812,242 @@ data-cursor-tip="Click, hold, and fling.">
   else init();
 
 })();
-
-// ---- Touch hover helper for inline walls ----
-(function(){
-  const d = document;
-  d.addEventListener('touchstart', (e) => {
-    const sentence = e.target.closest('.wall .wall-sentence');
-    const wall = e.target.closest('.wall');
-    if (!wall) return;
-    wall.classList.add('-touching');
-    wall.querySelectorAll('.is-hovered').forEach(n => n.classList.remove('is-hovered'));
-    if (sentence) sentence.classList.add('is-hovered');
-  }, {passive:true});
-  const clearTouch = () => {
-    d.querySelectorAll('.wall.-touching').forEach(wall => {
-      wall.classList.remove('-touching');
-      wall.querySelectorAll('.is-hovered').forEach(n => n.classList.remove('is-hovered'));
-    });
-  };
-  d.addEventListener('touchend', clearTouch, {passive:true});
-  d.addEventListener('touchcancel', clearTouch, {passive:true});
-})();
+    
+    // ---- Touch hover helper for inline walls ----
+    (function(){
+      const d = document;
+      d.addEventListener('touchstart', (e) => {
+        const sentence = e.target.closest('.wall .wall-sentence');
+        const wall = e.target.closest('.wall');
+        if (!wall) return;
+        wall.classList.add('-touching');
+        wall.querySelectorAll('.is-hovered').forEach(n => n.classList.remove('is-hovered'));
+        if (sentence) sentence.classList.add('is-hovered');
+      }, {passive:true});
+      const clearTouch = () => {
+        d.querySelectorAll('.wall.-touching').forEach(wall => {
+          wall.classList.remove('-touching');
+          wall.querySelectorAll('.is-hovered').forEach(n => n.classList.remove('is-hovered'));
+        });
+      };
+      d.addEventListener('touchend', clearTouch, {passive:true});
+      d.addEventListener('touchcancel', clearTouch, {passive:true});
+    })();
     </script>
     
-<!-- Dependencies (safe to keep once per site; will no-op if already present) -->
-<script>
-  (function ensureLib(src, test, cb){
-    if(test()){ cb && cb(); return; }
-    var s=document.createElement('script'); s.src=src; s.defer=true;
-    s.onload=cb; document.head.appendChild(s);
-  })(
-    "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js",
-    ()=>window._,
-    function(){ ensureLib(
-      "https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js",
-      ()=>window.d3,
-      initRedactedTreeBlock
-    ); }
-  );
-  
-  function ensureLib(src, test, cb){
-    if(test()){ cb && cb(); return; }
-    var s=document.createElement('script'); s.src=src; s.defer=true;
-    s.onload=cb; document.head.appendChild(s);
-  }
-  </script>
-<script>
-  /* Full D3 sitemap with square tiles (black by default, pink hover), including "..." leaves */
-  window.initRedactedTreeBlock = function initRedactedTreeBlock(){
-    if (!window._ || !window.d3) return; // safety
-  
-    var host  = document.querySelector('.d3-tree-block');
-    var stage = host && host.querySelector('.tree-wrap');
-    var svgEl = document.getElementById('d3-tree');
-    if (!host || !stage || !svgEl) return;
-  
-    // Data: use existing globals if present, else a tiny demo
-    var vals = window.vals || [
-      ["submitter-guide","submit4dn","..."],
-      ["submitter-guide","web-submission","..."],
-      ["submitter-guide","faq","question1"]
-    ];
-    var rootTitle = window.rootTitle || "/ help";
-  
-    function buildHierarchy(csv){
-      var root = { name:"root", children:[] };
-      for (var i=0;i<csv.length;i++){
-        var parts = _.filter(csv[i]);
-        var cur = root;
-        for (var j=0;j<parts.length;j++){
-          var name = parts[j], kids = cur.children, child=null, found=false;
-          if (j+1 < parts.length){
-            for (var k=0;k<kids.length;k++){ if (kids[k].name===name){ child=kids[k]; found=true; break; } }
-            if (!found){ child={ name, id:name, children:[] }; kids.push(child); }
-            cur = child;
-          } else {
-            kids.push({ name, id:name, size:1 });
+    <!-- Dependencies (safe to keep once per site; will no-op if already present) -->
+    <script>
+      (function ensureLib(src, test, cb){
+        if(test()){ cb && cb(); return; }
+        var s=document.createElement('script'); s.src=src; s.defer=true;
+        s.onload=cb; document.head.appendChild(s);
+      })(
+        "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js",
+        ()=>window._,
+        function(){ ensureLib(
+          "https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js",
+          ()=>window.d3,
+          function(){ if (window.initRedactedTreeBlock) initRedactedTreeBlock(); }
+        ); }
+      );
+    
+      function ensureLib(src, test, cb){
+        if(test()){ cb && cb(); return; }
+        var s=document.createElement('script'); s.src=src; s.defer=true;
+        s.onload=cb; document.head.appendChild(s);
+      }
+    </script>
+    
+    <!-- D3 sitemap (uses the libs above) -->
+    <script>
+      window.initRedactedTreeBlock = function initRedactedTreeBlock(){
+        if (!window._ || !window.d3) return;
+    
+        var host  = document.querySelector('.d3-tree-block');
+        var stage = host && host.querySelector('.tree-wrap');
+        var svgEl = document.getElementById('d3-tree');
+        if (!host || !stage || !svgEl) return;
+    
+        var vals = window.vals || [
+          ["Process","Design & Interactive Systems"],
+          ["Process","Data & User Taxonomies/Flows"],
+          ["Process","Information Architecture"]
+        ];
+        var rootTitle = window.rootTitle || "BEHIND THE BOX:";
+    
+        function buildHierarchy(csv){
+          var root = { name:"root", children:[] };
+          for (var i=0;i<csv.length;i++){
+            var parts = _.filter(csv[i]);
+            var cur = root;
+            for (var j=0;j<parts.length;j++){
+              var name = parts[j], kids = cur.children, child=null, found=false;
+              if (j+1 < parts.length){
+                for (var k=0;k<kids.length;k++){ if (kids[k].name===name){ child=kids[k]; found=true; break; } }
+                if (!found){ child={ name, id:name, children:[] }; kids.push(child); }
+                cur = child;
+              } else {
+                kids.push({ name, id:name, size:1 });
+              }
+            }
           }
+          return root;
         }
-      }
-      return root;
-    }
-  
-    // Fresh SVG content
-    var svg = d3.select(svgEl).html("");
-    var g   = svg.append("g");
-    var idc = 0;
-  
-    // Layout
-    var xroot = d3.hierarchy(buildHierarchy(vals));
-    var tree  = d3.tree();
-  
-    // Sizing knobs from CSS (—st-node), fallback 56
-    function tileSize(){
-      var css = getComputedStyle(host);
-      return parseFloat(css.getPropertyValue("--st-node")) || 56;
-    }
-  
-    function draw(nodeClicked){
-      var W = stage.clientWidth  || 800;
-      var H = stage.clientHeight || 600;
-      svg.attr("viewBox", "0 0 " + W + " " + H)
-         .attr("width", "100%").attr("height","100%");
-  
-      var TILE = tileSize() * 1.3;           // 30% larger
-      var NX   = Math.max(200, TILE * 4.6);  // horizontal spacing
-      var NY   = Math.max(56,  TILE * 1.6);  // vertical spacing
-  
-      tree.nodeSize([NY, NX])(xroot);
-  
-      // Center layout
-      var nodes = xroot.descendants();
-      var minX = d3.min(nodes, d=>d.x), maxX = d3.max(nodes, d=>d.x);
-      var minY = d3.min(nodes, d=>d.y), maxY = d3.max(nodes, d=>d.y);
-      var layoutW = Math.max(1, maxY - minY);
-      var layoutH = Math.max(1, maxX - minX);
-      var xOffset = (W - layoutW)/2 - minY;
-      var yOffset = (H - layoutH)/2 - minX;
-      g.attr("transform", "translate(" + xOffset + "," + yOffset + ")");
-  
-      // Links
-      var link = g.selectAll(".link")
-        .data(xroot.descendants().slice(1), d => d.__id || (d.__id = ++idc));
-  
-      function path(d){
-        return "M" + d.y + "," + d.x
-             + "C" + (d.parent.y + 100) + "," + d.x
-             + " "  + (d.parent.y + 100) + "," + d.parent.x
-             + " "  + d.parent.y + "," + d.parent.x;
-      }
-      function pathOut(d){
-        var p = nodeClicked || d.parent || d;
-        var useOld = nodeClicked && p.children;
-        var y = useOld ? p.oldY : p.y;
-        var x = useOld ? p.oldX : p.x;
-        return "M"+y+","+x+"C"+y+","+x+" "+y+","+x+" "+y+","+x;
-      }
-  
-      link.enter().append("path")
-        .attr("class","link")
-        .attr("d", pathOut)
-        .style("opacity", d => d.depth > 1 ? .5 : .15)
-        .transition().duration(600)
-        .attr("d", path);
-  
-      link.transition().duration(600).attr("d", path);
-      link.exit().transition().duration(600).attr("d", pathOut).remove();
-  
-      // Nodes as square tiles + label
-      var node = g.selectAll(".node")
-        .data(xroot.descendants(), d => d.__id || (d.__id = ++idc));
-  
-      var enter = node.enter().append("g")
-        .attr("class", d => "node depth-"+d.depth + ((d.children||d._xchildren) ? " node--internal" : " node--leaf"))
-        .attr("transform", d => "translate(" + (nodeClicked ? nodeClicked.oldY : d.y) + "," + (nodeClicked ? nodeClicked.oldX : d.x) + ")")
-        .style("opacity", 0)
-        .on("click", toggle);
-  
-      // square (pure SVG)
-      enter.append("rect")
-        .attr("class","node-square")
-        .attr("x", -TILE/2)
-        .attr("y", -TILE/2)
-        .attr("width", TILE)
-        .attr("height", TILE)
-        .attr("rx", 0).attr("ry", 0)
-        .style("fill", "#000")  // default black
-        .style("stroke", "#000")
-        .style("stroke-width", 1);
-  
-      // label to the right
-      enter.append("text")
-        .attr("dy", 5)
-        .attr("x", TILE/2 + 8)
-        .text(function(d){
-          if (d.data.name === "root") return rootTitle;
-          if (d.depth === 3) return "# " + d.data.name;
-          return "/ " + String(d.data.name).toLowerCase();
-        });
-  
-      enter.transition().duration(600)
-        .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
-        .style("opacity", d => d.depth > 0 ? 1 : .7);
-  
-      var upd = node.transition().duration(600)
-        .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
-  
-      upd.select("rect.node-square")
-        .attr("x", -TILE/2).attr("y", -TILE/2)
-        .attr("width", TILE).attr("height", TILE);
-  
-      upd.select("text")
-        .attr("x", TILE/2 + 8)
-        .text(function(d){
-          if (d.data.name === "root") return rootTitle;
-          if (d.depth === 3) return "# " + d.data.name;
-          return "/ " + String(d.data.name).toLowerCase();
-        });
-  
-      node.exit().transition().duration(600)
-        .attr("transform", function(d){
-          var p = nodeClicked || d;
-          return "translate(" + p.y + "," + (nodeClicked ? p.x : d.x) + ")";
-        })
-        .style("opacity", 0)
-        .remove();
-    }
-  
-    function toggle(d){
-      if (d.children){ d._xchildren = d.children; d.children = null; }
-      else { d.children = d._xchildren; d._xchildren = null; }
-      d.oldX = d.x; d.oldY = d.y;
-      draw(d);
-    }
-  
-    draw();
-    var raf = 0;
-    window.addEventListener("resize", function(){
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(draw);
-    }, { passive:true });
-  };
-  </script>
+    
+        var svg = d3.select(svgEl).html("");
+        var g   = svg.append("g");
+        var idc = 0;
+    
+        var xroot = d3.hierarchy(buildHierarchy(vals));
+        var tree  = d3.tree();
+    
+        function tileSize(){
+          var css = getComputedStyle(host);
+          return parseFloat(css.getPropertyValue("--st-node")) || 56;
+        }
+    
+        function draw(nodeClicked){
+          var W = stage.clientWidth  || 200;
+          var H = stage.clientHeight || 600;
+          svg.attr("viewBox", "0 0 " + W + " " + H).attr("width", "100%").attr("height","100%");
+    
+          var TILE = tileSize() * 1.3;
+          var NX   = Math.max(200, TILE * 3.6);
+          var NY   = Math.max(56,  TILE * 1.6);
+    
+          tree.nodeSize([NY, NX])(xroot);
+    
+// Center layout + fit-to-viewport on mobile
+var nodes = xroot.descendants();
+var minX = d3.min(nodes, d=>d.x), maxX = d3.max(nodes, d=>d.x);
+var minY = d3.min(nodes, d=>d.y), maxY = d3.max(nodes, d=>d.y);
+var half  = TILE/2;
+
+// content bounds in the tree’s local coords (include tile size)
+var contentW = (maxY - minY) + TILE;
+var contentH = (maxX - minX) + TILE;
+
+// if you only want this on mobile breakpoints:
+var isMobile = window.matchMedia("(max-width: 640px)").matches;
+
+// compute scale that fits content into the stage (<= 1 so desktop stays 1:1)
+var pad = Math.max(12, TILE * 0.25);
+var s   = Math.min(
+  1, // never upscale
+  (W - 2*pad) / Math.max(1, contentW),
+  (H - 2*pad) / Math.max(1, contentH)
+);
+if (!isMobile) s = Math.min(1, s); // keep it, but you can force s=1 for non-mobile if you prefer
+
+// place min corner at centered padding in *screen* space
+// NOTE: transform lists apply right-to-left => scale first, then translate.
+var tx = ((W - contentW * s) / 2) - s * (minY - half);
+var ty = ((H - contentH * s) / 2) - s * (minX - half);
+
+// apply transform
+g.attr("transform", "translate(" + tx + "," + ty + ") scale(" + s + ")");
+
+    
+          var link = g.selectAll(".link")
+            .data(xroot.descendants().slice(1), d => d.__id || (d.__id = ++idc));
+    
+          function path(d){
+            return "M" + d.y + "," + d.x
+                 + "C" + (d.parent.y + 100) + "," + d.x
+                 + " "  + (d.parent.y + 100) + "," + d.parent.x
+                 + " "  + d.parent.y + "," + d.parent.x;
+          }
+          function pathOut(d){
+            var p = nodeClicked || d.parent || d;
+            var useOld = nodeClicked && p.children;
+            var y = useOld ? p.oldY : p.y;
+            var x = useOld ? p.oldX : p.x;
+            return "M"+y+","+x+"C"+y+","+x+" "+y+","+x+" "+y+","+x;
+          }
+    
+          link.enter().append("path")
+            .attr("class","link")
+            .attr("d", pathOut)
+            .style("opacity", d => d.depth > 1 ? .5 : .15)
+            .transition().duration(600)
+            .attr("d", path);
+    
+          link.transition().duration(600).attr("d", path);
+          link.exit().transition().duration(600).attr("d", pathOut).remove();
+    
+          var node = g.selectAll(".node")
+            .data(xroot.descendants(), d => d.__id || (d.__id = ++idc));
+    
+          var enter = node.enter().append("g")
+            .attr("class", d => "node depth-"+d.depth + ((d.children||d._xchildren) ? " node--internal" : " node--leaf"))
+            .attr("transform", d => "translate(" + (nodeClicked ? nodeClicked.oldY : d.y) + "," + (nodeClicked ? nodeClicked.oldX : d.x) + ")")
+            .style("opacity", 0)
+            .on("click", toggle);
+    
+          enter.append("rect")
+            .attr("class","node-square")
+            .attr("x", -TILE/2)
+            .attr("y", -TILE/2)
+            .attr("width", TILE)
+            .attr("height", TILE)
+            .attr("rx", 0).attr("ry", 0)
+            .style("fill", "#000")
+            .style("stroke", "#000")
+            .style("stroke-width", 1);
+    
+          enter.append("text")
+            .attr("dy", 5)
+            .attr("x", TILE/2 + 8)
+            .text(function(d){
+              if (d.data.name === "root") return rootTitle;
+              if (d.depth === 3) return "# " + d.data.name;
+              return "  " + String(d.data.name).toUpperCase();
+            });
+    
+          enter.transition().duration(600)
+            .attr("transform", d => "translate(" + d.y + "," + d.x + ")")
+            .style("opacity", d => d.depth > 0 ? 1 : .7);
+    
+          var upd = node.transition().duration(600)
+            .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+    
+          upd.select("rect.node-square")
+            .attr("x", -TILE/2).attr("y", -TILE/2)
+            .attr("width", TILE).attr("height", TILE);
+    
+          upd.select("text")
+            .attr("x", TILE/2 + 8)
+            .text(function(d){
+              if (d.data.name === "root") return rootTitle;
+              if (d.depth === 3) return "# " + d.data.name;
+              return "  " + String(d.data.name).toUpperCase();
+            });
+    
+          node.exit().transition().duration(600)
+            .attr("transform", function(d){
+              var p = nodeClicked || d;
+              return "translate(" + p.y + "," + (nodeClicked ? p.x : d.x) + ")";
+            })
+            .style("opacity", 0)
+            .remove();
+        }
+    
+        function toggle(d){
+          if (d.children){ d._xchildren = d.children; d.children = null; }
+          else { d.children = d._xchildren; d._xchildren = null; }
+          d.oldX = d.x; d.oldY = d.y;
+          draw(d);
+        }
+    
+        draw();
+        var raf = 0;
+        window.addEventListener("resize", function(){
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(draw);
+        }, { passive:true });
+      };
+    </script>
+    
   
   
 </body></html>

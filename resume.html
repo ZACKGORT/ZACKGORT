@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
-<title>Zack Gort ~ CV</title>
+<title>Zachary Gort — Senior UX Designer</title>
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -1398,7 +1398,6 @@
       }
     }
     initTheme();
-
     // Gooey cursor (added will-change and ensured persistence)
     (function initGooeyCursor() {
       const shouldRunCursor = !window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1519,7 +1518,6 @@
     const overlay = document.getElementById('overlay');
     const closeOverlayBtn = document.getElementById('closeOverlay');
     let lastFocus = null;
-
     function openOverlay() {
       lastFocus = document.activeElement;
       overlay.classList.add('open');
@@ -1530,7 +1528,6 @@
       overlay.setAttribute('aria-hidden', 'false');
       fabButton.setAttribute('aria-expanded', 'true');
     }
-
     function closeOverlayFn() {
       overlay.classList.remove('open');
       document.removeEventListener('keydown', onKeyDown);
@@ -1538,7 +1535,6 @@
       overlay.setAttribute('aria-hidden', 'true');
       fabButton.setAttribute('aria-expanded', 'false');
     }
-
     function onKeyDown(e) {
       if (e.key === 'Escape') closeOverlayFn();
       // simple tab trap logic
@@ -1555,7 +1551,6 @@
         }
       }
     }
-
     if (fabButton) fabButton.addEventListener('click', openOverlay);
     if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
     if (overlay) overlay.addEventListener('click', (e) => {
@@ -1604,11 +1599,15 @@
     function initDragScroll(element) {
       if (!element) return;
       let isDragging = false;
+      let startedDragging = false;
       let startX, startY, scrollLeft, scrollTop;
       let velocityX = 0, velocityY = 0;
       let lastX, lastY, lastTime;
+      let originalTarget = null;
       element.addEventListener('pointerdown', (e) => {
         isDragging = true;
+        startedDragging = false;
+        originalTarget = e.target;
         element.setPointerCapture(e.pointerId);
         startX = e.pageX;
         startY = e.pageY;
@@ -1623,43 +1622,61 @@
       });
       element.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
-        e.preventDefault();
-        const now = Date.now();
-        const deltaTime = now - lastTime;
-        if (deltaTime > 20) { // Update velocity every 20ms
-          velocityX = (e.pageX - lastX) / deltaTime;
-          velocityY = (e.pageY - lastY) / deltaTime;
-          lastX = e.pageX;
-          lastY = e.pageY;
-          lastTime = now;
-        }
         const deltaX = startX - e.pageX;
         const deltaY = startY - e.pageY;
-        element.scrollLeft = scrollLeft + deltaX;
-        element.scrollTop = scrollTop + deltaY;
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+          startedDragging = true;
+        }
+        if (startedDragging) {
+          e.preventDefault();
+          const now = Date.now();
+          const deltaTime = now - lastTime;
+          if (deltaTime > 20) { // Update velocity every 20ms
+            velocityX = (e.pageX - lastX) / deltaTime;
+            velocityY = (e.pageY - lastY) / deltaTime;
+            lastX = e.pageX;
+            lastY = e.pageY;
+            lastTime = now;
+          }
+          element.scrollLeft = scrollLeft + deltaX;
+          element.scrollTop = scrollTop + deltaY;
+        }
       });
       element.addEventListener('pointerup', (e) => {
         isDragging = false;
         element.releasePointerCapture(e.pointerId);
         element.style.cursor = 'grab';
-        // Apply momentum
-        const momentum = () => {
-          element.scrollLeft += velocityX * 30; // Adjust factor for speed
-          element.scrollTop += velocityY * 30;
-          velocityX *= 0.95; // Friction
-          velocityY *= 0.95;
-          if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
-            requestAnimationFrame(momentum);
-          }
-        };
-        momentum();
+        if (!startedDragging) {
+          originalTarget.dispatchEvent(new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            clientX: e.clientX,
+            clientY: e.clientY
+          }));
+        } else {
+          // Apply momentum
+          const momentum = () => {
+            element.scrollLeft += velocityX * 30; // Adjust factor for speed
+            element.scrollTop += velocityY * 30;
+            velocityX *= 0.95; // Friction
+            velocityY *= 0.95;
+            if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+              requestAnimationFrame(momentum);
+            }
+          };
+          momentum();
+        }
+        originalTarget = null;
       });
       element.addEventListener('pointercancel', (e) => {
         isDragging = false;
         element.releasePointerCapture(e.pointerId);
+        originalTarget = null;
       });
       element.addEventListener('pointerleave', () => {
         isDragging = false;
+        originalTarget = null;
       });
     }
     initDragScroll(listView);

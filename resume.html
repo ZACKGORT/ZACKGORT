@@ -1,2420 +1,1917 @@
 <html lang="en">
-  <meta charset="utf-8" />
-  <meta
-    content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0"
-    name="viewport"
-  />
-  <title>Zachary Gort — Senior UX Designer</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin />
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap"
-    rel="stylesheet"
-  />
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <style>
-    :root {
-      --bg-color: #0f1014;
-      --card-color: transparent;
-      --ink: #ffffff;
-      --ink-2: #9f9f9f;
-      --ink-3: #6c6c6c;
-      --accent: #7ee787;
-      --curve-k: 1;
-      --vig-opacity: 0.9;
-      --edge-blur: 8px;
-      --cursor-size: 20px;
-      --corner-pad: clamp(14px, 2.4vw, 24px);
-      --corner-top: calc(env(safe-area-inset-top) + clamp(12px, 2vh, 18px));
-      --z-grain: 149;
-      --z-blur: 150;
-      --z-vig: 151;
-      --z-ui: 220;
-      --z-overlay: 250;
-      --z-cursor: 230;
-      --glass-bg: rgba(255, 255, 255, 0.04);
-      --glass-bg-hover: rgba(255, 255, 255, 0.08);
-      --glass-bg-bright: rgba(255, 255, 255, 0.12);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --fab-size: 80px;
-      --fab-bottom: calc(env(safe-area-inset-bottom) + clamp(16px, 3vh, 32px));
-      --base-font-size: 14px;
-      --subtle-outline: rgba(255, 255, 255, 0.08);
-    }
-    [data-theme='light'] {
-      --bg-color: #f8f8f8;
-      --ink: #0f1014;
-      --ink-2: #444444;
-      --ink-3: #777777;
-      --accent: #2aa64d;
-      --glass-bg: rgba(255, 255, 255, 0.9);
-      --glass-bg-hover: rgba(255, 255, 255, 1);
-      --glass-bg-bright: rgba(255, 255, 255, 1);
-      --glass-border: rgba(0, 0, 0, 0.15);
-      --vig-opacity: 0.5;
-      --subtle-outline: rgba(0, 0, 0, 0.05);
-    }
-    [data-theme='light'] .logo img {
-      filter: invert(0);
-    }
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-    html {
-      color-scheme: dark;
-      font-size: var(--base-font-size);
-    }
-    body,
-    html,
-    #root {
-      height: 100%;
-      margin: 0;
-      background: var(--bg-color);
-    }
-    body {
-      color: var(--ink);
-      font: 1rem/1.4 Inter, ui-sans-serif, system-ui;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-      touch-action: pan-y; /* Allow native vertical scroll */
-      -webkit-user-select: none;
-      user-select: none;
-      overscroll-behavior: none;
-    }
-    .edge-blur {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: var(--z-blur);
-      backdrop-filter: blur(var(--edge-blur));
-      -webkit-backdrop-filter: blur(var(--edge-blur));
-      mask: radial-gradient(
-        100% 64% at 50% 50%,
-        transparent 60%,
-        rgb(255 255 255 / 0.98) 75%
-      );
-    }
-    @media (max-width: 768px) {
-      .edge-blur {
-        mask: radial-gradient(
-          100% 80% at 50% 50%,
-          transparent 70%,
-          rgb(255 255 255 / 0.98) 85%
-        );
-      }
-    }
-    .vignette {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: var(--z-vig);
-      background: radial-gradient(
-        120% 90% at 50% 50%,
-        #fff0 25%,
-        rgb(0 0 0 / 0.62) 80%,
-        rgb(0 0 0 / 0.98) 100%
-      );
-      opacity: var(--vig-opacity);
-    }
-    [data-theme='light'] .vignette {
-      background: radial-gradient(
-        120% 90% at 50% 50%,
-        #fff0 25%,
-        rgb(255 255 255 / 0.62) 80%,
-        rgb(255 255 255 / 0.98) 100%
-      );
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: var(--z-grain);
-      opacity: 0.1;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
-      background-size: 120px 120px;
-    }
-    .curved {
-      transform-style: preserve-3d;
-      transform: perspective(1000px) translateZ(calc(-200px * var(--curve-k)))
-        scale(calc(1 + var(--curve-k) * 0.06));
-    }
+<meta charset="utf-8">
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
+<title>Zachary Gort — Senior UX Designer</title>
+<link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
+<link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+  :root {
+  /* DEFAULT DARK THEME */
+  --bg-color: #0f1014;
+  --card-color: transparent;
+  --ink: #ffffff;
+  --ink-2: #9f9f9f;
+  --ink-3: #6c6c6c;
+  --accent: #7ee787;
+  --curve-k: 1;
+  --vig-opacity: .9;
+  --edge-blur: 8px;
+  --cursor-size: 20px;
+  --corner-pad: clamp(14px, 2.4vw, 24px);
+  --corner-top: calc(env(safe-area-inset-top) + clamp(12px, 2vh, 18px));
+  --z-grain: 149;
+  --z-blur: 150;
+  --z-vig: 151;
+  --z-ui: 220;
+  --z-overlay: 250;
+  --z-cursor: 230;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-hover: rgba(255, 255, 255, 0.08);
+  --glass-bg-bright: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --fab-size: 80px;
+  --fab-bottom: calc(env(safe-area-inset-bottom) + clamp(16px, 3vh, 32px));
+  --base-font-size: 14px;
+  --subtle-outline: rgba(255, 255, 255, 0.08); 
+  }
 
-    /* MINIMALIST UI OVERRIDES: Default state is transparent/invisible */
-    .view-toggle,
-    .theme-toggle,
-    .fab,
-    .grid-item,
-    .grid-section,
-    details {
-      border: 1px solid transparent; /* Hidden by default */
-      background: transparent; /* Hidden by default */
-      box-shadow: none; /* Hidden by default */
-      transition: all 0.3s ease; /* Smooth fade in */
-    }
+  [data-theme="light"] {
+  --bg-color: #f8f8f8;
+  --ink: #0f1014;
+  --ink-2: #444444;
+  --ink-3: #777777;
+  --accent: #2aa64d;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg-hover: rgba(255, 255, 255, 1);
+  --glass-bg-bright: rgba(255, 255, 255, 1);
+  --glass-border: rgba(0, 0, 0, 0.15);
+  --vig-opacity: 0.5;
+  --subtle-outline: rgba(0, 0, 0, 0.05);
+  }
 
-    /* View toggle */
-    .view-toggle {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      left: var(--corner-pad);
-      z-index: var(--z-ui);
-      display: flex;
+  /* NEW: ROSE / POP ART THEME */
+  [data-theme="rose"] {
+  --bg-color: #FF8DA1; /* The Wall of Pink */
+  --ink: #000000;      /* Stark Black Ink */
+  --ink-2: #222222;    /* Dark Grey */
+  --ink-3: #444444;    
+  --accent: #000000;   /* Accents are black */
+  
+  /* Pop Art Overrides - "Glass" becomes "Card" */
+  --glass-bg: transparent;
+  --glass-bg-hover: #ffffff; /* Solid White on hover */
+  --glass-bg-bright: #ffffff;
+  --glass-border: #000000;   /* Solid Black Border */
+  
+  --vig-opacity: 0.1; /* Low opacity for halftone texture */
+  --subtle-outline: rgba(0, 0, 0, 0.0); /* Hidden until hover */
+  }
+
+  /* Rose Theme Halftone Pattern Overlay (Replaces Vignette) */
+  [data-theme="rose"] .vignette {
+    background-image: radial-gradient(#000 1px, transparent 1px);
+    background-size: 16px 16px; /* Comic dot size */
+    background-color: transparent;
+    mask: none;
+    opacity: 0.08; /* Subtle texture */
+  }
+  
+  [data-theme="rose"] .edge-blur {
+    display: none; /* Crisp edges for Pop Art */
+  }
+
+  /* Invert Logo for Rose theme (Make it black) */
+  [data-theme="rose"] .logo img {
+    filter: brightness(0); 
+  }
+
+  [data-theme="light"] .logo img {
+  filter: invert(0); 
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { color-scheme: dark; font-size: var(--base-font-size); }
+  body, html, #root { height: 100%; margin: 0; background: var(--bg-color); }
+  body {
+  color: var(--ink);
+  font: 1rem/1.4 Inter, ui-sans-serif, system-ui;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  touch-action: pan-y; 
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+  transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  .edge-blur {
+  position: fixed; inset: 0; pointer-events: none; z-index: var(--z-blur);
+  backdrop-filter: blur(var(--edge-blur)); -webkit-backdrop-filter: blur(var(--edge-blur));
+  mask: radial-gradient(100% 64% at 50% 50%, transparent 60%, rgb(255 255 255 / 0.98) 75%);
+  }
+  @media (max-width: 768px) {
+  .edge-blur {
+  mask: radial-gradient(100% 80% at 50% 50%, transparent 70%, rgb(255 255 255 / 0.98) 85%); 
+  }
+  }
+  .vignette {
+  position: fixed; inset: 0; pointer-events: none; z-index: var(--z-vig);
+  background: radial-gradient(120% 90% at 50% 50%, #fff0 25%, rgb(0 0 0 / 0.62) 80%, rgb(0 0 0 / 0.98) 100%);
+  opacity: var(--vig-opacity);
+  }
+  [data-theme="light"] .vignette {
+  background: radial-gradient(120% 90% at 50% 50%, #fff0 25%, rgb(255 255 255 / 0.62) 80%, rgb(255 255 255 / 0.98) 100%);
+  }
+
+  body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: var(--z-grain); opacity: 0.1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  }
+  .curved {
+  transform-style: preserve-3d;
+  transform: perspective(1000px) translateZ(calc(-200px * var(--curve-k))) scale(calc(1 + var(--curve-k) * 0.06));
+  }
+  
+  /* MINIMALIST UI OVERRIDES */
+  .view-toggle, .theme-toggle, .fab, .grid-item, .grid-section, details {
+    border: 1px solid transparent; 
+    background: transparent;       
+    box-shadow: none;             
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Snappier transition for Pop Art feel */
+  }
+
+  /* View toggle */
+  .view-toggle {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--corner-pad);
+  z-index: var(--z-ui);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px;
+  }
+  /* Show UI on hover */
+  .view-toggle:hover {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+  }
+  /* POP ART HOVER OVERRIDE */
+  [data-theme="rose"] .view-toggle:hover {
+    background: #fff;
+    border: 2px solid #000;
+    box-shadow: 4px 4px 0px #000;
+  }
+
+  .toggle-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  }
+  .toggle-btn:hover {
+  color: var(--ink);
+  background: var(--glass-bg-hover);
+  }
+  .toggle-btn.active {
+  color: var(--accent);
+  background: color-mix(in oklch, var(--accent) 20%, transparent);
+  }
+  .toggle-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  }
+  
+  /* List view */
+  .listview-root {
+  position: fixed; inset: 0; overflow-y: auto; background: transparent;
+  backdrop-filter: none; -webkit-backdrop-filter: none; z-index: 20;
+  /* Restore native momentum scrolling on touch */
+  -webkit-overflow-scrolling: touch;
+  }
+  [data-theme="light"] .listview-root {
+  background: transparent;
+  }
+  .portfolio-container {
+  position: relative; display: flex; flex-direction: column; gap: 0;
+  width: 100%; margin: 0 auto; padding: 4rem 1rem 6rem 4rem; min-height: 100vh;
+  pointer-events: auto; justify-content: flex-start;
+  }
+  @media (max-width: 768px) {
+  .portfolio-container {
+  padding: 2rem 1rem 4rem 1rem;
+  }
+  }
+  .project-list { list-style: none; margin: 0; padding: 0; width: 100%; }
+  
+  .project-item {
+  cursor: default;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 200px 1.1fr 135px 2.6fr;
+  gap: 1.5rem;
+  padding: 16px 8px; /* Added horizontal padding for hover state */
+  align-items: start;
+  
+  /* Minimalist: No border by default */
+  border-bottom: 1px solid transparent; 
+  border-radius: 6px; /* Soften edges on hover */
+  
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  position: relative;
+  z-index: 2;
+  }
+
+  /* LIST HOVER: Show UI */
+  .project-item:hover {
+    background: var(--glass-bg-hover);
+  }
+  /* POP ART LIST HOVER */
+  [data-theme="rose"] .project-item:hover {
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 0px; /* Sharp corners for retro feel */
+    box-shadow: 6px 6px 0px #000; /* Hard Shadow */
+    transform: translate(-2px, -2px); /* Pop Up */
+    z-index: 10;
+  }
+
+  /* MOBILE LAYOUT ADJUSTMENTS */
+  @media (max-width: 768px) {
+    .project-item, .project-item.quote, .project-item.skill {
+      display: flex !important; 
+      grid-template-columns: none !important;
       flex-direction: column;
-      gap: 8px;
-      padding: 6px;
+      gap: 4px;
+      padding: 16px 0; /* Revert padding for mobile */
+      border-bottom: 1px solid var(--glass-border); /* Keep structural lines on mobile */
     }
-    /* Show UI on hover */
-    .view-toggle:hover {
-      background: var(--glass-bg);
-      border-color: var(--glass-border);
+    [data-theme="rose"] .project-item {
+        border-bottom: 1px solid rgba(0,0,0,0.1); /* Subtle line for Rose mobile */
     }
-
-    .toggle-btn {
-      appearance: none;
-      border: 0;
-      background: transparent;
-      color: var(--ink-2);
-      padding: 8px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: all 0.2s ease;
-    }
-    .toggle-btn:hover {
-      color: var(--ink);
-      background: var(--glass-bg-hover);
-    }
-    .toggle-btn.active {
-      color: var(--accent);
-      background: color-mix(in oklch, var(--accent) 20%, transparent);
-    }
-    .toggle-btn svg {
-      width: 20px;
-      height: 20px;
-      display: block;
-    }
-    /* List view */
-    .listview-root {
-      position: fixed;
-      inset: 0;
-      overflow-y: auto;
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      z-index: 20;
-      /* Restore native momentum scrolling on touch */
-      -webkit-overflow-scrolling: touch;
-    }
-    [data-theme='light'] .listview-root {
-      background: transparent;
-    }
-    .portfolio-container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      width: 100%;
-      margin: 0 auto;
-      padding: 4rem 1rem 6rem 4rem;
-      min-height: 100vh;
-      pointer-events: auto;
-      justify-content: flex-start;
-    }
-    @media (max-width: 768px) {
-      .portfolio-container {
-        padding: 2rem 1rem 4rem 1rem;
-      }
-    }
-    .project-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      width: 100%;
-    }
-
-    .project-item {
-      cursor: default;
-      width: 100%;
-      display: grid;
-      grid-template-columns: 200px 1.1fr 135px 2.6fr;
-      gap: 1.5rem;
-      padding: 16px 8px; /* Added horizontal padding for hover state */
-      align-items: start;
-
-      /* Minimalist: No border by default */
-      border-bottom: 1px solid transparent;
-      border-radius: 6px; /* Soften edges on hover */
-
-      transition: background 0.3s ease, border-color 0.3s ease;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* LIST HOVER: Show UI */
-    .project-item:hover {
-      background: var(--glass-bg-hover);
-      /* border-bottom: 1px solid var(--glass-border);  Optional: add line back on hover */
-    }
-
-    /* MOBILE LAYOUT ADJUSTMENTS */
-    @media (max-width: 768px) {
-      .project-item,
-      .project-item.quote,
-      .project-item.skill {
-        display: flex !important;
-        grid-template-columns: none !important;
-        flex-direction: column;
-        gap: 4px;
-        padding: 16px 0; /* Revert padding for mobile */
-        border-bottom: 1px solid var(--glass-border); /* Keep structural lines on mobile for readability */
-      }
-      .project-item:hover {
-        background: transparent; /* No hover bg on mobile */
-      }
-      .project-item.experience .project-data.artist {
-        font-size: 1.25rem;
-        margin-bottom: 2px;
-      }
-      .project-item.experience .project-data.role {
-        width: 100%;
+    .project-item:hover, [data-theme="rose"] .project-item:hover {
+        background: transparent; 
+        box-shadow: none;
+        transform: none;
+        border: none;
         border-bottom: 1px solid var(--glass-border);
-        padding-bottom: 8px;
-        margin-bottom: 8px;
-      }
-      .project-item.experience .project-data.year {
-        width: 100%;
-        text-align: left !important;
-        opacity: 0.6;
-        font-size: 0.85rem;
-        margin-bottom: 12px;
-        font-family: 'JetBrains Mono', monospace;
-      }
-      .project-item.experience .project-data.album {
-        margin-top: 0;
-      }
-      .quote .project-data.album,
-      .project-item.skill .project-data.album,
-      .project-item.summary .project-data.album,
-      .project-item.hero .project-data.album {
-        width: 100%;
-      }
     }
-
-    .project-data {
-      white-space: normal;
-      line-height: 1.5;
-      padding: 2px 0;
-      color: var(--ink);
-    }
-    .project-data.artist {
-      font-weight: 700;
+    .project-item.experience .project-data.artist { 
       font-size: 1.25rem;
+      margin-bottom: 2px;
     }
-    .project-data.album {
-      opacity: 0.95;
-      max-width: 800px;
-    }
-    /* Hero Overrides */
-    .project-item.hero {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      border-bottom: none;
-      padding-bottom: 2rem;
-    }
-    .project-item.hero:hover {
-      background: transparent;
-    } /* No hover on hero */
-
-    .project-item.hero .project-data.artist {
-      font-size: 3rem;
-      font-weight: 700;
-      letter-spacing: -0.04em;
-    }
-    .project-item.hero .project-data.album {
-      font-size: 1.4rem;
-      opacity: 0.95;
-    }
-
-    @media (max-width: 768px) {
-      .project-item.hero .project-data.artist {
-        font-size: 2rem;
-      }
-      .project-item.hero .project-data.album {
-        font-size: 1.2rem;
-      }
-    }
-
-    /* Section Headers */
-    .project-item.section {
-      display: block;
-      padding-top: 2rem;
-    }
-    .project-item.section:hover {
-      background: transparent;
-    }
-    .project-item.section .project-data.artist {
-      font-size: 1.6rem;
-      opacity: 0.8;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .project-item.section .project-data.album {
-      display: none;
-    }
-
-    /* Summary Item */
-    .project-item.summary {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .project-item.summary .project-data.album {
-      font-size: 1.1rem;
-      line-height: 1.7;
-      opacity: 0.95;
-      max-width: 100%;
-    }
-
-    /* Experience Styles */
-    .project-item.experience .project-data.artist {
-      color: var(--accent);
-    }
-    .project-item.experience .project-data.role {
-      font-style: italic;
-      opacity: 0.9;
-    }
-    .project-item.experience .project-data.year {
-      text-align: right;
-      opacity: 0.8;
-      font-variant-numeric: tabular-nums;
-    }
-
-    /* Quote/Skill Styles */
-    .project-item.quote,
-    .project-item.skill {
-      grid-template-columns: 200px 1fr;
-    }
-    .project-item.skill .project-data.album {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .quote .project-data.album {
-      font-style: italic;
-      opacity: 0.85;
-    }
-
-    /* Active states */
-    .listview-root.has-active .project-item {
-      opacity: 0.6;
-    }
-    .listview-root.has-active .project-item.active {
-      opacity: 1;
-    }
-    .listview-root.has-active .project-item.adjacent {
-      opacity: 0.85;
-    }
-
-    /* Grid view */
-    .gridview-root {
-      position: fixed;
-      inset: 0;
-      overflow-y: auto;
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      z-index: 20;
-      -webkit-overflow-scrolling: touch;
-    }
-    [data-theme='light'] .gridview-root {
-      background: transparent;
-    }
-    .grid-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 4rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-    @media (max-width: 768px) {
-      .grid-container {
-        padding: 2rem 1rem;
-      }
-    }
-    .grid-section {
-      /* Minimalist: Transparent container */
-      background: transparent;
-      border: 1px solid transparent;
-      padding: 1.5rem;
-    }
-    /* On hover of the section, maybe distinctiveness? No, keep it clean. */
-
-    .grid-section-title {
-      font-size: 1.6rem;
-      opacity: 0.8;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-      padding-left: 1rem; /* Align with item text */
-    }
-    .grid-items {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
-    }
-    .grid-item {
-      /* Minimalist: Ghost card */
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 4px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      transition: all 0.3s ease;
-      box-shadow: none;
-    }
-
-    /* GRID HOVER: The card materializes */
-    .grid-item:hover {
-      background: var(--glass-bg-hover);
-      border-color: var(--glass-border);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .grid-item.skill {
-      border-radius: 999px;
-      flex-direction: row;
-      align-items: center;
-      padding: 0.5rem 1rem;
-    }
-    .grid-item.skill h4 {
-      margin: 0;
-      white-space: nowrap;
-    }
-    .grid-item.skill p {
-      margin: 0;
-      flex: 1;
-    }
-    .grid-item h4 {
-      font-size: 1.25rem;
-      color: var(--accent);
-      margin: 0;
-    }
-    .grid-item .role {
-      font-style: italic;
-      opacity: 0.9;
-    }
-    .grid-item .duration {
-      text-align: right;
-      opacity: 0.8;
-      font-variant-numeric: tabular-nums;
-    }
-    .grid-item p {
-      margin: 0;
-      line-height: 1.5;
-      opacity: 0.95;
-    }
-    .grid-item .detail {
-      font-size: 0.95rem;
-      color: var(--ink-2);
-    }
-    .grid-item .detail strong {
-      color: var(--ink);
-    }
-    .gridview-root.has-active .grid-item {
-      opacity: 0.6;
-    }
-    .gridview-root.has-active .grid-item.active {
-      opacity: 1;
-    }
-    .gridview-root.has-active .grid-item.adjacent {
-      opacity: 0.65;
-    }
-    /* Pill styles */
-    .pill {
-      display: inline-block;
-      background: var(--glass-bg-hover);
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      padding: 4px 12px;
-      margin: 2px;
-      font-size: 0.9rem;
-      color: var(--ink);
-    }
-    .pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    /* Common */
-    a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    #cursor {
-      position: fixed;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      mix-blend-mode: difference;
-      filter: url(#goo);
-      z-index: var(--z-cursor);
-      will-change: transform; /* Ensure persistence */
-    }
-    .cursor-circle {
-      position: absolute;
-      width: var(--cursor-size);
-      height: var(--cursor-size);
-      border-radius: 50%;
-      background: #fff;
-      transform: translate(-50%, -50%);
-    }
-    .listview-root.has-active .background-image,
-    .gridview-root.has-active .background-image {
-      opacity: 0.15;
-    }
-    /* Theme toggle */
-    .theme-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: var(--z-ui);
-      background: transparent;
-      border: 1px solid transparent; /* Ghost default */
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: none;
-      box-shadow: none;
-    }
-    .theme-toggle:hover {
-      background: var(--glass-bg-hover);
-      border-color: var(--glass-border);
-    }
-    .theme-toggle svg {
-      width: 20px;
-      height: 20px;
-      fill: var(--ink-2);
-    }
-    /* Logo */
-    .logo {
-      position: fixed;
-      top: var(--corner-top);
-      left: var(--corner-pad);
-      z-index: var(--z-ui);
-      cursor: pointer;
-    }
-    .logo img {
-      height: 32px;
-      width: auto;
-      display: block;
-    }
-    /* FAB */
-    .fab-wrap {
-      position: fixed;
-      right: var(--corner-pad);
-      bottom: var(--fab-bottom);
-      z-index: var(--z-ui);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .fab {
-      position: relative;
-      width: var(--fab-size);
-      height: var(--fab-size);
-      border-radius: 999px;
-      background: transparent;
-      color: var(--ink);
-      border: 1px solid transparent; /* Ghost default */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: none;
-      transition: all 0.2s ease;
-      pointer-events: auto;
-      backdrop-filter: none;
-    }
-    .fab:hover {
-      background: var(--glass-bg-hover);
-      border-color: var(--glass-border);
-      transform: scale(1.02);
-    }
-    .fab:active {
-      transform: scale(0.98);
-    }
-    .fab svg {
-      width: 58%;
-      height: auto;
-      display: block;
-    }
-    /* Overlay */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: var(--z-overlay);
-      display: none;
-      pointer-events: auto;
-      background: rgb(0 0 0 / 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      align-items: center;
-      justify-content: center;
-      padding: clamp(16px, 3vw, 32px);
-    }
-    .overlay.open {
-      display: flex;
-    }
-    [data-theme='light'] .overlay {
-      background: rgb(255 255 255 / 0.75);
-    }
-    .sheet {
-      width: min(99vw, 1024px);
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 4px;
-      padding: clamp(16px, 3vw, 32px);
-      box-shadow: 0 24px 48px rgb(0 0 0 / 0.15);
-      max-height: min(92vh, 92dvh);
-      position: relative;
-      overflow-y: auto;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .title-bar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: clamp(16px, 3vw, 24px) clamp(12px, 2.4vw, 28px);
-      background: none;
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-shrink: 0;
-    }
-    .title-bar h1 {
-      margin: 0;
-      font-size: clamp(1.25rem, 4vw, 1.75rem);
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -0.02em;
-    }
-    .close-button {
-      appearance: none;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 4px;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      color: var(--ink-2);
-      flex-shrink: 0;
-    }
-    .close-button:hover {
-      background: var(--glass-bg-hover);
-      color: var(--ink);
-      transform: scale(1.05);
-    }
-    .close-button:active {
-      transform: scale(0.95);
-    }
-    .container {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: clamp(20px, 2.4vw, 32px);
-      align-items: start;
-      align-content: start;
-    }
-    .container p {
-      margin: 0 0 1rem 0;
-      line-height: 1.6;
-      color: var(--ink-2);
-    }
-    .container a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .container a:hover {
-      text-decoration: underline;
-    }
-    .preview-img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-    }
-    /* Context menu */
-    #contextMenu {
-      position: fixed;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 4px;
-      padding: 8px 0;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 300;
-      display: none;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .menu-item {
-      padding: 8px 16px;
-      cursor: pointer;
-      color: var(--ink);
-      transition: background 0.2s ease;
-      white-space: nowrap;
-    }
-    .menu-item:hover {
-      background: var(--glass-bg-hover);
-    }
-    /* Print styles */
-    @media print {
-      body {
-        background: white !important;
-        color: black !important;
-      }
-      .listview-root,
-      .portfolio-container,
-      .project-list,
-      .gridview-root,
-      .grid-container {
-        background: none !important;
-        backdrop-filter: none !important;
-      }
-      .project-item,
-      .grid-item {
-        border-bottom: 1px solid #ddd !important;
-        page-break-inside: avoid;
-      }
-      .project-data.artist,
-      .grid-item h4 {
-        color: black !important;
-      }
-      .project-data.album,
-      .grid-item p {
-        color: #333 !important;
-      }
-      .theme-toggle,
-      .fab-wrap,
-      .logo,
-      .edge-blur,
-      .vignette,
-      #cursor,
-      .background-image,
-      .view-toggle,
-      .font-toggle {
-        display: none !important;
-      }
-      #listView {
-        display: block !important;
-      }
-      #gridView {
-        display: none !important;
-      }
-    }
-    /* Accordion */
-    details {
+    .project-item.experience .project-data.role { 
       width: 100%;
-      /* Minimalist: Transparent default */
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-      transition: all 0.3s ease;
-      box-shadow: none;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 8px;
+      margin-bottom: 8px;
     }
-
-    /* Show visible UI on open or hover */
-    details[open],
-    details:hover {
-      background: var(--glass-bg-hover);
-      border-color: var(--glass-border);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Brighten hover effect for open accordions in Dark Mode */
-    [data-theme='dark'] details[open]:hover {
-      background: var(--glass-bg-bright);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    summary {
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    summary::after {
-      content: '+';
-      font-size: 1.2rem;
-      opacity: 0.7;
-    }
-    details[open] summary::after {
-      content: '-';
-    }
-    .accordion-content {
-      padding: 0 1rem 1rem;
-      color: var(--ink-2);
-      line-height: 1.6;
-    }
-    .accordion-content ul {
-      margin: 0;
-      padding: 0 0 0 1.2rem;
-      list-style-type: disc;
-    }
-    .accordion-content li {
-      margin-bottom: 0.5rem;
-      color: var(--ink-2);
-      padding-left: 4px;
-    }
-    .accordion-content li::marker {
-      color: var(--ink-3);
-    }
-    .accordion-content li:last-child {
-      margin-bottom: 0;
-    }
-    .accordion-content img {
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin: 1rem auto;
+    .project-item.experience .project-data.year { 
+      width: 100%;
+      text-align: left !important;
+      opacity: 0.6;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .project-item.experience .project-data.album {
-      /* No special grid placement needed anymore with new column layout */
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      margin-top: 0;
     }
-    .grid-item details {
-      margin-top: 0.5rem;
-    }
-    /* Scrollbar styles */
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--ink-3);
-      border-radius: 2px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--ink-2);
-    }
-    .listview-root::-webkit-scrollbar,
-    .gridview-root::-webkit-scrollbar {
-      position: absolute;
-      right: 0;
-    }
-    [data-theme='light'] .project-data.album {
-      opacity: 1;
-    }
-    [data-theme='light'] .project-item.hero .project-data.album {
-      opacity: 1;
-    }
-    [data-theme='light'] .project-item.section .project-data.artist {
-      opacity: 1;
-    }
-    [data-theme='light'] .project-item.summary .project-data.album {
-      opacity: 1;
-    }
-    [data-theme='light'] .project-item.experience .project-data.role {
-      opacity: 1;
-    }
-    [data-theme='light'] .project-item.experience .project-data.year {
-      opacity: 1;
-    }
-    [data-theme='light'] .quote .project-data.album {
-      opacity: 1;
-    }
-    [data-theme='light'] .grid-section-title {
-      opacity: 1;
-    }
-    [data-theme='light'] .grid-item .role {
-      opacity: 1;
-    }
-    [data-theme='light'] .grid-item .duration {
-      opacity: 1;
-    }
-    [data-theme='light'] .grid-item p {
-      opacity: 1;
-    }
-    [data-theme='light'] .edge-blur {
-      display: none;
-    }
-    [data-theme='light'] .vignette {
-      display: none;
-    }
-    .summary {
-      margin-bottom: 1rem;
-      line-height: 1.6;
-      opacity: 0.95;
-    }
+    .quote .project-data.album,
+    .project-item.skill .project-data.album,
+    .project-item.summary .project-data.album,
+    .project-item.hero .project-data.album { width: 100%; }
+  }
+
+  .project-data {
+  white-space: normal;
+  line-height: 1.5;
+  padding: 2px 0;
+  color: var(--ink);
+  }
+  .project-data.artist {
+  font-weight: 700;
+  font-size: 1.25rem;
+  }
+  .project-data.album {
+  opacity: 0.95;
+  max-width: 800px;
+  }
+  /* Hero Overrides */
+  .project-item.hero { 
+      display: flex; flex-direction: column; gap: 0.5rem; border-bottom: none; padding-bottom: 2rem; 
+  }
+  .project-item.hero:hover, [data-theme="rose"] .project-item.hero:hover { 
+      background: transparent; box-shadow: none; transform: none; border: none;
+  }
+
+  .project-item.hero .project-data.artist { font-size: 3rem; font-weight: 700; letter-spacing: -0.04em; }
+  .project-item.hero .project-data.album { font-size: 1.4rem; opacity: 0.95; }
+  
+  @media (max-width: 768px) {
+  .project-item.hero .project-data.artist { font-size: 2rem; }
+  .project-item.hero .project-data.album { font-size: 1.2rem; }
+  }
+  
+  /* Section Headers */
+  .project-item.section { display: block; padding-top: 2rem; }
+  .project-item.section:hover, [data-theme="rose"] .project-item.section:hover { 
+      background: transparent; box-shadow: none; transform: none; border: none;
+  }
+  .project-item.section .project-data.artist { font-size: 1.6rem; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; }
+  .project-item.section .project-data.album { display: none; }
+  
+  /* Summary Item */
+  .project-item.summary { display: flex; flex-direction: column; gap: 0.5rem; }
+  .project-item.summary .project-data.album { font-size: 1.1rem; line-height: 1.7; opacity: 0.95; max-width: 100%; }
+  
+  /* Experience Styles */
+  .project-item.experience .project-data.artist { color: var(--accent); }
+  .project-item.experience .project-data.role { font-style: italic; opacity: 0.9; }
+  .project-item.experience .project-data.year { text-align: right; opacity: 0.8; font-variant-numeric: tabular-nums; }
+  
+  /* Quote/Skill Styles */
+  .project-item.quote, .project-item.skill {
+    grid-template-columns: 200px 1fr; 
+  }
+  .project-item.skill .project-data.album { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .quote .project-data.album { font-style: italic; opacity: 0.85; }
+  
+  /* Active states */
+  .listview-root.has-active .project-item { opacity: 0.6; }
+  .listview-root.has-active .project-item.active { opacity: 1; }
+  .listview-root.has-active .project-item.adjacent { opacity: 0.85; }
+  
+  /* Grid view */
+  .gridview-root {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  z-index: 20;
+  -webkit-overflow-scrolling: touch;
+  }
+  [data-theme="light"] .gridview-root {
+  background: transparent;
+  }
+  .grid-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  }
+  @media (max-width: 768px) {
+  .grid-container {
+  padding: 2rem 1rem;
+  }
+  }
+  .grid-section {
+  /* Minimalist: Transparent container */
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 1.5rem;
+  }
+  
+  .grid-section-title {
+  font-size: 1.6rem;
+  opacity: 0.8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding-left: 1rem; /* Align with item text */
+  }
+  .grid-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  }
+  .grid-item {
+  /* Minimalist: Ghost card */
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: none;
+  }
+
+  /* GRID HOVER: The card materializes */
+  .grid-item:hover {
+      background: var(--glass-bg-hover);
+      border-color: var(--glass-border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  /* POP ART GRID HOVER */
+  [data-theme="rose"] .grid-item:hover {
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 0px;
+    box-shadow: 6px 6px 0px #000;
+    transform: translate(-2px, -2px);
+  }
+
+  .grid-item.skill {
+  border-radius: 999px;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  }
+  .grid-item.skill h4 {
+  margin: 0;
+  white-space: nowrap;
+  }
+  .grid-item.skill p {
+  margin: 0;
+  flex: 1;
+  }
+  .grid-item h4 {
+  font-size: 1.25rem;
+  color: var(--accent);
+  margin: 0;
+  }
+  .grid-item .role {
+  font-style: italic;
+  opacity: 0.9;
+  }
+  .grid-item .duration {
+  text-align: right;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+  }
+  .grid-item p {
+  margin: 0;
+  line-height: 1.5;
+  opacity: 0.95;
+  }
+  .grid-item .detail {
+  font-size: 0.95rem;
+  color: var(--ink-2);
+  }
+  .grid-item .detail strong {
+  color: var(--ink);
+  }
+  .gridview-root.has-active .grid-item { opacity: 0.6; }
+  .gridview-root.has-active .grid-item.active { opacity: 1; }
+  .gridview-root.has-active .grid-item.adjacent { opacity: 0.65; }
+  /* Pill styles */
+  .pill {
+  display: inline-block;
+  background: var(--glass-bg-hover);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 4px 12px;
+  margin: 2px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  }
+  [data-theme="rose"] .pill {
+      background: rgba(255,255,255,0.5); /* Slight white bg for pills in Rose mode */
+      border-color: #000;
+  }
+  .pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  }
+  /* Common */
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  #cursor { position: fixed; top: 0; left: 0; pointer-events: none; mix-blend-mode: difference; filter: url(#goo); z-index: var(--z-cursor); will-change: transform; /* Ensure persistence */ }
+  .cursor-circle {
+  position: absolute;
+  width: var(--cursor-size); height: var(--cursor-size);
+  border-radius: 50%; background: #fff;
+  transform: translate(-50%, -50%);
+  }
+  .listview-root.has-active .background-image, .gridview-root.has-active .background-image { opacity: 0.15; }
+  /* Theme toggle */
+  .theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: var(--z-ui);
+  background: transparent;
+  border: 1px solid transparent; /* Ghost default */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: none;
+  box-shadow: none;
+  }
+  .theme-toggle:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border);
+  }
+  [data-theme="rose"] .theme-toggle:hover {
+    background: #fff;
+    border: 2px solid #000;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--ink-2);
+  }
+  /* Logo */
+  .logo {
+  position: fixed;
+  top: var(--corner-top);
+  left: var(--corner-pad);
+  z-index: var(--z-ui);
+  cursor: pointer;
+  }
+  .logo img {
+  height: 32px;
+  width: auto;
+  display: block;
+  }
+  /* FAB */
+  .fab-wrap {
+  position: fixed;
+  right: var(--corner-pad);
+  bottom: var(--fab-bottom);
+  z-index: var(--z-ui);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  }
+  .fab {
+  position: relative;
+  width: var(--fab-size);
+  height: var(--fab-size);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid transparent; /* Ghost default */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: none;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  backdrop-filter: none;
+  }
+  .fab:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border);
+  transform: scale(1.02);
+  }
+  [data-theme="rose"] .fab:hover {
+    background: #fff;
+    border: 2px solid #000;
+    box-shadow: 6px 6px 0px #000;
+    transform: translate(-2px, -2px);
+  }
+  .fab:active {
+  transform: scale(0.98);
+  }
+  .fab svg {
+  width: 58%;
+  height: auto;
+  display: block;
+  }
+  /* Overlay */
+  .overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: none;
+  pointer-events: auto;
+  background: rgb(0 0 0 / 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vw, 32px);
+  }
+  .overlay.open {
+  display: flex;
+  }
+  [data-theme="light"] .overlay {
+  background: rgb(255 255 255 / 0.75);
+  }
+  .sheet {
+  width: min(99vw, 1024px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  padding: clamp(16px, 3vw, 32px);
+  box-shadow: 0 24px 48px rgb(0 0 0 / 0.15);
+  max-height: min(92vh, 92dvh);
+  position: relative;
+  overflow-y: auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  }
+  [data-theme="rose"] .sheet {
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: 12px 12px 0px #000;
+      backdrop-filter: none;
+  }
+  .title-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: clamp(16px, 3vw, 24px) clamp(12px, 2.4vw, 28px);
+  background: none;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  }
+  .title-bar h1 {
+  margin: 0;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  }
+  .close-button {
+  appearance: none;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--ink-2);
+  flex-shrink: 0;
+  }
+  .close-button:hover {
+  background: var(--glass-bg-hover);
+  color: var(--ink);
+  transform: scale(1.05);
+  }
+  .close-button:active {
+  transform: scale(0.95);
+  }
+  .container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: clamp(20px, 2.4vw, 32px);
+  align-items: start;
+  align-content: start;
+  }
+  .container p {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+  color: var(--ink-2);
+  }
+  .container a {
+  color: var(--accent);
+  text-decoration: none;
+  }
+  .container a:hover {
+  text-decoration: underline;
+  }
+  .preview-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  }
+  /* Context menu */
+  #contextMenu {
+  position: fixed;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  padding: 8px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 300;
+  display: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  }
+  .menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: var(--ink);
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  }
+  .menu-item:hover {
+  background: var(--glass-bg-hover);
+  }
+  /* Print styles */
+  @media print {
+  body {
+  background: white !important;
+  color: black !important;
+  }
+  .listview-root, .portfolio-container, .project-list, .gridview-root, .grid-container {
+  background: none !important;
+  backdrop-filter: none !important;
+  }
+  .project-item, .grid-item {
+  border-bottom: 1px solid #ddd !important;
+  page-break-inside: avoid;
+  }
+  .project-data.artist, .grid-item h4 {
+  color: black !important;
+  }
+  .project-data.album, .grid-item p {
+  color: #333 !important;
+  }
+  .theme-toggle, .fab-wrap, .logo, .edge-blur, .vignette, #cursor, .background-image, .view-toggle, .font-toggle {
+  display: none !important;
+  }
+  #listView {
+  display: block !important;
+  }
+  #gridView {
+  display: none !important;
+  }
+  }
+  /* Accordion */
+  details {
+  width: 100%;
+  /* Minimalist: Transparent default */
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: none;
+  }
+  
+  /* Show visible UI on open or hover */
+  details[open], details:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* POP ART ACCORDION */
+  [data-theme="rose"] details[open], 
+  [data-theme="rose"] details:hover {
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 0px;
+    box-shadow: 4px 4px 0px #000;
+  }
+
+  /* Brighten hover effect for open accordions in Dark Mode */
+  [data-theme="dark"] details[open]:hover {
+    background: var(--glass-bg-bright);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  summary {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  }
+  summary::after {
+  content: '+';
+  font-size: 1.2rem;
+  opacity: 0.7;
+  }
+  details[open] summary::after {
+  content: '-';
+  }
+  .accordion-content {
+  padding: 0 1rem 1rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+  }
+  .accordion-content ul {
+  margin: 0;
+  padding: 0 0 0 1.2rem;
+  list-style-type: disc;
+  }
+  .accordion-content li {
+  margin-bottom: 0.5rem;
+  color: var(--ink-2);
+  padding-left: 4px;
+  }
+  .accordion-content li::marker {
+  color: var(--ink-3);
+  }
+  .accordion-content li:last-child {
+  margin-bottom: 0;
+  }
+  .accordion-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  }
+  .project-item.experience .project-data.album {
+  /* No special grid placement needed anymore with new column layout */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  }
+  .grid-item details {
+  margin-top: 0.5rem;
+  }
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+  width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+  background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+  background: var(--ink-3);
+  border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-2);
+  }
+  .listview-root::-webkit-scrollbar, .gridview-root::-webkit-scrollbar {
+  position: absolute;
+  right: 0;
+  }
+  [data-theme="light"] .project-data.album {
+  opacity: 1;
+  }
+  [data-theme="light"] .project-item.hero .project-data.album {
+  opacity: 1;
+  }
+  [data-theme="light"] .project-item.section .project-data.artist {
+  opacity: 1;
+  }
+  [data-theme="light"] .project-item.summary .project-data.album {
+  opacity: 1;
+  }
+  [data-theme="light"] .project-item.experience .project-data.role {
+  opacity: 1;
+  }
+  [data-theme="light"] .project-item.experience .project-data.year {
+  opacity: 1;
+  }
+  [data-theme="light"] .quote .project-data.album {
+  opacity: 1;
+  }
+  [data-theme="light"] .grid-section-title {
+  opacity: 1;
+  }
+  [data-theme="light"] .grid-item .role {
+  opacity: 1;
+  }
+  [data-theme="light"] .grid-item .duration {
+  opacity: 1;
+  }
+  [data-theme="light"] .grid-item p {
+  opacity: 1;
+  }
+  [data-theme="light"] .edge-blur {
+    display: none;
+  }
+  [data-theme="light"] .vignette {
+    display: none;
+  }
+  .summary {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    opacity: 0.95;
+  }
   </style>
-  <svg class="goo" style="position: absolute; width: 0; height: 0">
-    <filter id="goo">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-      <feColorMatrix
-        in="blur"
-        mode="matrix"
-        values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7"
-        result="goo"
-      />
-      <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-    </filter>
-  </svg>
-  <body data-theme="dark">
-    <div class="logo" id="logoToggle">
-      <img
-        src="https://raw.githubusercontent.com/ZACKGORT/intoview/978224baf6a6bce81827044f742761d1bc39893e/intoview-horizontal-lockup-small.svg"
-        alt="intoview"
-      />
-    </div>
-    <div class="view-toggle">
-      <button class="toggle-btn" id="gridBtn">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <rect x="3" y="3" width="8" height="8" />
-          <rect x="13" y="3" width="8" height="8" />
-          <rect x="3" y="13" width="8" height="8" />
-          <rect x="13" y="13" width="8" height="8" />
-        </svg>
-      </button>
-      <button class="toggle-btn active" id="listBtn">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <line x1="4" y1="6" x2="20" y2="6" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="18" x2="20" y2="18" />
-        </svg>
-      </button>
-    </div>
-    <div class="listview-root curved" id="listView" style="display: block">
-      <main class="portfolio-container">
-        <ul class="project-list" id="projectList">
-          <li class="project-item hero">
-            <div class="project-data artist">Zachary Gort</div>
-            <div class="project-data album">Senior UX Designer</div>
-          </li>
-          <li class="project-item" style="grid-template-columns: 200px 1fr">
-            <div class="project-data artist">Contact</div>
-            <div class="project-data album">
-              <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a> •
-              <a href="https://zackgort.com" target="_blank">zackgort.com</a> •
-              <a href="https://linkedin.com/in/zackgort" target="_blank"
-                >linkedin.com/in/zackgort</a
-              >
-            </div>
-          </li>
-          <li class="project-item summary">
-            <div class="project-data artist">Professional Summary</div>
-            <div class="project-data album">
-              Creative designer, facilitator, and visual storyteller with over a
-              decade leading end-to-end user experience initiatives.
-              Autodidactic in digital prototyping for e-commerce and enterprise
-              — I blend the mainstream design stack with a relentless curiosity
-              for AI and product craft.
-            </div>
-          </li>
-          <li class="project-item section">
-            <div class="project-data artist">Experience</div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Phenom</div>
-            <div class="project-data role">User Experience Strategist</div>
-            <div class="project-data year">2025</div>
-            <div class="project-data album">
-              <p class="summary">
-                Managed the corporate website and shaped the product roadmap,
-                centralizing campaign content and aligning Marketing, Sales, and
-                Product for live demos and launches.
-              </p>
-              <details>
-                <summary>Cross-Functional Strategy & Operations</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Great product and a positive team culture. I worked around
-                      operational silos across local and global teams to make
-                      cross-functional work land more smoothly.
-                    </li>
-                    <li>
-                      Advanced third-party integrations and refined live event
-                      management and demo workflows.
-                    </li>
-                    <li>
-                      Forged cross-department relationships that moved strategic
-                      initiatives forward.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Contentful</span>
-                <span class="pill">Jira</span>
-                <span class="pill">Digital Content Management</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Publicis Sapient</div>
-            <div class="project-data role">Senior User Experience Designer</div>
-            <div class="project-data year">04/2022-03/2023</div>
-            <div class="project-data album">
-              <p class="summary">
-                Product lead on BNY Mellon — Pershing X. Reframed a broad set of
-                tools into a centralized, modular ecosystem and delivered
-                prototypes that helped secure contract extensions.
-              </p>
-              <details>
-                <summary>Design System Architecture & Scale</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Led multi-track efforts to clarify product scope and
-                      design a modular canonical system to cut complexity.
-                    </li>
-                    <li>
-                      Shipped a modular design system and modernized the stack
-                      (React, Tailwind) to enable consistent, scalable delivery.
-                    </li>
-                    <li>
-                      Improved coordination and handoffs across design and
-                      engineering, speeding delivery cadence.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">UX Methodologies</span>
-                <span class="pill">Design Principles</span>
-                <span class="pill">Digital Products Enhancement</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Code & Theory</div>
-            <div class="project-data role">Senior Interaction Designer</div>
-            <div class="project-data year">08/2021-04/2022</div>
-            <div class="project-data album">
-              <p class="summary">
-                Lead UX and interaction designer for TikTok For Business — ran
-                competitive audits, market research, and feature definition
-                while serving as the client-facing strategist.
-              </p>
-              <details>
-                <summary>Content Strategy & Platform Modernization</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Balanced brand and B2B needs and helped the team adopt a
-                      headless CMS approach for better content flexibility.
-                    </li>
-                    <li>
-                      Delivered workshops on information architecture, modular
-                      systems, and design within Contentful.
-                    </li>
-                    <li>
-                      Enabled faster decision-making and more evidence-driven
-                      product choices.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Strategic Insights</span>
-                <span class="pill">Iterative Methodologies</span>
-                <span class="pill">Design Frameworks</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Elva Design Group</div>
-            <div class="project-data role">Senior User Experience Designer</div>
-            <div class="project-data year">04/2021-08/2021</div>
-            <div class="project-data album">
-              <p class="summary">
-                Owned UX from discovery through hi-fi prototypes and a modular
-                design system during a focused 12-week engagement — delivered on
-                time and to spec.
-              </p>
-              <details>
-                <summary>Mobile-First Commerce Frameworks</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Autonomy let me push pragmatic, creative solutions when
-                      the usual formula didn’t fit the client.
-                    </li>
-                    <li>
-                      Built a component framework optimized for mobile-first
-                      e-commerce and future navigation patterns.
-                    </li>
-                    <li>
-                      Aligned cross-functional teams and produced practical
-                      handoff assets for engineering.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Strategic Thinking</span>
-                <span class="pill">Technical Execution</span>
-                <span class="pill">Design Strategy</span>
-                <span class="pill">Hand-off</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Huge Inc.</div>
-            <div class="project-data role">Senior User Experience Designer</div>
-            <div class="project-data year">03/2021-04/2021</div>
-            <div class="project-data album">
-              <p class="summary">
-                Contract role defining booking flows and UX for Sentral
-                Lifestyle Apartments. Delivered critical flows under tight
-                constraints; the work shipped.
-              </p>
-              <details>
-                <summary>Booking Experience Optimization</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Small scope, high impact — a focused engagement that
-                      mattered.
-                    </li>
-                    <li>
-                      Advised on brand activation and competitive positioning to
-                      inform UX strategy.
-                    </li>
-                    <li>
-                      Delivered ship-ready UX despite limited resources and
-                      time.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Competitive Landscape Analysis</span>
-                <span class="pill">UX Research</span>
-                <span class="pill">Information Architecture</span>
-                <span class="pill">User Flow</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">PFSWeb LiveArea</div>
-            <div class="project-data role">Manager, UX</div>
-            <div class="project-data year">01/2020-02/2021</div>
-            <div class="project-data album">
-              <p class="summary">
-                UX Manager on full-spectrum Salesforce e-commerce builds for B2B
-                and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West
-                Marine, YETI). Served as the primary UX strategy and design
-                lead.
-              </p>
-              <details>
-                <summary>High-Volume Commerce Optimization</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      A period of accelerated growth — I listened to clients and
-                      delivered on demanding business objectives.
-                    </li>
-                    <li>
-                      Solved conversion, re-engagement, and deep inventory
-                      challenges with pragmatic UX approaches.
-                    </li>
-                    <li>
-                      The PFSweb acquisition changed context; I navigated
-                      shifting priorities while keeping delivery steady.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Salesforce Solutions Architecture</span>
-                <span class="pill">Design Systems</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Workarea</div>
-            <div class="project-data role">Senior User Experience Designer</div>
-            <div class="project-data year">07/2017-09/2018</div>
-            <div class="project-data album">
-              <p class="summary">
-                Focused on improving a SaaS e-commerce platform through client
-                collaboration and data-driven design, streamlining handoffs and
-                workflows for scale.
-              </p>
-              <details>
-                <summary>SaaS Platform Enhancements</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Quick sketches and dev conversations often unlocked
-                      product improvements — one of the best environments I’ve
-                      worked in.
-                    </li>
-                    <li>
-                      Introduced iterative processes and leveraged data to
-                      expand platform capabilities.
-                    </li>
-                    <li>
-                      Partnered with retail and lifestyle clients to deliver
-                      measurable product value.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Data Analysis</span>
-                <span class="pill">Design Systems</span>
-                <span class="pill">Research</span>
-                <span class="pill">UX Technical Writing</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">O3 World</div>
-            <div class="project-data role">User Experience Designer</div>
-            <div class="project-data year">07/2016-06/2017</div>
-            <div class="project-data album">
-              <p class="summary">
-                Practiced Lean UX in a scrum-led environment, designing FinTech
-                and iOS products with disciplined execution at every stage.
-              </p>
-              <details>
-                <summary>FinTech & Agile Product Design</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Projects began on a whiteboard and often redefined
-                      expectations — the process taught rigor and craft.
-                    </li>
-                    <li>
-                      Led whiteboard sessions, wireframes, and sprint-driven
-                      MVPs to ship robust solutions.
-                    </li>
-                    <li>
-                      Collaborated with researchers, PMs, and engineers to
-                      deliver measurable outcomes.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Lean UX</span>
-                <span class="pill">Agile Workflow</span>
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Product Design Systems</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">ONE SIXTY OVER NINETY</div>
-            <div class="project-data role">Interaction Designer</div>
-            <div class="project-data year">09/2014-07/2016</div>
-            <div class="project-data album">
-              <p class="summary">
-                At the preeminent .EDU agency, I delivered full-service
-                interactive work with a focus on IA and ADA-compliant systems.
-              </p>
-              <details>
-                <summary>Inclusive Design & Complex IA</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Developed deep IA and accessibility expertise, translating
-                      brand into usable digital experiences.
-                    </li>
-                    <li>
-                      As one of two interactive designers, I owned full-spectrum
-                      builds for higher-education clients.
-                    </li>
-                    <li>
-                      Led client-facing creative work across .EDU accounts and
-                      projects for Comcast and the Philadelphia Eagles.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Wireframe Prototyping</span>
-                <span class="pill">UI Design Systems</span>
-                <span class="pill">Creative Copywriting</span>
-                <span class="pill">Visual Design</span>
-              </div>
-            </div>
-          </li>
-          <li class="project-item section">
-            <div class="project-data artist">Specializations</div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Design Leadership</div>
-            <div class="project-data album">
-              Master facilitator: leading client workshops, inspiring teams, and
-              presenting design decisions with confidence.
-            </div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Strategic UX & Service Design</div>
-            <div class="project-data album">
-              Skilled at crafting experience maps, service blueprints, and
-              interaction models that solve user and business problems.
-            </div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Digital Design & Prototyping</div>
-            <div class="project-data album">
-              Advanced in Figma and Adobe Creative Suite; experienced in rapid
-              prototyping and comfortable with HTML/CSS/JS for interactive
-              proofs of concept.
-            </div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">
-              Design Systems & Visual Standards
-            </div>
-            <div class="project-data album">
-              Experienced in creating and evolving design systems and style
-              guides to maintain product coherence as teams scale.
-            </div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Collaboration</div>
-            <div class="project-data album">
-              Partner closely with product owners, front-end developers, and
-              multi-disciplinary teams to ship high-impact outcomes.
-            </div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Communication & Storytelling</div>
-            <div class="project-data album">
-              Clear writer and presenter who tailors the story to the audience
-              and moves decisions forward.
-            </div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Project Management</div>
-            <div class="project-data album">
-              Delivers projects on time and on budget with attention to detail
-              and strong organization.
-            </div>
-          </li>
-          <li class="project-item section">
-            <div class="project-data artist">Testimonials</div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Christopher Bayle</div>
-            <div class="project-data album">
-              “Zack has a deep connection to emotion and imagination. His
-              empathy and sensitivity let him give voice to human connections,
-              and he brings fresh perspective when we’re stuck — a great person
-              to work with.”
-            </div>
-            <div class="project-data year">ACD UX, Publicis Sapient</div>
-          </li>
-          <li class="project-item quote">
-            <div class="project-data artist">Andrés Moros, MPS</div>
-            <div class="project-data album">
-              “Zack is talented, hardworking, and highly communicative. He lifts
-              team performance and consistently goes the extra mile. I enjoyed
-              working with him and recommend him without reservation.”
-            </div>
-            <div class="project-data year">
-              Sr. UX Designer, Publicis Sapient
-            </div>
-          </li>
-          <li class="project-item section">
-            <div class="project-data artist">Education</div>
-          </li>
-          <li class="project-item experience">
-            <div class="project-data artist">Pratt Institute of Art</div>
-            <div class="project-data role">
-              BFA, 3D Animation & Motion Graphics
-            </div>
-            <div class="project-data year">2002-2005</div>
-            <div class="project-data album">
-              Incomplete Degree. Foundation in digital media arts, technical
-              prototyping, and the craft of meaningful storytelling.
-            </div>
-          </li>
-        </ul>
-      </main>
-      <div class="background-image" id="listBackgroundImage"></div>
-    </div>
-    <div class="gridview-root curved" id="gridView" style="display: none">
-      <div class="grid-container">
-        <div class="grid-section">
-          <div class="grid-section-title">Professional Summary</div>
-          <div class="grid-items">
-            <div class="grid-item">
-              <h4>Zachary Gort</h4>
-              <p>Senior UX Designer</p>
-              <p>
-                Creative designer, facilitator, and visual storyteller with over
-                a decade leading end-to-end user experience initiatives.
-                Autodidactic in digital prototyping for e-commerce and
-                enterprise — I blend the mainstream design stack with a
-                relentless curiosity for AI and product craft.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="grid-section">
-          <div class="grid-section-title">Contact</div>
-          <div class="grid-items">
-            <div class="grid-item">
-              <p>
-                Email: <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a
-                ><br />
-                Portfolio:
-                <a href="https://zackgort.com" target="_blank">zackgort.com</a
-                ><br />
-                LinkedIn:
-                <a href="https://linkedin.com/in/zackgort" target="_blank"
-                  >linkedin.com/in/zackgort</a
-                >
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="grid-section">
-          <div class="grid-section-title">Experience</div>
-          <div class="grid-items">
-            <div class="grid-item">
-              <h4>Phenom</h4>
-              <div class="job-info">
-                <span class="role">User Experience Strategist</span>
-                <span class="duration">2025</span>
-              </div>
-              <p class="summary">
-                Managed the corporate website and shaped the product roadmap,
-                centralizing campaign content and aligning Marketing, Sales, and
-                Product for live demos and launches.
-              </p>
-              <details>
-                <summary>Cross-Functional Strategy & Operations</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Great product and a positive team culture. I worked around
-                      operational silos across local and global teams to make
-                      cross-functional work land more smoothly.
-                    </li>
-                    <li>
-                      Advanced third-party integrations and refined live event
-                      management and demo workflows.
-                    </li>
-                    <li>
-                      Forged cross-department relationships that moved strategic
-                      initiatives forward.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Contentful</span>
-                <span class="pill">Jira</span>
-                <span class="pill">Digital Content Management</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>Publicis Sapient</h4>
-              <div class="job-info">
-                <span class="role">Senior User Experience Designer</span>
-                <span class="duration">04/2022-03/2023</span>
-              </div>
-              <p class="summary">
-                Product lead on BNY Mellon — Pershing X. Reframed a broad set of
-                tools into a centralized, modular ecosystem and delivered
-                prototypes that helped secure contract extensions.
-              </p>
-              <details>
-                <summary>Design System Architecture & Scale</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Led multi-track efforts to clarify product scope and
-                      design a modular canonical system to cut complexity.
-                    </li>
-                    <li>
-                      Shipped a modular design system and modernized the stack
-                      (React, Tailwind) to enable consistent, scalable delivery.
-                    </li>
-                    <li>
-                      Improved coordination and handoffs across design and
-                      engineering, speeding delivery cadence.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">UX Methodologies</span>
-                <span class="pill">Design Principles</span>
-                <span class="pill">Digital Products Enhancement</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>Code & Theory</h4>
-              <div class="job-info">
-                <span class="role">Senior Interaction Designer</span>
-                <span class="duration">08/2021-04/2022</span>
-              </div>
-              <p class="summary">
-                Lead UX and interaction designer for TikTok For Business — ran
-                competitive audits, market research, and feature definition
-                while serving as the client-facing strategist.
-              </p>
-              <details>
-                <summary>Content Strategy & Platform Modernization</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Balanced brand and B2B needs and helped the team adopt a
-                      headless CMS approach for better content flexibility.
-                    </li>
-                    <li>
-                      Delivered workshops on information architecture, modular
-                      systems, and design within Contentful.
-                    </li>
-                    <li>
-                      Enabled faster decision-making and more evidence-driven
-                      product choices.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Strategic Insights</span>
-                <span class="pill">Iterative Methodologies</span>
-                <span class="pill">Design Frameworks</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>Elva Design Group</h4>
-              <div class="job-info">
-                <span class="role">Senior User Experience Designer</span>
-                <span class="duration">04/2021-08/2021</span>
-              </div>
-              <p class="summary">
-                Owned discovery through hi-fi prototypes and a modular design
-                system during a focused 12-week engagement — delivered on time
-                and to spec.
-              </p>
-              <details>
-                <summary>Mobile-First Commerce Frameworks</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Autonomy let me push pragmatic, creative solutions when
-                      the usual formula didn’t fit the client.
-                    </li>
-                    <li>
-                      Built a component framework optimized for mobile-first
-                      e-commerce and future navigation patterns.
-                    </li>
-                    <li>
-                      Aligned cross-functional teams and produced practical
-                      handoff assets for engineering.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Strategic Thinking</span>
-                <span class="pill">Technical Execution</span>
-                <span class="pill">Design Strategy</span>
-                <span class="pill">Hand-off</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>Huge Inc.</h4>
-              <div class="job-info">
-                <span class="role">Senior User Experience Designer</span>
-                <span class="duration">03/2021-04/2021</span>
-              </div>
-              <p class="summary">
-                Contract role defining booking flows and UX for Sentral
-                Lifestyle Apartments. Delivered critical flows under tight
-                constraints; the work shipped.
-              </p>
-              <details>
-                <summary>Booking Experience Optimization</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Small scope, high impact — a focused engagement that
-                      mattered.
-                    </li>
-                    <li>
-                      Advised on brand activation and competitive positioning to
-                      inform UX strategy.
-                    </li>
-                    <li>
-                      Delivered ship-ready UX despite limited resources and
-                      time.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Competitive Landscape Analysis</span>
-                <span class="pill">UX Research</span>
-                <span class="pill">Information Architecture</span>
-                <span class="pill">User Flow</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>PFSWeb LiveArea</h4>
-              <div class="job-info">
-                <span class="role">Manager, UX</span>
-                <span class="duration">01/2020-02/2021</span>
-              </div>
-              <p class="summary">
-                UX Manager on full-spectrum Salesforce e-commerce builds for B2B
-                and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West
-                Marine, YETI). Served as the primary UX strategy and design
-                lead.
-              </p>
-              <details>
-                <summary>High-Volume Commerce Optimization</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      A period of accelerated growth — I listened to clients and
-                      delivered on demanding business objectives.
-                    </li>
-                    <li>
-                      Solved conversion, re-engagement, and deep inventory
-                      challenges with pragmatic UX approaches.
-                    </li>
-                    <li>
-                      The PFSweb acquisition changed context; I navigated
-                      shifting priorities while keeping delivery steady.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Salesforce Solutions Architecture</span>
-                <span class="pill">Design Systems</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>Workarea</h4>
-              <div class="job-info">
-                <span class="role">Senior User Experience Designer</span>
-                <span class="duration">07/2017-09/2018</span>
-              </div>
-              <p class="summary">
-                Focused on improving a SaaS e-commerce platform through client
-                collaboration and data-driven design, streamlining handoffs and
-                workflows for scale.
-              </p>
-              <details>
-                <summary>SaaS Platform Enhancements</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Quick sketches and dev conversations often unlocked
-                      product improvements — one of the best environments I’ve
-                      worked in.
-                    </li>
-                    <li>
-                      Introduced iterative processes and leveraged data to
-                      expand platform capabilities.
-                    </li>
-                    <li>
-                      Partnered with retail and lifestyle clients to deliver
-                      measurable product value.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Data Analysis</span>
-                <span class="pill">Design Systems</span>
-                <span class="pill">Research</span>
-                <span class="pill">UX Technical Writing</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>O3 World</h4>
-              <div class="job-info">
-                <span class="role">User Experience Designer</span>
-                <span class="duration">07/2016-06/2017</span>
-              </div>
-              <p class="summary">
-                Practiced Lean UX in a scrum-led environment, designing FinTech
-                and iOS products with disciplined execution at every stage.
-              </p>
-              <details>
-                <summary>FinTech & Agile Product Design</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Projects began on a whiteboard and often redefined
-                      expectations — the process taught rigor and craft.
-                    </li>
-                    <li>
-                      Led whiteboard sessions, wireframes, and sprint-driven
-                      MVPs to ship robust solutions.
-                    </li>
-                    <li>
-                      Collaborated with researchers, PMs, and engineers to
-                      deliver measurable outcomes.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Lean UX</span>
-                <span class="pill">Agile Workflow</span>
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Product Design Systems</span>
-              </div>
-            </div>
-            <div class="grid-item">
-              <h4>ONE SIXTY OVER NINETY</h4>
-              <div class="job-info">
-                <span class="role">Interaction Designer</span>
-                <span class="duration">09/2014-07/2016</span>
-              </div>
-              <p class="summary">
-                At the preeminent .EDU agency, I delivered full-service
-                interactive work with a focus on IA and ADA-compliant systems.
-              </p>
-              <details>
-                <summary>Inclusive Design & Complex IA</summary>
-                <div class="accordion-content">
-                  <ul>
-                    <li>
-                      Developed deep IA and accessibility expertise, translating
-                      brand into usable digital experiences.
-                    </li>
-                    <li>
-                      As one of two interactive designers, I owned full-spectrum
-                      builds for higher-education clients.
-                    </li>
-                    <li>
-                      Led client-facing creative work across .EDU accounts and
-                      projects for Comcast and the Philadelphia Eagles.
-                    </li>
-                  </ul>
-                </div>
-              </details>
-              <div class="pills">
-                <span class="pill">Information Architecture</span>
-                <span class="pill">Wireframe Prototyping</span>
-                <span class="pill">UI Design Systems</span>
-                <span class="pill">Creative Copywriting</span>
-                <span class="pill">Visual Design</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="grid-section">
-          <div class="grid-section-title">Specializations</div>
-          <div class="grid-items">
-            <div class="grid-item">
-              <h4>Design Leadership</h4>
-              <p>
-                Master facilitator: leading client workshops, inspiring teams,
-                and presenting design decisions with confidence.
-              </p>
-            </div>
-            <div class="grid-item">
-              <h4>Strategic UX & Service Design</h4>
-              <p>
-                Skilled at crafting experience maps, service blueprints, and
-                interaction models that solve user and business problems.
-              </p>
-            </div>
-            <div class="grid-item">
-              <h4>Digital Design & Prototyping</h4>
-              <p>
-                Advanced in Figma and Adobe Creative Suite; experienced in rapid
-                prototyping and comfortable with HTML/CSS/JS for interactive
-                proofs of concept.
-              </p>
-            </div>
-            <div class="grid-item">
-              <h4>Design Systems & Visual Standards</h4>
-              <p>
-                Experienced in creating and evolving design systems and style
-                guides to maintain product coherence as teams scale.
-              </p>
-            </div>
-            <div class="grid-item">
-              <h4>Collaboration</h4>
-              <p>
-                Partner closely with product owners, front-end developers, and
-                multi-disciplinary teams to ship high-impact outcomes.
-              </p>
-            </div>
-            <div class="grid-item">
-              <h4>Communication & Storytelling</h4>
-              <p>
-                Clear writer and presenter who tailors the story to the audience
-                and moves decisions forward.
-              </p>
-            </div>
-            <div class="grid-item">
-              <h4>Project Management</h4>
-              <p>
-                Delivers projects on time and on budget with attention to detail
-                and strong organization.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="grid-section">
-          <div class="grid-section-title">Testimonials</div>
-          <div class="grid-items">
-            <div class="grid-item">
-              <h4>Christopher Bayle</h4>
-              <p>
-                “Zack connects to emotion and imagination in a way that surfaces
-                thoughtful, human work. His empathy and perspective consistently
-                helped break creative logjams — a reliable and inspiring
-                collaborator.”
-              </p>
-              <span class="duration">ACD UX, Publicis Sapient</span>
-            </div>
-            <div class="grid-item">
-              <h4>Andrés Moros, MPS</h4>
-              <p>
-                “Zack is talented, hardworking, and communicative. He elevates
-                team collaboration and consistently goes the extra mile. I
-                enjoyed working with him and recommend him without reservation.”
-              </p>
-              <span class="duration">Sr. UX Designer, Publicis Sapient</span>
-            </div>
-          </div>
-        </div>
-        <div class="grid-section">
-          <div class="grid-section-title">Education</div>
-          <div class="grid-items">
-            <div class="grid-item">
-              <h4>Pratt Institute of Art</h4>
-              <p>
-                BFA, 3D Animation & Motion Graphics (Incomplete Degree).
-                Foundation in digital media arts, technical prototyping, and the
-                craft of meaningful storytelling.
-              </p>
-              <span class="duration">2002-2005</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="background-image" id="gridBackgroundImage"></div>
-    </div>
-    <div class="edge-blur"></div>
-    <div class="vignette"></div>
-    <div id="cursor"></div>
-    <button class="theme-toggle" id="themeToggle">
-      <svg viewBox="0 0 24 24" id="themeIcon">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+<svg class="goo" style="position:absolute; width:0; height:0;">
+  <filter id="goo">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+    <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7" result="goo"/>
+    <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+  </filter>
+</svg>
+<body data-theme="dark">
+  <div class="logo" id="logoToggle">
+    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/978224baf6a6bce81827044f742761d1bc39893e/intoview-horizontal-lockup-small.svg" alt="intoview">
+  </div>
+  <div class="view-toggle">
+    <button class="toggle-btn" id="gridBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="8" height="8"/>
+        <rect x="13" y="3" width="8" height="8"/>
+        <rect x="3" y="13" width="8" height="8"/>
+        <rect x="13" y="13" width="8" height="8"/>
       </svg>
     </button>
-    <div class="fab-wrap">
-      <button
-        class="fab"
-        id="fabButton"
-        title="About this Resume"
-        aria-label="Open Resume Info"
-        aria-haspopup="dialog"
-        aria-expanded="false"
-      >
-        <svg viewBox="0 0 100 100" aria-hidden="true">
-          <defs>
-            <linearGradient id="cubeTop" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#fff" stop-opacity="1" />
-              <stop offset="1" stop-color="#dcdcdc" stop-opacity="1" />
-            </linearGradient>
-            <linearGradient id="cubeSide" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#e8e8e8" />
-              <stop offset="1" stop-color="#bdbdbd" />
-            </linearGradient>
-            <linearGradient id="cubeDark" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#8a8a8a" />
-              <stop offset="1" stop-color="#4b4b4b" />
-            </linearGradient>
-            <filter id="cubeGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow
-                dx="0"
-                dy="6"
-                stdDeviation="6"
-                flood-color="#000"
-                flood-opacity=".45"
-              />
-            </filter>
-          </defs>
-          <g filter="url(#cubeGlow)">
-            <polygon fill="url(#cubeTop)" points="50,14 80,30 50,46 20,30" />
-            <polygon fill="url(#cubeSide)" points="80,30 80,66 50,82 50,46" />
-            <polygon fill="url(#cubeDark)" points="50,46 50,82 20,66 20,30" />
-          </g>
-        </svg>
-      </button>
-    </div>
-    <div class="overlay" id="overlay" aria-hidden="true">
-      <div class="sheet" tabindex="-1">
-        <div class="title-bar">
-          <h1>Zack Gort, Designer</h1>
-          <button class="close-button" id="closeOverlay">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <line
-                x1="18"
-                y1="6"
-                x2="6"
-                y2="18"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-              <line
-                x1="6"
-                y1="6"
-                x2="18"
-                y2="18"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
+    <button class="toggle-btn active" id="listBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="4" y1="6" x2="20" y2="6"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="listview-root curved" id="listView" style="display: block;">
+    <main class="portfolio-container">
+      <ul class="project-list" id="projectList">
+        <li class="project-item hero">
+          <div class="project-data artist">Zachary Gort</div>
+          <div class="project-data album">Senior UX Designer</div>
+        </li>
+        <li class="project-item" style="grid-template-columns: 200px 1fr;">
+          <div class="project-data artist">Contact</div>
+          <div class="project-data album">
+            <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a> •
+            <a href="https://zackgort.com" target="_blank">zackgort.com</a> •
+            <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>
+          </div>
+        </li>
+        <li class="project-item summary">
+          <div class="project-data artist">Professional Summary</div>
+          <div class="project-data album">Creative designer, facilitator, and visual storyteller with over a decade leading end-to-end user experience initiatives. Autodidactic in digital prototyping for e-commerce and enterprise — I blend the mainstream design stack with a relentless curiosity for AI and product craft.</div>
+        </li>
+        <li class="project-item section">
+          <div class="project-data artist">Experience</div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Phenom</div>
+          <div class="project-data role">User Experience Strategist</div>
+          <div class="project-data year">2025</div>
+          <div class="project-data album">
+            <p class="summary">Managed the corporate website and shaped the product roadmap, centralizing campaign content and aligning Marketing, Sales, and Product for live demos and launches.</p>
+            <details>
+              <summary>Cross-Functional Strategy & Operations</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Great product and a positive team culture. I worked around operational silos across local and global teams to make cross-functional work land more smoothly.</li>
+                  <li>Advanced third-party integrations and refined live event management and demo workflows.</li>
+                  <li>Forged cross-department relationships that moved strategic initiatives forward.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Contentful</span>
+              <span class="pill">Jira</span>
+              <span class="pill">Digital Content Management</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Publicis Sapient</div>
+          <div class="project-data role">Senior User Experience Designer</div>
+          <div class="project-data year">04/2022-03/2023</div>
+          <div class="project-data album">
+            <p class="summary">Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.</p>
+            <details>
+              <summary>Design System Architecture & Scale</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Led multi-track efforts to clarify product scope and design a modular canonical system to cut complexity.</li>
+                  <li>Shipped a modular design system and modernized the stack (React, Tailwind) to enable consistent, scalable delivery.</li>
+                  <li>Improved coordination and handoffs across design and engineering, speeding delivery cadence.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">UX Methodologies</span>
+              <span class="pill">Design Principles</span>
+              <span class="pill">Digital Products Enhancement</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Code & Theory</div>
+          <div class="project-data role">Senior Interaction Designer</div>
+          <div class="project-data year">08/2021-04/2022</div>
+          <div class="project-data album">
+            <p class="summary">Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.</p>
+            <details>
+              <summary>Content Strategy & Platform Modernization</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Balanced brand and B2B needs and helped the team adopt a headless CMS approach for better content flexibility.</li>
+                  <li>Delivered workshops on information architecture, modular systems, and design within Contentful.</li>
+                  <li>Enabled faster decision-making and more evidence-driven product choices.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Strategic Insights</span>
+              <span class="pill">Iterative Methodologies</span>
+              <span class="pill">Design Frameworks</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Elva Design Group</div>
+          <div class="project-data role">Senior User Experience Designer</div>
+          <div class="project-data year">04/2021-08/2021</div>
+          <div class="project-data album">
+            <p class="summary">Owned UX from discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
+            <details>
+              <summary>Mobile-First Commerce Frameworks</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Autonomy let me push pragmatic, creative solutions when the usual formula didn’t fit the client.</li>
+                  <li>Built a component framework optimized for mobile-first e-commerce and future navigation patterns.</li>
+                  <li>Aligned cross-functional teams and produced practical handoff assets for engineering.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Strategic Thinking</span>
+              <span class="pill">Technical Execution</span>
+              <span class="pill">Design Strategy</span>
+              <span class="pill">Hand-off</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Huge Inc.</div>
+          <div class="project-data role">Senior User Experience Designer</div>
+          <div class="project-data year">03/2021-04/2021</div>
+          <div class="project-data album">
+            <p class="summary">Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.</p>
+            <details>
+              <summary>Booking Experience Optimization</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Small scope, high impact — a focused engagement that mattered.</li>
+                  <li>Advised on brand activation and competitive positioning to inform UX strategy.</li>
+                  <li>Delivered ship-ready UX despite limited resources and time.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Competitive Landscape Analysis</span>
+              <span class="pill">UX Research</span>
+              <span class="pill">Information Architecture</span>
+              <span class="pill">User Flow</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">PFSWeb LiveArea</div>
+          <div class="project-data role">Manager, UX</div>
+          <div class="project-data year">01/2020-02/2021</div>
+          <div class="project-data album">
+            <p class="summary">UX Manager on full-spectrum Salesforce e-commerce builds for B2B and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West Marine, YETI). Served as the primary UX strategy and design lead.</p>
+            <details>
+              <summary>High-Volume Commerce Optimization</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>A period of accelerated growth — I listened to clients and delivered on demanding business objectives.</li>
+                  <li>Solved conversion, re-engagement, and deep inventory challenges with pragmatic UX approaches.</li>
+                  <li>The PFSweb acquisition changed context; I navigated shifting priorities while keeping delivery steady.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Salesforce Solutions Architecture</span>
+              <span class="pill">Design Systems</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Workarea</div>
+          <div class="project-data role">Senior User Experience Designer</div>
+          <div class="project-data year">07/2017-09/2018</div>
+          <div class="project-data album">
+            <p class="summary">Focused on improving a SaaS e-commerce platform through client collaboration and data-driven design, streamlining handoffs and workflows for scale.</p>
+            <details>
+              <summary>SaaS Platform Enhancements</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Quick sketches and dev conversations often unlocked product improvements — one of the best environments I’ve worked in.</li>
+                  <li>Introduced iterative processes and leveraged data to expand platform capabilities.</li>
+                  <li>Partnered with retail and lifestyle clients to deliver measurable product value.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Data Analysis</span>
+              <span class="pill">Design Systems</span>
+              <span class="pill">Research</span>
+              <span class="pill">UX Technical Writing</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">O3 World</div>
+          <div class="project-data role">User Experience Designer</div>
+          <div class="project-data year">07/2016-06/2017</div>
+          <div class="project-data album">
+            <p class="summary">Practiced Lean UX in a scrum-led environment, designing FinTech and iOS products with disciplined execution at every stage.</p>
+            <details>
+              <summary>FinTech & Agile Product Design</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Projects began on a whiteboard and often redefined expectations — the process taught rigor and craft.</li>
+                  <li>Led whiteboard sessions, wireframes, and sprint-driven MVPs to ship robust solutions.</li>
+                  <li>Collaborated with researchers, PMs, and engineers to deliver measurable outcomes.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Lean UX</span>
+              <span class="pill">Agile Workflow</span>
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Product Design Systems</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">ONE SIXTY OVER NINETY</div>
+          <div class="project-data role">Interaction Designer</div>
+          <div class="project-data year">09/2014-07/2016</div>
+          <div class="project-data album">
+            <p class="summary">At the preeminent .EDU agency, I delivered full-service interactive work with a focus on IA and ADA-compliant systems.</p>
+            <details>
+              <summary>Inclusive Design & Complex IA</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Developed deep IA and accessibility expertise, translating brand into usable digital experiences.</li>
+                  <li>As one of two interactive designers, I owned full-spectrum builds for higher-education clients.</li>
+                  <li>Led client-facing creative work across .EDU accounts and projects for Comcast and the Philadelphia Eagles.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Wireframe Prototyping</span>
+              <span class="pill">UI Design Systems</span>
+              <span class="pill">Creative Copywriting</span>
+              <span class="pill">Visual Design</span>
+            </div>
+          </div>
+        </li>
+        <li class="project-item section">
+          <div class="project-data artist">Specializations</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Design Leadership</div>
+          <div class="project-data album">Master facilitator: leading client workshops, inspiring teams, and presenting design decisions with confidence.</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Strategic UX & Service Design</div>
+          <div class="project-data album">Skilled at crafting experience maps, service blueprints, and interaction models that solve user and business problems.</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Digital Design & Prototyping</div>
+          <div class="project-data album">Advanced in Figma and Adobe Creative Suite; experienced in rapid prototyping and comfortable with HTML/CSS/JS for interactive proofs of concept.</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Design Systems & Visual Standards</div>
+          <div class="project-data album">Experienced in creating and evolving design systems and style guides to maintain product coherence as teams scale.</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Collaboration</div>
+          <div class="project-data album">Partner closely with product owners, front-end developers, and multi-disciplinary teams to ship high-impact outcomes.</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Communication & Storytelling</div>
+          <div class="project-data album">Clear writer and presenter who tailors the story to the audience and moves decisions forward.</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Project Management</div>
+          <div class="project-data album">Delivers projects on time and on budget with attention to detail and strong organization.</div>
+        </li>
+        <li class="project-item section">
+          <div class="project-data artist">Testimonials</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Christopher Bayle</div>
+          <div class="project-data album">“Zack has a deep connection to emotion and imagination. His empathy and sensitivity let him give voice to human connections, and he brings fresh perspective when we’re stuck — a great person to work with.”</div>
+          <div class="project-data year">ACD UX, Publicis Sapient</div>
+        </li>
+        <li class="project-item quote">
+          <div class="project-data artist">Andrés Moros, MPS</div>
+          <div class="project-data album">“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I enjoyed working with him and recommend him without reservation.”</div>
+          <div class="project-data year">Sr. UX Designer, Publicis Sapient</div>
+        </li>
+        <li class="project-item section">
+          <div class="project-data artist">Education</div>
+        </li>
+        <li class="project-item experience">
+          <div class="project-data artist">Pratt Institute of Art</div>
+          <div class="project-data role">BFA, 3D Animation & Motion Graphics</div>
+          <div class="project-data year">2002-2005</div>
+          <div class="project-data album">Incomplete Degree. Foundation in digital media arts, technical prototyping, and the craft of meaningful storytelling.</div>
+        </li>
+      </ul>
+    </main>
+    <div class="background-image" id="listBackgroundImage"></div>
+  </div>
+  <div class="gridview-root curved" id="gridView" style="display: none;">
+    <div class="grid-container">
+      <div class="grid-section">
+        <div class="grid-section-title">Professional Summary</div>
+        <div class="grid-items">
+          <div class="grid-item">
+            <h4>Zachary Gort</h4>
+            <p>Senior UX Designer</p>
+            <p>Creative designer, facilitator, and visual storyteller with over a decade leading end-to-end user experience initiatives. Autodidactic in digital prototyping for e-commerce and enterprise — I blend the mainstream design stack with a relentless curiosity for AI and product craft.</p>
+          </div>
         </div>
-        <div class="container">
-          <p>This resume was built by Zack Gort {Thinker & Maker}.</p>
-          <p>For inquiries or opportunities, reach out via:</p>
-          <p>
-            Email: <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a
-            ><br />
-            Portfolio:
-            <a href="https://zackgort.com" target="_blank">zackgort.com</a
-            ><br />
-            LinkedIn:
-            <a href="https://linkedin.com/in/zackgort" target="_blank"
-              >linkedin.com/in/zackgort</a
-            >
-          </p>
-          <p>
-            Available for full-time roles in design-led, data-driven
-            environments.
-          </p>
-          <h2>Things I'm building:</h2>
-          <h3>Note App</h3>
-          <img class="preview-img" src="" alt="Preview of intoview.pro/note" />
-          <a href="https://intoview.pro/note" target="_blank">intoview:note</a>
-          <h3>Kanban App</h3>
-          <img
-            class="preview-img"
-            src=""
-            alt="Preview of intoview.pro/kanban"
-          />
-          <a href="https://intoview.pro/kanban" target="_blank"
-            >intoview:kanban</a
-          >
+      </div>
+      <div class="grid-section">
+        <div class="grid-section-title">Contact</div>
+        <div class="grid-items">
+          <div class="grid-item">
+            <p>
+              Email: <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a><br>
+              Portfolio: <a href="https://zackgort.com" target="_blank">zackgort.com</a><br>
+              LinkedIn: <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="grid-section">
+        <div class="grid-section-title">Experience</div>
+        <div class="grid-items">
+          <div class="grid-item">
+            <h4>Phenom</h4>
+            <div class="job-info">
+              <span class="role">User Experience Strategist</span>
+              <span class="duration">2025</span>
+            </div>
+            <p class="summary">Managed the corporate website and shaped the product roadmap, centralizing campaign content and aligning Marketing, Sales, and Product for live demos and launches.</p>
+            <details>
+              <summary>Cross-Functional Strategy & Operations</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Great product and a positive team culture. I worked around operational silos across local and global teams to make cross-functional work land more smoothly.</li>
+                  <li>Advanced third-party integrations and refined live event management and demo workflows.</li>
+                  <li>Forged cross-department relationships that moved strategic initiatives forward.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Contentful</span>
+              <span class="pill">Jira</span>
+              <span class="pill">Digital Content Management</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>Publicis Sapient</h4>
+            <div class="job-info">
+              <span class="role">Senior User Experience Designer</span>
+              <span class="duration">04/2022-03/2023</span>
+            </div>
+            <p class="summary">Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.</p>
+            <details>
+              <summary>Design System Architecture & Scale</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Led multi-track efforts to clarify product scope and design a modular canonical system to cut complexity.</li>
+                  <li>Shipped a modular design system and modernized the stack (React, Tailwind) to enable consistent, scalable delivery.</li>
+                  <li>Improved coordination and handoffs across design and engineering, speeding delivery cadence.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">UX Methodologies</span>
+              <span class="pill">Design Principles</span>
+              <span class="pill">Digital Products Enhancement</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>Code & Theory</h4>
+            <div class="job-info">
+              <span class="role">Senior Interaction Designer</span>
+              <span class="duration">08/2021-04/2022</span>
+            </div>
+            <p class="summary">Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.</p>
+            <details>
+              <summary>Content Strategy & Platform Modernization</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Balanced brand and B2B needs and helped the team adopt a headless CMS approach for better content flexibility.</li>
+                  <li>Delivered workshops on information architecture, modular systems, and design within Contentful.</li>
+                  <li>Enabled faster decision-making and more evidence-driven product choices.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Strategic Insights</span>
+              <span class="pill">Iterative Methodologies</span>
+              <span class="pill">Design Frameworks</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>Elva Design Group</h4>
+            <div class="job-info">
+              <span class="role">Senior User Experience Designer</span>
+              <span class="duration">04/2021-08/2021</span>
+            </div>
+            <p class="summary">Owned discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
+            <details>
+              <summary>Mobile-First Commerce Frameworks</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Autonomy let me push pragmatic, creative solutions when the usual formula didn’t fit the client.</li>
+                  <li>Built a component framework optimized for mobile-first e-commerce and future navigation patterns.</li>
+                  <li>Aligned cross-functional teams and produced practical handoff assets for engineering.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Strategic Thinking</span>
+              <span class="pill">Technical Execution</span>
+              <span class="pill">Design Strategy</span>
+              <span class="pill">Hand-off</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>Huge Inc.</h4>
+            <div class="job-info">
+              <span class="role">Senior User Experience Designer</span>
+              <span class="duration">03/2021-04/2021</span>
+            </div>
+            <p class="summary">Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.</p>
+            <details>
+              <summary>Booking Experience Optimization</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Small scope, high impact — a focused engagement that mattered.</li>
+                  <li>Advised on brand activation and competitive positioning to inform UX strategy.</li>
+                  <li>Delivered ship-ready UX despite limited resources and time.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Competitive Landscape Analysis</span>
+              <span class="pill">UX Research</span>
+              <span class="pill">Information Architecture</span>
+              <span class="pill">User Flow</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>PFSWeb LiveArea</h4>
+            <div class="job-info">
+              <span class="role">Manager, UX</span>
+              <span class="duration">01/2020-02/2021</span>
+            </div>
+            <p class="summary">UX Manager on full-spectrum Salesforce e-commerce builds for B2B and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West Marine, YETI). Served as the primary UX strategy and design lead.</p>
+            <details>
+              <summary>High-Volume Commerce Optimization</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>A period of accelerated growth — I listened to clients and delivered on demanding business objectives.</li>
+                  <li>Solved conversion, re-engagement, and deep inventory challenges with pragmatic UX approaches.</li>
+                  <li>The PFSweb acquisition changed context; I navigated shifting priorities while keeping delivery steady.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Salesforce Solutions Architecture</span>
+              <span class="pill">Design Systems</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>Workarea</h4>
+            <div class="job-info">
+              <span class="role">Senior User Experience Designer</span>
+              <span class="duration">07/2017-09/2018</span>
+            </div>
+            <p class="summary">Focused on improving a SaaS e-commerce platform through client collaboration and data-driven design, streamlining handoffs and workflows for scale.</p>
+            <details>
+              <summary>SaaS Platform Enhancements</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Quick sketches and dev conversations often unlocked product improvements — one of the best environments I’ve worked in.</li>
+                  <li>Introduced iterative processes and leveraged data to expand platform capabilities.</li>
+                  <li>Partnered with retail and lifestyle clients to deliver measurable product value.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Data Analysis</span>
+              <span class="pill">Design Systems</span>
+              <span class="pill">Research</span>
+              <span class="pill">UX Technical Writing</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>O3 World</h4>
+            <div class="job-info">
+              <span class="role">User Experience Designer</span>
+              <span class="duration">07/2016-06/2017</span>
+            </div>
+            <p class="summary">Practiced Lean UX in a scrum-led environment, designing FinTech and iOS products with disciplined execution at every stage.</p>
+            <details>
+              <summary>FinTech & Agile Product Design</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Projects began on a whiteboard and often redefined expectations — the process taught rigor and craft.</li>
+                  <li>Led whiteboard sessions, wireframes, and sprint-driven MVPs to ship robust solutions.</li>
+                  <li>Collaborated with researchers, PMs, and engineers to deliver measurable outcomes.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Lean UX</span>
+              <span class="pill">Agile Workflow</span>
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Product Design Systems</span>
+            </div>
+          </div>
+          <div class="grid-item">
+            <h4>ONE SIXTY OVER NINETY</h4>
+            <div class="job-info">
+              <span class="role">Interaction Designer</span>
+              <span class="duration">09/2014-07/2016</span>
+            </div>
+            <p class="summary">At the preeminent .EDU agency, I delivered full-service interactive work with a focus on IA and ADA-compliant systems.</p>
+            <details>
+              <summary>Inclusive Design & Complex IA</summary>
+              <div class="accordion-content">
+                <ul>
+                  <li>Developed deep IA and accessibility expertise, translating brand into usable digital experiences.</li>
+                  <li>As one of two interactive designers, I owned full-spectrum builds for higher-education clients.</li>
+                  <li>Led client-facing creative work across .EDU accounts and projects for Comcast and the Philadelphia Eagles.</li>
+                </ul>
+              </div>
+            </details>
+            <div class="pills">
+              <span class="pill">Information Architecture</span>
+              <span class="pill">Wireframe Prototyping</span>
+              <span class="pill">UI Design Systems</span>
+              <span class="pill">Creative Copywriting</span>
+              <span class="pill">Visual Design</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-section">
+        <div class="grid-section-title">Specializations</div>
+        <div class="grid-items">
+          <div class="grid-item">
+            <h4>Design Leadership</h4>
+            <p>Master facilitator: leading client workshops, inspiring teams, and presenting design decisions with confidence.</p>
+          </div>
+          <div class="grid-item">
+            <h4>Strategic UX & Service Design</h4>
+            <p>Skilled at crafting experience maps, service blueprints, and interaction models that solve user and business problems.</p>
+          </div>
+          <div class="grid-item">
+            <h4>Digital Design & Prototyping</h4>
+            <p>Advanced in Figma and Adobe Creative Suite; experienced in rapid prototyping and comfortable with HTML/CSS/JS for interactive proofs of concept.</p>
+          </div>
+          <div class="grid-item">
+            <h4>Design Systems & Visual Standards</h4>
+            <p>Experienced in creating and evolving design systems and style guides to maintain product coherence as teams scale.</p>
+          </div>
+          <div class="grid-item">
+            <h4>Collaboration</h4>
+            <p>Partner closely with product owners, front-end developers, and multi-disciplinary teams to ship high-impact outcomes.</p>
+          </div>
+          <div class="grid-item">
+            <h4>Communication & Storytelling</h4>
+            <p>Clear writer and presenter who tailors the story to the audience and moves decisions forward.</p>
+          </div>
+          <div class="grid-item">
+            <h4>Project Management</h4>
+            <p>Delivers projects on time and on budget with attention to detail and strong organization.</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid-section">
+        <div class="grid-section-title">Testimonials</div>
+        <div class="grid-items">
+          <div class="grid-item">
+            <h4>Christopher Bayle</h4>
+            <p>“Zack connects to emotion and imagination in a way that surfaces thoughtful, human work. His empathy and perspective consistently helped break creative logjams — a reliable and inspiring collaborator.”</p>
+            <span class="duration">ACD UX, Publicis Sapient</span>
+          </div>
+          <div class="grid-item">
+            <h4>Andrés Moros, MPS</h4>
+            <p>“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I enjoyed working with him and recommend him without reservation.”</p>
+            <span class="duration">Sr. UX Designer, Publicis Sapient</span>
+          </div>
+        </div>
+      </div>
+      <div class="grid-section">
+        <div class="grid-section-title">Education</div>
+        <div class="grid-items">
+          <div class="grid-item">
+            <h4>Pratt Institute of Art</h4>
+            <p>BFA, 3D Animation & Motion Graphics (Incomplete Degree). Foundation in digital media arts, technical prototyping, and the craft of meaningful storytelling.</p>
+            <span class="duration">2002-2005</span>
+          </div>
         </div>
       </div>
     </div>
-    <div id="contextMenu" role="menu">
-      <div class="menu-item" id="expandAll" role="menuitem">Expand All</div>
-      <div class="menu-item" id="reset" role="menuitem">Reset</div>
-      <div class="menu-item" id="savePdf" role="menuitem">Save as PDF</div>
-      <div class="menu-item" id="copyLink" role="menuitem">
-        Copy Link to Clipboard
+    <div class="background-image" id="gridBackgroundImage"></div>
+  </div>
+  <div class="edge-blur"></div>
+  <div class="vignette"></div>
+  <div id="cursor"></div>
+  <button class="theme-toggle" id="themeToggle">
+    <svg viewBox="0 0 24 24" id="themeIcon">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+  <div class="fab-wrap">
+    <button class="fab" id="fabButton" title="About this Resume" aria-label="Open Resume Info" aria-haspopup="dialog" aria-expanded="false">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <linearGradient id="cubeTop" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity="1" />
+            <stop offset="1" stop-color="#dcdcdc" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="cubeSide" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#e8e8e8" />
+            <stop offset="1" stop-color="#bdbdbd" />
+          </linearGradient>
+          <linearGradient id="cubeDark" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#8a8a8a" />
+            <stop offset="1" stop-color="#4b4b4b" />
+          </linearGradient>
+          <filter id="cubeGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".45" />
+          </filter>
+        </defs>
+        <g filter="url(#cubeGlow)">
+          <polygon fill="url(#cubeTop)" points="50,14 80,30 50,46 20,30" />
+          <polygon fill="url(#cubeSide)" points="80,30 80,66 50,82 50,46" />
+          <polygon fill="url(#cubeDark)" points="50,46 50,82 20,66 20,30" />
+        </g>
+      </svg>
+    </button>
+  </div>
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="sheet" tabindex="-1">
+      <div class="title-bar">
+        <h1>Zack Gort, Designer</h1>
+        <button class="close-button" id="closeOverlay">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="container">
+        <p>This resume was built by Zack Gort {Thinker & Maker}.</p>
+        <p>For inquiries or opportunities, reach out via:</p>
+        <p>
+          Email: <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a><br>
+          Portfolio: <a href="https://zackgort.com" target="_blank">zackgort.com</a><br>
+          LinkedIn: <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>
+        </p>
+        <p>Available for full-time roles in design-led, data-driven environments.</p>
+        <h2>Things I'm building:</h2>
+        <h3>Note App</h3>
+        <img class="preview-img" src="" alt="Preview of intoview.pro/note" />
+        <a href="https://intoview.pro/note" target="_blank">intoview:note</a>
+        <h3>Kanban App</h3>
+        <img class="preview-img" src="" alt="Preview of intoview.pro/kanban" />
+        <a href="https://intoview.pro/kanban" target="_blank">intoview:kanban</a>
       </div>
     </div>
+  </div>
+  <div id="contextMenu" role="menu">
+    <div class="menu-item" id="expandAll" role="menuitem">Expand All</div>
+    <div class="menu-item" id="reset" role="menuitem">Reset</div>
+    <div class="menu-item" id="savePdf" role="menuitem">Save as PDF</div>
+    <div class="menu-item" id="copyLink" role="menuitem">Copy Link to Clipboard</div>
+  </div>
 
-    <script>
-      const body = document.body;
-      function initTheme() {
-        const saved = localStorage.getItem('zack-theme');
-        if (saved) {
-          body.setAttribute('data-theme', saved);
-        } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-          body.setAttribute('data-theme', 'light');
-        }
-      }
-      initTheme();
-      (function initGooeyCursor() {
-        const shouldRunCursor =
-          !window.matchMedia('(pointer: coarse)').matches &&
-          !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!shouldRunCursor) return;
-        const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
-        const host = document.getElementById('cursor');
-        if (!host) return;
-        for (let i = 0; i < TAIL_LENGTH; i++) {
-          const d = document.createElement('div');
-          d.className = 'cursor-circle';
-          host.appendChild(d);
-        }
-        const circles = host.querySelectorAll('.cursor-circle');
-        let mouseX = innerWidth / 2,
-          mouseY = innerHeight / 2;
-        const history = Array(TAIL_LENGTH)
-          .fill(0)
-          .map(() => ({ x: mouseX, y: mouseY }));
-        window.addEventListener(
-          'pointermove',
-          (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-          },
-          { passive: true }
-        );
-        function tick() {
-          history.shift();
-          history.push({ x: mouseX, y: mouseY });
-          circles.forEach((c, i) => {
-            const cur = history[i];
-            const next = history[i + 1] || history[TAIL_LENGTH - 1];
-            cur.x += (next.x - cur.x) * 0.35;
-            cur.y += (next.y - cur.y) * 0.35;
-            const s = Math.max(0.22, i / TAIL_LENGTH);
-            c.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${s})`;
-          });
-          requestAnimationFrame(tick);
-        }
-        tick();
-      })();
-      const gridView = document.getElementById('gridView');
-      const listView = document.getElementById('listView');
-      const gridBtn = document.getElementById('gridBtn');
-      const listBtn = document.getElementById('listBtn');
-      if (gridBtn) {
-        gridBtn.addEventListener('click', () => {
-          if (gridView && listView) {
-            gridView.style.display = 'block';
-            listView.style.display = 'none';
-            gridBtn.classList.add('active');
-            listBtn.classList.remove('active');
-          }
-        });
-      }
-      if (listBtn) {
-        listBtn.addEventListener('click', () => {
-          if (gridView && listView) {
-            gridView.style.display = 'none';
-            listView.style.display = 'block';
-            gridBtn.classList.remove('active');
-            listBtn.classList.add('active');
-          }
-        });
-      }
-      const listRoot = document.getElementById('listView');
-      if (listView) {
-        const listItems = listView.querySelectorAll(
-          '.project-item:not(.section)'
-        );
-        const listBgOverlay = document.getElementById('listBackgroundImage');
-        listItems.forEach((item) => {
-          item.addEventListener('mouseenter', () => {
-            listRoot.classList.add('has-active');
-            listItems.forEach((i) => {
-              i.classList.remove('active');
-              i.classList.remove('adjacent');
-            });
-            item.classList.add('active');
-            const prev = item.previousElementSibling;
-            const next = item.nextElementSibling;
-            if (prev && prev.classList.contains('project-item'))
-              prev.classList.add('adjacent');
-            if (next && next.classList.contains('project-item'))
-              next.classList.add('adjacent');
-            gsap.to(listBgOverlay, {
-              opacity: 0.65,
-              duration: 0.7,
-              ease: 'power2.out',
-            });
-          });
-        });
-        listRoot.addEventListener('mouseleave', () => {
-          listRoot.classList.remove('has-active');
-          listItems.forEach((i) => {
-            i.classList.remove('active');
-            i.classList.remove('adjacent');
-          });
-          gsap.to(listBgOverlay, { opacity: 0, duration: 0.6 });
-        });
-      }
-      const gridRoot = document.getElementById('gridView');
-      if (gridView) {
-        const gridItems = gridView.querySelectorAll('.grid-item');
-        const gridBgOverlay = document.getElementById('gridBackgroundImage');
-        gridItems.forEach((item) => {
-          item.addEventListener('mouseenter', () => {
-            gridRoot.classList.add('has-active');
-            gridItems.forEach((i) => {
-              i.classList.remove('active');
-              i.classList.remove('adjacent');
-            });
-            item.classList.add('active');
-            gsap.to(gridBgOverlay, {
-              opacity: 0.15,
-              duration: 0.7,
-              ease: 'power2.out',
-            });
-            gsap.to(item, { scale: 1.02, duration: 0.3 });
-          });
-          item.addEventListener('mouseleave', () => {
-            gsap.to(item, { scale: 1, duration: 0.3 });
-          });
-        });
-        gridRoot.addEventListener('mouseleave', () => {
-          gridRoot.classList.remove('has-active');
-          gridItems.forEach((i) => {
-            i.classList.remove('active');
-            i.classList.remove('adjacent');
-          });
-          gsap.to(gridBgOverlay, { opacity: 0, duration: 0.6 });
-        });
-      }
-      const themeToggle = document.getElementById('themeToggle');
-      const themeIcon = document.getElementById('themeIcon');
-      const logoToggle = document.getElementById('logoToggle');
-      function toggleTheme() {
-        const isLight = body.getAttribute('data-theme') === 'light';
-        const newTheme = isLight ? 'dark' : 'light';
-        body.setAttribute('data-theme', newTheme);
-        themeIcon.setAttribute(
-          'd',
-          isLight
-            ? 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'
-            : 'M12 3v2m0 14v2m-9-7h2m14 0h2m-4.95-6.364l1.414 1.414M5.636 17.95l1.414 1.414M18.364 5.636l1.414 1.414M6.05 5.636L4.636 7.05'
-        );
-        localStorage.setItem('zack-theme', newTheme);
-      }
-      if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-      if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
-      const fabButton = document.getElementById('fabButton');
-      const overlay = document.getElementById('overlay');
-      const closeOverlayBtn = document.getElementById('closeOverlay');
-      let lastFocus = null;
-      function openOverlay() {
-        lastFocus = document.activeElement;
-        overlay.classList.add('open');
-        const sheet = overlay.querySelector('.sheet');
-        sheet.setAttribute('tabindex', '-1');
-        sheet.focus();
-        document.addEventListener('keydown', onKeyDown);
-        overlay.setAttribute('aria-hidden', 'false');
-        fabButton.setAttribute('aria-expanded', 'true');
-      }
-      function closeOverlayFn() {
-        overlay.classList.remove('open');
-        document.removeEventListener('keydown', onKeyDown);
-        if (lastFocus) lastFocus.focus();
-        overlay.setAttribute('aria-hidden', 'true');
-        fabButton.setAttribute('aria-expanded', 'false');
-      }
-      function onKeyDown(e) {
-        if (e.key === 'Escape') closeOverlayFn();
-        if (e.key === 'Tab') {
-          const focusable = overlay.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          const first = focusable[0];
-          const last = focusable[focusable.length - 1];
-          if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }
-      }
-      if (fabButton) fabButton.addEventListener('click', openOverlay);
-      if (closeOverlayBtn)
-        closeOverlayBtn.addEventListener('click', closeOverlayFn);
-      if (overlay)
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) closeOverlayFn();
-        });
-      const contextMenu = document.getElementById('contextMenu');
-      const expandAll = document.getElementById('expandAll');
-      const reset = document.getElementById('reset');
-      const savePdf = document.getElementById('savePdf');
-      const copyLink = document.getElementById('copyLink');
-      document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        const { clientX: x, clientY: y } = e;
-        contextMenu.style.left = `${x}px`;
-        contextMenu.style.top = `${y}px`;
-        contextMenu.style.display = 'block';
-      });
-      document.addEventListener('click', () => {
-        contextMenu.style.display = 'none';
-      });
-      if (expandAll)
-        expandAll.addEventListener('click', () => {
-          contextMenu.style.display = 'none';
-          document.querySelectorAll('details').forEach((d) => (d.open = true));
-        });
-      if (reset)
-        reset.addEventListener('click', () => {
-          contextMenu.style.display = 'none';
-          document
-            .querySelectorAll('.project-data.album, .grid-item')
-            .forEach((container) => {
-              const details = container.querySelectorAll('details');
-              details.forEach((d, i) => (d.open = false));
-            });
-        });
-      if (savePdf)
-        savePdf.addEventListener('click', () => {
-          contextMenu.style.display = 'none';
-          window.print();
-        });
-      if (copyLink)
-        copyLink.addEventListener('click', () => {
-          contextMenu.style.display = 'none';
-          navigator.clipboard
-            .writeText(window.location.href)
-            .then(() => {
-              alert('Link copied to clipboard!');
-            })
-            .catch((err) => {
-              console.error('Failed to copy: ', err);
-            });
-        });
-      function initDragScroll(element) {
-        if (!element) return;
-        let isDown = false;
-        let isDragging = false;
-        let startX, startY, scrollLeft, scrollTop;
-        let velocityX = 0,
-          velocityY = 0;
-        let lastX, lastY, lastTime;
-        const threshold = 10;
-        let initialX, initialY;
-        element.addEventListener(
-          'pointerdown',
-          (e) => {
-            // FIX: Ignore touch inputs for custom drag. Let native scroll handle touches.
-            if (e.pointerType === 'touch') return;
+<script>
+const body = document.body;
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const logoToggle = document.getElementById('logoToggle');
 
-            isDown = true;
-            isDragging = false;
-            initialX = e.pageX;
-            initialY = e.pageY;
-            startX = e.pageX;
-            startY = e.pageY;
-            scrollLeft = element.scrollLeft;
-            scrollTop = element.scrollTop;
-            lastX = e.pageX;
-            lastY = e.pageY;
-            lastTime = Date.now();
-            velocityX = 0;
-            velocityY = 0;
-            element.style.cursor = 'grab';
-          },
-          { passive: true }
-        );
-        element.addEventListener('pointermove', (e) => {
-          if (!isDown) return;
-          const dx = e.pageX - initialX;
-          const dy = e.pageY - initialY;
-          if (
-            !isDragging &&
-            (Math.abs(dx) > threshold || Math.abs(dy) > threshold)
-          ) {
-            isDragging = true;
-            startX = e.pageX;
-            startY = e.pageY;
-            scrollLeft = element.scrollLeft;
-            scrollTop = element.scrollTop;
-            element.style.cursor = 'grabbing';
-          }
-          if (isDragging) {
-            e.preventDefault();
-            const walkX = e.pageX - startX;
-            const walkY = e.pageY - startY;
-            element.scrollLeft = scrollLeft - walkX;
-            element.scrollTop = scrollTop - walkY;
-            const now = Date.now();
-            const dt = now - lastTime;
-            if (dt > 20) {
-              velocityX = (e.pageX - lastX) / dt;
-              velocityY = (e.pageY - lastY) / dt;
-              lastX = e.pageX;
-              lastY = e.pageY;
-              lastTime = now;
-            }
-          }
-        });
-        const stop = () => {
-          if (!isDown) return;
-          const wasDragging = isDragging;
-          isDown = false;
-          isDragging = false;
-          element.style.cursor = wasDragging ? 'grab' : 'auto';
-          if (wasDragging) {
-            const momentum = () => {
-              element.scrollLeft += velocityX * 30;
-              element.scrollTop += velocityY * 30;
-              velocityX *= 0.95;
-              velocityY *= 0.95;
-              if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
-                requestAnimationFrame(momentum);
-              }
-            };
-            momentum();
-          }
-        };
-        element.addEventListener('pointerup', stop);
-        element.addEventListener('pointercancel', stop);
-        element.addEventListener('pointerleave', stop);
-      }
-      initDragScroll(listView);
-      initDragScroll(gridView);
-    </script>
-  </body>
+// Themes array
+const themes = ['dark', 'light', 'rose'];
+
+function getNextTheme(current) {
+  const index = themes.indexOf(current);
+  return themes[(index + 1) % themes.length];
+}
+
+function updateThemeIcon(theme) {
+  if (theme === 'light') {
+    // Sun icon
+    themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+  } else if (theme === 'rose') {
+    // Sparkle/Star icon
+    themeIcon.innerHTML = '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>';
+  } else {
+    // Moon icon (default dark)
+    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+  }
+}
+
+function initTheme() {
+  let saved = localStorage.getItem('zack-theme');
+  if (!themes.includes(saved)) {
+    saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+  body.setAttribute('data-theme', saved);
+  updateThemeIcon(saved);
+}
+
+function toggleTheme() {
+  const current = body.getAttribute('data-theme');
+  const next = getNextTheme(current);
+  body.setAttribute('data-theme', next);
+  localStorage.setItem('zack-theme', next);
+  updateThemeIcon(next);
+}
+
+initTheme();
+
+if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
+
+// --- Rest of the scripts --- 
+
+(function initGooeyCursor() {
+const shouldRunCursor = !window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!shouldRunCursor) return;
+const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
+const host = document.getElementById('cursor');
+if (!host) return;
+for (let i = 0; i < TAIL_LENGTH; i++) {
+const d = document.createElement('div');
+d.className = 'cursor-circle';
+host.appendChild(d);
+}
+const circles = host.querySelectorAll('.cursor-circle');
+let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
+const history = Array(TAIL_LENGTH).fill(0).map(() => ({ x: mouseX, y: mouseY }));
+window.addEventListener('pointermove', e => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
+function tick() {
+history.shift();
+history.push({ x: mouseX, y: mouseY });
+circles.forEach((c, i) => {
+const cur = history[i];
+const next = history[i + 1] || history[TAIL_LENGTH - 1];
+cur.x += (next.x - cur.x) * 0.35;
+cur.y += (next.y - cur.y) * 0.35;
+const s = Math.max(0.22, i / TAIL_LENGTH);
+c.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${s})`;
+});
+requestAnimationFrame(tick);
+}
+tick();
+})();
+const gridView = document.getElementById('gridView');
+const listView = document.getElementById('listView');
+const gridBtn = document.getElementById('gridBtn');
+const listBtn = document.getElementById('listBtn');
+if (gridBtn) {
+gridBtn.addEventListener('click', () => {
+if (gridView && listView) {
+gridView.style.display = 'block';
+listView.style.display = 'none';
+gridBtn.classList.add('active');
+listBtn.classList.remove('active');
+}
+});
+}
+if (listBtn) {
+listBtn.addEventListener('click', () => {
+if (gridView && listView) {
+gridView.style.display = 'none';
+listView.style.display = 'block';
+gridBtn.classList.remove('active');
+listBtn.classList.add('active');
+}
+});
+}
+const listRoot = document.getElementById('listView');
+if (listView) {
+const listItems = listView.querySelectorAll('.project-item:not(.section)');
+const listBgOverlay = document.getElementById('listBackgroundImage');
+listItems.forEach(item => {
+item.addEventListener('mouseenter', () => {
+listRoot.classList.add('has-active');
+listItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
+item.classList.add('active');
+const prev = item.previousElementSibling;
+const next = item.nextElementSibling;
+if (prev && prev.classList.contains('project-item')) prev.classList.add('adjacent');
+if (next && next.classList.contains('project-item')) next.classList.add('adjacent');
+gsap.to(listBgOverlay, { opacity: 0.65, duration: 0.7, ease: "power2.out" });
+});
+});
+listRoot.addEventListener('mouseleave', () => {
+listRoot.classList.remove('has-active');
+listItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
+gsap.to(listBgOverlay, { opacity: 0, duration: 0.6 });
+});
+}
+const gridRoot = document.getElementById('gridView');
+if (gridView) {
+const gridItems = gridView.querySelectorAll('.grid-item');
+const gridBgOverlay = document.getElementById('gridBackgroundImage');
+gridItems.forEach(item => {
+item.addEventListener('mouseenter', () => {
+gridRoot.classList.add('has-active');
+gridItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
+item.classList.add('active');
+gsap.to(gridBgOverlay, { opacity: 0.15, duration: 0.7, ease: "power2.out" });
+gsap.to(item, { scale: 1.02, duration: 0.3 });
+});
+item.addEventListener('mouseleave', () => {
+gsap.to(item, { scale: 1, duration: 0.3 });
+});
+});
+gridRoot.addEventListener('mouseleave', () => {
+gridRoot.classList.remove('has-active');
+gridItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
+gsap.to(gridBgOverlay, { opacity: 0, duration: 0.6 });
+});
+}
+
+const fabButton = document.getElementById('fabButton');
+const overlay = document.getElementById('overlay');
+const closeOverlayBtn = document.getElementById('closeOverlay');
+let lastFocus = null;
+function openOverlay() {
+lastFocus = document.activeElement;
+overlay.classList.add('open');
+const sheet = overlay.querySelector('.sheet');
+sheet.setAttribute('tabindex', '-1');
+sheet.focus();
+document.addEventListener('keydown', onKeyDown);
+overlay.setAttribute('aria-hidden', 'false');
+fabButton.setAttribute('aria-expanded', 'true');
+}
+function closeOverlayFn() {
+overlay.classList.remove('open');
+document.removeEventListener('keydown', onKeyDown);
+if (lastFocus) lastFocus.focus();
+overlay.setAttribute('aria-hidden', 'true');
+fabButton.setAttribute('aria-expanded', 'false');
+}
+function onKeyDown(e) {
+if (e.key === 'Escape') closeOverlayFn();
+if (e.key === 'Tab') {
+const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+const first = focusable[0];
+const last = focusable[focusable.length - 1];
+if (e.shiftKey && document.activeElement === first) {
+e.preventDefault();
+last.focus();
+} else if (!e.shiftKey && document.activeElement === last) {
+e.preventDefault();
+first.focus();
+}
+}
+}
+if (fabButton) fabButton.addEventListener('click', openOverlay);
+if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
+if (overlay) overlay.addEventListener('click', (e) => {
+if (e.target === overlay) closeOverlayFn();
+});
+const contextMenu = document.getElementById('contextMenu');
+const expandAll = document.getElementById('expandAll');
+const reset = document.getElementById('reset');
+const savePdf = document.getElementById('savePdf');
+const copyLink = document.getElementById('copyLink');
+document.addEventListener('contextmenu', (e) => {
+e.preventDefault();
+const { clientX: x, clientY: y } = e;
+contextMenu.style.left = `${x}px`;
+contextMenu.style.top = `${y}px`;
+contextMenu.style.display = 'block';
+});
+document.addEventListener('click', () => {
+contextMenu.style.display = 'none';
+});
+if (expandAll) expandAll.addEventListener('click', () => {
+contextMenu.style.display = 'none';
+document.querySelectorAll('details').forEach(d => d.open = true);
+});
+if (reset) reset.addEventListener('click', () => {
+contextMenu.style.display = 'none';
+document.querySelectorAll('.project-data.album, .grid-item').forEach(container => {
+const details = container.querySelectorAll('details');
+details.forEach((d, i) => d.open = false);
+});
+});
+if (savePdf) savePdf.addEventListener('click', () => {
+contextMenu.style.display = 'none';
+window.print();
+});
+if (copyLink) copyLink.addEventListener('click', () => {
+contextMenu.style.display = 'none';
+navigator.clipboard.writeText(window.location.href).then(() => {
+alert('Link copied to clipboard!');
+}).catch(err => {
+console.error('Failed to copy: ', err);
+});
+});
+function initDragScroll(element) {
+if (!element) return;
+let isDown = false;
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+let velocityX = 0, velocityY = 0;
+let lastX, lastY, lastTime;
+const threshold = 10;
+let initialX, initialY;
+element.addEventListener('pointerdown', (e) => {
+// FIX: Ignore touch inputs for custom drag. Let native scroll handle touches.
+if (e.pointerType === 'touch') return;
+
+isDown = true;
+isDragging = false;
+initialX = e.pageX;
+initialY = e.pageY;
+startX = e.pageX;
+startY = e.pageY;
+scrollLeft = element.scrollLeft;
+scrollTop = element.scrollTop;
+lastX = e.pageX;
+lastY = e.pageY;
+lastTime = Date.now();
+velocityX = 0;
+velocityY = 0;
+element.style.cursor = 'grab';
+}, { passive: true });
+element.addEventListener('pointermove', (e) => {
+if (!isDown) return;
+const dx = e.pageX - initialX;
+const dy = e.pageY - initialY;
+if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
+isDragging = true;
+startX = e.pageX;
+startY = e.pageY;
+scrollLeft = element.scrollLeft;
+scrollTop = element.scrollTop;
+element.style.cursor = 'grabbing';
+}
+if (isDragging) {
+e.preventDefault();
+const walkX = e.pageX - startX;
+const walkY = e.pageY - startY;
+element.scrollLeft = scrollLeft - walkX;
+element.scrollTop = scrollTop - walkY;
+const now = Date.now();
+const dt = now - lastTime;
+if (dt > 20) {
+velocityX = (e.pageX - lastX) / dt;
+velocityY = (e.pageY - lastY) / dt;
+lastX = e.pageX;
+lastY = e.pageY;
+lastTime = now;
+}
+}
+});
+const stop = () => {
+if (!isDown) return;
+const wasDragging = isDragging;
+isDown = false;
+isDragging = false;
+element.style.cursor = wasDragging ? 'grab' : 'auto';
+if (wasDragging) {
+const momentum = () => {
+element.scrollLeft += velocityX * 30;
+element.scrollTop += velocityY * 30;
+velocityX *= 0.95;
+velocityY *= 0.95;
+if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+requestAnimationFrame(momentum);
+}
+};
+momentum();
+}
+};
+element.addEventListener('pointerup', stop);
+element.addEventListener('pointercancel', stop);
+element.addEventListener('pointerleave', stop);
+}
+initDragScroll(listView);
+initDragScroll(gridView);
+</script>
+</body>
 </html>

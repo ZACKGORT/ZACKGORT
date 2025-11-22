@@ -1,14 +1,14 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
-<title>Zack Gort — Thinker & Maker</title>
+<title>Zachary Gort — Senior UX Designer</title>
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <style>
   :root {
-  --bg-color: #0f1014; /* Charcoal */
+  --bg-color: #0f1014;
   --card-color: transparent;
   --ink: #ffffff;
   --ink-2: #9f9f9f;
@@ -91,9 +91,15 @@
   transform-style: preserve-3d;
   transform: perspective(1000px) translateZ(calc(-200px * var(--curve-k))) scale(calc(1 + var(--curve-k) * 0.06));
   }
-  .view-toggle, .theme-toggle, .fab, .sheet, details, .grid-item, .grid-section {
-  border: 1px solid var(--subtle-outline);
+  
+  /* MINIMALIST UI OVERRIDES: Default state is transparent/invisible */
+  .view-toggle, .theme-toggle, .fab, .grid-item, .grid-section, details {
+    border: 1px solid transparent; /* Hidden by default */
+    background: transparent;       /* Hidden by default */
+    box-shadow: none;             /* Hidden by default */
+    transition: all 0.3s ease;    /* Smooth fade in */
   }
+
   /* View toggle */
   .view-toggle {
   position: fixed;
@@ -104,11 +110,14 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: transparent;
-  border: none;
   padding: 6px;
-  box-shadow: none;
   }
+  /* Show UI on hover */
+  .view-toggle:hover {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+  }
+
   .toggle-btn {
   appearance: none;
   border: 0;
@@ -156,24 +165,38 @@
   cursor: default;
   width: 100%;
   display: grid;
-  /* Updated Grid: Company(200px) | Role(1.1fr) | Year(135px) | Description(2.6fr) */
   grid-template-columns: 200px 1.1fr 135px 2.6fr;
   gap: 1.5rem;
-  padding: 16px 0;
+  padding: 16px 8px; /* Added horizontal padding for hover state */
   align-items: start;
-  border-bottom: 1px solid var(--glass-border);
-  transition: opacity 0.3s ease;
+  
+  /* Minimalist: No border by default */
+  border-bottom: 1px solid transparent; 
+  border-radius: 6px; /* Soften edges on hover */
+  
+  transition: background 0.3s ease, border-color 0.3s ease;
   position: relative;
   z-index: 2;
+  }
+
+  /* LIST HOVER: Show UI */
+  .project-item:hover {
+    background: var(--glass-bg-hover);
+    /* border-bottom: 1px solid var(--glass-border);  Optional: add line back on hover */
   }
 
   /* MOBILE LAYOUT ADJUSTMENTS */
   @media (max-width: 768px) {
     .project-item, .project-item.quote, .project-item.skill {
-      display: flex !important; /* Force flex on all items in mobile */
+      display: flex !important; 
       grid-template-columns: none !important;
       flex-direction: column;
       gap: 4px;
+      padding: 16px 0; /* Revert padding for mobile */
+      border-bottom: 1px solid var(--glass-border); /* Keep structural lines on mobile for readability */
+    }
+    .project-item:hover {
+        background: transparent; /* No hover bg on mobile */
     }
     .project-item.experience .project-data.artist { 
       font-size: 1.25rem;
@@ -217,7 +240,11 @@
   max-width: 800px;
   }
   /* Hero Overrides */
-  .project-item.hero { display: flex; flex-direction: column; gap: 0.5rem; border-bottom: none; padding-bottom: 2rem; }
+  .project-item.hero { 
+      display: flex; flex-direction: column; gap: 0.5rem; border-bottom: none; padding-bottom: 2rem; 
+  }
+  .project-item.hero:hover { background: transparent; } /* No hover on hero */
+
   .project-item.hero .project-data.artist { font-size: 3rem; font-weight: 700; letter-spacing: -0.04em; }
   .project-item.hero .project-data.album { font-size: 1.4rem; opacity: 0.95; }
   
@@ -228,6 +255,7 @@
   
   /* Section Headers */
   .project-item.section { display: block; padding-top: 2rem; }
+  .project-item.section:hover { background: transparent; }
   .project-item.section .project-data.artist { font-size: 1.6rem; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; }
   .project-item.section .project-data.album { display: none; }
   
@@ -240,7 +268,7 @@
   .project-item.experience .project-data.role { font-style: italic; opacity: 0.9; }
   .project-item.experience .project-data.year { text-align: right; opacity: 0.8; font-variant-numeric: tabular-nums; }
   
-  /* Quote/Skill Styles - Simple 2-col grid for Desktop */
+  /* Quote/Skill Styles */
   .project-item.quote, .project-item.skill {
     grid-template-columns: 200px 1fr; 
   }
@@ -279,18 +307,20 @@
   }
   }
   .grid-section {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 4px;
+  /* Minimalist: Transparent container */
+  background: transparent;
+  border: 1px solid transparent;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
+  /* On hover of the section, maybe distinctiveness? No, keep it clean. */
+  
   .grid-section-title {
   font-size: 1.6rem;
   opacity: 0.8;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 1rem;
+  padding-left: 1rem; /* Align with item text */
   }
   .grid-items {
   display: grid;
@@ -298,16 +328,25 @@
   gap: 1rem;
   }
   .grid-item {
-  background: var(--glass-bg-hover);
-  border: 1px solid var(--glass-border);
+  /* Minimalist: Ghost card */
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 4px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  box-shadow: none;
   }
+
+  /* GRID HOVER: The card materializes */
+  .grid-item:hover {
+      background: var(--glass-bg-hover);
+      border-color: var(--glass-border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
   .grid-item.skill {
   border-radius: 999px;
   flex-direction: row;
@@ -385,7 +424,7 @@
   right: 1rem;
   z-index: var(--z-ui);
   background: transparent;
-  border: none;
+  border: 1px solid transparent; /* Ghost default */
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -399,6 +438,7 @@
   }
   .theme-toggle:hover {
   background: var(--glass-bg-hover);
+  border-color: var(--glass-border);
   }
   .theme-toggle svg {
   width: 20px;
@@ -435,18 +475,19 @@
   border-radius: 999px;
   background: transparent;
   color: var(--ink);
-  border: none;
+  border: 1px solid transparent; /* Ghost default */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: none;
-  transition: background 150ms ease, color 150ms ease, transform 100ms ease;
+  transition: all 0.2s ease;
   pointer-events: auto;
   backdrop-filter: none;
   }
   .fab:hover {
   background: var(--glass-bg-hover);
+  border-color: var(--glass-border);
   transform: scale(1.02);
   }
   .fab:active {
@@ -618,15 +659,20 @@
   /* Accordion */
   details {
   width: 100%;
-  background: var(--glass-bg-hover);
-  border: 1px solid var(--glass-border);
+  /* Minimalist: Transparent default */
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 4px;
   margin-bottom: 0.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: none;
   }
-  details[open] {
-  background: var(--glass-bg);
+  
+  /* Show visible UI on open or hover */
+  details[open], details:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
   /* Brighten hover effect for open accordions in Dark Mode */
@@ -812,7 +858,7 @@
         <li class="project-item experience">
           <div class="project-data artist">Publicis Sapient</div>
           <div class="project-data role">Senior User Experience Designer</div>
-          <div class="project-data year">4/22-3/23</div>
+          <div class="project-data year">04/2022-03/2023</div>
           <div class="project-data album">
             <p class="summary">Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.</p>
             <details>
@@ -837,7 +883,7 @@
         <li class="project-item experience">
           <div class="project-data artist">Code & Theory</div>
           <div class="project-data role">Senior Interaction Designer</div>
-          <div class="project-data year">8/21-4/22</div>
+          <div class="project-data year">08/2021-04/2022</div>
           <div class="project-data album">
             <p class="summary">Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.</p>
             <details>
@@ -862,7 +908,7 @@
         <li class="project-item experience">
           <div class="project-data artist">Elva Design Group</div>
           <div class="project-data role">Senior User Experience Designer</div>
-          <div class="project-data year">4/21-8/21</div>
+          <div class="project-data year">04/2021-08/2021</div>
           <div class="project-data album">
             <p class="summary">Owned UX from discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
             <details>
@@ -888,7 +934,7 @@
         <li class="project-item experience">
           <div class="project-data artist">Huge Inc.</div>
           <div class="project-data role">Senior User Experience Designer</div>
-          <div class="project-data year">3/21-4/21</div>
+          <div class="project-data year">03/2021-04/2021</div>
           <div class="project-data album">
             <p class="summary">Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.</p>
             <details>
@@ -914,7 +960,7 @@
         <li class="project-item experience">
           <div class="project-data artist">PFSWeb LiveArea</div>
           <div class="project-data role">Manager, UX</div>
-          <div class="project-data year">1/20-2/21</div>
+          <div class="project-data year">01/2020-02/2021</div>
           <div class="project-data album">
             <p class="summary">UX Manager on full-spectrum Salesforce e-commerce builds for B2B and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West Marine, YETI). Served as the primary UX strategy and design lead.</p>
             <details>
@@ -939,7 +985,7 @@
         <li class="project-item experience">
           <div class="project-data artist">Workarea</div>
           <div class="project-data role">Senior User Experience Designer</div>
-          <div class="project-data year">7/17-9/18</div>
+          <div class="project-data year">07/2017-09/2018</div>
           <div class="project-data album">
             <p class="summary">Focused on improving a SaaS e-commerce platform through client collaboration and data-driven design, streamlining handoffs and workflows for scale.</p>
             <details>
@@ -966,7 +1012,7 @@
         <li class="project-item experience">
           <div class="project-data artist">O3 World</div>
           <div class="project-data role">User Experience Designer</div>
-          <div class="project-data year">7/16-6/17</div>
+          <div class="project-data year">07/2016-06/2017</div>
           <div class="project-data album">
             <p class="summary">Practiced Lean UX in a scrum-led environment, designing FinTech and iOS products with disciplined execution at every stage.</p>
             <details>
@@ -992,7 +1038,7 @@
         <li class="project-item experience">
           <div class="project-data artist">ONE SIXTY OVER NINETY</div>
           <div class="project-data role">Interaction Designer</div>
-          <div class="project-data year">9/14-7/16</div>
+          <div class="project-data year">09/2014-07/2016</div>
           <div class="project-data album">
             <p class="summary">At the preeminent .EDU agency, I delivered full-service interactive work with a focus on IA and ADA-compliant systems.</p>
             <details>

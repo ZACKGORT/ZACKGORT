@@ -205,8 +205,9 @@
   .portfolio-container {
   position: relative; display: flex; flex-direction: column; gap: 0;
   width: 100%; margin: 0 auto; 
-  /* UPDATED: Increased left padding to safely clear the fixed view-toggle rail. */
-  padding: 4rem 1rem 6rem 100px; 
+  /* UPDATED: Increased padding and added Max-Width for breathing room */
+  padding: 5rem 2rem 6rem 100px; 
+  max-width: 1280px; /* Constrain width so it doesn't hit viewport edges on large screens */
   min-height: 100vh;
   pointer-events: auto; justify-content: flex-start;
   /* Ensure 3D context for container */
@@ -216,6 +217,7 @@
   @media (max-width: 768px) {
   .portfolio-container {
   padding: 2rem 1rem 4rem 80px; 
+  max-width: 100%; /* Full width on mobile */
   }
   }
   .project-list { list-style: none; margin: 0; padding: 0; width: 100%; }
@@ -224,10 +226,11 @@
   cursor: default;
   width: 100%;
   display: grid;
-  grid-template-columns: 200px 1.1fr 135px 2.6fr;
-  gap: 1.5rem;
-  padding: 16px 8px; /* Added horizontal padding for hover state */
-  align-items: start;
+  /* UPDATED: Tighter columns but with more Gap */
+  grid-template-columns: 180px 1.4fr 110px 3fr;
+  gap: 2rem; /* Increased Gap for breathing room */
+  padding: 18px 12px; /* Increased vertical padding for air */
+  align-items: baseline; /* Align text by baseline */
   
   /* Minimalist: No border by default */
   border-bottom: 1px solid transparent; 
@@ -258,7 +261,7 @@
       display: flex !important; 
       grid-template-columns: none !important;
       flex-direction: column;
-      gap: 4px;
+      gap: 8px;
       padding: 16px 0; /* Revert padding for mobile */
       border-bottom: 1px solid var(--glass-border); /* Keep structural lines on mobile */
     }
@@ -296,22 +299,23 @@
     .quote .project-data.album,
     .project-item.skill .project-data.album,
     .project-item.summary .project-data.album,
-    .project-item.hero .project-data.album { width: 100%; }
+    .project-item.hero .project-data.album { width: 100%; max-width: 100%; }
   }
 
   .project-data {
   white-space: normal;
-  line-height: 1.5;
-  padding: 2px 0;
+  line-height: 1.4; /* Tighter line height */
+  padding: 0; /* Removed padding */
   color: var(--ink);
   }
   .project-data.artist {
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.15rem; /* Adjusted size */
   }
   .project-data.album {
   opacity: 0.95;
-  max-width: 800px;
+  /* UPDATED: Constrain text width for readability on large screens */
+  max-width: 680px; 
   }
   /* Hero Overrides */
   .project-item.hero { 
@@ -339,12 +343,21 @@
   
   /* Summary Item */
   .project-item.summary { display: flex; flex-direction: column; gap: 0.5rem; }
-  .project-item.summary .project-data.album { font-size: 1.1rem; line-height: 1.7; opacity: 0.95; max-width: 100%; }
+  .project-item.summary .project-data.album { font-size: 1.1rem; line-height: 1.7; opacity: 0.95; max-width: 800px; }
   
   /* Experience Styles */
   .project-item.experience .project-data.artist { color: var(--accent); }
   .project-item.experience .project-data.role { font-style: italic; opacity: 0.9; }
-  .project-item.experience .project-data.year { text-align: right; opacity: 0.8; font-variant-numeric: tabular-nums; }
+  
+  /* UPDATED: Year Style */
+  .project-item.experience .project-data.year { 
+    text-align: right; 
+    opacity: 0.7; 
+    font-family: 'JetBrains Mono', monospace; /* Monospace for strict alignment */
+    font-size: 0.85rem; 
+    font-variant-numeric: tabular-nums; 
+    letter-spacing: -0.02em;
+  }
   
   /* Quote/Skill Styles */
   .project-item.quote, .project-item.skill {
@@ -772,7 +785,7 @@
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem; /* Tightened margin */
   transition: all 0.3s ease;
   box-shadow: none;
   }
@@ -800,9 +813,10 @@
   }
 
   summary {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem; /* Tightened padding */
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -816,9 +830,10 @@
   content: '-';
   }
   .accordion-content {
-  padding: 0 1rem 1rem;
+  padding: 0 0.75rem 0.75rem; /* Tightened padding */
   color: var(--ink-2);
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 0.95rem;
   }
   .accordion-content ul {
   margin: 0;

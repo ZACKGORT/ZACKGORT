@@ -1,7 +1,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
-<title>Zack Gort — Senior UX Designer</title>
+<title>Zachary Gort — Senior UX Designer</title>
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
   --accent: #7ee787;
   --curve-k: 1;
   --vig-opacity: .9;
-  --edge-blur: 4px;
+  --edge-blur: 8px;
   --cursor-size: 20px;
   --corner-pad: clamp(14px, 2.4vw, 24px);
   --corner-top: calc(env(safe-area-inset-top) + clamp(12px, 2vh, 18px));
@@ -204,14 +204,18 @@
   }
   .portfolio-container {
   position: relative; display: flex; flex-direction: column; gap: 0;
-  width: 100%; margin: 0 auto; padding: 4rem 1rem 6rem 4rem; min-height: 100vh;
+  width: 100%; margin: 0 auto; 
+  /* UPDATED: Increased left padding to safely clear the fixed view-toggle rail. */
+  padding: 4rem 1rem 6rem 100px; 
+  min-height: 100vh;
   pointer-events: auto; justify-content: flex-start;
   /* Ensure 3D context for container */
   transform-style: preserve-3d;
   }
+  /* UPDATED: Apply the new, safer padding on mobile as well. */
   @media (max-width: 768px) {
   .portfolio-container {
-  padding: 2rem 1rem 4rem 1rem;
+  padding: 2rem 1rem 4rem 80px; 
   }
   }
   .project-list { list-style: none; margin: 0; padding: 0; width: 100%; }
@@ -1562,7 +1566,7 @@
           <filter id="cubeGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".45" />
           </filter>
-        </defs>
+        </g>
         <g filter="url(#cubeGlow)">
           <polygon fill="url(#cubeTop)" points="50,14 80,30 50,46 20,30" />
           <polygon fill="url(#cubeSide)" points="80,30 80,66 50,82 50,46" />

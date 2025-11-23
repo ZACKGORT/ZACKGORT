@@ -1,7 +1,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
-<title>Zachary Gort — Senior UX Designer</title>
+<title>Zack Gort — Senior UX Designer</title>
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -129,8 +129,11 @@
   background-size: 120px 120px;
   }
   .curved {
+  /* 3D Perspective Logic */
   transform-style: preserve-3d;
-  transform: perspective(1000px) translateZ(calc(-200px * var(--curve-k))) scale(calc(1 + var(--curve-k) * 0.06));
+  /* Initial state, updated via JS */
+  transform: perspective(2000px) rotateX(0deg) rotateY(0deg); 
+  will-change: transform; /* Perf optimization */
   }
   
   /* MINIMALIST UI OVERRIDES */
@@ -203,6 +206,8 @@
   position: relative; display: flex; flex-direction: column; gap: 0;
   width: 100%; margin: 0 auto; padding: 4rem 1rem 6rem 4rem; min-height: 100vh;
   pointer-events: auto; justify-content: flex-start;
+  /* Ensure 3D context for container */
+  transform-style: preserve-3d;
   }
   @media (max-width: 768px) {
   .portfolio-container {
@@ -239,7 +244,7 @@
     border: 2px solid #000;
     border-radius: 0px; /* Sharp corners for retro feel */
     box-shadow: 6px 6px 0px #000; /* Hard Shadow */
-    transform: translate(-2px, -2px); /* Pop Up */
+    transform: translate(-2px, -2px) translateZ(10px); /* Pop Up in 3D */
     z-index: 10;
   }
 
@@ -370,6 +375,8 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  /* 3D context for grid container */
+  transform-style: preserve-3d;
   }
   @media (max-width: 768px) {
   .grid-container {
@@ -421,7 +428,7 @@
     border: 2px solid #000;
     border-radius: 0px;
     box-shadow: 6px 6px 0px #000;
-    transform: translate(-2px, -2px);
+    transform: translate(-2px, -2px) translateZ(10px);
   }
 
   .grid-item.skill {
@@ -1510,7 +1517,7 @@
           </div>
           <div class="grid-item">
             <h4>Andrés Moros, MPS</h4>
-            <p>“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I enjoyed working with him and recommend him without reservation.”</p>
+            <p>“Zack is talented, hardworking, and communicative. He elevates team collaboration and consistently goes the extra mile. I enjoyed working with him and recommend him without reservation.”</p>
             <span class="duration">Sr. UX Designer, Publicis Sapient</span>
           </div>
         </div>
@@ -1912,6 +1919,34 @@ element.addEventListener('pointerleave', stop);
 }
 initDragScroll(listView);
 initDragScroll(gridView);
+
+// Global Tilt Effect for 3D Feel
+const tiltContainers = document.querySelectorAll('.curved'); // Select both list and grid view roots
+
+if (tiltContainers.length > 0) {
+  window.addEventListener('mousemove', (e) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    
+    // Calculate rotation (subtle tilt) - max 1.5 degrees
+    // X rotation is based on Y position (inverted)
+    // Y rotation is based on X position
+    const xRot = ((clientY / innerHeight) - 0.5) * 3; // Max 1.5 deg tilt (3 * 0.5)
+    const yRot = ((clientX / innerWidth) - 0.5) * 3;
+
+    tiltContainers.forEach(container => {
+      // Only animate the currently visible container (checking if style.display is NOT 'none')
+      if (container.style.display !== 'none') { 
+        gsap.to(container, {
+          rotationX: -xRot, 
+          rotationY: yRot,
+          duration: 1,
+          ease: "power2.out"
+        });
+      }
+    });
+  });
+}
 </script>
 </body>
 </html>

@@ -34,9 +34,8 @@
   --fab-size: 80px;
   --fab-bottom: calc(env(safe-area-inset-bottom) + clamp(16px, 3vh, 32px));
   --base-font-size: 14px;
-  --subtle-outline: rgba(255, 255, 255, 0.08); 
+  --subtle-outline: rgba(255, 255, 255, 0.08);
   }
-
   [data-theme="light"] {
   --bg-color: #f8f8f8;
   --ink: #0f1014;
@@ -50,25 +49,23 @@
   --vig-opacity: 0.5;
   --subtle-outline: rgba(0, 0, 0, 0.05);
   }
-
   /* NEW: ROSE / POP ART THEME */
   [data-theme="rose"] {
   --bg-color: #FF8DA1; /* The Wall of Pink */
-  --ink: #000000;      /* Stark Black Ink */
-  --ink-2: #222222;    /* Dark Grey */
-  --ink-3: #444444;    
-  --accent: #000000;   /* Accents are black */
-  
+  --ink: #000000; /* Stark Black Ink */
+  --ink-2: #222222; /* Dark Grey */
+  --ink-3: #444444;
+  --accent: #000000; /* Accents are black */
+ 
   /* Pop Art Overrides - "Glass" becomes "Card" */
   --glass-bg: transparent;
   --glass-bg-hover: #ffffff; /* Solid White on hover */
   --glass-bg-bright: #ffffff;
-  --glass-border: #000000;   /* Solid Black Border */
-  
+  --glass-border: #000000; /* Solid Black Border */
+ 
   --vig-opacity: 0.1; /* Low opacity for halftone texture */
   --subtle-outline: rgba(0, 0, 0, 0.0); /* Hidden until hover */
   }
-
   /* Rose Theme Halftone Pattern Overlay (Replaces Vignette) */
   [data-theme="rose"] .vignette {
     background-image: radial-gradient(#000 1px, transparent 1px);
@@ -77,11 +74,10 @@
     mask: none;
     opacity: 0.08; /* Subtle texture */
   }
-  
+ 
   [data-theme="rose"] .edge-blur {
     display: none; /* Crisp edges for Pop Art */
   }
-
   /* UPDATED: No CSS Filters needed for logos anymore */
   .logo img {
     height: 32px;
@@ -90,7 +86,6 @@
     /* Transition for smoother swap if cached */
     transition: opacity 0.2s ease;
   }
-
   *, *::before, *::after { box-sizing: border-box; }
   html { color-scheme: dark; font-size: var(--base-font-size); }
   body, html, #root { height: 100%; margin: 0; background: var(--bg-color); }
@@ -99,7 +94,7 @@
   font: 1rem/1.4 Inter, ui-sans-serif, system-ui;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  touch-action: pan-y; 
+  touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
   overscroll-behavior: none;
@@ -112,7 +107,7 @@
   }
   @media (max-width: 768px) {
   .edge-blur {
-  mask: radial-gradient(100% 80% at 50% 50%, transparent 70%, rgb(255 255 255 / 0.98) 85%); 
+  mask: radial-gradient(100% 80% at 50% 50%, transparent 70%, rgb(255 255 255 / 0.98) 85%);
   }
   }
   .vignette {
@@ -123,7 +118,6 @@
   [data-theme="light"] .vignette {
   background: radial-gradient(120% 90% at 50% 50%, #fff0 25%, rgb(255 255 255 / 0.62) 80%, rgb(255 255 255 / 0.98) 100%);
   }
-
   body::after {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: var(--z-grain); opacity: 0.1;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
@@ -133,18 +127,17 @@
   /* 3D Perspective Logic */
   transform-style: preserve-3d;
   /* Initial state, updated via JS */
-  transform: perspective(2000px) rotateX(0deg) rotateY(0deg); 
+  transform: perspective(2000px) rotateX(0deg) rotateY(0deg);
   will-change: transform; /* Perf optimization */
   }
-  
+ 
   /* MINIMALIST UI OVERRIDES */
   .view-toggle, .theme-toggle, .fab, .grid-item, .grid-section, details {
-    border: 1px solid transparent; 
-    background: transparent;       
-    box-shadow: none;             
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none;
     transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Snappier transition for Pop Art feel */
   }
-
   /* View toggle */
   .view-toggle {
   position: fixed;
@@ -168,7 +161,6 @@
     border: 2px solid #000;
     box-shadow: 4px 4px 0px #000;
   }
-
   .toggle-btn {
   appearance: none;
   border: 0;
@@ -192,7 +184,7 @@
   height: 20px;
   display: block;
   }
-  
+ 
   /* List view */
   .listview-root {
   position: fixed; inset: 0; overflow-y: auto; background: transparent;
@@ -205,9 +197,9 @@
   }
   .portfolio-container {
   position: relative; display: flex; flex-direction: column; gap: 0;
-  width: 100%; margin: 0 auto; 
+  width: 100%; margin: 0 auto;
   /* UPDATED: Increased padding and added Max-Width for breathing room */
-  padding: 5rem 2rem 6rem 100px; 
+  padding: 5rem 2rem 6rem 100px;
   max-width: 1280px; /* Constrain width so it doesn't hit viewport edges on large screens */
   min-height: 100vh;
   pointer-events: auto; justify-content: flex-start;
@@ -217,12 +209,12 @@
   /* UPDATED: Apply the new, safer padding on mobile as well. */
   @media (max-width: 768px) {
   .portfolio-container {
-  padding: 2rem 1rem 4rem 80px; 
+  padding: 2rem 1rem 4rem 80px;
   max-width: 100%; /* Full width on mobile */
   }
   }
   .project-list { list-style: none; margin: 0; padding: 0; width: 100%; }
-  
+ 
   .project-item {
   cursor: default;
   width: 100%;
@@ -232,16 +224,15 @@
   gap: 2rem; /* Increased Gap for breathing room */
   padding: 18px 12px; /* Increased vertical padding for air */
   align-items: baseline; /* Align text by baseline */
-  
+ 
   /* Minimalist: No border by default */
-  border-bottom: 1px solid transparent; 
+  border-bottom: 1px solid transparent;
   border-radius: 6px; /* Soften edges on hover */
-  
+ 
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   position: relative;
   z-index: 2;
   }
-
   /* LIST HOVER: Show UI */
   .project-item:hover {
     background: var(--glass-bg-hover);
@@ -255,11 +246,10 @@
     transform: translate(-2px, -2px) translateZ(10px); /* Pop Up in 3D */
     z-index: 10;
   }
-
   /* MOBILE LAYOUT ADJUSTMENTS */
   @media (max-width: 768px) {
     .project-item, .project-item.quote, .project-item.skill {
-      display: flex !important; 
+      display: flex !important;
       grid-template-columns: none !important;
       flex-direction: column;
       gap: 8px;
@@ -270,23 +260,23 @@
         border-bottom: 1px solid rgba(0,0,0,0.1); /* Subtle line for Rose mobile */
     }
     .project-item:hover, [data-theme="rose"] .project-item:hover {
-        background: transparent; 
+        background: transparent;
         box-shadow: none;
         transform: none;
         border: none;
         border-bottom: 1px solid var(--glass-border);
     }
-    .project-item.experience .project-data.artist { 
+    .project-item.experience .project-data.artist {
       font-size: 1.25rem;
       margin-bottom: 2px;
     }
-    .project-item.experience .project-data.role { 
+    .project-item.experience .project-data.role {
       width: 100%;
       border-bottom: 1px solid var(--glass-border);
       padding-bottom: 8px;
       margin-bottom: 8px;
     }
-    .project-item.experience .project-data.year { 
+    .project-item.experience .project-data.year {
       width: 100%;
       text-align: left !important;
       opacity: 0.6;
@@ -302,7 +292,6 @@
     .project-item.summary .project-data.album,
     .project-item.hero .project-data.album { width: 100%; max-width: 100%; }
   }
-
   .project-data {
   white-space: normal;
   line-height: 1.4; /* Tighter line height */
@@ -316,62 +305,61 @@
   .project-data.album {
   opacity: 0.95;
   /* UPDATED: Constrain text width for readability on large screens */
-  max-width: 680px; 
+  max-width: 680px;
   }
   /* Hero Overrides */
-  .project-item.hero { 
-      display: flex; flex-direction: column; gap: 0.5rem; border-bottom: none; padding-bottom: 2rem; 
+  .project-item.hero {
+      display: flex; flex-direction: column; gap: 0.5rem; border-bottom: none; padding-bottom: 2rem;
   }
-  .project-item.hero:hover, [data-theme="rose"] .project-item.hero:hover { 
+  .project-item.hero:hover, [data-theme="rose"] .project-item.hero:hover {
       background: transparent; box-shadow: none; transform: none; border: none;
   }
-
   .project-item.hero .project-data.artist { font-size: 3rem; font-weight: 700; letter-spacing: -0.04em; }
   .project-item.hero .project-data.album { font-size: 1.4rem; opacity: 0.95; }
-  
+ 
   @media (max-width: 768px) {
   .project-item.hero .project-data.artist { font-size: 2rem; }
   .project-item.hero .project-data.album { font-size: 1.2rem; }
   }
-  
+ 
   /* Section Headers */
   .project-item.section { display: block; padding-top: 2rem; }
-  .project-item.section:hover, [data-theme="rose"] .project-item.section:hover { 
+  .project-item.section:hover, [data-theme="rose"] .project-item.section:hover {
       background: transparent; box-shadow: none; transform: none; border: none;
   }
   .project-item.section .project-data.artist { font-size: 1.6rem; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; }
   .project-item.section .project-data.album { display: none; }
-  
+ 
   /* Summary Item */
   .project-item.summary { display: flex; flex-direction: column; gap: 0.5rem; }
   .project-item.summary .project-data.album { font-size: 1.1rem; line-height: 1.7; opacity: 0.95; max-width: 800px; }
-  
+ 
   /* Experience Styles */
   .project-item.experience .project-data.artist { color: var(--accent); }
   .project-item.experience .project-data.role { font-style: italic; opacity: 0.9; }
-  
+ 
   /* UPDATED: Year Style */
-  .project-item.experience .project-data.year { 
-    text-align: right; 
-    opacity: 0.7; 
+  .project-item.experience .project-data.year {
+    text-align: right;
+    opacity: 0.7;
     font-family: 'JetBrains Mono', monospace; /* Monospace for strict alignment */
-    font-size: 0.85rem; 
-    font-variant-numeric: tabular-nums; 
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
   }
-  
+ 
   /* Quote/Skill Styles */
   .project-item.quote, .project-item.skill {
-    grid-template-columns: 200px 1fr; 
+    grid-template-columns: 200px 1fr;
   }
   .project-item.skill .project-data.album { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .quote .project-data.album { font-style: italic; opacity: 0.85; }
-  
+ 
   /* Active states */
   .listview-root.has-active .project-item { opacity: 0.6; }
   .listview-root.has-active .project-item.active { opacity: 1; }
   .listview-root.has-active .project-item.adjacent { opacity: 0.85; }
-  
+ 
   /* Grid view */
   .gridview-root {
   position: fixed;
@@ -407,7 +395,7 @@
   border: 1px solid transparent;
   padding: 1.5rem;
   }
-  
+ 
   .grid-section-title {
   font-size: 1.6rem;
   opacity: 0.8;
@@ -433,7 +421,6 @@
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-shadow: none;
   }
-
   /* GRID HOVER: The card materializes */
   .grid-item:hover {
       background: var(--glass-bg-hover);
@@ -448,7 +435,6 @@
     box-shadow: 6px 6px 0px #000;
     transform: translate(-2px, -2px) translateZ(10px);
   }
-
   .grid-item.skill {
   border-radius: 999px;
   flex-direction: row;
@@ -515,7 +501,7 @@
   /* Common */
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  #cursor { position: fixed; top: 0; left: 0; pointer-events: none; mix-blend-mode: difference; filter: url(#goo); z-index: var(--z-cursor); will-change: transform; /* Ensure persistence */ }
+  #cursor { position: fixed; inset: 0; pointer-events: none; mix-blend-mode: difference; filter: url(#goo); z-index: var(--z-cursor); will-change: transform; /* Ensure persistence */ }
   .cursor-circle {
   position: absolute;
   width: var(--cursor-size); height: var(--cursor-size);
@@ -785,29 +771,27 @@
   transition: all 0.3s ease;
   box-shadow: none;
   }
-  
+ 
   /* Show visible UI on open or hover */
   details[open], details:hover {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  
+ 
   /* POP ART ACCORDION */
-  [data-theme="rose"] details[open], 
+  [data-theme="rose"] details[open],
   [data-theme="rose"] details:hover {
     background: #fff;
     border: 2px solid #000;
     border-radius: 0px;
     box-shadow: 4px 4px 0px #000;
   }
-
   /* Brighten hover effect for open accordions in Dark Mode */
   [data-theme="dark"] details[open]:hover {
     background: var(--glass-bg-bright);
     border-color: rgba(255,255,255,0.2);
   }
-
   summary {
   padding: 0.5rem 0.75rem; /* Tightened padding */
   cursor: pointer;
@@ -927,7 +911,7 @@
   </style>
 <svg class="goo" style="position:absolute; width:0; height:0;">
   <filter id="goo">
-    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
     <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7" result="goo"/>
     <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
   </filter>
@@ -1622,27 +1606,21 @@
     <div class="menu-item" id="savePdf" role="menuitem">Save as PDF</div>
     <div class="menu-item" id="copyLink" role="menuitem">Copy Link to Clipboard</div>
   </div>
-
-
 <script>
 const body = document.body;
-
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isFinePointer = window.matchMedia('(pointer: fine)').matches;
 const shouldRunCursor = isFinePointer && !prefersReducedMotion;
 const shouldRunAdvancedEffects = isFinePointer && !prefersReducedMotion;
-
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const logoToggle = document.getElementById('logoToggle');
-
 // Themes array
 const themes = ['dark', 'light', 'rose'];
-
 // Update Logo Function
 function updateLogo(theme) {
   const logoImg = document.querySelector('.logo img');
-  
+ 
   // Implementing conventional high-contrast logic (undoing any confusion about a "swap")
   if (theme === 'rose') {
     // Rose theme (bright background) uses the Rose logo
@@ -1655,12 +1633,10 @@ function updateLogo(theme) {
     logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
   }
 }
-
 function getNextTheme(current) {
   const index = themes.indexOf(current);
   return themes[(index + 1) % themes.length];
 }
-
 function updateThemeIcon(theme) {
   if (theme === 'light') {
     // Sun icon
@@ -1673,7 +1649,6 @@ function updateThemeIcon(theme) {
     themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
   }
 }
-
 function initTheme() {
   let saved = localStorage.getItem('zack-theme');
   if (!themes.includes(saved)) {
@@ -1683,7 +1658,6 @@ function initTheme() {
   updateThemeIcon(saved);
   updateLogo(saved); // Set initial logo
 }
-
 function toggleTheme() {
   const current = body.getAttribute('data-theme');
   const next = getNextTheme(current);
@@ -1692,60 +1666,48 @@ function toggleTheme() {
   updateThemeIcon(next);
   updateLogo(next); // Update logo on toggle
 }
-
 initTheme();
-
 if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
 if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
-
-
 // Cursor Trail Effect (Performance Fix: throttled by shouldRunCursor)
 (() => {
   if (!shouldRunCursor) return; // PERFORMANCE FIX: Skip on coarse pointers or reduced motion
-  
+
   const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
   const host = document.getElementById('cursor');
   if (!host) return;
-
   for (let i = 0; i < TAIL_LENGTH; i++) {
     const d = document.createElement('div');
     d.className = 'cursor-circle';
     host.appendChild(d);
   }
-
   const circles = host.querySelectorAll('.cursor-circle');
   let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
   const history = Array(TAIL_LENGTH).fill(0).map(() => ({ x: mouseX, y: mouseY }));
-
   window.addEventListener('pointermove', e => {
     mouseX = e.clientX;
     mouseY = e.clientY;
   }, { passive: true });
-
   function tick() {
     history.shift();
     history.push({ x: mouseX, y: mouseY });
-
     circles.forEach((c, i) => {
       const cur = history[i];
       const next = history[i + 1] || history[TAIL_LENGTH - 1];
       cur.x += (next.x - cur.x) * 0.35;
       cur.y += (next.y - cur.y) * 0.35;
       const s = Math.max(0.22, i / TAIL_LENGTH);
-      c.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${s})`;
+      // FIXED: Preserve centering with calc() to combine px and %
+      c.style.transform = `translate(calc(${cur.x}px - 50%), calc(${cur.y}px - 50%)) scale(${s})`;
     });
-
     requestAnimationFrame(tick);
   }
   tick();
 })();
-
-
 const gridView = document.getElementById('gridView');
 const listView = document.getElementById('listView');
 const gridBtn = document.getElementById('gridBtn');
 const listBtn = document.getElementById('listBtn');
-
 // MODE TRANSITION & ACCESSIBILITY FIX: Functions to handle view switching and state persistence
 function showGridView() {
     gridView.style.display = 'block';
@@ -1756,7 +1718,6 @@ function showGridView() {
     listBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
     localStorage.setItem('viewMode', 'grid'); // PERSISTENCE FIX
 }
-
 function showListView() {
     gridView.style.display = 'none';
     listView.style.display = 'block';
@@ -1766,7 +1727,6 @@ function showListView() {
     gridBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
     localStorage.setItem('viewMode', 'list'); // PERSISTENCE FIX
 }
-
 // Load View State on Initial Load
 function loadViewState() {
     const savedView = localStorage.getItem('viewMode') || 'list';
@@ -1774,22 +1734,18 @@ function loadViewState() {
         showGridView();
     } else {
         // Since list is default, call explicitly to set aria attributes correctly
-        showListView(); 
+        showListView();
     }
 }
-
 if (gridBtn) {
     // Attach new event listeners
     gridBtn.addEventListener('click', showGridView);
     listBtn.addEventListener('click', showListView);
 }
-
 loadViewState(); // Apply the saved state immediately
-
 // FIRST-TIME GUIDANCE FIX: Drag Hint Logic
 const dragHints = document.querySelectorAll('.drag-hint');
 const IS_FIRST_VISIT = !localStorage.getItem('hasVisitedCV'); // Use a specific key
-
 if (IS_FIRST_VISIT && shouldRunAdvancedEffects) { // Only show hint if effects are running
     // Show hint after a small delay
     setTimeout(() => {
@@ -1798,10 +1754,9 @@ if (IS_FIRST_VISIT && shouldRunAdvancedEffects) { // Only show hint if effects a
             hint.setAttribute('aria-hidden', 'false');
         });
     }, 2000); // Show after 2 seconds
-    
+   
     localStorage.setItem('hasVisitedCV', 'true'); // Set flag to remember the visit
 }
-
 // Function to hide the hint on first interaction
 function hideDragHint() {
     dragHints.forEach(hint => {
@@ -1813,23 +1768,19 @@ function hideDragHint() {
     window.removeEventListener('keydown', hideDragHint);
     window.removeEventListener('wheel', hideDragHint);
 }
-
 // Hide hint on any interaction
 window.addEventListener('pointerdown', hideDragHint, { once: true });
 window.addEventListener('keydown', hideDragHint, { once: true });
 window.addEventListener('wheel', hideDragHint, { once: true });
-
-
 // Drag Scroll Initialization (Performance Fix: includes throttling logic)
 function initDragScroll(element) {
-  
+ 
   // PERFORMANCE FIX: Only run complex momentum on fine pointers & without reduced motion
   if (!shouldRunAdvancedEffects) {
       // Fallback: Use only basic, synchronous drag-scroll for better performance
       let isDown = false;
       let startX;
       let scrollLeft;
-
       element.addEventListener('pointerdown', (e) => {
           isDown = true;
           startX = e.pageX - element.offsetLeft;
@@ -1853,7 +1804,7 @@ function initDragScroll(element) {
       });
       return; // Exit the function to prevent running the momentum version
   }
-  
+ 
   // Original Momentum Drag Scroll Logic (runs when shouldRunAdvancedEffects is true)
   let isDown = false;
   let isDragging = false;
@@ -1861,7 +1812,6 @@ function initDragScroll(element) {
   let velocityX = 0, velocityY = 0;
   let initialX, initialY;
   const threshold = 5; // Pixels to distinguish drag from click
-
   const start = (e) => {
     if (e.button !== 0 && e.pointerType !== 'touch') return;
     isDown = true;
@@ -1872,12 +1822,11 @@ function initDragScroll(element) {
     velocityY = 0;
     element.style.cursor = 'grab';
   };
-
   const move = (e) => {
     if (!isDown) return;
     const dx = e.pageX - initialX;
     const dy = e.pageY - initialY;
-    
+   
     // Check threshold to start dragging
     if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
       isDragging = true;
@@ -1887,22 +1836,19 @@ function initDragScroll(element) {
       scrollTop = element.scrollTop;
       element.style.cursor = 'grabbing';
     }
-
     if (isDragging) {
       e.preventDefault();
       const x = e.pageX;
       const y = e.pageY;
       const walkX = (x - startX);
       const walkY = (y - startY);
-      
+     
       // Calculate velocity for momentum
       velocityX = walkX * 0.1;
       velocityY = walkY * 0.1;
-
       // Apply drag scroll
       element.scrollLeft = scrollLeft - walkX;
       element.scrollTop = scrollTop - walkY;
-
       // Update start points for continuous velocity calculation
       startX = x;
       startY = y;
@@ -1910,21 +1856,18 @@ function initDragScroll(element) {
       scrollTop = element.scrollTop;
     }
   };
-
   const stop = (e) => {
     if (!isDown) return;
     isDown = false;
     const wasDragging = isDragging;
     isDragging = false;
     element.style.cursor = wasDragging ? 'grab' : 'auto';
-
     if (wasDragging) {
       const momentum = () => {
         element.scrollLeft += velocityX * 30;
         element.scrollTop += velocityY * 30;
         velocityX *= 0.95;
         velocityY *= 0.95;
-
         if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
           requestAnimationFrame(momentum);
         }
@@ -1932,7 +1875,6 @@ function initDragScroll(element) {
       momentum();
     }
   };
-
   element.addEventListener('pointerdown', start, { passive: true });
   element.addEventListener('pointermove', move, { passive: false }); // Needs to be non-passive for preventDefault
   element.addEventListener('pointerup', stop);
@@ -1941,21 +1883,18 @@ function initDragScroll(element) {
 }
 initDragScroll(listView);
 initDragScroll(gridView);
-
 // Global Tilt Effect for 3D Feel (Performance Fix: throttled by shouldRunAdvancedEffects)
-const tiltContainers = document.querySelectorAll('.curved'); 
-
+const tiltContainers = document.querySelectorAll('.curved');
 if (tiltContainers.length > 0 && shouldRunAdvancedEffects) { // PERFORMANCE FIX: Only run on high-spec/fine pointer devices
   window.addEventListener('mousemove', (e) => {
     const { clientX, clientY } = e;
     const { innerWidth, innerHeight } = window;
-    
+   
     // Calculate rotation (subtle tilt) - max 1.5 degrees
     // X rotation is based on Y position (inverted)
     // Y rotation is based on X position
     const xRot = ((clientY / innerHeight) - 0.5) * 3; // Max 1.5 deg tilt (3 * 0.5)
     const yRot = ((clientX / innerWidth) - 0.5) * 3;
-
     tiltContainers.forEach(container => {
       // Only animate the currently visible container
       if (container.style.display !== 'none') {
@@ -1964,8 +1903,6 @@ if (tiltContainers.length > 0 && shouldRunAdvancedEffects) { // PERFORMANCE FIX:
     });
   }, { passive: true });
 }
-
-
 // Image Lazy Loading/Preloading logic
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -1983,13 +1920,11 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('img[data-src]').forEach(img => {
     observer.observe(img);
 });
-
 // Overlay and Focus Trap logic
 const fabButton = document.getElementById('fabButton');
 const overlay = document.getElementById('overlay');
 const closeOverlayBtn = document.getElementById('closeOverlay');
 let lastFocus = null;
-
 function openOverlay() {
     lastFocus = document.activeElement;
     overlay.classList.add('open');
@@ -2000,7 +1935,6 @@ function openOverlay() {
     overlay.setAttribute('aria-hidden', 'false');
     fabButton.setAttribute('aria-expanded', 'true');
 }
-
 function closeOverlayFn() {
     overlay.classList.remove('open');
     document.removeEventListener('keydown', onKeyDown);
@@ -2008,14 +1942,13 @@ function closeOverlayFn() {
     overlay.setAttribute('aria-hidden', 'true');
     fabButton.setAttribute('aria-expanded', 'false');
 }
-
 function onKeyDown(e) {
     if (e.key === 'Escape') closeOverlayFn();
     if (e.key === 'Tab') {
         const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
-        
+       
         // Trap focus inside the sheet
         if (e.shiftKey && document.activeElement === first) {
             e.preventDefault();
@@ -2026,10 +1959,8 @@ function onKeyDown(e) {
         }
     }
 }
-
 if (fabButton) fabButton.addEventListener('click', openOverlay);
 if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
-
 // Context Menu (Right-click) Logic
 const contextMenu = document.getElementById('contextMenu');
 document.addEventListener('contextmenu', (e) => {
@@ -2041,7 +1972,6 @@ document.addEventListener('contextmenu', (e) => {
 document.addEventListener('click', () => {
   contextMenu.style.display = 'none';
 });
-
 // Context Menu Actions
 document.getElementById('expandAll').addEventListener('click', () => {
     document.querySelectorAll('details').forEach(d => d.open = true);
@@ -2063,6 +1993,5 @@ document.getElementById('copyLink').addEventListener('click', () => {
     });
     contextMenu.style.display = 'none';
 });
-
 </script>
 </html>

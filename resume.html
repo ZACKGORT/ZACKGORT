@@ -908,6 +908,23 @@
     line-height: 1.6;
     opacity: 0.95;
   }
+  .footer-link {
+    position: fixed;
+    bottom: var(--fab-bottom);
+    left: var(--corner-pad);
+    z-index: var(--z-ui);
+    cursor: pointer;
+    color: var(--ink-2);
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+  }
+  .footer-link:hover {
+    color: var(--ink);
+  }
+  [data-theme="rose"] .footer-link {
+    color: var(--ink);
+    font-weight: bold;
+  }
   </style>
 <svg class="goo" style="position:absolute; width:0; height:0;">
   <filter id="goo">
@@ -1600,6 +1617,27 @@
       </div>
     </div>
   </div>
+  <div class="overlay" id="thinkPinkOverlay" aria-hidden="true">
+    <div class="sheet" tabindex="-1">
+      <div class="title-bar">
+        <h1>Think Pink (#FF8DA1)</h1>
+        <button class="close-button" id="closeThinkPink">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div class="container">
+        <p>Pink is not a color I chose. I arrived in this country in a pink onesie, and it has carried meaning ever since. It marks a beginning and serves as an impetus for {my} particular point of view.</p>
+        <p>For most, pink reads as playful or trendy. For me, it is a call to challenge assumptions, push against conventions, and approach problems from unexpected angles. It reminds me that expectations are meant to be subverted.</p>
+        <p>I use pink not for razzle-dazzle, but as a beacon of intent in everything I do. It signals identity, clarity, and a refusal to follow defaults. Pink is not just a color. It is a mindset, a history, and a way to move fast while staying true to {myself}.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-link">
+    <a href="#" id="thinkPinkLink">#FF8DA1</a>
+  </div>
   <div id="contextMenu" role="menu">
     <div class="menu-item" id="expandAll" role="menuitem">Expand All</div>
     <div class="menu-item" id="reset" role="menuitem">Reset</div>
@@ -1942,6 +1980,43 @@ function closeOverlayFn() {
     overlay.setAttribute('aria-hidden', 'true');
     fabButton.setAttribute('aria-expanded', 'false');
 }
+const thinkPinkLink = document.getElementById('thinkPinkLink');
+const thinkPinkOverlay = document.getElementById('thinkPinkOverlay');
+const closeThinkPinkBtn = document.getElementById('closeThinkPink');
+function openThinkPink() {
+    lastFocus = document.activeElement;
+    thinkPinkOverlay.classList.add('open');
+    const sheet = thinkPinkOverlay.querySelector('.sheet');
+    sheet.setAttribute('tabindex', '-1');
+    sheet.focus();
+    document.addEventListener('keydown', onKeyDownThinkPink);
+    thinkPinkOverlay.setAttribute('aria-hidden', 'false');
+}
+function closeThinkPinkFn() {
+    thinkPinkOverlay.classList.remove('open');
+    document.removeEventListener('keydown', onKeyDownThinkPink);
+    if (lastFocus) lastFocus.focus();
+    thinkPinkOverlay.setAttribute('aria-hidden', 'true');
+}
+function onKeyDownThinkPink(e) {
+    if (e.key === 'Escape') closeThinkPinkFn();
+    if (e.key === 'Tab') {
+        const focusable = thinkPinkOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+       
+        // Trap focus inside the sheet
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+}
+if (thinkPinkLink) thinkPinkLink.addEventListener('click', (e) => { e.preventDefault(); openThinkPink(); });
+if (closeThinkPinkBtn) closeThinkPinkBtn.addEventListener('click', closeThinkPinkFn);
 function onKeyDown(e) {
     if (e.key === 'Escape') closeOverlayFn();
     if (e.key === 'Tab') {

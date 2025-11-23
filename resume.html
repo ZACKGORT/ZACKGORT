@@ -1626,6 +1626,12 @@
 
 <script>
 const body = document.body;
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+const shouldRunCursor = isFinePointer && !prefersReducedMotion;
+const shouldRunAdvancedEffects = isFinePointer && !prefersReducedMotion;
+
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const logoToggle = document.getElementById('logoToggle');

@@ -14,7 +14,7 @@
   --ink: #ffffff;
   --ink-2: #9f9f9f;
   --ink-3: #6c6c6c;
-  --accent: #7ee787;
+  --accent: #FF8DA1;
   --curve-k: 1;
   --vig-opacity: .9;
   --edge-blur: 2px;
@@ -752,7 +752,7 @@
   .project-data.album, .grid-item p {
   color: #333 !important;
   }
-  .theme-toggle, .fab-wrap, .logo, .edge-blur, .vignette, #cursor, .background-image, .view-toggle, .font-toggle {
+  .theme-toggle, .fab-wrap, .logo, .edge-blur, .vignette, #cursor, .background-image, .view-toggle, .font-toggle, #contextMenu, .footer-link, .overlay {
   display: none !important;
   }
   #listView {
@@ -2073,9 +2073,9 @@ document.getElementById('reset').addEventListener('click', () => {
     contextMenu.style.display = 'none';
 });
 document.getElementById('savePdf').addEventListener('click', () => {
-    // PRINTING / EXPORT FIX: The print styles already handle the layout degradation
-    window.print();
     contextMenu.style.display = 'none';
+    document.querySelectorAll('details').forEach(d => d.open = true);
+    window.print();
 });
 document.getElementById('copyLink').addEventListener('click', () => {
     navigator.clipboard.writeText(window.location.href).then(() => {

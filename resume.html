@@ -2,11 +2,6 @@
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
 <title>Zachary Gort — Senior UX Designer</title>
-
-<meta name="description" content="Zachary Gort: Senior UX Designer portfolio and resume. Creative designer, facilitator, and visual storyteller with over a decade of experience."/>
-<meta property="og:title" content="Zachary Gort — Senior UX Designer" />
-<meta property="og:description" content="Creative designer, facilitator, and visual storyteller with over a decade leading end-to-end user experience initiatives." />
-<meta property="og:image" content="https://zackgort.com/social-preview.jpg" /> <meta property="og:type" content="profile" />
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -1628,58 +1623,75 @@
     <div class="menu-item" id="copyLink" role="menuitem">Copy Link to Clipboard</div>
   </div>
 
+
 <script>
 const body = document.body;
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const logoToggle = document.getElementById('logoToggle');
 
-// PERFORMANCE FIX: Throttling checks moved to the top
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
-const shouldRunAdvancedEffects = !isCoarsePointer && !prefersReducedMotion;
-const shouldRunCursor = shouldRunAdvancedEffects; // Use the same check for cursor trail
-
 // Themes array
 const themes = ['dark', 'light', 'rose'];
 
 // Update Logo Function
 function updateLogo(theme) {
-  const logoImg = document.getElementById('logoImg');
-  if (!logoImg) return;
-  // Simple dark/light swap
-  if (theme === 'light' || theme === 'rose') {
-    logoImg.src = "https://zackgort.com/logo-dark.svg"; 
+  const logoImg = document.querySelector('.logo img');
+  
+  // Implementing conventional high-contrast logic (undoing any confusion about a "swap")
+  if (theme === 'rose') {
+    // Rose theme (bright background) uses the Rose logo
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-rose.svg.svg';
+  } else if (theme === 'light') {
+    // Light theme (light background) uses the DARK logo (dark text) for contrast.
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
   } else {
-    logoImg.src = "https://zackgort.com/logo-light.svg";
+    // Default 'dark' theme (dark background) uses the LIGHT logo (light text) for contrast.
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
   }
 }
 
-// Theme Persistence (Initial Load)
-const savedTheme = localStorage.getItem('theme') || themes[0]; // Default to 'dark'
-body.dataset.theme = savedTheme;
-updateLogo(savedTheme);
-
-// Theme Toggle Click Handler
-if (themeToggle) {
-  themeToggle.addEventListener('click', () => {
-    const currentTheme = body.dataset.theme || themes[0];
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    const newTheme = themes[nextIndex];
-
-    body.dataset.theme = newTheme;
-    localStorage.setItem('theme', newTheme);
-    updateLogo(newTheme);
-  });
+function getNextTheme(current) {
+  const index = themes.indexOf(current);
+  return themes[(index + 1) % themes.length];
 }
-if (logoToggle) {
-  logoToggle.addEventListener('click', () => {
-    body.dataset.theme = 'dark';
-    localStorage.setItem('theme', 'dark');
-    updateLogo('dark');
-  });
+
+function updateThemeIcon(theme) {
+  if (theme === 'light') {
+    // Sun icon
+    themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+  } else if (theme === 'rose') {
+    // Sparkle/Star icon
+    themeIcon.innerHTML = '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>';
+  } else {
+    // Moon icon (default dark)
+    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+  }
 }
+
+function initTheme() {
+  let saved = localStorage.getItem('zack-theme');
+  if (!themes.includes(saved)) {
+    saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+  body.setAttribute('data-theme', saved);
+  updateThemeIcon(saved);
+  updateLogo(saved); // Set initial logo
+}
+
+function toggleTheme() {
+  const current = body.getAttribute('data-theme');
+  const next = getNextTheme(current);
+  body.setAttribute('data-theme', next);
+  localStorage.setItem('zack-theme', next);
+  updateThemeIcon(next);
+  updateLogo(next); // Update logo on toggle
+}
+
+initTheme();
+
+if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
+
 
 // Cursor Trail Effect (Performance Fix: throttled by shouldRunCursor)
 (() => {

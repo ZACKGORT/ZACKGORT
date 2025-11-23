@@ -2,6 +2,11 @@
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
 <title>Zachary Gort — Senior UX Designer</title>
+
+<meta name="description" content="Zachary Gort: Senior UX Designer portfolio and resume. Creative designer, facilitator, and visual storyteller with over a decade of experience."/>
+<meta property="og:title" content="Zachary Gort — Senior UX Designer" />
+<meta property="og:description" content="Creative designer, facilitator, and visual storyteller with over a decade leading end-to-end user experience initiatives." />
+<meta property="og:image" content="https://zackgort.com/social-preview.jpg" /> <meta property="og:type" content="profile" />
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -934,7 +939,7 @@
 </svg>
 <body data-theme="dark">
   <div class="logo" id="logoToggle">
-    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg" alt="intoview">
+    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg" alt="intoview">
   </div>
   <div class="view-toggle">
     <button class="toggle-btn" id="gridBtn">
@@ -1629,331 +1634,300 @@ const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const logoToggle = document.getElementById('logoToggle');
 
+// PERFORMANCE FIX: Throttling checks moved to the top
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+const shouldRunAdvancedEffects = !isCoarsePointer && !prefersReducedMotion;
+const shouldRunCursor = shouldRunAdvancedEffects; // Use the same check for cursor trail
+
 // Themes array
 const themes = ['dark', 'light', 'rose'];
 
 // Update Logo Function
 function updateLogo(theme) {
-  const logoImg = document.querySelector('.logo img');
-  if (theme === 'light') {
-    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
-  } else if (theme === 'rose') {
-    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-rose.svg.svg';
+  const logoImg = document.getElementById('logoImg');
+  if (!logoImg) return;
+  // Simple dark/light swap
+  if (theme === 'light' || theme === 'rose') {
+    logoImg.src = "https://zackgort.com/logo-dark.svg"; 
   } else {
-    // Default to Dark
-    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
+    logoImg.src = "https://zackgort.com/logo-light.svg";
   }
 }
 
-function getNextTheme(current) {
-  const index = themes.indexOf(current);
-  return themes[(index + 1) % themes.length];
+// Theme Persistence (Initial Load)
+const savedTheme = localStorage.getItem('theme') || themes[0]; // Default to 'dark'
+body.dataset.theme = savedTheme;
+updateLogo(savedTheme);
+
+// Theme Toggle Click Handler
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = body.dataset.theme || themes[0];
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const newTheme = themes[nextIndex];
+
+    body.dataset.theme = newTheme;
+    localStorage.setItem('theme', newTheme);
+    updateLogo(newTheme);
+  });
+}
+if (logoToggle) {
+  logoToggle.addEventListener('click', () => {
+    body.dataset.theme = 'dark';
+    localStorage.setItem('theme', 'dark');
+    updateLogo('dark');
+  });
 }
 
-function updateThemeIcon(theme) {
-  if (theme === 'light') {
-    // Sun icon
-    themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-  } else if (theme === 'rose') {
-    // Sparkle/Star icon
-    themeIcon.innerHTML = '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>';
-  } else {
-    // Moon icon (default dark)
-    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+// Cursor Trail Effect (Performance Fix: throttled by shouldRunCursor)
+(() => {
+  if (!shouldRunCursor) return; // PERFORMANCE FIX: Skip on coarse pointers or reduced motion
+  
+  const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
+  const host = document.getElementById('cursor');
+  if (!host) return;
+
+  for (let i = 0; i < TAIL_LENGTH; i++) {
+    const d = document.createElement('div');
+    d.className = 'cursor-circle';
+    host.appendChild(d);
   }
-}
 
-function initTheme() {
-  let saved = localStorage.getItem('zack-theme');
-  if (!themes.includes(saved)) {
-    saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  const circles = host.querySelectorAll('.cursor-circle');
+  let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
+  const history = Array(TAIL_LENGTH).fill(0).map(() => ({ x: mouseX, y: mouseY }));
+
+  window.addEventListener('pointermove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  }, { passive: true });
+
+  function tick() {
+    history.shift();
+    history.push({ x: mouseX, y: mouseY });
+
+    circles.forEach((c, i) => {
+      const cur = history[i];
+      const next = history[i + 1] || history[TAIL_LENGTH - 1];
+      cur.x += (next.x - cur.x) * 0.35;
+      cur.y += (next.y - cur.y) * 0.35;
+      const s = Math.max(0.22, i / TAIL_LENGTH);
+      c.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${s})`;
+    });
+
+    requestAnimationFrame(tick);
   }
-  body.setAttribute('data-theme', saved);
-  updateThemeIcon(saved);
-  updateLogo(saved); // Set initial logo
-}
-
-function toggleTheme() {
-  const current = body.getAttribute('data-theme');
-  const next = getNextTheme(current);
-  body.setAttribute('data-theme', next);
-  localStorage.setItem('zack-theme', next);
-  updateThemeIcon(next);
-  updateLogo(next); // Update logo on toggle
-}
-
-initTheme();
-
-if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
-
-// --- Rest of the scripts --- 
-
-(function initGooeyCursor() {
-const shouldRunCursor = !window.matchMedia('(pointer: coarse)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (!shouldRunCursor) return;
-const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
-const host = document.getElementById('cursor');
-if (!host) return;
-for (let i = 0; i < TAIL_LENGTH; i++) {
-const d = document.createElement('div');
-d.className = 'cursor-circle';
-host.appendChild(d);
-}
-const circles = host.querySelectorAll('.cursor-circle');
-let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
-const history = Array(TAIL_LENGTH).fill(0).map(() => ({ x: mouseX, y: mouseY }));
-window.addEventListener('pointermove', e => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
-function tick() {
-history.shift();
-history.push({ x: mouseX, y: mouseY });
-circles.forEach((c, i) => {
-const cur = history[i];
-const next = history[i + 1] || history[TAIL_LENGTH - 1];
-cur.x += (next.x - cur.x) * 0.35;
-cur.y += (next.y - cur.y) * 0.35;
-const s = Math.max(0.22, i / TAIL_LENGTH);
-c.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${s})`;
-});
-requestAnimationFrame(tick);
-}
-tick();
+  tick();
 })();
+
+
 const gridView = document.getElementById('gridView');
 const listView = document.getElementById('listView');
 const gridBtn = document.getElementById('gridBtn');
 const listBtn = document.getElementById('listBtn');
+
+// MODE TRANSITION & ACCESSIBILITY FIX: Functions to handle view switching and state persistence
+function showGridView() {
+    gridView.style.display = 'block';
+    listView.style.display = 'none';
+    gridBtn.classList.add('active');
+    gridBtn.setAttribute('aria-current', 'true'); // ACCESSIBILITY FIX
+    listBtn.classList.remove('active');
+    listBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
+    localStorage.setItem('viewMode', 'grid'); // PERSISTENCE FIX
+}
+
+function showListView() {
+    gridView.style.display = 'none';
+    listView.style.display = 'block';
+    listBtn.classList.add('active');
+    listBtn.setAttribute('aria-current', 'true'); // ACCESSIBILITY FIX
+    gridBtn.classList.remove('active');
+    gridBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
+    localStorage.setItem('viewMode', 'list'); // PERSISTENCE FIX
+}
+
+// Load View State on Initial Load
+function loadViewState() {
+    const savedView = localStorage.getItem('viewMode') || 'list';
+    if (savedView === 'grid') {
+        showGridView();
+    } else {
+        // Since list is default, call explicitly to set aria attributes correctly
+        showListView(); 
+    }
+}
+
 if (gridBtn) {
-gridBtn.addEventListener('click', () => {
-if (gridView && listView) {
-gridView.style.display = 'block';
-listView.style.display = 'none';
-gridBtn.classList.add('active');
-listBtn.classList.remove('active');
-}
-});
-}
-if (listBtn) {
-listBtn.addEventListener('click', () => {
-if (gridView && listView) {
-gridView.style.display = 'none';
-listView.style.display = 'block';
-gridBtn.classList.remove('active');
-listBtn.classList.add('active');
-}
-});
-}
-const listRoot = document.getElementById('listView');
-if (listView) {
-const listItems = listView.querySelectorAll('.project-item:not(.section)');
-const listBgOverlay = document.getElementById('listBackgroundImage');
-listItems.forEach(item => {
-item.addEventListener('mouseenter', () => {
-listRoot.classList.add('has-active');
-listItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
-item.classList.add('active');
-const prev = item.previousElementSibling;
-const next = item.nextElementSibling;
-if (prev && prev.classList.contains('project-item')) prev.classList.add('adjacent');
-if (next && next.classList.contains('project-item')) next.classList.add('adjacent');
-gsap.to(listBgOverlay, { opacity: 0.65, duration: 0.7, ease: "power2.out" });
-});
-});
-listRoot.addEventListener('mouseleave', () => {
-listRoot.classList.remove('has-active');
-listItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
-gsap.to(listBgOverlay, { opacity: 0, duration: 0.6 });
-});
-}
-const gridRoot = document.getElementById('gridView');
-if (gridView) {
-const gridItems = gridView.querySelectorAll('.grid-item');
-const gridBgOverlay = document.getElementById('gridBackgroundImage');
-gridItems.forEach(item => {
-item.addEventListener('mouseenter', () => {
-gridRoot.classList.add('has-active');
-gridItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
-item.classList.add('active');
-gsap.to(gridBgOverlay, { opacity: 0.15, duration: 0.7, ease: "power2.out" });
-gsap.to(item, { scale: 1.02, duration: 0.3 });
-});
-item.addEventListener('mouseleave', () => {
-gsap.to(item, { scale: 1, duration: 0.3 });
-});
-});
-gridRoot.addEventListener('mouseleave', () => {
-gridRoot.classList.remove('has-active');
-gridItems.forEach(i => { i.classList.remove('active'); i.classList.remove('adjacent'); });
-gsap.to(gridBgOverlay, { opacity: 0, duration: 0.6 });
-});
+    // Attach new event listeners
+    gridBtn.addEventListener('click', showGridView);
+    listBtn.addEventListener('click', showListView);
 }
 
-const fabButton = document.getElementById('fabButton');
-const overlay = document.getElementById('overlay');
-const closeOverlayBtn = document.getElementById('closeOverlay');
-let lastFocus = null;
-function openOverlay() {
-lastFocus = document.activeElement;
-overlay.classList.add('open');
-const sheet = overlay.querySelector('.sheet');
-sheet.setAttribute('tabindex', '-1');
-sheet.focus();
-document.addEventListener('keydown', onKeyDown);
-overlay.setAttribute('aria-hidden', 'false');
-fabButton.setAttribute('aria-expanded', 'true');
+loadViewState(); // Apply the saved state immediately
+
+// FIRST-TIME GUIDANCE FIX: Drag Hint Logic
+const dragHints = document.querySelectorAll('.drag-hint');
+const IS_FIRST_VISIT = !localStorage.getItem('hasVisitedCV'); // Use a specific key
+
+if (IS_FIRST_VISIT && shouldRunAdvancedEffects) { // Only show hint if effects are running
+    // Show hint after a small delay
+    setTimeout(() => {
+        dragHints.forEach(hint => {
+            hint.classList.add('visible');
+            hint.setAttribute('aria-hidden', 'false');
+        });
+    }, 2000); // Show after 2 seconds
+    
+    localStorage.setItem('hasVisitedCV', 'true'); // Set flag to remember the visit
 }
-function closeOverlayFn() {
-overlay.classList.remove('open');
-document.removeEventListener('keydown', onKeyDown);
-if (lastFocus) lastFocus.focus();
-overlay.setAttribute('aria-hidden', 'true');
-fabButton.setAttribute('aria-expanded', 'false');
+
+// Function to hide the hint on first interaction
+function hideDragHint() {
+    dragHints.forEach(hint => {
+        hint.classList.remove('visible');
+        hint.setAttribute('aria-hidden', 'true');
+    });
+    // Remove listeners to only run once
+    window.removeEventListener('pointerdown', hideDragHint);
+    window.removeEventListener('keydown', hideDragHint);
+    window.removeEventListener('wheel', hideDragHint);
 }
-function onKeyDown(e) {
-if (e.key === 'Escape') closeOverlayFn();
-if (e.key === 'Tab') {
-const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-const first = focusable[0];
-const last = focusable[focusable.length - 1];
-if (e.shiftKey && document.activeElement === first) {
-e.preventDefault();
-last.focus();
-} else if (!e.shiftKey && document.activeElement === last) {
-e.preventDefault();
-first.focus();
-}
-}
-}
-if (fabButton) fabButton.addEventListener('click', openOverlay);
-if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
-if (overlay) overlay.addEventListener('click', (e) => {
-if (e.target === overlay) closeOverlayFn();
-});
-const contextMenu = document.getElementById('contextMenu');
-const expandAll = document.getElementById('expandAll');
-const reset = document.getElementById('reset');
-const savePdf = document.getElementById('savePdf');
-const copyLink = document.getElementById('copyLink');
-document.addEventListener('contextmenu', (e) => {
-e.preventDefault();
-const { clientX: x, clientY: y } = e;
-contextMenu.style.left = `${x}px`;
-contextMenu.style.top = `${y}px`;
-contextMenu.style.display = 'block';
-});
-document.addEventListener('click', () => {
-contextMenu.style.display = 'none';
-});
-if (expandAll) expandAll.addEventListener('click', () => {
-contextMenu.style.display = 'none';
-document.querySelectorAll('details').forEach(d => d.open = true);
-});
-if (reset) reset.addEventListener('click', () => {
-contextMenu.style.display = 'none';
-document.querySelectorAll('.project-data.album, .grid-item').forEach(container => {
-const details = container.querySelectorAll('details');
-details.forEach((d, i) => d.open = false);
-});
-});
-if (savePdf) savePdf.addEventListener('click', () => {
-contextMenu.style.display = 'none';
-window.print();
-});
-if (copyLink) copyLink.addEventListener('click', () => {
-contextMenu.style.display = 'none';
-navigator.clipboard.writeText(window.location.href).then(() => {
-alert('Link copied to clipboard!');
-}).catch(err => {
-console.error('Failed to copy: ', err);
-});
-});
+
+// Hide hint on any interaction
+window.addEventListener('pointerdown', hideDragHint, { once: true });
+window.addEventListener('keydown', hideDragHint, { once: true });
+window.addEventListener('wheel', hideDragHint, { once: true });
+
+
+// Drag Scroll Initialization (Performance Fix: includes throttling logic)
 function initDragScroll(element) {
-if (!element) return;
-let isDown = false;
-let isDragging = false;
-let startX, startY, scrollLeft, scrollTop;
-let velocityX = 0, velocityY = 0;
-let lastX, lastY, lastTime;
-const threshold = 10;
-let initialX, initialY;
-element.addEventListener('pointerdown', (e) => {
-// FIX: Ignore touch inputs for custom drag. Let native scroll handle touches.
-if (e.pointerType === 'touch') return;
+  
+  // PERFORMANCE FIX: Only run complex momentum on fine pointers & without reduced motion
+  if (!shouldRunAdvancedEffects) {
+      // Fallback: Use only basic, synchronous drag-scroll for better performance
+      let isDown = false;
+      let startX;
+      let scrollLeft;
 
-isDown = true;
-isDragging = false;
-initialX = e.pageX;
-initialY = e.pageY;
-startX = e.pageX;
-startY = e.pageY;
-scrollLeft = element.scrollLeft;
-scrollTop = element.scrollTop;
-lastX = e.pageX;
-lastY = e.pageY;
-lastTime = Date.now();
-velocityX = 0;
-velocityY = 0;
-element.style.cursor = 'grab';
-}, { passive: true });
-element.addEventListener('pointermove', (e) => {
-if (!isDown) return;
-const dx = e.pageX - initialX;
-const dy = e.pageY - initialY;
-if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
-isDragging = true;
-startX = e.pageX;
-startY = e.pageY;
-scrollLeft = element.scrollLeft;
-scrollTop = element.scrollTop;
-element.style.cursor = 'grabbing';
-}
-if (isDragging) {
-e.preventDefault();
-const walkX = e.pageX - startX;
-const walkY = e.pageY - startY;
-element.scrollLeft = scrollLeft - walkX;
-element.scrollTop = scrollTop - walkY;
-const now = Date.now();
-const dt = now - lastTime;
-if (dt > 20) {
-velocityX = (e.pageX - lastX) / dt;
-velocityY = (e.pageY - lastY) / dt;
-lastX = e.pageX;
-lastY = e.pageY;
-lastTime = now;
-}
-}
-});
-const stop = () => {
-if (!isDown) return;
-const wasDragging = isDragging;
-isDown = false;
-isDragging = false;
-element.style.cursor = wasDragging ? 'grab' : 'auto';
-if (wasDragging) {
-const momentum = () => {
-element.scrollLeft += velocityX * 30;
-element.scrollTop += velocityY * 30;
-velocityX *= 0.95;
-velocityY *= 0.95;
-if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
-requestAnimationFrame(momentum);
-}
-};
-momentum();
-}
-};
-element.addEventListener('pointerup', stop);
-element.addEventListener('pointercancel', stop);
-element.addEventListener('pointerleave', stop);
+      element.addEventListener('pointerdown', (e) => {
+          isDown = true;
+          startX = e.pageX - element.offsetLeft;
+          scrollLeft = element.scrollLeft;
+          element.style.cursor = 'grabbing';
+      });
+      element.addEventListener('pointerleave', () => {
+          isDown = false;
+          element.style.cursor = 'auto';
+      });
+      element.addEventListener('pointerup', () => {
+          isDown = false;
+          element.style.cursor = 'auto';
+      });
+      element.addEventListener('pointermove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - element.offsetLeft;
+          const walk = (x - startX) * 1.5; // Drag speed
+          element.scrollLeft = scrollLeft - walk;
+      });
+      return; // Exit the function to prevent running the momentum version
+  }
+  
+  // Original Momentum Drag Scroll Logic (runs when shouldRunAdvancedEffects is true)
+  let isDown = false;
+  let isDragging = false;
+  let startX, startY, scrollLeft, scrollTop;
+  let velocityX = 0, velocityY = 0;
+  let initialX, initialY;
+  const threshold = 5; // Pixels to distinguish drag from click
+
+  const start = (e) => {
+    if (e.button !== 0 && e.pointerType !== 'touch') return;
+    isDown = true;
+    isDragging = false;
+    initialX = e.pageX;
+    initialY = e.pageY;
+    velocityX = 0;
+    velocityY = 0;
+    element.style.cursor = 'grab';
+  };
+
+  const move = (e) => {
+    if (!isDown) return;
+    const dx = e.pageX - initialX;
+    const dy = e.pageY - initialY;
+    
+    // Check threshold to start dragging
+    if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
+      isDragging = true;
+      startX = e.pageX;
+      startY = e.pageY;
+      scrollLeft = element.scrollLeft;
+      scrollTop = element.scrollTop;
+      element.style.cursor = 'grabbing';
+    }
+
+    if (isDragging) {
+      e.preventDefault();
+      const x = e.pageX;
+      const y = e.pageY;
+      const walkX = (x - startX);
+      const walkY = (y - startY);
+      
+      // Calculate velocity for momentum
+      velocityX = walkX * 0.1;
+      velocityY = walkY * 0.1;
+
+      // Apply drag scroll
+      element.scrollLeft = scrollLeft - walkX;
+      element.scrollTop = scrollTop - walkY;
+
+      // Update start points for continuous velocity calculation
+      startX = x;
+      startY = y;
+      scrollLeft = element.scrollLeft;
+      scrollTop = element.scrollTop;
+    }
+  };
+
+  const stop = (e) => {
+    if (!isDown) return;
+    isDown = false;
+    const wasDragging = isDragging;
+    isDragging = false;
+    element.style.cursor = wasDragging ? 'grab' : 'auto';
+
+    if (wasDragging) {
+      const momentum = () => {
+        element.scrollLeft += velocityX * 30;
+        element.scrollTop += velocityY * 30;
+        velocityX *= 0.95;
+        velocityY *= 0.95;
+
+        if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+          requestAnimationFrame(momentum);
+        }
+      };
+      momentum();
+    }
+  };
+
+  element.addEventListener('pointerdown', start, { passive: true });
+  element.addEventListener('pointermove', move, { passive: false }); // Needs to be non-passive for preventDefault
+  element.addEventListener('pointerup', stop);
+  element.addEventListener('pointercancel', stop);
+  element.addEventListener('pointerleave', stop);
 }
 initDragScroll(listView);
 initDragScroll(gridView);
 
-// Global Tilt Effect for 3D Feel
-const tiltContainers = document.querySelectorAll('.curved'); // Select both list and grid view roots
+// Global Tilt Effect for 3D Feel (Performance Fix: throttled by shouldRunAdvancedEffects)
+const tiltContainers = document.querySelectorAll('.curved'); 
 
-if (tiltContainers.length > 0) {
+if (tiltContainers.length > 0 && shouldRunAdvancedEffects) { // PERFORMANCE FIX: Only run on high-spec/fine pointer devices
   window.addEventListener('mousemove', (e) => {
     const { clientX, clientY } = e;
     const { innerWidth, innerHeight } = window;
@@ -1965,18 +1939,112 @@ if (tiltContainers.length > 0) {
     const yRot = ((clientX / innerWidth) - 0.5) * 3;
 
     tiltContainers.forEach(container => {
-      // Only animate the currently visible container (checking if style.display is NOT 'none')
-      if (container.style.display !== 'none') { 
-        gsap.to(container, {
-          rotationX: -xRot, 
-          rotationY: yRot,
-          duration: 1,
-          ease: "power2.out"
-        });
+      // Only animate the currently visible container
+      if (container.style.display !== 'none') {
+        container.style.transform = `perspective(2000px) rotateX(${xRot}deg) rotateY(${-yRot}deg)`;
       }
     });
-  });
+  }, { passive: true });
 }
+
+
+// Image Lazy Loading/Preloading logic
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const img = entry.target;
+            const src = img.getAttribute('data-src');
+            if (src) {
+                img.src = src;
+                img.removeAttribute('data-src');
+                observer.unobserve(img);
+            }
+        }
+    });
+});
+document.querySelectorAll('img[data-src]').forEach(img => {
+    observer.observe(img);
+});
+
+// Overlay and Focus Trap logic
+const fabButton = document.getElementById('fabButton');
+const overlay = document.getElementById('overlay');
+const closeOverlayBtn = document.getElementById('closeOverlay');
+let lastFocus = null;
+
+function openOverlay() {
+    lastFocus = document.activeElement;
+    overlay.classList.add('open');
+    const sheet = overlay.querySelector('.sheet');
+    sheet.setAttribute('tabindex', '-1');
+    sheet.focus();
+    document.addEventListener('keydown', onKeyDown);
+    overlay.setAttribute('aria-hidden', 'false');
+    fabButton.setAttribute('aria-expanded', 'true');
+}
+
+function closeOverlayFn() {
+    overlay.classList.remove('open');
+    document.removeEventListener('keydown', onKeyDown);
+    if (lastFocus) lastFocus.focus();
+    overlay.setAttribute('aria-hidden', 'true');
+    fabButton.setAttribute('aria-expanded', 'false');
+}
+
+function onKeyDown(e) {
+    if (e.key === 'Escape') closeOverlayFn();
+    if (e.key === 'Tab') {
+        const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        
+        // Trap focus inside the sheet
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+}
+
+if (fabButton) fabButton.addEventListener('click', openOverlay);
+if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
+
+// Context Menu (Right-click) Logic
+const contextMenu = document.getElementById('contextMenu');
+document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  contextMenu.style.top = `${e.clientY}px`;
+  contextMenu.style.left = `${e.clientX}px`;
+  contextMenu.style.display = 'block';
+});
+document.addEventListener('click', () => {
+  contextMenu.style.display = 'none';
+});
+
+// Context Menu Actions
+document.getElementById('expandAll').addEventListener('click', () => {
+    document.querySelectorAll('details').forEach(d => d.open = true);
+    contextMenu.style.display = 'none';
+});
+document.getElementById('reset').addEventListener('click', () => {
+    localStorage.clear();
+    location.reload();
+    contextMenu.style.display = 'none';
+});
+document.getElementById('savePdf').addEventListener('click', () => {
+    // PRINTING / EXPORT FIX: The print styles already handle the layout degradation
+    window.print();
+    contextMenu.style.display = 'none';
+});
+document.getElementById('copyLink').addEventListener('click', () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        // Optional: Provide visual feedback like a brief toast message
+    });
+    contextMenu.style.display = 'none';
+});
+
 </script>
-</body>
 </html>

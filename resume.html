@@ -82,14 +82,15 @@
     display: none; /* Crisp edges for Pop Art */
   }
 
-  /* Invert Logo for Rose theme (Make it black) */
-  [data-theme="rose"] .logo img {
-    filter: brightness(0); 
+  /* UPDATED: No CSS Filters needed for logos anymore */
+  .logo img {
+    height: 32px;
+    width: auto;
+    display: block;
+    /* Transition for smoother swap if cached */
+    transition: opacity 0.2s ease;
   }
 
-  [data-theme="light"] .logo img {
-  filter: invert(0); 
-  }
   *, *::before, *::after { box-sizing: border-box; }
   html { color-scheme: dark; font-size: var(--base-font-size); }
   body, html, #root { height: 100%; margin: 0; background: var(--bg-color); }
@@ -563,12 +564,7 @@
   z-index: var(--z-ui);
   cursor: pointer;
   }
-  .logo img {
-  height: 32px;
-  width: auto;
-  display: block;
-  }
-  /* FAB */
+  /* Fab */
   .fab-wrap {
   position: fixed;
   right: var(--corner-pad);
@@ -938,7 +934,7 @@
 </svg>
 <body data-theme="dark">
   <div class="logo" id="logoToggle">
-    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/978224baf6a6bce81827044f742761d1bc39893e/intoview-horizontal-lockup-small.svg" alt="intoview">
+    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg" alt="intoview">
   </div>
   <div class="view-toggle">
     <button class="toggle-btn" id="gridBtn">
@@ -1536,7 +1532,7 @@
           </div>
           <div class="grid-item">
             <h4>Andrés Moros, MPS</h4>
-            <p>“Zack is talented, hardworking, and communicative. He elevates team collaboration and consistently goes the extra mile. I enjoyed working with him and recommend him without reservation.”</p>
+            <p>“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I enjoyed working with him and recommend him without reservation.”</p>
             <span class="duration">Sr. UX Designer, Publicis Sapient</span>
           </div>
         </div>
@@ -1581,7 +1577,7 @@
           <filter id="cubeGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".45" />
           </filter>
-        </g>
+        </defs>
         <g filter="url(#cubeGlow)">
           <polygon fill="url(#cubeTop)" points="50,14 80,30 50,46 20,30" />
           <polygon fill="url(#cubeSide)" points="80,30 80,66 50,82 50,46" />
@@ -1636,6 +1632,21 @@ const logoToggle = document.getElementById('logoToggle');
 // Themes array
 const themes = ['dark', 'light', 'rose'];
 
+// Update Logo Function
+function updateLogo(theme) {
+  const logoImg = document.querySelector('.logo img');
+  // Logic SWAPPED: Light theme gets Dark logo, Dark theme gets Light logo.
+  if (theme === 'rose') {
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-rose.svg.svg';
+  } else if (theme === 'light') {
+    // Current 'light' theme (white background) gets the DARK logo
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
+  } else {
+    // Default 'dark' theme (dark background) gets the LIGHT logo
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
+  }
+}
+
 function getNextTheme(current) {
   const index = themes.indexOf(current);
   return themes[(index + 1) % themes.length];
@@ -1661,6 +1672,7 @@ function initTheme() {
   }
   body.setAttribute('data-theme', saved);
   updateThemeIcon(saved);
+  updateLogo(saved); // Set initial logo
 }
 
 function toggleTheme() {
@@ -1669,6 +1681,7 @@ function toggleTheme() {
   body.setAttribute('data-theme', next);
   localStorage.setItem('zack-theme', next);
   updateThemeIcon(next);
+  updateLogo(next); // Update logo on toggle
 }
 
 initTheme();

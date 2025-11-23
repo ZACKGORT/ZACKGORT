@@ -934,7 +934,7 @@
 </svg>
 <body data-theme="dark">
   <div class="logo" id="logoToggle">
-    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg" alt="intoview">
+    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg" alt="intoview">
   </div>
   <div class="view-toggle">
     <button class="toggle-btn" id="gridBtn">
@@ -1635,15 +1635,13 @@ const themes = ['dark', 'light', 'rose'];
 // Update Logo Function
 function updateLogo(theme) {
   const logoImg = document.querySelector('.logo img');
-  // Logic SWAPPED: Light theme gets Dark logo, Dark theme gets Light logo.
-  if (theme === 'rose') {
-    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-rose.svg.svg';
-  } else if (theme === 'light') {
-    // Current 'light' theme (white background) gets the DARK logo
-    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
-  } else {
-    // Default 'dark' theme (dark background) gets the LIGHT logo
+  if (theme === 'light') {
     logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
+  } else if (theme === 'rose') {
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-rose.svg.svg';
+  } else {
+    // Default to Dark
+    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
   }
 }
 

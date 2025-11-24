@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
@@ -132,7 +133,7 @@
   }
  
   /* MINIMALIST UI OVERRIDES */
-  .view-toggle, .theme-toggle, .fab, .grid-item, .grid-section, details {
+  .view-toggle, .theme-toggle, .grid-item, .grid-section, details {
     border: 1px solid transparent;
     background: transparent;
     box-shadow: none;
@@ -377,7 +378,7 @@
   .grid-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 1rem;
+  padding: 4rem 1rem 4rem 100px;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -386,7 +387,7 @@
   }
   @media (max-width: 768px) {
   .grid-container {
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 2rem 80px;
   }
   }
   .grid-section {
@@ -560,23 +561,28 @@
   flex-direction: column;
   align-items: center;
   }
-  .fab {
+.fab {
   position: relative;
   width: var(--fab-size);
   height: var(--fab-size);
   border-radius: 999px;
-  background: transparent;
+  
+  /* Visibility improvements */
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  backdrop-filter: blur(6px);
+  
   color: var(--ink);
-  border: 1px solid transparent; /* Ghost default */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
   box-shadow: none;
   transition: all 0.2s ease;
   pointer-events: auto;
-  backdrop-filter: none;
-  }
+}
+
   .fab:hover {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border);
@@ -602,19 +608,21 @@
   inset: 0;
   z-index: var(--z-overlay);
   display: none;
-  pointer-events: auto;
-  background: rgb(0 0 0 / 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  pointer-events: none; /* Changed to none initially for better perf */
+  background: rgba(0, 0, 0, 0.6); /* More transparent scrim */
+  backdrop-filter: blur(4px) saturate(0%); /* Enhanced glassmorphism with saturation for subtle distortion */
+  -webkit-backdrop-filter: blur(4px) saturate(0%);
   align-items: center;
   justify-content: center;
   padding: clamp(16px, 3vw, 32px);
+  transition: background 0.3s ease; /* Smooth bg transition */
   }
   .overlay.open {
   display: flex;
+  pointer-events: auto;
   }
   [data-theme="light"] .overlay {
-  background: rgb(255 255 255 / 0.75);
+  background: rgba(255, 255, 255, 0.3);
   }
   .sheet {
   width: min(99vw, 1024px);
@@ -622,12 +630,15 @@
   border: 1px solid var(--glass-border);
   border-radius: 4px;
   padding: clamp(16px, 3vw, 32px);
-  box-shadow: 0 24px 48px rgb(0 0 0 / 0.15);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
   max-height: min(92vh, 92dvh);
   position: relative;
   overflow-y: auto;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px) saturate(110%); /* Glassmorphism on sheet with distortion */
+  -webkit-backdrop-filter: blur(12px) saturate(110%);
+  transform: translateY(100%); /* Initial state for slide-in animation */
+  opacity: 0;
+  will-change: transform, opacity; /* Perf hint for GSAP */
   }
   [data-theme="rose"] .sheet {
       background: #fff;
@@ -635,27 +646,10 @@
       box-shadow: 12px 12px 0px #000;
       backdrop-filter: none;
   }
-  .title-bar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  padding: clamp(16px, 3vw, 24px) clamp(12px, 2.4vw, 28px);
-  background: blur(20px)e;
-  backdrop-filter: none;
-  border-bottom: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  }
-  .title-bar h1 {
-  margin: 0;
-  font-size: clamp(1.25rem, 4vw, 1.75rem);
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: -0.02em;
-  }
   .close-button {
+  position: absolute;
+  top: clamp(16px, 3vw, 24px);
+  right: clamp(12px, 2.4vw, 28px);
   appearance: none;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -669,6 +663,7 @@
   transition: all 0.2s ease;
   color: var(--ink-2);
   flex-shrink: 0;
+  z-index: 101;
   }
   .close-button:hover {
   background: var(--glass-bg-hover);
@@ -688,6 +683,35 @@
   padding: clamp(20px, 2.4vw, 32px);
   align-items: start;
   align-content: start;
+  position: relative;
+  }
+  .container::before, .container::after {
+    content: '';
+    position: sticky;
+    left: 0;
+    right: 0;
+    height: 40px; /* Blur height at top/bottom */
+    z-index: 99;
+    pointer-events: none;
+  }
+  .container::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--glass-bg) 0%, transparent 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .container::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--glass-bg) 0%, transparent 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .container h1 {
+    margin: 0 0 1rem 0;
+    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.02em;
   }
   .container p {
   margin: 0 0 1rem 0;
@@ -941,7 +965,91 @@
     color: var(--ink);
     font-weight: bold;
   }
-  </style>
+
+  .full-width-section {
+  width: 100%; /* Full-width spans */
+  padding: 1rem 0; /* Ample whitespace */
+  margin-bottom: 1.5rem; /* Spacing between sections */
+  border-bottom: 1px solid var(--subtle-outline); /* Subtle dividers for modern dashboard feel */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sheet {
+    width: 100vw;
+    height: 100vh; /* Fullscreen on mobile */
+    border-radius: 0;
+    padding: 1rem;
+  }
+  
+  .full-width-section {
+    padding: 0.5rem 0;
+  }
+}
+
+  /* New Filters Panel Styles */
+  .filter-overlay {
+    justify-content: flex-start; /* Align to left for sidebar */
+    background: rgba(0, 0, 0, 0.5); /* Lighter overlay for side panel */
+  }
+  .filter-sheet {
+    width: clamp(250px, 30vw, 400px); /* Fixed width for sidebar */
+    height: 100vh;
+    border-radius: 0;
+    transform: translateX(-100%); /* Initial off-screen left */
+    opacity: 0;
+  }
+  #filterList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  #filterList label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  #applyFilter {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: var(--accent);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .hidden {
+    display: none;
+  }
+
+  /* Side-specific overlays */
+  .right-overlay {
+    justify-content: flex-end;
+  }
+  .right-overlay .sheet {
+    transform: translateX(100%);
+    width: clamp(768px, 40vw, 500px); /* Sidebar width */
+    height: 100vh;
+    border-radius: 0;
+    max-height: none;
+  }
+  .left-overlay {
+    justify-content: flex-start;
+  }
+  .left-overlay .sheet {
+    transform: translateX(-100%);
+    width: clamp(768px, 40vw, 500px);
+    height: 100vh;
+    border-radius: 0;
+    max-height: none;
+  }
+  @media (max-width: 768px) {
+    .right-overlay .sheet, .left-overlay .sheet {
+      width: 80vw;
+    }
+  }
+</style>
 <svg class="goo" style="position:absolute; width:0; height:0;">
   <filter id="goo">
     <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
@@ -949,6 +1057,14 @@
     <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
   </filter>
 </svg>
+
+<div id="contextMenu" style="display: none;">
+  <div id="expandAll" class="menu-item">Expand All</div>
+  <div id="reset" class="menu-item">Collapse All</div>
+  <div id="savePdf" class="menu-item">Save as PDF</div>
+  <div id="copyLink" class="menu-item">Copy Link</div>
+</div>
+
 <body data-theme="dark">
   <div class="logo" id="logoToggle">
     <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg" alt="intoview">
@@ -967,6 +1083,11 @@
         <line x1="4" y1="6" x2="20" y2="6"/>
         <line x1="4" y1="12" x2="20" y2="12"/>
         <line x1="4" y1="18" x2="20" y2="18"/>
+      </svg>
+    </button>
+    <button class="toggle-btn" id="filterBtn" style="display: none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 4h18v2l-6 6v6l-6 4v-10l-6-6v-2z" />
       </svg>
     </button>
   </div>
@@ -1603,63 +1724,68 @@
       </svg>
     </button>
   </div>
-  <div class="overlay curved" id="overlay" aria-hidden="true">
+  <div class="overlay right-overlay" id="overlay" aria-hidden="true">
     <div class="sheet" tabindex="-1">
-      <div class="title-bar">
-        <h1>Zack Gort, Designer</h1>
-        <button class="close-button" id="closeOverlay">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
+      <button class="close-button" id="closeOverlay">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+
+      
       <div class="container">
-        <p>This resume was built by Zack Gort {Thinker & Maker}.</p>
-        <p>For inquiries or opportunities, reach out via:</p>
-        <p>
-          Email: <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a><br>
-          Portfolio: <a href="https://zackgort.com" target="_blank">zackgort.com</a><br>
-          LinkedIn: <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>
-        </p>
-        <p>Available for full-time roles in design-led, data-driven environments.</p>
-        <h2>Things I'm building:</h2>
-        <h3>Note App</h3>
-        <img class="preview-img" src="" alt="Preview of intoview.pro/note" />
-        <a href="https://intoview.pro/note" target="_blank">intoview:note</a>
-        <h3>Kanban App</h3>
-        <img class="preview-img" src="" alt="Preview of intoview.pro/kanban" />
-        <a href="https://intoview.pro/kanban" target="_blank">intoview:kanban</a>
-      </div>
+        <h1>Insight & Outlook</h1>
+        <p class="full-width-section">I made this resume. Not for me, but for you. Do enjoy!</p>
+        
+        <details class="full-width-section">
+            <summary>Contact & Projects</summary>
+            <div class="accordion-content">
+                <p><strong>Zachary Gort {Thinker & Maker}</strong></p>
+                <p>Available for full-time roles in design-led, data-driven environments.</p>
+                <ul>
+                    <li>Email: <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a></li>
+                    <li>Portfolio: <a href="https://zackgort.com" target="_blank">zackgort.com</a></li>
+                    <li>LinkedIn: <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a></li>
+                </ul><br>
+                <p><strong>Things I'm building:</strong></p>
+                <ul>
+                    <li><a href="https://intoview.pro/note" target="_blank">intoview:note</a> - A visual note-taking app.</li>
+                    <li><a href="https://intoview.pro/kanban" target="_blank">intoview:kanban</a> - A project management tool.</li>
+                </ul>
+            </div>
+        </details>
+        
+        <details class="full-width-section">
+            <summary>Insight, Innovation, and Impact</summary>
+            <div class="accordion-content">
+                <p>Frankly, no one has time to read your life story. Folks filter fast and effectively. So, this is built to show precisely enough to satisfy and suffice, while not being more than you need.</p>
+            </div>
+        </details>
+        
+        <details class="full-width-section">
+            <summary>I didn't build this for me. I built it for you.</summary>
+            <div class="accordion-content">
+                <p>I can show you my world, but I can't control how you see it.  Or, can I?</p>
+                <ul>
+                    <li><strong>Focused Narrative:</strong> Gone is the "wall of words". Instead, prefer high-impact language and succinct conveyance.</li>
+                    <li><strong>Information Density:</strong> The same soup different ways", basically</li>
+                    <li><strong>Digestible Data</strong> Simple, scannable cognitive anchors for humans eye; and bots.</li>
+                </ul>
+            </div>
+        </details>
+        
+    
+        <details class="full-width-section">
+            <summary>4. Think Pink #FF8DA1</summary>
+            <div class="accordion-content">
+                <p>Long story short, I was adopted and shipped to the US in a pink onezie (which is a boy's color in Korea). Anyway, it's become part of my personal brand, signifying my embrace of defying expectations from the get-go.</p>
+                
+            </div>
+        </details>
+    
+        <p class="summary full-width-section">© Zack Gort, 2025</p>
     </div>
-  </div>
-  <div class="overlay curved" id="thinkPinkOverlay" aria-hidden="true">
-    <div class="sheet" tabindex="-1">
-      <div class="title-bar">
-        <h1>Think Pink (#FF8DA1)</h1>
-        <button class="close-button" id="closeThinkPink">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
-      <div class="container">
-        <p>Pink is not a color I chose. I arrived in this country in a pink onesie, and it has carried meaning ever since. It marks a beginning and serves as an impetus for {my} particular point of view.</p>
-        <p>For most, pink reads as playful or trendy. For me, it is a call to challenge assumptions, push against conventions, and approach problems from unexpected angles. It reminds me that expectations are meant to be subverted.</p>
-        <p>I use pink not for razzle-dazzle, but as a beacon of intent in everything I do. It signals identity, clarity, and a refusal to follow defaults. Pink is not just a color. It is a mindset, a history, and a way to move fast while staying true to {myself}.</p>
-      </div>
-    </div>
-  </div>
-  <div class="footer-link">
-    <a href="#" id="thinkPinkLink">#FF8DA1</a>
-  </div>
-  <div id="contextMenu" role="menu">
-    <div class="menu-item" id="expandAll" role="menuitem">Expand All</div>
-    <div class="menu-item" id="reset" role="menuitem">Reset</div>
-    <div class="menu-item" id="savePdf" role="menuitem">Save as PDF</div>
-    <div class="menu-item" id="copyLink" role="menuitem">Copy Link to Clipboard</div>
-  </div>
 <script>
 const body = document.body;
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1980,21 +2106,45 @@ const overlay = document.getElementById('overlay');
 const closeOverlayBtn = document.getElementById('closeOverlay');
 let lastFocus = null;
 function openOverlay() {
-    lastFocus = document.activeElement;
-    overlay.classList.add('open');
-    const sheet = overlay.querySelector('.sheet');
-    sheet.setAttribute('tabindex', '-1');
-    sheet.focus();
-    document.addEventListener('keydown', onKeyDown);
-    overlay.setAttribute('aria-hidden', 'false');
-    fabButton.setAttribute('aria-expanded', 'true');
+  lastFocus = document.activeElement;
+  overlay.classList.add('open');
+  const sheet = overlay.querySelector('.sheet');
+  sheet.setAttribute('tabindex', '-1');
+  
+  // GSAP animation: Slide in from right
+  gsap.fromTo(sheet, 
+    { x: '100%', opacity: 0, scale: 0.95 },  
+    { x: '0%', opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }  
+  );
+  
+  sheet.focus();
+  document.addEventListener('keydown', onKeyDown);
+  overlay.setAttribute('aria-hidden', 'false');
+  fabButton.setAttribute('aria-expanded', 'true');
+  overlay.addEventListener('click', handleOutsideClick);
 }
 function closeOverlayFn() {
-    overlay.classList.remove('open');
-    document.removeEventListener('keydown', onKeyDown);
-    if (lastFocus) lastFocus.focus();
-    overlay.setAttribute('aria-hidden', 'true');
-    fabButton.setAttribute('aria-expanded', 'false');
+  const sheet = overlay.querySelector('.sheet');
+  
+  // GSAP animation: Slide out to right
+  gsap.to(sheet, {
+    x: '100%', opacity: 0, scale: 0.95, duration: 0.4, ease: 'power2.in',
+    onComplete: () => {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+      fabButton.setAttribute('aria-expanded', 'false');
+      if (lastFocus) lastFocus.focus();
+      overlay.removeEventListener('click', handleOutsideClick);
+    }
+  });
+  
+  document.removeEventListener('keydown', onKeyDown);
+}
+function handleOutsideClick(e) {
+  const sheet = overlay.querySelector('.sheet');
+  if (!sheet.contains(e.target)) {
+    closeOverlayFn();
+  }
 }
 const thinkPinkLink = document.getElementById('thinkPinkLink');
 const thinkPinkOverlay = document.getElementById('thinkPinkOverlay');
@@ -2004,15 +2154,39 @@ function openThinkPink() {
     thinkPinkOverlay.classList.add('open');
     const sheet = thinkPinkOverlay.querySelector('.sheet');
     sheet.setAttribute('tabindex', '-1');
+    
+    // GSAP animation: Slide in from left
+    gsap.fromTo(sheet, 
+      { x: '-100%', opacity: 0, scale: 0.95 },  
+      { x: '0%', opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }  
+    );
+    
     sheet.focus();
     document.addEventListener('keydown', onKeyDownThinkPink);
     thinkPinkOverlay.setAttribute('aria-hidden', 'false');
+    thinkPinkOverlay.addEventListener('click', handleOutsideClickThinkPink);
 }
 function closeThinkPinkFn() {
-    thinkPinkOverlay.classList.remove('open');
+    const sheet = thinkPinkOverlay.querySelector('.sheet');
+    
+    // GSAP animation: Slide out to left
+    gsap.to(sheet, {
+      x: '-100%', opacity: 0, scale: 0.95, duration: 0.4, ease: 'power2.in',
+      onComplete: () => {
+        thinkPinkOverlay.classList.remove('open');
+        thinkPinkOverlay.setAttribute('aria-hidden', 'true');
+        if (lastFocus) lastFocus.focus();
+        thinkPinkOverlay.removeEventListener('click', handleOutsideClickThinkPink);
+      }
+    });
+    
     document.removeEventListener('keydown', onKeyDownThinkPink);
-    if (lastFocus) lastFocus.focus();
-    thinkPinkOverlay.setAttribute('aria-hidden', 'true');
+}
+function handleOutsideClickThinkPink(e) {
+  const sheet = thinkPinkOverlay.querySelector('.sheet');
+  if (!sheet.contains(e.target)) {
+    closeThinkPinkFn();
+  }
 }
 function onKeyDownThinkPink(e) {
     if (e.key === 'Escape') closeThinkPinkFn();
@@ -2083,5 +2257,79 @@ document.getElementById('copyLink').addEventListener('click', () => {
     });
     contextMenu.style.display = 'none';
 });
+
+// New Filters Logic (kept but button hidden)
+  const filterBtn = document.getElementById('filterBtn');
+  const filterOverlay = document.getElementById('filterOverlay');
+  const closeFilter = document.getElementById('closeFilter');
+  const applyFilter = document.getElementById('applyFilter');
+  const filterList = document.getElementById('filterList');
+
+  function openFilter() {
+    // Collect unique tags from pills
+    const tags = new Set();
+    document.querySelectorAll('.pills .pill').forEach(pill => tags.add(pill.textContent.trim()));
+    filterList.innerHTML = '';
+    tags.forEach(tag => {
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" value="${tag}"> ${tag}`;
+      filterList.appendChild(label);
+    });
+
+    lastFocus = document.activeElement;
+    filterOverlay.classList.add('open');
+    const sheet = filterOverlay.querySelector('.filter-sheet');
+    sheet.setAttribute('tabindex', '-1');
+    gsap.fromTo(sheet, { x: '-100%', opacity: 0 }, { x: '0%', opacity: 1, duration: 0.6, ease: 'power3.out' });
+    sheet.focus();
+    document.addEventListener('keydown', onKeyDownFilter);
+    filterOverlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeFilterFn() {
+    const sheet = filterOverlay.querySelector('.filter-sheet');
+    gsap.to(sheet, {
+      x: '-100%', opacity: 0, duration: 0.4, ease: 'power2.in',
+      onComplete: () => {
+        filterOverlay.classList.remove('open');
+        filterOverlay.setAttribute('aria-hidden', 'true');
+        if (lastFocus) lastFocus.focus();
+      }
+    });
+    document.removeEventListener('keydown', onKeyDownFilter);
+  }
+
+  function onKeyDownFilter(e) {
+    if (e.key === 'Escape') closeFilterFn();
+    if (e.key === 'Tab') {
+        const focusable = filterOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+       
+        // Trap focus inside the sheet
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    }
+  }
+
+  function applyFilters() {
+    const checked = Array.from(filterList.querySelectorAll('input:checked')).map(input => input.value);
+    const items = document.querySelectorAll('.project-item.experience, .grid-item.experience');
+    items.forEach(item => {
+      const itemTags = Array.from(item.querySelectorAll('.pill')).map(pill => pill.textContent.trim());
+      const matches = checked.length === 0 || checked.some(tag => itemTags.includes(tag));
+      item.style.display = matches ? '' : 'none';
+    });
+    closeFilterFn();
+  }
+
+  if (filterBtn) filterBtn.addEventListener('click', openFilter);
+  if (closeFilter) closeFilter.addEventListener('click', closeFilterFn);
+  if (applyFilter) applyFilter.addEventListener('click', applyFilters);
 </script>
 </html>

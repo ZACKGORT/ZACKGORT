@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
 <title>Zachary Gort — Senior UX Designer</title>
 <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
 <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <style>
   :root {
@@ -36,63 +37,281 @@
   --fab-bottom: calc(env(safe-area-inset-bottom) + clamp(16px, 3vh, 32px));
   --base-font-size: 14px;
   --subtle-outline: rgba(255, 255, 255, 0.08);
+  --font-stack: Inter, ui-sans-serif, system-ui;
   }
+
   [data-theme="light"] {
   --bg-color: #f8f8f8;
   --ink: #0f1014;
   --ink-2: #444444;
   --ink-3: #777777;
-  --accent: #2aa64d;
+  --accent: #EA426F;
   --glass-bg: rgba(255, 255, 255, 0.9);
   --glass-bg-hover: rgba(255, 255, 255, 1);
   --glass-bg-bright: rgba(255, 255, 255, 1);
   --glass-border: rgba(0, 0, 0, 0.15);
   --vig-opacity: 0.5;
   --subtle-outline: rgba(0, 0, 0, 0.05);
+  color-scheme: light;
   }
-  /* NEW: ROSE / POP ART THEME */
+
+  /* NEW ROSE THEME (BAUHAUS/GLASS STYLE) */
   [data-theme="rose"] {
   --bg-color: #FF8DA1; /* The Wall of Pink */
   --ink: #000000; /* Stark Black Ink */
   --ink-2: #222222; /* Dark Grey */
   --ink-3: #444444;
   --accent: #000000; /* Accents are black */
- 
-  /* Pop Art Overrides - "Glass" becomes "Card" */
-  --glass-bg: transparent;
-  --glass-bg-hover: #ffffff; /* Solid White on hover */
-  --glass-bg-bright: #ffffff;
-  --glass-border: #000000; /* Solid Black Border */
- 
-  --vig-opacity: 0.1; /* Low opacity for halftone texture */
-  --subtle-outline: rgba(0, 0, 0, 0.0); /* Hidden until hover */
+  /* Glass settings tuned for Pink background */
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --glass-bg-hover: rgba(255, 255, 255, 0.5);
+  --glass-bg-bright: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --vig-opacity: 0.2; /* Soft vignette */
+  --subtle-outline: rgba(0, 0, 0, 0.05);
+  color-scheme: light;
   }
-  /* Rose Theme Halftone Pattern Overlay (Replaces Vignette) */
-  [data-theme="rose"] .vignette {
-    background-image: radial-gradient(#000 1px, transparent 1px);
-    background-size: 16px 16px; /* Comic dot size */
-    background-color: transparent;
-    mask: none;
-    opacity: 0.08; /* Subtle texture */
+
+  /* BAUHAUS / BRUTALIST THEME */
+  [data-theme="bauhaus"] {
+    --bg-color: #f4f4f4;
+    --ink: #111111;
+    --ink-2: #333333;
+    --ink-3: #555555;
+    --accent: #EA426F;
+    --glass-bg: transparent;
+    --glass-bg-hover: #ffffff;
+    --glass-bg-bright: #ffffff;
+    --glass-border: #111111;
+    --vig-opacity: 0;
+    --subtle-outline: #111111;
+    --font-stack: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color-scheme: light;
   }
- 
-  [data-theme="rose"] .edge-blur {
-    display: none; /* Crisp edges for Pop Art */
+
+  /* --- TYPOGRAPHIC / OVERSIZED THEME --- */
+  [data-theme="typographic"] {
+      --bg-color: #f8f8f8;
+      --ink: #0f1014;
+      --ink-2: #444444;
+      --ink-3: #777777;
+      --accent: #EA426F; 
+      --glass-bg: transparent;
+      --glass-bg-hover: #ffffff;
+      --glass-border: transparent;
+      --vig-opacity: 0;
+      --subtle-outline: #000;
+      --font-stack: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color-scheme: light;
   }
-  /* UPDATED: No CSS Filters needed for logos anymore */
+
+  /* --- TYPOGRAPHIC: LIST VIEW OVERRIDES --- */
+  [data-theme="typographic"] .portfolio-container {
+      max-width: 98%; 
+      padding-left: 5%; 
+      padding-right: 1%;
+  }
+  [data-theme="typographic"] .project-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 4vw 0;
+      border-bottom: 6px solid var(--ink);
+      border-radius: 0;
+  }
+  [data-theme="typographic"] .project-item:hover {
+      background: transparent;
+      opacity: 0.7;
+  }
+  [data-theme="typographic"] .project-item.hero .project-data.artist {
+      font-size: clamp(5rem, 18vw, 22rem);
+      line-height: 0.8;
+      letter-spacing: -0.06em;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-left: -0.05em;
+  }
+  [data-theme="typographic"] .project-item.hero .project-data.album {
+      font-size: clamp(1.5rem, 4vw, 4rem);
+      font-weight: 400;
+      margin-top: 1rem;
+  }
+  [data-theme="typographic"] .project-item.experience .project-data.artist {
+      font-size: clamp(3rem, 9vw, 10rem);
+      line-height: 0.9;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--ink);
+  }
+  [data-theme="typographic"] .project-item.experience .project-data.role {
+      font-size: clamp(1.2rem, 3vw, 2.5rem);
+      font-weight: 700;
+      color: var(--accent); 
+      margin-top: 0.5rem;
+  }
+  [data-theme="typographic"] .project-item.experience .project-data.year {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-family: 'JetBrains Mono', monospace;
+      text-align: left;
+      margin-bottom: 1rem;
+  }
+  [data-theme="typographic"] .project-item.section {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-top: 6rem;
+  }
+  [data-theme="typographic"] .project-item.section .project-data.artist {
+      font-size: clamp(2rem, 5vw, 4rem);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 600;
+      border-bottom: 2px solid var(--ink);
+      display: inline-block;
+  }
+
+  /* --- TYPOGRAPHIC: GRID VIEW OVERRIDES --- */
+  [data-theme="typographic"] .grid-container {
+      max-width: 98%;
+      padding: 4rem 1% 4rem 5%;
+  }
+  [data-theme="typographic"] .grid-section-title {
+      font-size: clamp(4rem, 12vw, 14rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.05em;
+      line-height: 0.8;
+      color: var(--ink);
+      border-bottom: 8px solid var(--ink);
+      margin-bottom: 3rem;
+      padding-bottom: 1rem;
+      padding-left: 0;
+      opacity: 1;
+      width: 100%;
+  }
+  [data-theme="typographic"] .grid-items {
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+  }
+  @media (max-width: 768px) {
+      [data-theme="typographic"] .grid-container {
+          overflow-x: hidden;
+      }
+      [data-theme="typographic"] .grid-items {
+          grid-template-columns: 1fr;
+      }
+      [data-theme="typographic"] .grid-section-title {
+          font-size: 18vw;
+          border-bottom: 4px solid var(--ink);
+          white-space: nowrap;
+      }
+  }
+  [data-theme="typographic"] .grid-item {
+      background: transparent;
+      border: 4px solid var(--ink);
+      border-radius: 0;
+      padding: 2.5rem;
+      box-shadow: none;
+      transition: transform 0.1s steps(1), box-shadow 0.1s steps(1), background 0.1s steps(1);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+  }
+  [data-theme="typographic"] .grid-item:hover {
+      transform: translate(-6px, -6px);
+      box-shadow: 10px 10px 0px var(--ink);
+      background: #fff;
+      border-color: var(--ink);
+      z-index: 10;
+  }
+  [data-theme="typographic"] .grid-item h4 {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      line-height: 0.9;
+      margin-bottom: 0.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+  }
+  [data-theme="typographic"] .grid-item .role {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      opacity: 1;
+  }
+  [data-theme="typographic"] .grid-item .duration {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      opacity: 1;
+      text-align: left;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      width: 100%;
+  }
+  [data-theme="typographic"] .grid-item p {
+      font-size: 1.15rem;
+      line-height: 1.5;
+      font-weight: 500;
+      opacity: 1;
+  }
+  [data-theme="typographic"] .pill {
+      background: var(--ink);
+      color: var(--bg-color);
+      font-weight: 700;
+      border: none;
+      border-radius: 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+  }
+  [data-theme="typographic"] .grid-item details {
+      margin-top: auto;
+      border-left: 4px solid var(--accent);
+      padding-left: 1rem;
+  }
+  [data-theme="typographic"] .grid-item summary {
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-transform: uppercase;
+  }
+  [data-theme="typographic"] .edge-blur,
+  [data-theme="typographic"] .vignette,
+  [data-theme="typographic"] #cursor,
+  [data-theme="typographic"] .curved {
+      display: none;
+      transform: none !important;
+  }
+
+  /* Bauhaus Specific Overrides */
+  [data-theme="bauhaus"] .curved { transform: none !important; }
+  [data-theme="bauhaus"] .edge-blur, [data-theme="bauhaus"] .vignette, [data-theme="bauhaus"] body::after { display: none; }
+  [data-theme="bauhaus"] .project-item, [data-theme="bauhaus"] .grid-item, [data-theme="bauhaus"] details, [data-theme="bauhaus"] .sheet, [data-theme="bauhaus"] .fab, [data-theme="bauhaus"] .pill, [data-theme="bauhaus"] .view-toggle, [data-theme="bauhaus"] .theme-toggle { border-radius: 0 !important; }
+  [data-theme="bauhaus"] .project-item:hover, [data-theme="bauhaus"] .grid-item:hover, [data-theme="bauhaus"] details[open], [data-theme="bauhaus"] details:hover { background: #fff; border: 3px solid var(--ink); box-shadow: 6px 6px 0px var(--ink); transform: translate(-3px, -3px); }
+  [data-theme="bauhaus"] .project-item { border-bottom: 2px solid var(--ink); margin-bottom: 0; }
+  [data-theme="bauhaus"] .grid-item { border: 2px solid var(--ink); background: #fff; }
+  [data-theme="bauhaus"] h1, [data-theme="bauhaus"] h4, [data-theme="bauhaus"] .artist { text-transform: uppercase; letter-spacing: -0.02em; font-weight: 800; }
+  [data-theme="bauhaus"] .pill { background: var(--ink); color: var(--bg-color); font-weight: 700; border: none; }
+  [data-theme="bauhaus"] summary::after { content: "+"; font-weight: 900; font-size: 1.5rem; }
+  [data-theme="bauhaus"] details[open] summary::after { content: "-"; }
+
+  /* Logo adjustment */
   .logo img {
     height: 32px;
     width: auto;
     display: block;
-    /* Transition for smoother swap if cached */
     transition: opacity 0.2s ease;
   }
+
   *, *::before, *::after { box-sizing: border-box; }
   html { color-scheme: dark; font-size: var(--base-font-size); }
   body, html, #root { height: 100%; margin: 0; background: var(--bg-color); }
   body {
   color: var(--ink);
-  font: 1rem/1.4 Inter, ui-sans-serif, system-ui;
+  font-family: var(--font-stack);
+  line-height: 1.4;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   touch-action: pan-y;
@@ -116,7 +335,7 @@
   background: radial-gradient(120% 90% at 50% 50%, #fff0 25%, rgb(0 0 0 / 0.62) 80%, rgb(0 0 0 / 0.98) 100%);
   opacity: var(--vig-opacity);
   }
-  [data-theme="light"] .vignette {
+  [data-theme="light"] .vignette, [data-theme="rose"] .vignette {
   background: radial-gradient(120% 90% at 50% 50%, #fff0 25%, rgb(255 255 255 / 0.62) 80%, rgb(255 255 255 / 0.98) 100%);
   }
   body::after {
@@ -125,11 +344,9 @@
   background-size: 120px 120px;
   }
   .curved {
-  /* 3D Perspective Logic */
   transform-style: preserve-3d;
-  /* Initial state, updated via JS */
   transform: perspective(2000px) rotateX(0deg) rotateY(0deg);
-  will-change: transform; /* Perf optimization */
+  will-change: transform;
   }
  
   /* MINIMALIST UI OVERRIDES */
@@ -137,9 +354,8 @@
     border: 1px solid transparent;
     background: transparent;
     box-shadow: none;
-    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Snappier transition for Pop Art feel */
+    transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
-  /* View toggle */
   .view-toggle {
   position: fixed;
   top: 50%;
@@ -151,16 +367,9 @@
   gap: 8px;
   padding: 6px;
   }
-  /* Show UI on hover */
   .view-toggle:hover {
     background: var(--glass-bg);
     border-color: var(--glass-border);
-  }
-  /* POP ART HOVER OVERRIDE */
-  [data-theme="rose"] .view-toggle:hover {
-    background: #fff;
-    border: 2px solid #000;
-    box-shadow: 4px 4px 0px #000;
   }
   .toggle-btn {
   appearance: none;
@@ -190,28 +399,24 @@
   .listview-root {
   position: fixed; inset: 0; overflow-y: auto; background: transparent;
   backdrop-filter: none; -webkit-backdrop-filter: none; z-index: 20;
-  /* Restore native momentum scrolling on touch */
   -webkit-overflow-scrolling: touch;
   }
-  [data-theme="light"] .listview-root {
+  [data-theme="light"] .listview-root, [data-theme="rose"] .listview-root {
   background: transparent;
   }
   .portfolio-container {
   position: relative; display: flex; flex-direction: column; gap: 0;
   width: 100%; margin: 0 auto;
-  /* UPDATED: Increased padding and added Max-Width for breathing room */
   padding: 5rem 2rem 6rem 100px;
-  max-width: 1280px; /* Constrain width so it doesn't hit viewport edges on large screens */
+  max-width: 1280px;
   min-height: 100vh;
   pointer-events: auto; justify-content: flex-start;
-  /* Ensure 3D context for container */
   transform-style: preserve-3d;
   }
-  /* UPDATED: Apply the new, safer padding on mobile as well. */
   @media (max-width: 768px) {
   .portfolio-container {
   padding: 2rem 1rem 4rem 80px;
-  max-width: 100%; /* Full width on mobile */
+  max-width: 100%;
   }
   }
   .project-list { list-style: none; margin: 0; padding: 0; width: 100%; }
@@ -220,32 +425,18 @@
   cursor: default;
   width: 100%;
   display: grid;
-  /* UPDATED: Tighter columns but with more Gap */
   grid-template-columns: 180px 1.4fr 110px 3fr;
-  gap: 2rem; /* Increased Gap for breathing room */
-  padding: 18px 12px; /* Increased vertical padding for air */
-  align-items: baseline; /* Align text by baseline */
- 
-  /* Minimalist: No border by default */
+  gap: 2rem;
+  padding: 18px 12px;
+  align-items: baseline;
   border-bottom: 1px solid transparent;
-  border-radius: 6px; /* Soften edges on hover */
- 
+  border-radius: 6px;
   transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   position: relative;
   z-index: 2;
   }
-  /* LIST HOVER: Show UI */
   .project-item:hover {
     background: var(--glass-bg-hover);
-  }
-  /* POP ART LIST HOVER */
-  [data-theme="rose"] .project-item:hover {
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 0px; /* Sharp corners for retro feel */
-    box-shadow: 6px 6px 0px #000; /* Hard Shadow */
-    transform: translate(-2px, -2px) translateZ(10px); /* Pop Up in 3D */
-    z-index: 10;
   }
   /* MOBILE LAYOUT ADJUSTMENTS */
   @media (max-width: 768px) {
@@ -254,19 +445,21 @@
       grid-template-columns: none !important;
       flex-direction: column;
       gap: 8px;
-      padding: 16px 0; /* Revert padding for mobile */
-      border-bottom: 1px solid var(--glass-border); /* Keep structural lines on mobile */
+      padding: 16px 0;
+      border-bottom: 1px solid var(--glass-border);
     }
-    [data-theme="rose"] .project-item {
-        border-bottom: 1px solid rgba(0,0,0,0.1); /* Subtle line for Rose mobile */
-    }
-    .project-item:hover, [data-theme="rose"] .project-item:hover {
+    .project-item:hover, [data-theme="typographic"] .project-item:hover {
         background: transparent;
         box-shadow: none;
         transform: none;
         border: none;
         border-bottom: 1px solid var(--glass-border);
     }
+    /* Reapply typographic border on mobile */
+    [data-theme="typographic"] .project-item, [data-theme="typographic"] .project-item:hover {
+        border-bottom: 6px solid var(--ink) !important;
+    }
+    
     .project-item.experience .project-data.artist {
       font-size: 1.25rem;
       margin-bottom: 2px;
@@ -295,37 +488,44 @@
   }
   .project-data {
   white-space: normal;
-  line-height: 1.4; /* Tighter line height */
-  padding: 0; /* Removed padding */
+  line-height: 1.4;
+  padding: 0;
   color: var(--ink);
   }
   .project-data.artist {
   font-weight: 700;
-  font-size: 1.15rem; /* Adjusted size */
+  font-size: 1.15rem;
   }
   .project-data.album {
   opacity: 0.95;
-  /* UPDATED: Constrain text width for readability on large screens */
   max-width: 680px;
   }
-  /* Hero Overrides */
+  
+  /* Hero Overrides - UPDATED TYPOGRAPHY */
   .project-item.hero {
       display: flex; flex-direction: column; gap: 0.5rem; border-bottom: none; padding-bottom: 2rem;
   }
-  .project-item.hero:hover, [data-theme="rose"] .project-item.hero:hover {
+  .project-item.hero:hover {
       background: transparent; box-shadow: none; transform: none; border: none;
   }
-  .project-item.hero .project-data.artist { font-size: 3rem; font-weight: 700; letter-spacing: -0.04em; }
-  .project-item.hero .project-data.album { font-size: 1.4rem; opacity: 0.95; }
+  .project-item.hero .project-data.artist { 
+      font-size: 3.5rem; /* Increased from 3rem */
+      font-weight: 700; 
+      letter-spacing: -0.04em; 
+  }
+  .project-item.hero .project-data.album { 
+      font-size: 1.5rem; /* Increased from 1.4rem */
+      opacity: 0.95; 
+  }
  
   @media (max-width: 768px) {
-  .project-item.hero .project-data.artist { font-size: 2rem; }
-  .project-item.hero .project-data.album { font-size: 1.2rem; }
+    .project-item.hero .project-data.artist { font-size: 2.25rem; /* Increased from 2rem */ }
+    .project-item.hero .project-data.album { font-size: 1.25rem; line-height: 1.5; }
   }
  
   /* Section Headers */
   .project-item.section { display: block; padding-top: 2rem; }
-  .project-item.section:hover, [data-theme="rose"] .project-item.section:hover {
+  .project-item.section:hover {
       background: transparent; box-shadow: none; transform: none; border: none;
   }
   .project-item.section .project-data.artist { font-size: 1.6rem; opacity: 0.8; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -339,11 +539,11 @@
   .project-item.experience .project-data.artist { color: var(--accent); }
   .project-item.experience .project-data.role { font-style: italic; opacity: 0.9; }
  
-  /* UPDATED: Year Style */
+  /* Year Style */
   .project-item.experience .project-data.year {
     text-align: right;
     opacity: 0.7;
-    font-family: 'JetBrains Mono', monospace; /* Monospace for strict alignment */
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
@@ -372,7 +572,7 @@
   z-index: 20;
   -webkit-overflow-scrolling: touch;
   }
-  [data-theme="light"] .gridview-root {
+  [data-theme="light"] .gridview-root, [data-theme="rose"] .gridview-root {
   background: transparent;
   }
   .grid-container {
@@ -382,7 +582,6 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  /* 3D context for grid container */
   transform-style: preserve-3d;
   }
   @media (max-width: 768px) {
@@ -391,7 +590,6 @@
   }
   }
   .grid-section {
-  /* Minimalist: Transparent container */
   background: transparent;
   border: 1px solid transparent;
   padding: 1.5rem;
@@ -403,7 +601,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 1rem;
-  padding-left: 1rem; /* Align with item text */
+  padding-left: 1rem;
   }
   .grid-items {
   display: grid;
@@ -411,7 +609,6 @@
   gap: 1rem;
   }
   .grid-item {
-  /* Minimalist: Ghost card */
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -422,19 +619,10 @@
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-shadow: none;
   }
-  /* GRID HOVER: The card materializes */
   .grid-item:hover {
       background: var(--glass-bg-hover);
       border-color: var(--glass-border);
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  /* POP ART GRID HOVER */
-  [data-theme="rose"] .grid-item:hover {
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 0px;
-    box-shadow: 6px 6px 0px #000;
-    transform: translate(-2px, -2px) translateZ(10px);
   }
   .grid-item.skill {
   border-radius: 999px;
@@ -490,10 +678,6 @@
   font-size: 0.9rem;
   color: var(--ink);
   }
-  [data-theme="rose"] .pill {
-      background: rgba(255,255,255,0.5); /* Slight white bg for pills in Rose mode */
-      border-color: #000;
-  }
   .pills {
   display: flex;
   flex-wrap: wrap;
@@ -502,7 +686,7 @@
   /* Common */
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  #cursor { position: fixed; inset: 0; pointer-events: none; mix-blend-mode: difference; filter: url(#goo); z-index: var(--z-cursor); will-change: transform; /* Ensure persistence */ }
+  #cursor { position: fixed; inset: 0; pointer-events: none; mix-blend-mode: difference; filter: url(#goo); z-index: var(--z-cursor); will-change: transform; }
   .cursor-circle {
   position: absolute;
   width: var(--cursor-size); height: var(--cursor-size);
@@ -517,7 +701,7 @@
   right: 1rem;
   z-index: var(--z-ui);
   background: transparent;
-  border: 1px solid transparent; /* Ghost default */
+  border: 1px solid transparent;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -532,11 +716,6 @@
   .theme-toggle:hover {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border);
-  }
-  [data-theme="rose"] .theme-toggle:hover {
-    background: #fff;
-    border: 2px solid #000;
-    box-shadow: 4px 4px 0px #000;
   }
   .theme-toggle svg {
   width: 20px;
@@ -566,18 +745,14 @@
   width: var(--fab-size);
   height: var(--fab-size);
   border-radius: 999px;
-  
-  /* Visibility improvements */
   background: rgba(255,255,255,0.12);
   border: 1px solid rgba(255,255,255,0.25);
   backdrop-filter: blur(6px);
-  
   color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-
   box-shadow: none;
   transition: all 0.2s ease;
   pointer-events: auto;
@@ -587,12 +762,6 @@
   background: var(--glass-bg-hover);
   border-color: var(--glass-border);
   transform: scale(1.02);
-  }
-  [data-theme="rose"] .fab:hover {
-    background: #fff;
-    border: 2px solid #000;
-    box-shadow: 6px 6px 0px #000;
-    transform: translate(-2px, -2px);
   }
   .fab:active {
   transform: scale(0.98);
@@ -608,20 +777,20 @@
   inset: 0;
   z-index: var(--z-overlay);
   display: none;
-  pointer-events: none; /* Changed to none initially for better perf */
-  background: rgba(0, 0, 0, 0.6); /* More transparent scrim */
-  backdrop-filter: blur(4px) saturate(0%); /* Enhanced glassmorphism with saturation for subtle distortion */
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px) saturate(0%);
   -webkit-backdrop-filter: blur(4px) saturate(0%);
   align-items: center;
   justify-content: center;
   padding: clamp(16px, 3vw, 32px);
-  transition: background 0.3s ease; /* Smooth bg transition */
+  transition: background 0.3s ease;
   }
   .overlay.open {
   display: flex;
   pointer-events: auto;
   }
-  [data-theme="light"] .overlay {
+  [data-theme="light"] .overlay, [data-theme="rose"] .overlay {
   background: rgba(255, 255, 255, 0.3);
   }
   .sheet {
@@ -634,18 +803,71 @@
   max-height: min(92vh, 92dvh);
   position: relative;
   overflow-y: auto;
-  backdrop-filter: blur(12px) saturate(110%); /* Glassmorphism on sheet with distortion */
+  backdrop-filter: blur(12px) saturate(110%);
   -webkit-backdrop-filter: blur(12px) saturate(110%);
-  transform: translateY(100%); /* Initial state for slide-in animation */
+  transform: translateY(100%);
   opacity: 0;
-  will-change: transform, opacity; /* Perf hint for GSAP */
+  will-change: transform, opacity;
+  }
+
+  /* --- OVERLAY & SHEET NUANCES --- */
+
+  /* ROSE: Soft, ethereal, pink-tinted glass */
+  [data-theme="rose"] .overlay {
+    background: rgba(255, 255, 255, 0.2); /* Lighter overlay */
+    backdrop-filter: blur(8px); /* Stronger blur */
   }
   [data-theme="rose"] .sheet {
-      background: #fff;
-      border: 2px solid #000;
-      box-shadow: 12px 12px 0px #000;
-      backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.65); /* More opaque glass */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(255, 141, 161, 0.3); /* Pink tinted shadow */
+    backdrop-filter: blur(16px) saturate(140%);
   }
+
+  /* BAUHAUS: Brutalist, sharp, high contrast, no blur */
+  [data-theme="bauhaus"] .overlay {
+    background: rgba(255, 255, 255, 0.85); /* High opacity white */
+    backdrop-filter: none; /* No blur */
+    /* Optional: Dot pattern for overlay? */
+    background-image: radial-gradient(var(--ink-3) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  [data-theme="bauhaus"] .sheet {
+    background: #ffffff !important;
+    border: 3px solid var(--ink) !important;
+    border-radius: 0 !important;
+    box-shadow: 12px 12px 0px var(--ink) !important; /* Hard shadow */
+    backdrop-filter: none !important;
+  }
+  [data-theme="bauhaus"] .close-button {
+    border-radius: 0 !important;
+    border: 2px solid var(--ink) !important;
+    background: #fff !important;
+  }
+  [data-theme="bauhaus"] .close-button:hover {
+    background: var(--ink) !important;
+    color: #fff !important;
+  }
+
+  /* TYPOGRAPHIC: Paper-like, heavy borders, clean */
+  [data-theme="typographic"] .overlay {
+    background: rgba(245, 245, 245, 0.95); /* Almost solid paper */
+    backdrop-filter: none;
+  }
+  [data-theme="typographic"] .sheet {
+    background: #ffffff !important;
+    border: 6px solid var(--ink) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 4rem !important; /* More breathing room */
+    max-width: 900px; /* Readability width */
+  }
+  [data-theme="typographic"] .close-button {
+    border: none !important;
+    background: transparent !important;
+    transform: scale(1.5);
+  }
+
   .close-button {
   position: absolute;
   top: clamp(16px, 3vw, 24px);
@@ -690,7 +912,7 @@
     position: sticky;
     left: 0;
     right: 0;
-    height: 40px; /* Blur height at top/bottom */
+    height: 40px;
     z-index: 99;
     pointer-events: none;
   }
@@ -803,37 +1025,25 @@
   /* Accordion */
   details {
   width: 100%;
-  /* Minimalist: Transparent default */
   background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
-  margin-bottom: 0.25rem; /* Tightened margin */
+  margin-bottom: 0.25rem;
   transition: all 0.3s ease;
   box-shadow: none;
   }
  
-  /* Show visible UI on open or hover */
   details[open], details:hover {
   background: var(--glass-bg-hover);
   border-color: var(--glass-border);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
- 
-  /* POP ART ACCORDION */
-  [data-theme="rose"] details[open],
-  [data-theme="rose"] details:hover {
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 0px;
-    box-shadow: 4px 4px 0px #000;
-  }
-  /* Brighten hover effect for open accordions in Dark Mode */
   [data-theme="dark"] details[open]:hover {
     background: var(--glass-bg-bright);
     border-color: rgba(255,255,255,0.2);
   }
   summary {
-  padding: 0.5rem 0.75rem; /* Tightened padding */
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
@@ -850,7 +1060,7 @@
   content: '-';
   }
   .accordion-content {
-  padding: 0 0.75rem 0.75rem; /* Tightened padding */
+  padding: 0 0.75rem 0.75rem;
   color: var(--ink-2);
   line-height: 1.5;
   font-size: 0.95rem;
@@ -878,7 +1088,6 @@
   margin: 1rem auto;
   }
   .project-item.experience .project-data.album {
-  /* No special grid placement needed anymore with new column layout */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -904,43 +1113,40 @@
   position: absolute;
   right: 0;
   }
-  [data-theme="light"] .project-data.album {
+  [data-theme="light"] .project-data.album, [data-theme="rose"] .project-data.album {
   opacity: 1;
   }
-  [data-theme="light"] .project-item.hero .project-data.album {
+  [data-theme="light"] .project-item.hero .project-data.album, [data-theme="rose"] .project-item.hero .project-data.album {
   opacity: 1;
   }
-  [data-theme="light"] .project-item.section .project-data.artist {
+  [data-theme="light"] .project-item.section .project-data.artist, [data-theme="rose"] .project-item.section .project-data.artist {
   opacity: 1;
   }
-  [data-theme="light"] .project-item.summary .project-data.album {
+  [data-theme="light"] .project-item.summary .project-data.album, [data-theme="rose"] .project-item.summary .project-data.album {
   opacity: 1;
   }
-  [data-theme="light"] .project-item.experience .project-data.role {
+  [data-theme="light"] .project-item.experience .project-data.role, [data-theme="rose"] .project-item.experience .project-data.role {
   opacity: 1;
   }
-  [data-theme="light"] .project-item.experience .project-data.year {
+  [data-theme="light"] .project-item.experience .project-data.year, [data-theme="rose"] .project-item.experience .project-data.year {
   opacity: 1;
   }
-  [data-theme="light"] .quote .project-data.album {
+  [data-theme="light"] .quote .project-data.album, [data-theme="rose"] .quote .project-data.album {
   opacity: 1;
   }
-  [data-theme="light"] .grid-section-title {
+  [data-theme="light"] .grid-section-title, [data-theme="rose"] .grid-section-title {
   opacity: 1;
   }
-  [data-theme="light"] .grid-item .role {
+  [data-theme="light"] .grid-item .role, [data-theme="rose"] .grid-item .role {
   opacity: 1;
   }
-  [data-theme="light"] .grid-item .duration {
+  [data-theme="light"] .grid-item .duration, [data-theme="rose"] .grid-item .duration {
   opacity: 1;
   }
-  [data-theme="light"] .grid-item p {
+  [data-theme="light"] .grid-item p, [data-theme="rose"] .grid-item p {
   opacity: 1;
   }
   [data-theme="light"] .edge-blur {
-    display: none;
-  }
-  [data-theme="light"] .vignette {
     display: none;
   }
   .summary {
@@ -967,17 +1173,17 @@
   }
 
   .full-width-section {
-  width: 100%; /* Full-width spans */
-  padding: 1rem 0; /* Ample whitespace */
-  margin-bottom: 1.5rem; /* Spacing between sections */
-  border-bottom: 1px solid var(--subtle-outline); /* Subtle dividers for modern dashboard feel */
+  width: 100%;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--subtle-outline);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .sheet {
     width: 100vw;
-    height: 100vh; /* Fullscreen on mobile */
+    height: 100vh;
     border-radius: 0;
     padding: 1rem;
   }
@@ -989,14 +1195,14 @@
 
   /* New Filters Panel Styles */
   .filter-overlay {
-    justify-content: flex-start; /* Align to left for sidebar */
-    background: rgba(0, 0, 0, 0.5); /* Lighter overlay for side panel */
+    justify-content: flex-start;
+    background: rgba(0, 0, 0, 0.5);
   }
   .filter-sheet {
-    width: clamp(250px, 30vw, 400px); /* Fixed width for sidebar */
+    width: clamp(250px, 30vw, 400px);
     height: 100vh;
     border-radius: 0;
-    transform: translateX(-100%); /* Initial off-screen left */
+    transform: translateX(-100%);
     opacity: 0;
   }
   #filterList {
@@ -1029,7 +1235,7 @@
   }
   .right-overlay .sheet {
     transform: translateX(100%);
-    width: clamp(768px, 40vw, 500px); /* Sidebar width */
+    width: clamp(768px, 40vw, 500px);
     height: 100vh;
     border-radius: 0;
     max-height: none;
@@ -1187,7 +1393,7 @@
           <div class="project-data role">Senior User Experience Designer</div>
           <div class="project-data year">04/2021-08/2021</div>
           <div class="project-data album">
-            <p class="summary">Owned UX from discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
+            <p class="summary">Owned discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
             <details>
               <summary>Mobile-First Commerce Frameworks</summary>
               <div class="accordion-content">
@@ -1752,6 +1958,7 @@
                 <ul>
                     <li><a href="https://intoview.pro/note" target="_blank">intoview:note</a> - A visual note-taking app.</li>
                     <li><a href="https://intoview.pro/kanban" target="_blank">intoview:kanban</a> - A project management tool.</li>
+                    <li><a href="https://emdash.click" target="_blank">em—dash.click</a> - A much-needed linguistic utility.</li>
                 </ul>
             </div>
         </details>
@@ -1796,20 +2003,17 @@ const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const logoToggle = document.getElementById('logoToggle');
 // Themes array
-const themes = ['dark', 'light', 'rose'];
+const themes = ['dark', 'light', 'rose', 'bauhaus', 'typographic'];
 // Update Logo Function
 function updateLogo(theme) {
   const logoImg = document.querySelector('.logo img');
  
-  // Implementing conventional high-contrast logic (undoing any confusion about a "swap")
-  if (theme === 'rose') {
-    // Rose theme (bright background) uses the Rose logo
-    logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-rose.svg.svg';
-  } else if (theme === 'light') {
-    // Light theme (light background) uses the DARK logo (dark text) for contrast.
+  // Rose theme now uses the DARK logo because the background is a bright pink.
+  // This matches Light and Bauhaus themes.
+  if (theme === 'light' || theme === 'bauhaus' || theme === 'typographic' || theme === 'rose') {
     logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
   } else {
-    // Default 'dark' theme (dark background) uses the LIGHT logo (light text) for contrast.
+    // Default 'dark' theme uses the LIGHT logo.
     logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
   }
 }
@@ -1824,6 +2028,12 @@ function updateThemeIcon(theme) {
   } else if (theme === 'rose') {
     // Sparkle/Star icon
     themeIcon.innerHTML = '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>';
+  } else if (theme === 'bauhaus') {
+    // Bauhaus Square/Grid icon
+    themeIcon.innerHTML = '<rect x="3" y="3" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"/>';
+  } else if (theme === 'typographic') {
+    // Type/Text icon
+    themeIcon.innerHTML = '<path d="M4 7V4h16v3M9 20h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
   } else {
     // Moon icon (default dark)
     themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';

@@ -16,7 +16,7 @@
       content="Design systems, data refactors, and ecommerce that moves the needle."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://i.ibb.co/cSQCgNQY/work1.webp" />
+    <meta property="og:image" content="https://i.ibb.co/cSQCgNQ/work1.webp" />
     <meta name="theme-color" content="#0e0d0e" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     
@@ -662,6 +662,22 @@
   text-decoration-thickness: .1em;
 }
 
+      /* Added: Edge blur and vignette from cv.html dark theme */
+      .edge-blur {
+        position: fixed; inset: 0; pointer-events: none; z-index: var(--z-blur);
+        backdrop-filter: blur(var(--blur-max)); -webkit-backdrop-filter: blur(var(--blur-max));
+        mask: radial-gradient(100% 64% at 50% 50%, transparent 60%, rgb(255 255 255 / 0.98) 75%);
+      }
+      @media (max-width: 768px) {
+        .edge-blur {
+          mask: radial-gradient(100% 80% at 50% 50%, transparent 70%, rgb(255 255 255 / 0.98) 85%);
+        }
+      }
+      .vignette {
+        position: fixed; inset: 0; pointer-events: none; z-index: var(--z-vig);
+        background: radial-gradient(120% 90% at 50% 50%, #fff0 25%, rgb(0 0 0 / 0.62) 80%, rgb(0 0 0 / 0.98) 100%);
+        opacity: 0.9;
+      }
     </style>
     
   </head>
@@ -670,6 +686,10 @@
     <a class="skip-link" href="#about">Skip to content</a>
     <main id="app"></main>
     <div class="blur"></div>
+
+    <!-- Added: Edge blur and vignette divs -->
+    <div class="edge-blur"></div>
+    <div class="vignette"></div>
 
 <script>
 /* app.js — Zack Gort — Layout Formation on Scroll + Skills fx-2 Hover Reveal (desktop hover + mobile tap) */
@@ -1779,7 +1799,7 @@
         <span class="project__label project__label--date">Agency</span>
         <span class="project__date">${CONTENT.fintech.process.agency}</span>
 
-        <h2 class="project__title"><span class="project__title-line">design systems, dashboards, data, & due diligence. </span></h2>
+        <h2 class="project__title"><span class="project__title-line">Design systems, dashboards, data, & due diligence. </span></h2>
 
         <div class="project__mission content__text">
           <p>
@@ -1959,6 +1979,7 @@ app.appendChild(footer);
       else window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
+
 
   // --- NEW: Scroll progress (bar + % counter; hides near footer; smooth GSAP tween) ---
   function mountScrollProgress(){

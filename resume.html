@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,maximum-scale=1.0,minimum-scale=1.0" name="viewport">
-    <title>Zack Gort, UX</title>
+    <title>Zack Gort, Experience Design</title>
     <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
     <style>
-      :root {
+:root {
         /* DEFAULT DARK THEME */
         --bg-color: #0f1014;
         --card-color: transparent;
@@ -20,7 +20,7 @@
         --accent: #83ff83;
         --curve-k: 1;
         --vig-opacity: .9;
-        --edge-blur: 2px;
+        --edge-blur: 2.8px;
         --cursor-size: 20px;
         --corner-pad: clamp(14px, 2.4vw, 24px);
         --corner-top: calc(env(safe-area-inset-top) + clamp(12px, 2vh, 18px));
@@ -47,7 +47,7 @@
         --ink-2: #444444;
         --ink-3: #777777;
         --accent: #000000;
-        --glass-bg: rgba(255, 255, 255, 0.9);
+        --glass-bg: rgba(255, 255, 255, 0.98);
         --glass-bg-hover: rgba(255, 255, 255, 1);
         --glass-bg-bright: rgba(255, 255, 255, 1);
         --glass-border: rgba(0, 0, 0, 0.15);
@@ -64,7 +64,7 @@
         --ink-3: #444444;
         --accent: #000000; /* Accents are black */
         /* Glass settings tuned for Pink background */
-        --glass-bg: rgba(255, 255, 255, 0.25);
+        --glass-bg: rgba(255, 255, 255, 0.75);
         --glass-bg-hover: rgba(255, 255, 255, 0.5);
         --glass-bg-bright: rgba(255, 255, 255, 0.6);
         --glass-border: rgba(0, 0, 0, 0.1);
@@ -80,7 +80,7 @@
         --ink-2: #333333;
         --ink-3: #555555;
         --accent: #000000;
-        --glass-bg: transparent;
+        --glass-bg: rgba(255, 255, 255, 0.98);
         --glass-bg-hover: #ffffff;
         --glass-bg-bright: #ffffff;
         --glass-border: #111111;
@@ -105,7 +105,7 @@
           --font-stack: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           color-scheme: light;
       }
-
+  
       /* --- TYPOGRAPHIC: LIST VIEW OVERRIDES --- */
       [data-theme="typographic"] .portfolio-container {
           max-width: 98%; 
@@ -169,7 +169,7 @@
           border-bottom: 2px solid var(--ink);
           display: inline-block;
       }
-
+  
       /* --- TYPOGRAPHIC: GRID VIEW OVERRIDES --- */
       [data-theme="typographic"] .grid-container {
           max-width: 98%;
@@ -276,12 +276,13 @@
       }
       [data-theme="typographic"] .edge-blur,
       [data-theme="typographic"] .vignette,
-      [data-theme="typographic"] #cursor,
-      [data-theme="typographic"] .curved {
+      [data-theme="typographic"] #cursor {
           display: none;
+      }
+      [data-theme="typographic"] .curved {
           transform: none !important;
       }
-
+  
       
       /* Bauhaus Specific Overrides */
       [data-theme="bauhaus"] .curved { transform: none !important; }
@@ -1191,7 +1192,7 @@
         }
       }
       
-
+  
       /* Side-specific overlays */
       .right-overlay {
         justify-content: flex-end;
@@ -1336,7 +1337,7 @@
       }
       .view-content {
         padding: clamp(60px, 8vh, 80px) 5% var(--fab-bottom) 5%;
-
+  
         margin: 0 auto;
       }
       
@@ -1345,8 +1346,7 @@
         margin-bottom: 2rem;
       }
       .case-study-section h2 {
-        font-size: 1.2rem;
-        text-transform: uppercase;
+        font-size: 1.8rem;
         margin-bottom: 1rem;
         color: var(--accent);
       }
@@ -1482,8 +1482,7 @@
             min-width: 44px;
             min-height: 44px;
         }
-        
-
+  
         
         /* Content adjustments */
         .portfolio-container, .grid-container {
@@ -1510,7 +1509,7 @@
         
         /* Case studies mobile */
         .case-study-section h2 {
-            font-size: .8rem;
+            font-size: 1.4rem;
         }
         
         .case-study-section p {
@@ -1563,7 +1562,6 @@
         }
     }
     
-    /* Theme-specific mobile adjustments */
     [data-theme="rose"] @media (max-width: 768px) {
         .sheet {
             background: rgba(255, 255, 255, 0.75) !important;
@@ -1585,105 +1583,190 @@
         
         .grid-item {
             padding: 2rem;
-            border-width: 3px;
-        }
-        
-        .grid-item:active {
-            transform: translate(-4px, -4px);
-            box-shadow: 6px 6px 0px var(--ink);
         }
     }
-    
-    /* Add haptic-like feedback for all themes on active */
+
+    /* Base Mobile Refinements (All Themes) */
     @media (max-width: 768px) {
-        button:active, .toggle-btn:active, .fab:active, details summary:active {
-            transform: scale(0.96);
-            transition: transform 0.1s ease;
-        }
+      .portfolio-container {
+        padding: 2rem 1rem 5rem 60px !important; /* Reduced left from 80px, +1rem bottom for scroll */
+      }
+      .grid-container {
+        padding: 2.5rem 1rem 3rem 60px !important; /* Reduced left from 80px, balanced top/bottom */
+      }
+      .view-toggle {
+        left: clamp(10px, 2vw, 16px) !important; /* Slight inset to reduce overlap feel */
+        gap: 6px; /* Tighter for mobile */
+      }
+      .toggle-btn {
+        padding: 10px; /* Larger tap targets */
+      }
     }
-    </style>
-      
-    <svg class="goo" style="position:absolute; width:0; height:0;">
-      <filter id="goo">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"/>
-        <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
-      </filter>
+
+    /* Theme-Specific Mobile Padding Finesse */
+
+    /* Dark (default) - Keep glassy, minimal tweak */
+    @media (max-width: 768px) {
+      [data-theme="dark"] .portfolio-container,
+      [data-theme="dark"] .grid-container {
+        padding-left: 65px !important; /* Slight increase over base for vignette/blur balance */
+      }
+    }
+
+    /* Light - Brighter, so more airy padding */
+    @media (max-width: 768px) {
+      [data-theme="light"] .portfolio-container {
+        padding: 2.5rem 1.5rem 5.5rem 60px !important; /* Extra side/bottom for light scheme readability */
+      }
+      [data-theme="light"] .grid-container {
+        padding: 3rem 1.5rem 3.5rem 60px !important;
+      }
+    }
+
+    /* Rose - Pink/glass needs softer padding to avoid overwhelm */
+    @media (max-width: 768px) {
+      [data-theme="rose"] .portfolio-container,
+      [data-theme="rose"] .grid-container {
+        padding-top: 3rem !important; /* Extra top for the vibrant bg */
+        padding-bottom: 6rem !important; /* More scroll room */
+      }
+    }
+
+    /* Bauhaus - Brutalist/sharp, add more top/bottom to prevent "squished" feel */
+    @media (max-width: 768px) {
+      [data-theme="bauhaus"] .portfolio-container {
+        padding: 3rem 1.5rem 6rem 65px !important; /* Extra vertical for shadows/borders */
+      }
+      [data-theme="bauhaus"] .grid-container {
+        padding: 3.5rem 1.5rem 4rem 65px !important;
+      }
+      [data-theme="bauhaus"] .grid-items {
+        gap: 1.5rem; /* Extra gap to breathe */
+      }
+    }
+
+    /* Typographic - Oversized text, reduce left % for toggle, add vertical */
+    @media (max-width: 768px) {
+      [data-theme="typographic"] .portfolio-container {
+        padding-left: 4% !important; /* From 5%, equiv to ~60px on 360px wide */
+        padding-right: 2% !important; /* Balanced */
+        padding-top: 3rem !important;
+        padding-bottom: 6rem !important;
+      }
+      [data-theme="typographic"] .grid-container {
+        padding: 3rem 2% 4rem 4% !important; /* Adjusted from 4rem 1% 4rem 5% */
+      }
+      [data-theme="typographic"] .grid-items {
+        grid-template-columns: 1fr !important; /* Enforce single col, more padding around */
+        gap: 1.5rem;
+      }
+      [data-theme="typographic"] .project-item,
+      [data-theme="typographic"] .grid-item {
+        padding: 2rem 0 !important; /* More internal vertical space for large text */
+      }
+    }
+  </style>
+</head>
+<body>
+<body data-theme="dark">
+<!-- SVG Filter for Goo Effect -->
+<svg style="position: absolute; height: 0; width: 0;">
+    <filter id="goo">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="goo" />
+        <feBlend in="SourceGraphic" in2="goo" />
+    </filter>
+</svg>
+
+<!-- Edge Blur -->
+<div class="edge-blur"></div>
+
+<!-- Vignette -->
+<div class="vignette"></div>
+
+<!-- Cursor Trail -->
+<div id="cursor"></div>
+
+<!-- Theme Toggle -->
+<button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     </svg>
+</button>
 
-    <div id="contextMenu" style="display: none;">
-      <div id="expandAll" class="menu-item">Expand All</div>
-      <div id="reset" class="menu-item">Collapse All</div>
-      <div id="savePdf" class="menu-item">Save as PDF</div>
-      <div id="copyLink" class="menu-item">Copy Link</div>
-    </div>
+<!-- Logo -->
+<div class="logo" id="logoToggle">
+    <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg" alt="IntoView">
+</div>
 
-    <body data-theme="dark">
-      <div class="logo" id="logoToggle">
-        <img src="https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg" alt="intoview">
-      </div>
-      <div class="view-toggle">
-        <button class="toggle-btn" id="gridBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="8" height="8"/>
-            <rect x="13" y="3" width="8" height="8"/>
-            <rect x="3" y="13" width="8" height="8"/>
-            <rect x="13" y="13" width="8" height="8"/>
-          </svg>
-        </button>
-        <button class="toggle-btn active" id="listBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="6" x2="20" y2="6"/>
-            <line x1="4" y1="12" x2="20" y2="12"/>
-            <line x1="4" y1="18" x2="20" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="edge-blur"></div>
-      <div class="vignette"></div>
-      <div id="cursor"></div>
-      <button class="theme-toggle" id="themeToggle">
-        <svg viewBox="0 0 24 24" id="themeIcon">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+<!-- View Toggle -->
+<div class="view-toggle">
+    <button id="listBtn" class="toggle-btn active" aria-label="List view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
         </svg>
-      </button>
-      <div class="fab-wrap">
-        <button class="fab" id="fabButton" title="About this Resume" aria-label="Open Resume Info" aria-haspopup="dialog" aria-expanded="false">
-          <svg viewBox="0 0 100 100" aria-hidden="true">
+    </button>
+    <button id="gridBtn" class="toggle-btn" aria-label="Grid view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+    </button>
+</div>
+
+<!-- Top Toggle Navigation -->
+<div id="top-toggle-nav">
+    <button data-view="resume" data-emoji="📄" class="active">Resume</button>
+    <button data-view="case1" data-emoji="🏦">Financial</button>
+    <button data-view="case2" data-emoji="💊">E-commerce</button>
+</div>
+
+<!-- FAB Button -->
+<div class="fab-wrap">
+    <button id="fabButton" class="fab" aria-label="Open menu">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
             <defs>
-              <linearGradient id="cubeTop" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stop-color="#fff" stop-opacity="1" />
-                <stop offset="1" stop-color="#dcdcdc" stop-opacity="1" />
-              </linearGradient>
-              <linearGradient id="cubeSide" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stop-color="#e8e8e8" />
-                <stop offset="1" stop-color="#bdbdbd" />
-              </linearGradient>
-              <linearGradient id="cubeDark" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0" stop-color="#8a8a8a" />
-                <stop offset="1" stop-color="#4b4b4b" />
-              </linearGradient>
-              <filter id="cubeGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".45" />
-              </filter>
+                <linearGradient id="cubeTop" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#fff" stop-opacity="1" />
+                    <stop offset="1" stop-color="#dcdcdc" stop-opacity="1" />
+                </linearGradient>
+                <linearGradient id="cubeSide" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#e8e8e8" />
+                    <stop offset="1" stop-color="#bdbdbd" />
+                </linearGradient>
+                <linearGradient id="cubeDark" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#8a8a8a" />
+                    <stop offset="1" stop-color="#4b4b4b" />
+                </linearGradient>
+                <filter id="cubeGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".45" />
+                </filter>
             </defs>
             <g filter="url(#cubeGlow)">
-              <polygon fill="url(#cubeTop)" points="50,14 80,30 50,46 20,30" />
-              <polygon fill="url(#cubeSide)" points="80,30 80,66 50,82 50,46" />
-              <polygon fill="url(#cubeDark)" points="50,46 50,82 20,66 20,30" />
+                <polygon fill="url(#cubeTop)" points="50,14 80,30 50,46 20,30" />
+                <polygon fill="url(#cubeSide)" points="80,30 80,66 50,82 50,46" />
+                <polygon fill="url(#cubeDark)" points="50,46 50,82 20,66 20,30" />
             </g>
-          </svg>
-        </button>
-      </div>
-      <div class="overlay right-overlay" id="overlay" aria-hidden="true">
-        <div class="sheet" tabindex="-1">
-          <button class="close-button" id="closeOverlay">
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+    </button>
+</div>
+
+<!-- Overlay Menu -->
+<div id="overlay" class="overlay right-overlay" aria-hidden="true">
+    <div class="sheet">
+        <button id="closeOverlay" class="close-button" aria-label="Close menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
-          <div class="container">
+        </button>
+        <div class="container">
             <h1>Insight & Outlook</h1>
             <p class="full-width-section">I made this resume. Not for me, but for you. Do enjoy!</p>
             
@@ -1709,7 +1792,9 @@
             <details class="full-width-section">
                 <summary>Insight, Innovation, and Impact</summary>
                 <div class="accordion-content">
-                    <p>Frankly, no one has time to read your life story. Folks filter fast and effectively. So, this is built to show precisely enough to satisfy and suffice, while not being more than you need.</p>
+                    <p>Frankly, no one has time to read a story, but who doesn't enjoy an intentional & thoughtful narrative?</p><p>I built this end-to-end to show {you} precisely enough to satisfy and suffice, while not being more than you need.</p>
+                    <br>
+                    <p>My latest additions: I added two top-level case studies; while refactoring the overall structure for my own maintenance efficiency.</p>
                 </div>
             </details>
             
@@ -1734,1564 +1819,1317 @@
             </details>
         
             <p class="summary full-width-section">© Zack Gort, 2025</p>
-          </div>
         </div>
-      </div>
-      
-      <!-- NEW: Top Toggle Navigation -->
-      <div id="top-toggle-nav">
-        <button data-view="resume" data-emoji="📄" class="active"><span class="label">#resume</span></button>
-        <button data-view="case1" data-emoji="🏦"><span class="label">#financial</span></button>
-        <button data-view="case2" data-emoji="💊"><span class="label">#ecommerce</span></button>
-      </div>
+    </div>
+</div>
 
-            <!--
-      <nav id="top-toggle-nav">
-        <button id="btn-resume" class="active" data-emoji="📄">
-          <span class="label">Resume</span>
-        </button>
-        <button id="btn-case" data-emoji="📁">
-          <span class="label">Case Study</span>
-        </button>
-        <button id="btn-cases" data-emoji="📚">
-          <span class="label">Case Studies</span>
-        </button>
-      </nav> -->
-      
-      
-      <!-- Resume View (Existing Content) -->
-      <div id="resume-view" class="view-container active">
-        <div class="view-content">
-          <div class="listview-root curved" id="listView" style="display: block; position: relative; overflow-y: auto; z-index: auto; inset: auto;">
-            <main class="portfolio-container">
-              <ul class="project-list" id="projectList">
-                <li class="project-item hero">
-                  <div class="project-data artist">Zachary Gort</div>
-                  <div class="project-data album">Senior UX/UI Designer & Strategist</div>
-                </li>
-                <li class="project-item" style="grid-template-columns: 200px 1fr;">
-                  <div class="project-data artist">Contact</div>
-                  <div class="project-data album">
-                    <a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a> •
-                    <a href="https://zackgort.com" target="_blank">zackgort.com</a> •
-                    <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>
-                  </div>
-                </li>
-                <li class="project-item summary">
-                  <div class="project-data artist">Professional Summary</div>
-                  <div class="project-data album">Senior User Experience (UX) and User Interface (UI) Designer with 10+ years leading end-to-end design projects for enterprise organizations. Expert in interaction design, information architecture, design systems, prototyping, wireframing, user research, usability testing, and content strategy. Proven in Agile/Scrum environments, cross-functional collaboration, and delivering data-driven solutions for Fortune 500 clients.</div>
-                </li>
-                <li class="project-item section">
-                  <div class="project-data artist">Experience</div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">Phenom</div>
-                  <div class="project-data role">User Experience Strategist</div>
-                  <div class="project-data year">01/2025 – 04/2025</div>
-                  <div class="project-data album">
-                    <p class="summary">Managed the corporate website and shaped the product roadmap, centralizing campaign content and aligning Marketing, Sales, and Product for live demos and launches.</p>
-                    <details>
-                      <summary>Cross-Functional Strategy & Operations</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Great product and a positive team culture. I worked around operational silos across local and global teams to make cross-functional work land more smoothly.</li>
-                          <li>Advanced third-party integrations and refined live event management and demo workflows.</li>
-                          <li>Forged cross-department relationships that moved strategic initiatives forward.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Contentful</span>
-                      <span class="pill">Jira</span>
-                      <span class="pill">Digital Content Management</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">Publicis Sapient</div>
-                  <div class="project-data role">Senior User Experience Designer</div>
-                  <div class="project-data year">04/2022 – 03/2023</div>
-                  <div class="project-data album">
-                    <p class="summary">Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.</p>
-                    <details>
-                      <summary>Design System Architecture & Scale</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Led multi-track efforts to clarify product scope and design a modular canonical system to cut complexity.</li>
-                          <li>Shipped a modular design system and modernized the stack (React, Tailwind) to enable consistent, scalable delivery.</li>
-                          <li>Improved coordination and handoffs across design and engineering, speeding delivery cadence.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">UX Methodologies</span>
-                      <span class="pill">Design Principles</span>
-                      <span class="pill">Digital Products Enhancement</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">Code & Theory</div>
-                  <div class="project-data role">Senior Interaction Designer</div>
-                  <div class="project-data year">08/2021 – 04/2022</div>
-                  <div class="project-data album">
-                    <p class="summary">Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.</p>
-                    <details>
-                      <summary>Content Strategy & Platform Modernization</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Balanced brand and B2B needs and helped the team adopt a headless CMS approach for better content flexibility.</li>
-                          <li>Delivered workshops on information architecture, modular systems, and design within Contentful.</li>
-                          <li>Enabled faster decision-making and more evidence-driven product choices.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Strategic Insights</span>
-                      <span class="pill">Iterative Methodologies</span>
-                      <span class="pill">Design Frameworks</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">Elva Design Group</div>
-                  <div class="project-data role">Senior User Experience Designer</div>
-                  <div class="project-data year">04/2021 – 08/2021</div>
-                  <div class="project-data album">
-                    <p class="summary">Owned discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
-                    <details>
-                      <summary>Mobile-First Commerce Frameworks</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Autonomy let me push pragmatic, creative solutions when the usual formula didn’t fit the client.</li>
-                          <li>Built a component framework optimized for mobile-first e-commerce and future navigation patterns.</li>
-                          <li>Aligned cross-functional teams and produced practical handoff assets for engineering.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Strategic Thinking</span>
-                      <span class="pill">Technical Execution</span>
-                      <span class="pill">Design Strategy</span>
-                      <span class="pill">Hand-off</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">Huge Inc.</div>
-                  <div class="project-data role">Senior User Experience Designer</div>
-                  <div class="project-data year">03/2021 – 04/2021</div>
-                  <div class="project-data album">
-                    <p class="summary">Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.</p>
-                    <details>
-                      <summary>Booking Experience Optimization</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Small scope, high impact — a focused engagement that mattered.</li>
-                          <li>Advised on brand activation and competitive positioning to inform UX strategy.</li>
-                          <li>Delivered ship-ready UX despite limited resources and time.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Competitive Landscape Analysis</span>
-                      <span class="pill">UX Research</span>
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">User Flow</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">PFSWeb LiveArea</div>
-                  <div class="project-data role">Manager, UX</div>
-                  <div class="project-data year">01/2020 – 02/2021</div>
-                  <div class="project-data album">
-                    <p class="summary">UX Manager on full-spectrum Salesforce e-commerce builds for B2B and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West Marine, YETI). Served as the primary UX strategy and design lead.</p>
-                    <details>
-                      <summary>High-Volume Commerce Optimization</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>A period of accelerated growth — I listened to clients and delivered on demanding business objectives.</li>
-                          <li>Solved conversion, re-engagement, and deep inventory challenges with pragmatic UX approaches.</li>
-                          <li>The PFSweb acquisition changed context; I navigated shifting priorities while keeping delivery steady.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Salesforce Solutions Architecture</span>
-                      <span class="pill">Design Systems</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">Workarea</div>
-                  <div class="project-data role">Senior User Experience Designer</div>
-                  <div class="project-data year">07/2017 – 09/2018</div>
-                  <div class="project-data album">
-                    <p class="summary">Focused on improving a SaaS e-commerce platform through client collaboration and data-driven design, streamlining handoffs and workflows for scale.</p>
-                    <details>
-                      <summary>SaaS Platform Enhancements</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Quick sketches and dev conversations often unlocked product improvements — one of the best environments I’ve worked in.</li>
-                          <li>Introduced iterative processes and leveraged data to expand platform capabilities.</li>
-                          <li>Partnered with retail and lifestyle clients to deliver measurable product value.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Data Analysis</span>
-                      <span class="pill">Design Systems</span>
-                      <span class="pill">Research</span>
-                      <span class="pill">UX Technical Writing</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">O3 World</div>
-                  <div class="project-data role">User Experience Designer</div>
-                  <div class="project-data year">07/2016 – 06/2017</div>
-                  <div class="project-data album">
-                    <p class="summary">Practiced Lean UX in a scrum-led environment, designing FinTech and iOS products with disciplined execution at every stage.</p>
-                    <details>
-                      <summary>FinTech & Agile Product Design</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Projects began on a whiteboard and often redefined expectations — the process taught rigor and craft.</li>
-                          <li>Led whiteboard sessions, wireframes, and sprint-driven MVPs to ship robust solutions.</li>
-                          <li>Collaborated with researchers, PMs, and engineers to deliver measurable outcomes.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Lean UX</span>
-                      <span class="pill">Agile Workflow</span>
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Product Design Systems</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item experience">
-                  <div class="project-data artist">ONE SIXTY OVER NINETY</div>
-                  <div class="project-data role">Interaction Designer</div>
-                  <div class="project-data year">09/2014 – 07/2016</div>
-                  <div class="project-data album">
-                    <p class="summary">At the preeminent .EDU agency, I delivered full-service interactive work with a focus on IA and ADA-compliant systems.</p>
-                    <details>
-                      <summary>Inclusive Design & Complex IA</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Developed deep IA and accessibility expertise, translating brand into usable digital experiences.</li>
-                          <li>As one of two interactive designers, I owned full-spectrum builds for higher-education clients.</li>
-                          <li>Led client-facing creative work across .EDU accounts and projects for Comcast and the Philadelphia Eagles.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Wireframe Prototyping</span>
-                      <span class="pill">UI Design Systems</span>
-                      <span class="pill">Creative Copywriting</span>
-                      <span class="pill">Visual Design</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item section">
-                  <div class="project-data artist">Specializations</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Design Leadership</div>
-                  <div class="project-data album">Master facilitator: leading client workshops, inspiring teams, and presenting design decisions with confidence.</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Strategic UX & Service Design</div>
-                  <div class="project-data album">Skilled at crafting experience maps, service blueprints, and interaction models that solve user and business problems.</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Digital Design & Prototyping</div>
-                  <div class="project-data album">Advanced in Figma and Adobe Creative Suite; experienced in rapid prototyping and comfortable with HTML/CSS/JS for interactive proofs of concept.</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Design Systems & Visual Standards</div>
-                  <div class="project-data album">Experienced in creating and evolving design systems and style guides to maintain product coherence as teams scale.</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Collaboration</div>
-                  <div class="project-data album">Partner closely with product owners, front-end developers, and multi-disciplinary teams to ship high-impact outcomes.</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Communication & Storytelling</div>
-                  <div class="project-data album">Clear writer and presenter who tailors the story to the audience and moves decisions forward.</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Project Management</div>
-                  <div class="project-data album">Delivers projects on time and on budget with attention to detail and strong organization.</div>
-                </li>
-                <li class="project-item section">
-                  <div class="project-data artist">Core Competencies</div>
-                </li>
-                <li class="project-item skill">
-                  <div class="project-data artist">Design & Strategy</div>
-                  <div class="project-data album">
-                    <div class="pills">
-                      <span class="pill">User Experience Design</span>
-                      <span class="pill">User Interface Design</span>
-                      <span class="pill">Interaction Design</span>
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Design Systems</span>
-                      <span class="pill">Prototyping</span>
-                      <span class="pill">Wireframing</span>
-                      <span class="pill">User Research</span>
-                      <span class="pill">Usability Testing</span>
-                      <span class="pill">Content Strategy</span>
-                      <span class="pill">Service Design</span>
-                      <span class="pill">Design Thinking</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item skill">
-                  <div class="project-data artist">Collaboration & Process</div>
-                  <div class="project-data album">
-                    <div class="pills">
-                      <span class="pill">Agile/Scrum</span>
-                      <span class="pill">Cross-functional Team Leadership</span>
-                      <span class="pill">Stakeholder Management</span>
-                      <span class="pill">Workshop Facilitation</span>
-                      <span class="pill">Client Relations</span>
-                      <span class="pill">Design Hand-offs</span>
-                      <span class="pill">Strategic Planning</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item skill">
-                  <div class="project-data artist">Tools & Platforms</div>
-                  <div class="project-data album">
-                    <div class="pills">
-                      <span class="pill">Figma</span>
-                      <span class="pill">Sketch</span>
-                      <span class="pill">Adobe Creative Suite</span>
-                      <span class="pill">Contentful</span>
-                      <span class="pill">Jira</span>
-                      <span class="pill">Salesforce</span>
-                      <span class="pill">Shopify</span>
-                      <span class="pill">HTML/CSS</span>
-                      <span class="pill">JavaScript</span>
-                      <span class="pill">Miro</span>
-                      <span class="pill">InVision</span>
-                      <span class="pill">Notion</span>
-                    </div>
-                  </div>
-                </li>
-                <li class="project-item section">
-                  <div class="project-data artist">References & Testimonials</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Christopher Bayle</div>
-                  <div class="project-data album">“Zack connects to emotion and imagination in a way that surfaces thoughtful, human work. His empathy and perspective consistently helped break creative logjams — a reliable and inspiring collaborator.”</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Andrés Moros, MPS</div>
-                  <div class="project-data album">“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I recommend him without reservation.”</div>
-                </li>
-                <li class="project-item section">
-                  <div class="project-data artist">Education</div>
-                </li>
-                <li class="project-item quote">
-                  <div class="project-data artist">Pratt Institute of Art</div>
-                  <div class="project-data album">BFA, 3D Animation & Motion Graphics (Incomplete Degree). Foundation in digital media arts, technical prototyping, and the craft of meaningful storytelling. (2002 – 2005)</div>
-                </li>
-              </ul>
-            </main>
+<!-- Context Menu -->
+<div id="contextMenu">
+    <div class="menu-item" id="expandAll">Expand All Details</div>
+    <div class="menu-item" id="reset">Reset Details</div>
+    <div class="menu-item" id="savePdf">Save as PDF</div>
+    <div class="menu-item" id="copyLink">Copy Link</div>
+</div>
+
+<!-- View Containers -->
+<div id="resume-view" class="view-container active">
+    <div class="view-content">
+        <!-- List View (dynamically populated) -->
+        <div id="listView" class="listview-root">
+            <div class="portfolio-container curved" id="listViewContent">
+                <!-- Content generated by JS -->
+            </div>
             <div class="background-image" id="listBackgroundImage"></div>
-          </div>
-          <div class="gridview-root curved" id="gridView" style="display: none; position: relative; overflow-y: auto; z-index: auto; inset: auto;">
-            <div class="grid-container">
-              <div class="grid-section">
-                <div class="grid-section-title">Experience</div>
-                <div class="grid-items">
-                  <div class="grid-item">
-                    <h4>Phenom</h4>
-                    <div class="job-info">
-                      <span class="role">User Experience Strategist</span>
-                      <span class="duration">01/2025 – 04/2025</span>
-                    </div>
-                    <p class="summary">Managed the corporate website and shaped the product roadmap, centralizing campaign content and aligning Marketing, Sales, and Product for live demos and launches.</p>
-                    <details>
-                      <summary>Cross-Functional Strategy & Operations</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Great product and a positive team culture. I worked around operational silos across local and global teams to make cross-functional work land more smoothly.</li>
-                          <li>Advanced third-party integrations and refined live event management and demo workflows.</li>
-                          <li>Forged cross-department relationships that moved strategic initiatives forward.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Contentful</span>
-                      <span class="pill">Jira</span>
-                      <span class="pill">Digital Content Management</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Publicis Sapient</h4>
-                    <div class="job-info">
-                      <span class="role">Senior User Experience Designer</span>
-                      <span class="duration">04/2022 – 03/2023</span>
-                    </div>
-                    <p class="summary">Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.</p>
-                    <details>
-                      <summary>Design System Architecture & Scale</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Led multi-track efforts to clarify product scope and design a modular canonical system to cut complexity.</li>
-                          <li>Shipped a modular design system and modernized the stack (React, Tailwind) to enable consistent, scalable delivery.</li>
-                          <li>Improved coordination and handoffs across design and engineering, speeding delivery cadence.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">UX Methodologies</span>
-                      <span class="pill">Design Principles</span>
-                      <span class="pill">Digital Products Enhancement</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Code & Theory</h4>
-                    <div class="job-info">
-                      <span class="role">Senior Interaction Designer</span>
-                      <span class="duration">08/2021 – 04/2022</span>
-                    </div>
-                    <p class="summary">Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.</p>
-                    <details>
-                      <summary>Content Strategy & Platform Modernization</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Balanced brand and B2B needs and helped the team adopt a headless CMS approach for better content flexibility.</li>
-                          <li>Delivered workshops on information architecture, modular systems, and design within Contentful.</li>
-                          <li>Enabled faster decision-making and more evidence-driven product choices.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Strategic Insights</span>
-                      <span class="pill">Iterative Methodologies</span>
-                      <span class="pill">Design Frameworks</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Elva Design Group</h4>
-                    <div class="job-info">
-                      <span class="role">Senior User Experience Designer</span>
-                      <span class="duration">04/2021 – 08/2021</span>
-                    </div>
-                    <p class="summary">Owned discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.</p>
-                    <details>
-                      <summary>Mobile-First Commerce Frameworks</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Autonomy let me push pragmatic, creative solutions when the usual formula didn’t fit the client.</li>
-                          <li>Built a component framework optimized for mobile-first e-commerce and future navigation patterns.</li>
-                          <li>Aligned cross-functional teams and produced practical handoff assets for engineering.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Strategic Thinking</span>
-                      <span class="pill">Technical Execution</span>
-                      <span class="pill">Design Strategy</span>
-                      <span class="pill">Hand-off</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Huge Inc.</h4>
-                    <div class="job-info">
-                      <span class="role">Senior User Experience Designer</span>
-                      <span class="duration">03/2021 – 04/2021</span>
-                    </div>
-                    <p class="summary">Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.</p>
-                    <details>
-                      <summary>Booking Experience Optimization</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Small scope, high impact — a focused engagement that mattered.</li>
-                          <li>Advised on brand activation and competitive positioning to inform UX strategy.</li>
-                          <li>Delivered ship-ready UX despite limited resources and time.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Competitive Landscape Analysis</span>
-                      <span class="pill">UX Research</span>
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">User Flow</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>PFSWeb LiveArea</h4>
-                    <div class="job-info">
-                      <span class="role">Manager, UX</span>
-                      <span class="duration">01/2020 – 02/2021</span>
-                    </div>
-                    <p class="summary">UX Manager on full-spectrum Salesforce e-commerce builds for B2B and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West Marine, YETI). Served as the primary UX strategy and design lead.</p>
-                    <details>
-                      <summary>High-Volume Commerce Optimization</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>A period of accelerated growth — I listened to clients and delivered on demanding business objectives.</li>
-                          <li>Solved conversion, re-engagement, and deep inventory challenges with pragmatic UX approaches.</li>
-                          <li>The PFSweb acquisition changed context; I navigated shifting priorities while keeping delivery steady.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Salesforce Solutions Architecture</span>
-                      <span class="pill">Design Systems</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Workarea</h4>
-                    <div class="job-info">
-                      <span class="role">Senior User Experience Designer</span>
-                      <span class="duration">07/2017 – 09/2018</span>
-                    </div>
-                    <p class="summary">Focused on improving a SaaS e-commerce platform through client collaboration and data-driven design, streamlining handoffs and workflows for scale.</p>
-                    <details>
-                      <summary>SaaS Platform Enhancements</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Quick sketches and dev conversations often unlocked product improvements — one of the best environments I’ve worked in.</li>
-                          <li>Introduced iterative processes and leveraged data to expand platform capabilities.</li>
-                          <li>Partnered with retail and lifestyle clients to deliver measurable product value.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Data Analysis</span>
-                      <span class="pill">Design Systems</span>
-                      <span class="pill">Research</span>
-                      <span class="pill">UX Technical Writing</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>O3 World</h4>
-                    <div class="job-info">
-                      <span class="role">User Experience Designer</span>
-                      <span class="duration">07/2016 – 06/2017</span>
-                    </div>
-                    <p class="summary">Practiced Lean UX in a scrum-led environment, designing FinTech and iOS products with disciplined execution at every stage.</p>
-                    <details>
-                      <summary>FinTech & Agile Product Design</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Projects began on a whiteboard and often redefined expectations — the process taught rigor and craft.</li>
-                          <li>Led whiteboard sessions, wireframes, and sprint-driven MVPs to ship robust solutions.</li>
-                          <li>Collaborated with researchers, PMs, and engineers to deliver measurable outcomes.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Lean UX</span>
-                      <span class="pill">Agile Workflow</span>
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Product Design Systems</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>ONE SIXTY OVER NINETY</h4>
-                    <div class="job-info">
-                      <span class="role">Interaction Designer</span>
-                      <span class="duration">09/2014 – 07/2016</span>
-                    </div>
-                    <p class="summary">At the preeminent .EDU agency, I delivered full-service interactive work with a focus on IA and ADA-compliant systems.</p>
-                    <details>
-                      <summary>Inclusive Design & Complex IA</summary>
-                      <div class="accordion-content">
-                        <ul>
-                          <li>Developed deep IA and accessibility expertise, translating brand into usable digital experiences.</li>
-                          <li>As one of two interactive designers, I owned full-spectrum builds for higher-education clients.</li>
-                          <li>Led client-facing creative work across .EDU accounts and projects for Comcast and the Philadelphia Eagles.</li>
-                        </ul>
-                      </div>
-                    </details>
-                    <div class="pills">
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Wireframe Prototyping</span>
-                      <span class="pill">UI Design Systems</span>
-                      <span class="pill">Creative Copywriting</span>
-                      <span class="pill">Visual Design</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="grid-section">
-                <div class="grid-section-title">Specializations</div>
-                <div class="grid-items">
-                  <div class="grid-item">
-                    <h4>Design Leadership</h4>
-                    <p>Master facilitator: leading client workshops, inspiring teams, and presenting design decisions with confidence.</p>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Strategic UX & Service Design</h4>
-                    <p>Skilled at crafting experience maps, service blueprints, and interaction models that solve user and business problems.</p>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Digital Design & Prototyping</h4>
-                    <p>Advanced in Figma and Adobe Creative Suite; experienced in rapid prototyping and comfortable with HTML/CSS/JS for interactive proofs of concept.</p>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Design Systems & Visual Standards</h4>
-                    <p>Experienced in creating and evolving design systems and style guides to maintain product coherence as teams scale.</p>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Collaboration</h4>
-                    <p>Partner closely with product owners, front-end developers, and multi-disciplinary teams to ship high-impact outcomes.</p>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Communication & Storytelling</h4>
-                    <p>Clear writer and presenter who tailors the story to the audience and moves decisions forward.</p>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Project Management</h4>
-                    <p>Delivers projects on time and on budget with attention to detail and strong organization.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="grid-section">
-                <div class="grid-section-title">Core Competencies</div>
-                <div class="grid-items">
-                  <div class="grid-item">
-                    <h4>Design & Strategy</h4>
-                    <div class="pills">
-                      <span class="pill">User Experience Design</span>
-                      <span class="pill">User Interface Design</span>
-                      <span class="pill">Interaction Design</span>
-                      <span class="pill">Information Architecture</span>
-                      <span class="pill">Design Systems</span>
-                      <span class="pill">Prototyping</span>
-                      <span class="pill">Wireframing</span>
-                      <span class="pill">User Research</span>
-                      <span class="pill">Usability Testing</span>
-                      <span class="pill">Content Strategy</span>
-                      <span class="pill">Service Design</span>
-                      <span class="pill">Design Thinking</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Collaboration & Process</h4>
-                    <div class="pills">
-                      <span class="pill">Agile/Scrum</span>
-                      <span class="pill">Cross-functional Team Leadership</span>
-                      <span class="pill">Stakeholder Management</span>
-                      <span class="pill">Workshop Facilitation</span>
-                      <span class="pill">Client Relations</span>
-                      <span class="pill">Design Hand-offs</span>
-                      <span class="pill">Strategic Planning</span>
-                    </div>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Tools & Platforms</h4>
-                    <div class="pills">
-                      <span class="pill">Figma</span>
-                      <span class="pill">Sketch</span>
-                      <span class="pill">Adobe Creative Suite</span>
-                      <span class="pill">Contentful</span>
-                      <span class="pill">Jira</span>
-                      <span class="pill">Salesforce</span>
-                      <span class="pill">Shopify</span>
-                      <span class="pill">HTML/CSS</span>
-                      <span class="pill">JavaScript</span>
-                      <span class="pill">Miro</span>
-                      <span class="pill">InVision</span>
-                      <span class="pill">Notion</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="grid-section">
-                <div class="grid-section-title">References & Testimonials</div>
-                <div class="grid-items">
-                  <div class="grid-item">
-                    <h4>Christopher Bayle</h4>
-                    <p>“Zack connects to emotion and imagination in a way that surfaces thoughtful, human work. His empathy and perspective consistently helped break creative logjams — a reliable and inspiring collaborator.”</p>
-                    <span class="duration">ACD UX, Publicis Sapient</span>
-                  </div>
-                  <div class="grid-item">
-                    <h4>Andrés Moros, MPS</h4>
-                    <p>“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I recommend him without reservation.”</p>
-                    <span class="duration">Sr. UX Designer, Publicis Sapient</span>
-                  </div>
-                </div>
-              </div>
-              <div class="grid-section">
-                <div class="grid-section-title">Education</div>
-                <div class="grid-items">
-                  <div class="grid-item">
-                    <h4>Pratt Institute of Art</h4>
-                    <p>BFA, 3D Animation & Motion Graphics (Incomplete Degree). Foundation in digital media arts, technical prototyping, and the craft of meaningful storytelling.</p>
-                    <span class="duration">2002 – 2005</span>
-                  </div>
-                </div>
-              </div>
+        </div>
+        
+        <!-- Grid View (dynamically populated) -->
+        <div id="gridView" class="gridview-root" style="display: none;">
+            <div class="grid-container curved" id="gridViewContent">
+                <!-- Content generated by JS -->
             </div>
             <div class="background-image" id="gridBackgroundImage"></div>
-          </div>
         </div>
-      </div>
-      
+    </div>
+</div>
+
 <!-- Case Study 1 View (BNY Mellon) -->
-      <div id="case1-view" class="view-container case-study">
-        <div class="view-content">
-          <div class="case-study-stack"><img src="https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp" alt="desktop homepage"></div>
-          <h1>BNY Mellon — Pershing X</h1>
-          <div class="case-study-section">
-            <h2>Project Overview</h2>
-            <p>Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry.</p>
-          </div>
-          <div class="case-study-section">
-            <h2>Key Challenges & Solutions</h2>
-            <p>Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard</p>
-            <p>Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry).</p>
-          </div>
-          <div class="case-study-section case-study-process">
-            <h2>Process</h2>
-            <div class="detail">
-              <span class="label">Client:</span> BNY Melon — Pershing X
-            </div>
-            <div class="detail">
-              <span class="label">Agency:</span> Publicis Sapient
-            </div>
-            <div class="detail">
-              <span class="label">Role:</span> Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience. Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys.
-            </div>
-          </div>
-          <div class="case-study-section">
-            <h2>Visual Deliverables</h2>
-            <div class="case-study-grid">
-              <img src="https://i.ibb.co/wZY2bhKF/bny4.png" alt="BNY Mellon visual 1">
-              <img src="https://i.ibb.co/xS49C07B/bny3.png" alt="BNY Mellon visual 2">
-              <img src="https://i.ibb.co/vvMZmq94/bny2.png" alt="BNY Mellon visual 3">
-              <img src="https://i.ibb.co/XkM2hn8n/bny1.png" alt="BNY Mellon visual 4">
-              <img src="https://i.ibb.co/FJNG1jC/14.jpg" alt="BNY Mellon visual 5">
-              <img src="https://i.ibb.co/fxjgcYD/18.png" alt="BNY Mellon visual 6">
-              <img src="https://i.ibb.co/gtQLYJQ/17.jpg" alt="BNY Mellon visual 7">
-              <img src="https://i.ibb.co/Fgxcqj0/16.jpg" alt="BNY Mellon visual 8">
-              <img src="https://i.ibb.co/dcXH5fn/13.jpg" alt="BNY Mellon visual 9">
-            </div>
-          </div>
-          <div class="case-study-section case-study-insight">
-            <h2>Insights</h2>
-            <p>Deep Dive: No Artificial Intelligence Here</p>
-            <p class="aside">This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.</p>
-          </div>
-          <div class="case-study-section">
-            <h2>Outcomes</h2>
-            <p>Wove launched with BNY Melon power, scale, and security, helping advisors work faster and serve more clients.</p>
-          </div>
-          <div class="case-study-section case-study-stack">
-            <h2>Stack</h2>
-            <div class="case-study-stack">
-              <figure>
-                <img src="https://i.ibb.co/XkM2hn8n/bny1.png" alt="BNY 1">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/vvMZmq94/bny2.png" alt="BNY 2">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/xS49C07B/bny3.png" alt="BNY 3">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/wZY2bhKF/bny4.png" alt="BNY 4">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/HGv7ymj/4.jpg" alt="Account Opening">
-              </figure>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Case Study 2 View (GNC) -->
-      <div id="case2-view" class="view-container case-study">
-        <div class="view-content">
-          <div class="case-study-stack"><img src="https://i.ibb.co/cSQCgNQY/work1.webp" alt="desktop homepage"></div>
-   
-          <h1>General Nutrition Centers (GNC)</h1>
-          <div class="case-study-section">
-            <h2>Project Overview</h2>
-            <p>{We} dove deep into GNC's e-commerce ecosystem. From market research, to [client-supplied] user data, to wireframe feature prototyping; we built a modular component-based design system optimized for continued optimization.</p>
-          </div>
-          <div class="case-study-section">
-            <h2>Key Challenges & Solutions</h2>
-            <p>As part of a total overhaul and overcoming a recent bankruptcy, GNC asked us to shake things up; providing them with a modern and modular e-commerce solution through a ground-up build on the Shopify platform.</p>
-            <p>Lead UX {IA/UI Prototypes/Design Systems}. Paired with PM, Dev Lead, Design Team and Client-Side Stakeholders. 12-week engagement meant tight cadence, fast-on-our-feet design + strategy, and weekly exec reviews.</p>
-            <p>{We} introduced a modern mobile-first navigation schema and retail taxonomy strategy that separated GNC not just from its competition, but all in the e-retail space.</p>
-          </div>
-          <div class="case-study-section case-study-process">
-            <h2>Process</h2>
-            <div class="detail">
-              <span class="label">Client:</span> General Nutrition Centers (GNC)
-            </div>
-            <div class="detail">
-              <span class="label">Agency:</span> Elva Design Group
-            </div>
-            <div class="detail">
-              <span class="label">Role:</span> Senior User Experience Designer
-            </div>
-          </div>
-          <div class="case-study-section">
-            <h2>Visual Deliverables</h2>
-            <div class="case-study-grid">
-              <img src="https://i.ibb.co/ynjWYqv8/2.webp" alt="GNC visual 1">
-              <img src="https://i.ibb.co/spHgPH6N/1.webp" alt="GNC visual 2">
-              <img src="https://i.ibb.co/cXg5Phdc/3.webp" alt="GNC visual 3">
-              <img src="https://i.ibb.co/99h2bQMh/6.webp" alt="GNC visual 4">
-              <img src="https://i.ibb.co/gZ58PKyk/4.webp" alt="GNC visual 5">
-              <img src="https://i.ibb.co/Y7pGqJ69/5.webp" alt="GNC visual 6">
-              <img src="https://i.ibb.co/yB4RwkTf/7.webp" alt="GNC visual 7">
-              <img src="https://i.ibb.co/cSQCgNQY/work1.webp" alt="GNC visual 8">
-              <img src="https://i.ibb.co/pBMMxY1Z/11.webp" alt="GNC visual 9">
-              <img src="https://i.ibb.co/7N2rDqrN/8.webp" alt="GNC visual 10">
-              <img src="https://i.ibb.co/vx76zjgf/10.webp" alt="GNC visual 11">
-              <img src="https://i.ibb.co/rft2bf0T/9.webp" alt="GNC visual 12">
-            </div>
-          </div>
-          <div class="case-study-section case-study-insight">
-            <h2>Insights</h2>
-            <p>Outcome: The result helped GNC reclaim ~$500M in annual revenue.</p>
-            <p class="aside">if the bar ain't bending, you’re just pretending.</p>
-          </div>
-          <div class="case-study-section case-study-stack">
-            <h2>Stack</h2>
-            <div class="case-study-stack">
-              <figure>
-                <img src="https://i.ibb.co/ynjWYqv8/2.webp" alt="notes">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/spHgPH6N/1.webp" alt="research">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/cXg5Phdc/3.webp" alt="mobile commerce">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/99h2bQMh/6.webp" alt="product detail page">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/gZ58PKyk/4.webp" alt="mobile product detail">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/Y7pGqJ69/5.webp" alt="consumer engagement">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/yB4RwkTf/7.webp" alt="rewards program">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/cSQCgNQY/work1.webp" alt="handheld">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/pBMMxY1Z/11.webp" alt="mobile overview">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/7N2rDqrN/8.webp" alt="mobile closeup">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/vx76zjgf/10.webp" alt="desktop navigation">
-              </figure>
-              <figure>
-                <img src="https://i.ibb.co/rft2bf0T/9.webp" alt="desktop homepage">
-              </figure>
-            </div>
-          </div>
-        </div>
-      </div>
+<div id="case1-view" class="view-container case-study">
+    <div class="view-content" id="case1Content">
+        <!-- Content generated by JS -->
+    </div>
+</div>
 
-      <script>
-const body = document.body;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isFinePointer = window.matchMedia('(pointer: fine)').matches;
-    const shouldRunCursor = isFinePointer && !prefersReducedMotion;
-    const shouldRunAdvancedEffects = isFinePointer && !prefersReducedMotion;
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    const logoToggle = document.getElementById('logoToggle');
-    // Themes array
-    const themes = ['dark', 'light', 'rose', 'bauhaus', 'typographic'];
-    // Update Logo Function
-    function updateLogo(theme) {
-      const logoImg = document.querySelector('.logo img');
-     
-      // Rose theme now uses the DARK logo because the background is a bright pink.
-      // This matches Light and Bauhaus themes.
-      if (theme === 'light' || theme === 'bauhaus' || theme === 'typographic' || theme === 'rose') {
-        logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
-      } else {
-        // Default 'dark' theme uses the LIGHT logo.
-        logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
-      }
-    }
-    function getNextTheme(current) {
-      const index = themes.indexOf(current);
-      return themes[(index + 1) % themes.length];
-    }
-    function updateThemeIcon(theme) {
-      if (theme === 'light') {
-        // Sun icon
-        themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-      } else if (theme === 'rose') {
-        // Sparkle/Star icon
-        themeIcon.innerHTML = '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>';
-      } else if (theme === 'bauhaus') {
-        // Bauhaus Square/Grid icon
-        themeIcon.innerHTML = '<rect x="3" y="3" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"/>';
-      } else if (theme === 'typographic') {
-        // Type/Text icon
-        themeIcon.innerHTML = '<path d="M4 7V4h16v3M9 20h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-      } else {
-        // Moon icon (default dark)
-        themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
-      }
-    }
-    function initTheme() {
-      let saved = localStorage.getItem('zack-theme');
-      if (!themes.includes(saved)) {
-        saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-      }
-      body.setAttribute('data-theme', saved);
-      updateThemeIcon(saved);
-      updateLogo(saved); // Set initial logo
-    }
-    function toggleTheme() {
-      const current = body.getAttribute('data-theme');
-      const next = getNextTheme(current);
-      body.setAttribute('data-theme', next);
-      localStorage.setItem('zack-theme', next);
-      updateThemeIcon(next);
-      updateLogo(next); // Update logo on toggle
-    }
-    initTheme();
-    if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
-    if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
-    // Cursor Trail Effect (Performance Fix: throttled by shouldRunCursor)
-    (() => {
-      if (!shouldRunCursor) return; // PERFORMANCE FIX: Skip on coarse pointers or reduced motion
-
-      const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
-      const host = document.getElementById('cursor');
-      if (!host) return;
-      for (let i = 0; i < TAIL_LENGTH; i++) {
-        const d = document.createElement('div');
-        d.className = 'cursor-circle';
-        host.appendChild(d);
-      }
-      const circles = host.querySelectorAll('.cursor-circle');
-      let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
-      const history = Array(TAIL_LENGTH).fill(0).map(() => ({ x: mouseX, y: mouseY }));
-      window.addEventListener('pointermove', e => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-      }, { passive: true });
-      function tick() {
-        history.shift();
-        history.push({ x: mouseX, y: mouseY });
-        circles.forEach((c, i) => {
-          const cur = history[i];
-          const next = history[i + 1] || history[TAIL_LENGTH - 1];
-          cur.x += (next.x - cur.x) * 0.35;
-          cur.y += (next.y - cur.y) * 0.35;
-          const s = Math.max(0.22, i / TAIL_LENGTH);
-          c.style.transform = `translate(calc(${cur.x}px - 50%), calc(${cur.y}px - 50%)) scale(${s})`;
-        });
-        requestAnimationFrame(tick);
-      }
-      tick();
-    })();
-    const gridView = document.getElementById('gridView');
-    const listView = document.getElementById('listView');
-    const gridBtn = document.getElementById('gridBtn');
-    const listBtn = document.getElementById('listBtn');
-    // MODE TRANSITION & ACCESSIBILITY FIX: Functions to handle view switching and state persistence
-    function showGridView() {
-        gridView.style.display = 'block';
-        listView.style.display = 'none';
-        gridBtn.classList.add('active');
-        gridBtn.setAttribute('aria-current', 'true'); // ACCESSIBILITY FIX
-        listBtn.classList.remove('active');
-        listBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
-        localStorage.setItem('viewMode', 'grid'); // PERSISTENCE FIX
-    }
-    function showListView() {
-        gridView.style.display = 'none';
-        listView.style.display = 'block';
-        listBtn.classList.add('active');
-        listBtn.setAttribute('aria-current', 'true'); // ACCESSIBILITY FIX
-        gridBtn.classList.remove('active');
-        gridBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
-        localStorage.setItem('viewMode', 'list'); // PERSISTENCE FIX
-    }
-    // Load View State on Initial Load
-    function loadViewState() {
-        const savedView = localStorage.getItem('viewMode') || 'list';
-        if (savedView === 'grid') {
-            showGridView();
-        } else {
-            // Since list is default, call explicitly to set aria attributes correctly
-            showListView();
+<!-- Case Study 2 View (GNC) -->
+<div id="case2-view" class="view-container case-study">
+    <div class="view-content" id="case2Content">
+        <!-- Content generated by JS -->
+    </div>
+</div>
+<script>
+// Resume content
+const resumeContent = {
+    hero: {
+        type: 'hero',
+        artist: 'Zachary Gort',
+        album: 'Senior UX/UI Designer & Strategist'
+    },
+    contact: {
+        type: 'contact',
+        artist: 'Contact',
+        album: '<a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a> • <a href="https://zackgort.com" target="_blank">zackgort.com</a> • <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>'
+    },
+    summary: {
+        type: 'summary',
+        artist: 'Professional Summary',
+        album: 'Senior User Experience (UX) and User Interface (UI) Designer with 10+ years leading end-to-end design projects for enterprise organizations. Expert in interaction design, information architecture, design systems, prototyping, wireframing, user research, usability testing, and content strategy. Proven in Agile/Scrum environments, cross-functional collaboration, and delivering data-driven solutions for Fortune 500 clients.'
+    },
+    experiences: [
+        {
+            type: 'experience',
+            artist: 'Phenom',
+            role: 'User Experience Strategist',
+            year: '01/2025 – 04/2025',
+            summary: 'Managed the corporate website and shaped the product roadmap, centralizing campaign content and aligning Marketing, Sales, and Product for live demos and launches.',
+            details: {
+                title: 'Cross-Functional Strategy & Operations',
+                bullets: [
+                    'Great product and a positive team culture. I worked around operational silos across local and global teams to make cross-functional work land more smoothly.',
+                    'Advanced third-party integrations and refined live event management and demo workflows.',
+                    'Forged cross-department relationships that moved strategic initiatives forward.'
+                ]
+            },
+            pills: ['Contentful', 'Jira', 'Digital Content Management']
+        },
+        {
+            type: 'experience',
+            artist: 'Publicis Sapient',
+            role: 'Senior User Experience Designer',
+            year: '04/2022 – 03/2023',
+            summary: 'Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.',
+            details: {
+                title: 'Design System Architecture & Scale',
+                bullets: [
+                    'Led multi-track efforts to clarify product scope and design a modular canonical system to cut complexity.',
+                    'Shipped a modular design system and modernized the stack (React, Tailwind) to enable consistent, scalable delivery.',
+                    'Improved coordination and handoffs across design and engineering, speeding delivery cadence.'
+                ]
+            },
+            pills: ['UX Methodologies', 'Design Principles', 'Digital Products Enhancement']
+        },
+        {
+            type: 'experience',
+            artist: 'Code & Theory',
+            role: 'Senior Interaction Designer',
+            year: '08/2021 – 04/2022',
+            summary: 'Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.',
+            details: {
+                title: 'Content Strategy & Platform Modernization',
+                bullets: [
+                    'Balanced brand and B2B needs and helped the team adopt a headless CMS approach for better content flexibility.',
+                    'Delivered workshops on information architecture, modular systems, and design within Contentful.',
+                    'Enabled faster decision-making and more evidence-driven product choices.'
+                ]
+            },
+            pills: ['Strategic Insights', 'Iterative Methodologies', 'Design Frameworks']
+        },
+        {
+            type: 'experience',
+            artist: 'Elva Design Group',
+            role: 'Senior User Experience Designer',
+            year: '04/2021 – 08/2021',
+            summary: 'Owned discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.',
+            details: {
+                title: 'Mobile-First Commerce Frameworks',
+                bullets: [
+                    'Autonomy let me push pragmatic, creative solutions when the usual formula didn’t fit the client.',
+                    'Built a component framework optimized for mobile-first e-commerce and future navigation patterns.',
+                    'Aligned cross-functional teams and produced practical handoff assets for engineering.'
+                ]
+            },
+            pills: ['Strategic Thinking', 'Technical Execution', 'Design Strategy', 'Hand-off']
+        },
+        {
+            type: 'experience',
+            artist: 'Huge Inc.',
+            role: 'Senior User Experience Designer',
+            year: '03/2021 – 04/2021',
+            summary: 'Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.',
+            details: {
+                title: 'Booking Experience Optimization',
+                bullets: [
+                    'Small scope, high impact — a focused engagement that mattered.',
+                    'Advised on brand activation and competitive positioning to inform UX strategy.',
+                    'Delivered ship-ready UX despite limited resources and time.'
+                ]
+            },
+            pills: ['Competitive Landscape Analysis', 'UX Research', 'Information Architecture', 'User Flow']
+        },
+        {
+            type: 'experience',
+            artist: 'PFSWeb LiveArea',
+            role: 'Manager, UX',
+            year: '01/2020 – 02/2021',
+            summary: 'UX Manager on full-spectrum Salesforce e-commerce builds for B2B and B2C clients (Aquasana, Hardinge, Simpson Strong-Tie, West Marine, YETI). Served as the primary UX strategy and design lead.',
+            details: {
+                title: 'High-Volume Commerce Optimization',
+                bullets: [
+                    'A period of accelerated growth — I listened to clients and delivered on demanding business objectives.',
+                    'Solved conversion, re-engagement, and deep inventory challenges with pragmatic UX approaches.',
+                    'The PFSweb acquisition changed context; I navigated shifting priorities while keeping delivery steady.'
+                ]
+            },
+            pills: ['Information Architecture', 'Salesforce Solutions Architecture', 'Design Systems']
+        },
+        {
+            type: 'experience',
+            artist: 'Workarea',
+            role: 'Senior User Experience Designer',
+            year: '07/2017 – 09/2018',
+            summary: 'Focused on improving a SaaS e-commerce platform through client collaboration and data-driven design, streamlining handoffs and workflows for scale.',
+            details: {
+                title: 'SaaS Platform Enhancements',
+                bullets: [
+                    'Quick sketches and dev conversations often unlocked product improvements — one of the best environments I’ve worked in.',
+                    'Introduced iterative processes and leveraged data to expand platform capabilities.',
+                    'Partnered with retail and lifestyle clients to deliver measurable product value.'
+                ]
+            },
+            pills: ['Information Architecture', 'Data Analysis', 'Design Systems', 'Research', 'UX Technical Writing']
+        },
+        {
+            type: 'experience',
+            artist: 'O3 World',
+            role: 'User Experience Designer',
+            year: '07/2016 – 06/2017',
+            summary: 'Practiced Lean UX in a scrum-led environment, designing FinTech and iOS products with disciplined execution at every stage.',
+            details: {
+                title: 'FinTech & Agile Product Design',
+                bullets: [
+                    'Projects began on a whiteboard and often redefined expectations — the process taught rigor and craft.',
+                    'Led whiteboard sessions, wireframes, and sprint-driven MVPs to ship robust solutions.',
+                    'Collaborated with researchers, PMs, and engineers to deliver measurable outcomes.'
+                ]
+            },
+            pills: ['Lean UX', 'Agile Workflow', 'Information Architecture', 'Product Design Systems']
+        },
+        {
+            type: 'experience',
+            artist: 'ONE SIXTY OVER NINETY',
+            role: 'Interaction Designer',
+            year: '09/2014 – 07/2016',
+            summary: 'At the preeminent .EDU agency, I delivered full-service interactive work with a focus on IA and ADA-compliant systems.',
+            details: {
+                title: 'Inclusive Design & Complex IA',
+                bullets: [
+                    'Developed deep IA and accessibility expertise, translating brand into usable digital experiences.',
+                    'As one of two interactive designers, I owned full-spectrum builds for higher-education clients.',
+                    'Led client-facing creative work across .EDU accounts and projects for Comcast and the Philadelphia Eagles.'
+                ]
+            },
+            pills: ['Information Architecture', 'Wireframe Prototyping', 'UI Design Systems', 'Creative Copywriting', 'Visual Design']
         }
-    }
-    if (gridBtn) {
-        // Attach new event listeners
-        gridBtn.addEventListener('click', showGridView);
-        listBtn.addEventListener('click', showListView);
-    }
-    loadViewState(); // Apply the saved state immediately
-    // FIRST-TIME GUIDANCE FIX: Drag Hint Logic
-    const dragHints = document.querySelectorAll('.drag-hint');
-    const IS_FIRST_VISIT = !localStorage.getItem('hasVisitedCV'); // Use a specific key
-    if (IS_FIRST_VISIT && shouldRunAdvancedEffects) { // Only show hint if effects are running
-        // Show hint after a small delay
-        setTimeout(() => {
-            dragHints.forEach(hint => {
-                hint.classList.add('visible');
-                hint.setAttribute('aria-hidden', 'false');
+    ],
+    specializations: [
+        {
+            title: 'Design Leadership',
+            description: 'Master facilitator: leading client workshops, inspiring teams, and presenting design decisions with confidence.'
+        },
+        {
+            title: 'Strategic UX & Service Design',
+            description: 'Skilled at crafting experience maps, service blueprints, and interaction models that solve user and business problems.'
+        },
+        {
+            title: 'Digital Design & Prototyping',
+            description: 'Advanced in Figma and Adobe Creative Suite; experienced in rapid prototyping and comfortable with HTML/CSS/JS for interactive proofs of concept.'
+        },
+        {
+            title: 'Design Systems & Visual Standards',
+            description: 'Experienced in creating and evolving design systems and style guides to maintain product coherence as teams scale.'
+        },
+        {
+            title: 'Collaboration',
+            description: 'Partner closely with product owners, front-end developers, and multi-disciplinary teams to ship high-impact outcomes.'
+        },
+        {
+            title: 'Communication & Storytelling',
+            description: 'Clear writer and presenter who tailors the story to the audience and moves decisions forward.'
+        },
+        {
+            title: 'Project Management',
+            description: 'Delivers projects on time and on budget with attention to detail and strong organization.'
+        }
+    ],
+    competencies: [
+        {
+            category: 'Design & Strategy',
+            pills: ['User Experience Design', 'User Interface Design', 'Interaction Design', 'Information Architecture', 'Design Systems', 'Prototyping', 'Wireframing', 'User Research', 'Usability Testing', 'Content Strategy', 'Service Design', 'Design Thinking']
+        },
+        {
+            category: 'Collaboration & Process',
+            pills: ['Agile/Scrum', 'Cross-functional Team Leadership', 'Stakeholder Management', 'Workshop Facilitation', 'Client Relations', 'Design Hand-offs', 'Strategic Planning']
+        },
+        {
+            category: 'Tools & Platforms',
+            pills: ['Figma', 'Sketch', 'Adobe Creative Suite', 'Contentful', 'Jira', 'Salesforce', 'Shopify', 'HTML/CSS', 'JavaScript', 'Miro', 'InVision', 'Notion']
+        }
+    ],
+    references: [
+        {
+            name: 'Christopher Bayle',
+            quote: '“Zack connects to emotion and imagination in a way that surfaces thoughtful, human work. His empathy and perspective consistently helped break creative logjams — a reliable and inspiring collaborator.”',
+            title: 'ACD UX, Publicis Sapient'
+        },
+        {
+            name: 'Andrés Moros, MPS',
+            quote: '“Zack is talented, hardworking, and highly communicative. He elevates team collaboration and consistently goes the extra mile. I recommend him without reservation.”',
+            title: 'Sr. UX Designer, Publicis Sapient'
+        }
+    ],
+    education: [
+        {
+            school: 'Pratt Institute of Art',
+            description: 'BFA, 3D Animation & Motion Graphics (Incomplete Degree). Foundation in digital media arts, technical prototyping, and the craft of meaningful storytelling.',
+            duration: '2002 – 2005'
+        }
+    ]
+};
+
+// Case Study 1 content
+const case1Content = {
+    title: 'BNY Mellon — Pershing X',
+    sections: [
+        {
+            type: 'overview',
+            h2: 'Project Overview',
+            p: 'Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry.'
+        },
+        {
+            type: 'challenges',
+            h2: 'Key Challenges & Solutions',
+            p1: 'Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard',
+            p2: 'Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry).'
+        },
+        {
+            type: 'process',
+            h2: 'Process',
+            details: [
+                {label: 'Client:', value: ' BNY Melon — Pershing X'},
+                {label: 'Agency:', value: ' Publicis Sapient'},
+                {label: 'Role:', value: ' Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience. Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys.'}
+            ]
+        },
+        {
+            type: 'visuals',
+            h2: 'Visual Deliverables',
+            images: [
+                {src: "https://i.ibb.co/wZY2bhKF/bny4.png", alt: "BNY Mellon visual 1"},
+                {src: "https://i.ibb.co/xS49C07B/bny3.png", alt: "BNY Mellon visual 2"},
+                {src: "https://i.ibb.co/vvMZmq94/bny2.png", alt: "BNY Mellon visual 3"},
+                {src: "https://i.ibb.co/XkM2hn8n/bny1.png", alt: "BNY Mellon visual 4"},
+                {src: "https://i.ibb.co/FJNG1jC/14.jpg", alt: "BNY Mellon visual 5"},
+                {src: "https://i.ibb.co/fxjgcYD/18.png", alt: "BNY Mellon visual 6"},
+                {src: "https://i.ibb.co/gtQLYJQ/17.jpg", alt: "BNY Mellon visual 7"},
+                {src: "https://i.ibb.co/Fgxcqj0/16.jpg", alt: "BNY Mellon visual 8"},
+                {src: "https://i.ibb.co/dcXH5fn/13.jpg", alt: "BNY Mellon visual 9"}
+            ]
+        },
+        {
+            type: 'insights',
+            h2: 'Insights',
+            p: 'Deep Dive: No Artificial Intelligence Here',
+            aside: 'This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.'
+        },
+        {
+            type: 'outcomes',
+            h2: 'Outcomes',
+            p: 'Wove launched with BNY Melon power, scale, and security, helping advisors work faster and serve more clients.'
+        },
+        {
+            type: 'stack',
+            h2: 'Stack',
+            images: [
+                {src: "https://i.ibb.co/XkM2hn8n/bny1.png", alt: "BNY 1"},
+                {src: "https://i.ibb.co/vvMZmq94/bny2.png", alt: "BNY 2"},
+                {src: "https://i.ibb.co/xS49C07B/bny3.png", alt: "BNY 3"},
+                {src: "https://i.ibb.co/wZY2bhKF/bny4.png", alt: "BNY 4"},
+                {src: "https://i.ibb.co/HGv7ymj/4.jpg", alt: "Account Opening"}
+            ]
+        }
+    ]
+};
+
+// Case Study 2 content
+const case2Content = {
+    title: 'General Nutrition Centers (GNC)',
+    sections: [
+        {
+            type: 'overview',
+            h2: 'Project Overview',
+            p: '{We} dove deep into GNC\'s e-commerce ecosystem. From market research, to [client-supplied] user data, to wireframe feature prototyping; we built a modular component-based design system optimized for continued optimization.'
+        },
+        {
+            type: 'challenges',
+            h2: 'Key Challenges & Solutions',
+            p1: 'As part of a total overhaul and overcoming a recent bankruptcy, GNC asked us to shake things up; providing them with a modern and modular e-commerce solution through a ground-up build on the Shopify platform.',
+            p2: 'Lead UX {IA/UI Prototypes/Design Systems}. Paired with PM, Dev Lead, Design Team and Client-Side Stakeholders. 12-week engagement meant tight cadence, fast-on-our-feet design + strategy, and weekly exec reviews.',
+            p3: '{We} introduced a modern mobile-first navigation schema and retail taxonomy strategy that separated GNC not just from its competition, but all in the e-retail space.'
+        },
+        {
+            type: 'process',
+            h2: 'Process',
+            details: [
+                {label: 'Client:', value: ' General Nutrition Centers (GNC)'},
+                {label: 'Agency:', value: ' Elva Design Group'},
+                {label: 'Role:', value: ' Senior User Experience Designer'}
+            ]
+        },
+        {
+            type: 'visuals',
+            h2: 'Visual Deliverables',
+            images: [
+                {src: "https://i.ibb.co/ynjWYqv8/2.webp", alt: "GNC visual 1"},
+                {src: "https://i.ibb.co/spHgPH6N/1.webp", alt: "GNC visual 2"},
+                {src: "https://i.ibb.co/cXg5Phdc/3.webp", alt: "GNC visual 3"},
+                {src: "https://i.ibb.co/99h2bQMh/6.webp", alt: "GNC visual 4"},
+                {src: "https://i.ibb.co/gZ58PKyk/4.webp", alt: "GNC visual 5"},
+                {src: "https://i.ibb.co/Y7pGqJ69/5.webp", alt: "GNC visual 6"},
+                {src: "https://i.ibb.co/yB4RwkTf/7.webp", alt: "GNC visual 7"},
+                {src: "https://i.ibb.co/cSQCgNQY/work1.webp", alt: "GNC visual 8"},
+                {src: "https://i.ibb.co/pBMMxY1Z/11.webp", alt: "GNC visual 9"},
+                {src: "https://i.ibb.co/7N2rDqrN/8.webp", alt: "GNC visual 10"},
+                {src: "https://i.ibb.co/vx76zjgf/10.webp", alt: "GNC visual 11"},
+                {src: "https://i.ibb.co/rft2bf0T/9.webp", alt: "GNC visual 12"}
+            ]
+        },
+        {
+            type: 'insights',
+            h2: 'Insights',
+            p: 'Outcome: The result helped GNC reclaim ~$500M in annual revenue.',
+            aside: 'if the bar ain\'t bending, you’re just pretending.'
+        },
+        {
+            type: 'stack',
+            h2: 'Stack',
+            images: [
+                {src: "https://i.ibb.co/ynjWYqv8/2.webp", alt: "notes"},
+                {src: "https://i.ibb.co/spHgPH6N/1.webp", alt: "research"},
+                {src: "https://i.ibb.co/cXg5Phdc/3.webp", alt: "mobile commerce"},
+                {src: "https://i.ibb.co/99h2bQMh/6.webp", alt: "product detail page"},
+                {src: "https://i.ibb.co/gZ58PKyk/4.webp", alt: "mobile product detail"},
+                {src: "https://i.ibb.co/Y7pGqJ69/5.webp", alt: "consumer engagement"},
+                {src: "https://i.ibb.co/yB4RwkTf/7.webp", alt: "rewards program"},
+                {src: "https://i.ibb.co/cSQCgNQY/work1.webp", alt: "handheld"},
+                {src: "https://i.ibb.co/pBMMxY1Z/11.webp", alt: "mobile overview"},
+                {src: "https://i.ibb.co/7N2rDqrN/8.webp", alt: "mobile closeup"},
+                {src: "https://i.ibb.co/vx76zjgf/10.webp", alt: "desktop navigation"},
+                {src: "https://i.ibb.co/rft2bf0T/9.webp", alt: "desktop homepage"}
+            ]
+        }
+    ]
+};
+
+// Function to generate list view HTML for resume
+function generateListView(content) {
+    let html = '<ul class="project-list">';
+    
+    // Hero
+    html += `<li class="project-item hero">
+        <div class="project-data artist">${content.hero.artist}</div>
+        <div class="project-data album">${content.hero.album}</div>
+    </li>`;
+    
+    // Contact
+    html += `<li class="project-item" style="grid-template-columns: 200px 1fr;">
+        <div class="project-data artist">${content.contact.artist}</div>
+        <div class="project-data album">${content.contact.album}</div>
+    </li>`;
+    
+    // Summary
+    html += `<li class="project-item summary">
+        <div class="project-data artist">${content.summary.artist}</div>
+        <div class="project-data album">${content.summary.album}</div>
+    </li>`;
+    
+    // Experiences
+    html += '<li class="project-item section"><div class="project-data artist">Experience</div></li>';
+    content.experiences.forEach(exp => {
+        html += `<li class="project-item experience">
+            <div class="project-data artist">${exp.artist}</div>
+            <div class="project-data role">${exp.role}</div>
+            <div class="project-data year">${exp.year}</div>
+            <div class="project-data album">
+                <p class="summary">${exp.summary}</p>
+                <details>
+                    <summary>${exp.details.title}</summary>
+                    <div class="accordion-content">
+                        <ul>${exp.details.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+                    </div>
+                </details>
+                <div class="pills">${exp.pills.map(p => `<span class="pill">${p}</span>`).join('')}</div>
+            </div>
+        </li>`;
+    });
+    
+    // Specializations
+    html += '<li class="project-item section"><div class="project-data artist">Specializations</div></li>';
+    content.specializations.forEach(spec => {
+        html += `<li class="project-item quote">
+            <div class="project-data artist">${spec.title}</div>
+            <div class="project-data album">${spec.description}</div>
+        </li>`;
+    });
+    
+    // Core Competencies
+    html += '<li class="project-item section"><div class="project-data artist">Core Competencies</div></li>';
+    content.competencies.forEach(comp => {
+        html += `<li class="project-item skill">
+            <div class="project-data artist">${comp.category}</div>
+            <div class="project-data album">
+                <div class="pills">${comp.pills.map(p => `<span class="pill">${p}</span>`).join('')}</div>
+            </div>
+        </li>`;
+    });
+    
+    // References
+    html += '<li class="project-item section"><div class="project-data artist">References & Testimonials</div></li>';
+    content.references.forEach(ref => {
+        html += `<li class="project-item quote">
+            <div class="project-data artist">${ref.name}</div>
+            <div class="project-data album">"${ref.quote}"</div>
+        </li>`;
+    });
+    
+    // Education
+    html += '<li class="project-item section"><div class="project-data artist">Education</div></li>';
+    content.education.forEach(edu => {
+        html += `<li class="project-item quote">
+            <div class="project-data artist">${edu.school}</div>
+            <div class="project-data album">${edu.description} (${edu.duration})</div>
+        </li>`;
+    });
+    
+    html += '</ul>';
+    return html;
+}
+
+// Function to generate grid view HTML for resume
+function generateGridView(content) {
+    let html = '';
+    
+    // Hero and Summary as full-width
+    html += `<div class="full-width-section">
+        <h1 class="grid-section-title">${content.hero.artist}</h1>
+        <p class="summary">${content.hero.album}</p>
+        <p class="summary">${content.contact.album}</p>
+        <p class="summary">${content.summary.album}</p>
+    </div>`;
+    
+    // Experiences
+    html += '<div class="grid-section"><div class="grid-section-title">Experience</div><div class="grid-items">';
+    content.experiences.forEach(exp => {
+        html += `<div class="grid-item">
+            <h4>${exp.artist}</h4>
+            <div class="job-info">
+                <span class="role">${exp.role}</span>
+                <span class="duration">${exp.year}</span>
+            </div>
+            <p class="summary">${exp.summary}</p>
+            <details>
+                <summary>${exp.details.title}</summary>
+                <div class="accordion-content">
+                    <ul>${exp.details.bullets.map(b => `<li>${b}</li>`).join('')}</ul>
+                </div>
+            </details>
+            <div class="pills">${exp.pills.map(p => `<span class="pill">${p}</span>`).join('')}</div>
+        </div>`;
+    });
+    html += '</div></div>';
+    
+    // Specializations
+    html += '<div class="grid-section"><div class="grid-section-title">Specializations</div><div class="grid-items">';
+    content.specializations.forEach(spec => {
+        html += `<div class="grid-item">
+            <h4>${spec.title}</h4>
+            <p>${spec.description}</p>
+        </div>`;
+    });
+    html += '</div></div>';
+    
+    // Core Competencies
+    html += '<div class="grid-section"><div class="grid-section-title">Core Competencies</div><div class="grid-items">';
+    content.competencies.forEach(comp => {
+        html += `<div class="grid-item">
+            <h4>${comp.category}</h4>
+            <div class="pills">${comp.pills.map(p => `<span class="pill">${p}</span>`).join('')}</div>
+        </div>`;
+    });
+    html += '</div></div>';
+    
+    // References
+    html += '<div class="grid-section"><div class="grid-section-title">References & Testimonials</div><div class="grid-items">';
+    content.references.forEach(ref => {
+        html += `<div class="grid-item">
+            <h4>${ref.name}</h4>
+            <p>“${ref.quote}”</p>
+            <span class="duration">${ref.title}</span>
+        </div>`;
+    });
+    html += '</div></div>';
+    
+    // Education
+    html += '<div class="grid-section"><div class="grid-section-title">Education</div><div class="grid-items">';
+    content.education.forEach(edu => {
+        html += `<div class="grid-item">
+            <h4>${edu.school}</h4>
+            <p>${edu.description}</p>
+            <span class="duration">${edu.duration}</span>
+        </div>`;
+    });
+    html += '</div></div>';
+    
+    return html;
+}
+
+// Function to generate case study HTML
+function generateCaseStudyHTML(content) {
+    let html = '<h1>' + content.title + '</h1>';
+    content.sections.forEach(section => {
+        let className = 'case-study-section';
+        if (section.type === 'process') className += ' case-study-process';
+        if (section.type === 'insights') className += ' case-study-insight';
+        if (section.type === 'stack') className += ' case-study-stack';
+        
+        html += `<div class="${className}">`;
+        if (section.h2) html += `<h2>${section.h2}</h2>`;
+        
+        if (section.p) html += `<p>${section.p}</p>`;
+        if (section.aside) html += `<p class="aside">${section.aside}</p>`;
+        if (section.p1) html += `<p>${section.p1}</p>`;
+        if (section.p2) html += `<p>${section.p2}</p>`;
+        if (section.p3) html += `<p>${section.p3}</p>`;
+        
+        if (section.details) {
+            section.details.forEach(detail => {
+                html += `<div class="detail">
+                    <span class="label">${detail.label}</span> ${detail.value}
+                </div>`;
             });
-        }, 2000); // Show after 2 seconds
-       
-        localStorage.setItem('hasVisitedCV', 'true'); // Set flag to remember the visit
-    }
-    // Function to hide the hint on first interaction
-    function hideDragHint() {
-        dragHints.forEach(hint => {
-            hint.classList.remove('visible');
-            hint.setAttribute('aria-hidden', 'true');
-        });
-        // Remove listeners to only run once
-        window.removeEventListener('pointerdown', hideDragHint);
-        window.removeEventListener('keydown', hideDragHint);
-        window.removeEventListener('wheel', hideDragHint);
-    }
-    // Hide hint on any interaction
-    window.addEventListener('pointerdown', hideDragHint, { once: true });
-    window.addEventListener('keydown', hideDragHint, { once: true });
-    window.addEventListener('wheel', hideDragHint, { once: true });
-    // Drag Scroll Initialization (Performance Fix: includes throttling logic)
-    function initDragScroll(element) {
-     
-      // PERFORMANCE FIX: Only run complex momentum on fine pointers & without reduced motion
-      if (!shouldRunAdvancedEffects) {
-          // Fallback: Use only basic, synchronous drag-scroll for better performance
-          let isDown = false;
-          let startX;
-          let scrollLeft;
-          element.addEventListener('pointerdown', (e) => {
-              isDown = true;
-              startX = e.pageX - element.offsetLeft;
-              scrollLeft = element.scrollLeft;
-              element.style.cursor = 'grabbing';
-          });
-          element.addEventListener('pointerleave', () => {
-              isDown = false;
-              element.style.cursor = 'auto';
-          });
-          element.addEventListener('pointerup', () => {
-              isDown = false;
-              element.style.cursor = 'auto';
-          });
-          element.addEventListener('pointermove', (e) => {
-              if (!isDown) return;
-              e.preventDefault();
-              const x = e.pageX - element.offsetLeft;
-              const walk = (x - startX) * 1.5; // Drag speed
-              element.scrollLeft = scrollLeft - walk;
-          });
-          return; // Exit the function to prevent running the momentum version
-      }
-     
-      // Original Momentum Drag Scroll Logic (runs when shouldRunAdvancedEffects is true)
-      let isDown = false;
-      let isDragging = false;
-      let startX, startY, scrollLeft, scrollTop;
-      let velocityX = 0, velocityY = 0;
-      let initialX, initialY;
-      const threshold = 5; // Pixels to distinguish drag from click
-      const start = (e) => {
-        if (e.button !== 0 && e.pointerType !== 'touch') return;
-        isDown = true;
-        isDragging = false;
-        initialX = e.pageX;
-        initialY = e.pageY;
-        velocityX = 0;
-        velocityY = 0;
-        element.style.cursor = 'grab';
-      };
-      const move = (e) => {
-        if (!isDown) return;
-        const dx = e.pageX - initialX;
-        const dy = e.pageY - initialY;
-       
-        // Check threshold to start dragging
-        if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
-          isDragging = true;
-          startX = e.pageX;
-          startY = e.pageY;
-          scrollLeft = element.scrollLeft;
-          scrollTop = element.scrollTop;
-          element.style.cursor = 'grabbing';
         }
-        if (isDragging) {
-          e.preventDefault();
-          const x = e.pageX;
-          const y = e.pageY;
-          const walkX = (x - startX);
-          const walkY = (y - startY);
-         
-          // Calculate velocity for momentum
-          velocityX = walkX * 0.1;
-          velocityY = walkY * 0.1;
-          // Apply drag scroll
-          element.scrollLeft = scrollLeft - walkX;
-          element.scrollTop = scrollTop - walkY;
-          // Update start points for continuous velocity calculation
-          startX = x;
-          startY = y;
-          scrollLeft = element.scrollLeft;
-          scrollTop = element.scrollTop;
-        }
-      };
-      const stop = (e) => {
-        if (!isDown) return;
-        isDown = false;
-        const wasDragging = isDragging;
-        isDragging = false;
-        element.style.cursor = wasDragging ? 'grab' : 'auto';
-        if (wasDragging) {
-          const momentum = () => {
-            element.scrollLeft += velocityX * 30;
-            element.scrollTop += velocityY * 30;
-            velocityX *= 0.95;
-            velocityY *= 0.95;
-            if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
-              requestAnimationFrame(momentum);
+        
+        if (section.images) {
+            if (section.type === 'visuals') {
+                html += '<div class="case-study-grid">';
+                section.images.forEach(img => {
+                    html += `<img src="${img.src}" alt="${img.alt}">`;
+                });
+                html += '</div>';
+            } else if (section.type === 'stack') {
+                html += '<div class="case-study-stack">';
+                section.images.forEach(img => {
+                    html += `<figure><img src="${img.src}" alt="${img.alt}"></figure>`;
+                });
+                html += '</div>';
             }
-          };
-          momentum();
         }
-      };
-      element.addEventListener('pointerdown', start, { passive: true });
-      element.addEventListener('pointermove', move, { passive: false }); // Needs to be non-passive for preventDefault
-      element.addEventListener('pointerup', stop);
-      element.addEventListener('pointercancel', stop);
-      element.addEventListener('pointerleave', stop);
-    }
-    initDragScroll(document.getElementById('resume-view'));
-    initDragScroll(document.getElementById('case1-view'));
-    initDragScroll(document.getElementById('case2-view'));
-    // Global Tilt Effect for 3D Feel (Performance Fix: throttled by shouldRunAdvancedEffects)
-    const tiltContainers = document.querySelectorAll('.curved');
-    if (tiltContainers.length > 0 && shouldRunAdvancedEffects) { // PERFORMANCE FIX: Only run on high-spec/fine pointer devices
-      window.addEventListener('mousemove', (e) => {
-        const { clientX, clientY } = e;
-        const { innerWidth, innerHeight } = window;
-       
-        // Calculate rotation (subtle tilt) - max 1.5 degrees
-        // X rotation is based on Y position (inverted)
-        // Y rotation is based on X position
-        const xRot = ((clientY / innerHeight) - 0.5) * .25; // Max 1.5 deg tilt (3 * 0.5)
-        const yRot = ((clientX / innerWidth) - 0.5) * .25;
-        tiltContainers.forEach(container => {
-          // Only animate the currently visible container
-          if (container.style.display !== 'none') {
-            container.style.transform = `perspective(2000px) rotateX(${xRot}deg) rotateY(${-yRot}deg)`;
-          }
-        });
-      }, { passive: true });
-    }
-    // Image Lazy Loading/Preloading logic
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                const src = img.getAttribute('data-src');
-                if (src) {
-                    img.src = src;
-                    img.removeAttribute('data-src');
-                    observer.unobserve(img);
-                }
-            }
-        });
+        
+        html += '</div>';
     });
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        observer.observe(img);
+    return html;
+}
+
+// Render all content on load
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('listViewContent').innerHTML = generateListView(resumeContent);
+    document.getElementById('gridViewContent').innerHTML = generateGridView(resumeContent);
+    document.getElementById('case1Content').innerHTML = generateCaseStudyHTML(case1Content);
+    document.getElementById('case2Content').innerHTML = generateCaseStudyHTML(case2Content);
+});
+
+// Rest of the script...
+const body = document.body;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+const shouldRunCursor = isFinePointer && !prefersReducedMotion;
+const shouldRunAdvancedEffects = isFinePointer && !prefersReducedMotion;
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
+const logoToggle = document.getElementById('logoToggle');
+// Themes array
+const themes = ['dark', 'light', 'rose', 'bauhaus', 'typographic'];
+// Update Logo Function
+function updateLogo(theme) {
+const logoImg = document.querySelector('.logo img');
+
+// Rose theme now uses the DARK logo because the background is a bright pink.
+// This matches Light and Bauhaus themes.
+if (theme === 'light' || theme === 'bauhaus' || theme === 'typographic' || theme === 'rose') {
+logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-dark.svg.svg';
+} else {
+// Default 'dark' theme uses the LIGHT logo.
+logoImg.src = 'https://raw.githubusercontent.com/ZACKGORT/intoview/main/intoview-logo-light.svg.svg';
+}
+}
+function getNextTheme(current) {
+const index = themes.indexOf(current);
+return themes[(index + 1) % themes.length];
+}
+function updateThemeIcon(theme) {
+if (theme === 'light') {
+// Sun icon
+themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+} else if (theme === 'rose') {
+// Sparkle/Star icon
+themeIcon.innerHTML = '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>';
+} else if (theme === 'bauhaus') {
+// Bauhaus Square/Grid icon
+themeIcon.innerHTML = '<rect x="3" y="3" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"/>';
+} else if (theme === 'typographic') {
+// Type/Text icon
+themeIcon.innerHTML = '<path d="M4 7V4h16v3M9 20h6M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+} else {
+// Moon icon (default dark)
+themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+}
+}
+function initTheme() {
+let saved = localStorage.getItem('zack-theme');
+if (!themes.includes(saved)) {
+saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+body.setAttribute('data-theme', saved);
+updateThemeIcon(saved);
+updateLogo(saved); // Set initial logo
+}
+function toggleTheme() {
+const current = body.getAttribute('data-theme');
+const next = getNextTheme(current);
+body.setAttribute('data-theme', next);
+localStorage.setItem('zack-theme', next);
+updateThemeIcon(next);
+updateLogo(next); // Update logo on toggle
+}
+initTheme();
+if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+if (logoToggle) logoToggle.addEventListener('click', toggleTheme);
+// Cursor Trail Effect (Performance Fix: throttled by shouldRunCursor)
+(() => {
+if (!shouldRunCursor) return; // PERFORMANCE FIX: Skip on coarse pointers or reduced motion
+
+const TAIL_LENGTH = innerWidth < 800 ? 6 : 14;
+const host = document.getElementById('cursor');
+if (!host) return;
+for (let i = 0; i < TAIL_LENGTH; i++) {
+const d = document.createElement('div');
+d.className = 'cursor-circle';
+host.appendChild(d);
+}
+const circles = host.querySelectorAll('.cursor-circle');
+let mouseX = innerWidth / 2, mouseY = innerHeight / 2;
+const history = Array(TAIL_LENGTH).fill(0).map(() => ({ x: mouseX, y: mouseY }));
+window.addEventListener('pointermove', e => {
+mouseX = e.clientX;
+mouseY = e.clientY;
+}, { passive: true });
+function tick() {
+history.shift();
+history.push({ x: mouseX, y: mouseY });
+circles.forEach((c, i) => {
+  const cur = history[i];
+  const next = history[i + 1] || history[TAIL_LENGTH - 1];
+  cur.x += (next.x - cur.x) * 0.35;
+  cur.y += (next.y - cur.y) * 0.35;
+  const s = Math.max(0.22, i / TAIL_LENGTH);
+  c.style.transform = `translate(calc(${cur.x}px - 50%), calc(${cur.y}px - 50%)) scale(${s})`;
+});
+requestAnimationFrame(tick);
+}
+tick();
+})();
+const gridView = document.getElementById('gridView');
+const listView = document.getElementById('listView');
+const gridBtn = document.getElementById('gridBtn');
+const listBtn = document.getElementById('listBtn');
+// MODE TRANSITION & ACCESSIBILITY FIX: Functions to handle view switching and state persistence
+function showGridView() {
+gridView.style.display = 'block';
+listView.style.display = 'none';
+gridBtn.classList.add('active');
+gridBtn.setAttribute('aria-current', 'true'); // ACCESSIBILITY FIX
+listBtn.classList.remove('active');
+listBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
+localStorage.setItem('viewMode', 'grid'); // PERSISTENCE FIX
+}
+function showListView() {
+gridView.style.display = 'none';
+listView.style.display = 'block';
+listBtn.classList.add('active');
+listBtn.setAttribute('aria-current', 'true'); // ACCESSIBILITY FIX
+gridBtn.classList.remove('active');
+gridBtn.removeAttribute('aria-current'); // ACCESSIBILITY FIX
+localStorage.setItem('viewMode', 'list'); // PERSISTENCE FIX
+}
+// Load View State on Initial Load
+function loadViewState() {
+const savedView = localStorage.getItem('viewMode') || 'list';
+if (savedView === 'grid') {
+    showGridView();
+} else {
+    // Since list is default, call explicitly to set aria attributes correctly
+    showListView();
+}
+}
+if (gridBtn) {
+// Attach new event listeners
+gridBtn.addEventListener('click', showGridView);
+listBtn.addEventListener('click', showListView);
+}
+loadViewState(); // Apply the saved state immediately
+// FIRST-TIME GUIDANCE FIX: Drag Hint Logic
+const dragHints = document.querySelectorAll('.drag-hint');
+const IS_FIRST_VISIT = !localStorage.getItem('hasVisitedCV'); // Use a specific key
+if (IS_FIRST_VISIT && shouldRunAdvancedEffects) { // Only show hint if effects are running
+// Show hint after a small delay
+setTimeout(() => {
+    dragHints.forEach(hint => {
+        hint.classList.add('visible');
+        hint.setAttribute('aria-hidden', 'false');
     });
-    // Overlay and Focus Trap logic
-    const fabButton = document.getElementById('fabButton');
-    const overlay = document.getElementById('overlay');
-    const closeOverlayBtn = document.getElementById('closeOverlay');
-    let lastFocus = null;
-    function openOverlay() {
-      lastFocus = document.activeElement;
-      overlay.classList.add('open');
-      const sheet = overlay.querySelector('.sheet');
-      sheet.setAttribute('tabindex', '-1');
-      
-      // GSAP animation: Slide in from right
-      gsap.fromTo(sheet, 
-        { x: '100%', opacity: 0, scale: 0.95 },  
-        { x: '0%', opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }  
-      );
-      
-      sheet.focus();
-      document.addEventListener('keydown', onKeyDown);
-      overlay.setAttribute('aria-hidden', 'false');
-      fabButton.setAttribute('aria-expanded', 'true');
-      overlay.addEventListener('click', handleOutsideClick);
-    }
-    function closeOverlayFn() {
-      const sheet = overlay.querySelector('.sheet');
-      
-      // GSAP animation: Slide out to right
-      gsap.to(sheet, {
-        x: '100%', opacity: 0, scale: 0.95, duration: 0.4, ease: 'power2.in',
-        onComplete: () => {
-          overlay.classList.remove('open');
-          overlay.setAttribute('aria-hidden', 'true');
-          fabButton.setAttribute('aria-expanded', 'false');
-          if (lastFocus) lastFocus.focus();
-          overlay.removeEventListener('click', handleOutsideClick);
-        }
-      });
-      
-      document.removeEventListener('keydown', onKeyDown);
-    }
-    function handleOutsideClick(e) {
-      const sheet = overlay.querySelector('.sheet');
-      if (!sheet.contains(e.target)) {
-        closeOverlayFn();
-      }
-    }
-    function onKeyDown(e) {
-        if (e.key === 'Escape') closeOverlayFn();
-        if (e.key === 'Tab') {
-            const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-           
-            // Trap focus inside the sheet
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
-        }
-    }
-    if (fabButton) fabButton.addEventListener('click', openOverlay);
-    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
-    // Context Menu (Right-click) Logic
-    const contextMenu = document.getElementById('contextMenu');
-    document.addEventListener('contextmenu', (e) => {
+}, 2000); // Show after 2 seconds
+
+localStorage.setItem('hasVisitedCV', 'true'); // Set flag to remember the visit
+}
+// Function to hide the hint on first interaction
+function hideDragHint() {
+dragHints.forEach(hint => {
+    hint.classList.remove('visible');
+    hint.setAttribute('aria-hidden', 'true');
+});
+// Remove listeners to only run once
+window.removeEventListener('pointerdown', hideDragHint);
+window.removeEventListener('keydown', hideDragHint);
+window.removeEventListener('wheel', hideDragHint);
+}
+// Hide hint on any interaction
+window.addEventListener('pointerdown', hideDragHint, { once: true });
+window.addEventListener('keydown', hideDragHint, { once: true });
+window.addEventListener('wheel', hideDragHint, { once: true });
+// Drag Scroll Initialization (Performance Fix: includes throttling logic)
+function initDragScroll(element) {
+
+// PERFORMANCE FIX: Only run complex momentum on fine pointers & without reduced motion
+if (!shouldRunAdvancedEffects) {
+  // Fallback: Use only basic, synchronous drag-scroll for better performance
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  element.addEventListener('pointerdown', (e) => {
+      isDown = true;
+      startX = e.pageX - element.offsetLeft;
+      scrollLeft = element.scrollLeft;
+      element.style.cursor = 'grabbing';
+  });
+  element.addEventListener('pointerleave', () => {
+      isDown = false;
+      element.style.cursor = 'auto';
+  });
+  element.addEventListener('pointerup', () => {
+      isDown = false;
+      element.style.cursor = 'auto';
+  });
+  element.addEventListener('pointermove', (e) => {
+      if (!isDown) return;
       e.preventDefault();
-      contextMenu.style.top = `${e.clientY}px`;
-      contextMenu.style.left = `${e.clientX}px`;
-      contextMenu.style.display = 'block';
-    });
-    document.addEventListener('click', () => {
-      contextMenu.style.display = 'none';
-    });
-    // Context Menu Actions
-    document.getElementById('expandAll').addEventListener('click', () => {
-        document.querySelectorAll('details').forEach(d => d.open = true);
-        contextMenu.style.display = 'none';
-    });
-    document.getElementById('reset').addEventListener('click', () => {
-        document.querySelectorAll('details').forEach(d => d.open = false);
-        contextMenu.style.display = 'none';
-    });
-    document.getElementById('savePdf').addEventListener('click', () => {
-        contextMenu.style.display = 'none';
-        generateATSOptimizedPDF();
-    });
-    document.getElementById('copyLink').addEventListener('click', () => {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            // Optional: Provide visual feedback like a brief toast message
-        });
-        contextMenu.style.display = 'none';
-    });
-    function generateATSOptimizedPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: 'p',
-        unit: 'mm',
-        format: 'a4',
-        putOnlyUsedFonts: true
-      });
-      doc.setFont("helvetica");
-      doc.setFontSize(16);
-      doc.text("Zachary Gort", 20, 20);
-      doc.setFontSize(12);
-      doc.text("Senior UX/UI Designer & Strategist", 20, 30);
-      // Contact
-      doc.text("Contact:", 20, 40);
-      doc.text("Email: zack@reasonably.cc", 20, 50);
-      doc.text("Portfolio: zackgort.com", 20, 60);
-      doc.text("LinkedIn: linkedin.com/in/zackgort", 20, 70);
-      doc.text("Phone: Email me, please", 20, 80);
-      // Summary
-      let y = 90;
-      doc.text("Professional Summary:", 20, y);
-      y += 10;
-      const summaryText = document.querySelector('.project-item.summary .project-data.album').textContent;
-      const splitSummary = doc.splitTextToSize(summaryText, 170);
-      doc.text(splitSummary, 20, y);
-      y += splitSummary.length * 7; // approx line height
-      // Experience
-      doc.text("Experience:", 20, y);
-      y += 10;
-      const experiences = document.querySelectorAll('.project-item.experience');
-      for (let exp of experiences) {
-        const company = exp.querySelector('.artist').textContent;
-        const role = exp.querySelector('.role').textContent;
-        const year = exp.querySelector('.year').textContent;
-        const summary = exp.querySelector('.summary').textContent;
-        const detailTitle = exp.querySelector('summary')?.textContent || '';
-        const bullets = Array.from(exp.querySelectorAll('.accordion-content li')).map(li => li.textContent);
-        const skills = Array.from(exp.querySelectorAll('.pill')).map(p => p.textContent);
-        doc.setFont("helvetica", "bold");
-        doc.text(company, 20, y);
-        y += 7;
-        doc.setFont("helvetica", "normal");
-        doc.text(role, 20, y);
-        y += 7;
-        doc.text(year, 20, y);
-        y += 7;
-        const splitSum = doc.splitTextToSize(summary, 170);
-        doc.text(splitSum, 20, y);
-        y += splitSum.length * 7;
-        if (detailTitle) {
-          doc.text(detailTitle + ":", 20, y);
-          y += 7;
-          for (let bullet of bullets) {
-            const splitBullet = doc.splitTextToSize("- " + bullet, 160);
-            doc.text(splitBullet, 25, y);
-            y += splitBullet.length * 7;
-          }
-        }
-        if (skills.length) {
-          doc.text("Skills: " + skills.join(", "), 20, y);
-          y += 10;
-        }
-        y += 5; // spacing between experiences
-        if (y > 270) { // add page if needed
-          doc.addPage();
-          y = 20;
-        }
-      }
-      // Specializations
-      doc.text("Specializations:", 20, y);
-      y += 10;
-      const specs = document.querySelectorAll('.grid-section:nth-of-type(2) .grid-item');
-      for (let spec of specs) {
-        const title = spec.querySelector('h4').textContent;
-        const desc = spec.querySelector('p').textContent;
-        doc.setFont("helvetica", "bold");
-        doc.text(title, 20, y);
-        y += 7;
-        doc.setFont("helvetica", "normal");
-        const splitDesc = doc.splitTextToSize(desc, 170);
-        doc.text(splitDesc, 20, y);
-        y += splitDesc.length * 7 + 5;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      }
-      // Core Competencies
-      doc.text("Core Competencies:", 20, y);
-      y += 10;
-      const cores = document.querySelectorAll('.grid-section:nth-of-type(3) .grid-item');
-      for (let core of cores) {
-        const title = core.querySelector('h4').textContent;
-        const pills = Array.from(core.querySelectorAll('.pill')).map(p => p.textContent).join(", ");
-        doc.setFont("helvetica", "bold");
-        doc.text(title, 20, y);
-        y += 7;
-        doc.setFont("helvetica", "normal");
-        const splitPills = doc.splitTextToSize(pills, 170);
-        doc.text(splitPills, 20, y);
-        y += splitPills.length * 7 + 5;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      }
-      // References
-      doc.text("References & Testimonials:", 20, y);
-      y += 10;
-      const refs = document.querySelectorAll('.grid-section:nth-of-type(4) .grid-item');
-      for (let ref of refs) {
-        const name = ref.querySelector('h4').textContent;
-        const quote = ref.querySelector('p').textContent;
-        const title = ref.querySelector('.duration').textContent;
-        doc.setFont("helvetica", "bold");
-        doc.text(name, 20, y);
-        y += 7;
-        doc.setFont("helvetica", "normal");
-        const splitQuote = doc.splitTextToSize(quote, 170);
-        doc.text(splitQuote, 20, y);
-        y += splitQuote.length * 7;
-        doc.text(title, 20, y);
-        y += 7 + 5;
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
-        }
-      }
-      // Education
-      doc.text("Education:", 20, y);
-      y += 10;
-      const edu = document.querySelector('.grid-section:nth-of-type(5) .grid-item');
-      const school = edu.querySelector('h4').textContent;
-      const desc = edu.querySelector('p').textContent;
-      const years = edu.querySelector('.duration').textContent;
-      doc.setFont("helvetica", "bold");
-      doc.text(school, 20, y);
-      y += 7;
-      doc.setFont("helvetica", "normal");
-      const splitDesc = doc.splitTextToSize(desc, 170);
-      doc.text(splitDesc, 20, y);
-      y += splitDesc.length * 7;
-      doc.text(years, 20, y);
-      y += 7;
-      doc.save("ZacharyGort-UX-Resume-2025.pdf");
+      const x = e.pageX - element.offsetLeft;
+      const walk = (x - startX) * 1.5; // Drag speed
+      element.scrollLeft = scrollLeft - walk;
+  });
+  return; // Exit the function to prevent running the momentum version
+}
+
+// Original Momentum Drag Scroll Logic (runs when shouldRunAdvancedEffects is true)
+let isDown = false;
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+let velocityX = 0, velocityY = 0;
+let initialX, initialY;
+const threshold = 5; // Pixels to distinguish drag from click
+const start = (e) => {
+if (e.button !== 0 && e.pointerType !== 'touch') return;
+isDown = true;
+isDragging = false;
+initialX = e.pageX;
+initialY = e.pageY;
+velocityX = 0;
+velocityY = 0;
+element.style.cursor = 'grab';
+};
+const move = (e) => {
+if (!isDown) return;
+const dx = e.pageX - initialX;
+const dy = e.pageY - initialY;
+
+// Check threshold to start dragging
+if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
+  isDragging = true;
+  startX = e.pageX;
+  startY = e.pageY;
+  scrollLeft = element.scrollLeft;
+  scrollTop = element.scrollTop;
+  element.style.cursor = 'grabbing';
+}
+if (isDragging) {
+  e.preventDefault();
+  const x = e.pageX;
+  const y = e.pageY;
+  const walkX = (x - startX);
+  const walkY = (y - startY);
+ 
+  // Calculate velocity for momentum
+  velocityX = walkX * 0.1;
+  velocityY = walkY * 0.1;
+  // Apply drag scroll
+  element.scrollLeft = scrollLeft - walkX;
+  element.scrollTop = scrollTop - walkY;
+  // Update start points for continuous velocity calculation
+  startX = x;
+  startY = y;
+  scrollLeft = element.scrollLeft;
+  scrollTop = element.scrollTop;
+}
+};
+const stop = (e) => {
+if (!isDown) return;
+isDown = false;
+const wasDragging = isDragging;
+isDragging = false;
+element.style.cursor = wasDragging ? 'grab' : 'auto';
+if (wasDragging) {
+  const momentum = () => {
+    element.scrollLeft += velocityX * 30;
+    element.scrollTop += velocityY * 30;
+    velocityX *= 0.95;
+    velocityY *= 0.95;
+    if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+      requestAnimationFrame(momentum);
     }
+  };
+  momentum();
+}
+};
+element.addEventListener('pointerdown', start, { passive: true });
+element.addEventListener('pointermove', move, { passive: false }); // Needs to be non-passive for preventDefault
+element.addEventListener('pointerup', stop);
+element.addEventListener('pointercancel', stop);
+element.addEventListener('pointerleave', stop);
+}
+initDragScroll(document.getElementById('resume-view'));
+initDragScroll(document.getElementById('case1-view'));
+initDragScroll(document.getElementById('case2-view'));
+// Global Tilt Effect for 3D Feel (Performance Fix: throttled by shouldRunAdvancedEffects)
+const tiltContainers = document.querySelectorAll('.curved');
+if (tiltContainers.length > 0 && shouldRunAdvancedEffects) { // PERFORMANCE FIX: Only run on high-spec/fine pointer devices
+window.addEventListener('mousemove', (e) => {
+const { clientX, clientY } = e;
+const { innerWidth, innerHeight } = window;
 
-    // New Filters Logic (kept but button hidden)
-      const filterBtn = document.getElementById('filterBtn');
-      const filterOverlay = document.getElementById('filterOverlay');
-      const closeFilter = document.getElementById('closeFilter');
-      const applyFilter = document.getElementById('applyFilter');
-      const filterList = document.getElementById('filterList');
-
-      function openFilter() {
-        // Collect unique tags from pills
-        const tags = new Set();
-        document.querySelectorAll('.pills .pill').forEach(pill => tags.add(pill.textContent.trim()));
-        filterList.innerHTML = '';
-        tags.forEach(tag => {
-          const label = document.createElement('label');
-          label.innerHTML = `<input type="checkbox" value="${tag}"> ${tag}`;
-          filterList.appendChild(label);
-        });
-
-        lastFocus = document.activeElement;
-        filterOverlay.classList.add('open');
-        const sheet = filterOverlay.querySelector('.filter-sheet');
-        sheet.setAttribute('tabindex', '-1');
-        gsap.fromTo(sheet, { x: '-100%', opacity: 0 }, { x: '0%', opacity: 1, duration: 0.6, ease: 'power3.out' });
-        sheet.focus();
-        document.addEventListener('keydown', onKeyDownFilter);
-        filterOverlay.setAttribute('aria-hidden', 'false');
-      }
-
-      function closeFilterFn() {
-        const sheet = filterOverlay.querySelector('.filter-sheet');
-        gsap.to(sheet, {
-          x: '-100%', opacity: 0, duration: 0.4, ease: 'power2.in',
-          onComplete: () => {
-            filterOverlay.classList.remove('open');
-            filterOverlay.setAttribute('aria-hidden', 'true');
-            if (lastFocus) lastFocus.focus();
-          }
-        });
-        document.removeEventListener('keydown', onKeyDownFilter);
-      }
-
-      function onKeyDownFilter(e) {
-        if (e.key === 'Escape') closeFilterFn();
-        if (e.key === 'Tab') {
-            const focusable = filterOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-           
-            // Trap focus inside the sheet
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
+// Calculate rotation (subtle tilt) - max 1.5 degrees
+// X rotation is based on Y position (inverted)
+// Y rotation is based on X position
+const xRot = ((clientY / innerHeight) - 0.5) * .25; // Max 1.5 deg tilt (3 * 0.5)
+const yRot = ((clientX / innerWidth) - 0.5) * .25;
+tiltContainers.forEach(container => {
+  // Only animate the currently visible container
+  if (container.style.display !== 'none') {
+    container.style.transform = `perspective(2000px) rotateX(${xRot}deg) rotateY(${-yRot}deg)`;
+  }
+});
+}, { passive: true });
+}
+// Image Lazy Loading/Preloading logic
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(entry => {
+    if (entry.isIntersecting) {
+        const img = entry.target;
+        const src = img.getAttribute('data-src');
+        if (src) {
+            img.src = src;
+            img.removeAttribute('data-src');
+            observer.unobserve(img);
         }
-      }
+    }
+});
+});
+document.querySelectorAll('img[data-src]').forEach(img => {
+observer.observe(img);
+});
+// Overlay and Focus Trap logic
+const fabButton = document.getElementById('fabButton');
+const overlay = document.getElementById('overlay');
+const closeOverlayBtn = document.getElementById('closeOverlay');
+let lastFocus = null;
+function openOverlay() {
+lastFocus = document.activeElement;
+overlay.classList.add('open');
+const sheet = overlay.querySelector('.sheet');
+sheet.setAttribute('tabindex', '-1');
 
-      function applyFilters() {
-        const checked = Array.from(filterList.querySelectorAll('input:checked')).map(input => input.value);
-        const items = document.querySelectorAll('.project-item.experience, .grid-item.experience');
-        items.forEach(item => {
-          const itemTags = Array.from(item.querySelectorAll('.pill')).map(pill => pill.textContent.trim());
-          const matches = checked.length === 0 || checked.some(tag => itemTags.includes(tag));
-          item.style.display = matches ? '' : 'none';
-        });
-        closeFilterFn();
-      }
+// GSAP animation: Slide in from right
+gsap.fromTo(sheet, 
+{ x: '100%', opacity: 0, scale: 0.95 },  
+{ x: '0%', opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }  
+);
 
-      if (filterBtn) filterBtn.addEventListener('click', openFilter);
-      if (closeFilter) closeFilter.addEventListener('click', closeFilterFn);
-      if (applyFilter) applyFilter.addEventListener('click', applyFilters);
-      
-      // NEW: Toggle Navigation JavaScript (Refactored)
-      const toggleButtons = document.querySelectorAll('#top-toggle-nav button');
-      const views = {
-        resume: document.getElementById('resume-view'),
-        case1: document.getElementById('case1-view'),
-        case2: document.getElementById('case2-view')
-      };
-      
+sheet.focus();
+document.addEventListener('keydown', onKeyDown);
+overlay.setAttribute('aria-hidden', 'false');
+fabButton.setAttribute('aria-expanded', 'true');
+overlay.addEventListener('click', handleOutsideClick);
+}
+function closeOverlayFn() {
+const sheet = overlay.querySelector('.sheet');
+
+// GSAP animation: Slide out to right
+gsap.to(sheet, {
+x: '100%', opacity: 0, scale: 0.95, duration: 0.4, ease: 'power2.in',
+onComplete: () => {
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  fabButton.setAttribute('aria-expanded', 'false');
+  if (lastFocus) lastFocus.focus();
+  overlay.removeEventListener('click', handleOutsideClick);
+}
+});
+
+document.removeEventListener('keydown', onKeyDown);
+}
+function handleOutsideClick(e) {
+const sheet = overlay.querySelector('.sheet');
+if (!sheet.contains(e.target)) {
+closeOverlayFn();
+}
+}
+function onKeyDown(e) {
+if (e.key === 'Escape') closeOverlayFn();
+if (e.key === 'Tab') {
+    const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+   
+    // Trap focus inside the sheet
+    if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+    }
+}
+}
+if (fabButton) fabButton.addEventListener('click', openOverlay);
+if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlayFn);
+// Context Menu (Right-click) Logic
+const contextMenu = document.getElementById('contextMenu');
+document.addEventListener('contextmenu', (e) => {
+e.preventDefault();
+contextMenu.style.top = `${e.clientY}px`;
+contextMenu.style.left = `${e.clientX}px`;
+contextMenu.style.display = 'block';
+});
+document.addEventListener('click', () => {
+contextMenu.style.display = 'none';
+});
+// Context Menu Actions
+document.getElementById('expandAll').addEventListener('click', () => {
+document.querySelectorAll('details').forEach(d => d.open = true);
+contextMenu.style.display = 'none';
+});
+document.getElementById('reset').addEventListener('click', () => {
+document.querySelectorAll('details').forEach(d => d.open = false);
+contextMenu.style.display = 'none';
+});
+document.getElementById('savePdf').addEventListener('click', () => {
+contextMenu.style.display = 'none';
+generateATSOptimizedPDF();
+});
+document.getElementById('copyLink').addEventListener('click', () => {
+navigator.clipboard.writeText(window.location.href).then(() => {
+    // Optional: Provide visual feedback like a brief toast message
+});
+contextMenu.style.display = 'none';
+});
+function generateATSOptimizedPDF() {
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({
+orientation: 'p',
+unit: 'mm',
+format: 'a4',
+putOnlyUsedFonts: true
+});
+doc.setFont("helvetica");
+doc.setFontSize(16);
+doc.text("Zachary Gort", 20, 20);
+doc.setFontSize(12);
+doc.text(resumeContent.hero.album, 20, 30);
+// Contact
+doc.text("Contact:", 20, 40);
+doc.text("Email: zack@reasonably.cc", 20, 50);
+doc.text("Portfolio: zackgort.com", 20, 60);
+doc.text("LinkedIn: linkedin.com/in/zackgort", 20, 70);
+doc.text("Phone: Email me, please", 20, 80);
+// Summary
+let y = 90;
+doc.text("Professional Summary:", 20, y);
+y += 10;
+const summaryText = resumeContent.summary.album;
+const splitSummary = doc.splitTextToSize(summaryText, 170);
+doc.text(splitSummary, 20, y);
+y += splitSummary.length * 7;
+// Experience
+doc.text("Experience:", 20, y);
+y += 10;
+resumeContent.experiences.forEach(exp => {
+const company = exp.artist;
+const role = exp.role;
+const year = exp.year;
+const summary = exp.summary;
+const detailTitle = exp.details.title;
+const bullets = exp.details.bullets;
+const skills = exp.pills;
+doc.setFont("helvetica", "bold");
+doc.text(company, 20, y);
+y += 7;
+doc.setFont("helvetica", "normal");
+doc.text(role, 20, y);
+y += 7;
+doc.text(year, 20, y);
+y += 7;
+const splitSum = doc.splitTextToSize(summary, 170);
+doc.text(splitSum, 20, y);
+y += splitSum.length * 7;
+if (detailTitle) {
+  doc.text(detailTitle + ":", 20, y);
+  y += 7;
+  bullets.forEach(bullet => {
+    const splitBullet = doc.splitTextToSize("- " + bullet, 160);
+    doc.text(splitBullet, 25, y);
+    y += splitBullet.length * 7;
+  });
+}
+if (skills.length) {
+  doc.text("Skills: " + skills.join(", "), 20, y);
+  y += 10;
+}
+y += 5;
+if (y > 270) {
+  doc.addPage();
+  y = 20;
+}
+});
+// Specializations
+doc.text("Specializations:", 20, y);
+y += 10;
+resumeContent.specializations.forEach(spec => {
+const title = spec.title;
+const desc = spec.description;
+doc.setFont("helvetica", "bold");
+doc.text(title, 20, y);
+y += 7;
+doc.setFont("helvetica", "normal");
+const splitDesc = doc.splitTextToSize(desc, 170);
+doc.text(splitDesc, 20, y);
+y += splitDesc.length * 7 + 5;
+if (y > 270) {
+  doc.addPage();
+  y = 20;
+}
+});
+// Core Competencies
+doc.text("Core Competencies:", 20, y);
+y += 10;
+resumeContent.competencies.forEach(core => {
+const title = core.category;
+const pills = core.pills.join(", ");
+doc.setFont("helvetica", "bold");
+doc.text(title, 20, y);
+y += 7;
+doc.setFont("helvetica", "normal");
+const splitPills = doc.splitTextToSize(pills, 170);
+doc.text(splitPills, 20, y);
+y += splitPills.length * 7 + 5;
+if (y > 270) {
+  doc.addPage();
+  y = 20;
+}
+});
+// References
+doc.text("References & Testimonials:", 20, y);
+y += 10;
+resumeContent.references.forEach(ref => {
+const name = ref.name;
+const quote = ref.quote;
+const title = ref.title;
+doc.setFont("helvetica", "bold");
+doc.text(name, 20, y);
+y += 7;
+doc.setFont("helvetica", "normal");
+const splitQuote = doc.splitTextToSize(quote, 170);
+doc.text(splitQuote, 20, y);
+y += splitQuote.length * 7;
+doc.text(title, 20, y);
+y += 7 + 5;
+if (y > 270) {
+  doc.addPage();
+  y = 20;
+}
+});
+// Education
+doc.text("Education:", 20, y);
+y += 10;
+resumeContent.education.forEach(edu => {
+const school = edu.school;
+const desc = edu.description;
+const years = edu.duration;
+doc.setFont("helvetica", "bold");
+doc.text(school, 20, y);
+y += 7;
+doc.setFont("helvetica", "normal");
+const splitDesc = doc.splitTextToSize(desc, 170);
+doc.text(splitDesc, 20, y);
+y += splitDesc.length * 7;
+doc.text(years, 20, y);
+y += 7;
+if (y > 270) {
+  doc.addPage();
+  y = 20;
+}
+});
+doc.save("ZacharyGort-UX-Resume-2025.pdf");
+}
+
+// New Filters Logic (kept but button hidden)
+const filterBtn = document.getElementById('filterBtn');
+const filterOverlay = document.getElementById('filterOverlay');
+const closeFilter = document.getElementById('closeFilter');
+const applyFilter = document.getElementById('applyFilter');
+const filterList = document.getElementById('filterList');
+
+function openFilter() {
+// Collect unique tags from pills
+const tags = new Set();
+document.querySelectorAll('.pills .pill').forEach(pill => tags.add(pill.textContent.trim()));
+filterList.innerHTML = '';
+tags.forEach(tag => {
+  const label = document.createElement('label');
+  label.innerHTML = `<input type="checkbox" value="${tag}"> ${tag}`;
+  filterList.appendChild(label);
+});
+
+lastFocus = document.activeElement;
+filterOverlay.classList.add('open');
+const sheet = filterOverlay.querySelector('.filter-sheet');
+sheet.setAttribute('tabindex', '-1');
+gsap.fromTo(sheet, { x: '-100%', opacity: 0 }, { x: '0%', opacity: 1, duration: 0.6, ease: 'power3.out' });
+sheet.focus();
+document.addEventListener('keydown', onKeyDownFilter);
+filterOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeFilterFn() {
+const sheet = filterOverlay.querySelector('.filter-sheet');
+gsap.to(sheet, {
+  x: '-100%', opacity: 0, duration: 0.4, ease: 'power2.in',
+  onComplete: () => {
+    filterOverlay.classList.remove('open');
+    filterOverlay.setAttribute('aria-hidden', 'true');
+    if (lastFocus) lastFocus.focus();
+  }
+});
+document.removeEventListener('keydown', onKeyDownFilter);
+}
+
+function onKeyDownFilter(e) {
+if (e.key === 'Escape') closeFilterFn();
+if (e.key === 'Tab') {
+    const focusable = filterOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+   
+    // Trap focus inside the sheet
+    if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+    }
+}
+}
+
+function applyFilters() {
+const checked = Array.from(filterList.querySelectorAll('input:checked')).map(input => input.value);
+const items = document.querySelectorAll('.project-item.experience, .grid-item.experience');
+items.forEach(item => {
+  const itemTags = Array.from(item.querySelectorAll('.pill')).map(pill => pill.textContent.trim());
+  const matches = checked.length === 0 || checked.some(tag => itemTags.includes(tag));
+  item.style.display = matches ? '' : 'none';
+});
+closeFilterFn();
+}
+
+if (filterBtn) filterBtn.addEventListener('click', openFilter);
+if (closeFilter) closeFilter.addEventListener('click', closeFilterFn);
+if (applyFilter) applyFilter.addEventListener('click', applyFilters);
+
+// NEW: Toggle Navigation JavaScript (Refactored)
+const toggleButtons = document.querySelectorAll('#top-toggle-nav button');
+const views = {
+resume: document.getElementById('resume-view'),
+case1: document.getElementById('case1-view'),
+case2: document.getElementById('case2-view')
+};
+
 // Updated switchView function to handle hiding the grid:list toggle and increasing padding for case studies
 function switchView(view) {
-  Object.values(views).forEach(v => v.classList.remove('active'));
-  views[view].classList.add('active');
-  
-  toggleButtons.forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.view === view);
-  });
-  
-  // Hide grid:list UI toggle (view-toggle) when in case study view
-  const viewToggle = document.querySelector('.view-toggle');
-  if (view.startsWith('case')) {
-    viewToggle.style.display = 'none';
-  } else {
-    viewToggle.style.display = ''; // Reset to default (visible)
-  }
-  
-  // Increase visual padding for case study content
-  const content = views[view].querySelector('.view-content');
-  if (content) {
-    if (view.startsWith('case')) {
-      // Increased padding: more top/bottom and wider sides
-      content.style.padding = 'clamp(80px, 12vh, 120px) 8% var(--fab-bottom) 8%';
-    } else {
-      // Reset to original for resume view
-      content.style.padding = 'clamp(60px, 8vh, 80px) 5% var(--fab-bottom) 5%';
-    }
-  }
-  
-  // Smooth transition
-  gsap.fromTo(views[view], 
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
-  );
+Object.values(views).forEach(v => v.classList.remove('active'));
+views[view].classList.add('active');
+
+toggleButtons.forEach(btn => {
+btn.classList.toggle('active', btn.dataset.view === view);
+});
+
+// Hide grid:list UI toggle (view-toggle) when in case study view
+const viewToggle = document.querySelector('.view-toggle');
+if (view.startsWith('case')) {
+viewToggle.style.display = 'none';
+} else {
+viewToggle.style.display = ''; // Reset to default (visible)
 }
-      
-      toggleButtons.forEach(btn => {
-        btn.addEventListener('click', () => switchView(btn.dataset.view));
-      });
-      
-      // Initial setup
-      switchView('resume');
-    </script>
-    </body>
+
+// Increase visual padding for case study content
+const content = views[view].querySelector('.view-content');
+if (content) {
+if (view.startsWith('case')) {
+// Increased padding: more top/bottom and wider sides
+content.style.padding = 'clamp(80px, 12vh, 120px) 8% var(--fab-bottom) 8%';
+} else {
+// Reset to original for resume view
+content.style.padding = 'clamp(60px, 8vh, 80px) 5% var(--fab-bottom) 5%';
+}
+}
+
+// Smooth transition
+gsap.fromTo(views[view], 
+{ opacity: 0, y: 20 },
+{ opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
+);
+}
+
+toggleButtons.forEach(btn => {
+btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// Initial setup
+switchView('resume');
+</script>
+</body>
 </html>

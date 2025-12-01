@@ -1191,7 +1191,6 @@
           padding: 0.5rem 0;
         }
       }
-      
   
       /* Side-specific overlays */
       .right-overlay {
@@ -1410,262 +1409,192 @@
       .view-container.case-study.active .view-toggle * {
         display: none !important;
       }
-      
-      /* supports a dedicated case study root container */
-      #caseStudyView.active .view-toggle,
-      #caseStudyView.active .view-toggle * {
-        display: none !important;
-      }
-      
-      /* supports toggling a body-level flag */
-      body.case-study .view-toggle,
-      body.case-study .view-toggle * {
-        display: none !important;
-      }
-      
-      /* End of stylesheet */
-      
-    /* Enhanced Mobile Optimizations */
-    @media (max-width: 768px) {
-        :root {
-            --base-font-size: 14px; /* Adjusted to minimum compliant size */
-        }
-        
-        body {
-            touch-action: manipulation; /* Improve touch response */
-            -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
-            font-size: var(--base-font-size);
-            line-height: 1.3; /* Tightened for density */
-        }
-        
-        /* Overlays on mobile */
-        .overlay {
-            padding: 0;
-            justify-content: flex-end; /* Bottom sheet style */
-        }
-        
-        .sheet {
-            width: 100vw !important;
-            max-height: 80vh !important;
-            border-radius: 16px 16px 0 0 !important;
-            transform: translateY(100%);
-            padding: 16px;
-        }
-        
-        .close-button {
-            top: 16px;
-            right: 16px;
-            width: 44px; /* Larger touch target */
-            height: 44px;
-        }
-        
-        /* FAB optimizations */
-        .fab {
-            width: var(--fab-size);
-            height: var(--fab-size);
-            min-width: 44px;
-            min-height: 44px;
-        }
-        
-        .fab svg {
-            width: 70%; /* Larger icon for touch */
-        }
-        
-        /* Toggles */
-        .view-toggle {
-            padding: 4px;
-            background: var(--glass-bg);
-        }
-        
-        .toggle-btn {
-            padding: 12px; /* Larger touch targets */
-            min-width: 44px;
-            min-height: 44px;
-        }
-        
-        
-        /* Content adjustments */
-        .portfolio-container, .grid-container {
-            padding: 3rem 1rem 6rem 1rem; /* More bottom padding for scroll */
-        }
-        
-        .project-item, .grid-item {
-            padding: 1.5rem; /* Increased padding for touch */
-        }
-        
-        .project-data.artist {
-            font-size: 1.2rem; /* Smaller headings */
-        }
-        
-        .project-data.album {
-            font-size: 0.9rem; /* Smaller body text */
-            line-height: 1.3;
-        }
-        
-        .pill {
-            padding: 5px 12px; /* Slightly smaller pills */
-            font-size: 0.85rem;
-        }
-        
-        /* Case studies mobile */
-        .case-study-section h2 {
-            font-size: 1.4rem;
-        }
-        
-        .case-study-section p {
-            font-size: 0.9rem;
-            line-height: 1.3;
-        }
-        
-        .case-study-grid {
-            grid-template-columns: 1fr; /* Single column */
-            gap: 1rem;
-        }
-        
-        .case-study-grid img {
-            touch-action: auto; /* Allow scrolling */
-        }
-        
-        .case-study-stack {
-            flex-direction: column;
-        }
-        
-        /* Disable hover effects on mobile, use active instead */
-        .project-item:hover, .grid-item:hover, .case-study-grid img:hover {
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .project-item:active, .grid-item:active, .case-study-grid img:active {
-            background: var(--glass-bg-hover);
-            transform: scale(0.98);
-            transition: transform 0.1s ease;
-        }
-        
-        /* Adjust other elements for refinement */
-        .grid-section-title {
-            font-size: 1.4rem;
-            letter-spacing: 0.08em;
-        }
-        
-        .accordion-content {
-            font-size: 0.9rem;
-            line-height: 1.3;
-        }
-        
-        .pill {
-            margin: 1px; /* Tighter spacing */
-        }
-        
-        .pills {
-            gap: 0.4rem;
-        }
-    }
-    
-    [data-theme="rose"] @media (max-width: 768px) {
-        .sheet {
-            background: rgba(255, 255, 255, 0.75) !important;
-        }
-    }
-    
-    [data-theme="bauhaus"] @media (max-width: 768px) {
-        .grid-item {
-            border-width: 2px !important;
-            padding: 1.5rem;
-        }
-    }
-    
-    [data-theme="typographic"] @media (max-width: 768px) {
-        .project-item {
-            padding: 2rem 0 !important;
-            border-bottom-width: 4px !important;
-        }
-        
-        .grid-item {
-            padding: 2rem;
-        }
-    }
 
-    /* Base Mobile Refinements (All Themes) */
-    @media (max-width: 768px) {
-      .portfolio-container {
-        padding: 2rem 1rem 5rem 60px !important; /* Reduced left from 80px, +1rem bottom for scroll */
+      /* NEW: Bento Layout Styles (Utilitarian & Sophisticated) */
+      .bento-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
       }
-      .grid-container {
-        padding: 2.5rem 1rem 3rem 60px !important; /* Reduced left from 80px, balanced top/bottom */
+      .bento-box {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 4px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        transition: all 0.2s ease;
       }
-      .view-toggle {
-        left: clamp(10px, 2vw, 16px) !important; /* Slight inset to reduce overlap feel */
-        gap: 6px; /* Tighter for mobile */
+      .bento-box:hover {
+        background: var(--glass-bg-hover);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       }
-      .toggle-btn {
-        padding: 10px; /* Larger tap targets */
+      .bento-box h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin: 0;
+        letter-spacing: -0.02em;
+        color: var(--accent);
       }
-    }
+      .bento-box h2 {
+        font-size: 1.5rem;
+        margin: 0;
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .bento-box p {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0;
+        color: var(--ink-2);
+      }
+      .bento-box .aside {
+        font-size: 0.95rem;
+        font-style: italic;
+        color: var(--ink-3);
+      }
+      .bento-box .detail {
+        font-size: 0.95rem;
+      }
+      .bento-box .label {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .bento-box.span-1 { grid-column: span 1; }
+      .bento-box.span-2 { grid-column: span 2; }
+      .bento-box.span-3 { grid-column: span 3; }
+      .bento-box.span-4 { grid-column: span 4; }
+      .image-grid .case-study-grid,
+      .stack-grid .case-study-stack {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .image-grid img,
+      .stack-grid img {
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      }
 
-    /* Theme-Specific Mobile Padding Finesse */
+      /* Bento Theme-Specific Typography Overrides */
+      [data-theme="typographic"] .bento-box {
+        background: transparent;
+        border: 2px solid var(--ink);
+        border-radius: 0;
+        padding: 2rem;
+        box-shadow: none;
+      }
+      [data-theme="typographic"] .bento-box:hover {
+        transform: translate(-4px, -4px);
+        box-shadow: 8px 8px 0 var(--ink);
+      }
+      [data-theme="typographic"] .bento-box h1 {
+        font-size: clamp(3rem, 10vw, 8rem);
+        line-height: 0.85;
+        letter-spacing: -0.05em;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+      [data-theme="typographic"] .bento-box h2 {
+        font-size: clamp(1.5rem, 3vw, 2.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+      }
+      [data-theme="typographic"] .bento-box p {
+        font-size: 1.1rem;
+        line-height: 1.55;
+        font-weight: 500;
+      }
+      [data-theme="typographic"] .bento-box .aside {
+        font-size: 1rem;
+        line-height: 1.6;
+        border-left: 4px solid var(--ink);
+        padding-left: 1rem;
+      }
 
-    /* Dark (default) - Keep glassy, minimal tweak */
-    @media (max-width: 768px) {
-      [data-theme="dark"] .portfolio-container,
-      [data-theme="dark"] .grid-container {
-        padding-left: 65px !important; /* Slight increase over base for vignette/blur balance */
+      [data-theme="bauhaus"] .bento-box {
+        background: #fff;
+        border: 2px solid var(--ink);
+        border-radius: 0;
+        padding: 1.5rem;
+        box-shadow: none;
       }
-    }
+      [data-theme="bauhaus"] .bento-box:hover {
+        box-shadow: 6px 6px 0 var(--ink);
+        transform: translate(-3px, -3px);
+      }
+      [data-theme="bauhaus"] .bento-box h1 {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+      [data-theme="bauhaus"] .bento-box h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      [data-theme="bauhaus"] .bento-box p {
+        font-size: 1rem;
+        line-height: 1.4;
+        font-weight: 600;
+      }
 
-    /* Light - Brighter, so more airy padding */
-    @media (max-width: 768px) {
-      [data-theme="light"] .portfolio-container {
-        padding: 2.5rem 1.5rem 5.5rem 60px !important; /* Extra side/bottom for light scheme readability */
+      [data-theme="rose"] .bento-box {
+        background: rgba(255,255,255,0.6);
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 16px rgba(255,141,161,0.2);
       }
-      [data-theme="light"] .grid-container {
-        padding: 3rem 1.5rem 3.5rem 60px !important;
+      [data-theme="rose"] .bento-box h1 {
+        font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+        letter-spacing: -0.01em;
+        font-weight: 700;
       }
-    }
+      [data-theme="rose"] .bento-box h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+      }
+      [data-theme="rose"] .bento-box p {
+        font-size: 1.05rem;
+        line-height: 1.65;
+      }
 
-    /* Rose - Pink/glass needs softer padding to avoid overwhelm */
-    @media (max-width: 768px) {
-      [data-theme="rose"] .portfolio-container,
-      [data-theme="rose"] .grid-container {
-        padding-top: 3rem !important; /* Extra top for the vibrant bg */
-        padding-bottom: 6rem !important; /* More scroll room */
+      [data-theme="light"] .bento-box {
+        background: rgba(255,255,255,0.98);
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       }
-    }
-
-    /* Bauhaus - Brutalist/sharp, add more top/bottom to prevent "squished" feel */
-    @media (max-width: 768px) {
-      [data-theme="bauhaus"] .portfolio-container {
-        padding: 3rem 1.5rem 6rem 65px !important; /* Extra vertical for shadows/borders */
+      [data-theme="light"] .bento-box h1,
+      [data-theme="light"] .bento-box h2 {
+        color: var(--ink);
       }
-      [data-theme="bauhaus"] .grid-container {
-        padding: 3.5rem 1.5rem 4rem 65px !important;
+      [data-theme="light"] .bento-box p {
+        color: var(--ink-2);
       }
-      [data-theme="bauhaus"] .grid-items {
-        gap: 1.5rem; /* Extra gap to breathe */
+      .drag-hint {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--glass-bg);
+        padding: 8px 16px;
+        border-radius: 999px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
       }
-    }
-
-    /* Typographic - Oversized text, reduce left % for toggle, add vertical */
-    @media (max-width: 768px) {
-      [data-theme="typographic"] .portfolio-container {
-        padding-left: 4% !important; /* From 5%, equiv to ~60px on 360px wide */
-        padding-right: 2% !important; /* Balanced */
-        padding-top: 3rem !important;
-        padding-bottom: 6rem !important;
+      .drag-hint.visible {
+        opacity: 1;
       }
-      [data-theme="typographic"] .grid-container {
-        padding: 3rem 2% 4rem 4% !important; /* Adjusted from 4rem 1% 4rem 5% */
-      }
-      [data-theme="typographic"] .grid-items {
-        grid-template-columns: 1fr !important; /* Enforce single col, more padding around */
-        gap: 1.5rem;
-      }
-      [data-theme="typographic"] .project-item,
-      [data-theme="typographic"] .grid-item {
-        padding: 2rem 0 !important; /* More internal vertical space for large text */
-      }
-    }
-  </style>
+    </style>
 </head>
 <body>
 <body data-theme="dark">
@@ -1788,6 +1717,23 @@
                     </ul>
                 </div>
             </details>
+
+            
+            <details class="full-width-section">
+            <summary>Impetus Begets Action</summary>
+            <div class="accordion-content">
+                <p><a href="https://zackgort.com">https://zackgort.com</a> — started by thinking about my own brand, but eponymous branding is hit or miss. #ZCKGRT</p>
+                <p>I re-purposed <a href="https://intoview.pro">https://intoview.pro</a> — now a platform for exploration to further my craft.</p>
+                <p>First exploration: <a href="https://intoview.pro/melody">https://intoview.pro/melody</a> — guitar:piano notation via a bespoke UI. Having these assets piqued interest and led to more interviews.</p>
+                <p>One interview inspired a proof-of-concept: <a href="https://intoview.pro/noted">https://intoview.pro/noted</a> — a functioning #MVP #prototype.</p>
+                <p>Then came <a href="https://intoview.pro/note">https://intoview.pro/note</a> — “not a novel way to take note.”</p>
+                <p>Meanwhile, I built <a href="https://intoview.pro/kanban">https://intoview.pro/kanban</a> — a SMS-powered multi-user task manager. Explored variable themes, right-click utility, and data-density display preferences.</p>
+                <p>My “aha!” moment: my resume was fluff (<a href="http://reasonably.cc/resume">reasonably.cc/resume</a>).</p>
+                <p>So I rebuilt it in the intoview.pro ecosystem — a hub to build up, upon, and beyond. Test, build, see what works, refactor, fall forward. Framework first; libraries optional; single-source content to support evolution.</p>
+                <p>Also, spontaneous one-day project: <a href="https://emdash.click">https://emdash.click</a></p>
+                <p>— NOTE: all em dashes in this message sourced from <a href="https://emdash.click">https://emdash.click</a></p>
+            </div>
+        </details>
             
             <details class="full-width-section">
                 <summary>Insight, Innovation, and Impact</summary>
@@ -1801,9 +1747,9 @@
             <details class="full-width-section">
                 <summary>I didn't build this for me. I built it for you.</summary>
                 <div class="accordion-content">
-                    <p>I can show you my world, but I can't control how you see it.  Or, can I?</p>
+                    <p>Welcome to my world. Coffee? Water?</p>
                     <ul>
-                        <li><strong>Focused Narrative:</strong> Gone is the "wall of words". Instead, prefer high-impact language and succinct conveyance.</li>
+                        <li><strong>Focused Narrative:</strong> Gone is the "wall of words". Instead, high-impact language and succinct conveyance.</li>
                         <li><strong>Information Density:</strong> The same soup served different ways, basically</li>
                         <li><strong>Digestible Data</strong> Simple, scannable cognitive anchors for humans eye; and bots.</li>
                     </ul>
@@ -1866,65 +1812,101 @@
     </div>
 </div>
     
-    <script>
+<script>
+// Resume content
 const resumeContent = {
     hero: {
+        type: 'hero',
         artist: 'Zachary Gort',
         album: 'Experience Designer'
     },
     contact: {
+        type: 'contact',
         artist: 'Contact',
-        album: 'zack@reasonably.cc • zackgort.com • linkedin.com/in/zackgort'
+        album: '<a href="mailto:zack@reasonably.cc">zack@reasonably.cc</a> • <a href="https://zackgort.com" target="_blank">zackgort.com</a> • <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin.com/in/zackgort</a>'
     },
     summary: {
-        artist: 'Summary',
-        album: 'Seasoned UX/Product Designer with a track record in FinTech, eCommerce, and SaaS. Excel in strategic UX, IA, and design systems. Passionate about human-centered design that drives impact.'
+        type: 'summary',
+        artist: 'Professional Summary',
+        album: 'Senior User Experience (UX) and User Interface (UI) Designer with 10+ years leading end-to-end design projects for enterprise organizations. Expert in interaction design, information architecture, design systems, prototyping, wireframing, user research, usability testing, and content strategy. Proven in Agile/Scrum environments, cross-functional collaboration, and delivering data-driven solutions for Fortune 500 clients.'
     },
     experiences: [
         {
             type: 'experience',
-            artist: 'BNY Mellon — Pershing X',
-            role: 'Senior User Experience Designer',
-            year: '08/2023 – 11/2024',
-            summary: 'Led UX for Wove, an advisor platform integrating workflows across legacy systems. Focused on IA, flows, and cross-module navigation.',
+            artist: 'Phenom',
+            role: 'User Experience Strategist',
+            year: '01/2025 – 04/2025',
+            summary: 'Managed the corporate website and shaped the product roadmap, centralizing campaign content and aligning Marketing, Sales, and Product for live demos and launches.',
             details: {
-                title: 'Unified Advisor Experience',
+                title: 'Cross-Functional Strategy & Operations',
                 bullets: [
-                    'Mapped and modernized fragmented tools into a cohesive dashboard — a first for the industry.',
-                    'Delivered IA and prototypes that reduced data re-entry and boosted advisor efficiency.',
-                    'Collaborated with PMs, engineers, and compliance to ship secure, scalable solutions.'
+                    'Collaborated with local and globally-distributed teams towards a unified product roadmap.',
+                    'Advanced third-party integrations and refined live event management and demo workflows.',
+                    'Forged cross-department relationships that moved strategic initiatives forward.'
                 ]
             },
-            pills: ['Information Architecture', 'Prototypes', 'User Flow', 'FinTech']
+            pills: ['Contentful', 'Jira', 'Digital Content Management']
         },
         {
             type: 'experience',
             artist: 'Publicis Sapient',
             role: 'Senior User Experience Designer',
-            year: '08/2021 – 11/2024',
-            summary: 'Drove UX for enterprise clients (BNY Mellon, GNC, US Bank, TransUnion). Specialized in complex IA, service design, and e-commerce builds.',
+            year: '04/2022 – 03/2023',
+            summary: 'Product lead on BNY Mellon — Pershing X. Reframed a broad set of tools into a centralized, modular ecosystem and delivered prototypes that helped secure contract extensions.',
             details: {
-                title: 'Enterprise UX Delivery',
+                title: 'Design System Architecture & Scale',
                 bullets: [
-                    'Led end-to-end UX for Salesforce and Shopify projects — from research to handoff.',
-                    'Crafted design systems and prototypes that aligned business goals with user needs.',
-                    'Facilitated workshops and presented to C-suite, ensuring buy-in and iterative success.'
+                    'Led multi-track efforts to clarify product scope and design a modular canonical system to cut complexity.',
+                    'Shipped a modular design system and modernized the stack (React, Tailwind) to enable consistent, scalable delivery.',
+                    'Improved coordination and handoffs across design and engineering, speeding delivery cadence.'
                 ]
             },
-            pills: ['Information Architecture', 'Prototypes', 'Design Systems', 'Salesforce', 'Shopify']
+            pills: ['Financial Product', 'Design Systems', 'Information Architecture']
+        },
+        {
+            type: 'experience',
+            artist: 'Code & Theory',
+            role: 'Senior Interaction Designer',
+            year: '08/2021 – 04/2022',
+            summary: 'Lead UX and interaction designer for TikTok For Business — ran competitive audits, market research, and feature definition while serving as the client-facing strategist.',
+            details: {
+                title: 'Content Strategy & Platform Modernization',
+                bullets: [
+                    'Balanced brand and B2B needs and helped the team adopt a headless CMS approach for better content flexibility.',
+                    'Delivered workshops on information architecture, modular systems, and design within Contentful.',
+                    'Enabled faster decision-making and more evidence-driven product choices.'
+                ]
+            },
+            pills: ['Headless CMS', 'Competititve Audit', 'B2B Brand Initialization']
         },
         {
             type: 'experience',
             artist: 'Elva Design Group',
             role: 'Senior User Experience Designer',
-            year: '02/2021 – 08/2021',
-            summary: 'Led UX for GNC\'s Shopify rebuild post-bankruptcy. Focused on mobile-first navigation and taxonomy for high-conversion e-commerce.',
+            year: '04/2021 – 08/2021',
+            summary: 'Owned discovery through hi-fi prototypes and a modular design system during a focused 12-week engagement — delivered on time and to spec.',
             details: {
-                title: 'E-commerce Replatform',
+                title: 'Mobile-First Commerce Frameworks',
                 bullets: [
-                    'Designed modular components and flows that reclaimed $500M in revenue.',
-                    'Conducted research and iterated on prototypes to optimize user journeys.',
-                    'Partnered with devs and stakeholders in a fast-paced 12-week engagement.'
+                    'Autonomy let me push pragmatic, creative solutions when the usual formula didn’t fit the client.',
+                    'Built a component framework optimized for mobile-first e-commerce and future navigation patterns.',
+                    'Aligned cross-functional teams and produced practical handoff assets for engineering.'
+                ]
+            },
+            pills: ['Shopify E-commerce', 'Wireframe Prototypes', 'Design Systems', 'Mobile-Optimized']
+        },
+        {
+            type: 'experience',
+            artist: 'Huge Inc.',
+            role: 'Senior User Experience Designer',
+            year: '03/2021 – 04/2021',
+            summary: 'Contract role defining booking flows and UX for Sentral Lifestyle Apartments. Delivered critical flows under tight constraints; the work shipped.',
+            details: {
+                title: 'Booking Experience Optimization',
+                bullets: [
+                    'Small scope, high impact — a focused on onboarding flow as part of greater brand and website experience overhaul',
+                    'Iterated and shipped a variety of viable ways forward, one of which becoming the hallmark at launch.',
+                    'The fallback ultimately is where it settled; less ambitious, but safer and proven to produce leads.'
                 ]
             },
             pills: ['UX Research', 'User Flow', 'User Journey', 'Luxury/Lifestyle']
@@ -2059,135 +2041,139 @@ const resumeContent = {
     ]
 };
 
-// Case Study 1 content
+// Reworked Case Study 1 Content (Standardized Model: Utilitarian, Sophisticated, Reworded for Clarity/Conciseness)
 const case1Content = {
     title: 'BNY Mellon — Pershing X',
     sections: [
         {
             type: 'overview',
-            h2: 'Project Overview',
-            p: 'Build Wove, an industry-first platform that connects a client’s full financial picture with the tools advisors actually use, so work moves across modules without reentry.'
+            h2: 'Overview',
+            p: 'Developed Wove, an integrated platform unifying advisor tools to eliminate data re-entry and streamline workflows across client financial data.'
         },
         {
             type: 'challenges',
-            h2: 'Key Challenges & Solutions',
-            p1: 'Advisors worked across many disconnected tools; context was lost and data had to be re-entered. We sought to flatten the experience through a uniform and interconnected dashboard',
-            p2: 'Information architecture, task and flow mapping, cross-module navigation, and component patterns that keep data alive across steps (no reentry).'
+            h2: 'Challenges',
+            p1: 'Advisors navigated fragmented tools, losing context and duplicating efforts. Goal: Create a cohesive dashboard with persistent data across modules.',
+            p2: 'Addressed complex IA, task mapping, navigation, and patterns for seamless cross-step interactions.'
         },
         {
             type: 'process',
             h2: 'Process',
             details: [
-                {label: 'Client:', value: ' BNY Mellon — Pershing X'},
-                {label: 'Agency:', value: ' Publicis Sapient'},
-                {label: 'Role:', value: ' Senior User Experience Designer, Product Design Lead (IA/flows) for Wove’s advisor experience. Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys.'}
+                {label: 'Client:', value: 'BNY Mellon — Pershing X'},
+                {label: 'Agency:', value: 'Publicis Sapient'},
+                {label: 'Role:', value: 'Senior UX Designer; Led IA/flows for advisor experience. Collaborated with PM, tech, data, compliance, and design teams on unified journeys.'}
             ]
         },
         {
             type: 'visuals',
-            h2: 'Visual Deliverables',
+            h2: 'Visuals',
             images: [
-                {src: "https://i.ibb.co/wZY2bhKF/bny4.png", alt: "BNY Mellon visual 1"},
-                {src: "https://i.ibb.co/xS49C07B/bny3.png", alt: "BNY Mellon visual 2"},
-                {src: "https://i.ibb.co/vvMZmq94/bny2.png", alt: "BNY Mellon visual 3"},
-                {src: "https://i.ibb.co/XkM2hn8n/bny1.png", alt: "BNY Mellon visual 4"},
-                {src: "https://i.ibb.co/FJNG1jC/14.jpg", alt: "BNY Mellon visual 5"},
-                {src: "https://i.ibb.co/fxjgcYD/18.png", alt: "BNY Mellon visual 6"},
-                {src: "https://i.ibb.co/gtQLYJQ/17.jpg", alt: "BNY Mellon visual 7"},
-                {src: "https://i.ibb.co/Fgxcqj0/16.jpg", alt: "BNY Mellon visual 8"},
-                {src: "https://i.ibb.co/dcXH5fn/13.jpg", alt: "BNY Mellon visual 9"}
+                {src: "https://i.ibb.co/wZY2bhKF/bny4.png", alt: "Dashboard overview"},
+                {src: "https://i.ibb.co/xS49C07B/bny3.png", alt: "Workflow mapping"},
+                {src: "https://i.ibb.co/vvMZmq94/bny2.png", alt: "Navigation"},
+                {src: "https://i.ibb.co/XkM2hn8n/bny1.png", alt: "Component patterns"},
+                {src: "https://i.ibb.co/FJNG1jC/14.jpg", alt: "User flow diagram"},
+                {src: "https://i.ibb.co/fxjgcYD/18.png", alt: "Compliance integration"},
+                {src: "https://i.ibb.co/gtQLYJQ/17.jpg", alt: "Data persistence UI"},
+                {src: "https://i.ibb.co/Fgxcqj0/16.jpg", alt: "Mobile adaptation"},
+                {src: "https://i.ibb.co/dcXH5fn/13.jpg", alt: "Final interface"}
             ]
         },
         {
             type: 'insights',
             h2: 'Insights',
-            p: 'Deep Dive: No Artificial Intelligence Here',
-            aside: 'This is important. This was only 2023 into 2024, before the buzzword craze and subsequent hype. But, while the world gets distracted by the wow-factor of AI developments, AI had ZERO part in any of this project. It was HUMAN blood, sweat, and copious amounts of caffeine that did the due diligence of analyzing every individual legacy application, mapping that **** out, socializing it with the team, and ultimately shipping a viable modernized financial product ecosystem to one of the largest banking entities in the world.'
+            p: 'Human-Centric Design in FinTech',
+            aside: 'Pre-AI era (2023-2024): Relied on manual analysis of legacy apps, team collaboration, and rigorous mapping to modernize a major banking ecosystem—proving thoughtful human effort drives real innovation.'
         },
         {
             type: 'outcomes',
             h2: 'Outcomes',
-            p: 'Wove launched with BNY Mellon power, scale, and security, helping advisors work faster and serve more clients.'
+            p: 'Launched Wove with enterprise-grade security, enabling faster advisor workflows and expanded client service capacity.'
         },
         {
             type: 'stack',
             h2: 'Stack',
             images: [
-                {src: "https://i.ibb.co/XkM2hn8n/bny1.png", alt: "BNY 1"},
-                {src: "https://i.ibb.co/vvMZmq94/bny2.png", alt: "BNY 2"},
-                {src: "https://i.ibb.co/xS49C07B/bny3.png", alt: "BNY 3"},
-                {src: "https://i.ibb.co/wZY2bhKF/bny4.png", alt: "BNY 4"},
-                {src: "https://i.ibb.co/HGv7ymj/4.jpg", alt: "Account Opening"}
+                {src: "https://i.ibb.co/XkM2hn8n/bny1.png", alt: "Core components"},
+                {src: "https://i.ibb.co/vvMZmq94/bny2.png", alt: "Integration layers"},
+                {src: "https://i.ibb.co/xS49C07B/bny3.png", alt: "Data models"},
+                {src: "https://i.ibb.co/wZY2bhKF/bny4.png", alt: "UI patterns"},
+                {src: "https://i.ibb.co/HGv7ymj/4.jpg", alt: "Account workflows"}
             ]
         }
     ]
 };
 
-// Case Study 2 content
+// Reworked Case Study 2 Content (Standardized Model: Matched to Case 1, Reworded for Clarity/Conciseness, Added Outcomes Section)
 const case2Content = {
     title: 'General Nutrition Centers (GNC)',
     sections: [
         {
             type: 'overview',
-            h2: 'Project Overview',
-            p: '{We} dove deep into GNC\'s e-commerce ecosystem. From market research, to [client-supplied] user data, to wireframe feature prototyping; we built a modular component-based design system optimized for continued optimization.'
+            h2: 'Overview',
+            p: 'Conducted comprehensive e-commerce audit—from market research to user data analysis—and built a modular, optimizable design system on Shopify.'
         },
         {
             type: 'challenges',
-            h2: 'Key Challenges & Solutions',
-            p1: 'As part of a total overhaul and overcoming a recent bankruptcy, GNC asked us to shake things up; providing them with a modern and modular e-commerce solution through a ground-up build on the Shopify platform.',
-            p2: 'Lead UX {IA/UI Prototypes/Design Systems}. Paired with PM, Dev Lead, Design Team and Client-Side Stakeholders. 12-week engagement meant tight cadence, fast-on-our-feet design + strategy, and weekly exec reviews.',
-            p3: '{We} introduced a modern mobile-first navigation schema and retail taxonomy strategy that separated GNC not just from its competition, but all in the e-retail space.'
+            h2: 'Challenges',
+            p1: 'Post-bankruptcy overhaul required a modern, modular e-commerce solution to differentiate in retail.',
+            p2: 'Introduced mobile-first navigation and taxonomy separating GNC from competitors.'
         },
         {
             type: 'process',
             h2: 'Process',
             details: [
-                {label: 'Client:', value: ' General Nutrition Centers (GNC)'},
-                {label: 'Agency:', value: ' Elva Design Group'},
-                {label: 'Role:', value: ' Senior User Experience Designer'}
+                {label: 'Client:', value: 'General Nutrition Centers (GNC)'},
+                {label: 'Agency:', value: 'Elva Design Group'},
+                {label: 'Role:', value: 'Senior UX Designer; Led IA, prototypes, and design systems. Collaborated with PM, dev, and stakeholders in a 12-week sprint with weekly reviews.'}
             ]
         },
         {
             type: 'visuals',
-            h2: 'Visual Deliverables',
+            h2: 'Visuals',
             images: [
-                {src: "https://i.ibb.co/ynjWYqv8/2.webp", alt: "GNC visual 1"},
-                {src: "https://i.ibb.co/spHgPH6N/1.webp", alt: "GNC visual 2"},
-                {src: "https://i.ibb.co/cXg5Phdc/3.webp", alt: "GNC visual 3"},
-                {src: "https://i.ibb.co/99h2bQMh/6.webp", alt: "GNC visual 4"},
-                {src: "https://i.ibb.co/gZ58PKyk/4.webp", alt: "GNC visual 5"},
-                {src: "https://i.ibb.co/Y7pGqJ69/5.webp", alt: "GNC visual 6"},
-                {src: "https://i.ibb.co/yB4RwkTf/7.webp", alt: "GNC visual 7"},
-                {src: "https://i.ibb.co/cSQCgNQY/work1.webp", alt: "GNC visual 8"},
-                {src: "https://i.ibb.co/pBMMxY1Z/11.webp", alt: "GNC visual 9"},
-                {src: "https://i.ibb.co/7N2rDqrN/8.webp", alt: "GNC visual 10"},
-                {src: "https://i.ibb.co/vx76zjgf/10.webp", alt: "GNC visual 11"},
-                {src: "https://i.ibb.co/rft2bf0T/9.webp", alt: "GNC visual 12"}
+                {src: "https://i.ibb.co/ynjWYqv8/2.webp", alt: "Site architecture"},
+                {src: "https://i.ibb.co/spHgPH6N/1.webp", alt: "User research synthesis"},
+                {src: "https://i.ibb.co/cXg5Phdc/3.webp", alt: "Mobile wireframes"},
+                {src: "https://i.ibb.co/99h2bQMh/6.webp", alt: "Product detail prototype"},
+                {src: "https://i.ibb.co/gZ58PKyk/4.webp", alt: "Mobile PDP closeup"},
+                {src: "https://i.ibb.co/Y7pGqJ69/5.webp", alt: "Engagement features"},
+                {src: "https://i.ibb.co/yB4RwkTf/7.webp", alt: "Rewards integration"},
+                {src: "https://i.ibb.co/cSQCgNQY/work1.webp", alt: "Handheld views"},
+                {src: "https://i.ibb.co/pBMMxY1Z/11.webp", alt: "Mobile overview"},
+                {src: "https://i.ibb.co/7N2rDqrN/8.webp", alt: "Mobile navigation"},
+                {src: "https://i.ibb.co/vx76zjgf/10.webp", alt: "Desktop navigation"},
+                {src: "https://i.ibb.co/rft2bf0T/9.webp", alt: "Homepage layout"}
             ]
         },
         {
             type: 'insights',
             h2: 'Insights',
-            p: 'Outcome: The result helped GNC reclaim ~$500M in annual revenue.',
-            aside: 'if the bar ain\'t bending, you’re just pretending.'
+            p: 'Retail Taxonomy Innovation',
+            aside: 'By prioritizing modular components and unique navigation, we created a flexible system for ongoing optimization—proving adaptability is key in e-commerce recovery.'
+        },
+        {
+            type: 'outcomes',
+            h2: 'Outcomes',
+            p: 'Replatformed site reclaimed ~$500M in annual revenue through improved user flows and conversion rates.'
         },
         {
             type: 'stack',
             h2: 'Stack',
             images: [
-                {src: "https://i.ibb.co/ynjWYqv8/2.webp", alt: "notes"},
-                {src: "https://i.ibb.co/spHgPH6N/1.webp", alt: "research"},
-                {src: "https://i.ibb.co/cXg5Phdc/3.webp", alt: "mobile commerce"},
-                {src: "https://i.ibb.co/99h2bQMh/6.webp", alt: "product detail page"},
-                {src: "https://i.ibb.co/gZ58PKyk/4.webp", alt: "mobile product detail"},
-                {src: "https://i.ibb.co/Y7pGqJ69/5.webp", alt: "consumer engagement"},
-                {src: "https://i.ibb.co/yB4RwkTf/7.webp", alt: "rewards program"},
-                {src: "https://i.ibb.co/cSQCgNQY/work1.webp", alt: "handheld"},
-                {src: "https://i.ibb.co/pBMMxY1Z/11.webp", alt: "mobile overview"},
-                {src: "https://i.ibb.co/7N2rDqrN/8.webp", alt: "mobile closeup"},
-                {src: "https://i.ibb.co/vx76zjgf/10.webp", alt: "desktop navigation"},
-                {src: "https://i.ibb.co/rft2bf0T/9.webp", alt: "desktop homepage"}
+                {src: "https://i.ibb.co/ynjWYqv8/2.webp", alt: "Design notes"},
+                {src: "https://i.ibb.co/spHgPH6N/1.webp", alt: "Research outputs"},
+                {src: "https://i.ibb.co/cXg5Phdc/3.webp", alt: "Mobile commerce views"},
+                {src: "https://i.ibb.co/99h2bQMh/6.webp", alt: "PDP components"},
+                {src: "https://i.ibb.co/gZ58PKyk/4.webp", alt: "Mobile PDP"},
+                {src: "https://i.ibb.co/Y7pGqJ69/5.webp", alt: "Engagement modules"},
+                {src: "https://i.ibb.co/yB4RwkTf/7.webp", alt: "Rewards system"},
+                {src: "https://i.ibb.co/cSQCgNQY/work1.webp", alt: "Handheld prototypes"},
+                {src: "https://i.ibb.co/pBMMxY1Z/11.webp", alt: "Mobile summaries"},
+                {src: "https://i.ibb.co/7N2rDqrN/8.webp", alt: "Mobile closeups"},
+                {src: "https://i.ibb.co/vx76zjgf/10.webp", alt: "Desktop nav"},
+                {src: "https://i.ibb.co/rft2bf0T/9.webp", alt: "Desktop homepage"}
             ]
         }
     ]
@@ -2355,54 +2341,89 @@ function generateGridView(content) {
     return html;
 }
 
-// Function to generate case study HTML
+// Updated generateCaseStudyHTML (Supports Standardized Content Model)
 function generateCaseStudyHTML(content) {
-    let html = '<h1>' + content.title + '</h1>';
-    content.sections.forEach(section => {
-        let className = 'case-study-section';
-        if (section.type === 'process') className += ' case-study-process';
-        if (section.type === 'insights') className += ' case-study-insight';
-        if (section.type === 'stack') className += ' case-study-stack';
-        
-        html += `<div class="${className}">`;
-        if (section.h2) html += `<h2>${section.h2}</h2>`;
-        
-        if (section.p) html += `<p>${section.p}</p>`;
-        if (section.aside) html += `<p class="aside">${section.aside}</p>`;
-        if (section.p1) html += `<p>${section.p1}</p>`;
-        if (section.p2) html += `<p>${section.p2}</p>`;
-        if (section.p3) html += `<p>${section.p3}</p>`;
-        
-        if (section.details) {
-            section.details.forEach(detail => {
-                html += `<div class="detail">
-                    <span class="label">${detail.label}</span> ${detail.value}
-                </div>`;
-            });
-        }
-        
-        if (section.images) {
-            if (section.type === 'visuals') {
-                html += '<div class="case-study-grid">';
-                section.images.forEach(img => {
-                    html += `<img src="${img.src}" alt="${img.alt}">`;
-                });
-                html += '</div>';
-            } else if (section.type === 'stack') {
-                html += '<div class="case-study-stack">';
-                section.images.forEach(img => {
-                    html += `<figure><img src="${img.src}" alt="${img.alt}"></figure>`;
-                });
-                html += '</div>';
-            }
-        }
-        
-        html += '</div>';
-    });
+    let html = '<div class="bento-container">';
+    
+    // Title (span-4, prominent)
+    html += `<div class="bento-box span-4">
+        <h1>${content.title}</h1>
+    </div>`;
+    
+    // Overview (span-3 for breadth)
+    const overview = content.sections.find(s => s.type === 'overview');
+    if (overview) {
+        html += `<div class="bento-box span-3">
+            <h2>${overview.h2}</h2>
+            <p>${overview.p}</p>
+        </div>`;
+    }
+    
+    // Process (span-1, compact)
+    const process = content.sections.find(s => s.type === 'process');
+    if (process) {
+        html += `<div class="bento-box span-1">
+            <h2>${process.h2}</h2>
+            ${process.details.map(d => `<div class="detail"><span class="label">${d.label}</span> ${d.value}</div>`).join('')}
+        </div>`;
+    }
+    
+    // Challenges (span-2)
+    const challenges = content.sections.find(s => s.type === 'challenges');
+    if (challenges) {
+        html += `<div class="bento-box span-2">
+            <h2>${challenges.h2}</h2>
+            <p>${challenges.p1}</p>
+            <p>${challenges.p2}</p>
+        </div>`;
+    }
+    
+    // Insights (span-2, reflective)
+    const insights = content.sections.find(s => s.type === 'insights');
+    if (insights) {
+        html += `<div class="bento-box span-2">
+            <h2>${insights.h2}</h2>
+            <p>${insights.p}</p>
+            <p class="aside">${insights.aside}</p>
+        </div>`;
+    }
+    
+    // Outcomes (span-2, results-focused)
+    const outcomes = content.sections.find(s => s.type === 'outcomes');
+    if (outcomes) {
+        html += `<div class="bento-box span-2">
+            <h2>${outcomes.h2}</h2>
+            <p>${outcomes.p}</p>
+        </div>`;
+    }
+    
+    // Visuals (span-4, grid layout)
+    const visuals = content.sections.find(s => s.type === 'visuals');
+    if (visuals) {
+        html += `<div class="bento-box span-4 image-grid">
+            <h2>${visuals.h2}</h2>
+            <div class="case-study-grid">
+                ${visuals.images.map(img => `<img src="${img.src}" alt="${img.alt}" data-src="${img.src}">`).join('')}
+            </div>
+        </div>`;
+    }
+    
+    // Stack (span-4, flex/grid layout)
+    const stack = content.sections.find(s => s.type === 'stack');
+    if (stack) {
+        html += `<div class="bento-box span-4 stack-grid">
+            <h2>${stack.h2}</h2>
+            <div class="case-study-stack">
+                ${stack.images.map(img => `<figure><img src="${img.src}" alt="${img.alt}" data-src="${img.src}"></figure>`).join('')}
+            </div>
+        </div>`;
+    }
+    
+    html += '</div>';
     return html;
 }
 
-// Render all content on load
+// Existing DOMContentLoaded event and rendering remains unchanged
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('listViewContent').innerHTML = generateListView(resumeContent);
     document.getElementById('gridViewContent').innerHTML = generateGridView(resumeContent);
@@ -2410,7 +2431,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('case2Content').innerHTML = generateCaseStudyHTML(case2Content);
 });
 
-// Rest of the script...
+// Rest of the script remains unchanged...
 const body = document.body;
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isFinePointer = window.matchMedia('(pointer: fine)').matches;
@@ -2499,12 +2520,12 @@ function tick() {
 history.shift();
 history.push({ x: mouseX, y: mouseY });
 circles.forEach((c, i) => {
-  const cur = history[i];
-  const next = history[i + 1] || history[TAIL_LENGTH - 1];
-  cur.x += (next.x - cur.x) * 0.35;
-  cur.y += (next.y - cur.y) * 0.35;
-  const s = Math.max(0.22, i / TAIL_LENGTH);
-  c.style.transform = `translate(calc(${cur.x}px - 50%), calc(${cur.y}px - 50%)) scale(${s})`;
+const cur = history[i];
+const next = history[i + 1] || history[TAIL_LENGTH - 1];
+cur.x += (next.x - cur.x) * 0.35;
+cur.y += (next.y - cur.y) * 0.35;
+const s = Math.max(0.22, i / TAIL_LENGTH);
+c.style.transform = `translate(calc(${cur.x}px - 50%), calc(${cur.y}px - 50%)) scale(${s})`;
 });
 requestAnimationFrame(tick);
 }
@@ -2537,10 +2558,10 @@ localStorage.setItem('viewMode', 'list'); // PERSISTENCE FIX
 function loadViewState() {
 const savedView = localStorage.getItem('viewMode') || 'list';
 if (savedView === 'grid') {
-    showGridView();
+showGridView();
 } else {
-    // Since list is default, call explicitly to set aria attributes correctly
-    showListView();
+// Since list is default, call explicitly to set aria attributes correctly
+showListView();
 }
 }
 if (gridBtn) {
@@ -2555,10 +2576,10 @@ const IS_FIRST_VISIT = !localStorage.getItem('hasVisitedCV'); // Use a specific 
 if (IS_FIRST_VISIT && shouldRunAdvancedEffects) { // Only show hint if effects are running
 // Show hint after a small delay
 setTimeout(() => {
-    dragHints.forEach(hint => {
-        hint.classList.add('visible');
-        hint.setAttribute('aria-hidden', 'false');
-    });
+dragHints.forEach(hint => {
+hint.classList.add('visible');
+hint.setAttribute('aria-hidden', 'false');
+});
 }, 2000); // Show after 2 seconds
 
 localStorage.setItem('hasVisitedCV', 'true'); // Set flag to remember the visit
@@ -2566,8 +2587,8 @@ localStorage.setItem('hasVisitedCV', 'true'); // Set flag to remember the visit
 // Function to hide the hint on first interaction
 function hideDragHint() {
 dragHints.forEach(hint => {
-    hint.classList.remove('visible');
-    hint.setAttribute('aria-hidden', 'true');
+hint.classList.remove('visible');
+hint.setAttribute('aria-hidden', 'true');
 });
 // Remove listeners to only run once
 window.removeEventListener('pointerdown', hideDragHint);
@@ -2583,32 +2604,32 @@ function initDragScroll(element) {
 
 // PERFORMANCE FIX: Only run complex momentum on fine pointers & without reduced motion
 if (!shouldRunAdvancedEffects) {
-  // Fallback: Use only basic, synchronous drag-scroll for better performance
-  let isDown = false;
-  let startX;
-  let scrollLeft;
-  element.addEventListener('pointerdown', (e) => {
-      isDown = true;
-      startX = e.pageX - element.offsetLeft;
-      scrollLeft = element.scrollLeft;
-      element.style.cursor = 'grabbing';
-  });
-  element.addEventListener('pointerleave', () => {
-      isDown = false;
-      element.style.cursor = 'auto';
-  });
-  element.addEventListener('pointerup', () => {
-      isDown = false;
-      element.style.cursor = 'auto';
-  });
-  element.addEventListener('pointermove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - element.offsetLeft;
-      const walk = (x - startX) * 1.5; // Drag speed
-      element.scrollLeft = scrollLeft - walk;
-  });
-  return; // Exit the function to prevent running the momentum version
+// Fallback: Use only basic, synchronous drag-scroll for better performance
+let isDown = false;
+let startX;
+let scrollLeft;
+element.addEventListener('pointerdown', (e) => {
+isDown = true;
+startX = e.pageX - element.offsetLeft;
+scrollLeft = element.scrollLeft;
+element.style.cursor = 'grabbing';
+});
+element.addEventListener('pointerleave', () => {
+isDown = false;
+element.style.cursor = 'auto';
+});
+element.addEventListener('pointerup', () => {
+isDown = false;
+element.style.cursor = 'auto';
+});
+element.addEventListener('pointermove', (e) => {
+if (!isDown) return;
+e.preventDefault();
+const x = e.pageX - element.offsetLeft;
+const walk = (x - startX) * 1.5; // Drag speed
+element.scrollLeft = scrollLeft - walk;
+});
+return; // Exit the function to prevent running the momentum version
 }
 
 // Original Momentum Drag Scroll Logic (runs when shouldRunAdvancedEffects is true)
@@ -2635,31 +2656,31 @@ const dy = e.pageY - initialY;
 
 // Check threshold to start dragging
 if (!isDragging && (Math.abs(dx) > threshold || Math.abs(dy) > threshold)) {
-  isDragging = true;
-  startX = e.pageX;
-  startY = e.pageY;
-  scrollLeft = element.scrollLeft;
-  scrollTop = element.scrollTop;
-  element.style.cursor = 'grabbing';
+isDragging = true;
+startX = e.pageX;
+startY = e.pageY;
+scrollLeft = element.scrollLeft;
+scrollTop = element.scrollTop;
+element.style.cursor = 'grabbing';
 }
 if (isDragging) {
-  e.preventDefault();
-  const x = e.pageX;
-  const y = e.pageY;
-  const walkX = (x - startX);
-  const walkY = (y - startY);
- 
-  // Calculate velocity for momentum
-  velocityX = walkX * 0.1;
-  velocityY = walkY * 0.1;
-  // Apply drag scroll
-  element.scrollLeft = scrollLeft - walkX;
-  element.scrollTop = scrollTop - walkY;
-  // Update start points for continuous velocity calculation
-  startX = x;
-  startY = y;
-  scrollLeft = element.scrollLeft;
-  scrollTop = element.scrollTop;
+e.preventDefault();
+const x = e.pageX;
+const y = e.pageY;
+const walkX = (x - startX);
+const walkY = (y - startY);
+
+// Calculate velocity for momentum
+velocityX = walkX * 0.1;
+velocityY = walkY * 0.1;
+// Apply drag scroll
+element.scrollLeft = scrollLeft - walkX;
+element.scrollTop = scrollTop - walkY;
+// Update start points for continuous velocity calculation
+startX = x;
+startY = y;
+scrollLeft = element.scrollLeft;
+scrollTop = element.scrollTop;
 }
 };
 const stop = (e) => {
@@ -2669,16 +2690,16 @@ const wasDragging = isDragging;
 isDragging = false;
 element.style.cursor = wasDragging ? 'grab' : 'auto';
 if (wasDragging) {
-  const momentum = () => {
-    element.scrollLeft += velocityX * 30;
-    element.scrollTop += velocityY * 30;
-    velocityX *= 0.95;
-    velocityY *= 0.95;
-    if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
-      requestAnimationFrame(momentum);
-    }
-  };
-  momentum();
+const momentum = () => {
+element.scrollLeft += velocityX * 30;
+element.scrollTop += velocityY * 30;
+velocityX *= 0.95;
+velocityY *= 0.95;
+if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+requestAnimationFrame(momentum);
+}
+};
+momentum();
 }
 };
 element.addEventListener('pointerdown', start, { passive: true });
@@ -2703,25 +2724,25 @@ const { innerWidth, innerHeight } = window;
 const xRot = ((clientY / innerHeight) - 0) * .3; // Max 1.5 deg tilt (3 * 0.5)
 const yRot = ((clientX / innerWidth) - 0) * .3;
 tiltContainers.forEach(container => {
-  // Only animate the currently visible container
-  if (container.style.display !== 'none') {
-    container.style.transform = `perspective(2000px) rotateX(${xRot}deg) rotateY(${-yRot}deg)`;
-  }
+// Only animate the currently visible container
+if (container.style.display !== 'none') {
+container.style.transform = `perspective(2000px) rotateX(${xRot}deg) rotateY(${-yRot}deg)`;
+}
 });
 }, { passive: true });
 }
 // Image Lazy Loading/Preloading logic
 const observer = new IntersectionObserver((entries) => {
 entries.forEach(entry => {
-    if (entry.isIntersecting) {
-        const img = entry.target;
-        const src = img.getAttribute('data-src');
-        if (src) {
-            img.src = src;
-            img.removeAttribute('data-src');
-            observer.unobserve(img);
-        }
-    }
+if (entry.isIntersecting) {
+const img = entry.target;
+const src = img.getAttribute('data-src');
+if (src) {
+    img.src = src;
+    img.removeAttribute('data-src');
+    observer.unobserve(img);
+}
+}
 });
 });
 document.querySelectorAll('img[data-src]').forEach(img => {
@@ -2757,11 +2778,11 @@ const sheet = overlay.querySelector('.sheet');
 gsap.to(sheet, {
 x: '100%', opacity: 0, scale: 0.95, duration: 0.4, ease: 'power2.in',
 onComplete: () => {
-  overlay.classList.remove('open');
-  overlay.setAttribute('aria-hidden', 'true');
-  fabButton.setAttribute('aria-expanded', 'false');
-  if (lastFocus) lastFocus.focus();
-  overlay.removeEventListener('click', handleOutsideClick);
+overlay.classList.remove('open');
+overlay.setAttribute('aria-hidden', 'true');
+fabButton.setAttribute('aria-expanded', 'false');
+if (lastFocus) lastFocus.focus();
+overlay.removeEventListener('click', handleOutsideClick);
 }
 });
 
@@ -2776,18 +2797,18 @@ closeOverlayFn();
 function onKeyDown(e) {
 if (e.key === 'Escape') closeOverlayFn();
 if (e.key === 'Tab') {
-    const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-   
-    // Trap focus inside the sheet
-    if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-    }
+const focusable = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+const first = focusable[0];
+const last = focusable[focusable.length - 1];
+
+// Trap focus inside the sheet
+if (e.shiftKey && document.activeElement === first) {
+e.preventDefault();
+last.focus();
+} else if (!e.shiftKey && document.activeElement === last) {
+e.preventDefault();
+first.focus();
+}
 }
 }
 if (fabButton) fabButton.addEventListener('click', openOverlay);
@@ -2818,7 +2839,7 @@ generateATSOptimizedPDF();
 });
 document.getElementById('copyLink').addEventListener('click', () => {
 navigator.clipboard.writeText(window.location.href).then(() => {
-    // Optional: Provide visual feedback like a brief toast message
+// Optional: Provide visual feedback like a brief toast message
 });
 contextMenu.style.display = 'none';
 });
@@ -2872,22 +2893,22 @@ const splitSum = doc.splitTextToSize(summary, 170);
 doc.text(splitSum, 20, y);
 y += splitSum.length * 7;
 if (detailTitle) {
-  doc.text(detailTitle + ":", 20, y);
-  y += 7;
-  bullets.forEach(bullet => {
-    const splitBullet = doc.splitTextToSize("- " + bullet, 160);
-    doc.text(splitBullet, 25, y);
-    y += splitBullet.length * 7;
-  });
+doc.text(detailTitle + ":", 20, y);
+y += 7;
+bullets.forEach(bullet => {
+const splitBullet = doc.splitTextToSize("- " + bullet, 160);
+doc.text(splitBullet, 25, y);
+y += splitBullet.length * 7;
+});
 }
 if (skills.length) {
-  doc.text("Skills: " + skills.join(", "), 20, y);
-  y += 10;
+doc.text("Skills: " + skills.join(", "), 20, y);
+y += 10;
 }
 y += 5;
 if (y > 270) {
-  doc.addPage();
-  y = 20;
+doc.addPage();
+y = 20;
 }
 });
 // Specializations
@@ -2904,8 +2925,8 @@ const splitDesc = doc.splitTextToSize(desc, 170);
 doc.text(splitDesc, 20, y);
 y += splitDesc.length * 7 + 5;
 if (y > 270) {
-  doc.addPage();
-  y = 20;
+doc.addPage();
+y = 20;
 }
 });
 // Core Competencies
@@ -2922,8 +2943,8 @@ const splitPills = doc.splitTextToSize(pills, 170);
 doc.text(splitPills, 20, y);
 y += splitPills.length * 7 + 5;
 if (y > 270) {
-  doc.addPage();
-  y = 20;
+doc.addPage();
+y = 20;
 }
 });
 // References
@@ -2943,8 +2964,8 @@ y += splitQuote.length * 7;
 doc.text(title, 20, y);
 y += 7 + 5;
 if (y > 270) {
-  doc.addPage();
-  y = 20;
+doc.addPage();
+y = 20;
 }
 });
 // Education
@@ -2964,8 +2985,8 @@ y += splitDesc.length * 7;
 doc.text(years, 20, y);
 y += 7;
 if (y > 270) {
-  doc.addPage();
-  y = 20;
+doc.addPage();
+y = 20;
 }
 });
 doc.save("ZacharyGort-UX-Resume-2025.pdf");
@@ -2984,9 +3005,9 @@ const tags = new Set();
 document.querySelectorAll('.pills .pill').forEach(pill => tags.add(pill.textContent.trim()));
 filterList.innerHTML = '';
 tags.forEach(tag => {
-  const label = document.createElement('label');
-  label.innerHTML = `<input type="checkbox" value="${tag}"> ${tag}`;
-  filterList.appendChild(label);
+const label = document.createElement('label');
+label.innerHTML = `<input type="checkbox" value="${tag}"> ${tag}`;
+filterList.appendChild(label);
 });
 
 lastFocus = document.activeElement;
@@ -3002,12 +3023,12 @@ filterOverlay.setAttribute('aria-hidden', 'false');
 function closeFilterFn() {
 const sheet = filterOverlay.querySelector('.filter-sheet');
 gsap.to(sheet, {
-  x: '-100%', opacity: 0, duration: 0.4, ease: 'power2.in',
-  onComplete: () => {
-    filterOverlay.classList.remove('open');
-    filterOverlay.setAttribute('aria-hidden', 'true');
-    if (lastFocus) lastFocus.focus();
-  }
+x: '-100%', opacity: 0, duration: 0.4, ease: 'power2.in',
+onComplete: () => {
+filterOverlay.classList.remove('open');
+filterOverlay.setAttribute('aria-hidden', 'true');
+if (lastFocus) lastFocus.focus();
+}
 });
 document.removeEventListener('keydown', onKeyDownFilter);
 }
@@ -3015,18 +3036,18 @@ document.removeEventListener('keydown', onKeyDownFilter);
 function onKeyDownFilter(e) {
 if (e.key === 'Escape') closeFilterFn();
 if (e.key === 'Tab') {
-    const focusable = filterOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-   
-    // Trap focus inside the sheet
-    if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-    }
+const focusable = filterOverlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+const first = focusable[0];
+const last = focusable[focusable.length - 1];
+
+// Trap focus inside the sheet
+if (e.shiftKey && document.activeElement === first) {
+e.preventDefault();
+last.focus();
+} else if (!e.shiftKey && document.activeElement === last) {
+e.preventDefault();
+first.focus();
+}
 }
 }
 
@@ -3034,9 +3055,9 @@ function applyFilters() {
 const checked = Array.from(filterList.querySelectorAll('input:checked')).map(input => input.value);
 const items = document.querySelectorAll('.project-item.experience, .grid-item.experience');
 items.forEach(item => {
-  const itemTags = Array.from(item.querySelectorAll('.pill')).map(pill => pill.textContent.trim());
-  const matches = checked.length === 0 || checked.some(tag => itemTags.includes(tag));
-  item.style.display = matches ? '' : 'none';
+const itemTags = Array.from(item.querySelectorAll('.pill')).map(pill => pill.textContent.trim());
+const matches = checked.length === 0 || checked.some(tag => itemTags.includes(tag));
+item.style.display = matches ? '' : 'none';
 });
 closeFilterFn();
 }

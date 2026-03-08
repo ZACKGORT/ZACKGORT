@@ -1113,7 +1113,7 @@ header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 28px; border-bottom: 1px solid var(--border);
   background: rgba(8,7,4,0.85); backdrop-filter: blur(16px);
-  position: sticky; top: 0; z-index: 100; overflow: visible;
+  position: sticky; top: 0; z-index: 9000; overflow: visible;
   transition: background 0.35s ease, border-color 0.35s ease;
 }
 header:hover { background: rgba(248,246,240,0.97); border-bottom-color: rgba(0,0,0,0.07); }
@@ -1160,7 +1160,7 @@ header:hover .h-btn:hover { border-color: #c8902a; color: #c8902a; }
   opacity: 0; pointer-events: none;
   transform: translateY(-6px);
   transition: opacity 0.22s ease, transform 0.22s ease;
-  z-index: 99;
+  z-index: 8999;
 }
 header:hover #header-overlay { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .ho-cell { padding: 16px 24px; border-right: 1px solid rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 6px; }
@@ -1687,12 +1687,13 @@ body.ch-7 { --hud-bg: rgba(248,236,240,0.97); --hud-ink: #200810; --hud-ink-2: #
   .h-center { display: flex; position: static; transform: none; align-items: flex-start; gap: 1px; flex-direction: column; }
   #wolfie-credit { display: none; }
   .mall-crumb { display: none; }
-  /* Mobile header: logo left only */
-  header { padding: 0 14px; justify-content: flex-start; }
+  /* Mobile header: logo left, toggles right, tagline hidden */
+  header { padding: 0 14px; justify-content: space-between; }
   .h-center { position: static; transform: none; display: block; }
   .h-tagline { display: none; }
   .mall-crumb { display: none; }
-  .h-actions { display: none; }
+  .h-actions { display: flex; gap: 5px; align-items: center; }
+  .h-btn { padding: 5px 8px; white-space: nowrap; }
   /* HUD button alignment */
   .nw-action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .nw-cell-value { display: flex; align-items: center; justify-content: center; line-height: 1; }
@@ -2988,7 +2989,7 @@ body.dark-ask #ask-interstitial { opacity: 1; pointer-events: auto; }
    MANIFESTO — POSTER THEME
 ═══════════════════════════════════════════════ */
 #manifesto{
-  position:fixed;inset:0;z-index:1000;
+  position:fixed;inset:0;z-index:9500;
   background:#0a0908;
   opacity:0;pointer-events:none;
   transition:opacity .6s cubic-bezier(.22,1,.36,1);
@@ -4016,7 +4017,7 @@ body.raw-theme.split-view #stream-col { max-width: 52vw; }
   <!-- ── HERO ── -->
   <div class="rp-hero">
     <div class="rp-hero-name">Zack Gort</div>
-    <div class="rp-hero-role">Senior UX / Product Designer &middot; Thinker & Maker</div>
+    <div class="rp-hero-role">Senior UX / Product Designer &middot; Open to Work</div>
     <div class="rp-hero-summary">20+ years. Enterprise &amp; agency. Systems thinker who ships. Fintech, ecommerce, identity, platforms. Looking for the right problem.</div>
   </div>
 
@@ -4985,16 +4986,166 @@ document.querySelectorAll('a,button,[data-idx]').forEach(function(el) {
 // ── IMAGE LAYER ───────────────────────────────────────────────────────────
 var imgs = document.querySelectorAll('#image-layer img');
 var currentImg = 0;
+
+// Per-image focal points — keyed by img index
+// portraits: face usually upper-third → center 20-30%
+// street/scene: horizon mid → center 45-55%
+// skylines: sky heavy → center 60-70%
+// project screens: top-aligned UI → center top
+var IMG_FOCAL = {
+  0:  'center 50%',   // warmth
+  1:  'center 55%',   // underthebridge
+  2:  'center 50%',   // subway
+  3:  'center 50%',   // redlight
+  4:  'center 45%',   // pinstripes
+  5:  'center 50%',   // newyorksubway
+  6:  'center 60%',   // manhattanbridge — horizon/sky
+  7:  'center 55%',   // greenpoint
+  8:  'center 50%',   // bridge-open
+  9:  'center 35%',   // adadoggie2 — subject
+  10: 'center 35%',   // adadoggie1 — subject
+  11: 'center 50%',   // 6feetapart
+  12: 'center 45%',   // flightpath
+  13: 'center 30%',   // outdoor portrait
+  14: 'center 50%',   // vermont-124
+  15: 'center 60%',   // skylinephilly — skyline
+  16: 'center 50%',   // tunnel
+  17: 'center 50%',   // pennstation
+  18: 'center 55%',   // skyline
+  19: 'center 45%',   // commute
+  20: 'center 40%',   // life
+  21: 'center 40%',   // outdoor-table
+  22: 'center 35%',   // window-light
+  23: 'center 40%',   // old-photo
+  24: 'center 40%',   // hands
+  25: 'center 20%',   // portrait-25 — face
+  26: 'center 20%',   // portrait-26 — face
+  27: 'center 20%',   // portrait-27 — face
+  28: 'center 50%',   // vermont-521
+  29: 'center 20%',   // portrait-29 — face
+  30: 'center 20%',   // portrait-30 — face
+  31: 'center 20%',   // portrait-31 — face
+  32: 'center 20%',   // portrait-32 — face
+  33: 'center 50%',   // vermont-91
+  34: 'center 40%',   // moment-34
+  35: 'center 45%',   // moment-35
+  36: 'center 45%',   // moment-36
+  37: 'center 20%',   // portrait-37 — face
+  38: 'center 20%',   // portrait-38 — face
+  39: 'center 20%',   // portrait-39 — face
+  40: 'center 20%',   // portrait-40 — face
+  41: 'center 50%',   // scene-41
+  42: 'center 20%',   // portrait-42 — face
+  43: 'center 50%',   // scene-43
+  44: 'center 20%',   // portrait-44 — face
+  45: 'center 20%',   // portrait-45 — face
+  46: 'center 20%',   // portrait-46 — face
+  47: 'center 20%',   // portrait-47 — face
+  48: 'center 20%',   // portrait-48 — face
+  49: 'center 20%',   // portrait-49 — face
+  50: 'center 20%',   // portrait-50 — face
+  51: 'center 20%',   // portrait-51 — face
+  52: 'center 20%',   // portrait-52 — face
+  53: 'center 20%',   // portrait-53 — face
+  54: 'center 20%',   // portrait-54 — face
+  55: 'center 20%',   // portrait-55 — face
+  56: 'center 20%',   // portrait-56 — face
+  57: 'center 20%',   // portrait-57 — face
+  58: 'center 20%',   // portrait-58 — face
+  59: 'center 20%',   // portrait-59 — face
+  60: 'center 20%',   // portrait-60 — face
+  61: 'center 20%',   // portrait-61 — face
+  62: 'center 20%',   // portrait-62 — face
+  63: 'center 20%',   // portrait-63 — face
+  64: 'center 50%',   // vermont-509
+  65: 'center 45%',   // moment-65
+  66: 'center 45%',   // moment-66
+  67: 'center 45%',   // moment-67
+  68: 'center 45%',   // moment-68
+  69: 'center 50%',   // scene-69
+  70: 'center 50%',   // scene-70
+  71: 'center 50%',   // scene-71
+  72: 'center 50%',   // scene-72
+  73: 'center 20%',   // portrait-73 — face
+  74: 'center 20%',   // portrait-74 — face
+  75: 'center 50%',   // scene-75
+  76: 'center 50%',   // vermont-500
+  77: 'center top',   // design-77 — UI screen
+  78: 'center top',   // design-78 — UI screen
+  79: 'center top',   // design-79 — UI screen
+  80: 'center top',   // design-80 — UI screen
+  81: 'center top',   // design-81 — UI screen
+  82: 'center top',   // design-82 — UI screen
+  83: 'center top',   // screen-83 — UI screen
+  84: 'center 22%',   // portrait-84 — face
+  85: 'center 22%',   // portrait-85 — face
+  86: 'center 22%',   // portrait-86 — face
+  87: 'center 22%',   // portrait-87 — face
+  88: 'center 22%',   // portrait-88 — face
+  89: 'center 22%',   // portrait-89 — face
+  90: 'center 45%',   // moment-90
+  91: 'center 45%',   // moment-91
+  92: 'center 45%',   // moment-92
+  93: 'center 45%',   // moment-93
+  94: 'center 45%',   // moment-94
+  95: 'center 40%',   // moment-95
+  96: 'center 22%',   // portrait-96 — face
+  97: 'center 45%',   // moment-97
+  98: 'center 45%',   // moment-98
+  99: 'center 45%',   // moment-99
+  100:'center 45%',   // moment-100
+  101:'center 45%',   // moment-101
+  102:'center 45%',   // moment-102
+  103:'center 50%',   // scene-103
+  104:'center 50%',   // scene-104
+  105:'center 50%',   // scene-105
+  106:'center 50%',   // scene-106
+  107:'center 45%',   // moment-107
+  108:'center 22%',   // portrait-108 — face
+  109:'center 22%',   // portrait-109 — face
+  110:'center 22%',   // portrait-110 — face
+  111:'center 22%',   // portrait-111 — face
+  112:'center 45%',   // moment-112
+  113:'center 22%',   // portrait-113 — face
+  114:'center 22%',   // portrait-114 — face
+  115:'center 22%',   // portrait-115 — face
+  116:'center 22%',   // portrait-116 — face
+  117:'center 45%',   // moment-117
+  118:'center 45%',   // moment-118
+  119:'center 45%',   // moment-119
+  120:'center 45%',   // moment-120
+  121:'center 45%',   // moment-121
+  122:'center 45%',   // moment-122
+  123:'center 45%',   // moment-123
+  124:'center 45%',   // moment-124
+  125:'center 45%',   // moment-125
+  126:'center 45%',   // moment-126
+  127:'center 45%',   // moment-127
+  128:'center 45%',   // moment-128
+  129:'center 45%',   // moment-129
+  130:'center top',   // gnc-project-1 — UI screen
+  131:'center top',   // gnc-project-2 — UI screen
+  132:'center top',   // bny-project-1 — UI screen
+  133:'center top',   // bny-project-2 — UI screen
+  134:'center top',   // bny-project-3 — UI screen
+};
+
 function setImage(n) {
   if (n === currentImg) return;
   imgs[currentImg] && imgs[currentImg].classList.remove('visible');
-  imgs[n] && imgs[n].classList.add('visible');
+  if (imgs[n]) {
+    imgs[n].style.objectPosition = IMG_FOCAL[n] || 'center 40%';
+    imgs[n].classList.add('visible');
+  }
   currentImg = n;
   var pi = document.getElementById('panel-img-main');
   if (pi && imgs[n]) pi.src = imgs[n].src;
   if (window._liImgUpdate && imgs[n]) window._liImgUpdate(imgs[n].src);
 }
-imgs[0].classList.add('visible');
+if (imgs[0]) {
+  imgs[0].style.objectPosition = IMG_FOCAL[0] || 'center 40%';
+  imgs[0].classList.add('visible');
+}
 
 // ── LINKEDIN IMAGE LAYER — lerp-drifting center image ────────────────────
 (function() {
@@ -5077,15 +5228,28 @@ imgs[0].classList.add('visible');
   function midX()  { return window.innerWidth * 0.5; }
 
   function applyTransform() {
+    if (!isRaw()) return;
     var imgs = layer.querySelectorAll('img');
     for (var i = 0; i < imgs.length; i++) {
       imgs[i].style.transform = 'translateX(-50%) translateY(-50%) translate(' + lerpX.toFixed(2) + 'px, ' + lerpY.toFixed(2) + 'px)';
     }
   }
 
+  function clearTransform() {
+    var imgs = layer.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      imgs[i].style.cssText = '';
+      if (typeof IMG_FOCAL !== 'undefined') {
+        var idx = parseInt(imgs[i].id.replace('img-', ''));
+        imgs[i].style.objectPosition = IMG_FOCAL[idx] || 'center 40%';
+      }
+    }
+  }
+
   function tick() {
-    var tx = (isRaw() && !isMob() && following) ? targetX : 0;
-    var ty = (isRaw() && !isMob() && following) ? targetY : 0;
+    if (!isRaw()) { clearTransform(); rafId = null; return; }
+    var tx = (!isMob() && following) ? targetX : 0;
+    var ty = (!isMob() && following) ? targetY : 0;
     var t  = following ? LERP_FOLLOW : LERP_IDLE;
     lerpX = lerp(lerpX, tx, t);
     lerpY = lerp(lerpY, ty, t);
@@ -5112,7 +5276,7 @@ imgs[0].classList.add('visible');
   document.addEventListener('mouseleave', function() { enterIdle(); });
 
   var obs = new MutationObserver(function() {
-    if (!isRaw()) { following = false; startRaf(); }
+    if (!isRaw()) { following = false; clearTransform(); if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
   });
   obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 })();
@@ -6254,6 +6418,16 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
   function apply(s) {
     document.body.classList.remove('raw-theme', 'li-theme', 'no-transitions');
     btn.textContent = labels[s];
+    // Clear inline styles left by raw-theme lerp so default/li get clean full-bleed images
+    if (s !== 1) {
+      document.querySelectorAll('#image-layer img').forEach(function(el) {
+        el.style.cssText = '';
+        if (typeof IMG_FOCAL !== 'undefined') {
+          var idx = parseInt(el.id.replace('img-', ''));
+          el.style.objectPosition = IMG_FOCAL[idx] || 'center 40%';
+        }
+      });
+    }
     if (s === 1) {
       document.body.classList.add('raw-theme');
       showToast('◻', 'Raw', 'Engine exposed.', null, null, 2500);
@@ -7789,13 +7963,13 @@ document.addEventListener('keydown', function(e) {
   // Map: chapter number → site to surface when that chapter activates.
   // Fires once on first entry to each chapter; user dismiss suppresses repeat.
   var CHAPTER_TRIGGERS = {
-    1: { url: 'https://wolfie.love',       label: 'Platform',       urlDisplay: 'wolfie.love',       desc: 'The engine behind this page — sentence-progressive narrative for every vertical.' },
-    2: { url: 'https://wolfie.love/shop',  label: 'Commerce',       urlDisplay: 'wolfie.love/shop',  desc: 'The same engine applied to e-commerce — GNC\'s domain, wolfie\'s medium.' },
-    3: { url: 'https://wolfie.love/dash',  label: 'Analytics',      urlDisplay: 'wolfie.love/dash',  desc: 'Dispatch — narrative analytics. Data made legible, delivered as story.' },
-    4: { url: 'https://intoview.pro/home', label: 'Creative Work',  urlDisplay: 'intoview.pro',      desc: 'A live product built on the same conviction: the medium should earn the idea.' },
-    5: { url: 'https://wolfie.love/real',  label: 'Real Estate',    urlDisplay: 'wolfie.love/real',  desc: 'The placemaking arm — presentation built for property, development, and hospitality.' },
-    6: { url: 'https://wolfie.life',       label: 'Studio',         urlDisplay: 'wolfie.life',       desc: 'wolfie.life — the studio behind all of it. Products built with conviction.' },
-    7: { url: 'https://wolfie.love',       label: 'Say Hello',      urlDisplay: 'wolfie.love',       desc: 'The complete platform. Every chapter leads here.' },
+    1: { url: 'https://wolfie.love',            label: 'Platform',    urlDisplay: 'wolfie.love',       desc: 'The engine behind this page — sentence-progressive narrative for every vertical.' },
+    2: { url: 'https://wolfie.love/shop',  label: 'E-commerce',  urlDisplay: 'wolfie.love/shop',  desc: 'Narrative commerce — the GNC case study, rendered as product experience.' },
+    3: { url: 'https://wolfie.love/dash',  label: 'Analytics',   urlDisplay: 'wolfie.love/dash',  desc: 'Dispatch — data made legible, delivered as story. Built for the Wove platform mindset.' },
+    4: { url: 'https://intoview.pro/home', label: 'The Work',    urlDisplay: 'intoview.pro',      desc: 'Twenty years. One through-line. A live product built on the same conviction.' },
+    5: { url: 'https://wolfie.life',       label: 'Who I Am',    urlDisplay: 'wolfie.life',       desc: 'The studio behind all of it — products built with conviction, by a self-taught practitioner.' },
+    6: { url: 'https://wolfie.love',       label: 'wolfie.life', urlDisplay: 'wolfie.love',       desc: 'The full engine powering wolfie.life — one platform, every domain, for craft.' },
+    7: { url: 'https://wolfie.love/job',   label: 'Say Hello',   urlDisplay: 'wolfie.love/job',   desc: "Open to interesting work. Senior Product / UX Designer — let's find the right problem." },
   };
 
   var nstPanel   = document.getElementById('nst-panel');
@@ -8621,12 +8795,12 @@ document.addEventListener('keydown', function(e) {
       <div id="mf-hero-bg-letter" aria-hidden="true"><span>Z</span></div>
       <nav id="mf-hero-nav">
         <div id="mf-hero-logo">Zack Gort</div>
-        <div id="mf-hero-tagline">Narrative Engine · wolfie.love</div>
+        <div id="mf-hero-tagline">Senior Experience Designer · wolfie.life</div>
       </nav>
       <div id="mf-hero-body">
         <div class="mf-eyebrow">Manifesto</div>
-        <div class="mf-hero-headline">The sentence<br>that lands<br><em>changes</em><br>everything.</div>
-        <div class="mf-hero-sub">Not the paragraph. Not the chapter. The one that arrives at exactly the right speed, in exactly the right order, and does something irreversible.</div>
+        <div class="mf-hero-headline">How you say it<br>is part of<br><em>what it is.</em></div>
+        <div class="mf-hero-sub">Not just what you make. Not just how it works. The way an idea moves through a person — that is the design. That has always been the design.</div>
       </div>
       <div id="mf-scroll-cue" aria-hidden="true">
         <span>Read</span>
@@ -8634,161 +8808,161 @@ document.addEventListener('keydown', function(e) {
       </div>
     </div>
 
-    <!-- I · ON ATTENTION -->
+    <!-- I · ON MAKING -->
     <div class="mf-chapter-section">
       <div class="mf-sec-hdr">
         <div class="mf-sec-hdr-num">I</div>
         <div class="mf-sec-hdr-info">
           <div class="mf-sec-hdr-chapter">Chapter I</div>
-          <div class="mf-sec-hdr-title">On Attention</div>
+          <div class="mf-sec-hdr-title">On Making</div>
         </div>
       </div>
       <div class="mf-chapter-content">
-        <div class="mf-chapter-headline">Every great story<br>has <em>one.</em></div>
-        <div class="mf-txt-lede">The scene where everything shifts. The monologue that costs a character something real. The moment the music stops and the silence has to carry the weight.</div>
-        <div class="mf-txt-body">You cannot manufacture that moment. You can only <em>arrive at it ready.</em> Every great story has one. And the interface you use to find that story either prepares you for it — or gets in the way.<br><br>This interface was built to help you arrive ready.</div>
-        <div class="mf-txt-pull">This interface was built to help you arrive ready.</div>
+        <div class="mf-chapter-headline">I think.<br>I make.<br><em>I made this.</em></div>
+        <div class="mf-txt-lede">Not with a team of fifteen. Not from a brief. From a decision that the thing I wanted to exist did not exist yet, so I would have to build it.</div>
+        <div class="mf-txt-body">Twenty years in agencies taught me to work at scale. Startups taught me to work without permission. The years in between taught me that the best work usually happens when those two instincts are running at the same time.<br><br>The instinct to think systemically. And the instinct to just <em>make the thing.</em></div>
+        <div class="mf-txt-pull">The portfolio you are reading is itself the work.</div>
       </div>
     </div>
 
-    <!-- DARK INTERLUDE: THE POSTURE -->
+    <!-- DARK INTERLUDE: THE SENTENCE -->
     <div class="mf-dark-interlude">
       <div class="mf-interlude-inner">
-        <div class="mf-interlude-tag">Chapter II · On the Posture</div>
-        <div class="mf-interlude-text">Most interfaces assume you<br>do not know<br>what you want.<br><em>We assume the opposite.</em></div>
-        <div class="mf-interlude-sub">It assumes you showed up with some orientation toward experience — even if you cannot name it yet. A mood. A quality of attention. A Tuesday night that needs something specific.</div>
+        <div class="mf-interlude-tag">Chapter II · On the Sentence</div>
+        <div class="mf-interlude-text">Most interfaces deliver<br>information.<br><em>This one delivers it<br>in order.</em></div>
+        <div class="mf-interlude-sub">There is a difference between a page that contains everything and a page that knows when to say each thing. The second one is harder to build. It is also the only one worth reading.</div>
       </div>
     </div>
 
     <!-- II CONTINUED -->
     <div class="mf-chapter-section">
       <div class="mf-ch-divider">
-        <div class="mf-ch-divider-num">Chapter II continues · On the Posture</div>
+        <div class="mf-ch-divider-num">Chapter II continues · On the Sentence</div>
       </div>
       <div class="mf-chapter-content" style="padding-top:clamp(32px,5vh,64px)">
-        <div class="mf-txt-lede">You arrive. You do not get processed. The difference is posture. <em>One system reaches toward you. The other reaches into you.</em></div>
-        <div class="mf-txt-body">We decided the interface was the problem. Not the content. The interface.<br><br>The algorithm wants you to keep scrolling. <span class="r">We want you to stop.</span></div>
+        <div class="mf-txt-lede">Sentence-by-sentence navigation is not a gimmick. It is a position. <em>The position that pacing is part of meaning.</em></div>
+        <div class="mf-txt-body">When you read a sentence and have to decide to go to the next one, you are actually reading. You are not scanning. You are not skimming. You are <span class="r">present.</span><br><br>That is a different experience than a wall of text. And it is the experience this platform was built to create.</div>
       </div>
     </div>
 
-    <!-- III · ON DESCENT -->
+    <!-- III · ON SYSTEMS -->
     <div class="mf-chapter-section" style="background:#f5f0e8">
       <div class="mf-sec-hdr" style="border-color:rgba(13,11,9,.18)">
         <div class="mf-sec-hdr-num">III</div>
         <div class="mf-sec-hdr-info">
           <div class="mf-sec-hdr-chapter">Chapter III</div>
-          <div class="mf-sec-hdr-title">On Descent</div>
+          <div class="mf-sec-hdr-title">On Systems</div>
         </div>
       </div>
       <div class="mf-chapter-content">
-        <div class="mf-chapter-headline">The stream is not<br>a list. It is a column<br>you <em>descend into.</em></div>
-        <div class="mf-txt-lede">Each show exists at a specific depth. The one you are at is fully present. The ones above are memory. The ones below are anticipation.</div>
-        <div class="mf-txt-body">You do not scan horizontally across titles. You go <em>down.</em> This means you have to pass through each show on the way to the next one.<br><br>Even the ones you do not choose, you encounter. You develop a sense of the catalog through passage — not selection.</div>
+        <div class="mf-chapter-headline">A component is<br>not a system.<br><em>A decision is.</em></div>
+        <div class="mf-txt-lede">The pattern library is the output. The thinking that produced it — the hierarchy of choices, the names, the constraints, the things you decided not to include — that is the system.</div>
+        <div class="mf-txt-body">I have built design systems for fintech platforms, enterprise SaaS, and e-commerce at scale. The artifact in each case was tokens and components. But the work was always <em>making decisions visible</em> so that other designers could make consistent ones.<br><br>A good system does not restrict creativity. It redirects it toward the problems that actually matter.</div>
         <div class="mf-txt-pull">The interface does not ask for your attention. It assumes you brought it with you.</div>
       </div>
     </div>
 
-    <!-- IV · ON FEEL -->
+    <!-- IV · ON COMMERCE -->
     <div class="mf-dark-interlude">
       <div class="mf-interlude-inner">
-        <div class="mf-interlude-tag">Chapter IV · On Feel as a Coordinate</div>
-        <div class="mf-interlude-text">We do not<br>recommend<br>by genre.<br><em>Genre is a filing system.</em></div>
-        <div class="mf-interlude-sub">Drama is a distribution category, not an experience. Haunting and cerebral and slow is something you actually feel on a Tuesday night. The feel field maps your current frequency — not your history.</div>
+        <div class="mf-interlude-tag">Chapter IV · On Commerce</div>
+        <div class="mf-interlude-text">A product page<br>is not a shelf.<br><em>It is an argument.</em></div>
+        <div class="mf-interlude-sub">The argument that this thing, right now, is exactly what you need. Most product pages make that argument badly. They list features. They show specs. They trust the photograph to do the heavy lifting.</div>
       </div>
     </div>
     <div class="mf-chapter-section">
       <div class="mf-ch-divider">
-        <div class="mf-ch-divider-num">Chapter IV continues · On Feel as a Coordinate</div>
+        <div class="mf-ch-divider-num">Chapter IV continues · On Commerce</div>
       </div>
       <div class="mf-chapter-content" style="padding-top:clamp(32px,5vh,64px)">
-        <div class="mf-txt-lede">This is not a recommendation engine. A recommendation engine knows your history. <em>A resonance engine knows your present.</em></div>
-        <div class="mf-txt-body">The difference is that one is looking backward. The other is looking at you right now.<br><br>You drag a point across the feel field and the catalog reorganizes around what you are actually in the mood for. Not what you most recently watched. Not what is trending. <span class="r">Your current frequency.</span></div>
+        <div class="mf-txt-lede">Narrative commerce is what happens when you treat the product page as a story. Not a brochure. <em>A story with stakes, with voice, with a reason to keep reading.</em></div>
+        <div class="mf-txt-body">The sentence-progressive format was built for this. You give someone a sentence. They choose the next one. By the time they reach the call to action, they have not been sold to — <span class="r">they have been convinced.</span><br><br>There is a difference. The second one actually works.</div>
       </div>
     </div>
 
-    <!-- V · ON PERIPHERAL VISION -->
+    <!-- V · ON CRAFT -->
     <div class="mf-chapter-section" style="background:#edeae0">
       <div class="mf-sec-hdr">
         <div class="mf-sec-hdr-num">V</div>
         <div class="mf-sec-hdr-info">
           <div class="mf-sec-hdr-chapter">Chapter V</div>
-          <div class="mf-sec-hdr-title">On Peripheral Vision</div>
+          <div class="mf-sec-hdr-title">On Craft</div>
         </div>
       </div>
       <div class="mf-chapter-content">
-        <div class="mf-chapter-headline">The ghost panels<br>are not tooltips.<br>They are <em>peripheral vision.</em></div>
-        <div class="mf-txt-lede">Information that arrives without demanding your central attention. You move near something; the ghost appears to the side. You look at it or you do not. It does not interrupt.</div>
-        <div class="mf-txt-body">The design principle: <em>not all information should be foregrounded at the same time.</em><br><br>You develop a sense of the catalog through peripheral encounters — shows you passed near but did not choose become legibly distinct from shows you have never approached. The browsing accumulates. <span class="r">You know more than you selected.</span></div>
+        <div class="mf-chapter-headline">The detail is not<br>decoration.<br>It is <em>evidence.</em></div>
+        <div class="mf-txt-lede">Evidence that someone cared enough to think about the thing no one will notice unless it is wrong. The kerning. The easing curve. The label that doesn't truncate at 320px.</div>
+        <div class="mf-txt-body">I build in vanilla HTML, CSS, and JavaScript because frameworks are abstractions, and abstractions have a cost. When you work close to the metal, you understand <em>why</em> something behaves the way it does.<br><br>You also understand when to stop. Craft is not perfectionism. Craft is knowing which details change the experience and <span class="r">spending your attention there.</span></div>
       </div>
     </div>
 
-    <!-- VI · ON THE RIGHT PANEL -->
+    <!-- VI · ON VOICE -->
     <div class="mf-dark-interlude">
       <div class="mf-interlude-inner">
-        <div class="mf-interlude-tag">Chapter VI · On the Right Panel</div>
-        <div class="mf-interlude-text">Most interfaces treat<br>narrative as <em>inventory.</em><br>A title is a product.<br>A season is a unit.</div>
-        <div class="mf-interlude-sub">None of these are the thing. The thing is the specific, located instance of the work being exactly what you needed it to be.</div>
+        <div class="mf-interlude-tag">Chapter VI · On Voice</div>
+        <div class="mf-interlude-text">Most brands have<br>a visual identity.<br><em>Fewer have<br>a voice.</em></div>
+        <div class="mf-interlude-sub">Voice is harder to systematize than color. It is the reason two headlines can follow the same style guide and one of them sounds like the brand and the other one doesn't.</div>
       </div>
     </div>
     <div class="mf-chapter-section">
       <div class="mf-ch-divider">
-        <div class="mf-ch-divider-num">Chapter VI continues · On the Right Panel</div>
+        <div class="mf-ch-divider-num">Chapter VI continues · On Voice</div>
       </div>
       <div class="mf-chapter-content" style="padding-top:clamp(32px,5vh,64px)">
-        <div class="mf-txt-lede">When a show enters focus, the intent zone makes a spatial <em>argument</em> about the work — here is the whole thing, here are the ways in, here is how its parts relate to each other.</div>
-        <div class="mf-txt-body">The primary cell is the work itself. The secondary cells are doors. Trailers that tell you the tone before the commitment. Scenes that show you what kind of show this is before you have seen what kind of show this is.<br><br>The right panel is trying to show you that instance before you commit to it.</div>
+        <div class="mf-txt-lede">Content strategy and UX writing are not support roles. They are <em>design decisions expressed in language.</em> The label on a button is an interaction. The empty state is a relationship moment.</div>
+        <div class="mf-txt-body">Wolfgang & Co. was built around this premise — that brand voice is not a marketing asset, it is a product feature. When the words feel like the experience, the experience becomes <span class="r">something you trust.</span></div>
       </div>
     </div>
 
-    <!-- VII · ON THE PIN -->
+    <!-- VII · ON BEING SELF-TAUGHT -->
     <div class="mf-chapter-section" style="background:#f5f0e8">
       <div class="mf-sec-hdr">
         <div class="mf-sec-hdr-num">VII</div>
         <div class="mf-sec-hdr-info">
           <div class="mf-sec-hdr-chapter">Chapter VII</div>
-          <div class="mf-sec-hdr-title">On the Pin</div>
+          <div class="mf-sec-hdr-title">On Being Self-Taught</div>
         </div>
       </div>
       <div class="mf-chapter-content">
-        <div class="mf-chapter-headline">Pinning is not<br>playing a preview.<br>It is <em>holding something still</em><br>while you think.</div>
-        <div class="mf-txt-lede">The most important interaction in the system. And the easiest to miss.</div>
-        <div class="mf-txt-body">When you pin the primary video, the interface reorganizes around that choice. The scattered nodes collapse. The chip list appears — media and moments, accessible below the running frame.<br><br>You can watch the trailer for one show while reading about three others. The video continues. The context updates. This treats browsing and watching not as sequential states, <span class="r">but as simultaneous ones.</span></div>
-        <div class="mf-txt-pull">Cinema mode is the terminal state. Full screen, the work itself, the interface dissolved. You get there when you are ready. Not before.</div>
+        <div class="mf-chapter-headline">No one taught me<br>to code.<br><em>That is the point.</em></div>
+        <div class="mf-txt-lede">I learned to build because I had ideas that required it. The learning was never abstract — it was always in service of a specific thing that needed to exist.</div>
+        <div class="mf-txt-body">Self-teaching produces a different kind of knowledge. You do not learn the canonical path. You learn by solving problems, which means you understand <em>why</em> something works, not just that it does.<br><br>The downside: gaps. The upside: no assumptions about what is or isn't possible. I have built things that a formally trained developer would have told me <span class="r">couldn't be done that way.</span></div>
+        <div class="mf-txt-pull">They work. They're live. You're reading one now.</div>
       </div>
     </div>
 
-    <!-- VIII · ON KEY MOMENTS -->
+    <!-- VIII · ON THE RIGHT PROBLEM -->
     <div class="mf-dark-interlude">
       <div class="mf-interlude-inner">
-        <div class="mf-interlude-tag">Chapter VIII · On Key Moments</div>
-        <div class="mf-interlude-text">A timestamp is<br>a location.<br>A key moment is a<br><em>coordinate in an emotional geography.</em></div>
-        <div class="mf-interlude-sub">The difference is that one tells you where something is in the file. The other tells you what kind of thing it is, what it will cost you, what you need to have seen before it arrives.</div>
+        <div class="mf-interlude-tag">Chapter VIII · On the Right Problem</div>
+        <div class="mf-interlude-text">Most briefs describe<br>a solution.<br><em>The job is to find<br>the actual problem.</em></div>
+        <div class="mf-interlude-sub">The actual problem is almost never what the brief says. The brief is a guess. The job is to find the thing beneath it — the friction, the gap, the assumption nobody has questioned yet.</div>
       </div>
     </div>
     <div class="mf-chapter-section">
       <div class="mf-ch-divider">
-        <div class="mf-ch-divider-num">Chapter VIII continues · On Key Moments</div>
+        <div class="mf-ch-divider-num">Chapter VIII continues · On the Right Problem</div>
       </div>
       <div class="mf-chapter-content" style="padding-top:clamp(32px,5vh,64px)">
-        <div class="mf-txt-lede">The salvaging scene in Making a Murderer. Fleabag's first look to camera. The silence after the verdict. <em>These are not timestamps. They are the show.</em></div>
-        <div class="mf-txt-body">The first three minutes of a show is almost never where the show lives. The show lives in the specific sentence that makes everything before it necessary.<br><br>The interface is trying to take you there — not after you have watched eight episodes, but <span class="r">before you have decided whether to start.</span></div>
+        <div class="mf-txt-lede">Twenty years of agency work is, mostly, a training program in problem reframing. You learn to listen for what is <em>not</em> being said. You learn that the stakeholder who is hardest to read is usually the one with the most important constraint.</div>
+        <div class="mf-txt-body">The best projects I have worked on started with someone willing to say: we thought we knew what we needed, and we were wrong. <span class="r">Let's figure out what we actually need.</span><br><br>That conversation is where the real design begins.</div>
       </div>
     </div>
 
-    <!-- IX · ON WHAT THE BROWSING IS -->
+    <!-- IX · ON PRESENCE -->
     <div class="mf-chapter-section" style="background:#edeae0">
       <div class="mf-sec-hdr">
         <div class="mf-sec-hdr-num">IX</div>
         <div class="mf-sec-hdr-info">
           <div class="mf-sec-hdr-chapter">Chapter IX</div>
-          <div class="mf-sec-hdr-title">On What the Browsing Is</div>
+          <div class="mf-sec-hdr-title">On Presence</div>
         </div>
       </div>
       <div class="mf-chapter-content">
-        <div class="mf-chapter-headline">Browsing is not<br>waste. It is already<br><em>watching.</em></div>
-        <div class="mf-txt-lede">Most streaming UX is designed to minimize the time between opening the app and playing something. The implicit message: get through it faster.</div>
-        <div class="mf-txt-body">This interface inverts that. The browsing is part of the work. Descending through the stream, locating yourself in the feel field, pinning something to sit with it — these are not steps toward watching. They are <em>already watching,</em> in the sense that matters.<br><br>You are attending to something. You are being changed by proximity to it.</div>
-        <div class="mf-txt-pull">The act of finding something to watch is itself an experience worth having. Not a problem to solve. An experience with texture, depth, and its own satisfaction.</div>
+        <div class="mf-chapter-headline">Engagement is not<br>the goal.<br><em>Presence is.</em></div>
+        <div class="mf-txt-lede">Engagement is a metric. It tells you how long someone stayed. It does not tell you whether they were actually there — whether the thing you made reached them, changed something, left a mark.</div>
+        <div class="mf-txt-body">The platforms optimized for engagement have produced an internet that is very sticky and not very good. The alternative is harder to measure: <em>Did this matter to the person who experienced it?</em><br><br>That is the question this work is trying to answer. Not with user testing. With the thing itself — the pacing, the voice, the decision to give the reader a moment before the next sentence.</div>
+        <div class="mf-txt-pull">The act of reading this is itself an experience worth having. Not a funnel. An experience.</div>
       </div>
     </div>
 
@@ -8796,7 +8970,7 @@ document.addEventListener('keydown', function(e) {
     <div class="mf-dark-interlude" style="padding-bottom:0">
       <div class="mf-interlude-inner">
         <div class="mf-interlude-tag">Chapter X · On Wolfgang</div>
-        <div class="mf-interlude-text">The engine is<br>named for<br><em>a dog.</em></div>
+        <div class="mf-interlude-text">The platform is<br>named for<br><em>a dog.</em></div>
         <div class="mf-interlude-sub">A rescue. Someone who had no interest in what came next until he was certain about what was happening right now.</div>
       </div>
     </div>
@@ -8806,7 +8980,7 @@ document.addEventListener('keydown', function(e) {
       </div>
       <div class="mf-chapter-content" style="background:#0a0908;padding-top:clamp(32px,5vh,64px);padding-bottom:0">
         <div class="mf-txt-lede" style="color:rgba(240,235,226,.72)">He would stop on walks. Not because he was tired. Because <em style="color:var(--cat-color)">something was worth stopping for.</em></div>
-        <div class="mf-txt-body" style="color:rgba(240,235,226,.38)">The smell of a particular patch of ground. The sound of something two streets over. The specific texture of this moment, which would not occur again.<br><br>We called it walking your dog. The practice of not rushing past the thing that is actually there. The interface is built on that instinct. <span class="r">It wants you to find the right thing — and to remember, afterward, that the finding was part of it.</span></div>
+        <div class="mf-txt-body" style="color:rgba(240,235,226,.38)">The smell of a particular patch of ground. The sound of something two streets over. The specific texture of this moment, which would not occur again.<br><br>We called it walking your dog. The practice of not rushing past the thing that is actually there. The platform is built on that instinct — <span class="r">the belief that slowing down is not a design constraint. It is the design.</span></div>
       </div>
     </div>
 
@@ -8815,17 +8989,17 @@ document.addEventListener('keydown', function(e) {
       <div class="mf-coda-inner">
         <div class="mf-coda-mark" aria-hidden="true">N</div>
         <div class="mf-coda-text">
-          <div class="mf-coda-pull">The sentence that lands.<br>The scene that costs.<br>The moment you stop<br>and let it reach you.<br><br>That is what this is for.</div>
+          <div class="mf-coda-pull">How you say it<br>is part of what it is.<br>The pacing is the argument.<br>The sentence is the design.<br><br>That is what this is for.</div>
           <div class="mf-coda-rule"></div>
-          <div class="mf-coda-dedication">Narrative Engine is dedicated to Wolfgang, 2012–2024.<br>His sanctuary lives at <a href="https://www.wolfie.love" target="_blank" rel="noopener">wolfie.love</a></div>
+          <div class="mf-coda-dedication">Wolfgang & Co. is dedicated to Wolfgang, 2012–2024.<br>His sanctuary lives at <a href="https://www.wolfie.love" target="_blank" rel="noopener">wolfie.love</a></div>
         </div>
       </div>
     </div>
 
     <!-- RETURN BAR -->
     <div id="mf-return-bar">
-      <button id="mf-return-btn" onclick="closeManifesto()">← Return to the Interface</button>
-      <div id="mf-return-sig">Zack Gort · wolfie.love</div>
+      <button id="mf-return-btn" onclick="closeManifesto()">← Return to the Work</button>
+      <div id="mf-return-sig">Zack Gort · wolfie.life</div>
     </div>
 
   </div><!-- /mf-poster-scroll -->

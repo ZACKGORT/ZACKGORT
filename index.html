@@ -937,45 +937,35 @@ body.subch-workarea{ --pulse-rgb: 240,120,32; }
 #toast.contact-toast #toast-icon { color: var(--accent); }
 #toast.contact-toast .toast-title { color: var(--hud-ink); }
 
-#li-toggle {
+#theme-toggle {
   position: relative;
-  display: inline-flex; align-items: center; justify-content: center; gap: 0;
-  padding: 5px 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 5px 12px;
   border: 1px solid var(--border);
   background: none;
   font-family: var(--ui); font-size: 7px;
-  letter-spacing: 0.10em; text-transform: uppercase;
+  letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink-3);
   cursor: none;
   transition: all 0.18s ease;
   flex-shrink: 0;
   white-space: nowrap;
-  overflow: hidden;
 }
-#li-toggle:hover { border-color: #0a66c2; color: #0a66c2; }
-/* The LinkedIn "in" logo mark */
-#li-toggle .li-mark {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 14px; height: 14px;
-  background: #0a66c2; border-radius: 2px;
-  font-family: var(--ui); font-weight: 700; font-size: 9px;
-  color: #fff; letter-spacing: 0; text-transform: none;
-  flex-shrink: 0;
-  transition: transform 0.18s ease;
+#theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* raw state */
+body.raw-theme #theme-toggle {
+  border-color: #000; background: #000; color: #fff;
+  font-family: monospace; cursor: auto;
 }
-#li-toggle:hover .li-mark { transform: scale(1.12); }
-body.li-theme #li-toggle {
-  background: #0a66c2;
-  border-color: #0a66c2;
-  color: #fff;
-  border-radius: 4px;
-  padding: 5px 8px;
+body.raw-theme #theme-toggle:hover { background: #333; border-color: #333; }
+
+/* li state */
+body.li-theme #theme-toggle {
+  background: #0a66c2; border-color: #0a66c2; color: #fff;
+  border-radius: 16px; padding: 5px 14px;
 }
-body.li-theme #li-toggle .li-mark {
-  background: #fff;
-  color: #0a66c2;
-}
-body.li-theme #li-toggle:hover { background: #004182; border-color: #004182; }
+body.li-theme #theme-toggle:hover { background: #004182; border-color: #004182; }
 
 /* Scan line easter egg in li-theme — very faint LinkedIn grid */
 body.li-theme::before {
@@ -1205,9 +1195,15 @@ header:hover #header-overlay { opacity: 1; pointer-events: auto; transform: tran
   font-family: var(--disp); font-weight: 900;
   font-size: clamp(52px,7.5vw,100px);
   line-height: 0.88; letter-spacing: -0.03em; text-transform: uppercase; padding: 4px 0;
+  max-width: 560px;
 }
 .sentence.poster .ac { color: var(--accent); }
 .sentence.poster .dim { color: var(--ink-2); font-weight: 300; font-style: italic; }
+.sentence.body {
+  font-family: var(--disp); font-weight: 300;
+  font-size: clamp(17px,2.2vw,24px); line-height: 1.45;
+  letter-spacing: 0.005em; color: var(--ink-2); max-width: 560px;
+}font-weight: 300; font-style: italic; }
 .sentence.body {
   font-family: var(--disp); font-weight: 300;
   font-size: clamp(17px,2.2vw,24px); line-height: 1.45;
@@ -3309,13 +3305,55 @@ body.raw-theme::after { display: none !important; }
 body.raw-theme #li-img-layer { display: none !important; }
 body.raw-theme #cursor { display: none !important; }
 
-/* Image layer — show at medium opacity with a white-wash veil so black type reads */
-body.raw-theme #image-layer { display: block !important; }
-body.raw-theme #image-layer img.visible { opacity: 0.30; transform: scale(1); }
-body.raw-theme #image-layer::after {
-  background:
-    linear-gradient(to right, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.60) 50%, rgba(255,255,255,0.30) 100%),
-    linear-gradient(to top, rgba(255,255,255,0.82) 0%, transparent 50%) !important;
+/* Image layer — postcard treatment ── */
+body.raw-theme #image-layer {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+/* Kill the full-bleed veil — postcards have their own border */
+body.raw-theme #image-layer::after { display: none !important; }
+
+/* Each image becomes a postcard — centered, fixed card size, white border, faint shadow */
+body.raw-theme #image-layer img {
+  position: absolute;
+  inset: auto;
+  width: clamp(220px, 28vw, 380px);
+  height: clamp(160px, 20vw, 280px);
+  object-fit: cover;
+  object-position: center 40%;
+  opacity: 0;
+  transform: none;
+  transition: opacity 0.55s ease;
+  border: 10px solid #ffffff;
+  outline: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 2px 3px 10px rgba(0,0,0,0.12);
+  border-radius: 0;
+  /* center in viewport */
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+body.raw-theme #image-layer img.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Split + raw — postcard anchors to right half center */
+body.raw-theme.split-view #image-layer {
+  left: 48%;
+  right: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+body.raw-theme.split-view #image-layer img {
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: clamp(200px, 36vw, 420px);
+  height: clamp(150px, 26vw, 310px);
 }
 
 /* Override chapter and sub-chapter palette shifts — lock to raw */
@@ -3596,12 +3634,6 @@ body.raw-theme #split-toggle:hover { background: rgba(0,0,0,0.06); color: #00000
 body.raw-theme #scroll-toggle.on,
 body.raw-theme #split-toggle.split-active { background: #000000; color: #ffffff; border-color: #000000; box-shadow: none; }
 
-/* Li toggle — preserve but normalize */
-body.raw-theme #li-toggle {
-  background: transparent; border: 1px solid rgba(0,0,0,0.25); border-radius: 0;
-  color: #999999;
-}
-body.raw-theme #li-toggle:hover { border-color: #000000; color: #000000; }
 
 /* Compose btn */
 body.raw-theme #h-compose-btn, body.raw-theme #h-studio-btn {
@@ -3611,18 +3643,6 @@ body.raw-theme #h-compose-btn:hover, body.raw-theme #h-studio-btn:hover { border
 body.raw-theme #h-compose-btn.compose-active { border-color: #000000; color: #000000; background: rgba(0,0,0,0.06); }
 
 /* Raw theme toggle button in header */
-#raw-toggle {
-  font-family: monospace; font-size: 9px; letter-spacing: 0.10em; text-transform: uppercase;
-  background: none; border: 1px solid var(--border); color: var(--ink-3);
-  padding: 5px 10px; transition: all .15s; cursor: none; display: inline-flex; align-items: center; gap: 4px;
-}
-#raw-toggle:hover { border-color: var(--accent); color: var(--accent); }
-body.raw-theme #raw-toggle {
-  border-color: #000000; color: #000000; background: #000000; color: #ffffff;
-  font-family: monospace; cursor: auto;
-}
-body.raw-theme #raw-toggle:hover { background: #333333; }
-
 /* Wolfie credit */
 body.raw-theme #wolfie-credit { color: #cccccc; border-color: rgba(0,0,0,0.10); font-family: monospace; background: transparent; backdrop-filter: none; }
 body.raw-theme #wolfie-credit a { color: #999999; }
@@ -3953,10 +3973,7 @@ body.raw-theme.split-view #stream-col { max-width: 52vw; }
       <span class="h-tagline">Thinker &amp; Maker &middot; UX / Product &middot; 20 yrs</span>
     </div>
     <div class="h-actions">
-      <button id="raw-toggle" aria-label="Toggle raw theme" title="Stripped / Engine-only theme">RAW</button>
-      <button id="li-toggle" aria-label="Toggle LinkedIn theme">
-        <span class="li-mark" id="li-mark-logo">in</span>
-      </button>
+      <button id="theme-toggle" aria-label="Cycle theme">theme</button>
       <button id="h-compose-btn" class="h-btn h-compose-btn" aria-label="Toggle compose mode" title="Edit narrative (Cmd+E)">
         <span class="h-compose-icon">&#9998;</span>
       </button>
@@ -6135,12 +6152,18 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
   });
 })();
 
-// ── LINKEDIN THEME TOGGLE ─────────────────────────────────────────────────
-(function initLiTheme() {
-  var active = false;
+// ── THEME TOGGLE — cycles default → raw → li → default ────────────────────
+(function initThemeCycle() {
+  var btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+
+  // 0 = default, 1 = raw, 2 = li
+  var state = 0;
   var toastTimer = null;
 
-  function showLiToast(icon, title, sub, actionLabel, actionFn, duration) {
+  var labels = ['theme', 'raw', 'in'];
+
+  function showToast(icon, title, sub, actionLabel, actionFn, duration) {
     var ti = document.getElementById('toast-icon');
     var tt = document.getElementById('toast-title');
     var ts = document.getElementById('toast-sub');
@@ -6151,15 +6174,15 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
     if (ta) {
       ta.innerHTML = '';
       if (actionLabel) {
-        var btn = document.createElement('button');
-        btn.className = 'toast-act-btn';
-        btn.textContent = actionLabel;
-        btn.onclick = function() {
+        var b = document.createElement('button');
+        b.className = 'toast-act-btn';
+        b.textContent = actionLabel;
+        b.onclick = function() {
           var t = document.getElementById('toast');
           if (t) t.classList.remove('show');
           if (actionFn) actionFn();
         };
-        ta.appendChild(btn);
+        ta.appendChild(b);
       }
     }
     var t = document.getElementById('toast');
@@ -6168,45 +6191,44 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
     toastTimer = setTimeout(function() {
       var t2 = document.getElementById('toast');
       if (t2) t2.classList.remove('show');
-    }, duration || 4000);
+    }, duration || 3500);
   }
 
-  function toggle() {
-    active = !active;
-    var mark = document.getElementById('li-mark-logo');
-    if (active) {
-      document.body.classList.add('li-theme', 'no-transitions');
-      if (mark) mark.textContent = 'out';
-      showLiToast('🔵', 'In Mode', 'Congratulations. You are open to work.', 'Escape →', toggle, 6000);
+  function apply(s) {
+    document.body.classList.remove('raw-theme', 'li-theme', 'no-transitions');
+    btn.textContent = labels[s];
+    if (s === 1) {
+      document.body.classList.add('raw-theme');
+      showToast('◻', 'Raw', 'Engine exposed.', null, null, 2500);
+    } else if (s === 2) {
+      document.body.classList.add('no-transitions');
+      document.body.classList.add('li-theme');
+      showToast('🔵', 'In Mode', 'Congratulations. You are open to work.', 'Escape →', function() { cycle(); }, 6000);
       setTimeout(function() { document.body.classList.remove('no-transitions'); }, 50);
     } else {
-      document.body.classList.remove('li-theme');
-      if (mark) mark.textContent = 'in';
-      showLiToast('✦', 'Back to Normal', 'Conviction restored.', null, null, 2800);
+      showToast('✦', 'Default', 'Conviction restored.', null, null, 2200);
     }
   }
 
-  var btn = document.getElementById('li-toggle');
-  if (btn) btn.addEventListener('click', toggle);
-})();
-
-// ── RAW THEME TOGGLE ──────────────────────────────────────────────────────
-(function initRawTheme() {
-  var rawBtn = document.getElementById('raw-toggle');
-  if (!rawBtn) return;
-  var on = false;
-
-  function enter() {
-    on = true;
-    document.body.classList.add('raw-theme');
-    document.body.classList.remove('li-theme');
+  function cycle() {
+    state = (state + 1) % 3;
+    apply(state);
   }
-  function exit() {
-    on = false;
-    document.body.classList.remove('raw-theme');
-  }
-  function toggle() { on ? exit() : enter(); }
-  rawBtn.addEventListener('click', toggle);
+
+  // Expose for external callers (split-view observer, etc.)
+  window._liThemeActive = function() { return state === 2; };
+
+  btn.addEventListener('click', cycle);
+
+  // Keep split-view observer working — observe li-theme class
+  var obs = new MutationObserver(function() {
+    // If li-theme was removed externally, sync state back to default
+    if (state === 2 && !document.body.classList.contains('li-theme')) {
+      state = 0;
+      btn.textContent = labels[0];
+    }
+  });
+  obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 })();
 
 // ── SPLIT VIEW TOGGLE ─────────────────────────────────────────────────────

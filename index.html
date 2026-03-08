@@ -3307,12 +3307,15 @@ body.raw-theme #cursor { display: none !important; }
 
 /* Image layer — postcard treatment ── */
 body.raw-theme #image-layer {
-  display: none;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
 }
 /* Kill the full-bleed veil — postcards have their own border */
 body.raw-theme #image-layer::after { display: none !important; }
 
-/* Each image becomes a postcard — centered, fixed card size, white border, faint shadow */
+/* Each image becomes a postcard — nudged toward HUD, faded + grayscale at rest */
 body.raw-theme #image-layer img {
   position: absolute;
   inset: auto;
@@ -3322,19 +3325,25 @@ body.raw-theme #image-layer img {
   object-position: center 40%;
   opacity: 0;
   transform: none;
-  transition: opacity 0.55s ease;
+  transition: opacity 0.55s ease, filter 0.4s ease;
   border: 10px solid #ffffff;
   outline: 1px solid rgba(0,0,0,0.08);
   box-shadow: 2px 3px 10px rgba(0,0,0,0.12);
   border-radius: 0;
-  /* center in viewport */
+  /* nudged right toward HUD */
   top: 50%;
-  left: 50%;
+  left: calc(50% + 80px);
   translate: -50% -50%;
+  filter: grayscale(1) opacity(0.45);
+  cursor: auto;
 }
 body.raw-theme #image-layer img.visible {
   opacity: 1;
   transform: none;
+}
+body.raw-theme #image-layer img:hover {
+  filter: grayscale(0) opacity(1);
+  transition: opacity 0.55s ease, filter 0.25s ease;
 }
 
 /* Split + raw — postcard anchors to right half center */
@@ -3346,7 +3355,7 @@ body.raw-theme.split-view #image-layer {
   justify-content: center;
 }
 body.raw-theme.split-view #image-layer img {
-  left: 50%;
+  left: calc(50% + 80px);
   top: 50%;
   translate: -50% -50%;
   width: clamp(200px, 36vw, 420px);
@@ -5057,6 +5066,66 @@ imgs[0].classList.add('visible');
   obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 })();
 
+// ── RAW-THEME IMAGE — magnetic cursor lerp (mirrors spec ghost lerp) ───────
+(function() {
+  var layer = document.getElementById('image-layer');
+  if (!layer) return;
+
+  var lerpX = 0, lerpY = 0;    // current lerped offset
+  var targetX = 0, targetY = 0; // cursor-driven target
+  var following = false;
+  var rafId = null;
+
+  var LERP_FOLLOW = 0.13;
+  var LERP_IDLE   = 0.07;
+  var MAG_X = 28;
+  var MAG_Y = 18;
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function isRaw() { return document.body.classList.contains('raw-theme'); }
+  function isMob() { return window.innerWidth <= 760; }
+  function midX()  { return window.innerWidth * 0.5; }
+
+  function applyTransform() {
+    var imgs = layer.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      imgs[i].style.translate = 'calc(-50% + ' + lerpX.toFixed(2) + 'px) calc(-50% + ' + lerpY.toFixed(2) + 'px)';
+    }
+  }
+
+  function tick() {
+    var tx = (isRaw() && !isMob() && following) ? targetX : 0;
+    var ty = (isRaw() && !isMob() && following) ? targetY : 0;
+    var t  = following ? LERP_FOLLOW : LERP_IDLE;
+    lerpX = lerp(lerpX, tx, t);
+    lerpY = lerp(lerpY, ty, t);
+    applyTransform();
+    var dist = Math.abs(lerpX - tx) + Math.abs(lerpY - ty);
+    rafId = dist > 0.05 ? requestAnimationFrame(tick) : null;
+  }
+
+  function startRaf() { if (!rafId) rafId = requestAnimationFrame(tick); }
+  function enterFollow() { if (!following) { following = true;  startRaf(); } }
+  function enterIdle()   { if (following)  { following = false; startRaf(); } }
+  function applyZone(mx) { mx < midX() ? enterFollow() : enterIdle(); }
+
+  document.addEventListener('mousemove', function(e) {
+    if (!isRaw() || isMob()) return;
+    var nx = (e.clientX / window.innerWidth  - 0.5) * 2;
+    var ny = (e.clientY / window.innerHeight - 0.5) * 2;
+    targetX = nx * MAG_X;
+    targetY = ny * MAG_Y;
+    applyZone(e.clientX);
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', function() { enterIdle(); });
+
+  var obs = new MutationObserver(function() {
+    if (!isRaw()) { following = false; startRaf(); }
+  });
+  obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+})();
+
 // ── SENTENCE ENGINE ───────────────────────────────────────────────────────
 var all = Array.from(document.querySelectorAll('[data-idx]'));
 var navigable = all.filter(function(el) {
@@ -6155,7 +6224,7 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
   if (!btn) return;
 
   // 0 = default, 1 = raw, 2 = li
-  var state = 0;
+  var state = 1;
   var toastTimer = null;
 
   var labels = ['theme', 'raw', 'in'];
@@ -6216,6 +6285,10 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
   window._liThemeActive = function() { return state === 2; };
 
   btn.addEventListener('click', cycle);
+
+  // Initialize with raw theme as default (no toast on load)
+  document.body.classList.add('raw-theme');
+  btn.textContent = 'raw';
 
   // Keep split-view observer working — observe li-theme class
   var obs = new MutationObserver(function() {

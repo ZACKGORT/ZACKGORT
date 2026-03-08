@@ -3307,59 +3307,49 @@ body.raw-theme #cursor { display: none !important; }
 
 /* Image layer — postcard treatment ── */
 body.raw-theme #image-layer {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
+  display: block !important;
   background: transparent;
+  z-index: 150;          /* above layout stacking context (z:10), below HUD (z:300) */
+  pointer-events: none;  /* layer itself doesn't eat clicks */
 }
-/* Kill the full-bleed veil — postcards have their own border */
+/* Kill the full-bleed veil */
 body.raw-theme #image-layer::after { display: none !important; }
 
-/* Each image becomes a postcard — nudged toward HUD, faded + grayscale at rest */
+/* Postcard — original centered position, nudged right toward HUD */
 body.raw-theme #image-layer img {
-  position: absolute;
+  position: fixed;
   inset: auto;
   width: clamp(220px, 28vw, 380px);
   height: clamp(160px, 20vw, 280px);
   object-fit: cover;
   object-position: center 40%;
   opacity: 0;
-  transform: none;
+  top: 50%;
+  left: calc(50% + 80px);
+  translate: none;
+  transform: translateX(-50%) translateY(-50%);
   transition: opacity 0.55s ease, filter 0.4s ease;
   border: 10px solid #ffffff;
   outline: 1px solid rgba(0,0,0,0.08);
   box-shadow: 2px 3px 10px rgba(0,0,0,0.12);
   border-radius: 0;
-  /* nudged right toward HUD */
-  top: 50%;
-  left: calc(50% + 80px);
-  translate: -50% -50%;
   filter: grayscale(1) opacity(0.45);
-  cursor: auto;
+  cursor: default;
+  pointer-events: none;
 }
-body.raw-theme #image-layer img.visible {
-  opacity: 1;
-  transform: none;
-}
-body.raw-theme #image-layer img:hover {
-  filter: grayscale(0) opacity(1);
-  transition: opacity 0.55s ease, filter 0.25s ease;
-}
+body.raw-theme #image-layer img.visible { opacity: 1; }
+body.raw-theme #image-layer img:hover { filter: grayscale(0) opacity(1); }
 
-/* Split + raw — postcard anchors to right half center */
-body.raw-theme.split-view #image-layer {
-  left: 48%;
-  right: 0;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-}
+/* Split + raw */
 body.raw-theme.split-view #image-layer img {
-  left: calc(50% + 80px);
-  top: 50%;
-  translate: -50% -50%;
   width: clamp(200px, 36vw, 420px);
   height: clamp(150px, 26vw, 310px);
+}
+
+/* Mobile — hide image in raw portrait; show in landscape split-view only */
+@media (max-width: 760px) {
+  body.raw-theme #image-layer { display: none !important; }
+  body.raw-theme.split-view #image-layer { display: block !important; }
 }
 
 /* Override chapter and sub-chapter palette shifts — lock to raw */
@@ -5089,7 +5079,7 @@ imgs[0].classList.add('visible');
   function applyTransform() {
     var imgs = layer.querySelectorAll('img');
     for (var i = 0; i < imgs.length; i++) {
-      imgs[i].style.translate = 'calc(-50% + ' + lerpX.toFixed(2) + 'px) calc(-50% + ' + lerpY.toFixed(2) + 'px)';
+      imgs[i].style.transform = 'translateX(-50%) translateY(-50%) translate(' + lerpX.toFixed(2) + 'px, ' + lerpY.toFixed(2) + 'px)';
     }
   }
 
@@ -5107,6 +5097,7 @@ imgs[0].classList.add('visible');
   function startRaf() { if (!rafId) rafId = requestAnimationFrame(tick); }
   function enterFollow() { if (!following) { following = true;  startRaf(); } }
   function enterIdle()   { if (following)  { following = false; startRaf(); } }
+  // image is center-anchored, nudged right — follow when cursor is on left half
   function applyZone(mx) { mx < midX() ? enterFollow() : enterIdle(); }
 
   document.addEventListener('mousemove', function(e) {

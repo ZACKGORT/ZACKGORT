@@ -1280,24 +1280,66 @@ header:hover #header-overlay { opacity: 1; pointer-events: auto; transform: tran
 @keyframes spec-scan { from { width: 0; } to { width: 100%; } }
 
 /* scroll toggle */
-#scroll-toggle {
+/* ── TOGGLE CLUSTER — scroll + split, fixed pair ── */
+#toggle-cluster {
   position: fixed;
-  top: clamp(68px,10vh,88px); right: clamp(340px,calc(320px + 2vw),380px);
-  z-index: 501; width: 48px; height: 48px; border-radius: 50%;
+  top: clamp(68px, 10vh, 88px);
+  right: clamp(340px, calc(320px + 2vw), 380px);
+  z-index: 501;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: right 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+}
+
+/* In split view — cluster moves right, nav widget is at right:20px so cluster steps left of it */
+body.split-view #toggle-cluster {
+  right: 88px;
+}
+
+/* Each toggle button — matching pill style */
+#scroll-toggle,
+#split-toggle {
+  width: 48px; height: 48px; border-radius: 50%;
   background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.18);
   font-family: var(--ui); font-size: 7px;
   letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45);
   display: flex; align-items: center; justify-content: center;
-  transition: color .2s, border-color .2s, background .2s;
+  transition: color .2s, border-color .2s, background .2s, box-shadow .2s;
   line-height: 1.2; text-align: center; cursor: none; padding: 0;
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* reset any prior positioning — cluster handles placement */
+  position: static;
 }
-#scroll-toggle:hover { color: #fff; border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.14); }
-#scroll-toggle.on {
+
+#scroll-toggle:hover,
+#split-toggle:hover {
+  color: #fff; border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.14);
+}
+
+#scroll-toggle.on,
+#split-toggle.split-active {
   background: var(--accent); border-color: var(--accent); color: #000;
   box-shadow: 0 0 0 1px var(--accent), 0 0 24px rgba(200,144,42,0.40);
 }
+
+/* Split icon inside button */
+.split-icon {
+  display: inline-flex; align-items: center; gap: 2px;
+  width: 14px; height: 11px; flex-shrink: 0;
+}
+.split-icon span {
+  display: block; height: 100%; border-radius: 1px;
+  background: currentColor; transition: opacity 0.2s;
+}
+.split-icon span:first-child { width: 6px; }
+.split-icon span:last-child  { width: 5px; opacity: 0.45; }
+#split-toggle.split-active .split-icon span:last-child { opacity: 0.18; }
 
 body.scroll-free { overflow-y: auto !important; overflow-x: hidden !important; }
 body.scroll-free #stream-col { justify-content: flex-start; min-height: auto; padding-top: 64px; padding-bottom: 80px; }
@@ -1664,12 +1706,8 @@ body.ch-7 { --hud-bg: rgba(248,236,240,0.97); --hud-ink: #200810; --hud-ink-2: #
   #header-overlay { grid-template-columns: 1fr 1fr; }
   .ho-cell:nth-child(2) { border-right: none; }
   .ho-cell:nth-child(3) { border-top: 1px solid rgba(0,0,0,0.06); }
-  #scroll-toggle {
-    top: calc(52px + 12px) !important;
-    right: 16px !important; left: auto !important;
-    width: 42px; height: 42px; z-index: 9500 !important;
-    pointer-events: auto !important; touch-action: manipulation;
-    display: none !important; /* replaced by HUD scroll button on mobile */
+  #toggle-cluster {
+    display: none !important; /* HUD scroll button handles it on mobile */
   }
   #scroll-lockout { right: 0; pointer-events: none; }
   #nav-widget {
@@ -2720,7 +2758,7 @@ body.dark-moment #panel,
 body.dark-moment #progress,
 body.dark-moment #built-by,
 body.dark-moment #wolfie-credit,
-body.dark-moment #scroll-toggle {
+body.dark-moment #toggle-cluster {
   opacity: 0 !important; pointer-events: none !important;
   transition: opacity 0.5s ease !important;
 }
@@ -3547,13 +3585,16 @@ body.raw-theme.dark-moment .ds-ch-label { color: #999999; font-family: monospace
 body.raw-theme.dark-moment .ds-ch-title { color: #444444; font-family: monospace; }
 body.raw-theme.dark-moment #dark-escape-hint { color: rgba(0,0,0,0.35); font-family: monospace; }
 
-/* Scroll toggle button */
-body.raw-theme #scroll-toggle {
+/* Cluster buttons in raw theme — square, black/white */
+body.raw-theme #scroll-toggle,
+body.raw-theme #split-toggle {
   background: transparent; border: 1px solid #000000;
-  color: #555555; box-shadow: none; border-radius: 0; font-family: monospace;
+  color: #555555; box-shadow: none; border-radius: 0; font-family: monospace; cursor: auto;
 }
-body.raw-theme #scroll-toggle:hover { background: rgba(0,0,0,0.06); color: #000000; border-color: #000000; }
-body.raw-theme #scroll-toggle.on { background: #000000; color: #ffffff; border-color: #000000; box-shadow: none; }
+body.raw-theme #scroll-toggle:hover,
+body.raw-theme #split-toggle:hover { background: rgba(0,0,0,0.06); color: #000000; border-color: #000000; }
+body.raw-theme #scroll-toggle.on,
+body.raw-theme #split-toggle.split-active { background: #000000; color: #ffffff; border-color: #000000; box-shadow: none; }
 
 /* Li toggle — preserve but normalize */
 body.raw-theme #li-toggle {
@@ -3661,6 +3702,93 @@ body.raw-theme .cw-item { cursor: auto; }
 
 /* ── Panel image area ─ strip ── */
 body.raw-theme .panel-img-area { background: #eeeeee; border-color: rgba(0,0,0,0.12); border-radius: 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SPLIT VIEW — right rail hidden, stream left, image breathes right
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Shell collapses to single column */
+body.split-view #shell {
+  grid-template-columns: 1fr;
+  transition: grid-template-columns 0.4s ease;
+}
+
+/* Panel — slides off right edge */
+body.split-view #panel {
+  position: fixed;
+  top: 52px; right: -340px; bottom: 0;
+  width: 320px;
+  pointer-events: none;
+  transition: right 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 50;
+}
+
+/* Scroll lockout — expand to full viewport right */
+body.split-view #scroll-lockout { right: 0; }
+
+/* Stream column — constrain to left half */
+body.split-view #stream-col {
+  max-width: 54vw;
+  padding-left: clamp(28px, 5vw, 80px);
+  padding-right: 3vw;
+  transition: max-width 0.4s ease, padding 0.4s ease;
+}
+
+/* Image layer — in split view, anchor to right half and show full strength */
+body.split-view #image-layer {
+  left: 48%;
+  right: 0;
+  transition: left 0.4s ease;
+}
+body.split-view #image-layer img.visible { opacity: 0.82; }
+/* Remove the veil gradients in split view — image gets the whole right pane */
+body.split-view #image-layer::after {
+  background:
+    linear-gradient(to right, rgba(8,7,4,0.95) 0%, rgba(8,7,4,0.30) 18%, transparent 42%) !important;
+}
+
+/* Nav widget — affixes to right viewport edge when panel is hidden */
+body.split-view #nav-widget {
+  right: 20px;
+  transition: right 0.38s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease;
+}
+body.split-view #nav-widget.nw-free { right: auto; }
+
+/* Chapter widget follows */
+body.split-view #chapter-widget {
+  transition: right 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Progress bar — full width */
+body.split-view #progress { width: 100% !important; }
+
+/* Panel hover hides nav/chapter widgets — but not in split view */
+body.split-view:has(#panel:hover) #nav-widget,
+body.split-view:has(#panel:hover) #chapter-widget { opacity: 1 !important; pointer-events: auto !important; }
+
+/* Raw theme + split: image layer shows normally */
+body.raw-theme.split-view #image-layer { display: block !important; }
+body.raw-theme.split-view #image-layer img.visible { opacity: 0.82; }
+body.raw-theme.split-view #image-layer::after {
+  background:
+    linear-gradient(to right, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.70) 14%, rgba(255,255,255,0.0) 40%) !important;
+}
+body.raw-theme.split-view #stream-col { max-width: 52vw; }
+
+/* Nav widget — split button inside the HUD */
+#nw-split-btn .nw-action-label { color: var(--hud-ink-3); transition: color .12s; }
+#nw-split-btn.split-active { color: var(--hud-accent); }
+#nw-split-btn.split-active .nw-action-label { color: var(--hud-accent); }
+
+/* Mobile: split layout resets */
+@media (max-width: 760px) {
+  body.split-view #shell { grid-template-columns: 1fr; }
+  body.split-view #panel { right: -340px !important; }
+  body.split-view #image-layer { left: 0; }
+  body.split-view #stream-col { max-width: 100%; padding-right: 24px; }
+  body.split-view #nav-widget { right: auto; left: 50%; transform: translateX(-50%); }
+  #nw-split-btn { display: none !important; }
+}
 
 </style>
 </head>
@@ -3861,7 +3989,12 @@ body.raw-theme .panel-img-area { background: #eeeeee; border-color: rgba(0,0,0,0
   </header>
 
   <main id="stream-col">
-    <button id="scroll-toggle" aria-label="Toggle free scroll">scroll</button>
+    <div id="toggle-cluster">
+      <button id="scroll-toggle" aria-label="Toggle free scroll">scroll</button>
+      <button id="split-toggle" aria-label="Toggle split view" title="Split view — hides right rail (S)">
+        <span class="split-icon"><span></span><span></span></span>
+      </button>
+    </div>
     <div id="narrative-root"></div>
   </main>
 
@@ -4304,6 +4437,10 @@ body.raw-theme .panel-img-area { background: #eeeeee; border-color: rgba(0,0,0,0
 
     <button class="nw-action-btn" id="nw-scroll-btn" title="Free scroll" onclick="document.getElementById('scroll-toggle').click()">
       <span class="nw-cell-value" id="nw-scroll-icon">&#8645;</span><span class="nw-action-label" id="nw-scroll-label">Scroll</span>
+    </button>
+
+    <button class="nw-action-btn" id="nw-split-btn" title="Split view — hides right rail (S)">
+      <span class="nw-cell-value">&#9646;</span><span class="nw-action-label">Split</span>
     </button>
 
     <div class="nw-divider"></div>
@@ -6070,6 +6207,55 @@ function isGridOpen() { return document.getElementById('imageGridOverlay').class
   }
   function toggle() { on ? exit() : enter(); }
   rawBtn.addEventListener('click', toggle);
+})();
+
+// ── SPLIT VIEW TOGGLE ─────────────────────────────────────────────────────
+(function initSplitView() {
+  var on = false;
+
+  var headerBtn = document.getElementById('split-toggle');
+  var hudBtn    = document.getElementById('nw-split-btn');
+
+  function enter() {
+    on = true;
+    document.body.classList.add('split-view');
+    if (headerBtn) headerBtn.classList.add('split-active');
+    if (hudBtn)    hudBtn.classList.add('split-active');
+    // Reset nav widget to its default anchored position if it's been dragged free
+    var nw = document.getElementById('nav-widget');
+    if (nw && nw.classList.contains('nw-free')) {
+      nw.classList.remove('nw-free');
+      nw.style.left = ''; nw.style.top = ''; nw.style.right = ''; nw.style.bottom = '';
+    }
+  }
+
+  function exit() {
+    on = false;
+    document.body.classList.remove('split-view');
+    if (headerBtn) headerBtn.classList.remove('split-active');
+    if (hudBtn)    hudBtn.classList.remove('split-active');
+  }
+
+  function toggle() { on ? exit() : enter(); }
+
+  if (headerBtn) headerBtn.addEventListener('click', toggle);
+  if (hudBtn)    hudBtn.addEventListener('click', toggle);
+
+  // Keyboard: S key (when not in a text field / compose mode)
+  document.addEventListener('keydown', function(e) {
+    if (document.body.classList.contains('compose-mode')) return;
+    if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
+    if (e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      toggle();
+    }
+  });
+
+  // When li-theme activates, exit split (they conflict visually)
+  var obs = new MutationObserver(function() {
+    if (on && document.body.classList.contains('li-theme')) exit();
+  });
+  obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 })();
 
 // ===================================

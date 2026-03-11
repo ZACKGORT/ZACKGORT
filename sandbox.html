@@ -2492,9 +2492,11 @@ function toggleTheme() {
 
   // Hover on artifact nodes
   document.addEventListener('mouseover', e => {
-    const node = e.target.closest('.node.artifact[data-artifact-id]');
-    if (node) { showGhost(node); return; }
-    // Keep visible if cursor moved into the panel itself
+    const icon = e.target.closest('.artifact-preview-icon');
+    if (icon) {
+      const node = icon.closest('.node.artifact[data-artifact-id]');
+      if (node) { showGhost(node); return; }
+    }
     if (e.target.closest('#artifact-ghost-panel')) { clearTimeout(hideTimer); return; }
     hideGhost(false);
   });

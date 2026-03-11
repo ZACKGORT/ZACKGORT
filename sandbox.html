@@ -2704,10 +2704,10 @@ const SCATTER_ERAS = [
     }
 
     function getNodeAt(mx, my) {
+      const hitR = isMobile ? 18 : 7;
       return NODES.findIndex(n => {
         const x = px(n[1]), y = py(n[2]);
-        const r = n[5] ? 10 : 7;
-        return Math.hypot(mx - x, my - y) <= r;
+        return Math.hypot(mx - x, my - y) <= hitR;
       });
     }
 
@@ -2743,13 +2743,11 @@ const SCATTER_ERAS = [
     }
 
     if (isMobile) {
-      canvas.addEventListener('touchend', e => {
-        const touch = e.changedTouches[0];
+      canvas.addEventListener('click', e => {
         const rect = canvas.getBoundingClientRect();
-        const idx = getNodeAt(touch.clientX - rect.left, touch.clientY - rect.top);
+        const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
         if (idx >= 0) jumpToArtifact(NODES[idx][0]);
-        e.preventDefault();
-      }, { passive: false });
+      });
     }
 
     const ro = new ResizeObserver(() => draw());

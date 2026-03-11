@@ -1,1 +1,2114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sandbox · zackgort.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+
+/* ── Light theme (default) ── */
+:root {
+  --bg:        #f5f2ec;
+  --bg-2:      #ede9e1;
+  --bg-3:      #e6e1d8;
+  --bg-4:      #f9f7f3;
+  --ink:       #1a1815;
+  --ink-2:     #6a6660;
+  --ink-3:     #9a958e;
+  --accent:    #c05f38;
+  --accent-l:  rgba(192,95,56,0.08);
+  --border:    rgba(26,24,21,0.08);
+  --border-2:  rgba(26,24,21,0.13);
+  --border-3:  rgba(26,24,21,0.22);
+  --disp:      'DM Serif Display', serif;
+  --text:      'DM Serif Text', serif;
+  --mono:      'DM Mono', monospace;
+
+  --t-code:    #3d7a52;
+  --t-figma:   #7a52a8;
+  --t-note:    #9a7040;
+  --t-media:   #3a6ea0;
+  --t-sketch:  #a05030;
+  --t-live:    #c05f38;
+
+  --era-pre:   #7a7870;
+  --era-loss:  #9a6858;
+  --era-build: #5a7850;
+  --era-now:   #c05f38;
+
+  --sidebar-w: 240px;
+  --detail-w:  400px;
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  --bg:        #0c0b09;
+  --bg-2:      #111009;
+  --bg-3:      #161410;
+  --bg-4:      #090807;
+  --ink:       #ede9e0;
+  --ink-2:     #7a7870;
+  --ink-3:     #58544e;
+  --accent:    #d97757;
+  --accent-l:  rgba(217,119,87,0.09);
+  --border:    rgba(237,233,224,0.06);
+  --border-2:  rgba(237,233,224,0.11);
+  --border-3:  rgba(237,233,224,0.19);
+
+  --t-code:    #7a9e7e;
+  --t-figma:   #9b7cc0;
+  --t-note:    #c4a882;
+  --t-media:   #6a9bcc;
+  --t-sketch:  #c08060;
+  --t-live:    #d97757;
+
+  --era-pre:   #6a6860;
+  --era-loss:  #8a6858;
+  --era-build: #6a7858;
+  --era-now:   #d97757;
+}
+
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--ink);
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* Grain */
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:9999;
+  pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px;
+  opacity:.015;
+  transition: opacity 0.4s;
+}
+[data-theme="dark"] body::after { opacity:.025; }
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+#layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* ═══════════════════════════════════════
+   LEFT SIDEBAR — timeline navigation
+═══════════════════════════════════════ */
+#sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  height: 100%;
+  border-right: 1px solid var(--border);
+  background: var(--bg-4);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+.sidebar-brand {
+  padding: 20px 18px 15px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.sidebar-brand:hover { background: rgba(0,0,0,0.03); }
+[data-theme="dark"] .sidebar-brand:hover { background: rgba(255,255,255,0.03); }
+.sidebar-brand-line1 {
+  font-family: var(--disp);
+  font-size: 17px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.sidebar-brand-line2 {
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 3px;
+}
+.sidebar-brand-line2 em { color: var(--accent); font-style: normal; }
+.sidebar-brand-theme {
+  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.sidebar-brand:hover .sidebar-brand-theme { opacity: 1; }
+
+/* Era navigation */
+.sidebar-section-label {
+  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 14px 18px 6px;
+  flex-shrink: 0;
+}
+
+.era-nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.era-nav-item:hover { background: rgba(255,255,255,0.02); }
+.era-nav-item.active { border-left-color: currentColor; background: rgba(255,255,255,0.025); }
+.era-nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.era-nav-item.active .era-nav-dot { opacity: 1; }
+.era-nav-text { flex: 1; }
+.era-nav-name {
+  font-family: var(--text);
+  font-size: 13px;
+  color: var(--ink);
+}
+.era-nav-period {
+  font-size: 8px; letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-top: 1px;
+}
+
+/* Artifact type legend */
+.sidebar-section-label.legend-label { margin-top: 6px; }
+.type-legend-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 18px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.type-legend-item:hover { opacity: 1 !important; }
+.type-legend-dot {
+  width: 6px; height: 6px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.type-legend-label {
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Timeline mini — vertical strata */
+#sidebar-timeline {
+  flex: 1;
+  min-height: 0;
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.timeline-axis {
+  position: absolute;
+  left: 50%; top: 8%; bottom: 8%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--border-2) 20%, var(--border-2) 80%, transparent);
+  pointer-events: none;
+}
+
+.timeline-era-marker {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0;
+}
+.timeline-era-tick {
+  width: 10px; height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+}
+.timeline-era-name {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: currentColor;
+  opacity: 0.5;
+  position: absolute;
+  left: calc(50% + 10px);
+  white-space: nowrap;
+  font-family: var(--mono);
+}
+
+.timeline-artifact-dot {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.timeline-bottom {
+  position: absolute; bottom: 10px; left: 0; right: 0;
+  text-align: center;
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+/* Sidebar bottom */
+.sidebar-bottom {
+  border-top: 1px solid var(--border);
+  padding: 12px 18px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-bottom-brand {
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.sidebar-field-btn {
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); font-size: 11px;
+  padding: 5px 10px; border-radius: 3px;
+  cursor: pointer; transition: all 0.15s;
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.sidebar-field-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ═══════════════════════════════════════
+   MAIN STREAM
+═══════════════════════════════════════ */
+#main {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Progress */
+#progress {
+  position: absolute; top: 0; left: 0;
+  height: 1px; z-index: 100;
+  background: var(--accent);
+  width: 0%; transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+/* HUD */
+#stream-hud {
+  padding: 10px 24px 10px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  flex-shrink: 0;
+  height: 56px;
+}
+.hud-identity {
+  display: flex; flex-direction: column; gap: 2px;
+  flex-shrink: 0;
+}
+.hud-brand {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.1em;
+  color: var(--ink-2);
+}
+.hud-brand strong { color: var(--ink); font-weight: 500; }
+.hud-brand em { color: var(--accent); font-style: normal; }
+.hud-era-indicator {
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.hud-era-indicator span { color: currentColor; transition: color 0.3s; }
+.hud-actions {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.hud-btn {
+  font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); padding: 6px 12px;
+  cursor: pointer; border-radius: 3px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.hud-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Header scatter canvas */
+#hud-scatter {
+  flex: 1;
+  height: 36px;
+  position: relative;
+  cursor: crosshair;
+  border-radius: 3px;
+  overflow: visible;
+}
+#hud-scatter-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 3px;
+}
+/* Scatter node tooltip */
+#hud-scatter-tip {
+  position: fixed;
+  background: var(--bg-4);
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 0.1em;
+  color: var(--ink-2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 9999;
+  white-space: nowrap;
+}
+
+/* Era strip */
+#era-strip {
+  display: flex;
+  height: 2px;
+  flex-shrink: 0;
+}
+.era-seg {
+  flex: 1;
+  background: var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.era-seg::after {
+  content: attr(title);
+  position: absolute;
+  top: 6px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.era-seg:hover { background: var(--border-3); }
+.era-seg:hover::after { opacity: 1; }
+.era-seg.active { background: var(--accent); }
+
+/* Stream */
+#stream {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 60px;
+}
+#stream::-webkit-scrollbar { width: 4px; }
+#stream::-webkit-scrollbar-track { background: transparent; }
+#stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+#stream::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+.stream-inner {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* Era block */
+.era-block {
+  padding: 52px 0 24px;
+  position: relative;
+}
+.era-block::before {
+  content:'';
+  display:block;
+  height:1px;
+  background: linear-gradient(to right, transparent, var(--border-2) 40%, transparent);
+  margin-bottom: 36px;
+}
+.era-eyebrow {
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+.era-num {
+  font-family: var(--disp);
+  font-size: 88px;
+  line-height: 1;
+  color: var(--ink-3);
+  letter-spacing: -0.03em;
+  -webkit-text-stroke: 1px rgba(237,233,224,0.04);
+  user-select: none;
+  opacity: 0.65;
+}
+.era-title {
+  font-family: var(--disp);
+  font-size: 26px;
+  color: var(--ink);
+  margin-top: -10px;
+  letter-spacing: 0.005em;
+}
+.era-period {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 8px;
+}
+.era-period span {
+  display: inline-block;
+  width: 16px; height: 1px;
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* Nodes */
+.node {
+  padding: 12px 0;
+  position: relative;
+}
+.node::before {
+  content:'';
+  position:absolute;
+  left:-32px; top:0; bottom:0;
+  width:2px;
+  background: transparent;
+  transition: background 0.2s;
+}
+.node.body { font-size: 15px; line-height: 1.8; color: var(--ink); font-weight: 300; }
+.node.pull {
+  font-family: var(--text);
+  font-style: italic;
+  font-size: 19px; line-height: 1.5;
+  color: var(--ink-2);
+  border-left: 2px solid var(--accent);
+  padding-left: 18px;
+  margin: 6px 0;
+}
+.node.break { pointer-events: none; padding: 16px 0; }
+.node.break::after {
+  content:''; display:block; height:1px;
+  background: linear-gradient(to right, var(--border-2), transparent 60%);
+}
+
+.ac { color:var(--accent); }
+.em { font-style:italic; }
+.dim { opacity:0.4; }
+
+/* Artifact card */
+.node.artifact {
+  padding: 14px 0;
+  cursor: pointer;
+}
+.node-type-tag {
+  font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 7px;
+  display: flex; align-items: center; gap: 5px;
+}
+.artifact-card {
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  background: var(--bg-3);
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+}
+.node.artifact:hover .artifact-card { border-color: var(--border-3); background: var(--bg-2); }
+.artifact-type-stripe {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.artifact-card-top {
+  padding: 14px 16px 12px 20px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.artifact-title {
+  font-family: var(--text);
+  font-size: 16px; color: var(--ink);
+  line-height: 1.25;
+}
+.artifact-sentence {
+  font-family: var(--text);
+  font-style: italic;
+  font-size: 12px; color: var(--ink-2);
+  line-height: 1.6; font-weight: 300;
+}
+.artifact-card-foot {
+  padding: 8px 16px 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.artifact-meta { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.artifact-open-hint {
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex; align-items: center; gap: 3px;
+  transition: color 0.15s;
+}
+.artifact-open-hint::after { content: '›'; font-size: 12px; }
+.node.artifact:hover .artifact-open-hint { color: var(--accent); }
+
+/* ═══════════════════════════════════════
+   FIELD OVERLAY — timeline topology
+═══════════════════════════════════════ */
+#field-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: var(--bg);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease, background 0.4s ease;
+  display: flex; flex-direction: column;
+}
+body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
+
+.field-overlay-hud {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.field-overlay-title {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2);
+}
+.field-overlay-close {
+  font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); padding: 7px 14px;
+  cursor: pointer; border-radius: 3px;
+  transition: all 0.2s;
+}
+.field-overlay-close:hover { border-color: var(--accent); color: var(--accent); }
+
+.field-canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+.field-canvas-wrap:active { cursor: grabbing; }
+
+.field-canvas-inner {
+  position: absolute;
+  width: 3000px; height: 3000px;
+  top: 50%; left: 50%;
+  transform-origin: center center;
+}
+
+/* Grid */
+.field-canvas-inner::before {
+  content:'';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(237,233,224,0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+[data-theme="dark"] .field-canvas-inner::before {
+  background-image: radial-gradient(circle, rgba(237,233,224,0.05) 1px, transparent 1px);
+}
+
+/* Subtle ambient water shimmer */
+.field-canvas-inner::after {
+  content:'';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 30% 55%, rgba(106,155,204,0.04) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 60% at 70% 45%, rgba(120,137,93,0.03) 0%, transparent 70%);
+  animation: waterShimmer 12s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes waterShimmer {
+  0%   { opacity: 0.6; transform: scale(1) translate(0, 0); }
+  33%  { opacity: 1; transform: scale(1.04) translate(1%, -0.5%); }
+  66%  { opacity: 0.7; transform: scale(0.98) translate(-1%, 0.5%); }
+  100% { opacity: 0.9; transform: scale(1.02) translate(0.5%, -0.3%); }
+}
+
+/* Timeline axis */
+.field-timeline-axis {
+  position: absolute;
+  left: 3%; right: 3%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-2) 10%, var(--border-2) 90%, transparent);
+  pointer-events: none;
+}
+
+/* Era bands in field */
+.field-era-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--border);
+  pointer-events: none;
+}
+.field-era-label {
+  position: absolute;
+  top: 14%;
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+.field-era-year {
+  position: absolute;
+  bottom: 14%;
+  font-family: var(--disp);
+  font-size: 13px;
+  color: var(--ink-3);
+  pointer-events: none;
+  transform: translateX(-50%);
+  opacity: 0.5;
+}
+
+/* ── Lily pad nodes ── */
+.field-artifact-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+/* Wrapper that anchors ripples to the pad center */
+.fad-wrap {
+  position: relative;
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+}
+
+/* The pad itself */
+.fad-pad {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.55;
+  transition: opacity 0.3s, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 2;
+}
+
+/* Ripple rings — anchored to center of fad-wrap */
+.fad-ripple {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  width: 18px; height: 18px;
+  margin-left: -9px; margin-top: -9px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.fad-ripple-1 { animation: ripple 3.2s ease-out infinite; }
+.fad-ripple-2 { animation: ripple 3.2s ease-out infinite; animation-delay: 0.9s; }
+.fad-ripple-3 { animation: ripple 3.2s ease-out infinite; animation-delay: 1.8s; }
+
+@keyframes ripple {
+  0%   { width: 18px;  height: 18px;  margin-left: -9px;  margin-top: -9px;  opacity: 0.5; }
+  100% { width: 100px; height: 100px; margin-left: -50px; margin-top: -50px; opacity: 0; }
+}
+
+.fad-label {
+  font-size: 8px; letter-spacing: 0.1em;
+  color: currentColor;
+  opacity: 0.6;
+  white-space: nowrap;
+  margin-top: 12px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  pointer-events: none;
+  transition: opacity 0.25s;
+  position: relative; z-index: 2;
+}
+
+/* Ghost tooltip — surfaces on hover */
+.fad-ghost {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  width: 220px;
+  background: var(--bg-4);
+  border: 1px solid var(--border-2);
+  border-radius: 5px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  z-index: 100;
+}
+.fad-ghost::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--border-2);
+}
+.fad-ghost-type {
+  font-size: 6px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: currentColor; opacity: 0.8;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+}
+.fad-ghost-title {
+  font-family: var(--text);
+  font-size: 13px; color: var(--ink);
+  line-height: 1.3; margin-bottom: 7px;
+}
+.fad-ghost-sentence {
+  font-family: var(--text);
+  font-style: italic;
+  font-size: 11px; color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/* Hover — pad blooms, label sharpens, ghost appears */
+.field-artifact-dot:hover .fad-pad { opacity: 1; transform: scale(1.3); }
+.field-artifact-dot:hover .fad-label { opacity: 1; }
+.field-artifact-dot:hover .fad-ghost {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Major nodes */
+.field-artifact-dot.major .fad-wrap { width: 26px; height: 26px; }
+.field-artifact-dot.major .fad-ripple {
+  width: 26px; height: 26px;
+  margin-left: -13px; margin-top: -13px;
+}
+.field-artifact-dot.major .fad-ripple-1 { animation: ripple-major 3.6s ease-out infinite; }
+.field-artifact-dot.major .fad-ripple-2 { animation: ripple-major 3.6s ease-out infinite; animation-delay: 1.0s; }
+.field-artifact-dot.major .fad-ripple-3 { animation: ripple-major 3.6s ease-out infinite; animation-delay: 2.0s; }
+
+@keyframes ripple-major {
+  0%   { width: 26px;  height: 26px;  margin-left: -13px; margin-top: -13px; opacity: 0.6; }
+  100% { width: 130px; height: 130px; margin-left: -65px; margin-top: -65px; opacity: 0; }
+}
+
+.field-artifact-dot.major .fad-pad { opacity: 0.7; }
+.field-artifact-dot.major .fad-label { font-size: 9px; }
+.field-artifact-dot.major:hover .fad-pad { opacity: 1; transform: scale(1.2); }
+
+/* ═══════════════════════════════════════
+   ARTIFACT GHOST — fixed overlay, mouse-tracked
+═══════════════════════════════════════ */
+/* Ghost lives as a single fixed element — never clips */
+#artifact-ghost-panel {
+  position: fixed;
+  z-index: 9000;
+  width: 340px;
+  background: var(--bg-4);
+  border: 1px solid var(--border-2);
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: translateY(6px);
+}
+#artifact-ghost-panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.agp-media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  background: var(--bg-3);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.agp-media iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: none;
+  pointer-events: none;
+}
+.agp-media img, .agp-media video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.agp-load-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 7px;
+  background: var(--bg-3);
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.agp-load-overlay.loaded { opacity: 0; }
+.agp-spinner {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: agp-spin 0.9s linear infinite;
+}
+@keyframes agp-spin { to { transform: rotate(360deg); } }
+.agp-load-url {
+  font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.12em;
+  color: var(--ink-3);
+}
+/* No-URL fallback — sentence preview */
+.agp-sentence-preview {
+  padding: 20px 18px;
+}
+.agp-sentence-type {
+  font-family: var(--mono);
+  font-size: 6px; letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.agp-sentence-text {
+  font-family: var(--text);
+  font-style: italic;
+  font-size: 14px; line-height: 1.65;
+  color: var(--ink-2);
+}
+.agp-cap {
+  padding: 9px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg-4);
+}
+.agp-cap-title {
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 0.08em;
+  color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 200px;
+}
+.agp-cap-link {
+  font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.agp-cap-link:hover { opacity: 0.75; }
+
+/* Zoom hint */
+.field-zoom-hint {
+  position: absolute; bottom: 18px; right: 24px;
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex; gap: 12px;
+}
+.kbd {
+  display: inline-flex; align-items: center;
+  font-size: 7px; font-family: var(--mono);
+  background: var(--bg-3); border: 1px solid var(--border-2);
+  border-radius: 3px; padding: 1px 5px;
+  color: var(--ink-3);
+}
+
+/* ═══════════════════════════════════════
+   RIGHT DETAIL PANEL
+═══════════════════════════════════════ */
+#main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+  transition: padding-right 0.44s cubic-bezier(0.32,0.72,0,1);
+}
+/* When detail is open, shrink main's usable width to avoid content hiding under panel */
+body.detail-open #main {
+  padding-right: var(--detail-w);
+}
+
+#detail {
+  width: var(--detail-w);
+  flex-shrink: 0;
+  height: 100%;
+  display: flex; flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg-4);
+  position: absolute;
+  top: 0; right: 0;
+  transform: translateX(var(--detail-w));
+  transition: transform 0.44s cubic-bezier(0.32,0.72,0,1), background 0.4s ease, border-color 0.4s ease;
+  z-index: 20;
+}
+#detail.open { transform: translateX(0); }
+
+.detail-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.detail-type-tag {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+.detail-type-stripe {
+  width: 14px; height: 2px; border-radius: 1px;
+}
+.detail-close {
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); font-size: 11px;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.detail-close:hover { border-color: var(--accent); color: var(--accent); }
+
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.detail-body::-webkit-scrollbar { width: 3px; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border-2); }
+
+/* Hero types */
+.detail-hero {
+  width: 100%;
+  flex-shrink: 0;
+}
+.detail-hero-code {
+  background: var(--bg-4);
+  padding: 20px;
+  font-family: var(--mono);
+  font-size: 11px; line-height: 1.8;
+  color: var(--t-code);
+  border-bottom: 1px solid var(--border);
+  min-height: 140px;
+  transition: background 0.4s;
+}
+.code-line { display: block; }
+.code-comment { color: var(--ink-3); }
+.code-keyword { color: #9b7cc0; }
+.code-string { color: #c4a882; }
+.code-num { color: var(--t-code); }
+
+.detail-hero-figma {
+  background: var(--bg-3);
+  min-height: 130px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.4s;
+}
+.figma-frame {
+  background: var(--bg-3);
+  border: 1px solid rgba(155,124,192,0.2);
+  border-radius: 2px;
+  flex: 1; max-width: 72px;
+  aspect-ratio: 3/4;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; opacity: 0.3;
+}
+.figma-frame.wide { aspect-ratio: 16/9; max-width: 130px; }
+
+.detail-hero-live {
+  width: 100%; aspect-ratio: 16/9;
+  background: #000; border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.detail-hero-live iframe { width: 100%; height: 100%; border: none; }
+.detail-hero-live-load {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  background: var(--bg-3); cursor: pointer;
+  transition: background 0.2s;
+}
+.detail-hero-live-load:hover { background: var(--bg-2); }
+.detail-hero-live-load-icon { font-size: 20px; opacity: 0.3; }
+.detail-hero-live-load-hint {
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.detail-hero-media {
+  width: 100%; aspect-ratio: 16/9;
+  background: #000814;
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 32px; opacity: 0.15; color: var(--t-media);
+}
+.detail-hero-sketch {
+  background: var(--bg-3);
+  min-height: 110px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; gap: 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.4s;
+}
+.sketch-mark { opacity: 0.18; font-size: 28px; color: var(--t-sketch); }
+
+.detail-hero-note {
+  padding: 22px 20px;
+  background: var(--bg-3);
+  border-bottom: 1px solid var(--border);
+}
+.detail-hero-note-text {
+  font-family: var(--text);
+  font-size: 15px; line-height: 1.65;
+  color: var(--ink-2); font-style: italic;
+}
+
+/* Artifact body in detail */
+.detail-artifact-body { padding: 22px 20px; }
+.detail-artifact-period {
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 7px;
+}
+.detail-artifact-title {
+  font-family: var(--disp);
+  font-size: 22px; color: var(--ink);
+  line-height: 1.2; margin-bottom: 12px;
+}
+.detail-artifact-sentence {
+  font-family: var(--text);
+  font-size: 14px; line-height: 1.7;
+  color: var(--ink-2); font-style: italic;
+  margin-bottom: 16px;
+  border-left: 2px solid var(--accent);
+  padding-left: 12px;
+}
+.detail-artifact-desc {
+  font-size: 12px; color: var(--ink-2);
+  line-height: 1.75; font-weight: 300;
+  margin-bottom: 20px;
+}
+.detail-artifact-specs {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.detail-spec-row {
+  display: flex; gap: 12px; padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.detail-spec-row:last-child { border-bottom: none; }
+.detail-spec-k {
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); white-space: nowrap; flex-shrink: 0;
+  width: 80px;
+}
+.detail-spec-v {
+  font-size: 12px; color: var(--ink-2); font-weight: 300;
+}
+.detail-artifact-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 18px;
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  border: 1px solid rgba(217,119,87,0.3);
+  padding: 7px 14px; border-radius: 3px;
+  transition: all 0.15s;
+}
+.detail-artifact-link:hover { border-color: var(--accent); background: var(--accent-l); }
+</style>
+</head>
+<body>
+
+<!-- ═══ FIELD OVERLAY ═══ -->
+<div id="field-overlay">
+  <div class="field-overlay-hud">
+    <span class="field-overlay-title">Timeline Topology · 16 artifacts · 4 eras</span>
+    <button class="field-overlay-close" onclick="closeField()">✕ Return to Stream</button>
+  </div>
+  <div class="field-canvas-wrap" id="field-canvas-wrap">
+    <div class="field-canvas-inner" id="field-canvas-inner">
+      <!-- Timeline axis -->
+      <div class="field-timeline-axis"></div>
+
+      <!-- Era lines + labels -->
+      <div class="field-era-line" style="left:9%"></div>
+      <div class="field-era-line" style="left:30%"></div>
+      <div class="field-era-line" style="left:52%"></div>
+      <div class="field-era-line" style="left:76%"></div>
+      <div class="field-era-line" style="left:90%"></div>
+
+      <div class="field-era-label" style="left:19.5%">Before · 2018–20</div>
+      <div class="field-era-label" style="left:41%">Loss · 2020–21</div>
+      <div class="field-era-label" style="left:64%">Build · 2021–24</div>
+      <div class="field-era-label" style="left:83%">Now · 2024–</div>
+
+      <div class="field-era-year" style="left:19.5%">2018</div>
+      <div class="field-era-year" style="left:41%">2020</div>
+      <div class="field-era-year" style="left:64%">2021</div>
+      <div class="field-era-year" style="left:83%">2024</div>
+
+      <!-- Artifact dots — distributed along timeline on 3000×3000 canvas -->
+      <div class="field-artifact-dot" style="left:11%;top:42%;color:var(--t-figma)" onclick="jumpToArtifact('a1')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Figma · 2018</div><div class="fad-ghost-title">Navigation System Studies</div><div class="fad-ghost-sentence">I kept trying to make the nav disappear — to make the interface feel like it had no edges.</div></div>
+        <div class="fad-label">nav systems</div>
+      </div>
+      <div class="field-artifact-dot" style="left:13%;top:60%;color:var(--t-note)" onclick="jumpToArtifact('a2')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Note · 2019</div><div class="fad-ghost-title">On the Interface of the Page</div><div class="fad-ghost-sentence">The page does not try to help you. That is why you trust it.</div></div>
+        <div class="fad-label">reading essay</div>
+      </div>
+      <div class="field-artifact-dot" style="left:16%;top:46%;color:var(--t-figma)" onclick="jumpToArtifact('a3')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Figma · 2019</div><div class="fad-ghost-title">Sentence Grid Experiments</div><div class="fad-ghost-sentence">I was trying to make text feel spatial. I did not have the engine yet.</div></div>
+        <div class="fad-label">sentence grid</div>
+      </div>
+      <div class="field-artifact-dot" style="left:19%;top:62%;color:var(--t-sketch)" onclick="jumpToArtifact('a4')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Sketch · 2020</div><div class="fad-ghost-title">Scroll Behavior Sketches</div><div class="fad-ghost-sentence">Paper. Just paper. I was trying to figure out what happens when you read.</div></div>
+        <div class="fad-label">scroll sketches</div>
+      </div>
+      <div class="field-artifact-dot major" style="left:34%;top:50%;color:var(--t-note)" onclick="jumpToArtifact('a5')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Note · Late 2020</div><div class="fad-ghost-title">wolfie.love — The First File</div><div class="fad-ghost-sentence">I just wanted to make something that felt like him. Warm. Present. Not archived.</div></div>
+        <div class="fad-label">wolfie.love origin</div>
+      </div>
+      <div class="field-artifact-dot" style="left:36%;top:38%;color:var(--t-code)" onclick="jumpToArtifact('a6')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Code · 2021</div><div class="fad-ghost-title">First Narrative HTML</div><div class="fad-ghost-sentence">I had never written a line of JavaScript. I was just trying to make the photo change when I scrolled.</div></div>
+        <div class="fad-label">first html</div>
+      </div>
+      <div class="field-artifact-dot" style="left:38%;top:64%;color:var(--t-media)" onclick="jumpToArtifact('a7')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Media · 2020–21</div><div class="fad-ghost-title">Wolfgang Photo Archive</div><div class="fad-ghost-sentence">Every photo was a sentence. I started thinking about them that way.</div></div>
+        <div class="fad-label">photo archive</div>
+      </div>
+      <div class="field-artifact-dot" style="left:55%;top:42%;color:var(--t-code)" onclick="jumpToArtifact('a8')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Code · 2021</div><div class="fad-ghost-title">Narrative Engine v1</div><div class="fad-ghost-sentence">It could parse a string into sentences and render them one at a time. That was all. That was enough.</div></div>
+        <div class="fad-label">engine v1</div>
+      </div>
+      <div class="field-artifact-dot" style="left:58%;top:60%;color:var(--t-figma)" onclick="jumpToArtifact('a9')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Figma · 2022</div><div class="fad-ghost-title">Node System Design</div><div class="fad-ghost-sentence">I finally understood what I was designing. Not a reading app. A grammar.</div></div>
+        <div class="fad-label">node system</div>
+      </div>
+      <div class="field-artifact-dot" style="left:62%;top:38%;color:var(--t-code)" onclick="jumpToArtifact('a10')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Code · 2022–23</div><div class="fad-ghost-title">Grammar + Telemetry</div><div class="fad-ghost-sentence">I added dwell time. I wanted to know which sentences people stayed inside.</div></div>
+        <div class="fad-label">telemetry</div>
+      </div>
+      <div class="field-artifact-dot" style="left:65%;top:64%;color:var(--t-sketch)" onclick="jumpToArtifact('a11')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Sketch · 2023</div><div class="fad-ghost-title">The Verticals</div><div class="fad-ghost-sentence">If the engine works for one thing, it works for everything.</div></div>
+        <div class="fad-label">verticals</div>
+      </div>
+      <div class="field-artifact-dot" style="left:68%;top:50%;color:var(--t-code)" onclick="jumpToArtifact('a12')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Code · 2023–24</div><div class="fad-ghost-title">intoview — The Full Engine</div><div class="fad-ghost-sentence">I gave it a name. That was when I knew it was real.</div></div>
+        <div class="fad-label">intoview</div>
+      </div>
+      <div class="field-artifact-dot major" style="left:79%;top:48%;color:var(--t-live)" onclick="jumpToArtifact('a13')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Live · 2024</div><div class="fad-ghost-title">wolfie.love</div><div class="fad-ghost-sentence">Utility first. Emotional vessel second. The platform proving the thesis by existing.</div></div>
+        <div class="fad-label">wolfie.love live</div>
+      </div>
+      <div class="field-artifact-dot" style="left:82%;top:38%;color:var(--t-live)" onclick="jumpToArtifact('a14')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Live · 2024</div><div class="fad-ghost-title">reasonably.cc</div><div class="fad-ghost-sentence">A structured AI prompting companion. The engine meeting a new use case.</div></div>
+        <div class="fad-label">reasonably.cc</div>
+      </div>
+      <div class="field-artifact-dot" style="left:84%;top:62%;color:var(--t-live)" onclick="jumpToArtifact('a15')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Live · 2025</div><div class="fad-ghost-title">zackgort.com</div><div class="fad-ghost-sentence">A portfolio that refuses to be a portfolio. The narrative engine as credential.</div></div>
+        <div class="fad-label">zackgort.com</div>
+      </div>
+      <div class="field-artifact-dot major" style="left:88%;top:50%;color:var(--t-live)" onclick="jumpToArtifact('a16')">
+        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Live · March 2026</div><div class="fad-ghost-title">Reason &amp; Resolution</div><div class="fad-ghost-sentence">The sentence is the argument. This is my reason and resolution.</div></div>
+        <div class="fad-label">R&amp;R · Anthropic</div>
+      </div>
+    </div>
+    <div class="field-zoom-hint">
+      <span><kbd class="kbd">scroll</kbd> zoom</span>
+      <span><kbd class="kbd">drag</kbd> pan</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ARTIFACT GHOST PANEL — fixed, mouse-tracked ═══ -->
+<div id="artifact-ghost-panel">
+  <div class="agp-media" id="agp-media"></div>
+  <div class="agp-cap" id="agp-cap">
+    <span class="agp-cap-title" id="agp-cap-title"></span>
+    <a class="agp-cap-link" id="agp-cap-link" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ open</a>
+  </div>
+</div>
+
+<!-- ═══ LAYOUT ═══ -->
+<div id="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <div id="sidebar">
+    <div class="sidebar-brand" onclick="toggleTheme()" title="Toggle light / dark">
+      <div class="sidebar-brand-line1">sandbox</div>
+      <div class="sidebar-brand-line2">zackgort.com · made with <em>wolfie.love*</em></div>
+      <div class="sidebar-brand-theme" id="theme-hint">◐ dark</div>
+    </div>
+
+    <div class="sidebar-section-label">Eras</div>
+
+    <div class="era-nav-item active" data-era="0" style="color:var(--era-pre)" onclick="scrollToEra(0)">
+      <div class="era-nav-dot"></div>
+      <div class="era-nav-text">
+        <div class="era-nav-name">Before</div>
+        <div class="era-nav-period">2018 – 2020 · 4 artifacts</div>
+      </div>
+    </div>
+    <div class="era-nav-item" data-era="1" style="color:var(--era-loss)" onclick="scrollToEra(1)">
+      <div class="era-nav-dot"></div>
+      <div class="era-nav-text">
+        <div class="era-nav-name">Wolfgang</div>
+        <div class="era-nav-period">2020 – 2021 · 3 artifacts</div>
+      </div>
+    </div>
+    <div class="era-nav-item" data-era="2" style="color:var(--era-build)" onclick="scrollToEra(2)">
+      <div class="era-nav-dot"></div>
+      <div class="era-nav-text">
+        <div class="era-nav-name">The Engine</div>
+        <div class="era-nav-period">2021 – 2024 · 5 artifacts</div>
+      </div>
+    </div>
+    <div class="era-nav-item" data-era="3" style="color:var(--era-now)" onclick="scrollToEra(3)">
+      <div class="era-nav-dot"></div>
+      <div class="era-nav-text">
+        <div class="era-nav-name">What Propagated</div>
+        <div class="era-nav-period">2024 – Present · 4 artifacts</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label legend-label">Types</div>
+    <div class="type-legend-item" style="opacity:0.7">
+      <div class="type-legend-dot" style="background:var(--t-figma)"></div>
+      <span class="type-legend-label" style="color:var(--t-figma)">Figma</span>
+    </div>
+    <div class="type-legend-item" style="opacity:0.7">
+      <div class="type-legend-dot" style="background:var(--t-code)"></div>
+      <span class="type-legend-label" style="color:var(--t-code)">Code</span>
+    </div>
+    <div class="type-legend-item" style="opacity:0.7">
+      <div class="type-legend-dot" style="background:var(--t-note)"></div>
+      <span class="type-legend-label" style="color:var(--t-note)">Note</span>
+    </div>
+    <div class="type-legend-item" style="opacity:0.7">
+      <div class="type-legend-dot" style="background:var(--t-media)"></div>
+      <span class="type-legend-label" style="color:var(--t-media)">Media</span>
+    </div>
+    <div class="type-legend-item" style="opacity:0.7">
+      <div class="type-legend-dot" style="background:var(--t-sketch)"></div>
+      <span class="type-legend-label" style="color:var(--t-sketch)">Sketch</span>
+    </div>
+    <div class="type-legend-item" style="opacity:0.7">
+      <div class="type-legend-dot" style="background:var(--t-live)"></div>
+      <span class="type-legend-label" style="color:var(--t-live)">Live</span>
+    </div>
+
+    <!-- Mini timeline REMOVED — scatter lives in header now -->
+
+    <div class="sidebar-bottom">
+      <span class="sidebar-bottom-brand">16 artifacts · 4 eras</span>
+    </div>
+  </div>
+
+  <!-- ── STREAM ── -->
+  <div id="main">
+    <div id="progress"></div>
+
+    <div id="stream-hud">
+      <div class="hud-identity">
+        <div class="hud-brand">zackgort.com / <strong>sandbox</strong> · <em>wolfie.love*</em></div>
+        <div class="hud-era-indicator" id="hud-era-indicator">
+          <span id="hud-era-text" style="color:var(--era-pre)">Before · 2018–2020</span>
+        </div>
+      </div>
+
+      <!-- ── Header scatter strip ── -->
+      <div id="hud-scatter" title="Click any node to jump · or open full field view">
+        <canvas id="hud-scatter-canvas"></canvas>
+      </div>
+
+      <div class="hud-actions">
+        <button class="hud-btn" onclick="openField()">◈ Field</button>
+      </div>
+    </div>
+
+    <!-- Era progress strip -->
+    <div id="era-strip">
+      <div class="era-seg active" data-era="0" onclick="scrollToEra(0)" title="Before"></div>
+      <div class="era-seg" data-era="1" onclick="scrollToEra(1)" title="Wolfgang"></div>
+      <div class="era-seg" data-era="2" onclick="scrollToEra(2)" title="Build"></div>
+      <div class="era-seg" data-era="3" onclick="scrollToEra(3)" title="Now"></div>
+    </div>
+
+    <div id="stream" onscroll="onStreamScroll()">
+      <div class="stream-inner" id="stream-inner"></div>
+    </div>
+
+    <!-- ── DETAIL ── -->
+    <div id="detail">
+      <div class="detail-header">
+        <div class="detail-type-tag">
+          <div class="detail-type-stripe" id="detail-stripe"></div>
+          <span id="detail-label">artifact</span>
+        </div>
+        <button class="detail-close" onclick="closeDetail()">✕</button>
+      </div>
+      <div class="detail-body" id="detail-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══ TYPES ═══
+const TYPES = {
+  figma:  { label:'Figma',  color:'var(--t-figma)',  icon:'◈' },
+  code:   { label:'Code',   color:'var(--t-code)',   icon:'{ }' },
+  note:   { label:'Note',   color:'var(--t-note)',   icon:'✎' },
+  media:  { label:'Media',  color:'var(--t-media)',  icon:'▶' },
+  sketch: { label:'Sketch', color:'var(--t-sketch)', icon:'△' },
+  live:   { label:'Live',   color:'var(--t-live)',   icon:'◆' },
+};
+
+const ERA_COLORS = ['var(--era-pre)','var(--era-loss)','var(--era-build)','var(--era-now)'];
+const ERA_LABELS = ['Before · 2018–2020','Wolfgang · 2020–2021','The Engine · 2021–2024','What Propagated · 2024–'];
+
+const STREAM = [
+  // ── ERA 0: BEFORE ──
+  { type:'era', id:'era-0', era:0, num:'01', title:'Before I Knew What I Was Making', period:'2018 – 2020', color:'var(--era-pre)' },
+  { type:'body', text:'I had been designing navigation systems for ten years. I was good at it. I did not find it interesting anymore.' },
+  { type:'artifact', id:'a1', atype:'figma', era:0, period:'2018', title:'Navigation System Studies',
+    sentence:'I kept trying to make the nav disappear — to make the interface feel like it had no edges.',
+    desc:'A series of Figma explorations into navigation as ambient context rather than explicit wayfinding. The pattern that kept emerging: the sentence as the primary unit of navigation.',
+    specs:[{k:'Tool',v:'Figma'},{k:'What it was',v:'Navigation pattern library'},{k:'What it became',v:'The first argument for sentence-level reading'}],
+    url:'https://www.are.na/zack-gort' },
+  { type:'body', text:'I kept writing essays about reading. About how the interface of a book — invisible, assumed — carried more design intelligence than most apps I was shipping.' },
+  { type:'artifact', id:'a2', atype:'note', era:0, period:'2019', title:'On the Interface of the Page',
+    sentence:'The page does not try to help you. That is why you trust it.',
+    desc:'A long essay written over several months about reading interfaces, attention density, and the violence of the notification paradigm. Never published. Became the philosophical backbone of the wolfie engine.',
+    specs:[{k:'Format',v:'Private essay, ~4,000 words'},{k:'Core argument',v:'Absence of UI is itself a design decision'},{k:'Became',v:'The thesis behind sentence-progressive reveal'}],
+    url:'https://en.wikipedia.org/wiki/Reading_(process)' },
+  { type:'pull', text:'What if the interface knew where you were in the sentence — not the page, not the scroll position, but the sentence?' },
+  { type:'artifact', id:'a3', atype:'figma', era:0, period:'2019', title:'Sentence Grid Experiments',
+    sentence:'I was trying to make text feel spatial. I did not have the engine yet.',
+    desc:'Early Figma work treating sentences as grid objects — cards with type weights, responsive to reading state. Closer to a design system than a product. The grid logic here became the Mondrian influence I still cite.',
+    specs:[{k:'Tool',v:'Figma'},{k:'Insight',v:'Sentence type determines spatial weight'},{k:'Missing',v:'Any way to actually make it move'}],
+    url:'https://www.figma.com/community' },
+  { type:'artifact', id:'a4', atype:'sketch', era:0, period:'2020', title:'Scroll Behavior Sketches',
+    sentence:'Paper. Just paper. I was trying to figure out what happens when you read.',
+    desc:'A stack of A5 sketches mapping reading behavior — where eyes go, when attention breaks, what causes a re-read. These fed directly into the dwell-time telemetry that became the Node Analytics system.',
+    specs:[{k:'Format',v:'Paper sketches, ~40 pages'},{k:'Question',v:'Can a reading surface know if a sentence landed?'},{k:'Answer',v:'Eventually, yes'}],
+    url:'https://en.wikipedia.org/wiki/Eye_tracking' },
+  { type:'break' },
+
+  // ── ERA 1: LOSS ──
+  { type:'era', id:'era-1', era:1, num:'02', title:'Wolfgang', period:'2020 – 2021', color:'var(--era-loss)' },
+  { type:'body', text:'Wolfgang died. I needed somewhere to put him. I did not know I was going to build a publishing platform.' },
+  { type:'artifact', id:'a5', atype:'note', era:1, period:'Late 2020', title:'wolfie.love — The First File',
+    sentence:'I just wanted to make something that felt like him. Warm. Present. Not archived.',
+    desc:'The origin file. A single HTML page, hand-coded, with his photos and no navigation. The interface was the absence of interface. I kept adding to it.',
+    specs:[{k:'Stack',v:'HTML · CSS · no framework'},{k:'Intent',v:'Memorial'},{k:'What happened',v:'It became the engine'}],
+    url:'https://wolfie.love' },
+  { type:'body', text:'I wrote sentences about him. I noticed the sentences mattered more than the layout. The layout existed to make the sentences feel right.' },
+  { type:'artifact', id:'a6', atype:'code', era:1, period:'2021', title:'First Narrative HTML',
+    sentence:"I had never written a line of JavaScript. I was just trying to make the photo change when I scrolled.",
+    desc:"The first coded experiment with scroll-driven narrative. Embarrassingly crude. But the idea — that position in a reading sequence should trigger state change in the interface — was already there.",
+    specs:[{k:'Stack',v:'Vanilla JS · CSS scroll events'},{k:'Capability',v:'Scroll position → image swap'},{k:"What I didn't know",v:'I was building a reading engine'}],
+    url:'https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API' },
+  { type:'artifact', id:'a7', atype:'media', era:1, period:'2020–21', title:'Wolfgang Photo Archive',
+    sentence:'Every photo was a sentence. I started thinking about them that way.',
+    desc:'Thousands of photos organized not by date but by mood — the way memory actually works. The tagging system I built for this became the image indexing logic in the wolfie narrative engine.',
+    specs:[{k:'Volume',v:'~3,000 photos'},{k:'Organization',v:'Emotional state, not chronology'},{k:'Output',v:'Image indexing system for narrative engine'}],
+    url:'https://unsplash.com' },
+  { type:'pull', text:'Grief is not a subject. It is a design constraint. It tells you what cannot be skipped.' },
+  { type:'break' },
+
+  // ── ERA 2: BUILD ──
+  { type:'era', id:'era-2', era:2, num:'03', title:'The Engine', period:'2021 – 2024', color:'var(--era-build)' },
+  { type:'body', text:'I started building in earnest. Not knowing how to code turned out to be an advantage — I built the things I needed, not the things convention said to build.' },
+  { type:'artifact', id:'a8', atype:'code', era:2, period:'2021', title:'Narrative Engine v1',
+    sentence:'It could parse a string into sentences and render them one at a time. That was all. That was enough.',
+    desc:'The first working sentence engine. A crude parser that split text on sentence boundaries and revealed nodes on scroll. No types, no grammar, no analytics. Just the primitive: one sentence at a time.',
+    specs:[{k:'Lines of code',v:'~200'},{k:'Capability',v:'String → sentence array → scroll reveal'},{k:'Missing',v:'Everything else'}],
+    url:'https://wolfie.love' },
+  { type:'artifact', id:'a9', atype:'figma', era:2, period:'2022', title:'Node System Design',
+    sentence:'I finally understood what I was designing. Not a reading app. A grammar.',
+    desc:'The Figma file where the node type system crystallized: [body], [poster], [pull], [label], [spec], [break]. Each type a different epistemic register. The design system for a language.',
+    specs:[{k:'Tool',v:'Figma'},{k:'Breakthrough',v:'Sentence types as semantic primitives'},{k:'Output',v:'The wolfie markup grammar'}],
+    url:'https://www.figma.com/community/file/1166831539721848656' },
+  { type:'body', text:'Every type of sentence does something different to the reader. A poster sentence stops. A pull quote bends. A body sentence accumulates. I was designing affect, not layout.' },
+  { type:'artifact', id:'a10', atype:'code', era:2, period:'2022–23', title:'Sentence Engine — Grammar + Telemetry',
+    sentence:'I added dwell time. I wanted to know which sentences people stayed inside.',
+    desc:'The engine grew a grammar and then grew a nervous system. Node Analytics: reading psychometrics at the sentence level. Dwell time, re-read rate, drop-off signal. The sentence as a measurable unit of attention.',
+    specs:[{k:'New',v:'Type parser · dwell tracking · signal scoring'},{k:'Grammar',v:'[body] [poster] [pull] [label] [spec] [break]'},{k:'Insight',v:'The sentence is the atomic unit of engagement'}],
+    url:'https://wolfie.love' },
+  { type:'artifact', id:'a11', atype:'sketch', era:2, period:'2023', title:'The Verticals — Platform Sketch',
+    sentence:'If the engine works for one thing, it works for everything. I started drawing verticals.',
+    desc:'The sketch session where wolfie.love became a platform: /dash, /news, /tube, /shop, /real, /invite, /job, /food, /entro, /net. Each vertical a different content type running the same underlying sentence engine.',
+    specs:[{k:'Format',v:'Whiteboard + Figma'},{k:'Count',v:'10 verticals sketched'},{k:'Principle',v:'One engine · infinite surfaces'}],
+    url:'https://wolfie.love' },
+  { type:'artifact', id:'a12', atype:'code', era:2, period:'2023–24', title:'intoview — The Full Engine',
+    sentence:'I gave it a name. That was when I knew it was real.',
+    desc:'The sentence engine matured into intoview — a complete narrative publishing system with chapter palettes, cinematic dark reveals, ghost overlay system, LinkedIn/document themes, compose mode, and the Studio. The sentence is the interface, fully realized.',
+    specs:[{k:'Stack',v:'Vanilla JS · CSS custom properties · no deps'},{k:'Themes',v:'Dark · LinkedIn · Document · Raw'},{k:'Features',v:'Chapter palettes · ghost overlays · compose · studio · telemetry'}],
+    url:'https://wolfie.love' },
+  { type:'pull', text:"I had been building the same thing for four years. I just did not know it had a name yet." },
+  { type:'break' },
+
+  // ── ERA 3: NOW ──
+  { type:'era', id:'era-3', era:3, num:'04', title:'What Propagated', period:'2024 – Present', color:'var(--era-now)' },
+  { type:'body', text:'wolfie.love went live. Then things started coming out of it — not planned, not in sequence. More like consequence.' },
+  { type:'artifact', id:'a13', atype:'live', era:3, period:'2024', title:'wolfie.love',
+    sentence:'Utility first. Emotional vessel second. The platform proving the thesis by existing.',
+    desc:'The live platform. A sentence-first narrative publishing engine across multiple verticals. The sentence is the primitive. The interface is the argument.',
+    specs:[{k:'Verticals',v:'10 live'},{k:'Engine',v:'intoview · wolfie grammar'},{k:'Status',v:'Live · wolfie.love'}],
+    url:'https://wolfie.love' },
+  { type:'artifact', id:'a14', atype:'live', era:3, period:'2024', title:'reasonably.cc',
+    sentence:'A structured AI prompting companion. The engine meeting a new use case.',
+    desc:'The second live vertical outside wolfie.love. An AI prompting interface built on the same sentence-progressive engine. The wolfie grammar applied to a new domain.',
+    specs:[{k:'Engine',v:'intoview · wolfie grammar'},{k:'Domain',v:'AI prompting interface'},{k:'Status',v:'Live · reasonably.cc'}],
+    url:'https://reasonably.cc' },
+  { type:'artifact', id:'a15', atype:'live', era:3, period:'2025', title:'zackgort.com',
+    sentence:'A portfolio that refuses to be a portfolio. The narrative engine as credential.',
+    desc:'Single-page narrative engine with right-rail resume panel, multi-theme toggle, ghost overlay system, dark chapter moments, and sentence-progressive navigation. The platform demonstrating itself.',
+    specs:[{k:'Engine',v:'intoview · custom narrative'},{k:'Themes',v:'Default · LinkedIn · Document'},{k:'Status',v:'Live · zackgort.com'}],
+    url:'https://zackgort.com' },
+  { type:'body', text:'Then Anthropic published things. And I built responses — same day, same engine, deployed as outreach.' },
+  { type:'artifact', id:'a16', atype:'live', era:3, period:'March 11, 2026', title:'Reason & Resolution',
+    sentence:'The sentence is the argument. This is my reason and resolution.',
+    desc:'A narrative redesign of the Anthropic RSP v3. Then /sydney responding to the Sydney office announcement. Then /institute responding to The Anthropic Institute launch — same day, same hour. The platform as outreach. The velocity as the argument.',
+    specs:[{k:'URL',v:'reasonandresolution.com'},{k:'Pages',v:'/ · /sydney · /institute'},{k:'Signal',v:'Same-day response to live Anthropic publications'}],
+    url:'https://reasonandresolution.com' },
+  { type:'pull', text:'I did not apply for a job. I built the room and sent them the link.' },
+  { type:'body', text:'This is the sandbox. Everything that came before is in here. Everything that comes next starts here.' },
+];
+
+// ═══ INLINE ═══
+function applyInline(t) {
+  return t
+    .replace(/\*\*(.*?)\*\*/g,'<span class="ac">$1</span>')
+    .replace(/\*(.*?)\*/g,'<span class="em">$1</span>')
+    .replace(/~~(.*?)~~/g,'<span class="dim">$1</span>');
+}
+
+// ═══ RENDER ═══
+function renderStream() {
+  const inner = document.getElementById('stream-inner');
+  let html = '';
+  STREAM.forEach(node => {
+    if (node.type === 'era') {
+      html += `<div class="era-block" id="${node.id}" data-era="${node.era}">
+        <div class="era-eyebrow" style="color:${node.color}">${node.period}</div>
+        <div class="era-num">${node.num}</div>
+        <div class="era-title">${node.title}</div>
+        <div class="era-period"><span style="background:${node.color}"></span>${node.period}</div>
+      </div>`;
+    } else if (node.type === 'body') {
+      html += `<div class="node body">${applyInline(node.text)}</div>`;
+    } else if (node.type === 'pull') {
+      html += `<div class="node pull">${applyInline(node.text)}</div>`;
+    } else if (node.type === 'break') {
+      html += `<div class="node break"></div>`;
+    } else if (node.type === 'artifact') {
+      const t = TYPES[node.atype] || TYPES.note;
+      html += `<div class="node artifact" id="node-${node.id}"
+        data-artifact-id="${node.id}"
+        data-artifact-url="${node.url||''}"
+        data-artifact-title="${node.title.replace(/"/g,'&quot;')}"
+        data-artifact-sentence="${node.sentence.replace(/"/g,'&quot;')}"
+        data-artifact-type="${t.label}"
+        data-artifact-icon="${t.icon}"
+        data-artifact-period="${node.period}"
+        data-artifact-color="${t.color}"
+        onclick="openDetail('${node.id}')">
+        <div class="node-type-tag" style="color:${t.color}">${t.icon} ${t.label} · ${node.period}</div>
+        <div class="artifact-card">
+          <div class="artifact-type-stripe" style="background:${t.color}"></div>
+          <div class="artifact-card-top">
+            <div class="artifact-title">${node.title}</div>
+            <div class="artifact-sentence">${node.sentence}</div>
+          </div>
+          <div class="artifact-card-foot">
+            <span class="artifact-meta">${node.period}</span>
+            <span class="artifact-open-hint">${node.url ? '↗ preview' : 'open'}</span>
+          </div>
+        </div>
+      </div>`;
+    }
+  });
+  inner.innerHTML = html;
+  updateProgress();
+}
+
+// ═══ SCROLL + PROGRESS ═══
+function updateProgress() {
+  const s = document.getElementById('stream');
+  const pct = s.scrollTop / (s.scrollHeight - s.clientHeight) * 100;
+  document.getElementById('progress').style.width = Math.min(100, pct||0) + '%';
+}
+
+const eraIds = ['era-0','era-1','era-2','era-3'];
+
+function onStreamScroll() {
+  updateProgress();
+  const stream = document.getElementById('stream');
+  const scrollTop = stream.scrollTop;
+
+  let activeEra = 0;
+  eraIds.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop - 80 <= scrollTop) activeEra = i;
+  });
+
+  document.querySelectorAll('.era-seg').forEach((s,i) => s.classList.toggle('active', i === activeEra));
+  document.querySelectorAll('.era-nav-item').forEach((el,i) => el.classList.toggle('active', i === activeEra));
+
+  const hud = document.getElementById('hud-era-text');
+  hud.textContent = ERA_LABELS[activeEra];
+  hud.style.color = ERA_COLORS[activeEra];
+}
+
+function scrollToEra(idx) {
+  const el = document.getElementById('era-' + idx);
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ═══ DETAIL ═══
+function openDetail(id) {
+  const node = STREAM.find(n => n.id === id);
+  if (!node || node.type !== 'artifact') return;
+
+  const t = TYPES[node.atype] || TYPES.note;
+  document.getElementById('detail-stripe').style.background = t.color;
+  document.getElementById('detail-label').textContent = t.label;
+
+  // Build hero
+  let heroHtml = '';
+  if (node.atype === 'code') {
+    heroHtml = `<div class="detail-hero detail-hero-code">
+      <span class="code-line"><span class="code-comment">// ${node.title}</span></span>
+      <span class="code-line"><span class="code-comment">// ${node.period}</span></span>
+      <span class="code-line"> </span>
+      <span class="code-line"><span class="code-keyword">const</span> engine = <span class="code-keyword">new</span> <span class="code-num">Narrative</span>({</span>
+      <span class="code-line">  primitive: <span class="code-string">'sentence'</span>,</span>
+      <span class="code-line">  render: <span class="code-string">'progressive'</span>,</span>
+      <span class="code-line">  dwell: <span class="code-num">true</span></span>
+      <span class="code-line">});</span>
+    </div>`;
+  } else if (node.atype === 'figma') {
+    heroHtml = `<div class="detail-hero detail-hero-figma">
+      <div class="figma-frame">⬜</div>
+      <div class="figma-frame wide">⬜</div>
+      <div class="figma-frame">⬜</div>
+    </div>`;
+  } else if (node.atype === 'live' && node.url) {
+    heroHtml = `<div class="detail-hero detail-hero-live">
+      <div class="detail-hero-live-load" id="hero-${id}" onclick="loadHeroIframe('${id}','${node.url}')">
+        <div class="detail-hero-live-load-icon">↗</div>
+        <div class="detail-hero-live-load-hint">Click to load · ${node.url.replace('https://','')}</div>
+      </div>
+    </div>`;
+  } else if (node.atype === 'media') {
+    heroHtml = `<div class="detail-hero detail-hero-media">▶</div>`;
+  } else if (node.atype === 'sketch') {
+    heroHtml = `<div class="detail-hero detail-hero-sketch">
+      <div class="sketch-mark">△</div>
+      <div class="sketch-mark" style="font-size:22px;margin-top:14px">◇</div>
+      <div class="sketch-mark" style="font-size:30px;margin-top:-6px">○</div>
+    </div>`;
+  } else if (node.atype === 'note') {
+    heroHtml = `<div class="detail-hero detail-hero-note">
+      <div class="detail-hero-note-text">${node.sentence}</div>
+    </div>`;
+  }
+
+  // Build specs
+  const specsHtml = (node.specs||[]).map(s =>
+    `<div class="detail-spec-row">
+      <div class="detail-spec-k">${s.k}</div>
+      <div class="detail-spec-v">${s.v}</div>
+    </div>`
+  ).join('');
+
+  const linkHtml = node.url ? `<a class="detail-artifact-link" href="${node.url}" target="_blank" rel="noopener">↗ Open · ${node.url.replace('https://','')}</a>` : '';
+
+  document.getElementById('detail-body').innerHTML = `
+    ${heroHtml}
+    <div class="detail-artifact-body">
+      <div class="detail-artifact-period">${node.period} · ${t.label}</div>
+      <div class="detail-artifact-title">${node.title}</div>
+      <div class="detail-artifact-sentence">${node.sentence}</div>
+      <div class="detail-artifact-desc">${node.desc}</div>
+      <div class="detail-artifact-specs">${specsHtml}</div>
+      ${linkHtml}
+    </div>
+  `;
+
+  document.getElementById('detail').classList.add('open');
+  document.body.classList.add('detail-open');
+}
+
+function loadHeroIframe(id, url) {
+  const loader = document.getElementById('hero-' + id);
+  if (!loader) return;
+  loader.parentElement.innerHTML = `<iframe src="${url}" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
+}
+
+function closeDetail() {
+  document.getElementById('detail').classList.remove('open');
+  document.body.classList.remove('detail-open');
+}
+
+function jumpToArtifact(id) {
+  closeField();
+  setTimeout(() => {
+    const el = document.getElementById('node-' + id);
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
+    setTimeout(() => openDetail(id), 400);
+  }, 350);
+}
+
+// ═══ FIELD ═══
+function openField() {
+  document.body.classList.add('field-open');
+  // Stagger each node's ripple phase so they feel independent — pond life
+  document.querySelectorAll('.field-artifact-dot').forEach((dot, i) => {
+    const offset = (i * 0.37) % 3.2;
+    dot.querySelectorAll('.fad-ripple-1').forEach(r => r.style.animationDelay = `${offset}s`);
+    dot.querySelectorAll('.fad-ripple-2').forEach(r => r.style.animationDelay = `${offset + 0.9}s`);
+    dot.querySelectorAll('.fad-ripple-3').forEach(r => r.style.animationDelay = `${offset + 1.8}s`);
+  });
+  // Fire initScale after overlay transition completes (~400ms)
+  setTimeout(() => {
+    document.getElementById('field-overlay').dispatchEvent(new Event('transitionend'));
+  }, 420);
+}
+function closeField() {
+  document.body.classList.remove('field-open');
+}
+
+// Pan + zoom — uniform scale so ripples stay circular
+(function initFieldPan() {
+  const wrap = document.getElementById('field-canvas-wrap');
+  const inner = document.getElementById('field-canvas-inner');
+  const CANVAS = 3000; // matches CSS width/height
+  let panX = 0, panY = 0, scale = 1;
+  let isPanning = false, startX = 0, startY = 0;
+
+  function applyTransform() {
+    // inner starts at top:50% left:50% (center of wrap), then we offset by -CANVAS/2 each axis
+    inner.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${scale})`;
+  }
+
+  function initScale() {
+    // Fit canvas width to wrap width with a bit of padding
+    const ww = wrap.offsetWidth, wh = wrap.offsetHeight;
+    scale = (ww * 0.85) / CANVAS;
+    panX = 0;
+    panY = 0;
+    applyTransform();
+  }
+
+  // Wait for overlay to be visible before measuring
+  document.getElementById('field-overlay').addEventListener('transitionend', () => {
+    if (document.body.classList.contains('field-open')) initScale();
+  }, { once: false });
+
+  wrap.addEventListener('mousedown', e => {
+    if (e.target.closest('.field-artifact-dot')) return;
+    isPanning = true;
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+    wrap.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isPanning) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    applyTransform();
+  });
+  document.addEventListener('mouseup', () => { isPanning = false; wrap.style.cursor = 'grab'; });
+
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const prev = scale;
+    scale = Math.min(2.5, Math.max(0.2, scale * (1 - e.deltaY * 0.001)));
+    // Zoom toward mouse position
+    const rect = wrap.getBoundingClientRect();
+    const mx = e.clientX - rect.left - rect.width / 2;
+    const my = e.clientY - rect.top - rect.height / 2;
+    panX = mx - (mx - panX) * (scale / prev);
+    panY = my - (my - panY) * (scale / prev);
+    applyTransform();
+  }, { passive: false });
+})();
+
+// ═══ KEYBOARD ═══
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDetail(); closeField(); }
+});
+
+// ═══ THEME TOGGLE ═══
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    html.removeAttribute('data-theme');
+    document.getElementById('theme-hint').textContent = '◐ dark';
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    document.getElementById('theme-hint').textContent = '◑ light';
+  }
+}
+
+// ═══ GHOST PANEL — fixed, mouse-tracked ═══
+(function initGhostPanel() {
+  const panel     = document.getElementById('artifact-ghost-panel');
+  const mediaEl   = document.getElementById('agp-media');
+  const capTitle  = document.getElementById('agp-cap-title');
+  const capLink   = document.getElementById('agp-cap-link');
+  const capEl     = document.getElementById('agp-cap');
+
+  const W = 340, OFFSET_X = 24, OFFSET_Y = -20;
+  let currentId = null, hideTimer = null;
+  let mouseX = 0, mouseY = 0;
+  // Track loaded iframes so we don't reload on re-hover
+  const loadedFrames = {};
+
+  function positionPanel() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let x = mouseX + OFFSET_X;
+    let y = mouseY + OFFSET_Y;
+    const ph = panel.offsetHeight || 250;
+    // flip left if no room on right
+    if (x + W > vw - 12) x = mouseX - W - OFFSET_X;
+    // clamp vertically
+    if (y + ph > vh - 12) y = vh - ph - 12;
+    if (y < 8) y = 8;
+    panel.style.left = x + 'px';
+    panel.style.top  = y + 'px';
+  }
+
+  function showGhost(node) {
+    clearTimeout(hideTimer);
+    const id      = node.dataset.artifactId;
+    const url     = node.dataset.artifactUrl;
+    const title   = node.dataset.artifactTitle;
+    const sentence= node.dataset.artifactSentence;
+    const type    = node.dataset.artifactType;
+    const icon    = node.dataset.artifactIcon;
+    const period  = node.dataset.artifactPeriod;
+    const color   = node.dataset.artifactColor;
+
+    if (id === currentId) { positionPanel(); return; }
+    currentId = id;
+
+    // Build media area
+    mediaEl.innerHTML = '';
+
+    if (url) {
+      // Determine media type from URL extension
+      const ext = url.split('?')[0].split('.').pop().toLowerCase();
+      let mediaHtml = '';
+
+      if (['mp4','webm','mov'].includes(ext)) {
+        mediaHtml = `<video src="${url}" autoplay muted loop playsinline></video>`;
+      } else if (['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)) {
+        mediaHtml = `<img src="${url}" alt="${title}">`;
+      } else {
+        // Website — iframe, lazy-loaded once per id
+        const frameId = 'agp-frame-' + id;
+        const overlayId = 'agp-overlay-' + id;
+        const frameSrc = loadedFrames[id] ? url : '';
+        mediaHtml = `
+          <div class="agp-load-overlay${loadedFrames[id] ? ' loaded' : ''}" id="${overlayId}">
+            <div class="agp-spinner"></div>
+            <div class="agp-load-url">${url.replace('https://','').replace(/\/$/,'')}</div>
+          </div>
+          <iframe id="${frameId}" src="${frameSrc}"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            loading="lazy"></iframe>`;
+        mediaEl.innerHTML = mediaHtml;
+
+        // Fire iframe load if not already loaded
+        if (!loadedFrames[id]) {
+          requestAnimationFrame(() => {
+            const frame   = document.getElementById(frameId);
+            const overlay = document.getElementById(overlayId);
+            if (frame) {
+              frame.src = url;
+              loadedFrames[id] = true;
+              frame.addEventListener('load', () => {
+                if (overlay) overlay.classList.add('loaded');
+              }, { once: true });
+            }
+          });
+        }
+      }
+
+      if (!['mp4','webm','mov','jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)) {
+        // already set above via innerHTML
+      } else {
+        mediaEl.innerHTML = mediaHtml;
+      }
+
+      capTitle.textContent = title;
+      capLink.href = url;
+      capLink.style.display = '';
+      capEl.style.display = '';
+      panel.style.width = W + 'px';
+
+    } else {
+      // No URL — sentence preview, no media strip
+      mediaEl.innerHTML = `
+        <div class="agp-sentence-preview">
+          <div class="agp-sentence-type" style="color:${color}">${icon} ${type} · ${period}</div>
+          <div class="agp-sentence-text">${sentence}</div>
+        </div>`;
+      mediaEl.style.aspectRatio = 'unset';
+      capLink.style.display = 'none';
+      capTitle.textContent = title;
+      capEl.style.display = '';
+      panel.style.width = '300px';
+    }
+
+    positionPanel();
+    panel.classList.add('visible');
+  }
+
+  function hideGhost(immediate) {
+    if (immediate) {
+      panel.classList.remove('visible');
+      currentId = null;
+      mediaEl.style.aspectRatio = '';
+    } else {
+      hideTimer = setTimeout(() => {
+        panel.classList.remove('visible');
+        currentId = null;
+        mediaEl.style.aspectRatio = '';
+      }, 120);
+    }
+  }
+
+  // Mouse tracking
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    if (panel.classList.contains('visible')) positionPanel();
+  }, { passive: true });
+
+  // Hover on artifact nodes
+  document.addEventListener('mouseover', e => {
+    const node = e.target.closest('.node.artifact[data-artifact-id]');
+    if (node) { showGhost(node); return; }
+    // Keep visible if cursor moved into the panel itself
+    if (e.target.closest('#artifact-ghost-panel')) { clearTimeout(hideTimer); return; }
+    hideGhost(false);
+  });
+
+  document.addEventListener('mouseleave', () => hideGhost(true), { capture: true });
+  panel.addEventListener('mouseleave', () => hideGhost(false));
+})();
+
+// ═══ INIT ═══
+renderStream();
+
+// ═══ HEADER SCATTER MAP ═══
+(function initHeaderScatter() {
+  const canvas = document.getElementById('hud-scatter-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // Resolve a CSS var to its computed hex value
+  function resolveColor(cssVar) {
+    return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+  }
+
+  // Node layout data: [id, x% along timeline (0–1), y% vertical (0–1), cssColorVar, label]
+  const NODES = [
+    ['a1',  0.11, 0.35, '--t-figma',  'nav systems'],
+    ['a2',  0.13, 0.65, '--t-note',   'reading essay'],
+    ['a3',  0.16, 0.40, '--t-figma',  'sentence grid'],
+    ['a4',  0.19, 0.62, '--t-sketch', 'scroll sketches'],
+    ['a5',  0.34, 0.50, '--t-note',   'wolfie.love origin', true],
+    ['a6',  0.36, 0.32, '--t-code',   'first html'],
+    ['a7',  0.38, 0.68, '--t-media',  'photo archive'],
+    ['a8',  0.55, 0.38, '--t-code',   'engine v1'],
+    ['a9',  0.58, 0.62, '--t-figma',  'node system'],
+    ['a10', 0.62, 0.34, '--t-code',   'telemetry'],
+    ['a11', 0.65, 0.66, '--t-sketch', 'verticals'],
+    ['a12', 0.68, 0.50, '--t-code',   'intoview'],
+    ['a13', 0.79, 0.48, '--t-live',   'wolfie.love live', true],
+    ['a14', 0.82, 0.34, '--t-live',   'reasonably.cc'],
+    ['a15', 0.84, 0.65, '--t-live',   'zackgort.com'],
+    ['a16', 0.88, 0.50, '--t-live',   'R&R · Anthropic', true],
+  ];
+
+  // Era bands
+  const ERAS = [
+    { x0:0,    x1:0.30, color:'--era-pre',   label:'Before' },
+    { x0:0.30, x1:0.52, color:'--era-loss',  label:'Wolfgang' },
+    { x0:0.52, x1:0.76, color:'--era-build', label:'Build' },
+    { x0:0.76, x1:1.00, color:'--era-now',   label:'Now' },
+  ];
+
+  let W = 0, H = 0, hovered = -1, tipEl = null;
+
+  function px(x) { return x * W; }
+  function py(y) { return y * H; }
+
+  function draw() {
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    W = canvas.offsetWidth;
+    H = canvas.offsetHeight;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const inkAlpha = isDark ? 'rgba(237,233,224,' : 'rgba(26,24,21,';
+
+    // Era bands — very subtle background bands
+    ERAS.forEach(era => {
+      const c = resolveColor(era.color);
+      ctx.fillStyle = c + (isDark ? '14' : '0a'); // hex alpha
+      ctx.beginPath();
+      ctx.roundRect(px(era.x0) + 1, 0, px(era.x1 - era.x0) - 2, H, 2);
+      ctx.fill();
+    });
+
+    // Horizontal axis line
+    ctx.strokeStyle = inkAlpha + '0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.5);
+    ctx.lineTo(W, H * 0.5);
+    ctx.stroke();
+
+    // Era dividers
+    [0.30, 0.52, 0.76].forEach(x => {
+      ctx.strokeStyle = inkAlpha + '0.1)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(px(x), 4);
+      ctx.lineTo(px(x), H - 4);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // Nodes
+    NODES.forEach((n, i) => {
+      const [id, nx, ny, colorVar, label, isMajor] = n;
+      const x = px(nx), y = py(ny);
+      const r = isMajor ? 5 : 3.5;
+      const color = resolveColor(colorVar);
+      const isHovered = i === hovered;
+
+      // Outer glow on hover
+      if (isHovered) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 5, 0, Math.PI * 2);
+        ctx.fillStyle = color + '28';
+        ctx.fill();
+      }
+
+      // Dot
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = isHovered ? 1 : (isMajor ? 0.75 : 0.55);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  // Ensure tip element exists
+  function getTip() {
+    if (!tipEl) {
+      tipEl = document.createElement('div');
+      tipEl.id = 'hud-scatter-tip';
+      document.body.appendChild(tipEl);
+    }
+    return tipEl;
+  }
+
+  function getNodeAt(mx, my) {
+    return NODES.findIndex((n) => {
+      const x = px(n[1]), y = py(n[2]);
+      const r = n[5] ? 8 : 6; // hit radius
+      return Math.hypot(mx - x, my - y) <= r;
+    });
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const idx = getNodeAt(mx, my);
+    if (idx !== hovered) { hovered = idx; draw(); }
+
+    const tip = getTip();
+    if (idx >= 0) {
+      tip.textContent = NODES[idx][4];
+      tip.style.opacity = '1';
+      tip.style.left = (e.clientX + 12) + 'px';
+      tip.style.top  = (e.clientY - 28) + 'px';
+      canvas.style.cursor = 'pointer';
+    } else {
+      tip.style.opacity = '0';
+      canvas.style.cursor = 'crosshair';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    hovered = -1; draw();
+    if (tipEl) tipEl.style.opacity = '0';
+    canvas.style.cursor = 'crosshair';
+  });
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
+    if (idx >= 0) {
+      jumpToArtifact(NODES[idx][0]);
+    }
+  });
+
+  // Redraw on theme toggle and resize
+  const ro = new ResizeObserver(() => draw());
+  ro.observe(canvas);
+  document.getElementById('hud-scatter').addEventListener('themechange', draw);
+
+  // Also redraw when theme toggles
+  const origToggle = window.toggleTheme;
+  window.toggleTheme = function() {
+    if (origToggle) origToggle();
+    requestAnimationFrame(draw);
+  };
+
+  // Initial draw after layout settles
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

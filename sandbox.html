@@ -433,8 +433,12 @@ body::after {
 .era-seg:hover::after { opacity: 1; }
 .era-seg.active { background: var(--accent); }
 
-/* Stream */
-#stream {
+/* Mobile scatter strip — hidden on desktop */
+#mobile-scatter-strip {
+  display: none;
+}
+
+
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -1381,7 +1385,22 @@ body.detail-open #main {
   }
   #detail.open { transform: translateY(0); }
 
-  /* HUD simplify on mobile */
+  /* Mobile scatter strip */
+  #mobile-scatter-strip {
+    display: block;
+    width: 100%;
+    height: 36px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-4);
+    flex-shrink: 0;
+    cursor: crosshair;
+  }
+  #mobile-scatter-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  /* Hide the HUD scatter on mobile — strip replaces it */
   #hud-scatter { display: none; }
   .hud-actions { gap: 4px; }
 
@@ -1727,6 +1746,11 @@ body.detail-open #main {
       <div class="hud-actions">
         <button class="hud-btn" onclick="openField()">◈ Field</button>
       </div>
+    </div>
+
+    <!-- Mobile-only scatter strip — sits below HUD, above era strip -->
+    <div id="mobile-scatter-strip">
+      <canvas id="mobile-scatter-canvas"></canvas>
     </div>
 
     <!-- Era progress strip -->
@@ -2553,184 +2577,200 @@ function toggleTheme() {
 // ═══ INIT ═══
 renderStream();
 
+// ═══ SCATTER DATA (shared) ═══
+const SCATTER_NODES = [
+  ['a1',  0.11, 0.35, '--t-figma',  'First Build'],
+  ['a2',  0.13, 0.65, '--t-note',   'Self-Curriculum'],
+  ['a3',  0.16, 0.40, '--t-figma',  'Craigslist Post'],
+  ['a4',  0.19, 0.62, '--t-sketch', 'Turn5'],
+  ['a5',  0.22, 0.44, '--t-media',  'Photography'],
+  ['a6',  0.25, 0.58, '--t-code',   'Design by Data'],
+  ['a7',  0.28, 0.38, '--t-figma',  'Leadnomics'],
+  ['a8',  0.31, 0.66, '--t-note',   'Clavicle'],
+  ['a9',  0.38, 0.42, '--t-figma',  '160/90'],
+  ['a10', 0.41, 0.60, '--t-media',  'Interactive Work'],
+  ['a11', 0.44, 0.38, '--t-code',   'O3 World'],
+  ['a12', 0.47, 0.62, '--t-figma',  'Workarea'],
+  ['a13', 0.54, 0.35, '--t-media',  'Commute', true],
+  ['a14', 0.57, 0.58, '--t-code',   'FlightPath'],
+  ['a15', 0.60, 0.42, '--t-figma',  'LiveArea'],
+  ['a16', 0.63, 0.65, '--t-figma',  'GNC Nav'],
+  ['a17', 0.66, 0.38, '--t-note',   'Cards Against Bad UX'],
+  ['a18', 0.69, 0.60, '--t-figma',  'Code & Theory'],
+  ['a19', 0.72, 0.44, '--t-code',   'BNY Mellon'],
+  ['a20', 0.79, 0.40, '--t-media',  'Camera On'],
+  ['a21', 0.82, 0.62, '--t-code',   'Low Voltage'],
+  ['a22', 0.85, 0.48, '--t-live',   'Side Builds'],
+  ['a23', 0.90, 0.38, '--t-figma',  'What I Offer', true],
+  ['a24', 0.93, 0.58, '--t-live',   'zackgort.com', true],
+  ['a25', 0.96, 0.44, '--t-live',   'Beyond the Work'],
+];
+const SCATTER_ERAS = [
+  { x0:0,    x1:0.17, color:'--era-pre',   label:'Origins' },
+  { x0:0.17, x1:0.35, color:'--era-loss',  label:'Suburbia' },
+  { x0:0.35, x1:0.52, color:'--era-build', label:'Agency' },
+  { x0:0.52, x1:0.76, color:'--era-now',   label:'New York' },
+  { x0:0.76, x1:0.88, color:'--era-pre',   label:'Remote' },
+  { x0:0.88, x1:1.00, color:'--era-loss',  label:'Now' },
+];
+
 // ═══ HEADER SCATTER MAP ═══
 (function initHeaderScatter() {
-  const canvas = document.getElementById('hud-scatter-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const NODES = SCATTER_NODES;
+  const ERAS  = SCATTER_ERAS;
 
-  // Resolve a CSS var to its computed hex value
-  function resolveColor(cssVar) {
-    return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
-  }
+  function initCanvas(canvas, isMobile) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, hovered = -1, tipEl = null;
 
-  // Node layout data: [id, x% along timeline (0–1), y% vertical (0–1), cssColorVar, label]
-  const NODES = [
-    ['a1',  0.11, 0.35, '--t-figma',  'nav systems'],
-    ['a2',  0.13, 0.65, '--t-note',   'reading essay'],
-    ['a3',  0.16, 0.40, '--t-figma',  'sentence grid'],
-    ['a4',  0.19, 0.62, '--t-sketch', 'scroll sketches'],
-    ['a5',  0.34, 0.50, '--t-note',   'wolfie.love origin', true],
-    ['a6',  0.36, 0.32, '--t-code',   'first html'],
-    ['a7',  0.38, 0.68, '--t-media',  'photo archive'],
-    ['a8',  0.55, 0.38, '--t-code',   'engine v1'],
-    ['a9',  0.58, 0.62, '--t-figma',  'node system'],
-    ['a10', 0.62, 0.34, '--t-code',   'telemetry'],
-    ['a11', 0.65, 0.66, '--t-sketch', 'verticals'],
-    ['a12', 0.68, 0.50, '--t-code',   'intoview'],
-    ['a13', 0.79, 0.48, '--t-live',   'wolfie.love live', true],
-    ['a14', 0.82, 0.34, '--t-live',   'reasonably.cc'],
-    ['a15', 0.84, 0.65, '--t-live',   'zackgort.com'],
-    ['a16', 0.88, 0.50, '--t-live',   'R&R · Anthropic', true],
-  ];
+    function resolveColor(cssVar) {
+      return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    }
 
-  // Era bands
-  const ERAS = [
-    { x0:0,    x1:0.30, color:'--era-pre',   label:'Before' },
-    { x0:0.30, x1:0.52, color:'--era-loss',  label:'Wolfgang' },
-    { x0:0.52, x1:0.76, color:'--era-build', label:'Build' },
-    { x0:0.76, x1:1.00, color:'--era-now',   label:'Now' },
-  ];
+    function px(x) { return x * W; }
+    function py(y) { return y * H; }
 
-  let W = 0, H = 0, hovered = -1, tipEl = null;
+    function draw() {
+      if (!ctx) return;
+      const dpr = window.devicePixelRatio || 1;
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, W, H);
 
-  function px(x) { return x * W; }
-  function py(y) { return y * H; }
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const inkAlpha = isDark ? 'rgba(237,233,224,' : 'rgba(26,24,21,';
 
-  function draw() {
-    if (!ctx) return;
-    const dpr = window.devicePixelRatio || 1;
-    W = canvas.offsetWidth;
-    H = canvas.offsetHeight;
-    canvas.width  = W * dpr;
-    canvas.height = H * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, W, H);
-
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const inkAlpha = isDark ? 'rgba(237,233,224,' : 'rgba(26,24,21,';
-
-    // Era bands — very subtle background bands
-    ERAS.forEach(era => {
-      const c = resolveColor(era.color);
-      ctx.fillStyle = c + (isDark ? '14' : '0a'); // hex alpha
-      ctx.beginPath();
-      ctx.roundRect(px(era.x0) + 1, 0, px(era.x1 - era.x0) - 2, H, 2);
-      ctx.fill();
-    });
-
-    // Horizontal axis line
-    ctx.strokeStyle = inkAlpha + '0.08)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, H * 0.5);
-    ctx.lineTo(W, H * 0.5);
-    ctx.stroke();
-
-    // Era dividers
-    [0.30, 0.52, 0.76].forEach(x => {
-      ctx.strokeStyle = inkAlpha + '0.1)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 3]);
-      ctx.beginPath();
-      ctx.moveTo(px(x), 4);
-      ctx.lineTo(px(x), H - 4);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    });
-
-    // Nodes
-    NODES.forEach((n, i) => {
-      const [id, nx, ny, colorVar, label, isMajor] = n;
-      const x = px(nx), y = py(ny);
-      const r = isMajor ? 5 : 3.5;
-      const color = resolveColor(colorVar);
-      const isHovered = i === hovered;
-
-      // Outer glow on hover
-      if (isHovered) {
+      ERAS.forEach(era => {
+        const c = resolveColor(era.color);
+        ctx.fillStyle = c + (isDark ? '14' : '0a');
         ctx.beginPath();
-        ctx.arc(x, y, r + 5, 0, Math.PI * 2);
-        ctx.fillStyle = color + '28';
+        ctx.roundRect(px(era.x0) + 1, 0, px(era.x1 - era.x0) - 2, H, 2);
         ctx.fill();
-      }
+      });
 
-      // Dot
+      ctx.strokeStyle = inkAlpha + '0.08)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.globalAlpha = isHovered ? 1 : (isMajor ? 0.75 : 0.55);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    });
+      ctx.moveTo(0, H * 0.5);
+      ctx.lineTo(W, H * 0.5);
+      ctx.stroke();
+
+      [0.17, 0.35, 0.52, 0.76, 0.88].forEach(x => {
+        ctx.strokeStyle = inkAlpha + '0.1)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath();
+        ctx.moveTo(px(x), 4);
+        ctx.lineTo(px(x), H - 4);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      });
+
+      NODES.forEach((n, i) => {
+        const [id, nx, ny, colorVar, label, isMajor] = n;
+        const x = px(nx), y = py(ny);
+        const r = isMajor ? 5 : 3.5;
+        const color = resolveColor(colorVar);
+        const isHovered = i === hovered;
+
+        if (isHovered) {
+          ctx.beginPath();
+          ctx.arc(x, y, r + 5, 0, Math.PI * 2);
+          ctx.fillStyle = color + '28';
+          ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = isHovered ? 1 : (isMajor ? 0.75 : 0.55);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    function getTip() {
+      if (!tipEl) {
+        tipEl = document.createElement('div');
+        tipEl.className = 'scatter-tip';
+        tipEl.style.cssText = 'position:fixed;background:var(--bg-4);border:1px solid var(--border-2);border-radius:4px;padding:4px 8px;font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:var(--ink-2);pointer-events:none;z-index:9000;opacity:0;transition:opacity 0.15s;white-space:nowrap;';
+        document.body.appendChild(tipEl);
+      }
+      return tipEl;
+    }
+
+    function getNodeAt(mx, my) {
+      return NODES.findIndex(n => {
+        const x = px(n[1]), y = py(n[2]);
+        const r = n[5] ? 10 : 7;
+        return Math.hypot(mx - x, my - y) <= r;
+      });
+    }
+
+    if (!isMobile) {
+      canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const idx = getNodeAt(mx, my);
+        if (idx !== hovered) { hovered = idx; draw(); }
+        const tip = getTip();
+        if (idx >= 0) {
+          tip.textContent = NODES[idx][4];
+          tip.style.opacity = '1';
+          tip.style.left = (e.clientX + 12) + 'px';
+          tip.style.top  = (e.clientY - 28) + 'px';
+          canvas.style.cursor = 'pointer';
+        } else {
+          tip.style.opacity = '0';
+          canvas.style.cursor = 'crosshair';
+        }
+      });
+      canvas.addEventListener('mouseleave', () => {
+        hovered = -1; draw();
+        if (tipEl) tipEl.style.opacity = '0';
+        canvas.style.cursor = 'crosshair';
+      });
+      canvas.addEventListener('click', e => {
+        const rect = canvas.getBoundingClientRect();
+        const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
+        if (idx >= 0) jumpToArtifact(NODES[idx][0]);
+      });
+    }
+
+    if (isMobile) {
+      canvas.addEventListener('touchend', e => {
+        const touch = e.changedTouches[0];
+        const rect = canvas.getBoundingClientRect();
+        const idx = getNodeAt(touch.clientX - rect.left, touch.clientY - rect.top);
+        if (idx >= 0) jumpToArtifact(NODES[idx][0]);
+        e.preventDefault();
+      }, { passive: false });
+    }
+
+    const ro = new ResizeObserver(() => draw());
+    ro.observe(canvas);
+    requestAnimationFrame(draw);
+
+    return draw;
   }
 
-  // Ensure tip element exists
-  function getTip() {
-    if (!tipEl) {
-      tipEl = document.createElement('div');
-      tipEl.id = 'hud-scatter-tip';
-      document.body.appendChild(tipEl);
-    }
-    return tipEl;
-  }
+  const desktopDraw = initCanvas(document.getElementById('hud-scatter-canvas'), false);
+  const mobileDraw  = initCanvas(document.getElementById('mobile-scatter-canvas'), true);
 
-  function getNodeAt(mx, my) {
-    return NODES.findIndex((n) => {
-      const x = px(n[1]), y = py(n[2]);
-      const r = n[5] ? 8 : 6; // hit radius
-      return Math.hypot(mx - x, my - y) <= r;
-    });
-  }
-
-  canvas.addEventListener('mousemove', e => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-    const idx = getNodeAt(mx, my);
-    if (idx !== hovered) { hovered = idx; draw(); }
-
-    const tip = getTip();
-    if (idx >= 0) {
-      tip.textContent = NODES[idx][4];
-      tip.style.opacity = '1';
-      tip.style.left = (e.clientX + 12) + 'px';
-      tip.style.top  = (e.clientY - 28) + 'px';
-      canvas.style.cursor = 'pointer';
-    } else {
-      tip.style.opacity = '0';
-      canvas.style.cursor = 'crosshair';
-    }
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    hovered = -1; draw();
-    if (tipEl) tipEl.style.opacity = '0';
-    canvas.style.cursor = 'crosshair';
-  });
-
-  canvas.addEventListener('click', e => {
-    const rect = canvas.getBoundingClientRect();
-    const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
-    if (idx >= 0) {
-      jumpToArtifact(NODES[idx][0]);
-    }
-  });
-
-  // Redraw on theme toggle and resize
-  const ro = new ResizeObserver(() => draw());
-  ro.observe(canvas);
-  document.getElementById('hud-scatter').addEventListener('themechange', draw);
-
-  // Also redraw when theme toggles
+  // Theme toggle redraws both
   const origToggle = window.toggleTheme;
   window.toggleTheme = function() {
     if (origToggle) origToggle();
-    requestAnimationFrame(draw);
+    requestAnimationFrame(() => {
+      if (desktopDraw) desktopDraw();
+      if (mobileDraw)  mobileDraw();
+    });
   };
-
-  // Initial draw after layout settles
-  requestAnimationFrame(draw);
 })();
 </script>
 </body>

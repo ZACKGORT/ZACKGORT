@@ -1278,11 +1278,12 @@ body.detail-open #main {
   color: var(--ink-3);
   opacity: 0;
   transition: opacity 0.18s, border-color 0.18s, color 0.18s;
-  pointer-events: none;
+  pointer-events: none; /* enabled on card hover below */
   z-index: 2;
 }
 .node.artifact:hover .artifact-preview-icon {
   opacity: 1;
+  pointer-events: auto;
 }
 /* Ghost is active — highlight the icon */
 .node.artifact.ghost-active .artifact-preview-icon {
@@ -1993,7 +1994,7 @@ function renderStream() {
             <span class="artifact-meta">${node.period}</span>
             <span class="artifact-open-hint">${node.url ? '↗ preview' : 'open'}</span>
           </div>
-          <div class="artifact-preview-icon" title="Preview">◎</div>
+          <div class="artifact-preview-icon" title="Preview" onclick="event.stopPropagation()">◎</div>
         </div>
       </div>`;
     } else if (node.type === 'gallery') {

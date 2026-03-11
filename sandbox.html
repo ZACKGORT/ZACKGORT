@@ -1429,23 +1429,57 @@ body.detail-open #main {
     display: flex;
     position: fixed; bottom: 0; left: 0; right: 0;
     z-index: 200;
-    padding: 8px 20px calc(env(safe-area-inset-bottom, 0px) + 8px);
-    background: linear-gradient(to top, var(--bg) 55%, transparent);
-    align-items: center; justify-content: space-around;
+    padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px);
+    background: var(--bg-4);
+    border-top: 1px solid var(--border);
+    align-items: stretch;
+    gap: 0;
   }
-  .mobile-bar-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  .mobile-spine-seg {
+    flex: 1;
+    display: flex; flex-direction: column;
+    cursor: pointer;
+    min-width: 0;
+    padding: 0 3px;
     background: none; border: none;
-    color: var(--ink-3); cursor: pointer;
-    font-family: var(--mono);
-    padding: 4px 8px;
-    transition: color 0.15s;
+    position: relative;
   }
-  .mobile-bar-btn.active { color: var(--accent); }
-  .mobile-bar-btn-icon { font-size: 14px; line-height: 1; }
-  .mobile-bar-btn-label {
-    font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  .mobile-spine-seg + .mobile-spine-seg::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 1px; background: var(--border);
   }
+  .mobile-spine-bar {
+    height: 4px; border-radius: 1px; margin-bottom: 5px;
+    opacity: 0.45; transition: height 0.2s, opacity 0.2s;
+  }
+  .mobile-spine-seg.active .mobile-spine-bar { height: 7px; opacity: 1; }
+  .mobile-spine-num {
+    font-family: var(--mono); font-size: 6px; letter-spacing: 0.14em;
+    color: var(--ink-3); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; text-align: left; line-height: 1;
+    margin-bottom: 2px;
+    transition: color 0.2s;
+  }
+  .mobile-spine-title {
+    font-family: var(--serif); font-size: 9px; font-style: italic;
+    color: var(--ink-3); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; text-align: left; line-height: 1.2;
+    transition: color 0.2s;
+  }
+  .mobile-spine-seg.active .mobile-spine-num,
+  .mobile-spine-seg.active .mobile-spine-title { color: var(--ink); }
+  /* Field button — compact, right-anchored */
+  .mobile-field-btn {
+    flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    background: none; border: none; border-left: 1px solid var(--border);
+    padding: 0 0 0 10px; margin-left: 8px;
+    cursor: pointer; color: var(--ink-3);
+    font-family: var(--mono); font-size: 7px; letter-spacing: 0.12em;
+    gap: 4px; transition: color 0.15s;
+  }
+  .mobile-field-btn:active { color: var(--accent); }
+  .mobile-field-icon { font-size: 13px; line-height: 1; }
 }
 
 /* ── Tablet: 701px – 1100px — show sidebar ── */
@@ -1784,25 +1818,39 @@ body.detail-open #main {
 
 <!-- Mobile bottom bar -->
 <div id="mobile-bar">
-  <button class="mobile-bar-btn" onclick="scrollToEra(0)">
-    <span class="mobile-bar-btn-icon">◐</span>
-    <span class="mobile-bar-btn-label">Before</span>
+  <button class="mobile-spine-seg active" data-era="0" onclick="scrollToEra(0)">
+    <div class="mobile-spine-bar" style="background:var(--era-pre)"></div>
+    <div class="mobile-spine-num">01</div>
+    <div class="mobile-spine-title">Origins</div>
   </button>
-  <button class="mobile-bar-btn" onclick="scrollToEra(1)">
-    <span class="mobile-bar-btn-icon">◑</span>
-    <span class="mobile-bar-btn-label">Loss</span>
+  <button class="mobile-spine-seg" data-era="1" onclick="scrollToEra(1)">
+    <div class="mobile-spine-bar" style="background:var(--era-loss)"></div>
+    <div class="mobile-spine-num">02</div>
+    <div class="mobile-spine-title">Suburbia</div>
   </button>
-  <button class="mobile-bar-btn" onclick="scrollToEra(2)">
-    <span class="mobile-bar-btn-icon">◒</span>
-    <span class="mobile-bar-btn-label">Build</span>
+  <button class="mobile-spine-seg" data-era="2" onclick="scrollToEra(2)">
+    <div class="mobile-spine-bar" style="background:var(--era-build)"></div>
+    <div class="mobile-spine-num">03</div>
+    <div class="mobile-spine-title">Agency</div>
   </button>
-  <button class="mobile-bar-btn" onclick="scrollToEra(3)">
-    <span class="mobile-bar-btn-icon">◓</span>
-    <span class="mobile-bar-btn-label">Now</span>
+  <button class="mobile-spine-seg" data-era="3" onclick="scrollToEra(3)">
+    <div class="mobile-spine-bar" style="background:var(--era-now)"></div>
+    <div class="mobile-spine-num">04</div>
+    <div class="mobile-spine-title">New York</div>
   </button>
-  <button class="mobile-bar-btn" onclick="openField()">
-    <span class="mobile-bar-btn-icon">◈</span>
-    <span class="mobile-bar-btn-label">Field</span>
+  <button class="mobile-spine-seg" data-era="4" onclick="scrollToEra(4)">
+    <div class="mobile-spine-bar" style="background:var(--era-pre)"></div>
+    <div class="mobile-spine-num">05</div>
+    <div class="mobile-spine-title">Remote</div>
+  </button>
+  <button class="mobile-spine-seg" data-era="5" onclick="scrollToEra(5)">
+    <div class="mobile-spine-bar" style="background:var(--era-loss)"></div>
+    <div class="mobile-spine-num">06</div>
+    <div class="mobile-spine-title">Now</div>
+  </button>
+  <button class="mobile-field-btn" onclick="openField()">
+    <span class="mobile-field-icon">◈</span>
+    <span>Field</span>
   </button>
 </div>
 
@@ -2141,6 +2189,7 @@ function onStreamScroll() {
 
   document.querySelectorAll('.era-seg').forEach((s,i) => s.classList.toggle('active', i === activeEra));
   document.querySelectorAll('.era-nav-item').forEach((el,i) => el.classList.toggle('active', i === activeEra));
+  document.querySelectorAll('.mobile-spine-seg').forEach((el,i) => el.classList.toggle('active', i === activeEra));
 
   const hud = document.getElementById('hud-era-text');
   hud.textContent = ERA_LABELS[activeEra];
@@ -2244,8 +2293,13 @@ function jumpToArtifact(id) {
   closeField();
   setTimeout(() => {
     const el = document.getElementById('node-' + id);
-    if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
-    setTimeout(() => openDetail(id), 400);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Only auto-open detail on desktop — on mobile it locks scroll
+      if (window.innerWidth > 700) {
+        setTimeout(() => openDetail(id), 400);
+      }
+    }
   }, 350);
 }
 

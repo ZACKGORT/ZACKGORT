@@ -1351,7 +1351,15 @@ body.detail-open #main {
 
   /* Stream padding accounts for safe areas */
   #stream { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px); }
-  #stream-hud { padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px; }
+  #stream-hud {
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
+    height: auto;
+    gap: 10px;
+  }
+  .hud-identity { flex: 1; min-width: 0; }
+  .hud-brand { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hud-era-indicator { display: none; }
+  .hud-actions { gap: 4px; flex-shrink: 0; }
   .stream-inner { padding: 0 18px; }
 
   /* Era nodes: smaller */

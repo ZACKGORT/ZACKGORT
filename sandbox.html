@@ -2248,6 +2248,63 @@ function closeField() {
   });
   document.addEventListener('mouseup', () => { isPanning = false; wrap.style.cursor = 'grab'; });
 
+  // ── Touch: pan (1 finger) + pinch zoom (2 fingers) ──
+  let touchStartX = 0, touchStartY = 0;
+  let pinchStartDist = 0, pinchStartScale = 1;
+  let isTouching = false, isPinching = false;
+
+  function touchDist(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      if (e.target.closest('.field-artifact-dot')) return;
+      isTouching = true; isPinching = false;
+      touchStartX = e.touches[0].clientX - panX;
+      touchStartY = e.touches[0].clientY - panY;
+    } else if (e.touches.length === 2) {
+      isTouching = false; isPinching = true;
+      pinchStartDist = touchDist(e.touches);
+      pinchStartScale = scale;
+      // midpoint for zoom origin
+      touchStartX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      touchStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', e => {
+    if (isPinching && e.touches.length === 2) {
+      const dist = touchDist(e.touches);
+      const prev = scale;
+      scale = Math.min(5, Math.max(0.2, pinchStartScale * (dist / pinchStartDist)));
+      const rect = wrap.getBoundingClientRect();
+      const mx = touchStartX - rect.left - rect.width / 2;
+      const my = touchStartY - rect.top - rect.height / 2;
+      panX = mx - (mx - panX) * (scale / prev);
+      panY = my - (my - panY) * (scale / prev);
+      applyTransform();
+    } else if (isTouching && e.touches.length === 1) {
+      panX = e.touches[0].clientX - touchStartX;
+      panY = e.touches[0].clientY - touchStartY;
+      applyTransform();
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', e => {
+    if (e.touches.length === 0) { isTouching = false; isPinching = false; }
+    else if (e.touches.length === 1) {
+      // Dropped from pinch back to single finger — re-anchor pan
+      isPinching = false; isTouching = true;
+      touchStartX = e.touches[0].clientX - panX;
+      touchStartY = e.touches[0].clientY - panY;
+    }
+  }, { passive: true });
+
   wrap.addEventListener('wheel', e => {
     e.preventDefault();
     const prev = scale;

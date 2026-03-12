@@ -1395,6 +1395,79 @@ body.cluster-long #long-beckon-wrap { display: block; }
 }
 .parse-commit-btn:hover { opacity: 0.85; }
 
+/* ── Longform compose — Arrange & Fill phase ── */
+.lfc-back-btn {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2); color: var(--ink-3);
+  padding: 3px 10px; border-radius: 20px; cursor: pointer; transition: all 0.14s;
+}
+.lfc-back-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lfc-batch-btn {
+  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.12s;
+}
+.lfc-batch-btn:hover { border-color: var(--c-long); color: var(--c-long); }
+.lfc-add-btn {
+  font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.12s;
+}
+.lfc-add-btn:hover { border-color: var(--c-long); color: var(--c-long); background: rgba(128,96,168,0.06); }
+
+/* Node cards in lfc-canvas */
+.lfc-card {
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 7px 6px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  transition: border-color 0.1s, background 0.1s;
+  margin-bottom: 3px;
+}
+.lfc-card:hover { background: var(--bg-2); border-color: var(--border); }
+.lfc-card.drag-over { background: rgba(128,96,168,0.08); border-color: var(--c-long); }
+.lfc-grip {
+  font-size: 10px; color: var(--ink-3); opacity: 0.3; cursor: grab;
+  flex-shrink: 0; padding-top: 3px; user-select: none;
+  transition: opacity 0.15s;
+}
+.lfc-card:hover .lfc-grip { opacity: 0.7; }
+.lfc-grip:active { cursor: grabbing; }
+.lfc-card-body { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.lfc-type-row {
+  display: flex; gap: 3px; flex-wrap: wrap;
+}
+.lfc-type-btn {
+  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 7px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.1s;
+}
+.lfc-type-btn:hover { border-color: var(--c-long); color: var(--c-long); }
+.lfc-type-btn.active { background: var(--c-long); color: #fff; border-color: var(--c-long); }
+.lfc-text-input {
+  width: 100%; background: none; border: none; outline: none;
+  color: var(--ink); caret-color: var(--c-long);
+  font-family: var(--text); font-size: 12px; line-height: 1.5;
+  resize: none; padding: 0;
+}
+.lfc-text-input::placeholder { color: var(--ink-3); font-style: italic; }
+.lfc-text-input.t-poster { font-family: var(--disp); font-size: 14px; font-style: normal; }
+.lfc-text-input.t-pull   { font-family: var(--disp); font-style: italic; color: var(--ink-2); }
+.lfc-text-input.t-label  { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c-long); }
+.lfc-text-input.t-break  { display: none; }
+.lfc-break-rule {
+  width: 100%; height: 1px; background: var(--border-2); margin: 4px 0;
+  display: none;
+}
+.lfc-card[data-type="break"] .lfc-break-rule { display: block; }
+.lfc-del {
+  background: none; border: none; color: var(--ink-3); cursor: pointer;
+  font-size: 11px; padding: 2px 4px; opacity: 0.3; transition: opacity 0.12s;
+  flex-shrink: 0; align-self: flex-start; line-height: 1;
+}
+.lfc-card:hover .lfc-del { opacity: 0.7; }
+.lfc-del:hover { color: #e07070 !important; opacity: 1 !important; }
+
 /* ═══════════════════════════════════════
    FIELD OVERLAY — Lily Pad Treatment
    (inspired by sandbox.html)
@@ -2019,28 +2092,62 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       </div>
     </div>
 
-    <!-- LONGFORM — sentence parse protocol integrated -->
+    <!-- LONGFORM — two-phase: Write → Arrange & Fill -->
     <div class="compose-mode-body" id="mode-longform">
-      <div style="padding:10px 20px 0;flex-shrink:0;">
-        <input class="longform-title-input" id="longform-title-input" type="text"
-          placeholder="Document title (optional)…" autocomplete="off"
-          style="padding:8px 0 10px;font-size:15px;border-bottom:1px solid var(--border);width:100%;background:none;border-left:none;border-right:none;border-top:none;outline:none;color:var(--ink);font-family:var(--disp);caret-color:var(--c-long);">
+
+      <!-- Phase 1: Write freely -->
+      <div id="lfc-phase-write" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <div style="padding:10px 20px 0;flex-shrink:0;">
+          <input class="longform-title-input" id="longform-title-input" type="text"
+            placeholder="Document title (optional)…" autocomplete="off"
+            style="padding:8px 0 10px;font-size:15px;border-bottom:1px solid var(--border);width:100%;background:none;border-left:none;border-right:none;border-top:none;outline:none;color:var(--ink);font-family:var(--disp);caret-color:var(--c-long);">
+        </div>
+        <div style="padding:6px 20px 0;flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
+          <span style="font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-right:6px;">format</span>
+          <button class="note-fmt-btn" title="Bold" onclick="noteFmtTextarea('longform-ta','**','**')"><b>B</b></button>
+          <button class="note-fmt-btn" title="Italic" onclick="noteFmtTextarea('longform-ta','*','*')"><i>I</i></button>
+          <div class="note-fmt-sep"></div>
+          <span style="font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-left:4px;">write freely · sentences parsed on commit</span>
+        </div>
+        <textarea class="longform-body" id="longform-ta" rows="7"
+          placeholder="The thought arrives whole. Write it. Don't stop to classify it.&#10;&#10;Sentences will be split and typed on parse."
+          onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();lfcParseToArrange();}"
+          oninput="updateLongformCount()"></textarea>
+        <div class="longform-wordcount" id="longform-wordcount">0 words</div>
+        <div class="compose-commit-bar">
+          <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> parse sentences</span>
+          <button class="compose-commit-btn" style="background:var(--c-long)" onclick="lfcParseToArrange()">Arrange →</button>
+        </div>
       </div>
-      <div style="padding:6px 20px 0;flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
-        <span style="font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-right:6px;">format</span>
-        <button class="note-fmt-btn" title="Bold" onclick="noteFmtTextarea('longform-ta','**','**')"><b>B</b></button>
-        <button class="note-fmt-btn" title="Italic" onclick="noteFmtTextarea('longform-ta','*','*')"><i>I</i></button>
-        <div class="note-fmt-sep"></div>
-        <span style="font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-left:4px;">write freely · sentences parsed on commit</span>
-      </div>
-      <textarea class="longform-body" id="longform-ta" rows="7"
-        placeholder="The thought arrives whole. Write it. Don't stop to classify it.&#10;&#10;Sentences will be split and typed on parse."
-        onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();triggerLongformParse();}"
-        oninput="updateLongformCount()"></textarea>
-      <div class="longform-wordcount" id="longform-wordcount">0 words</div>
-      <div class="compose-commit-bar">
-        <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> parse sentences</span>
-        <button class="compose-commit-btn" style="background:var(--c-long)" onclick="triggerLongformParse()">Parse &amp; Review →</button>
+
+      <!-- Phase 2: Arrange & Fill -->
+      <div id="lfc-phase-arrange" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <!-- Toolbar: back + batch type + node count -->
+        <div id="lfc-arrange-toolbar" style="padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <button class="lfc-back-btn" onclick="lfcBackToWrite()">← Write</button>
+          <span style="flex:1;font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)" id="lfc-node-count">0 nodes</span>
+          <span style="font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-right:2px;">all →</span>
+          <button class="lfc-batch-btn" onclick="lfcBatchType('poster')">poster</button>
+          <button class="lfc-batch-btn" onclick="lfcBatchType('body')">body</button>
+          <button class="lfc-batch-btn" onclick="lfcBatchType('pull')">pull</button>
+        </div>
+        <!-- Node canvas: drag-to-reorder, inline fill -->
+        <div id="lfc-canvas" style="flex:1;overflow-y:auto;padding:6px 8px 8px;"></div>
+        <!-- Add node strip -->
+        <div id="lfc-add-strip" style="padding:6px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:4px;flex-shrink:0;">
+          <span style="font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-right:4px;">add</span>
+          <button class="lfc-add-btn" onclick="lfcAddNode('poster')">poster</button>
+          <button class="lfc-add-btn" onclick="lfcAddNode('body')">body</button>
+          <button class="lfc-add-btn" onclick="lfcAddNode('pull')">pull</button>
+          <button class="lfc-add-btn" onclick="lfcAddNode('label')">label</button>
+          <button class="lfc-add-btn" onclick="lfcAddNode('break')">break</button>
+        </div>
+        <!-- Commit bar -->
+        <div class="compose-commit-bar">
+          <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> commit</span>
+          <button class="compose-commit-btn" style="background:var(--c-long)" onclick="lfcCommit()"
+            onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){lfcCommit();}">Commit doc →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3696,6 +3803,11 @@ function openCompose(mode) {
 function closeCompose() {
   document.body.classList.remove('compose-open','compose-longform');
   _clearNoteEditMode();
+  // Reset longform compose to write phase
+  const pw = document.getElementById('lfc-phase-write');
+  const pa = document.getElementById('lfc-phase-arrange');
+  if (pw) pw.style.display = 'flex';
+  if (pa) pa.style.display = 'none';
 }
 function closeBeckon() {} // stub — beckon is now compose only
 function handleOverlayClick(e) { if (e.target === document.getElementById('compose-overlay')) closeCompose(); }
@@ -3985,14 +4097,196 @@ function commitLongform() {
 }
 
 function triggerLongformParse() {
+  lfcParseToArrange();
+}
+
+// ═══ LONGFORM COMPOSE — two-phase Write → Arrange & Fill ═══
+let _lfcNodes = [];
+
+function lfcParseToArrange() {
   const ta = document.getElementById('longform-ta');
-  if (!ta) return;
+  if (!ta || !ta.value.trim()) return;
   const raw = ta.value.trim();
-  if (!raw) return;
-  ta.value = '';
-  document.getElementById('longform-wordcount').textContent = '0 words';
+
+  // Parse sentences using existing protocol
+  const sentenceRegex = /[^.!?]*[.!?]+(?:\s|$)/g;
+  const matches = raw.match(sentenceRegex) || [];
+  const joined = matches.join('');
+  const remainder = raw.slice(joined.length).trim();
+  _lfcNodes = [
+    ...matches.map(s => ({ text: s.trim(), type: 'body', id: Date.now() + Math.random() })),
+    ...(remainder ? [{ text: remainder, type: 'body', id: Date.now() + Math.random() }] : [])
+  ].filter(n => n.text.length > 0);
+
+  if (!_lfcNodes.length) return;
+
+  // Switch to arrange phase
+  document.getElementById('lfc-phase-write').style.display = 'none';
+  document.getElementById('lfc-phase-arrange').style.display = 'flex';
+  lfcRenderCanvas();
+}
+
+function lfcBackToWrite() {
+  document.getElementById('lfc-phase-arrange').style.display = 'none';
+  document.getElementById('lfc-phase-write').style.display = 'flex';
+}
+
+const LFC_TYPES = ['poster','body','pull','label'];
+const LFC_PLACEHOLDERS = {
+  poster: 'The central declaration.',
+  body:   'The thought, plainly stated.',
+  pull:   'The truest sentence.',
+  label:  'Category · Date',
+  break:  '',
+};
+
+function lfcRenderCanvas() {
+  const canvas = document.getElementById('lfc-canvas');
+  if (!canvas) return;
+  canvas.innerHTML = '';
+  const countEl = document.getElementById('lfc-node-count');
+  if (countEl) countEl.textContent = _lfcNodes.length + ' node' + (_lfcNodes.length !== 1 ? 's' : '');
+
+  _lfcNodes.forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = 'lfc-card';
+    card.dataset.idx = i;
+    card.dataset.type = n.type;
+
+    // Grip (drag handle)
+    const grip = document.createElement('span');
+    grip.className = 'lfc-grip'; grip.textContent = '⠿'; grip.draggable = true;
+    grip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', String(i));
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault(); card.classList.remove('drag-over');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      if (isNaN(from) || from === i) return;
+      const [moved] = _lfcNodes.splice(from, 1);
+      _lfcNodes.splice(i, 0, moved);
+      lfcRenderCanvas();
+    });
+
+    // Card body
+    const body = document.createElement('div'); body.className = 'lfc-card-body';
+
+    // Type row: Poster Body Pull Label (break handled via add strip only)
+    if (n.type !== 'break') {
+      const typeRow = document.createElement('div'); typeRow.className = 'lfc-type-row';
+      LFC_TYPES.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'lfc-type-btn' + (n.type === t ? ' active' : '');
+        btn.textContent = t;
+        btn.onclick = () => {
+          n.type = t; card.dataset.type = t;
+          typeRow.querySelectorAll('.lfc-type-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          // Update input styling
+          const inp = card.querySelector('.lfc-text-input');
+          if (inp) {
+            inp.className = 'lfc-text-input t-' + t;
+            inp.placeholder = LFC_PLACEHOLDERS[t] || '';
+          }
+        };
+        typeRow.appendChild(btn);
+      });
+      body.appendChild(typeRow);
+    }
+
+    // Text input (or break rule)
+    if (n.type === 'break') {
+      const rule = document.createElement('div'); rule.className = 'lfc-break-rule';
+      rule.style.display = 'block'; body.appendChild(rule);
+    } else {
+      const inp = document.createElement('textarea');
+      inp.className = 'lfc-text-input t-' + n.type;
+      inp.value = n.text || '';
+      inp.placeholder = LFC_PLACEHOLDERS[n.type] || '';
+      inp.rows = 1;
+      inp.style.overflow = 'hidden';
+      inp.addEventListener('input', () => {
+        n.text = inp.value;
+        inp.style.height = 'auto';
+        inp.style.height = inp.scrollHeight + 'px';
+      });
+      // Auto-size on render
+      setTimeout(() => { inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 'px'; }, 0);
+      inp.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); lfcCommit(); }
+      });
+      body.appendChild(inp);
+    }
+
+    // Delete button
+    const del = document.createElement('button');
+    del.className = 'lfc-del'; del.textContent = '×';
+    del.title = 'Remove node';
+    del.onclick = () => { _lfcNodes.splice(i, 1); lfcRenderCanvas(); };
+
+    card.append(grip, body, del);
+    canvas.appendChild(card);
+  });
+}
+
+function lfcAddNode(type) {
+  _lfcNodes.push({ type, text: '', id: Date.now() + Math.random() });
+  lfcRenderCanvas();
+  // Focus last input
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.lfc-card');
+    const last = cards[cards.length - 1];
+    const inp = last?.querySelector('.lfc-text-input');
+    if (inp) inp.focus();
+  }, 60);
+}
+
+function lfcBatchType(type) {
+  _lfcNodes.forEach(n => { if (n.type !== 'break') n.type = type; });
+  lfcRenderCanvas();
+}
+
+function lfcCommit() {
+  if (!_lfcNodes.length) return;
+  const titleInput = document.getElementById('longform-title-input');
+  const firstPoster = _lfcNodes.find(n => n.type === 'poster');
+  const titleSource = (titleInput && titleInput.value.trim())
+    || (firstPoster ? firstPoster.text : _lfcNodes[0].text);
+  const autoTitle = titleSource.replace(/\*\*/g,'').replace(/\*/g,'').slice(0, 60).trim();
+
+  const innerNodes = _lfcNodes.map(n => ({
+    id: Date.now() + Math.random(),
+    type: n.type,
+    text: n.text || '',
+    key: n.key, val: n.val,
+  }));
+
+  const newNode = {
+    id: nextId++, type: 'longform', cluster: 'long',
+    title: autoTitle,
+    excerpt: _lfcNodes.filter(n => n.type === 'body').map(n => n.text).join(' ').slice(0, 140),
+    nodes: innerNodes, _user: true
+  };
+  nodes.push(newNode);
+
+  // Reset compose
+  _lfcNodes = [];
+  const ta = document.getElementById('longform-ta');
+  if (ta) { ta.value = ''; }
+  const wc = document.getElementById('longform-wordcount');
+  if (wc) wc.textContent = '0 words';
+  const ti = document.getElementById('longform-title-input');
+  if (ti) ti.value = '';
+  document.getElementById('lfc-phase-arrange').style.display = 'none';
+  document.getElementById('lfc-phase-write').style.display = 'flex';
+
   closeCompose();
-  parseLongInput(raw);
+  renderStream(); renderSpine(); updateNavCounts(); saveState();
+  if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+  setTimeout(() => openLFE(newNode.id), 220);
 }
 
 function updateLongformCount() {

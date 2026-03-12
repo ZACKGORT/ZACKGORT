@@ -102,6 +102,13 @@ body::after {
   background: var(--bg-4);
   position: relative;
   z-index: 10;
+  transition: width 0.28s cubic-bezier(0.4,0,0.2,1), border-color 0.28s, opacity 0.28s;
+  overflow: hidden;
+}
+body.rails-hidden #sidebar {
+  width: 0 !important;
+  border-right-color: transparent;
+  opacity: 0;
 }
 .sidebar-brand {
   padding: 22px 20px 16px;
@@ -400,7 +407,13 @@ body.cluster-media #stream-hud { border-bottom-color: rgba(74,126,175,0.22); }
   flex-direction: column;
   border-left: 1px solid var(--border);
   background: var(--bg-4);
-  transition: background 0.3s, border-color 0.3s;
+  transition: width 0.28s cubic-bezier(0.4,0,0.2,1), border-color 0.28s, opacity 0.28s, background 0.3s;
+  overflow: hidden;
+}
+body.rails-hidden #spine {
+  width: 0 !important;
+  border-left-color: transparent;
+  opacity: 0;
 }
 .spine-header {
   padding: 10px 14px 8px;
@@ -1867,6 +1880,16 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
   .compose-commit-bar { padding:10px 18px calc(var(--sab) + 10px); }
   .compose-commit-btn { padding:10px 18px; }
 
+  /* Notes input: push above dock */
+  #nc-input-wrap {
+    padding-bottom: calc(var(--sab) + 90px);
+  }
+
+  /* LFE arrange add strip: always visible, prominent on mobile */
+  #lfc-add-strip {
+    padding: 10px 16px calc(var(--sab) + 10px);
+  }
+
   /* mobile dive sheet */
   #dive-sheet { position:fixed; inset:0; z-index:1000; pointer-events:none; overflow:hidden; }
   .dive-backdrop { position:absolute; inset:0; background:rgba(10,9,8,0); transition:background 0.4s ease; pointer-events:none; }
@@ -2132,7 +2155,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
           <button class="lfc-batch-btn" onclick="lfcBatchType('pull')">pull</button>
         </div>
         <!-- Node canvas: drag-to-reorder, inline fill -->
-        <div id="lfc-canvas" style="flex:1;overflow-y:auto;padding:6px 8px 8px;"></div>
+        <div id="lfc-canvas" style="flex:1;overflow-y:auto;padding:6px 8px 8px;display:flex;flex-direction:column;"></div>
         <!-- Add node strip -->
         <div id="lfc-add-strip" style="padding:6px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:4px;flex-shrink:0;">
           <span style="font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-right:4px;">add</span>
@@ -2248,6 +2271,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <!-- Rendered by JS -->
       </div>
       <div class="hud-right-controls">
+        <button class="hud-ctrl-btn" id="hud-rails-btn" onclick="toggleRails()" title="Toggle rails">⊢⊣</button>
         <button class="hud-ctrl-btn" onclick="openField()">◈ Field</button>
         <button class="hud-ctrl-btn" id="hud-new-btn" onclick="hudNewAction()">+ New</button>
       </div>
@@ -2611,6 +2635,13 @@ let composeTaskPri = 'med';
 let fieldCluster = 'media'; // active cluster shown in field view
 
 // ═══ THEME ═══
+function toggleRails() {
+  const hidden = document.body.classList.toggle('rails-hidden');
+  const btn = document.getElementById('hud-rails-btn');
+  if (btn) btn.classList.toggle('active', hidden);
+  try { localStorage.setItem('cortex-rails-hidden', hidden ? '1' : '0'); } catch(e) {}
+}
+
 function toggleTheme() {
   const dark = document.body.classList.toggle('dark');
   document.getElementById('theme-badge').textContent = dark ? 'light' : 'dark';
@@ -2622,7 +2653,12 @@ function loadTheme() {
     document.body.classList.add('dark');
     const b = document.getElementById('theme-badge'); if (b) b.textContent = 'light';
   }
-  // default is light, badge says 'dark' (what clicking will switch TO)
+  // Restore rails state
+  if (localStorage.getItem('cortex-rails-hidden') === '1') {
+    document.body.classList.add('rails-hidden');
+    const btn = document.getElementById('hud-rails-btn');
+    if (btn) btn.classList.add('active');
+  }
 }
 
 // ═══ PERSISTENCE ═══
@@ -4146,6 +4182,17 @@ function lfcRenderCanvas() {
   canvas.innerHTML = '';
   const countEl = document.getElementById('lfc-node-count');
   if (countEl) countEl.textContent = _lfcNodes.length + ' node' + (_lfcNodes.length !== 1 ? 's' : '');
+
+  if (!_lfcNodes.length) {
+    canvas.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px 20px;gap:10px;opacity:0.5;text-align:center;">
+      <div style="font-size:22px;color:var(--c-long)">✦</div>
+      <div style="font-family:var(--disp);font-size:14px;color:var(--ink)">No nodes yet</div>
+      <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)">Add one below to begin</div>
+      <div style="font-size:18px;color:var(--ink-3);margin-top:4px">↓</div>
+    </div>`;
+    if (countEl) countEl.textContent = '0 nodes';
+    return;
+  }
 
   _lfcNodes.forEach((n, i) => {
     const card = document.createElement('div');

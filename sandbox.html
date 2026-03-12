@@ -176,7 +176,90 @@ body::after {
 }
 .sidebar-brand:hover .sidebar-brand-theme { opacity: 1; }
 
-/* Era navigation */
+/* ── Floating spine widget — appears on scroll, fixed left edge ── */
+#floating-spine {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) translateX(100%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  width: 28px;
+  height: 60vh;
+  background: var(--bg-4);
+  border-right: 1px solid var(--border-2);
+  border-radius: 0 4px 4px 0;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, right 0.4s cubic-bezier(0.32,0.72,0,1);
+}
+#floating-spine.visible {
+  transform: translateY(-50%) translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+/* When detail panel is open, spine clamps to its left edge */
+body.detail-open #floating-spine {
+  right: var(--detail-w);
+}
+.fsp-seg {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+.fsp-seg.active {
+  border-left-color: currentColor;
+  background: rgba(128,128,128,0.05);
+}
+.fsp-seg-label {
+  font-family: var(--mono);
+  font-size: 6px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: currentColor;
+  opacity: 0.4;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+.fsp-seg.active .fsp-seg-label,
+.fsp-seg:hover .fsp-seg-label { opacity: 1; }
+/* Tooltip */
+.fsp-seg::after {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 8px);
+  left: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-4);
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+.fsp-seg:hover::after { opacity: 1; }
+
+/* ── Sidebar — unchanged original ── */
 .sidebar-section-label {
   font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--ink-3);
@@ -438,7 +521,8 @@ body::after {
   display: none;
 }
 
-
+/* Stream */
+#stream {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -1394,6 +1478,9 @@ body.detail-open #main {
     background: var(--bg-4);
     flex-shrink: 0;
     cursor: crosshair;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
   #mobile-scatter-canvas {
     width: 100%;
@@ -1423,6 +1510,8 @@ body.detail-open #main {
 
   /* Ghost panel — hide on mobile (touch) */
   #artifact-ghost-panel { display: none; }
+  /* Floating spine hidden on mobile — bottom bar handles nav */
+  #floating-spine { display: none; }
 
   /* Mobile bottom bar */
   #mobile-bar {
@@ -1482,7 +1571,17 @@ body.detail-open #main {
   .mobile-field-icon { font-size: 13px; line-height: 1; }
 }
 
-/* ── Tablet: 701px – 1100px — show sidebar ── */
+/* ── Landscape mobile ── */
+@media (max-width: 900px) and (orientation: landscape) {
+  #sidebar { display: none; }
+  #layout { display: block; }
+  #main {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+  }
+}
+
 @media (min-width: 701px) and (max-width: 1100px) {
   :root { --detail-w: 320px; }
   #mobile-bar { display: none; }
@@ -1668,6 +1767,28 @@ body.detail-open #main {
   <div class="agp-cap" id="agp-cap">
     <span class="agp-cap-title" id="agp-cap-title"></span>
     <a class="agp-cap-link" id="agp-cap-link" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ open</a>
+  </div>
+</div>
+
+<!-- ═══ FLOATING SPINE WIDGET ═══ -->
+<div id="floating-spine">
+  <div class="fsp-seg active" data-era="0" data-label="Origins · 2005–13" style="color:var(--era-pre)" onclick="scrollToEra(0)">
+    <span class="fsp-seg-label">01</span>
+  </div>
+  <div class="fsp-seg" data-era="1" data-label="Suburbia · 2013–16" style="color:var(--era-loss)" onclick="scrollToEra(1)">
+    <span class="fsp-seg-label">02</span>
+  </div>
+  <div class="fsp-seg" data-era="2" data-label="Agency · 2016–18" style="color:var(--era-build)" onclick="scrollToEra(2)">
+    <span class="fsp-seg-label">03</span>
+  </div>
+  <div class="fsp-seg" data-era="3" data-label="New York · 2018–21" style="color:var(--era-now)" onclick="scrollToEra(3)">
+    <span class="fsp-seg-label">04</span>
+  </div>
+  <div class="fsp-seg" data-era="4" data-label="Remote · 2021–23" style="color:var(--t-live)" onclick="scrollToEra(4)">
+    <span class="fsp-seg-label">05</span>
+  </div>
+  <div class="fsp-seg" data-era="5" data-label="Now · 2023–" style="color:var(--t-figma)" onclick="scrollToEra(5)">
+    <span class="fsp-seg-label">06</span>
   </div>
 </div>
 
@@ -1872,7 +1993,7 @@ const ERA_LABELS = ['Origins · 2005–2013','Suburbia Startup · 2013–2016','
 
 const STREAM = [
   // ── ERA 0: BEFORE ──
-  { type:'era', id:'era-0', era:0, num:'01', title:'Okay, so this is different.', period:'2018 – 2020', color:'var(--era-pre)' },
+  { type:'era', id:'era-0', era:0, num:'01', title:'Okay, so this is different.', period:'2005 – 2013', color:'var(--era-pre)' },
   { type:'body', text:'This is opinionated — these are not mere musings of my mind, but the manifestation of a thinker. A thinker & maker.' },
   { type:'artifact', id:'a1', atype:'photo', era:0, period:'2005–2006', title:'First Build',
     sentence:'I built my first computer circa 2005. I immediately installed pirated copies of Photoshop and Illustrator.',
@@ -2190,6 +2311,11 @@ function onStreamScroll() {
   document.querySelectorAll('.era-seg').forEach((s,i) => s.classList.toggle('active', i === activeEra));
   document.querySelectorAll('.era-nav-item').forEach((el,i) => el.classList.toggle('active', i === activeEra));
   document.querySelectorAll('.mobile-spine-seg').forEach((el,i) => el.classList.toggle('active', i === activeEra));
+  document.querySelectorAll('.fsp-seg').forEach((el,i) => el.classList.toggle('active', i === activeEra));
+
+  // Show floating spine after scrolling past the sidebar era nav
+  const floatingSpine = document.getElementById('floating-spine');
+  if (floatingSpine) floatingSpine.classList.toggle('visible', scrollTop > 120);
 
   const hud = document.getElementById('hud-era-text');
   hud.textContent = ERA_LABELS[activeEra];
@@ -2197,8 +2323,11 @@ function onStreamScroll() {
 }
 
 function scrollToEra(idx) {
+  const stream = document.getElementById('stream');
   const el = document.getElementById('era-' + idx);
-  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  if (!el || !stream) return;
+  const top = el.offsetTop - 8;
+  stream.scrollTo({ top, behavior: 'smooth' });
 }
 
 // ═══ DETAIL ═══
@@ -2292,14 +2421,11 @@ function closeDetail() {
 function jumpToArtifact(id) {
   closeField();
   setTimeout(() => {
+    const stream = document.getElementById('stream');
     const el = document.getElementById('node-' + id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Only auto-open detail on desktop — on mobile it locks scroll
-      if (window.innerWidth > 700) {
-        setTimeout(() => openDetail(id), 400);
-      }
-    }
+    if (!el || !stream) return;
+    const top = el.offsetTop - (stream.offsetHeight / 2) + (el.offsetHeight / 2);
+    stream.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   }, 350);
 }
 

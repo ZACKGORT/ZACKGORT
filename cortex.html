@@ -216,6 +216,24 @@ body::after {
 }
 #fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(217,119,87,0.55); }
 #fab:active { transform: scale(0.94); }
+/* ── HUD cluster strip ── */
+#hud-cluster-strip {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 8px;
+}
+.hud-cs-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 8px; border-radius: 20px;
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer; opacity: 0.5; transition: opacity 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.hud-cs-item:hover { opacity: 0.85; background: rgba(255,255,255,0.05); }
+.hud-cs-item.active { opacity: 1; background: rgba(255,255,255,0.06); }
+.hud-cs-count {
+  font-family: var(--mono); font-size: 8px; opacity: 0.7;
+}
+
 /* When spine is visible on desktop, clamp FAB to not overlap it */
 @media (min-width: 768px) {
   #fab { right: calc(220px + 28px); }
@@ -371,8 +389,8 @@ body.cluster-media #stream-hud { border-bottom-color: rgba(74,126,175,0.22); }
 .stream-empty { padding:60px 0; text-align:center; color:var(--ink-3); font-size:13px; font-weight:300; line-height:2; }
 
 /* ══════════════════════════════════════════
-   CHAPTER SPINE — right rail, always visible
-   Shows chapters + subchapters per active cluster
+   SPINE — right rail, holistic node log
+   Always shows all nodes across all clusters
 ══════════════════════════════════════════ */
 #spine {
   width: 220px;
@@ -385,80 +403,57 @@ body.cluster-media #stream-hud { border-bottom-color: rgba(74,126,175,0.22); }
   transition: background 0.3s, border-color 0.3s;
 }
 .spine-header {
-  padding: 16px 18px 12px;
+  padding: 10px 14px 8px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
+.spine-header-left { display: flex; flex-direction: column; gap: 1px; }
 .spine-label {
   font-size: 7px; letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--ink-3);
 }
 .spine-cluster-name {
-  font-family: var(--disp); font-size: 15px; color: var(--ink);
-  margin-top: 3px;
+  font-family: var(--disp); font-size: 13px; color: var(--ink);
 }
+.spine-mode-toggle {
+  font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 8px; border: 1px solid var(--border-2); border-radius: 20px;
+  background: none; color: var(--ink-3); cursor: pointer;
+  transition: all 0.14s; white-space: nowrap; flex-shrink: 0;
+}
+.spine-mode-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.spine-mode-toggle.active { background: rgba(255,255,255,0.07); color: var(--ink); border-color: var(--border-3); }
+
 .spine-body {
   flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 10px 0 20px;
+  padding: 6px 0 20px;
 }
 .spine-body::-webkit-scrollbar { width: 2px; }
 .spine-body::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 1px; }
 
-/* Chapter entry */
-.spine-ch {
-  padding: 12px 18px 6px;
+/* Cluster group header inside log */
+.spine-cluster-group {
+  padding: 10px 18px 3px;
+  display: flex; align-items: center; gap: 6px;
   cursor: pointer;
-  transition: background 0.12s;
-  position: relative;
 }
-.spine-ch::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 2px; background: transparent; transition: background 0.2s;
-}
-.spine-ch:hover { background: rgba(255,255,255,0.018); }
-.spine-ch.active::before { background: var(--accent); }
-.spine-ch-num {
-  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--ink-3); margin-bottom: 3px;
-}
-.spine-ch-title {
-  font-family: var(--disp); font-size: 13px; color: var(--ink);
-  line-height: 1.3;
-}
-.spine-ch-count {
-  font-size: 7px; letter-spacing: 0.1em; color: var(--ink-3);
-  margin-top: 3px;
-}
-
-/* Subchapter / label entries */
-.spine-sub {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 18px 6px 28px;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-.spine-sub:hover { background: rgba(255,255,255,0.014); }
-.spine-sub.active { background: rgba(255,255,255,0.025); }
-.spine-sub-dot {
-  width: 4px; height: 4px; border-radius: 50%;
-  flex-shrink: 0; opacity: 0.5;
-  transition: opacity 0.15s;
-}
-.spine-sub.active .spine-sub-dot { opacity: 1; }
-.spine-sub-label {
-  font-size: 9px; letter-spacing: 0.06em;
-  color: var(--ink-2); line-height: 1.3;
+.spine-cluster-group:hover { background: rgba(255,255,255,0.014); }
+.spine-cluster-group-icon { font-size: 10px; opacity: 0.7; }
+.spine-cluster-group-name {
+  font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase;
   flex: 1;
 }
-.spine-sub.active .spine-sub-label { color: var(--ink); }
+.spine-cluster-group-count {
+  font-size: 7px; color: var(--ink-3); font-family: var(--mono);
+}
 
-/* Node entry — individual lines in spine */
+/* Node entry */
 .spine-node {
   display: flex; align-items: baseline; gap: 8px;
-  padding: 3px 18px 3px 32px;
+  padding: 3px 18px 3px 30px;
   cursor: pointer;
-  opacity: 0.55;
+  opacity: 0.5;
   transition: opacity 0.12s;
   font-size: 9px; color: var(--ink-2);
   line-height: 1.45;
@@ -470,16 +465,75 @@ body.cluster-media #stream-hud { border-bottom-color: rgba(74,126,175,0.22); }
   color: var(--ink-3); flex-shrink: 0; min-width: 28px;
 }
 .spine-node-text {
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.spine-divider {
+  height: 1px; background: var(--border); margin: 6px 18px; opacity: 0.5;
 }
 
-.spine-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 8px 18px;
-  opacity: 0.6;
+/* ── Notes arrange panel (opt-in) ── */
+#spine-arrange {
+  display: none; flex: 1; flex-direction: column; overflow: hidden;
 }
+#spine.arrange-mode #spine-arrange { display: flex; }
+#spine.arrange-mode .spine-body { display: none; }
+.spa-inner {
+  flex: 1; overflow-y: auto; padding: 8px 0 20px;
+}
+.spa-inner::-webkit-scrollbar { width: 2px; }
+.spa-inner::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 1px; }
+.spa-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  cursor: grab; user-select: none;
+  transition: background 0.1s;
+  border-radius: 4px; margin: 0 4px;
+}
+.spa-row:active { cursor: grabbing; }
+.spa-row.drag-over { background: rgba(255,255,255,0.07); outline: 1px solid var(--border-2); }
+.spa-grip { font-size: 10px; color: var(--ink-3); opacity: 0.35; flex-shrink: 0; }
+.spa-badge {
+  font-size: 6px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border-2);
+  color: var(--ink-3); flex-shrink: 0;
+}
+.spa-text {
+  font-size: 9px; color: var(--ink-2); flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── Tasks archive panel ── */
+#spine-archive {
+  display: none; flex: 1; flex-direction: column; overflow: hidden;
+}
+#spine.archive-mode #spine-archive { display: flex; }
+#spine.archive-mode .spine-body { display: none; }
+.sarch-inner {
+  flex: 1; overflow-y: auto; padding: 8px 0 20px;
+}
+.sarch-inner::-webkit-scrollbar { width: 2px; }
+.sarch-inner::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 1px; }
+.sarch-empty {
+  padding: 24px 18px; font-size: 10px; color: var(--ink-3); font-style: italic;
+}
+.sarch-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 14px;
+  transition: background 0.1s;
+}
+.sarch-row:hover { background: rgba(255,255,255,0.02); }
+.sarch-check { font-size: 9px; color: var(--c-tasks); flex-shrink: 0; opacity: 0.6; }
+.sarch-text {
+  font-size: 9px; color: var(--ink-3); flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  text-decoration: line-through;
+}
+.sarch-restore {
+  font-size: 7px; color: var(--ink-3); cursor: pointer; flex-shrink: 0;
+  background: none; border: none; padding: 0; letter-spacing: 0.05em;
+  transition: color 0.12s;
+}
+.sarch-restore:hover { color: var(--c-tasks); }
 
 /* ── Spine node editor (shows when a note node is selected) ── */
 #spine.editing .spine-body { display: none; }
@@ -1455,18 +1509,17 @@ body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
 /* ghost tooltip */
 .fnd-ghost {
   position:absolute; bottom:calc(100% + 16px); left:50%;
-  transform:translateX(-50%) translateY(4px);
+  transform:translateX(-50%);
   width:200px; background:var(--bg-2); border:1px solid var(--border-2);
   border-radius:6px; padding:10px 12px;
   box-shadow:0 8px 28px rgba(0,0,0,0.15);
-  opacity:0; pointer-events:none;
-  transition:opacity 0.2s ease, transform 0.2s ease; z-index:100;
+  opacity:1; pointer-events:none;
+  z-index:100;
 }
 .fnd-ghost::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:var(--border-2); }
 .fnd-ghost-type { font-size:6px; letter-spacing:0.2em; text-transform:uppercase; color:currentColor; opacity:0.8; margin-bottom:4px; }
 .fnd-ghost-title { font-family:var(--disp); font-size:12px; color:var(--ink); line-height:1.3; margin-bottom:5px; }
 .fnd-ghost-text { font-family:var(--text); font-style:italic; font-size:10px; color:var(--ink-2); line-height:1.5; }
-.field-node-dot:hover .fnd-ghost { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ═══════════════════════════════════════
    COMPOSE — DESKTOP (side panel)
@@ -1843,8 +1896,8 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 <div id="nc-ghost-overlay" onclick="ncGhostBackdropClick(event)">
   <div id="nc-ghost-panel">
     <div class="nc-ghost-header">
-      <button class="nc-ghost-type-btn active" data-ghosttype="body"   onclick="ncGhostSetType(this)">body</button>
       <button class="nc-ghost-type-btn"         data-ghosttype="poster" onclick="ncGhostSetType(this)">poster</button>
+      <button class="nc-ghost-type-btn active"   data-ghosttype="body"   onclick="ncGhostSetType(this)">body</button>
       <button class="nc-ghost-type-btn"         data-ghosttype="pull"   onclick="ncGhostSetType(this)">pull</button>
       <button class="nc-ghost-type-btn"         data-ghosttype="label"  onclick="ncGhostSetType(this)">label</button>
       <button class="nc-ghost-del-btn" onclick="ncGhostDelete()">✕ delete</button>
@@ -1896,8 +1949,8 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
     <!-- NOTE -->
     <div class="compose-mode-body active" id="mode-note">
       <div class="note-style-row">
-        <button class="note-style-btn active" data-nstyle="body"   onclick="selectNoteStyle(this)">body</button>
         <button class="note-style-btn"         data-nstyle="poster" onclick="selectNoteStyle(this)">poster</button>
+        <button class="note-style-btn active"   data-nstyle="body"   onclick="selectNoteStyle(this)">body</button>
         <button class="note-style-btn"         data-nstyle="pull"   onclick="selectNoteStyle(this)">pull</button>
         <button class="note-style-btn"         data-nstyle="label"  onclick="selectNoteStyle(this)">label</button>
       </div>
@@ -2083,6 +2136,10 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       </div>
       <!-- Desktop filter label -->
       <span class="hud-filter" id="hud-filter-label">All clusters · <span id="hud-count">16</span> nodes</span>
+      <!-- Cluster mini-dashboard strip -->
+      <div id="hud-cluster-strip">
+        <!-- Rendered by JS -->
+      </div>
       <div class="hud-right-controls">
         <button class="hud-ctrl-btn" onclick="openField()">◈ Field</button>
         <button class="hud-ctrl-btn" id="hud-new-btn" onclick="hudNewAction()">+ New</button>
@@ -2123,8 +2180,8 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       <!-- Controls: type selector + format toolbar + export/clear — above write line -->
       <div id="nc-controls">
         <div id="nc-type-bar">
-          <button class="nc-type-btn active" data-ntype="body"   onclick="ncSetType(this)">body</button>
           <button class="nc-type-btn"         data-ntype="poster" onclick="ncSetType(this)">poster</button>
+          <button class="nc-type-btn active"   data-ntype="body"   onclick="ncSetType(this)">body</button>
           <button class="nc-type-btn"         data-ntype="pull"   onclick="ncSetType(this)">pull</button>
           <button class="nc-type-btn"         data-ntype="label"  onclick="ncSetType(this)">label</button>
         </div>
@@ -2210,14 +2267,25 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
     <button id="fab" onclick="fabAction()" title="New node (N)">+</button>
   </div>
 
-  <!-- ── CHAPTER SPINE (right rail, desktop) ── -->
+  <!-- ── SPINE — holistic node log (right rail, desktop) ── -->
   <div id="spine">
     <div class="spine-header">
-      <div class="spine-label">Structure</div>
-      <div class="spine-cluster-name" id="spine-cluster-name">All clusters</div>
+      <div class="spine-header-left">
+        <div class="spine-label">Log</div>
+        <div class="spine-cluster-name" id="spine-cluster-name">All nodes</div>
+      </div>
+      <button class="spine-mode-toggle" id="spine-toggle-btn" onclick="toggleSpineMode()">Arrange</button>
     </div>
     <div class="spine-body" id="spine-body">
       <!-- Rendered by JS -->
+    </div>
+    <!-- Notes arrange panel (opt-in) -->
+    <div id="spine-arrange">
+      <div class="spa-inner" id="spa-inner"></div>
+    </div>
+    <!-- Tasks archive panel -->
+    <div id="spine-archive">
+      <div class="sarch-inner" id="sarch-inner"></div>
     </div>
     <!-- Node editor — shown when a note is selected -->
     <div id="spine-editor">
@@ -2226,8 +2294,8 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <button class="spe-close" onclick="closeSpineEditor()">✕</button>
       </div>
       <div class="spe-type-row" id="spe-type-row">
-        <button class="spe-type-btn active" data-spetype="body"   onclick="speSetType(this)">body</button>
         <button class="spe-type-btn"         data-spetype="poster" onclick="speSetType(this)">poster</button>
+        <button class="spe-type-btn active"   data-spetype="body"   onclick="speSetType(this)">body</button>
         <button class="spe-type-btn"         data-spetype="pull"   onclick="speSetType(this)">pull</button>
         <button class="spe-type-btn"         data-spetype="label"  onclick="speSetType(this)">label</button>
       </div>
@@ -2639,7 +2707,12 @@ function filterCluster(cluster) {
   }
 
   // Spine
+  // Reset spine mode panels on cluster change
+  const spine = document.getElementById('spine');
+  if (spine) spine.classList.remove('arrange-mode','archive-mode');
+
   renderSpine();
+  renderHudStrip();
   closeDetail();
   closeDive();
   renderStream();
@@ -2665,58 +2738,160 @@ function hudNewAction() {
   fabAction();
 }
 
-// ═══ CHAPTER SPINE ═══
+// ═══ SPINE — holistic node log ═══
 function renderSpine() {
   const body = document.getElementById('spine-body');
-  const nameEl = document.getElementById('spine-cluster-name');
   if (!body) return;
 
-  const clusterLabel = activeFilter === 'all' ? 'All clusters' : CLUSTERS[activeFilter]?.label || activeFilter;
-  if (nameEl) nameEl.textContent = clusterLabel;
-
-  const filtered = activeFilter === 'all' ? nodes : nodes.filter(n => n.cluster === activeFilter);
-
   let html = '';
-  let lastCh = null;
-
-  filtered.forEach(node => {
-    if (node.type === 'ch') {
-      if (lastCh !== null) html += '<div class="spine-divider"></div>';
-      lastCh = node;
-      const c = CLUSTERS[node.cluster];
-      html += `<div class="spine-ch" onclick="spineScrollTo(${node.id})">
-        <div class="spine-ch-num">${c?.icon || '·'} Ch. 0${node.ch}</div>
-        <div class="spine-ch-title">${node.title}</div>
-      </div>`;
-    } else if (node.type === 'label') {
-      const cc = CLUSTERS[node.cluster]?.color || 'var(--accent)';
-      html += `<div class="spine-sub" onclick="spineScrollTo(${node.id})">
-        <div class="spine-sub-dot" style="background:${cc}"></div>
-        <div class="spine-sub-label">${node.text}</div>
-      </div>`;
-    } else if (['body','poster','pull'].includes(node.type)) {
-      const preview = (node.text || '').replace(/\*\*/g,'').replace(/\*/g,'').substring(0, 38);
-      html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
-        <span class="spine-node-type">${node.type}</span>
-        <span class="spine-node-text">${preview}…</span>
-      </div>`;
-    } else if (node.type === 'spec') {
-      html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
-        <span class="spine-node-type">task</span>
-        <span class="spine-node-text">${node.val.substring(0,36)}</span>
-      </div>`;
-    } else if (node.type === 'longform') {
-      html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
-        <span class="spine-node-type">long</span>
-        <span class="spine-node-text">${node.title.substring(0,36)}</span>
-      </div>`;
-    }
+  CLUSTER_ORDER.forEach((cl, ci) => {
+    const c = CLUSTERS[cl];
+    const clNodes = nodes.filter(n => n.cluster === cl && n.type !== 'ch');
+    if (!clNodes.length) return;
+    if (ci > 0) html += '<div class="spine-divider"></div>';
+    html += `<div class="spine-cluster-group" style="color:${c.color}" onclick="filterCluster('${cl}')">
+      <span class="spine-cluster-group-icon">${c.icon}</span>
+      <span class="spine-cluster-group-name">${c.label}</span>
+      <span class="spine-cluster-group-count">${clNodes.length}</span>
+    </div>`;
+    clNodes.forEach(node => {
+      if (node.type === 'label') {
+        html += `<div class="spine-node" onclick="spineScrollTo(${node.id})" style="color:${c.color};opacity:0.6">
+          <span class="spine-node-type" style="color:${c.color}">label</span>
+          <span class="spine-node-text">${(node.text||'').substring(0,36)}</span>
+        </div>`;
+      } else if (['body','poster','pull'].includes(node.type)) {
+        const preview = (node.text||'').replace(/\*\*/g,'').replace(/\*/g,'').substring(0,36);
+        html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
+          <span class="spine-node-type">${node.type}</span>
+          <span class="spine-node-text">${preview}</span>
+        </div>`;
+      } else if (node.type === 'spec') {
+        html += `<div class="spine-node" onclick="spineScrollTo(${node.id})"${node.done?' style="opacity:0.3;text-decoration:line-through"':''}>
+          <span class="spine-node-type">task</span>
+          <span class="spine-node-text">${(node.val||'').substring(0,36)}</span>
+        </div>`;
+      } else if (node.type === 'longform') {
+        html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
+          <span class="spine-node-type">long</span>
+          <span class="spine-node-text">${(node.title||'').substring(0,36)}</span>
+        </div>`;
+      } else if (node.type === 'media') {
+        html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
+          <span class="spine-node-type">media</span>
+          <span class="spine-node-text">${(node.title||node.url||'').substring(0,36)}</span>
+        </div>`;
+      }
+    });
   });
 
-  body.innerHTML = html || '<div style="padding:20px 18px;font-size:10px;color:var(--ink-3)">No structure yet.</div>';
+  body.innerHTML = html || '<div style="padding:20px 18px;font-size:10px;color:var(--ink-3)">No nodes yet.</div>';
+
+  // Also update toggle button label based on active cluster
+  _updateSpineToggle();
+}
+
+function _updateSpineToggle() {
+  const btn = document.getElementById('spine-toggle-btn');
+  if (!btn) return;
+  const spine = document.getElementById('spine');
+  if (activeFilter === 'tasks') {
+    btn.textContent = spine.classList.contains('archive-mode') ? 'Log' : 'Archive';
+    btn.style.display = '';
+  } else if (activeFilter === 'notes') {
+    btn.textContent = spine.classList.contains('arrange-mode') ? 'Log' : 'Arrange';
+    btn.style.display = '';
+  } else {
+    btn.style.display = 'none';
+    spine.classList.remove('arrange-mode','archive-mode');
+  }
+}
+
+function toggleSpineMode() {
+  const spine = document.getElementById('spine');
+  if (activeFilter === 'notes') {
+    const isArrange = spine.classList.toggle('arrange-mode');
+    if (isArrange) renderSpineArrange();
+  } else if (activeFilter === 'tasks') {
+    const isArchive = spine.classList.toggle('archive-mode');
+    if (isArchive) renderSpineArchive();
+  }
+  _updateSpineToggle();
+}
+
+function renderSpineArrange() {
+  const inner = document.getElementById('spa-inner');
+  if (!inner) return;
+  const noteNodes = nodes.filter(n => n.cluster === 'notes' && !['ch'].includes(n.type));
+  if (!noteNodes.length) { inner.innerHTML = '<div style="padding:20px 14px;font-size:10px;color:var(--ink-3)">No notes yet.</div>'; return; }
+  inner.innerHTML = noteNodes.map((n,i) => {
+    const text = (n.text||n.title||n.val||'').replace(/\*\*/g,'').replace(/\*/g,'').substring(0,40);
+    return `<div class="spa-row" draggable="true" data-nodeid="${n.id}"
+      ondragstart="spaDragStart(event)" ondragover="spaDragOver(event)" ondrop="spaDrop(event)" ondragleave="spaDragLeave(event)">
+      <span class="spa-grip">⠿</span>
+      <span class="spa-badge">${n.type}</span>
+      <span class="spa-text">${text}</span>
+    </div>`;
+  }).join('');
+}
+
+function spaDragStart(e) {
+  e.dataTransfer.setData('text/plain', e.currentTarget.dataset.nodeid);
+  e.currentTarget.style.opacity = '0.4';
+}
+function spaDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function spaDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function spaDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const fromId = parseInt(e.dataTransfer.getData('text/plain'));
+  const toId = parseInt(e.currentTarget.dataset.nodeid);
+  if (fromId === toId) return;
+  const fromIdx = nodes.findIndex(n => n.id === fromId);
+  const toIdx   = nodes.findIndex(n => n.id === toId);
+  if (fromIdx < 0 || toIdx < 0) return;
+  const [moved] = nodes.splice(fromIdx, 1);
+  nodes.splice(toIdx, 0, moved);
+  document.querySelector(`[data-nodeid="${fromId}"]`)?.style && (document.querySelector(`[data-nodeid="${fromId}"]`).style.opacity = '1');
+  renderSpineArrange(); renderStream(); saveState();
+}
+
+function renderSpineArchive() {
+  const inner = document.getElementById('sarch-inner');
+  if (!inner) return;
+  const done = nodes.filter(n => n.type === 'spec' && n.done);
+  if (!done.length) { inner.innerHTML = '<div class="sarch-empty">No completed tasks yet.</div>'; return; }
+  inner.innerHTML = done.map(n => `
+    <div class="sarch-row">
+      <span class="sarch-check">✓</span>
+      <span class="sarch-text">${n.key ? n.key+': ' : ''}${(n.val||'').substring(0,40)}</span>
+      <button class="sarch-restore" onclick="restoreTask(${n.id})" title="Restore">↩</button>
+    </div>`).join('');
+}
+
+function restoreTask(nodeId) {
+  const n = nodes.find(n => n.id === nodeId);
+  if (n) { n.done = false; renderStream(); renderSpine(); renderSpineArchive(); saveState(); }
 }
 
 // ═══ ALL-MODE HORIZONTAL SPINE ═══
+function renderHudStrip() {
+  const strip = document.getElementById('hud-cluster-strip');
+  if (!strip) return;
+  strip.innerHTML = CLUSTER_ORDER.map(cl => {
+    const c = CLUSTERS[cl];
+    const count = nodes.filter(n => n.cluster === cl && n.type !== 'ch').length;
+    const isActive = activeFilter === cl;
+    return `<div class="hud-cs-item${isActive?' active':''}" style="color:${c.color}" onclick="filterCluster('${cl}')">
+      <span>${c.icon}</span>
+      <span class="hud-cs-count">${count}</span>
+    </div>`;
+  }).join('');
+}
+
 function renderAllSpine() {
   const inner = document.getElementById('all-spine-inner');
   if (!inner) return;
@@ -3159,6 +3334,7 @@ function updateNavCounts() {
   });
   const fnc = document.getElementById('field-node-count');
   if (fnc) fnc.textContent = nodes.filter(n=>n.cluster===fieldCluster&&n.type!=='ch'&&n.type!=='label').length;
+  renderHudStrip();
 }
 
 // ═══ MEDIA RENDERER (shared) ═══
@@ -3411,6 +3587,56 @@ function renderFieldNodes() {
   });
 }
 
+// ── Magnetic cursor lerp ──
+(function initFieldMagnet() {
+  let mouse = { x: -9999, y: -9999 };
+  const RADIUS = 140;   // px — attraction starts within this distance
+  const STRENGTH = 0.28; // how far nodes drift toward cursor (0–1)
+  const LERP = 0.07;    // smoothing factor per frame
+
+  // Per-node current offset state
+  const state = new WeakMap();
+
+  function getState(el) {
+    if (!state.has(el)) state.set(el, { ox: 0, oy: 0 });
+    return state.get(el);
+  }
+
+  function tick() {
+    const layer = document.getElementById('field-nodes-layer');
+    if (!layer || !document.body.classList.contains('mode-field')) {
+      requestAnimationFrame(tick); return;
+    }
+    layer.querySelectorAll('.field-node-dot').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = mouse.x - cx;
+      const dy = mouse.y - cy;
+      const dist = Math.hypot(dx, dy);
+      const s = getState(el);
+      let tx = 0, ty = 0;
+      if (dist < RADIUS && dist > 0) {
+        const pull = (1 - dist / RADIUS) * STRENGTH * RADIUS;
+        tx = (dx / dist) * pull;
+        ty = (dy / dist) * pull;
+      }
+      s.ox += (tx - s.ox) * LERP;
+      s.oy += (ty - s.oy) * LERP;
+      if (Math.abs(s.ox) > 0.05 || Math.abs(s.oy) > 0.05) {
+        el.style.transform = `translate(calc(-50% + ${s.ox.toFixed(2)}px), calc(-50% + ${s.oy.toFixed(2)}px))`;
+      } else {
+        el.style.transform = 'translate(-50%,-50%)';
+      }
+    });
+    requestAnimationFrame(tick);
+  }
+
+  document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  document.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+  requestAnimationFrame(tick);
+})();
+
 function fieldNodeClick(nodeId) {
   // Filter stream to this cluster and close field, then open detail
   filterAndClose(fieldCluster);
@@ -3482,6 +3708,10 @@ function switchComposeMode(mode) {
   const modeLabels = { note:'New note', task:'New task', media:'New media', longform:'New long-form' };
   document.getElementById('compose-title').textContent = modeLabels[mode] || 'New node';
   document.body.classList.toggle('compose-longform', mode === 'longform');
+  // Sync page cluster to match selected mode
+  const modeToCluster = { note:'notes', task:'tasks', media:'media', longform:'long' };
+  const targetCluster = modeToCluster[mode];
+  if (targetCluster && targetCluster !== activeFilter) filterCluster(targetCluster);
   refreshTaskExisting();
 }
 
@@ -4073,6 +4303,7 @@ function init() {
   renderSpine();
   renderAllSpine();
   updateNavCounts();
+  _updateSpineToggle();
   updateSidebarDate();
   initFieldPan();
   initScrollNudge();

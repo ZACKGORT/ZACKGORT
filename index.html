@@ -1685,7 +1685,7 @@ body.detail-open #main {
       </div>
       <div class="field-artifact-dot major" style="left:55%;top:50%;color:var(--t-media)" onclick="jumpToArtifact('a12')">
         <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2018</div><div class="fad-ghost-title">The Commute</div><div class="fad-ghost-sentence">PHI ↷ NYC ↝ PHI ↷ NYC ↝ PHI ↷ NYC ∞</div></div>
+        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2018</div><div class="fad-ghost-title">The Commute</div><div class="fad-ghost-sentence">The PATH train. Every morning. The city arriving as a wall of light at the end of the tunnel.</div></div>
         <div class="fad-label">the commute</div>
       </div>
       <div class="field-artifact-dot" style="left:58%;top:36%;color:var(--t-media)" onclick="jumpToArtifact('a13')">
@@ -2466,8 +2466,25 @@ function closeField() {
   let panX = 0, panY = 0, scale = 1;
   let isPanning = false, startX = 0, startY = 0;
 
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  function getBounds() {
+    const ww = wrap.offsetWidth;
+    const wh = wrap.offsetHeight;
+    const scaledW = CANVAS * scale;
+    const scaledH = CANVAS * scale;
+    // panX: left edge can't go past right side of wrap, right edge can't go past left
+    const maxPanX = ww * 0.5;
+    const minPanX = ww - scaledW + ww * 0.5 - ww * 0.5;
+    // Y locked — always centered
+    const panYFixed = 0;
+    return { minPanX: ww / 2 - scaledW + ww * 0.1, maxPanX: ww * 0.9, panYFixed };
+  }
+
   function applyTransform() {
-    // inner starts at top:50% left:50% (center of wrap), then we offset by -CANVAS/2 each axis
+    const { minPanX, maxPanX, panYFixed } = getBounds();
+    panX = clamp(panX, minPanX, maxPanX);
+    panY = panYFixed; // Y always locked — horizontal scroll only
     inner.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${scale})`;
   }
 
@@ -2478,9 +2495,10 @@ function closeField() {
     const ww = wrap.offsetWidth;
     scale = (ww * 2.8) / CANVAS;
     panY = 0;
-    const ex = ERA_X[eraIdx] !== undefined ? ERA_X[eraIdx] : 0;
+    const ex = ERA_X[eraIdx] !== undefined ? ERA_X[eraIdx] : 0.5;
+    // Center the era in the viewport
     panX = ww / 2 - CANVAS * ex * scale;
-    applyTransform();
+    applyTransform(); // clamp applied inside
   }
 
   // Wait for overlay to be visible before measuring
@@ -2925,6 +2943,13 @@ const SCATTER_ERAS = [
         if (tipEl) tipEl.style.opacity = '0';
         canvas.style.cursor = 'crosshair';
       });
+      // Safety reset — if mouse leaves canvas fast, mouseleave can miss
+      document.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
+                       e.clientY >= rect.top  && e.clientY <= rect.bottom;
+        if (!inside && hovered !== -1) { hovered = -1; draw(); if (tipEl) tipEl.style.opacity = '0'; }
+      }, { passive: true });
       canvas.addEventListener('click', e => {
         const rect = canvas.getBoundingClientRect();
         const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);

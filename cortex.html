@@ -231,7 +231,20 @@ body::after {
   display: flex;
   flex-direction: column;
   position: relative;
+  transition: background 0.3s ease;
 }
+/* Subtle cluster tint on #main background for mode awareness */
+body.cluster-notes #main  { background: color-mix(in srgb, var(--c-notes) 3%, var(--bg)); }
+body.cluster-tasks #main  { background: color-mix(in srgb, var(--c-tasks) 3%, var(--bg)); }
+body.cluster-long  #main  { background: color-mix(in srgb, var(--c-long)  3%, var(--bg)); }
+body.cluster-media #main  { background: color-mix(in srgb, var(--c-media) 3%, var(--bg)); }
+body.cluster-all   #main  { background: var(--bg); }
+/* Also tint stream-hud border-bottom as accent line */
+body.cluster-notes #stream-hud { border-bottom-color: rgba(196,98,58,0.22); }
+body.cluster-tasks #stream-hud { border-bottom-color: rgba(90,112,64,0.22); }
+body.cluster-long  #stream-hud { border-bottom-color: rgba(128,96,168,0.22); }
+body.cluster-media #stream-hud { border-bottom-color: rgba(74,126,175,0.22); }
+
 
 #progress {
   position: absolute; top: 0; left: 0;
@@ -549,6 +562,169 @@ body::after {
 
 /* ── Keyboard badge ── */
 .kbd { display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-family:var(--mono); background:var(--bg-3); border:1px solid var(--border-2); border-radius:3px; padding:1px 5px; color:var(--ink-3); letter-spacing:0; }
+
+/* ══════════════════════════════════════════
+   ALL-MODE HORIZONTAL SPINE (chapter strip)
+   Desktop: rollout from top (sticky header inside #main)
+   Mobile: always visible above stream
+══════════════════════════════════════════ */
+#all-spine {
+  display: none; /* shown via JS when filter=all */
+  flex-shrink: 0;
+  overflow-x: auto; overflow-y: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-4);
+  position: relative;
+  z-index: 20;
+  scrollbar-width: none;
+}
+#all-spine::-webkit-scrollbar { display: none; }
+body.cluster-all #all-spine { display: flex; }
+
+.all-spine-inner {
+  display: flex; align-items: stretch;
+  gap: 0; flex-shrink: 0;
+  padding: 0;
+}
+
+.all-spine-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 20px;
+  cursor: pointer;
+  border-right: 1px solid var(--border);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.14s;
+  min-width: 0;
+}
+.all-spine-item::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: transparent; transition: background 0.2s;
+}
+.all-spine-item:hover { background: rgba(255,255,255,0.02); }
+.all-spine-item.active::after { background: var(--accent); }
+.all-spine-item:hover::after { background: rgba(217,119,87,0.35); }
+
+.asi-icon {
+  width: 22px; height: 22px; border-radius: 4px;
+  border: 1px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; opacity: 0.7;
+}
+.all-spine-item.active .asi-icon { opacity: 1; }
+.asi-name {
+  font-size: 10px; letter-spacing: 0.04em; color: var(--ink);
+  white-space: nowrap;
+}
+.asi-count {
+  font-size: 7px; letter-spacing: 0.1em; color: var(--ink-3);
+  white-space: nowrap;
+}
+/* Separator: "All" overview entry */
+.all-spine-item.all-entry {
+  color: var(--ink-2);
+  border-right: 1px solid var(--border-2);
+}
+.all-spine-item.all-entry .asi-icon { border-color: var(--border-3); }
+
+/* ── desktop: animate spine in from right edge ── */
+@media (min-width: 768px) {
+  #all-spine {
+    max-height: 0; opacity: 0;
+    transition: max-height 0.28s cubic-bezier(0.25,1,0.5,1), opacity 0.22s ease;
+    overflow: hidden;
+  }
+  body.cluster-all #all-spine {
+    max-height: 56px; opacity: 1; overflow-x: auto; overflow-y: hidden;
+  }
+}
+
+/* ══════════════════════════════════════════
+   LONGFORM 3-STATE MOBILE EDITOR
+   States: write (free), compose (node cards), arrange (sort)
+══════════════════════════════════════════ */
+#lfe-mobile-states {
+  display: none;
+}
+@media (max-width: 767px) {
+  body.cluster-long #lfe-mobile-states { display: flex; }
+}
+/* State tab bar */
+.lfe-state-bar {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--bg-4); flex-shrink: 0;
+}
+.lfe-state-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 9px 6px; font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; transition: all 0.15s;
+}
+.lfe-state-tab .lst-icon { font-size: 14px; }
+.lfe-state-tab.active { color: var(--c-long); border-bottom-color: var(--c-long); }
+
+/* Write state: full-screen textarea, no chrome */
+#lfe-write-state {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+#lfe-write-ta {
+  flex: 1; width: 100%; background: none; border: none; outline: none;
+  resize: none; padding: 22px 22px 16px;
+  font-family: var(--text); font-size: 18px; font-style: italic;
+  font-weight: 300; line-height: 1.85; color: var(--ink);
+  caret-color: var(--c-long);
+}
+#lfe-write-ta::placeholder { color: var(--ink-3); font-style: italic; }
+.lfe-write-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px calc(var(--sab) + 10px);
+  border-top: 1px solid var(--border);
+  background: var(--bg-4); flex-shrink: 0;
+}
+.lfe-write-wc { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.lfe-write-commit {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--c-long); color: #fff; border: none;
+  padding: 8px 18px; border-radius: 3px; cursor: pointer;
+}
+
+/* Compose state: canvas cards */
+#lfe-compose-state {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+/* Arrange state: sort handles */
+#lfe-arrange-state {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+}
+.lfe-arrange-inner {
+  flex: 1; overflow-y: auto; padding: 12px 16px calc(var(--sab) + 20px);
+}
+.lfe-arrange-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; margin-bottom: 6px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 4px; cursor: grab; user-select: none;
+}
+.lfe-arrange-grip { color: var(--ink-3); font-size: 14px; letter-spacing: -2px; }
+.lfe-arrange-badge {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--c-long); border: 1px solid var(--c-long);
+  padding: 2px 7px; border-radius: 10px; flex-shrink: 0;
+}
+.lfe-arrange-text { font-size: 13px; color: var(--ink); line-height: 1.4; flex: 1; }
+.lfe-arrange-commit {
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 10px 20px; border-top: 1px solid var(--border);
+  background: var(--bg-4); flex-shrink: 0;
+}
+.lfe-arrange-btn {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--c-long); color: #fff; border: none;
+  padding: 8px 18px; border-radius: 3px; cursor: pointer;
+}
+
 
 /* ══════════════════════════════════════════
    NOTES GHOST OVERLAY — inline sentence editor
@@ -1449,6 +1625,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 .compose-backdrop-mobile { display: none; }
 .compose-handle { display: none; }
 #hud-brand { display: none; }
+#lfe-mobile-states { display: none; }
 
 /* ═══════════════════════════════════════
    MOBILE OVERRIDES (< 768px)
@@ -1615,6 +1792,14 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
   /* hide desktop-only elements */
   #stream-hud .hud-right-controls { display: flex; }
   .field-overlay-close { font-size: 8px; padding: 6px 12px; }
+  /* hide right spine on mobile */
+  #spine { display: none !important; }
+  /* HUD brand is tappable for theme on mobile */
+  #hud-brand { cursor: pointer; }
+  /* Mobile cluster-long: show 3-state editor, hide standard beckon+stream */
+  body.cluster-long #lfe-mobile-states { display: flex !important; flex-direction: column; flex: 1; overflow: hidden; }
+  body.cluster-long #stream { display: none; }
+  body.cluster-long #long-beckon-wrap { display: none !important; }
 }
 
 @media (max-width: 767px) {
@@ -1827,24 +2012,24 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <div class="cluster-nav-count" id="nav-count-all">16 nodes</div>
       </div>
     </div>
-    <div class="cluster-nav-item" data-cluster="tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
-      <div class="cluster-nav-icon">◎</div>
-      <div class="cluster-nav-text">
-        <div class="cluster-nav-name">Tasks</div>
-        <div class="cluster-nav-count" id="nav-count-tasks">3 nodes</div>
-      </div>
-    </div>
     <div class="cluster-nav-item" data-cluster="notes" style="color:var(--c-notes)" onclick="filterCluster('notes')">
       <div class="cluster-nav-icon">✎</div>
       <div class="cluster-nav-text">
-        <div class="cluster-nav-name">Notes</div>
+        <div class="cluster-nav-name">Note</div>
         <div class="cluster-nav-count" id="nav-count-notes">7 nodes</div>
+      </div>
+    </div>
+    <div class="cluster-nav-item" data-cluster="tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
+      <div class="cluster-nav-icon">◎</div>
+      <div class="cluster-nav-text">
+        <div class="cluster-nav-name">Task</div>
+        <div class="cluster-nav-count" id="nav-count-tasks">3 nodes</div>
       </div>
     </div>
     <div class="cluster-nav-item" data-cluster="long" style="color:var(--c-long)" onclick="filterCluster('long')">
       <div class="cluster-nav-icon">≡</div>
       <div class="cluster-nav-text">
-        <div class="cluster-nav-name">Long-form</div>
+        <div class="cluster-nav-name">Long</div>
         <div class="cluster-nav-count" id="nav-count-long">2 nodes</div>
       </div>
     </div>
@@ -1893,7 +2078,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
     <!-- Desktop HUD -->
     <div id="stream-hud">
       <!-- Mobile brand (shown via CSS on mobile) -->
-      <div id="hud-brand">
+      <div id="hud-brand" onclick="toggleTheme()" title="Toggle theme">
         <span class="hud-brand-word">cortex</span><span class="hud-brand-dot">·</span>
       </div>
       <!-- Desktop filter label -->
@@ -1901,6 +2086,13 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       <div class="hud-right-controls">
         <button class="hud-ctrl-btn" onclick="openField()">◈ Field</button>
         <button class="hud-ctrl-btn" id="hud-new-btn" onclick="hudNewAction()">+ New</button>
+      </div>
+    </div>
+
+    <!-- All-mode horizontal chapter spine (desktop rollout, mobile evergreen) -->
+    <div id="all-spine">
+      <div class="all-spine-inner" id="all-spine-inner">
+        <!-- Rendered by JS -->
       </div>
     </div>
 
@@ -1963,6 +2155,50 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       </div>
     </div>
 
+    <!-- Mobile Long-form 3-state editor (Write / Compose / Arrange) -->
+    <!-- Shown on mobile when cluster=long, replaces beckon+stream combo -->
+    <div id="lfe-mobile-states" style="flex-direction:column;flex:1;overflow:hidden;">
+      <!-- State tab bar -->
+      <div class="lfe-state-bar">
+        <button class="lfe-state-tab active" id="lst-write" onclick="lfeMobileState('write')">
+          <span class="lst-icon">✏</span>write
+        </button>
+        <button class="lfe-state-tab" id="lst-compose" onclick="lfeMobileState('compose')">
+          <span class="lst-icon">≡</span>compose
+        </button>
+        <button class="lfe-state-tab" id="lst-arrange" onclick="lfeMobileState('arrange')">
+          <span class="lst-icon">↕</span>arrange
+        </button>
+      </div>
+
+      <!-- Write: blank canvas, write freely -->
+      <div id="lfe-write-state" style="display:flex;">
+        <textarea id="lfe-write-ta" placeholder="The thought arrives whole. Write freely. Don't stop to classify it.&#10;&#10;This draft will parse into nodes on Compose."></textarea>
+        <div class="lfe-write-foot">
+          <span class="lfe-write-wc" id="lfe-write-wc">0 words</span>
+          <button class="lfe-write-commit" onclick="lfeMobileWriteCommit()">Compose →</button>
+        </div>
+      </div>
+
+      <!-- Compose: node cards canvas (LFE canvas) -->
+      <div id="lfe-compose-state" style="display:none;">
+        <!-- LFE canvas injected here on state switch -->
+        <div id="lfe-mobile-canvas" style="flex:1;overflow-y:auto;padding:12px 16px 80px;"></div>
+        <div class="lfe-write-foot">
+          <span class="lfe-write-wc" id="lfe-compose-count">0 nodes</span>
+          <button class="lfe-write-commit" onclick="lfeMobileState('arrange')">Arrange →</button>
+        </div>
+      </div>
+
+      <!-- Arrange: drag-sort nodes -->
+      <div id="lfe-arrange-state" style="display:none;">
+        <div class="lfe-arrange-inner" id="lfe-arrange-inner"></div>
+        <div class="lfe-arrange-commit">
+          <button class="lfe-arrange-btn" onclick="lfeMobileArrangeCommit()">Package as doc →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- All / media / tasks / long stream -->
     <div id="stream">
       <div class="stream-inner" id="stream-inner">
@@ -2018,22 +2254,22 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 
 <!-- ── Mobile bottom dock ── -->
 <div id="dock">
-  <div class="dock-cluster" id="dock-tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
-    <div class="dock-icon">◎</div>
-    <span class="dock-cluster-label">Tasks</span>
+  <div class="dock-cluster" id="dock-all" onclick="filterCluster('all')">
+    <div class="dock-icon" style="border-color:var(--border-3);color:var(--ink-2)">⊞</div>
+    <span class="dock-cluster-label">All</span>
   </div>
   <div class="dock-cluster" id="dock-notes" style="color:var(--c-notes)" onclick="filterCluster('notes')">
     <div class="dock-icon">✎</div>
-    <span class="dock-cluster-label">Notes</span>
+    <span class="dock-cluster-label">Note</span>
   </div>
   <button class="dock-compose" onclick="fabAction()">+</button>
+  <div class="dock-cluster" id="dock-tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
+    <div class="dock-icon">◎</div>
+    <span class="dock-cluster-label">Task</span>
+  </div>
   <div class="dock-cluster" id="dock-long" style="color:var(--c-long)" onclick="filterCluster('long')">
     <div class="dock-icon">≡</div>
     <span class="dock-cluster-label">Long</span>
-  </div>
-  <div class="dock-cluster active" id="dock-media" style="color:var(--c-media)" onclick="filterCluster('media')">
-    <div class="dock-icon">▶</div>
-    <span class="dock-cluster-label">Media</span>
   </div>
 </div>
 
@@ -2247,9 +2483,21 @@ function applyInline(text) {
 }
 
 // ═══ RENDER STREAM ═══
+// Canonical cluster order for All-mode rendering
+const CLUSTER_ORDER = ['notes', 'tasks', 'long', 'media'];
+
 function renderStream() {
   const inner = document.getElementById('stream-inner');
-  const filtered = activeFilter === 'all' ? nodes : nodes.filter(n => n.cluster === activeFilter);
+  let filtered;
+  if (activeFilter === 'all') {
+    // Render in canonical left-rail order
+    filtered = [];
+    CLUSTER_ORDER.forEach(cl => {
+      filtered.push(...nodes.filter(n => n.cluster === cl));
+    });
+  } else {
+    filtered = nodes.filter(n => n.cluster === activeFilter);
+  }
 
   // Update desktop HUD label
   const clusterLabel = activeFilter === 'all' ? 'All clusters' : CLUSTERS[activeFilter]?.label;
@@ -2260,10 +2508,12 @@ function renderStream() {
   filtered.forEach(node => {
     if (node.type === 'ch') {
       const c = CLUSTERS[node.cluster];
-      html += `<div class="ch-block">
-        <div class="ch-num">0${node.ch}</div>
-        <div class="ch-title">${node.title}</div>
-        <div class="ch-cluster-tag" style="color:${c.color}">${c.icon} ${c.label}</div>
+      // Use mode name instead of chapter number
+      const modeName = c.label;
+      html += `<div class="ch-block" id="ch-block-${node.cluster}">
+        <div class="ch-num" style="font-size:72px;opacity:0.35">${c.icon}</div>
+        <div class="ch-title">${modeName}</div>
+        <div class="ch-cluster-tag" style="color:${c.color}">${c.icon} ${node.title}</div>
       </div>`;
       return;
     }
@@ -2319,6 +2569,7 @@ function renderStream() {
   inner.innerHTML = html || '<div class="stream-empty">No nodes in this cluster yet.<br>Press <strong>N</strong> or <strong>+</strong> to compose one.</div>';
   renderFieldNodes();
   renderSpine();
+  renderAllSpine();
   updateProgress();
 }
 
@@ -2351,7 +2602,11 @@ function filterCluster(cluster) {
   document.querySelectorAll('.dock-cluster').forEach(el => el.classList.remove('active'));
   const dockEl = document.getElementById('dock-' + cluster);
   if (dockEl) dockEl.classList.add('active');
-  if (cluster === 'all') document.querySelectorAll('.dock-cluster').forEach(e => e.classList.remove('active'));
+  // 'all' gets its own dock item active state
+  if (cluster === 'all') {
+    const dockAll = document.getElementById('dock-all');
+    if (dockAll) dockAll.classList.add('active');
+  }
 
   // HUD new button label
   const newBtn = document.getElementById('hud-new-btn');
@@ -2388,6 +2643,7 @@ function filterCluster(cluster) {
   closeDetail();
   closeDive();
   renderStream();
+  renderAllSpine();
   document.getElementById('stream').scrollTop = 0;
   saveState();
 }
@@ -2458,6 +2714,42 @@ function renderSpine() {
   });
 
   body.innerHTML = html || '<div style="padding:20px 18px;font-size:10px;color:var(--ink-3)">No structure yet.</div>';
+}
+
+// ═══ ALL-MODE HORIZONTAL SPINE ═══
+function renderAllSpine() {
+  const inner = document.getElementById('all-spine-inner');
+  if (!inner) return;
+
+  let html = '';
+  CLUSTER_ORDER.forEach(cl => {
+    const c = CLUSTERS[cl];
+    const count = nodes.filter(n => n.cluster === cl && n.type !== 'ch').length;
+    const isActive = activeFilter === cl;
+    html += `<div class="all-spine-item${isActive?' active':''}" style="color:${c.color}"
+      onclick="filterCluster('${cl}')">
+      <div class="asi-icon">${c.icon}</div>
+      <div>
+        <div class="asi-name">${c.label}</div>
+        <div class="asi-count">${count} nodes</div>
+      </div>
+    </div>`;
+  });
+  inner.innerHTML = html;
+}
+
+function scrollToClusterSection(cluster) {
+  // Scroll the main stream to the chapter block for this cluster
+  const el = document.getElementById('ch-block-' + cluster);
+  if (el) {
+    const stream = document.getElementById('stream');
+    if (stream) {
+      const offset = el.offsetTop - stream.offsetTop - 12;
+      stream.scrollTo({ top: offset, behavior: 'smooth' });
+    }
+  } else {
+    filterCluster(cluster);
+  }
 }
 
 function spineScrollTo(nodeId) {
@@ -3125,7 +3417,7 @@ function fieldNodeClick(nodeId) {
   setTimeout(() => openDetail(nodeId), 300);
 }
 
-const CLUSTER_ORDER = ['media','notes','tasks','long'];
+// CLUSTER_ORDER defined at top of data section
 function setFieldCluster(cl) {
   fieldCluster = cl;
   renderFieldNodes();
@@ -3648,6 +3940,123 @@ function updateSidebarDate() {
   if (el) el.textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 }
 
+// ═══ MOBILE LONGFORM 3-STATE ═══
+let _lfeMobileState = 'write'; // 'write' | 'compose' | 'arrange'
+let _lfeMobileDraft = ''; // raw text from Write state
+let _lfeMobileNodes = []; // parsed node cards from Compose state
+
+function lfeMobileState(state) {
+  _lfeMobileState = state;
+  ['write','compose','arrange'].forEach(s => {
+    const el = document.getElementById('lfe-' + s + '-state');
+    if (el) el.style.display = s === state ? 'flex' : 'none';
+    const tab = document.getElementById('lst-' + s);
+    if (tab) tab.classList.toggle('active', s === state);
+  });
+  if (state === 'compose') lfeMobileRenderCompose();
+  if (state === 'arrange') lfeMobileRenderArrange();
+}
+
+function lfeMobileWriteCommit() {
+  const ta = document.getElementById('lfe-write-ta');
+  if (!ta) return;
+  _lfeMobileDraft = ta.value.trim();
+  if (!_lfeMobileDraft) return;
+  // Parse draft into node cards
+  const sentenceRegex = /[^.!?]*[.!?]+(?:\s|$)/g;
+  const matches = _lfeMobileDraft.match(sentenceRegex) || [];
+  const joined = matches.join('');
+  const remainder = _lfeMobileDraft.slice(joined.length).trim();
+  _lfeMobileNodes = [
+    ...matches.map(s => ({ text: s.trim(), type: 'body', id: Date.now() + Math.random() })),
+    ...(remainder ? [{ text: remainder, type: 'body', id: Date.now() + Math.random() + 1 }] : []),
+  ].filter(n => n.text.length > 0);
+  lfeMobileState('compose');
+}
+
+function lfeMobileUpdateWriteCount() {
+  const ta = document.getElementById('lfe-write-ta');
+  const wc = document.getElementById('lfe-write-wc');
+  if (!ta || !wc) return;
+  const n = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+  wc.textContent = n + ' word' + (n !== 1 ? 's' : '');
+}
+
+function lfeMobileRenderCompose() {
+  const container = document.getElementById('lfe-mobile-canvas');
+  if (!container) return;
+  const types = ['body','poster','pull','label'];
+  container.innerHTML = _lfeMobileNodes.map((n, i) => {
+    const typeBtns = types.map(t =>
+      `<button style="font-family:var(--mono);font-size:6px;letter-spacing:0.1em;text-transform:uppercase;padding:3px 8px;border:1px solid var(--border-2);border-radius:10px;color:${n.type===t?'var(--c-long)':'var(--ink-3)'};background:${n.type===t?'rgba(128,96,168,0.12)':'none'};cursor:pointer;margin:2px;"
+        onclick="lfeMobileSetNodeType(${i},'${t}',this)">${t}</button>`
+    ).join('');
+    return `<div style="background:var(--bg-2);border:1px solid var(--border);border-radius:4px;margin-bottom:8px;overflow:hidden;">
+      <div style="padding:10px 12px;font-size:13px;color:var(--ink);line-height:1.5;">${n.text}</div>
+      <div style="padding:4px 10px 8px;display:flex;flex-wrap:wrap;gap:2px;">${typeBtns}</div>
+    </div>`;
+  }).join('') || '<div style="padding:40px 20px;text-align:center;color:var(--ink-3);font-size:13px;">No nodes yet. Go back to Write.</div>';
+  const countEl = document.getElementById('lfe-compose-count');
+  if (countEl) countEl.textContent = _lfeMobileNodes.length + ' node' + (_lfeMobileNodes.length !== 1 ? 's' : '');
+}
+
+function lfeMobileSetNodeType(idx, type) {
+  if (_lfeMobileNodes[idx]) {
+    _lfeMobileNodes[idx].type = type;
+    lfeMobileRenderCompose();
+  }
+}
+
+function lfeMobileRenderArrange() {
+  const container = document.getElementById('lfe-arrange-inner');
+  if (!container) return;
+  container.innerHTML = _lfeMobileNodes.map((n, i) =>
+    `<div class="lfe-arrange-row" draggable="true" data-idx="${i}" ondragstart="lfeDragStart(event,${i})" ondragover="lfeDragOver(event)" ondrop="lfeDrop(event,${i})">
+      <span class="lfe-arrange-grip">⋮⋮</span>
+      <span class="lfe-arrange-badge">${n.type}</span>
+      <span class="lfe-arrange-text">${n.text.substring(0, 60)}${n.text.length > 60 ? '…' : ''}</span>
+    </div>`
+  ).join('') || '<div style="padding:30px;text-align:center;color:var(--ink-3)">No nodes to arrange.</div>';
+}
+
+let _dragIdx = null;
+function lfeDragStart(e, idx) { _dragIdx = idx; e.dataTransfer.effectAllowed = 'move'; }
+function lfeDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function lfeDrop(e, toIdx) {
+  e.preventDefault();
+  if (_dragIdx === null || _dragIdx === toIdx) return;
+  const moved = _lfeMobileNodes.splice(_dragIdx, 1)[0];
+  _lfeMobileNodes.splice(toIdx, 0, moved);
+  _dragIdx = null;
+  lfeMobileRenderArrange();
+}
+
+function lfeMobileArrangeCommit() {
+  if (!_lfeMobileNodes.length) return;
+  // Package as a longform doc node
+  const title = (_lfeMobileNodes[0]?.text || 'Untitled').substring(0, 48);
+  const doc = {
+    id: nextId++,
+    type: 'longform',
+    cluster: 'long',
+    title,
+    excerpt: _lfeMobileNodes.map(n => n.text).join(' ').substring(0, 140),
+    nodes: _lfeMobileNodes.map(n => ({ type: n.type, text: n.text })),
+    _user: true,
+  };
+  nodes.push(doc);
+  // Reset state
+  _lfeMobileNodes = [];
+  _lfeMobileDraft = '';
+  const ta = document.getElementById('lfe-write-ta');
+  if (ta) ta.value = '';
+  const wc = document.getElementById('lfe-write-wc');
+  if (wc) wc.textContent = '0 words';
+  lfeMobileState('write');
+  renderStream(); renderSpine(); renderAllSpine(); updateNavCounts(); saveState();
+  if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+}
+
 // ═══ INIT ═══
 function init() {
   loadTheme();
@@ -3662,6 +4071,7 @@ function init() {
   }
   renderStream();
   renderSpine();
+  renderAllSpine();
   updateNavCounts();
   updateSidebarDate();
   initFieldPan();
@@ -3677,6 +4087,10 @@ function init() {
   if (longTa) longTa.addEventListener('input', () => {
     document.getElementById('long-cp-count').textContent = longTa.value.length;
   });
+
+  // Mobile LFE write count
+  const lfeWriteTa = document.getElementById('lfe-write-ta');
+  if (lfeWriteTa) lfeWriteTa.addEventListener('input', lfeMobileUpdateWriteCount);
 
   // Show scroll nudge briefly on mobile
   if (isMobile()) {

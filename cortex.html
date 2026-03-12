@@ -194,20 +194,34 @@ body::after {
   display: flex; align-items: center; justify-content: space-between;
 }
 .sidebar-date { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
-.sidebar-compose-btn {
-  width: 32px; height: 32px;
+
+/* ── FAB — floating action button in content area ── */
+#fab {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   background: var(--accent);
   border: none;
   color: #fff;
-  font-size: 16px;
+  font-size: 22px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(217,119,87,0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(217,119,87,0.42), 0 1px 6px rgba(0,0,0,0.18);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  z-index: 100;
+  line-height: 1;
+  font-family: var(--mono);
 }
-.sidebar-compose-btn:hover { transform: scale(1.08); box-shadow: 0 4px 18px rgba(217,119,87,0.45); }
+#fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(217,119,87,0.55); }
+#fab:active { transform: scale(0.94); }
+/* When spine is visible on desktop, clamp FAB to not overlap it */
+@media (min-width: 768px) {
+  #fab { right: calc(220px + 28px); }
+}
+
+
 
 /* ── Main stream (desktop) ── */
 #main {
@@ -548,6 +562,42 @@ body::after {
 }
 body.cluster-notes #notes-canvas { display: flex; }
 body.cluster-notes #stream { display: none; }
+body.cluster-notes #fab { display: none !important; }
+body.cluster-notes #hud-new-btn { display: none !important; }
+
+
+/* Note format bar inside compose panel */
+.note-fmt-bar {
+  display: flex; align-items: center; gap: 3px;
+  padding: 6px 18px 4px; border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.note-fmt-btn {
+  background: none; border: 1px solid transparent;
+  border-radius: 3px; padding: 3px 7px;
+  font-size: 11px; font-family: var(--mono);
+  color: var(--ink-3); cursor: pointer; line-height: 1;
+  transition: all 0.12s;
+}
+.note-fmt-btn:hover { border-color: var(--border-2); color: var(--ink-2); }
+.note-fmt-sep { width: 1px; height: 14px; background: var(--border-2); margin: 0 3px; flex-shrink: 0; }
+.note-fmt-hint { font-size: 7px; color: var(--ink-3); font-family: var(--mono); letter-spacing: 0.06em; margin-left: 4px; }
+
+/* Longform excerpt hint */
+.longform-excerpt-hint {
+  padding: 14px 20px 20px;
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  line-height: 1.65; font-style: italic; flex: 1;
+}
+
+/* Edit mode label in compose header */
+.compose-edit-tag {
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent-l);
+  padding: 2px 7px; border-radius: 10px; margin-right: 4px;
+}
+
+
 
 /* Floating type bar — hovers above the input line */
 #nc-type-bar {
@@ -568,10 +618,19 @@ body.cluster-notes #stream { display: none; }
 /* Format toolbar */
 #nc-fmt-bar {
   display: flex; align-items: center; gap: 3px;
-  padding: 6px 32px;
-  border-bottom: 1px solid var(--border);
+  padding: 6px 32px 8px;
   flex-shrink: 0;
 }
+/* Export / clear action buttons in fmt bar */
+.nc-action-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.10em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2); border-radius: 3px;
+  color: var(--ink-3); padding: 3px 8px; cursor: pointer;
+  transition: all 0.14s; line-height: 1.5; white-space: nowrap; flex-shrink: 0;
+}
+.nc-action-btn:hover { border-color: var(--ink-2); color: var(--ink-2); }
+.nc-action-danger:hover { border-color: rgba(255,80,60,0.5) !important; color: rgba(255,80,60,0.75) !important; }
+
 .nc-fmt-btn {
   background: none; border: 1px solid transparent;
   border-radius: 3px; padding: 3px 7px;
@@ -601,21 +660,34 @@ body.cluster-notes #stream { display: none; }
 /* Writing surface — scrolls above */
 #nc-stream {
   flex: 1; overflow-y: auto; overflow-x: hidden;
-  padding: 24px 32px 0;
+  padding: 24px 32px 12px;
 }
 #nc-stream::-webkit-scrollbar { width: 3px; }
 #nc-stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
 #nc-stream-inner { max-width: 620px; margin: 0 auto; }
 
-/* The write line — contenteditable sentence input */
+/* Controls block — sits between stream and input */
+#nc-controls {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-4);
+}
+
+/* Floating type bar — hovers above the input line */
+#nc-type-bar {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 32px 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
 #nc-input-wrap {
-  padding: 0 32px 28px;
+  padding: 14px 32px 24px;
   flex-shrink: 0;
   max-width: 100%;
+  border-top: 1px solid var(--border);
 }
 #nc-input-inner {
   max-width: 620px; margin: 0 auto;
-  border-top: 1px solid var(--border);
   padding-top: 16px;
   position: relative;
 }
@@ -1201,6 +1273,8 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
   #stream-hud { padding: calc(var(--sat) + 14px) 18px 10px; background: linear-gradient(to bottom, var(--bg) 60%, transparent); border-bottom: none; }
   .hud-filter { display: none; }
 
+  #fab { display: none; }
+
   /* mobile HUD brand */
   #hud-brand { display: flex; align-items: center; }
   .hud-brand-word { font-family: var(--disp); font-size: 15px; letter-spacing: 0.04em; color: var(--ink); opacity: 0.9; }
@@ -1440,10 +1514,18 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <button class="compose-cluster-btn" data-cluster="tasks" onclick="selectComposeCluster(this)">Tasks</button>
         <button class="compose-cluster-btn" data-cluster="long" onclick="selectComposeCluster(this)">Long</button>
       </div>
-      <textarea class="note-textarea" id="note-input" placeholder="Write a sentence. The sentence is the primitive." rows="5"></textarea>
+      <div class="note-fmt-bar">
+        <button class="note-fmt-btn" title="Bold" onclick="noteFmt('bold')"><b>B</b></button>
+        <button class="note-fmt-btn" title="Italic" onclick="noteFmt('italic')"><i>I</i></button>
+        <button class="note-fmt-btn" title="Underline" onclick="noteFmt('underline')"><u>U</u></button>
+        <div class="note-fmt-sep"></div>
+        <span class="note-fmt-hint"><kbd class="kbd">⌘B</kbd> <kbd class="kbd">⌘I</kbd></span>
+      </div>
+      <textarea class="note-textarea" id="note-input" placeholder="Write the sentence." rows="5"
+        onkeydown="noteKeydown(event)"></textarea>
       <div class="compose-commit-bar">
-        <span class="compose-commit-hint" id="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> to commit</span>
-        <button class="compose-commit-btn" onclick="commitNote()">Commit Node</button>
+        <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> commit</span>
+        <button class="compose-commit-btn" onclick="commitNote()">Commit Node →</button>
       </div>
     </div>
 
@@ -1491,20 +1573,12 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 
     <!-- LONGFORM -->
     <div class="compose-mode-body" id="mode-longform">
-      <input class="longform-title-input" id="longform-title-input" type="text" placeholder="Title" autocomplete="off">
-      <div class="longform-toolbar">
-        <button class="lf-tool" onclick="lfInsert('**','**')"><b>B</b></button>
-        <button class="lf-tool" onclick="lfInsert('*','*')"><i>I</i></button>
-        <button class="lf-tool" onclick="lfInsert('~~','~~')">~~</button>
-        <button class="lf-tool" onclick="lfInsertLine('### ')">H</button>
-        <button class="lf-tool" onclick="lfInsertLine('> ')">›</button>
-        <button class="lf-tool" onclick="lfInsertLine('— ')">—</button>
-      </div>
-      <textarea class="longform-body" id="longform-body" placeholder="Begin. The sentence is still the primitive, even here."></textarea>
-      <div class="longform-wordcount" id="longform-wordcount">0 words</div>
+      <input class="longform-title-input" id="longform-title-input" type="text" placeholder="Document title…" autocomplete="off"
+        onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();commitLongform();}">
+      <div class="longform-excerpt-hint">A new long-form document. Open it after creating to build its node structure in the editor.</div>
       <div class="compose-commit-bar">
-        <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> to save</span>
-        <button class="compose-commit-btn" onclick="commitLongform()">Save Draft</button>
+        <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> create</span>
+        <button class="compose-commit-btn" onclick="commitLongform()">Create Document →</button>
       </div>
     </div>
   </div>
@@ -1529,11 +1603,11 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <div class="cluster-nav-count" id="nav-count-all">16 nodes</div>
       </div>
     </div>
-    <div class="cluster-nav-item" data-cluster="media" style="color:var(--c-media)" onclick="filterCluster('media')">
-      <div class="cluster-nav-icon">▶</div>
+    <div class="cluster-nav-item" data-cluster="tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
+      <div class="cluster-nav-icon">◎</div>
       <div class="cluster-nav-text">
-        <div class="cluster-nav-name">Media</div>
-        <div class="cluster-nav-count" id="nav-count-media">4 nodes</div>
+        <div class="cluster-nav-name">Tasks</div>
+        <div class="cluster-nav-count" id="nav-count-tasks">3 nodes</div>
       </div>
     </div>
     <div class="cluster-nav-item" data-cluster="notes" style="color:var(--c-notes)" onclick="filterCluster('notes')">
@@ -1543,18 +1617,18 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <div class="cluster-nav-count" id="nav-count-notes">7 nodes</div>
       </div>
     </div>
-    <div class="cluster-nav-item" data-cluster="tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
-      <div class="cluster-nav-icon">◎</div>
-      <div class="cluster-nav-text">
-        <div class="cluster-nav-name">Tasks</div>
-        <div class="cluster-nav-count" id="nav-count-tasks">3 nodes</div>
-      </div>
-    </div>
     <div class="cluster-nav-item" data-cluster="long" style="color:var(--c-long)" onclick="filterCluster('long')">
       <div class="cluster-nav-icon">≡</div>
       <div class="cluster-nav-text">
         <div class="cluster-nav-name">Long-form</div>
         <div class="cluster-nav-count" id="nav-count-long">2 nodes</div>
+      </div>
+    </div>
+    <div class="cluster-nav-item" data-cluster="media" style="color:var(--c-media)" onclick="filterCluster('media')">
+      <div class="cluster-nav-icon">▶</div>
+      <div class="cluster-nav-text">
+        <div class="cluster-nav-name">Media</div>
+        <div class="cluster-nav-count" id="nav-count-media">4 nodes</div>
       </div>
     </div>
     <div class="sidebar-section-label" style="margin-top:8px">Spatial</div>
@@ -1585,7 +1659,6 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
     </div>
     <div class="sidebar-bottom">
       <span class="sidebar-date" id="sidebar-date"></span>
-      <button class="sidebar-compose-btn" onclick="openCompose()" title="New node (N)">+</button>
     </div>
   </div>
 
@@ -1627,26 +1700,30 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 
     <!-- Notes canvas — shown when cluster=notes -->
     <div id="notes-canvas">
-      <!-- Type selector -->
-      <div id="nc-type-bar">
-        <button class="nc-type-btn active" data-ntype="body"   onclick="ncSetType(this)">body</button>
-        <button class="nc-type-btn"         data-ntype="poster" onclick="ncSetType(this)">poster</button>
-        <button class="nc-type-btn"         data-ntype="pull"   onclick="ncSetType(this)">pull</button>
-        <button class="nc-type-btn"         data-ntype="label"  onclick="ncSetType(this)">label</button>
-      </div>
-      <!-- Format toolbar -->
-      <div id="nc-fmt-bar">
-        <button class="nc-fmt-btn" title="Bold (⌘B)" onclick="ncFmt('bold')"><b>B</b></button>
-        <button class="nc-fmt-btn" title="Italic (⌘I)" onclick="ncFmt('italic')"><i>I</i></button>
-        <button class="nc-fmt-btn" title="Underline (⌘U)" onclick="ncFmt('underline')"><u>U</u></button>
-        <button class="nc-fmt-btn" title="Strikethrough" onclick="ncFmt('strikeThrough')"><s>S</s></button>
-        <div class="nc-fmt-sep"></div>
-        <button class="nc-undo-btn" title="Undo" onclick="document.execCommand('undo')">↩</button>
-        <button class="nc-undo-btn" title="Redo" onclick="document.execCommand('redo')">↪</button>
-      </div>
       <!-- Stream (viewing surface) -->
       <div id="nc-stream">
         <div id="nc-stream-inner"></div>
+      </div>
+      <!-- Controls: type selector + format toolbar + export/clear — above write line -->
+      <div id="nc-controls">
+        <div id="nc-type-bar">
+          <button class="nc-type-btn active" data-ntype="body"   onclick="ncSetType(this)">body</button>
+          <button class="nc-type-btn"         data-ntype="poster" onclick="ncSetType(this)">poster</button>
+          <button class="nc-type-btn"         data-ntype="pull"   onclick="ncSetType(this)">pull</button>
+          <button class="nc-type-btn"         data-ntype="label"  onclick="ncSetType(this)">label</button>
+        </div>
+        <div id="nc-fmt-bar">
+          <button class="nc-fmt-btn" title="Bold (⌘B)" onclick="ncFmt('bold')"><b>B</b></button>
+          <button class="nc-fmt-btn" title="Italic (⌘I)" onclick="ncFmt('italic')"><i>I</i></button>
+          <button class="nc-fmt-btn" title="Underline (⌘U)" onclick="ncFmt('underline')"><u>U</u></button>
+          <button class="nc-fmt-btn" title="Strikethrough" onclick="ncFmt('strikeThrough')"><s>S</s></button>
+          <div class="nc-fmt-sep"></div>
+          <button class="nc-undo-btn" title="Undo" onclick="document.execCommand('undo')">↩</button>
+          <button class="nc-undo-btn" title="Redo" onclick="document.execCommand('redo')">↪</button>
+          <div style="flex:1"></div>
+          <button class="nc-action-btn" title="Export notes as text" onclick="ncExport()">↓ export</button>
+          <button class="nc-action-btn nc-action-danger" title="Clear all notes" onclick="ncClear()">✕ clear</button>
+        </div>
       </div>
       <!-- Write line (writing surface) -->
       <div id="nc-input-wrap">
@@ -1656,7 +1733,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
             onkeydown="ncKeydown(event)"></div>
           <div class="nc-input-foot">
             <span class="nc-commit-hint"><kbd class="kbd">⌘↵</kbd> to commit</span>
-            <button class="nc-commit-btn" onclick="ncCommit()">Commit node</button>
+            <button class="nc-commit-btn" onclick="ncCommit()">Commit node →</button>
           </div>
         </div>
       </div>
@@ -1668,6 +1745,9 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
         <!-- Rendered by JS -->
       </div>
     </div>
+
+    <!-- Floating Action Button — clamped to content area -->
+    <button id="fab" onclick="fabAction()" title="New node (N)">+</button>
   </div>
 
   <!-- ── CHAPTER SPINE (right rail, desktop) ── -->
@@ -1714,22 +1794,22 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 
 <!-- ── Mobile bottom dock ── -->
 <div id="dock">
-  <div class="dock-cluster active" id="dock-media" style="color:var(--c-media)" onclick="filterCluster('media')">
-    <div class="dock-icon">▶</div>
-    <span class="dock-cluster-label">Media</span>
+  <div class="dock-cluster" id="dock-tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
+    <div class="dock-icon">◎</div>
+    <span class="dock-cluster-label">Tasks</span>
   </div>
   <div class="dock-cluster" id="dock-notes" style="color:var(--c-notes)" onclick="filterCluster('notes')">
     <div class="dock-icon">✎</div>
     <span class="dock-cluster-label">Notes</span>
   </div>
-  <button class="dock-compose" onclick="openCompose()">+</button>
-  <div class="dock-cluster" id="dock-tasks" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
-    <div class="dock-icon">◎</div>
-    <span class="dock-cluster-label">Tasks</span>
-  </div>
+  <button class="dock-compose" onclick="fabAction()">+</button>
   <div class="dock-cluster" id="dock-long" style="color:var(--c-long)" onclick="filterCluster('long')">
     <div class="dock-icon">≡</div>
     <span class="dock-cluster-label">Long</span>
+  </div>
+  <div class="dock-cluster active" id="dock-media" style="color:var(--c-media)" onclick="filterCluster('media')">
+    <div class="dock-icon">▶</div>
+    <span class="dock-cluster-label">Media</span>
   </div>
 </div>
 
@@ -1969,7 +2049,7 @@ function renderStream() {
     const click = `onclick="nodeClick(${node.id})"`;
 
     if (node.type === 'label') {
-      html += `<div class="node label" data-id="${node.id}">${node.text}${dot}</div>`;
+      html += `<div class="node label" data-id="${node.id}" ${click}>${node.text}${dot}</div>`;
     } else if (node.type === 'poster') {
       const lines = node.text.split('\n').map(l => applyInline(l)).join('<br>');
       html += `<div class="node poster" data-id="${node.id}" ${click}>${lines}${dot}</div>`;
@@ -2021,6 +2101,9 @@ function renderStream() {
 
 // ═══ NODE CLICK — desktop = detail rail, mobile = dive ═══
 function nodeClick(nodeId) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (node && node.type === 'longform') { openLFE(nodeId); return; }
+  if (node && ['body','poster','pull','label'].includes(node.type)) { openNoteEdit(nodeId); return; }
   if (isMobile()) openDive(nodeId);
   else openDetail(nodeId);
 }
@@ -2050,14 +2133,31 @@ function filterCluster(cluster) {
   // HUD new button label
   const newBtn = document.getElementById('hud-new-btn');
   if (newBtn) {
-    if (cluster === 'notes') newBtn.style.display = 'none'; // canvas handles it
-    else { newBtn.style.display = ''; newBtn.textContent = cluster === 'tasks' ? '' : cluster === 'long' ? '' : '+ New'; }
+    newBtn.style.display = '';
+    if (cluster === 'notes') newBtn.textContent = '+ Note';
+    else if (cluster === 'tasks') newBtn.textContent = '+ Task';
+    else if (cluster === 'long') newBtn.textContent = '+ Doc';
+    else if (cluster === 'media') newBtn.textContent = '+ Media';
+    else newBtn.textContent = '+ New';
   }
 
-  // Notes canvas: render notes stream
+  // Update FAB context color
+  const fab = document.getElementById('fab');
+  if (fab) {
+    const clusterColors = { notes:'var(--c-notes)', tasks:'var(--c-tasks)', long:'var(--c-long)', media:'var(--c-media)' };
+    fab.style.background = clusterColors[cluster] || 'var(--accent)';
+  }
+
+  // Notes canvas
   if (cluster === 'notes') {
     renderNcStream();
     setTimeout(() => document.getElementById('nc-input')?.focus(), 80);
+  }
+
+  // If compose was open during the switch, close it — the cluster's native
+  // writing surface is now active, removing the friction of re-opening
+  if (document.body.classList.contains('compose-open')) {
+    closeCompose();
   }
 
   // Spine
@@ -2074,15 +2174,16 @@ function filterAndClose(cluster) {
   closeField();
 }
 
-// ═══ HUD NEW ACTION — context-aware ═══
+// ═══ FAB + HUD NEW ACTION — context-aware ═══
+function fabAction() {
+  if (activeFilter === 'tasks') openCompose('task');
+  else if (activeFilter === 'long') openCompose('longform');
+  else if (activeFilter === 'media') openCompose('media');
+  else openCompose('note');
+}
+
 function hudNewAction() {
-  if (activeFilter === 'tasks') {
-    document.getElementById('tasks-beckon-input')?.focus();
-  } else if (activeFilter === 'long') {
-    document.getElementById('long-beckon-ta')?.focus();
-  } else {
-    openCompose();
-  }
+  fabAction();
 }
 
 // ═══ CHAPTER SPINE ═══
@@ -2137,7 +2238,6 @@ function renderSpine() {
 }
 
 function spineScrollTo(nodeId) {
-  // In notes canvas mode, scroll nc-stream
   const stream = activeFilter === 'notes' ? document.getElementById('nc-stream') : document.getElementById('stream');
   const el = (stream || document).querySelector(`[data-id="${nodeId}"]`);
   if (!el) return;
@@ -2148,22 +2248,18 @@ function spineScrollTo(nodeId) {
 }
 
 // ═══ NOTES CANVAS ═══
+
+// ═══ NOTES CANVAS ═══
 let ncType = 'body';
 
 function ncSetType(btn) {
   ncType = btn.dataset.ntype;
   document.querySelectorAll('.nc-type-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // Morph input style
   const inp = document.getElementById('nc-input');
   if (!inp) return;
   inp.className = 'style-' + ncType;
-  const placeholders = {
-    body: 'Write the sentence.',
-    poster: 'A statement. Large.',
-    pull: 'A line worth pulling out…',
-    label: 'SECTION LABEL',
-  };
+  const placeholders = { body:'Write the sentence.', poster:'A statement. Large.', pull:'A line worth pulling out…', label:'SECTION LABEL' };
   inp.dataset.placeholder = placeholders[ncType] || 'Write.';
   inp.focus();
 }
@@ -2174,11 +2270,7 @@ function ncFmt(cmd) {
 }
 
 function ncKeydown(e) {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-    e.preventDefault();
-    ncCommit();
-  }
-  // ⌘B/I/U shortcuts
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); ncCommit(); }
   if (e.metaKey && e.key === 'b') { e.preventDefault(); ncFmt('bold'); }
   if (e.metaKey && e.key === 'i') { e.preventDefault(); ncFmt('italic'); }
   if (e.metaKey && e.key === 'u') { e.preventDefault(); ncFmt('underline'); }
@@ -2187,39 +2279,29 @@ function ncKeydown(e) {
 function ncCommit() {
   const inp = document.getElementById('nc-input');
   if (!inp) return;
-  // Get innerHTML for formatted content, text for plain
   const rawText = inp.innerText.trim();
   const html = inp.innerHTML.trim();
   if (!rawText) return;
-
-  // Store html if formatted, otherwise plain text
   const hasFormatting = /<(b|i|u|s|strong|em)[^>]*>/i.test(html);
   const text = hasFormatting ? html : rawText;
-
-  nodes.push({ id: nextId++, type: ncType, cluster: 'notes', text, _user: true });
-
+  nodes.push({ id:nextId++, type:ncType, cluster:'notes', text, _user:true });
   inp.innerHTML = '';
-  renderNcStream();
-  renderSpine();
-  updateNavCounts();
-  saveState();
-
-  // Scroll nc-stream to bottom
+  renderNcStream(); renderStream(); renderSpine(); updateNavCounts(); saveState();
   const s = document.getElementById('nc-stream');
-  if (s) setTimeout(() => s.scrollTo({ top: s.scrollHeight, behavior: 'smooth' }), 40);
+  if (s) setTimeout(() => s.scrollTo({ top:s.scrollHeight, behavior:'smooth' }), 40);
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
 function renderNcStream() {
   const inner = document.getElementById('nc-stream-inner');
   if (!inner) return;
-  const noteNodes = nodes.filter(n => n.cluster === 'notes' && n.type !== 'ch' && n.type !== 'label');
+  const noteNodes = nodes.filter(n => n.cluster === 'notes' && n.type !== 'ch');
   let html = '';
   noteNodes.forEach(node => {
     const id = node.id;
     const cc = CLUSTERS.notes.color;
     const dot = `<div class="node-cluster-dot" style="background:${cc}"></div>`;
-    const click = `onclick="openSpineEditor(${id})"`;
+    const click = `onclick="ncNodeClick(${id})"`;
     if (node.type === 'label') {
       html += `<div class="node label" data-id="${id}" ${click}>${node.text}${dot}</div>`;
     } else if (node.type === 'poster') {
@@ -2232,6 +2314,46 @@ function renderNcStream() {
     }
   });
   inner.innerHTML = html || '<div class="stream-empty" style="padding:40px 0">Notes canvas is empty.<br><span style="opacity:0.5">Begin writing below.</span></div>';
+}
+
+function ncExport() {
+  const noteNodes = nodes.filter(n => n.cluster === 'notes' && n.type !== 'ch');
+  if (!noteNodes.length) return;
+  const lines = noteNodes.map(n => {
+    const raw = (n.text || '').replace(/<[^>]+>/g, '');
+    const prefix = { poster:'# ', pull:'> ', label:'— ', body:'' }[n.type] || '';
+    return prefix + raw;
+  });
+  const text = lines.join('\n\n');
+  // Copy to clipboard and offer download
+  navigator.clipboard?.writeText(text).catch(() => {});
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = 'notes-export.txt';
+  a.click();
+}
+
+function ncClear() {
+  if (!confirm('Clear all notes? This cannot be undone.')) return;
+  nodes = nodes.filter(n => n.cluster !== 'notes');
+  renderNcStream(); renderStream(); renderSpine(); updateNavCounts(); saveState();
+}
+
+function ncNodeClick(nodeId) {
+  // Edit node inline — populate nc-input with its text
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  const inp = document.getElementById('nc-input');
+  if (!inp) return;
+  inp.innerHTML = node.text || '';
+  // Set type
+  ncType = node.type;
+  inp.className = 'style-' + ncType;
+  document.querySelectorAll('.nc-type-btn').forEach(b => b.classList.toggle('active', b.dataset.ntype === ncType));
+  inp.focus();
+  // Remove from stream (re-commit replaces it)
+  nodes.splice(nodes.findIndex(n => n.id === nodeId), 1);
+  renderNcStream();
 }
 
 // ═══ TASKS PANEL (frank pattern) ═══
@@ -2413,7 +2535,7 @@ function speSave() {
   node.type = _speType;
   node.text = inp.innerHTML.trim() || inp.innerText.trim();
   closeSpineEditor();
-  renderNcStream(); renderStream(); renderSpine(); saveState();
+  renderStream(); renderSpine(); saveState();
 }
 function speDeleteNode() {
   if (_speNodeId === null) return;
@@ -2492,20 +2614,16 @@ function toggleTaskInline(nodeId) {
 function openDive(nodeId) {
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
+  if (node.type === 'longform') { openLFE(nodeId); return; }
   const cc = CLUSTERS[node.cluster]?.color || 'var(--accent)';
   document.getElementById('dive-dot').style.background = cc;
   document.getElementById('dive-label').textContent = node.type === 'longform' ? 'long-form' : node.type;
 
   let content = '';
-  if (['body','poster','pull'].includes(node.type)) {
-    const lines = node.text.replace(/\\n/g,'<br>').split('\n').join('<br>');
-    content = `<div class="dive-note">
-      <div class="dive-note-sentence">${applyInline(lines)}</div>
-      <div class="dive-note-body">${CLUSTERS[node.cluster]?.label} · ${node.type}</div>
-      <div class="dive-note-write"><textarea class="dive-note-input" id="dive-extend-${nodeId}" placeholder="Add a thought…" rows="4"></textarea>
-      <button onclick="submitDiveExtend(${nodeId})" style="margin-top:8px;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:3px;cursor:pointer;">Save Thought</button>
-      </div>
-    </div>`;
+  if (['body','poster','pull','label'].includes(node.type)) {
+    // On mobile, open compose panel in note edit mode
+    openNoteEdit(nodeId);
+    return;
   } else if (node.type === 'spec') {
     content = `<div class="dive-tasks">
       <div class="task-row">
@@ -2735,11 +2853,15 @@ function initFieldPan() {
 
 // ═══ COMPOSE ═══
 function openCompose(mode) {
+  _clearNoteEditMode();
   document.body.classList.add('compose-open');
   if (mode) switchComposeMode(mode);
   refreshTaskExisting();
 }
-function closeCompose() { document.body.classList.remove('compose-open','compose-longform'); }
+function closeCompose() {
+  document.body.classList.remove('compose-open','compose-longform');
+  _clearNoteEditMode();
+}
 function closeBeckon() {} // stub — beckon is now compose only
 function handleOverlayClick(e) { if (e.target === document.getElementById('compose-overlay')) closeCompose(); }
 
@@ -2776,13 +2898,84 @@ function selectTaskPri(btn) {
   composeTaskPri = btn.dataset.pri;
 }
 
+let _editingNoteId = null;
+
+function openNoteEdit(nodeId) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  _editingNoteId = nodeId;
+  // Open compose in note mode
+  openCompose('note');
+  // Pre-fill
+  const ta = document.getElementById('note-input');
+  if (ta) ta.value = node.text || '';
+  // Set style
+  const styleBtns = document.querySelectorAll('.note-style-btn');
+  styleBtns.forEach(b => b.classList.toggle('active', b.dataset.nstyle === node.type));
+  composeNoteType = node.type;
+  ta.className = 'note-textarea' + (node.type !== 'body' ? ' style-' + node.type : '');
+  // Set cluster
+  composeNoteCluster = node.cluster;
+  document.querySelectorAll('.compose-cluster-btn').forEach(b => b.classList.toggle('active', b.dataset.cluster === node.cluster));
+  // Mark as edit mode in header
+  document.getElementById('compose-title').textContent = 'Edit note';
+  const header = document.querySelector('.compose-title');
+  if (header) {
+    let tag = document.querySelector('.compose-edit-tag');
+    if (!tag) { tag = document.createElement('span'); tag.className = 'compose-edit-tag'; header.parentNode.insertBefore(tag, header); }
+    tag.textContent = 'editing';
+  }
+  // Update commit button
+  const btn = document.querySelector('#mode-note .compose-commit-btn');
+  if (btn) btn.textContent = 'Save Edit →';
+  setTimeout(() => ta?.focus(), 60);
+}
+
+function _clearNoteEditMode() {
+  _editingNoteId = null;
+  const tag = document.querySelector('.compose-edit-tag');
+  if (tag) tag.remove();
+  const btn = document.querySelector('#mode-note .compose-commit-btn');
+  if (btn) btn.textContent = 'Commit Node →';
+  document.getElementById('compose-title').textContent = 'New note';
+}
+
+function noteFmt(cmd) {
+  const ta = document.getElementById('note-input');
+  if (!ta) return;
+  const start = ta.selectionStart, end = ta.selectionEnd;
+  const sel = ta.value.slice(start, end);
+  const wrap = { bold: '**', italic: '*', underline: '_' }[cmd] || '';
+  if (!wrap) return;
+  const wrapped = wrap + sel + wrap;
+  ta.setRangeText(wrapped, start, end, 'select');
+  ta.focus();
+}
+
+function noteKeydown(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); commitNote(); }
+  if (e.metaKey && e.key === 'b') { e.preventDefault(); noteFmt('bold'); }
+  if (e.metaKey && e.key === 'i') { e.preventDefault(); noteFmt('italic'); }
+}
+
 function commitNote() {
   const text = document.getElementById('note-input').value.trim();
   if (!text) return;
+  if (_editingNoteId !== null) {
+    // Update existing node
+    const node = nodes.find(n => n.id === _editingNoteId);
+    if (node) { node.text = text; node.type = composeNoteType; node.cluster = composeNoteCluster; }
+    _clearNoteEditMode();
+    document.getElementById('note-input').value = '';
+    renderStream(); renderSpine(); updateNavCounts(); saveState();
+    closeCompose();
+    return;
+  }
   nodes.push({ id:nextId++, type:composeNoteType, cluster:composeNoteCluster, text, _user:true });
   document.getElementById('note-input').value = '';
   finishCommit();
 }
+
 
 function commitTask() {
   const title = document.getElementById('task-title-input').value.trim();
@@ -2817,25 +3010,15 @@ function commitMedia() {
 
 function commitLongform() {
   const title = document.getElementById('longform-title-input').value.trim();
-  const body = document.getElementById('longform-body').value.trim();
-  if (!title && !body) return;
-  // Parse body into typed nodes using markdown syntax
-  const parsedNodes = body ? body.split('\n\n').filter(Boolean).map(block => {
-    const t = block.trim();
-    if (t.startsWith('### ')) return { type:'poster', text: t.slice(4) };
-    if (t.startsWith('> '))   return { type:'pull',   text: t.slice(2) };
-    if (t.startsWith('— '))  return { type:'body',   text: t };
-    return { type:'body', text: t };
-  }) : [];
-  nodes.push({ id:nextId++, type:'longform', cluster:'long',
-    title: title || 'Untitled draft',
-    excerpt: body.replace(/#{1,6}\s|>\s|[*_~]+/g,'').slice(0,140) + (body.length>140?'…':''),
-    nodes: parsedNodes,
-    _user:true });
+  if (!title) { document.getElementById('longform-title-input').focus(); return; }
+  const newNode = { id:nextId++, type:'longform', cluster:'long',
+    title, excerpt:'', nodes:[], _user:true };
+  nodes.push(newNode);
   document.getElementById('longform-title-input').value = '';
-  document.getElementById('longform-body').value = '';
-  document.getElementById('longform-wordcount').textContent = '0 words';
-  finishCommit();
+  renderStream(); updateNavCounts(); saveState();
+  closeCompose();
+  // Open LFE immediately so user can build the document
+  setTimeout(() => openLFE(newNode.id), 300);
 }
 
 function finishCommit() {
@@ -2936,29 +3119,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ═══ LONGFORM TOOLBAR ═══
-function lfInsert(pre, post) {
-  const ta = document.getElementById('longform-body');
-  const s=ta.selectionStart, e=ta.selectionEnd, sel=ta.value.slice(s,e);
-  ta.value = ta.value.slice(0,s)+pre+sel+post+ta.value.slice(e);
-  ta.selectionStart=s+pre.length; ta.selectionEnd=s+pre.length+sel.length; ta.focus();
-  updateWordCount();
-}
-function lfInsertLine(prefix) {
-  const ta = document.getElementById('longform-body');
-  const s=ta.selectionStart, lineStart=ta.value.lastIndexOf('\n',s-1)+1;
-  ta.value = ta.value.slice(0,lineStart)+prefix+ta.value.slice(lineStart);
-  ta.selectionStart=ta.selectionEnd=s+prefix.length; ta.focus();
-  updateWordCount();
-}
-function updateWordCount() {
-  const ta = document.getElementById('longform-body');
-  const wc = document.getElementById('longform-wordcount');
-  if (!ta||!wc) return;
-  const count = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
-  wc.textContent = count + ' word' + (count!==1?'s':'');
-}
-
 // ═══ MOBILE SWIPE TO CLOSE DIVE ═══
 (function() {
   let startY = 0;
@@ -3032,7 +3192,6 @@ function init() {
   }
   renderStream();
   renderSpine();
-  if (activeFilter === 'notes') renderNcStream();
   updateNavCounts();
   updateSidebarDate();
   initFieldPan();
@@ -3059,6 +3218,993 @@ function init() {
 }
 
 init();
+</script>
+
+<!-- ═══ LONGFORM EDITOR OVERLAY ═══ -->
+<style>
+/* LFE — full-screen overlay */
+#lfe {
+  position: fixed; inset: 0; z-index: 2000;
+  display: none; flex-direction: row;
+  background: var(--bg);
+}
+body.lfe-open #lfe { display: flex; }
+body.lfe-open #layout { pointer-events: none; }
+
+/* LFE — left: live preview */
+#lfe-preview {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden; position: relative;
+}
+#lfe-preview-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 24px; height: 48px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  background: var(--bg-4);
+}
+.lfe-back {
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 2px; cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+.lfe-back:hover { border-color: var(--accent); color: var(--accent); }
+#lfe-doc-title {
+  font-family: var(--disp); font-size: 15px; color: var(--ink);
+  flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.lfe-wc {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+#lfe-stream {
+  flex: 1; overflow-y: auto; padding: 32px 48px 48px 48px;
+  overflow-x: visible;
+}
+#lfe-stream::-webkit-scrollbar { width: 2px; }
+#lfe-stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+#lfe-stream .node { padding-left: 0; padding-right: 0; }
+#lfe-stream .node::before { display: none; }
+#lfe-stream .node.poster { font-size: 32px; }
+#lfe-stream .node.break::after { width: 60%; }
+
+/* LFE preview node wrapper — enables hover edit */
+.lfe-preview-node {
+  position: relative;
+  cursor: default;
+}
+.lfe-preview-node:hover .lfe-node-edit-btn { opacity: 1; }
+.lfe-node-edit-btn {
+  position: absolute; right: -36px; top: 50%; transform: translateY(-50%);
+  opacity: 0; transition: opacity 0.14s;
+  background: var(--bg-3); border: 1px solid var(--border-2); border-radius: 3px;
+  color: var(--ink-3); font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em;
+  padding: 3px 7px; cursor: pointer; white-space: nowrap; line-height: 1.5;
+  transition: opacity 0.14s, border-color 0.12s, color 0.12s;
+}
+.lfe-node-edit-btn:hover { border-color: var(--c-long); color: var(--c-long); }
+
+/* Inline edit state on preview node */
+.lfe-preview-node.editing .lfe-node-edit-btn { display: none; }
+.lfe-inline-editor {
+  display: none;
+  flex-direction: column; gap: 6px;
+  padding: 8px 0;
+}
+.lfe-preview-node.editing .lfe-inline-editor { display: flex; }
+.lfe-preview-node.editing > .node { display: none; }
+.lfe-inline-ta {
+  width: 100%; background: var(--bg-2); border: 1px solid var(--c-long);
+  border-radius: 3px; outline: none; resize: none;
+  color: var(--ink); caret-color: var(--c-long);
+  font-family: var(--text); font-size: 15px; line-height: 1.65;
+  padding: 10px 14px; min-height: 48px; overflow-y: auto;
+  transition: border-color 0.15s;
+}
+.lfe-inline-ta:focus { border-color: var(--c-long); box-shadow: 0 0 0 2px rgba(128,96,168,0.12); }
+.lfe-inline-actions {
+  display: flex; align-items: center; gap: 8px; justify-content: flex-end;
+}
+.lfe-inline-cancel {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2); color: var(--ink-3);
+  padding: 5px 12px; border-radius: 3px; cursor: pointer; transition: all 0.14s;
+}
+.lfe-inline-cancel:hover { border-color: var(--ink-2); color: var(--ink-2); }
+.lfe-inline-save {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--c-long); color: #fff; border: none;
+  padding: 5px 14px; border-radius: 3px; cursor: pointer; transition: opacity 0.15s;
+}
+.lfe-inline-save:hover { opacity: 0.85; }
+
+
+.lfe-empty-preview {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; opacity: 0.3;
+  font-family: var(--disp); font-size: 18px; color: var(--ink-3);
+  font-style: italic;
+}
+
+/* LFE — right: compose rail */
+#lfe-rail {
+  width: 300px; flex-shrink: 0; display: flex; flex-direction: column;
+  background: var(--bg-4); overflow: hidden;
+}
+#lfe-rail-head {
+  display: flex; align-items: center;
+  padding: 0 16px; height: 48px;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  gap: 8px;
+}
+#lfe-title-input {
+  flex: 1; background: none; border: none; outline: none;
+  font-family: var(--disp); font-size: 14px; color: var(--ink);
+  caret-color: var(--c-long);
+}
+#lfe-title-input::placeholder { color: var(--ink-3); font-style: italic; }
+.lfe-type-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--c-long); flex-shrink: 0; opacity: 0.7;
+}
+
+/* Mode toggle */
+.lfe-mode-bar {
+  display: flex; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.lfe-mode-btn {
+  flex: 1; background: none; border: none; cursor: pointer;
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
+  padding: 8px 0; border-right: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  transition: color 0.12s, background 0.12s;
+}
+.lfe-mode-btn:last-child { border-right: none; }
+.lfe-mode-btn:hover { color: var(--ink-2); background: var(--bg-3); }
+.lfe-mode-btn.active { color: var(--ink); background: var(--bg-2); }
+.lfe-mode-btn.active .lfe-mode-dot { opacity: 1; }
+.lfe-mode-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--c-long); opacity: 0.25; flex-shrink: 0;
+  transition: opacity 0.12s;
+}
+
+/* Node canvas */
+#lfe-canvas-wrap {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 8px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+#lfe-canvas-wrap::-webkit-scrollbar { width: 2px; }
+#lfe-canvas-wrap::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+#lfe-arrange-wrap {
+  display: none; flex: 1; min-height: 0; overflow-y: auto; padding: 10px 8px 20px;
+}
+#lfe-arrange-wrap::-webkit-scrollbar { width: 2px; }
+#lfe-arrange-wrap::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+#lfe-rail.mode-arrange #lfe-canvas-wrap { display: none; }
+#lfe-rail.mode-arrange #lfe-arrange-wrap { display: block; }
+#lfe-rail.mode-arrange #lfe-palette { display: none; }
+
+.lfe-canvas-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; gap: 6px;
+  opacity: 0.35; pointer-events: none;
+}
+.lfe-canvas-empty-icon { font-size: 18px; opacity: 0.5; }
+.lfe-canvas-empty-text {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3); text-align: center; line-height: 1.8;
+}
+
+/* n-cards (adapted from frank) */
+.lfe-card {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 8px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 2px;
+  transition: border-color 0.12s, background 0.12s;
+  animation: lfeNIn 0.14s ease both;
+}
+@keyframes lfeNIn { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; } }
+.lfe-card:hover { border-color: var(--border-2); background: var(--bg-2); }
+
+.lfe-grip {
+  color: var(--ink-3); font-size: 9px; cursor: grab; flex-shrink: 0;
+  letter-spacing: -3px; user-select: none;
+}
+.lfe-grip:active { cursor: grabbing; }
+.lfe-arrows { display: flex; flex-direction: column; gap: 0; flex-shrink: 0; }
+.lfe-arr {
+  background: none; border: none; cursor: pointer; color: var(--ink-3);
+  font-size: 7px; padding: 1px 3px; line-height: 1; transition: color 0.1s;
+}
+.lfe-arr:hover { color: var(--c-long); }
+.lfe-arr:disabled { opacity: 0.2; pointer-events: none; }
+
+.lfe-badge {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--c-long);
+  border: 1px solid var(--border-2); padding: 1px 6px; border-radius: 10px;
+  flex-shrink: 0; min-width: 38px; text-align: center;
+}
+.lfe-badge.dim { color: var(--ink-3); }
+.lfe-badge.red { color: var(--accent); border-color: rgba(196,98,58,0.3); }
+
+.lfe-content { flex: 1; min-width: 0; }
+.lfe-input {
+  background: none; border: none; outline: none; width: 100%;
+  caret-color: var(--c-long); color: var(--ink);
+  font-family: var(--mono); font-size: 10px; line-height: 1.5;
+}
+.lfe-input-poster { font-family: var(--disp); font-style: italic; font-size: 12px; }
+.lfe-input-body   { font-family: var(--text); font-style: italic; font-size: 11px; }
+.lfe-input-pull   { font-family: var(--disp); font-style: italic; font-size: 11px; color: var(--ink-2); }
+.lfe-input-label  { font-family: var(--mono); font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; }
+
+.lfe-del {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-3); font-size: 13px; padding: 0 2px; flex-shrink: 0;
+  line-height: 1; transition: color 0.1s;
+}
+.lfe-del:hover { color: var(--accent); }
+
+/* Palette */
+#lfe-palette {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px; padding: 8px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-3); flex-shrink: 0;
+}
+.lfe-pal-btn {
+  position: relative; background: var(--bg-2);
+  border: 1px solid var(--border); border-radius: 2px;
+  padding: 8px 10px; cursor: pointer; text-align: left;
+  transition: border-color 0.14s, background 0.14s;
+  min-height: 44px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.lfe-pal-btn:hover { border-color: var(--c-long); background: rgba(128,96,168,0.06); }
+.lfe-pal-btn.wide { grid-column: 1/-1; min-height: 32px; padding: 6px 10px; }
+.lfe-pal-type {
+  font-family: var(--mono); font-size: 8px; color: var(--c-long);
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1px;
+}
+.lfe-pal-hint { font-size: 7px; color: var(--ink-3); font-family: var(--mono); }
+
+/* Arrange view (simplified chip list) */
+.lfe-ar-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 8px; cursor: grab; user-select: none;
+  border-radius: 2px; margin-bottom: 2px;
+  border: 1px solid var(--border);
+  background: var(--bg); transition: background 0.1s;
+}
+.lfe-ar-chip:hover { background: var(--bg-2); border-color: var(--border-2); }
+.lfe-ar-chip.dragging { opacity: 0.35; }
+.lfe-ar-chip.drop-above { border-top: 2px solid var(--c-long); }
+.lfe-ar-chip.drop-below { border-bottom: 2px solid var(--c-long); }
+.lfe-ar-type {
+  font-family: var(--mono); font-size: 6px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink-3); min-width: 28px; flex-shrink: 0;
+}
+.lfe-ar-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  flex-shrink: 0; background: var(--c-long); opacity: 0.6;
+}
+.lfe-ar-text {
+  font-family: var(--text); font-size: 11px; font-style: italic;
+  color: var(--ink-2); flex: 1; min-width: 0;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.lfe-ar-grip { font-size: 7px; color: var(--ink-3); letter-spacing: -2px; opacity: 0.5; flex-shrink: 0; }
+
+/* Compile bar */
+#lfe-compile-bar {
+  border-top: 1px solid var(--border); padding: 8px 10px 10px;
+  background: var(--bg-2); display: flex; align-items: flex-start;
+  gap: 8px; flex-shrink: 0;
+}
+#lfe-compile-preview {
+  flex: 1; font-family: var(--mono); font-size: 8px; color: var(--ink-3);
+  line-height: 1.6; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  font-style: italic;
+}
+.lfe-copy-btn {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em;
+  text-transform: uppercase; background: var(--ink);
+  color: var(--bg); border: none; padding: 7px 12px;
+  border-radius: 2px; cursor: pointer; flex-shrink: 0;
+  transition: background 0.14s, transform 0.1s; white-space: nowrap;
+}
+.lfe-copy-btn:hover { background: var(--c-long); }
+.lfe-copy-btn:active { transform: scale(0.95); }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #lfe { flex-direction: column; }
+  #lfe-preview { flex: 1; border-right: none; border-bottom: 1px solid var(--border); min-height: 0; }
+  #lfe-rail { width: 100%; height: 55vh; flex-shrink: 0; }
+  #lfe-stream { padding: 20px 24px 24px; }
+  #lfe-ghost { display: none !important; }
+}
+
+/* ── LFE Ghost Type Layer ── */
+#lfe-ghost {
+  position: absolute; inset: 0;
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+#lfe-ghost.open {
+  opacity: 1; pointer-events: auto;
+}
+#lfe-ghost-backdrop {
+  position: absolute; inset: 0;
+  background: var(--bg);
+  opacity: 0.88;
+}
+#lfe-ghost-inner {
+  position: relative; z-index: 1;
+  width: min(580px, 86%);
+  display: flex; flex-direction: column; gap: 12px;
+}
+#lfe-ghost-pill {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--c-long);
+  align-self: flex-start;
+}
+#lfe-ghost-ta {
+  width: 100%; background: none; border: none; outline: none;
+  resize: none; caret-color: var(--c-long);
+  color: var(--ink);
+  font-family: var(--text); font-weight: 300; font-style: italic;
+  font-size: clamp(22px, 3.2vw, 36px);
+  line-height: 1.38; min-height: 80px; max-height: 55vh; overflow-y: auto;
+}
+#lfe-ghost-ta::placeholder { color: var(--ink-3); font-style: italic; }
+/* Type-specific styles on the ghost layer */
+#lfe-ghost.ngo-poster #lfe-ghost-ta { font-family: var(--disp); font-size: clamp(26px,4vw,48px); line-height: 1.2; font-style: normal; }
+#lfe-ghost.ngo-body   #lfe-ghost-ta { font-family: var(--text); font-size: clamp(20px,2.8vw,32px); }
+#lfe-ghost.ngo-pull   #lfe-ghost-ta { font-family: var(--disp); font-size: clamp(20px,2.8vw,34px); font-style: italic; border-left: 2px solid var(--c-long); padding-left: 18px; }
+#lfe-ghost.ngo-label  #lfe-ghost-ta { font-family: var(--mono); font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; font-style: normal; color: var(--c-long); min-height: 28px; }
+#lfe-ghost.ngo-spec   #lfe-ghost-ta { font-family: var(--mono); font-size: clamp(16px,2vw,24px); letter-spacing: 0.04em; font-style: normal; }
+#lfe-ghost.ngo-break  #lfe-ghost-ta { display: none; }
+#lfe-ghost-rule {
+  width: 100%; height: 1px;
+  background: linear-gradient(to right, var(--border-2), transparent);
+}
+#lfe-ghost-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+#lfe-ghost-hints {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3);
+  display: flex; gap: 14px; flex: 1; flex-wrap: wrap;
+}
+#lfe-ghost-hints kbd {
+  font-family: var(--mono); font-style: normal;
+  color: var(--ink-2); font-size: 7px;
+  background: var(--bg-3); border: 1px solid var(--border-2);
+  padding: 1px 4px; border-radius: 2px;
+}
+#lfe-ghost-submit {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: var(--c-long); color: #fff;
+  border: none; border-radius: 2px;
+  padding: 8px 18px; cursor: pointer;
+  transition: background 0.14s;
+  white-space: nowrap; flex-shrink: 0;
+}
+#lfe-ghost-submit:hover { background: var(--ink); }
+#lfe-ghost-submit:active { transform: scale(0.97); }
+/* Break special state */
+#lfe-ghost.ngo-break #lfe-ghost-submit { margin: 0 auto; }
+</style>
+
+<!-- LFE HTML -->
+<div id="lfe">
+  <div id="lfe-preview">
+    <div id="lfe-preview-head">
+      <button class="lfe-back" onclick="closeLFE()">← Back</button>
+      <div id="lfe-doc-title">Untitled</div>
+      <div class="lfe-wc" id="lfe-wc">0 words</div>
+    </div>
+    <div id="lfe-stream">
+      <div class="lfe-empty-preview" id="lfe-empty-preview">Begin writing.</div>
+    </div>
+    <!-- Ghost type layer — surfaces over preview when a node input is focused -->
+    <div id="lfe-ghost">
+      <div id="lfe-ghost-backdrop"></div>
+      <div id="lfe-ghost-inner">
+        <div id="lfe-ghost-pill">body</div>
+        <textarea id="lfe-ghost-ta" rows="3" spellcheck="true" placeholder="The thought, plainly stated."></textarea>
+        <div id="lfe-ghost-rule"></div>
+        <div id="lfe-ghost-footer">
+          <div id="lfe-ghost-hints">
+            <span><kbd>⌘↵</kbd> commit</span>
+            <span><kbd>Esc</kbd> dismiss</span>
+            <span><kbd>Shift↵</kbd> line break</span>
+          </div>
+          <button id="lfe-ghost-submit" onclick="lfeGhostCommit()">Commit →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="lfe-rail">
+    <div id="lfe-rail-head">
+      <div class="lfe-type-dot"></div>
+      <input id="lfe-title-input" type="text" placeholder="Document title" autocomplete="off"
+        oninput="lfeTitleChange(this.value)">
+    </div>
+    <div class="lfe-mode-bar">
+      <button class="lfe-mode-btn active" id="lfe-btn-compose" onclick="lfeSetMode('compose')">
+        <span class="lfe-mode-dot"></span>Compose
+      </button>
+      <button class="lfe-mode-btn" id="lfe-btn-arrange" onclick="lfeSetMode('arrange')">
+        <span class="lfe-mode-dot"></span>Arrange
+      </button>
+    </div>
+    <div id="lfe-canvas-wrap"></div>
+    <div id="lfe-arrange-wrap"></div>
+    <div id="lfe-palette">
+      <button class="lfe-pal-btn" onclick="lfeAddNode('poster')">
+        <div class="lfe-pal-type">Poster</div>
+        <div class="lfe-pal-hint">The declaration</div>
+      </button>
+      <button class="lfe-pal-btn" onclick="lfeAddNode('body')">
+        <div class="lfe-pal-type">Body</div>
+        <div class="lfe-pal-hint">The argument</div>
+      </button>
+      <button class="lfe-pal-btn" onclick="lfeAddNode('pull')">
+        <div class="lfe-pal-type">Pull</div>
+        <div class="lfe-pal-hint">The truest sentence</div>
+      </button>
+      <button class="lfe-pal-btn" onclick="lfeAddNode('label')">
+        <div class="lfe-pal-type">Label</div>
+        <div class="lfe-pal-hint">Section marker</div>
+      </button>
+      <button class="lfe-pal-btn" onclick="lfeAddNode('spec')">
+        <div class="lfe-pal-type">Spec</div>
+        <div class="lfe-pal-hint">key :: value</div>
+      </button>
+      <button class="lfe-pal-btn wide" onclick="lfeAddNode('break')">
+        <div class="lfe-pal-type">Break  — — — —</div>
+      </button>
+    </div>
+    <div id="lfe-compile-bar">
+      <div id="lfe-compile-preview" style="color:var(--ink-3);font-style:italic">Start writing…</div>
+      <button class="lfe-copy-btn" onclick="lfeCopy()">⎘ Copy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ LONGFORM EDITOR (LFE) ═══
+let lfeNodeId = null;   // id of the parent longform node in `nodes`
+let lfeMode = 'compose';
+let lfeDebounceTimer = null;
+
+function openLFE(nodeId) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node || node.type !== 'longform') return;
+  lfeNodeId = nodeId;
+  lfeMode = 'compose';
+
+  // Populate title
+  const titleInput = document.getElementById('lfe-title-input');
+  titleInput.value = node.title || '';
+  document.getElementById('lfe-doc-title').textContent = node.title || 'Untitled';
+
+  // Reset mode
+  const rail = document.getElementById('lfe-rail');
+  rail.className = 'mode-compose';
+  document.getElementById('lfe-btn-compose').classList.add('active');
+  document.getElementById('lfe-btn-arrange').classList.remove('active');
+  document.getElementById('lfe-palette').style.display = '';
+
+  // Open overlay
+  document.body.classList.add('lfe-open');
+
+  // Render
+  lfeRenderCanvas();
+  lfeRenderPreview();
+  lfeUpdateCompileBar();
+}
+
+function closeLFE() {
+  document.body.classList.remove('lfe-open');
+  lfeNodeId = null;
+}
+
+function lfeNode() {
+  return nodes.find(n => n.id === lfeNodeId);
+}
+
+function lfeTitleChange(val) {
+  const node = lfeNode();
+  if (!node) return;
+  node.title = val;
+  document.getElementById('lfe-doc-title').textContent = val || 'Untitled';
+  lfeScheduleCommit();
+}
+
+function lfeSetMode(mode) {
+  lfeMode = mode;
+  const rail = document.getElementById('lfe-rail');
+  rail.className = mode === 'arrange' ? 'mode-arrange' : 'mode-compose';
+  document.getElementById('lfe-btn-compose').classList.toggle('active', mode === 'compose');
+  document.getElementById('lfe-btn-arrange').classList.toggle('active', mode === 'arrange');
+  if (mode === 'arrange') lfeRenderArrange();
+  else lfeRenderCanvas();
+}
+
+function lfeAddNode(type) {
+  const node = lfeNode();
+  if (!node) return;
+  if (!node.nodes) node.nodes = [];
+  const newN = { type, text: '', id: Date.now() };
+  if (type === 'spec') { newN.key = ''; newN.val = ''; }
+  node.nodes.push(newN);
+  lfeRenderCanvas();
+  lfeRenderPreview();
+  lfeUpdateCompileBar();
+  // Focus last input
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.lfe-card');
+    if (cards.length) {
+      const last = cards[cards.length - 1];
+      const inp = last.querySelector('.lfe-input,.lfe-input-poster,.lfe-input-body,.lfe-input-pull');
+      if (inp) inp.focus();
+    }
+  }, 60);
+  lfeScheduleCommit();
+}
+
+function lfeRenderCanvas() {
+  const node = lfeNode();
+  const wrap = document.getElementById('lfe-canvas-wrap');
+  const innerNodes = (node && node.nodes) ? node.nodes : [];
+  const emptyEl = document.getElementById('lfe-empty-preview');
+
+  if (!innerNodes.length) {
+    wrap.innerHTML = `<div class="lfe-canvas-empty">
+      <div class="lfe-canvas-empty-icon">✦</div>
+      <div class="lfe-canvas-empty-text">Add a node<br>from the palette</div>
+    </div>`;
+    return;
+  }
+
+  wrap.innerHTML = '';
+  innerNodes.forEach((n, i) => {
+    const card = document.createElement('div');
+    card.className = 'lfe-card';
+    card.dataset.idx = i;
+    card.draggable = false;
+
+    // Grip
+    const grip = document.createElement('span');
+    grip.className = 'lfe-grip'; grip.textContent = '⋮⋮'; grip.draggable = true;
+    grip.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', String(i)));
+    card.addEventListener('dragover', e => e.preventDefault());
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      if (isNaN(from) || from === i) return;
+      const [moved] = innerNodes.splice(from, 1);
+      innerNodes.splice(i, 0, moved);
+      lfeRenderCanvas(); lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit();
+    });
+
+    // Arrows
+    const arrows = document.createElement('div'); arrows.className = 'lfe-arrows';
+    const up = document.createElement('button'); up.className = 'lfe-arr'; up.textContent = '▲'; up.disabled = i === 0;
+    up.onclick = () => { if(i>0){[innerNodes[i-1],innerNodes[i]]=[innerNodes[i],innerNodes[i-1]]; lfeRenderCanvas();lfeRenderPreview();lfeUpdateCompileBar();lfeScheduleCommit();} };
+    const dn = document.createElement('button'); dn.className = 'lfe-arr'; dn.textContent = '▼'; dn.disabled = i === innerNodes.length-1;
+    dn.onclick = () => { if(i<innerNodes.length-1){[innerNodes[i],innerNodes[i+1]]=[innerNodes[i+1],innerNodes[i]]; lfeRenderCanvas();lfeRenderPreview();lfeUpdateCompileBar();lfeScheduleCommit();} };
+    arrows.append(up, dn);
+
+    // Badge
+    const badge = document.createElement('span');
+    badge.className = 'lfe-badge' + (n.type==='break'?' red':'');
+    badge.textContent = n.type;
+
+    // Content
+    const content = document.createElement('div'); content.className = 'lfe-content';
+    if (n.type === 'break') {
+      const brk = document.createElement('span');
+      brk.style.cssText = 'font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--ink-3);width:100%;display:block';
+      brk.textContent = '— — — — — —';
+      content.appendChild(brk);
+    } else if (n.type === 'spec') {
+      const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:0;width:100%';
+      const kIn = document.createElement('input');
+      kIn.className = 'lfe-input'; kIn.style.cssText = 'width:60px;flex-shrink:0;color:var(--ink-2);font-size:9px;';
+      kIn.value = n.key||''; kIn.placeholder = 'key';
+      kIn.addEventListener('input', e => { n.key = e.target.value; lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit(); });
+      const sep = document.createElement('span');
+      sep.style.cssText = 'color:var(--ink-3);padding:0 4px;font-family:var(--mono);font-size:9px;flex-shrink:0';
+      sep.textContent = '::';
+      const vIn = document.createElement('input');
+      vIn.className = 'lfe-input'; vIn.style.flex = '1';
+      vIn.value = n.val||''; vIn.placeholder = 'value';
+      vIn.addEventListener('input', e => { n.val = e.target.value; lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit(); });
+      row.append(kIn, sep, vIn); content.appendChild(row);
+    } else {
+      const inp = document.createElement('input');
+      inp.className = 'lfe-input';
+      if (n.type==='poster') inp.classList.add('lfe-input-poster');
+      else if (n.type==='body') inp.classList.add('lfe-input-body');
+      else if (n.type==='pull') inp.classList.add('lfe-input-pull');
+      else if (n.type==='label') inp.classList.add('lfe-input-label');
+      inp.value = n.text||'';
+      inp.placeholder = {poster:'The central declaration.',body:'The thought, plainly stated.',pull:'The truest sentence.',label:'Category · Date'}[n.type]||'';
+      inp.addEventListener('input', e => { n.text = e.target.value; lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit(); });
+      content.appendChild(inp);
+    }
+
+    // Delete
+    const del = document.createElement('button'); del.className = 'lfe-del'; del.textContent = '×';
+    del.onclick = e => {
+      e.stopPropagation();
+      innerNodes.splice(i, 1);
+      lfeRenderCanvas(); lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit();
+    };
+
+    card.append(grip, arrows, badge, content, del);
+    wrap.appendChild(card);
+  });
+}
+
+function lfeRenderPreview() {
+  const node = lfeNode();
+  const stream = document.getElementById('lfe-stream');
+  const innerNodes = (node && node.nodes) ? node.nodes : [];
+
+  if (!innerNodes.length) {
+    stream.innerHTML = '<div class="lfe-empty-preview">Begin writing.</div>';
+    document.getElementById('lfe-wc').textContent = '0 words';
+    return;
+  }
+
+  stream.innerHTML = '';
+  let wordCount = 0;
+
+  innerNodes.forEach((n, idx) => {
+    // Build the rendered node element
+    let nodeEl;
+    if (n.type === 'poster') {
+      const t = n.text||'';
+      wordCount += t.split(/\s+/).filter(Boolean).length;
+      nodeEl = document.createElement('div'); nodeEl.className = 'node poster';
+      nodeEl.innerHTML = applyInline(t.replace(/\\n/g,'<br>').split('\n').join('<br>'));
+    } else if (n.type === 'body') {
+      const t = n.text||'';
+      wordCount += t.split(/\s+/).filter(Boolean).length;
+      nodeEl = document.createElement('div'); nodeEl.className = 'node body';
+      nodeEl.innerHTML = applyInline(t);
+    } else if (n.type === 'pull') {
+      const t = n.text||'';
+      wordCount += t.split(/\s+/).filter(Boolean).length;
+      nodeEl = document.createElement('div'); nodeEl.className = 'node pull';
+      nodeEl.innerHTML = applyInline(t);
+    } else if (n.type === 'label') {
+      nodeEl = document.createElement('div'); nodeEl.className = 'node label';
+      nodeEl.textContent = n.text||'';
+    } else if (n.type === 'spec') {
+      const k = n.key||'—', v = n.val||'';
+      wordCount += v.split(/\s+/).filter(Boolean).length;
+      nodeEl = document.createElement('div'); nodeEl.className = 'node body';
+      nodeEl.style.cssText = 'font-family:var(--mono);font-size:12px';
+      nodeEl.innerHTML = `<span style="color:var(--ink-2)">${k}</span><span style="color:var(--ink-3);padding:0 6px">::</span>${applyInline(v)}`;
+    } else if (n.type === 'break') {
+      nodeEl = document.createElement('div'); nodeEl.className = 'node break';
+    }
+    if (!nodeEl) return;
+
+    // Wrapper gives us hover + dblclick surface
+    const wrapper = document.createElement('div');
+    wrapper.className = 'lfe-preview-node';
+
+    // Edit affordance button (hover-visible)
+    const editBtn = document.createElement('button');
+    editBtn.className = 'lfe-node-edit-btn';
+    editBtn.textContent = 'edit';
+    editBtn.title = 'Edit node (or double-click)';
+
+    // Inline editor (hidden until activated)
+    const editorDiv = document.createElement('div');
+    editorDiv.className = 'lfe-inline-editor';
+
+    const ta = document.createElement('textarea');
+    ta.className = 'lfe-inline-ta';
+    ta.rows = 3;
+    // For spec nodes, show key :: val in textarea
+    if (n.type === 'spec') {
+      ta.value = (n.key||'') + ' :: ' + (n.val||'');
+      ta.placeholder = 'key :: value';
+    } else if (n.type === 'break') {
+      ta.style.display = 'none';
+    } else {
+      ta.value = n.text||'';
+      ta.placeholder = { poster:'The central declaration.', body:'The thought, plainly stated.', pull:'The truest sentence.', label:'Category · Date' }[n.type]||'';
+    }
+    // Auto-size
+    ta.addEventListener('input', () => { ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; });
+
+    const actions = document.createElement('div');
+    actions.className = 'lfe-inline-actions';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'lfe-inline-cancel'; cancelBtn.textContent = 'Cancel';
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'lfe-inline-save'; saveBtn.textContent = n.type === 'break' ? 'Keep' : 'Save →';
+    actions.append(cancelBtn, saveBtn);
+
+    editorDiv.append(ta, actions);
+    wrapper.append(nodeEl, editBtn, editorDiv);
+    stream.appendChild(wrapper);
+
+    // Open inline editor
+    function openEdit() {
+      wrapper.classList.add('editing');
+      if (ta.style.display !== 'none') {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+        setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 20);
+      } else {
+        setTimeout(() => saveBtn.focus(), 20);
+      }
+    }
+
+    // Save and close
+    function saveEdit() {
+      if (n.type === 'spec') {
+        const parts = ta.value.split('::');
+        n.key = (parts[0]||'').trim();
+        n.val = (parts.slice(1).join('::') || '').trim();
+      } else if (n.type !== 'break') {
+        n.text = ta.value;
+      }
+      wrapper.classList.remove('editing');
+      lfeRenderCanvas(); lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit();
+    }
+
+    function cancelEdit() {
+      wrapper.classList.remove('editing');
+    }
+
+    editBtn.addEventListener('click', openEdit);
+    wrapper.addEventListener('dblclick', e => { if (!wrapper.classList.contains('editing')) openEdit(); });
+    cancelBtn.addEventListener('click', cancelEdit);
+    saveBtn.addEventListener('click', saveEdit);
+    ta.addEventListener('keydown', e => {
+      if ((e.metaKey||e.ctrlKey) && e.key==='Enter') { e.preventDefault(); saveEdit(); }
+      if (e.key==='Escape') { e.preventDefault(); cancelEdit(); }
+    });
+  });
+
+  document.getElementById('lfe-wc').textContent = wordCount + (wordCount === 1 ? ' word' : ' words');
+}
+
+
+function lfeRenderArrange() {
+  const node = lfeNode();
+  const wrap = document.getElementById('lfe-arrange-wrap');
+  const innerNodes = (node && node.nodes) ? node.nodes : [];
+
+  if (!innerNodes.length) {
+    wrap.innerHTML = '<div style="opacity:0.3;text-align:center;padding:30px;font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)">No nodes yet</div>';
+    return;
+  }
+
+  wrap.innerHTML = '';
+  innerNodes.forEach((n, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'lfe-ar-chip';
+    chip.draggable = true;
+    chip.dataset.idx = i;
+
+    chip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', String(i));
+      chip.classList.add('dragging');
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    chip.addEventListener('dragover', e => {
+      e.preventDefault();
+      chip.classList.add('drop-above');
+    });
+    chip.addEventListener('dragleave', () => chip.classList.remove('drop-above', 'drop-below'));
+    chip.addEventListener('drop', e => {
+      e.preventDefault();
+      chip.classList.remove('drop-above', 'drop-below');
+      const from = parseInt(e.dataTransfer.getData('text/plain'));
+      if (isNaN(from) || from === i) return;
+      const [moved] = innerNodes.splice(from, 1);
+      innerNodes.splice(i, 0, moved);
+      lfeRenderArrange(); lfeRenderPreview(); lfeUpdateCompileBar(); lfeScheduleCommit();
+    });
+
+    const typeEl = document.createElement('span'); typeEl.className = 'lfe-ar-type'; typeEl.textContent = n.type;
+    const dot = document.createElement('span'); dot.className = 'lfe-ar-dot';
+    if (n.type === 'break') dot.style.background = 'var(--accent)';
+    const text = document.createElement('span'); text.className = 'lfe-ar-text';
+    text.textContent = n.type === 'break' ? '— — —' : n.type === 'spec' ? `${n.key||''}::${n.val||''}` : (n.text||'');
+    const gripEl = document.createElement('span'); gripEl.className = 'lfe-ar-grip'; gripEl.textContent = '⋮⋮';
+
+    chip.append(typeEl, dot, text, gripEl);
+    wrap.appendChild(chip);
+  });
+}
+
+function lfeUpdateCompileBar() {
+  const node = lfeNode();
+  const innerNodes = (node && node.nodes) ? node.nodes : [];
+  const preview = document.getElementById('lfe-compile-preview');
+
+  if (!innerNodes.length) {
+    preview.textContent = 'Start writing…'; preview.style.fontStyle='italic'; return;
+  }
+
+  const raw = innerNodes.map(n => {
+    if (n.type === 'poster') return `[poster] ${n.text||''}`;
+    if (n.type === 'body')   return n.text||'';
+    if (n.type === 'pull')   return `"${n.text||''}"`;
+    if (n.type === 'label')  return `— ${n.text||''} —`;
+    if (n.type === 'spec')   return `${n.key||''}::${n.val||''}`;
+    if (n.type === 'break')  return '* * *';
+    return '';
+  }).filter(Boolean).join('\n');
+  preview.textContent = raw; preview.style.fontStyle='normal';
+}
+
+function lfeCopy() {
+  const node = lfeNode();
+  const innerNodes = (node && node.nodes) ? node.nodes : [];
+  const raw = (node ? `# ${node.title||'Untitled'}\n\n` : '') + innerNodes.map(n => {
+    if (n.type === 'poster') return `# ${n.text||''}`;
+    if (n.type === 'body')   return n.text||'';
+    if (n.type === 'pull')   return `> ${n.text||''}`;
+    if (n.type === 'label')  return `[${n.text||''}]`;
+    if (n.type === 'spec')   return `${n.key||''} :: ${n.val||''}`;
+    if (n.type === 'break')  return '\n* * *\n';
+    return '';
+  }).filter(Boolean).join('\n\n');
+  navigator.clipboard.writeText(raw).then(() => {
+    const btn = document.querySelector('.lfe-copy-btn');
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(()=>btn.textContent=orig, 1600); }
+  });
+}
+
+function lfeScheduleCommit() {
+  clearTimeout(lfeDebounceTimer);
+  lfeDebounceTimer = setTimeout(() => {
+    renderStream(); renderSpine(); saveState();
+  }, 900);
+}
+
+// ═══ LFE GHOST TYPE LAYER ═══
+(function() {
+  let _ghostSource = null;   // the .lfe-input element that triggered ghost
+  let _ghostType   = 'body';
+  let _ghostOpen   = false;
+  let _blurTimer   = null;
+
+  const TYPE_PLACEHOLDERS = {
+    poster: 'The central declaration.',
+    body:   'The thought, plainly stated.',
+    pull:   'The truest sentence.',
+    label:  'Category · Date',
+    spec:   'key :: value',
+    break:  ''
+  };
+  const TYPE_LABELS = { poster:'poster', body:'body', pull:'pull', label:'label', spec:'spec', break:'break' };
+
+  function openGhost(inp, type) {
+    _ghostSource = inp;
+    _ghostType   = type || 'body';
+    _ghostOpen   = true;
+
+    const overlay = document.getElementById('lfe-ghost');
+    const ta      = document.getElementById('lfe-ghost-ta');
+    const pill    = document.getElementById('lfe-ghost-pill');
+    const submit  = document.getElementById('lfe-ghost-submit');
+
+    overlay.className = 'open ngo-' + _ghostType;
+    pill.textContent  = TYPE_LABELS[_ghostType] || _ghostType;
+    ta.placeholder    = TYPE_PLACEHOLDERS[_ghostType] || 'Write…';
+
+    // Copy current value from source
+    ta.value = inp.value || '';
+
+    // Submit button label
+    if (submit) submit.textContent = _ghostType === 'break' ? 'Insert Break →' : 'Commit →';
+
+    // Auto-size
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, window.innerHeight * 0.5) + 'px';
+
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    });
+  }
+
+  function closeGhost(refocus) {
+    if (!_ghostOpen) return;
+    _ghostOpen = false;
+    const overlay = document.getElementById('lfe-ghost');
+    overlay.classList.remove('open');
+    if (refocus && _ghostSource) {
+      _ghostSource.focus();
+      _ghostSource.setSelectionRange?.(_ghostSource.value.length, _ghostSource.value.length);
+    }
+    _ghostSource = null;
+  }
+
+  window.lfeGhostCommit = function() {
+    if (!_ghostOpen || !_ghostSource) { closeGhost(false); return; }
+    const ta = document.getElementById('lfe-ghost-ta');
+    _ghostSource.value = ta.value;
+    _ghostSource.dispatchEvent(new Event('input', { bubbles: true }));
+    closeGhost(true);
+  };
+
+  // Real-time sync ghost → source input → preview
+  document.getElementById('lfe-ghost-ta').addEventListener('input', () => {
+    if (!_ghostSource) return;
+    const ta = document.getElementById('lfe-ghost-ta');
+    _ghostSource.value = ta.value;
+    _ghostSource.dispatchEvent(new Event('input', { bubbles: true }));
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, window.innerHeight * 0.5) + 'px';
+  });
+
+  document.getElementById('lfe-ghost-ta').addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); closeGhost(false); }
+    const multiLine = ['body','poster','pull'].includes(_ghostType);
+    if (e.key === 'Enter' && !e.shiftKey && !multiLine) { e.preventDefault(); lfeGhostCommit(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); lfeGhostCommit(); }
+  });
+
+  document.getElementById('lfe-ghost-backdrop').addEventListener('mousedown', () => closeGhost(false));
+
+  // Wire into canvas: open ghost when any lfe-input in the canvas gains focus
+  const canvasWrap = document.getElementById('lfe-canvas-wrap');
+  if (canvasWrap) {
+    canvasWrap.addEventListener('focusin', e => {
+      const inp = e.target;
+      if (!inp || inp.tagName !== 'INPUT') return;
+      clearTimeout(_blurTimer);
+
+      const card = inp.closest('.lfe-card');
+      if (!card) return;
+      const badge = card.querySelector('.lfe-badge');
+      let type = badge ? badge.textContent.trim() : 'body';
+
+      openGhost(inp, type);
+    });
+
+    canvasWrap.addEventListener('focusout', () => {
+      _blurTimer = setTimeout(() => {
+        if (!_ghostOpen) return;
+        const active = document.activeElement;
+        const overlay = document.getElementById('lfe-ghost');
+        if (active && overlay && overlay.contains(active)) return;
+        closeGhost(false);
+      }, 120);
+    });
+  }
+
+  const overlay = document.getElementById('lfe-ghost');
+  if (overlay) overlay.addEventListener('focusin', () => clearTimeout(_blurTimer));
+
+  window.openLfeGhost  = openGhost;
+  window.closeLfeGhost = closeGhost;
+})();
 </script>
 </body>
 </html>

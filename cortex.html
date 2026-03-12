@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>cortex · wolfie.love</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset & Root ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; overflow: hidden; }
+
+:root {
+  --bg:       #0f0e0c;
+  --bg-2:     #141310;
+  --ink:      #f0ede6;
+  --ink-2:    #8a8880;
+  --ink-3:    #524f48;
+  --accent:   #d97757;
+  --accent-l: rgba(217,119,87,0.10);
+  --border:   rgba(240,237,230,0.07);
+  --border-2: rgba(240,237,230,0.12);
+  --disp:     'DM Serif Display', serif;
+  --mono:     'DM Mono', monospace;
+
+  /* cluster colors */
+  --c-media:  #6a9bcc;
+  --c-notes:  #d97757;
+  --c-tasks:  #78895d;
+  --c-long:   #a07cc0;
+
+  /* safe areas */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--ink);
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Grain overlay ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 9998;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/180px;
+  opacity: .028;
+}
+
+/* ═══════════════════════════════════════
+   LAYER 2 — THE FIELD (background)
+═══════════════════════════════════════ */
+#field {
+  position: fixed; inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+#field.field-focused { pointer-events: auto; }
+
+/* Field grid dots */
+#field::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(240,237,230,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+  transition: opacity 0.6s ease;
+}
+
+/* Cluster orbs */
+.cluster-orb {
+  position: absolute;
+  border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
+  pointer-events: none;
+}
+#field.field-focused .cluster-orb { pointer-events: auto; }
+
+.cluster-orb .orb-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.2;
+  animation: orbPulse 4s ease-in-out infinite;
+}
+.cluster-orb .orb-ring-2 {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.08;
+  animation: orbPulse 4s ease-in-out infinite 0.8s;
+}
+@keyframes orbPulse {
+  0%, 100% { transform: scale(1); opacity: inherit; }
+  50% { transform: scale(1.06); opacity: 0.15; }
+}
+.orb-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: currentColor;
+  position: relative; z-index: 1;
+}
+.orb-count {
+  font-family: var(--disp);
+  font-size: 20px;
+  color: currentColor;
+  position: relative; z-index: 1;
+  line-height: 1;
+}
+
+/* Field active state — blooms */
+body.field-open #field { opacity: 1; }
+body:not(.field-open) #field { opacity: 0.18; }
+
+body.field-open .cluster-orb {
+  transform: scale(1);
+}
+body:not(.field-open) .cluster-orb {
+  transform: scale(0.85);
+}
+
+/* ═══════════════════════════════════════
+   LAYER 1 — THE STREAM
+═══════════════════════════════════════ */
+#stream-wrap {
+  position: fixed; inset: 0;
+  z-index: 10;
+  display: flex; flex-direction: column;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+body.field-open #stream-wrap {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+}
+
+/* ── Stream HUD (top bar) ── */
+#hud {
+  position: relative; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(var(--sat) + 14px) 18px 10px;
+  background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+  flex-shrink: 0;
+}
+.hud-brand {
+  font-family: var(--disp);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  opacity: 0.9;
+}
+.hud-brand em { color: var(--accent); font-style: normal; }
+.hud-right { display: flex; align-items: center; gap: 10px; }
+.hud-btn {
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--border-2);
+  color: var(--ink-2);
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+.hud-btn:hover, .hud-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-l);
+}
+.hud-field-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.hud-field-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Stream scroll area ── */
+#stream {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 8px 0 calc(var(--sab) + 100px);
+  scroll-behavior: smooth;
+}
+#stream::-webkit-scrollbar { display: none; }
+
+/* ── Chapter header ── */
+.ch-block {
+  padding: 40px 22px 12px;
+  position: relative;
+}
+.ch-block::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-2), transparent);
+  margin-bottom: 28px;
+}
+.ch-num {
+  font-family: var(--disp);
+  font-size: 72px;
+  line-height: 1;
+  color: var(--ink-3);
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1px rgba(240,237,230,0.06);
+  user-select: none;
+}
+.ch-title {
+  font-family: var(--disp);
+  font-size: 18px;
+  color: var(--ink);
+  margin-top: -8px;
+  letter-spacing: 0.01em;
+}
+.ch-cluster-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  opacity: 0.6;
+}
+
+/* ── Sentence nodes ── */
+.node {
+  padding: 11px 22px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.node::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: transparent;
+  transition: background 0.2s;
+}
+.node.active::before,
+.node:active::before {
+  background: var(--accent);
+}
+.node:active { background: rgba(217,119,87,0.04); }
+
+/* node types */
+.node.body {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+  font-weight: 300;
+}
+.node.poster {
+  font-family: var(--disp);
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--ink);
+  padding: 18px 22px;
+  letter-spacing: 0.01em;
+}
+.node.pull {
+  font-family: var(--disp);
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  border-left: 2px solid var(--accent);
+  padding-left: 16px;
+  margin: 4px 22px;
+  padding-right: 0;
+}
+.node.label {
+  font-size: 7px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 14px 22px 4px;
+}
+.node.break {
+  padding: 12px 22px;
+  pointer-events: none;
+}
+.node.break::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+.node.spec {
+  display: flex; align-items: baseline; gap: 10px;
+  font-size: 12px;
+  padding: 7px 22px;
+}
+.spec-key {
+  color: var(--ink-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.spec-sep { color: var(--ink-3); }
+.spec-val { color: var(--ink); }
+
+/* media node */
+.node.media {
+  padding: 14px 22px;
+}
+.media-card {
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-2);
+  position: relative;
+}
+.media-thumb {
+  width: 100%; aspect-ratio: 16/9;
+  background: var(--ink-3);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.media-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+}
+.media-play {
+  position: absolute;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(217,119,87,0.9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+.media-info {
+  padding: 10px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.media-title {
+  font-size: 11px; color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.media-type {
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--c-media);
+  border: 1px solid var(--c-media);
+  padding: 2px 6px; border-radius: 2px;
+  opacity: 0.7;
+}
+
+/* inline accent / em */
+.ac { color: var(--accent); }
+.em { font-style: italic; }
+.dim { opacity: 0.45; }
+
+/* cluster dot on node */
+.node-cluster-dot {
+  position: absolute;
+  right: 16px; top: 50%; transform: translateY(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  opacity: 0.4;
+}
+
+/* ── Bottom dock ── */
+#dock {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 10px 16px calc(var(--sab) + 10px);
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  pointer-events: none;
+}
+.dock-cluster {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  padding: 8px 12px;
+}
+.dock-cluster.active { opacity: 1; }
+.dock-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+.dock-cluster.active .dock-icon { opacity: 1; background: var(--accent-l); border-color: var(--accent); }
+.dock-cluster-label {
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+.dock-compose {
+  pointer-events: auto;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(217,119,87,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+.dock-compose:active { transform: scale(0.94); box-shadow: 0 2px 10px rgba(217,119,87,0.3); }
+
+/* ═══════════════════════════════════════
+   LAYER 3 — THE DIVE
+═══════════════════════════════════════ */
+#dive-sheet {
+  position: fixed; inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Backdrop */
+.dive-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(10,9,8,0);
+  transition: background 0.4s ease;
+  pointer-events: none;
+}
+body.dive-open .dive-backdrop {
+  background: rgba(10,9,8,0.88);
+  pointer-events: auto;
+}
+
+/* Sheet panel */
+.dive-panel {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border-2);
+  border-radius: 18px 18px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.44s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+}
+body.dive-open .dive-panel {
+  transform: translateY(0);
+}
+body.dive-open #dive-sheet { pointer-events: auto; }
+
+/* Panel drag handle */
+.dive-handle {
+  width: 36px; height: 4px;
+  background: var(--border-2);
+  border-radius: 2px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+/* Panel header */
+.dive-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.dive-type-tag {
+  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-2);
+  display: flex; align-items: center; gap: 6px;
+}
+.dive-type-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+}
+.dive-close {
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); font-size: 12px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dive-close:hover { color: var(--ink); border-color: var(--ink-2); }
+
+/* Panel body */
+.dive-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 0;
+}
+.dive-body::-webkit-scrollbar { display: none; }
+
+/* ── Dive: Note mode ── */
+.dive-note {
+  padding: 20px;
+}
+.dive-note-sentence {
+  font-family: var(--disp);
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+.dive-note-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  font-weight: 300;
+}
+.dive-note-write {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.dive-note-input {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.65;
+  resize: none;
+  min-height: 80px;
+  outline: none;
+  caret-color: var(--accent);
+}
+.dive-note-input::placeholder { color: var(--ink-3); }
+
+/* ── Dive: Task mode ── */
+.dive-tasks {
+  padding: 16px 20px;
+}
+.task-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.task-check {
+  width: 18px; height: 18px;
+  border: 1px solid var(--border-2);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.task-check.done { background: var(--c-tasks); border-color: var(--c-tasks); }
+.task-check.done::after { content: '✓'; color: #fff; font-size: 10px; font-family: var(--mono); }
+.task-text {
+  font-size: 14px; line-height: 1.5;
+  color: var(--ink);
+  flex: 1;
+  font-weight: 300;
+}
+.task-text.done { text-decoration: line-through; color: var(--ink-2); }
+.task-meta {
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+/* ── Dive: Media mode ── */
+.dive-media-frame {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  position: relative;
+}
+.dive-media-frame iframe {
+  width: 100%; height: 100%;
+  border: none;
+}
+.dive-media-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  background: var(--ink-3);
+}
+.dive-media-placeholder-icon { font-size: 32px; opacity: 0.4; }
+.dive-media-meta {
+  padding: 16px 20px;
+}
+.dive-media-title {
+  font-family: var(--disp);
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.dive-media-sub {
+  font-size: 11px; color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+
+/* ── Dive: Long-form mode ── */
+.dive-longform {
+  padding: 24px 20px;
+}
+.dive-longform-stream .node {
+  padding-left: 0; padding-right: 0;
+}
+.dive-longform-stream .node::before { display: none; }
+.dive-longform-stream .node.pull {
+  margin: 4px 0;
+}
+
+/* ── Dive: Chapter mode (cluster landing) ── */
+.dive-cluster-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.dive-cluster-name {
+  font-family: var(--disp);
+  font-size: 28px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.dive-cluster-count {
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+.cluster-node-list {
+  padding: 8px 0;
+}
+.cluster-node-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cluster-node-item:active { background: rgba(217,119,87,0.04); }
+.cni-type {
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3);
+  width: 36px; flex-shrink: 0;
+}
+.cni-text {
+  font-size: 13px; color: var(--ink);
+  line-height: 1.4;
+  flex: 1;
+  font-weight: 300;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cni-arrow { color: var(--ink-3); font-size: 10px; }
+
+/* ═══════════════════════════════════════
+   FIELD VIEW (full map mode)
+═══════════════════════════════════════ */
+#field-view {
+  position: fixed; inset: 0;
+  z-index: 500;
+  display: flex; flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+body.field-open #field-view {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.field-hud {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(var(--sat) + 14px) 18px 10px;
+  background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+  flex-shrink: 0;
+}
+.field-title {
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+.field-close-btn {
+  font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); padding: 6px 10px;
+  cursor: pointer; border-radius: 3px;
+  transition: all 0.2s;
+}
+.field-close-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.field-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cluster cards in field view */
+.field-cluster {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.field-cluster:active { transform: translate(-50%,-50%) scale(0.94); }
+
+.field-cluster-ring {
+  position: relative;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+  opacity: 0.85;
+  background: radial-gradient(circle at 40% 35%, rgba(255,255,255,0.04), transparent 60%);
+}
+.field-cluster-ring::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.15;
+}
+.field-cluster-count {
+  font-family: var(--disp);
+  font-size: 24px;
+  color: currentColor;
+  line-height: 1;
+}
+.field-cluster-label {
+  font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: currentColor; opacity: 0.7;
+}
+.field-cluster-name {
+  margin-top: 8px;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* Node micro-dots in field */
+.field-node-dot {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.35;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.field-node-dot:hover { opacity: 0.8; transform: translate(-50%,-50%) scale(2); }
+
+/* ═══════════════════════════════════════
+   COMPOSE SHEET
+═══════════════════════════════════════ */
+#compose-sheet {
+  position: fixed; inset: 0;
+  z-index: 2000;
+  pointer-events: none;
+}
+.compose-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(10,9,8,0);
+  transition: background 0.3s ease;
+}
+
+/* Type picker */
+
+/* Cluster picker */
+
+/* Input area */
+
+/* ═══════════════════════════════════
+   COMPOSE SHEET — mode-aware
+═══════════════════════════════════ */
+#compose-sheet {
+  position: fixed; inset: 0; z-index: 700;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+body.compose-open #compose-sheet { opacity: 1; pointer-events: auto; }
+
+.compose-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(12,11,9,0.7);
+  backdrop-filter: blur(4px);
+}
+.compose-panel {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border-2);
+  border-radius: 14px 14px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+body.compose-open .compose-panel { transform: translateY(0); }
+
+/* Longform takes full viewport */
+body.compose-open.compose-longform .compose-panel {
+  max-height: 100vh;
+  border-radius: 0;
+  top: 0; height: 100%;
+}
+
+.compose-handle {
+  width: 36px; height: 4px;
+  background: var(--border-2);
+  border-radius: 2px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+.compose-header {
+  padding: 10px 18px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.compose-title {
+  font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+.compose-close {
+  background: none; border: 1px solid var(--border-2);
+  color: var(--ink-2); font-size: 12px;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+/* Mode tabs — replaces type + cluster pickers */
+.compose-mode-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.compose-mode-tabs::-webkit-scrollbar { display: none; }
+.compose-tab {
+  flex: 1; min-width: 56px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 6px;
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); cursor: pointer;
+  border: none; background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.compose-tab .tab-icon { font-size: 14px; }
+.compose-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* Mode bodies — only one visible at a time */
+.compose-mode-body {
+  display: none; flex: 1; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+}
+.compose-mode-body::-webkit-scrollbar { display: none; }
+.compose-mode-body.active { display: flex; }
+
+/* ── Shared: cluster row ── */
+.compose-cluster-row {
+  display: flex; gap: 6px; padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.compose-cluster-btn {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.compose-cluster-btn.active {
+  color: var(--ink); border-color: var(--ink-2);
+  background: rgba(255,255,255,0.04);
+}
+
+/* ── NOTE mode ── */
+.note-type-row {
+  display: flex; gap: 6px; padding: 10px 16px 0;
+  flex-shrink: 0;
+}
+.note-type-btn {
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 5px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.note-type-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-l); }
+.note-textarea {
+  flex: 1; width: 100%;
+  background: none; border: none; outline: none; resize: none;
+  color: var(--ink); font-family: var(--mono);
+  font-size: 16px; line-height: 1.75;
+  caret-color: var(--accent);
+  padding: 14px 18px;
+  min-height: 120px;
+}
+.note-textarea::placeholder { color: var(--ink-3); }
+
+/* ── TASK mode ── */
+.task-input-wrap {
+  display: flex; flex-direction: column;
+  padding: 14px 18px; gap: 10px;
+}
+.task-title-input {
+  background: none; border: none; outline: none;
+  color: var(--ink); font-family: var(--mono);
+  font-size: 17px; line-height: 1.6;
+  caret-color: var(--accent);
+  width: 100%;
+}
+.task-title-input::placeholder { color: var(--ink-3); }
+.task-detail-input {
+  background: none; border: none; outline: none; resize: none;
+  color: var(--ink-2); font-family: var(--mono);
+  font-size: 13px; line-height: 1.65;
+  caret-color: var(--accent);
+  width: 100%; min-height: 40px;
+}
+.task-detail-input::placeholder { color: var(--ink-3); }
+.task-priority-row {
+  display: flex; gap: 6px; align-items: center;
+  padding: 0 18px 10px;
+  flex-shrink: 0;
+}
+.task-priority-label {
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3); margin-right: 4px;
+}
+.task-pri-btn {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer;
+  transition: all 0.15s;
+}
+.task-pri-btn.active-high { color: #d97757; border-color: #d97757; background: rgba(217,119,87,0.08); }
+.task-pri-btn.active-med  { color: #c4a882; border-color: #c4a882; background: rgba(196,168,130,0.08); }
+.task-pri-btn.active-low  { color: var(--ink-3); border-color: var(--ink-3); background: rgba(255,255,255,0.03); }
+.task-existing {
+  border-top: 1px solid var(--border);
+  padding: 10px 18px;
+  flex-shrink: 0;
+  max-height: 160px; overflow-y: auto;
+}
+.task-existing-label {
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 8px;
+}
+.task-existing-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.task-existing-item:last-child { border-bottom: none; }
+.tei-check {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 1px solid var(--border-2);
+  flex-shrink: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; color: var(--accent);
+  transition: all 0.15s;
+}
+.tei-check.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tei-text { font-size: 12px; color: var(--ink-2); flex: 1; font-weight: 300; }
+.tei-text.done { text-decoration: line-through; opacity: 0.5; }
+
+/* ── MEDIA mode ── */
+.media-drop-zone {
+  margin: 14px 18px 0;
+  border: 1px dashed var(--border-2);
+  border-radius: 6px;
+  padding: 24px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  flex-shrink: 0;
+}
+.media-drop-zone:hover, .media-drop-zone.drag-over {
+  border-color: var(--c-media);
+  background: rgba(106,155,204,0.05);
+}
+.media-drop-zone input[type=file] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+}
+.media-drop-icon { font-size: 26px; opacity: 0.3; color: var(--c-media); }
+.media-drop-hint {
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.media-drop-sub {
+  font-size: 8px; color: var(--ink-3); opacity: 0.6;
+}
+.media-preview-wrap {
+  margin: 10px 18px 0;
+  position: relative; border-radius: 4px; overflow: hidden;
+  display: none;
+}
+.media-preview-wrap.has-media { display: block; }
+.media-preview-img {
+  width: 100%; max-height: 160px; object-fit: cover;
+  display: block;
+}
+.media-preview-clear {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(12,11,9,0.7); color: var(--ink);
+  border: 1px solid var(--border-2); border-radius: 50%;
+  width: 24px; height: 24px; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.media-title-input {
+  margin: 10px 18px 0;
+  background: none; border: none; outline: none;
+  color: var(--ink); font-family: var(--mono);
+  font-size: 16px; line-height: 1.6;
+  caret-color: var(--accent);
+  width: calc(100% - 36px);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.media-title-input::placeholder { color: var(--ink-3); }
+.media-desc-input {
+  margin: 10px 18px 0;
+  background: none; border: none; outline: none; resize: none;
+  color: var(--ink-2); font-family: var(--mono);
+  font-size: 13px; line-height: 1.7;
+  caret-color: var(--accent);
+  width: calc(100% - 36px);
+  min-height: 60px;
+}
+.media-desc-input::placeholder { color: var(--ink-3); }
+.media-url-input {
+  margin: 8px 18px 0;
+  background: var(--bg-3); border: 1px solid var(--border); border-radius: 3px;
+  outline: none; color: var(--ink-2); font-family: var(--mono);
+  font-size: 11px; line-height: 1.5;
+  caret-color: var(--accent);
+  width: calc(100% - 36px);
+  padding: 8px 10px;
+}
+.media-url-input::placeholder { color: var(--ink-3); }
+
+/* ── LONGFORM mode ── */
+.longform-title-input {
+  background: none; border: none; outline: none;
+  color: var(--ink); font-family: var(--disp);
+  font-size: 22px; line-height: 1.3;
+  caret-color: var(--accent);
+  width: 100%; padding: 16px 18px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.longform-title-input::placeholder { color: var(--ink-3); font-style: italic; }
+.longform-toolbar {
+  display: flex; gap: 2px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.lf-tool {
+  background: none; border: 1px solid var(--border-2); border-radius: 3px;
+  color: var(--ink-2); font-size: 10px; font-family: var(--mono);
+  padding: 4px 8px; cursor: pointer;
+  transition: all 0.15s; letter-spacing: 0.06em;
+}
+.lf-tool:hover { border-color: var(--ink-2); color: var(--ink); }
+.lf-tool.active { background: var(--accent-l); border-color: var(--accent); color: var(--accent); }
+.longform-body {
+  flex: 1; width: 100%;
+  background: none; border: none; outline: none; resize: none;
+  color: var(--ink); font-family: var(--text);
+  font-size: 17px; line-height: 1.75;
+  caret-color: var(--accent);
+  padding: 14px 18px;
+  min-height: 200px;
+}
+.longform-body::placeholder { color: var(--ink-3); font-style: italic; }
+.longform-wordcount {
+  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); padding: 0 18px 8px;
+  flex-shrink: 0;
+}
+
+/* ── Shared: commit bar ── */
+.compose-commit-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 18px calc(var(--sab) + 10px);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0; background: var(--bg-2);
+}
+.compose-commit-hint {
+  font-size: 9px; color: var(--ink-3); letter-spacing: 0.06em;
+}
+.compose-commit-btn {
+  font-family: var(--mono);
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  background: var(--accent); color: #fff;
+  border: none; padding: 10px 18px;
+  border-radius: 3px; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.compose-commit-btn:active { opacity: 0.8; }
+  position: fixed; top: 0; left: 0;
+  height: 2px; z-index: 9999;
+  background: var(--accent);
+  width: 0%; transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+/* ── Scroll indicator ── */
+.scroll-nudge {
+  position: fixed; bottom: calc(var(--sab) + 72px);
+  left: 50%; transform: translateX(-50%);
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  animation: nudgeFade 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.scroll-nudge.visible { opacity: 1; }
+@keyframes nudgeFade {
+  0%, 100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 0.7; transform: translateX(-50%) translateY(3px); }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div id="progress"></div>
+
+<!-- ═══ LAYER 2: THE FIELD (background) ═══ -->
+<div id="field">
+  <!-- Cluster orbs visible behind stream -->
+  <div class="cluster-orb" id="orb-media" style="left:22%;top:28%;width:60px;height:60px;color:var(--c-media)">
+    <div class="orb-ring"></div><div class="orb-ring-2"></div>
+    <span class="orb-count">4</span>
+    <span class="orb-label">Media</span>
+  </div>
+  <div class="cluster-orb" id="orb-notes" style="left:68%;top:22%;width:70px;height:70px;color:var(--c-notes)">
+    <div class="orb-ring"></div><div class="orb-ring-2"></div>
+    <span class="orb-count">7</span>
+    <span class="orb-label">Notes</span>
+  </div>
+  <div class="cluster-orb" id="orb-tasks" style="left:18%;top:62%;width:55px;height:55px;color:var(--c-tasks)">
+    <div class="orb-ring"></div><div class="orb-ring-2"></div>
+    <span class="orb-count">3</span>
+    <span class="orb-label">Tasks</span>
+  </div>
+  <div class="cluster-orb" id="orb-long" style="left:72%;top:65%;width:65px;height:65px;color:var(--c-long)">
+    <div class="orb-ring"></div><div class="orb-ring-2"></div>
+    <span class="orb-count">2</span>
+    <span class="orb-label">Long</span>
+  </div>
+</div>
+
+<!-- ═══ FIELD VIEW (full map) ═══ -->
+<div id="field-view">
+  <div class="field-hud">
+    <span class="field-title">Spatial Field · 16 nodes</span>
+    <button class="field-close-btn" onclick="closeField()">✕ Stream</button>
+  </div>
+  <div class="field-canvas" id="field-canvas">
+    <!-- Cluster cards -->
+    <div class="field-cluster" style="left:28%;top:30%;color:var(--c-media)" onclick="openCluster('media')">
+      <div class="field-cluster-ring">
+        <span class="field-cluster-count">4</span>
+        <span class="field-cluster-label">nodes</span>
+      </div>
+      <span class="field-cluster-name">Media</span>
+    </div>
+    <div class="field-cluster" style="left:72%;top:26%;color:var(--c-notes)" onclick="openCluster('notes')">
+      <div class="field-cluster-ring">
+        <span class="field-cluster-count">7</span>
+        <span class="field-cluster-label">nodes</span>
+      </div>
+      <span class="field-cluster-name">Notes</span>
+    </div>
+    <div class="field-cluster" style="left:24%;top:68%;color:var(--c-tasks)" onclick="openCluster('tasks')">
+      <div class="field-cluster-ring">
+        <span class="field-cluster-count">3</span>
+        <span class="field-cluster-label">nodes</span>
+      </div>
+      <span class="field-cluster-name">Tasks</span>
+    </div>
+    <div class="field-cluster" style="left:74%;top:70%;color:var(--c-long)" onclick="openCluster('long')">
+      <div class="field-cluster-ring">
+        <span class="field-cluster-count">2</span>
+        <span class="field-cluster-label">nodes</span>
+      </div>
+      <span class="field-cluster-name">Long-form</span>
+    </div>
+    <!-- Node micro-dots -->
+    <div class="field-node-dot" style="left:24%;top:24%;background:var(--c-media)" title="node"></div>
+    <div class="field-node-dot" style="left:31%;top:36%;background:var(--c-media)" title="node"></div>
+    <div class="field-node-dot" style="left:19%;top:38%;background:var(--c-media)" title="node"></div>
+    <div class="field-node-dot" style="left:28%;top:42%;background:var(--c-media)" title="node"></div>
+    <div class="field-node-dot" style="left:66%;top:20%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:74%;top:18%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:78%;top:28%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:70%;top:32%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:64%;top:30%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:76%;top:22%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:68%;top:36%;background:var(--c-notes)" title="node"></div>
+    <div class="field-node-dot" style="left:20%;top:62%;background:var(--c-tasks)" title="node"></div>
+    <div class="field-node-dot" style="left:26%;top:72%;background:var(--c-tasks)" title="node"></div>
+    <div class="field-node-dot" style="left:18%;top:74%;background:var(--c-tasks)" title="node"></div>
+    <div class="field-node-dot" style="left:72%;top:64%;background:var(--c-long)" title="node"></div>
+    <div class="field-node-dot" style="left:78%;top:76%;background:var(--c-long)" title="node"></div>
+  </div>
+</div>
+
+<!-- ═══ LAYER 1: THE STREAM ═══ -->
+<div id="stream-wrap">
+  <div id="hud">
+    <div class="hud-brand">cortex<em>·</em></div>
+    <div class="hud-right">
+      <button class="hud-btn" id="filter-btn" onclick="cycleFilter()">all</button>
+      <button class="hud-field-btn" onclick="openField()" title="Field view">⊞</button>
+    </div>
+  </div>
+  <div id="stream">
+    <!-- Rendered by JS -->
+  </div>
+  <div class="scroll-nudge" id="scroll-nudge">
+    <span>scroll</span>
+    <span>↓</span>
+  </div>
+</div>
+
+<!-- Bottom dock -->
+<div id="dock">
+  <div class="dock-cluster active" style="color:var(--c-media)" onclick="filterCluster('media')">
+    <div class="dock-icon">▶</div>
+    <span class="dock-cluster-label">Media</span>
+  </div>
+  <div class="dock-cluster" style="color:var(--c-notes)" onclick="filterCluster('notes')">
+    <div class="dock-icon">✎</div>
+    <span class="dock-cluster-label">Notes</span>
+  </div>
+  <button class="dock-compose" onclick="openCompose()">+</button>
+  <div class="dock-cluster" style="color:var(--c-tasks)" onclick="filterCluster('tasks')">
+    <div class="dock-icon">◎</div>
+    <span class="dock-cluster-label">Tasks</span>
+  </div>
+  <div class="dock-cluster" style="color:var(--c-long)" onclick="filterCluster('long')">
+    <div class="dock-icon">≡</div>
+    <span class="dock-cluster-label">Long</span>
+  </div>
+</div>
+
+<!-- ═══ LAYER 3: THE DIVE SHEET ═══ -->
+<div id="dive-sheet">
+  <div class="dive-backdrop" onclick="closeDive()"></div>
+  <div class="dive-panel" id="dive-panel">
+    <div class="dive-handle"></div>
+    <div class="dive-header">
+      <div class="dive-type-tag">
+        <div class="dive-type-dot" id="dive-type-dot"></div>
+        <span id="dive-type-label">node</span>
+      </div>
+      <button class="dive-close" onclick="closeDive()">✕</button>
+    </div>
+    <div class="dive-body" id="dive-body">
+      <!-- Populated dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMPOSE SHEET — mode-aware ═══ -->
+<div id="compose-sheet">
+  <div class="compose-backdrop" onclick="closeCompose()"></div>
+  <div class="compose-panel">
+    <div class="compose-handle"></div>
+    <div class="compose-header">
+      <span class="compose-title" id="compose-title">New Note</span>
+      <button class="compose-close" onclick="closeCompose()">✕</button>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="compose-mode-tabs">
+      <button class="compose-tab active" data-mode="note" onclick="switchComposeMode('note')">
+        <span class="tab-icon">✎</span>note
+      </button>
+      <button class="compose-tab" data-mode="task" onclick="switchComposeMode('task')">
+        <span class="tab-icon">◎</span>task
+      </button>
+      <button class="compose-tab" data-mode="media" onclick="switchComposeMode('media')">
+        <span class="tab-icon">▶</span>media
+      </button>
+      <button class="compose-tab" data-mode="longform" onclick="switchComposeMode('longform')">
+        <span class="tab-icon">≡</span>long
+      </button>
+    </div>
+
+    <!-- ── NOTE mode ── -->
+    <div class="compose-mode-body active" id="mode-note">
+      <div class="note-type-row">
+        <button class="note-type-btn active" data-ntype="body" onclick="selectNoteType(this)">body</button>
+        <button class="note-type-btn" data-ntype="poster" onclick="selectNoteType(this)">poster</button>
+        <button class="note-type-btn" data-ntype="pull" onclick="selectNoteType(this)">pull</button>
+        <button class="note-type-btn" data-ntype="label" onclick="selectNoteType(this)">label</button>
+      </div>
+      <div class="compose-cluster-row">
+        <button class="compose-cluster-btn active" data-cluster="notes" onclick="selectComposeCluster(this,'note')">Notes</button>
+        <button class="compose-cluster-btn" data-cluster="media" onclick="selectComposeCluster(this,'note')">Media</button>
+        <button class="compose-cluster-btn" data-cluster="tasks" onclick="selectComposeCluster(this,'note')">Tasks</button>
+        <button class="compose-cluster-btn" data-cluster="long" onclick="selectComposeCluster(this,'note')">Long</button>
+      </div>
+      <textarea class="note-textarea" id="note-input" placeholder="Write a sentence. The sentence is the primitive." rows="4"></textarea>
+    </div>
+
+    <!-- ── TASK mode ── -->
+    <div class="compose-mode-body" id="mode-task">
+      <div class="task-input-wrap">
+        <input class="task-title-input" id="task-title-input" type="text" placeholder="What needs to happen?" autocomplete="off" />
+        <textarea class="task-detail-input" id="task-detail-input" placeholder="Detail or context (optional)" rows="2"></textarea>
+      </div>
+      <div class="task-priority-row">
+        <span class="task-priority-label">Priority</span>
+        <button class="task-pri-btn" data-pri="high" onclick="selectTaskPri(this)">High</button>
+        <button class="task-pri-btn active-med" data-pri="med" onclick="selectTaskPri(this)">Med</button>
+        <button class="task-pri-btn" data-pri="low" onclick="selectTaskPri(this)">Low</button>
+      </div>
+      <div class="task-existing" id="task-existing">
+        <div class="task-existing-label">In queue</div>
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- ── MEDIA mode ── -->
+    <div class="compose-mode-body" id="mode-media">
+      <div class="media-drop-zone" id="media-drop-zone">
+        <input type="file" id="media-file-input" accept="image/*,video/*,audio/*" onchange="handleMediaFile(this)">
+        <div class="media-drop-icon">⊕</div>
+        <div class="media-drop-hint">Upload image, video, or audio</div>
+        <div class="media-drop-sub">tap to browse · or drag & drop</div>
+      </div>
+      <div class="media-preview-wrap" id="media-preview-wrap">
+        <img class="media-preview-img" id="media-preview-img" src="" alt="">
+        <div class="media-preview-clear" onclick="clearMediaFile()">✕</div>
+      </div>
+      <input class="media-title-input" id="media-title-input" type="text" placeholder="Title" autocomplete="off">
+      <textarea class="media-desc-input" id="media-desc-input" placeholder="Description — what is this, why does it matter?" rows="3"></textarea>
+      <input class="media-url-input" id="media-url-input" type="url" placeholder="URL or source (optional)">
+    </div>
+
+    <!-- ── LONGFORM mode ── -->
+    <div class="compose-mode-body" id="mode-longform">
+      <input class="longform-title-input" id="longform-title-input" type="text" placeholder="Title" autocomplete="off">
+      <div class="longform-toolbar">
+        <button class="lf-tool" onclick="lfInsert('**','**')"><b>B</b></button>
+        <button class="lf-tool" onclick="lfInsert('*','*')"><i>I</i></button>
+        <button class="lf-tool" onclick="lfInsert('~~','~~')">~~</button>
+        <button class="lf-tool" onclick="lfInsertLine('### ')">H</button>
+        <button class="lf-tool" onclick="lfInsertLine('> ')">›</button>
+        <button class="lf-tool" onclick="lfInsertLine('— ')">—</button>
+      </div>
+      <textarea class="longform-body" id="longform-body-input" placeholder="Begin writing. This is the long form — sentence by sentence, as long as it needs to be."></textarea>
+      <div class="longform-wordcount" id="longform-wordcount">0 words</div>
+    </div>
+
+    <!-- Commit bar -->
+    <div class="compose-commit-bar">
+      <span class="compose-commit-hint" id="compose-commit-hint">body · notes</span>
+      <button class="compose-commit-btn" onclick="commitNode()">Commit ↵</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════
+
+const CLUSTERS = {
+  media: { label: 'Media', color: 'var(--c-media)', icon: '▶' },
+  notes: { label: 'Notes', color: 'var(--c-notes)', icon: '✎' },
+  tasks: { label: 'Tasks', color: 'var(--c-tasks)', icon: '◎' },
+  long:  { label: 'Long-form', color: 'var(--c-long)', icon: '≡' },
+};
+
+let nodes = [
+  // Chapter 1 — Media
+  { id: 1, type: 'ch', cluster: 'media', ch: 1, title: 'Moving Image', sub: 'Media · 4 nodes' },
+  { id: 2, type: 'label', cluster: 'media', text: 'Media · Saved' },
+  { id: 3, type: 'media', cluster: 'media',
+    title: 'The Sentence Is The Interface',
+    src: null, thumbBg: '#1a1e2a',
+    caption: 'A talk on narrative primitives and how the sentence became the unit of meaning in modern publishing platforms.' },
+  { id: 4, type: 'body', cluster: 'media', text: 'The architecture of attention is a design problem. Every medium that has survived long enough leaves a residue — a shape that tells you what its makers believed about how people think.' },
+  { id: 5, type: 'pull', cluster: 'media', text: 'The frame is never neutral. It is always an argument.' },
+  { id: 6, type: 'media', cluster: 'media',
+    title: 'Mondrian and the Grid',
+    src: null, thumbBg: '#1a1412',
+    caption: 'Proportionality as a design philosophy. How Mondrian\'s primary logic maps to content systems.' },
+
+  // Chapter 2 — Notes
+  { id: 7, type: 'ch', cluster: 'notes', ch: 2, title: 'Thinking Out Loud', sub: 'Notes · 7 nodes' },
+  { id: 8, type: 'label', cluster: 'notes', text: 'Notes · Wolfie Platform' },
+  { id: 9, type: 'poster', cluster: 'notes', text: 'The sentence is the **primitive**.\nEverything else is *composition.*' },
+  { id: 10, type: 'body', cluster: 'notes', text: 'Utility first, emotional vessel second. The platform proves the thesis by existing. You are reading the argument.' },
+  { id: 11, type: 'body', cluster: 'notes', text: 'The ghost iframe is not a preview. It is a portal. The spatial cortex makes this literal — every node is a window into a depth layer, not just a card on a screen.' },
+  { id: 12, type: 'pull', cluster: 'notes', text: 'What would it mean for the reading surface to know what you are feeling while you read?' },
+  { id: 13, type: 'body', cluster: 'notes', text: 'Presence Design: the discipline of making systems that feel inhabited. Not populated — *inhabited.* The difference is agency.' },
+
+  // Chapter 3 — Tasks
+  { id: 14, type: 'ch', cluster: 'tasks', ch: 3, title: 'The Queue', sub: 'Tasks · 3 nodes' },
+  { id: 15, type: 'label', cluster: 'tasks', text: 'Tasks · Active' },
+  { id: 16, type: 'spec', cluster: 'tasks', key: 'Ship', val: 'cortex mobile prototype', done: false },
+  { id: 17, type: 'spec', cluster: 'tasks', key: 'Write', val: 'spatial cortex architecture doc', done: false },
+  { id: 18, type: 'spec', cluster: 'tasks', key: 'Send', val: '/institute when Anthropic posts', done: true },
+
+  // Chapter 4 — Long-form
+  { id: 19, type: 'ch', cluster: 'long', ch: 4, title: 'Extended Field', sub: 'Long-form · 2 nodes' },
+  { id: 20, type: 'label', cluster: 'long', text: 'Long-form · RSP Analysis' },
+  { id: 21, type: 'longform', cluster: 'long',
+    title: 'Reason & Resolution',
+    excerpt: 'A narrative redesign of the Anthropic RSP v3. Six chapters. The argument that governance documents are interfaces, and that interfaces carry epistemic weight.',
+    nodes: [
+      { type: 'poster', text: 'Policy documents are **interfaces**.\nHow they *feel* shapes how they are obeyed.' },
+      { type: 'body', text: 'The RSP v3 is a governance artifact. It describes what Anthropic will do when AI reaches certain capability thresholds. But it was written in the language of legal caution, not the language of commitment.' },
+      { type: 'pull', text: 'The medium is the argument. A document that reads like a hedge creates a reader who treats it like one.' },
+      { type: 'body', text: 'The redesign asks: what if the document was built to be read? Not filed, not published — read. Sentence by sentence. Chapter by chapter. With the reading surface itself tracking whether the argument lands.' },
+    ]
+  },
+  { id: 22, type: 'longform', cluster: 'long',
+    title: 'The Presence Designer',
+    excerpt: 'On the discipline of making systems feel inhabited. A working definition of Presence Design as distinct from UX, product, and systems thinking.',
+    nodes: [
+      { type: 'poster', text: 'Presence Design is not UX.\nIt is the discipline of *inhabited* systems.' },
+      { type: 'body', text: 'UX optimizes friction. Presence Design asks what the system believes. Every design decision encodes a position on what users are — and what they deserve.' },
+    ]
+  },
+];
+
+let activeFilter = 'all';
+let currentDiveNode = null;
+
+// ═══════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════
+
+function applyInline(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<span class="ac">$1</span>')
+    .replace(/\*(.*?)\*/g, '<span class="em">$1</span>')
+    .replace(/~~(.*?)~~/g, '<span class="dim">$1</span>');
+}
+
+function renderStream() {
+  const stream = document.getElementById('stream');
+  const filtered = activeFilter === 'all' ? nodes : nodes.filter(n => n.cluster === activeFilter || n.type === 'ch' && n.cluster === activeFilter);
+  let html = '';
+  let lastCluster = null;
+
+  filtered.forEach(node => {
+    if (node.type === 'ch') {
+      const c = CLUSTERS[node.cluster];
+      html += `<div class="ch-block">
+        <div class="ch-num">0${node.ch}</div>
+        <div class="ch-title">${node.title}</div>
+        <div class="ch-cluster-tag" style="color:${c.color}">${c.icon} ${c.label}</div>
+      </div>`;
+      return;
+    }
+
+    const clusterColor = CLUSTERS[node.cluster]?.color || 'var(--accent)';
+    const dot = `<div class="node-cluster-dot" style="background:${clusterColor}"></div>`;
+
+    if (node.type === 'label') {
+      html += `<div class="node label" data-id="${node.id}">${node.text}${dot}</div>`;
+    } else if (node.type === 'poster') {
+      const lines = node.text.split('\\n').map(l => applyInline(l)).join('<br>');
+      html += `<div class="node poster" data-id="${node.id}" onclick="diveInto(${node.id})">${lines}${dot}</div>`;
+    } else if (node.type === 'body') {
+      html += `<div class="node body" data-id="${node.id}" onclick="diveInto(${node.id})">${applyInline(node.text)}${dot}</div>`;
+    } else if (node.type === 'pull') {
+      html += `<div class="node pull" data-id="${node.id}" onclick="diveInto(${node.id})">${applyInline(node.text)}</div>`;
+    } else if (node.type === 'spec') {
+      const doneClass = node.done ? ' style="text-decoration:line-through;opacity:0.4"' : '';
+      html += `<div class="node spec" data-id="${node.id}" onclick="diveInto(${node.id})">
+        <span class="spec-key">${node.key}</span>
+        <span class="spec-sep">::</span>
+        <span class="spec-val"${doneClass}>${node.val}</span>
+        ${dot}
+      </div>`;
+    } else if (node.type === 'media') {
+      html += `<div class="node media" data-id="${node.id}" onclick="diveInto(${node.id})">
+        <div class="media-card">
+          <div class="media-thumb" style="background:${node.thumbBg || '#1a1a1a'}">
+            <div class="media-play">▶</div>
+          </div>
+          <div class="media-info">
+            <span class="media-title">${node.title}</span>
+            <span class="media-type">video</span>
+          </div>
+        </div>
+      </div>`;
+    } else if (node.type === 'longform') {
+      html += `<div class="node media" data-id="${node.id}" onclick="diveInto(${node.id})">
+        <div class="media-card">
+          <div class="media-info" style="padding:16px 12px;flex-direction:column;align-items:flex-start;gap:6px">
+            <span class="media-type" style="color:var(--c-long);border-color:var(--c-long)">Long-form</span>
+            <span class="media-title" style="font-size:14px;font-family:var(--disp)">${node.title}</span>
+            <span style="font-size:12px;color:var(--ink-2);font-weight:300;line-height:1.5">${node.excerpt}</span>
+          </div>
+        </div>
+      </div>`;
+    } else if (node.type === 'break') {
+      html += `<div class="node break"></div>`;
+    }
+  });
+
+  stream.innerHTML = html;
+  updateProgress();
+}
+
+// ═══════════════════════════════════════
+// DIVE SYSTEM
+// ═══════════════════════════════════════
+
+function diveInto(nodeId) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  currentDiveNode = node;
+
+  const typeLabel = document.getElementById('dive-type-label');
+  const typeDot = document.getElementById('dive-type-dot');
+  const body = document.getElementById('dive-body');
+  const clusterColor = CLUSTERS[node.cluster]?.color || 'var(--accent)';
+
+  typeLabel.textContent = node.type === 'longform' ? 'Long-form' : node.type;
+  typeDot.style.background = clusterColor;
+
+  let content = '';
+
+  if (node.type === 'body' || node.type === 'poster' || node.type === 'pull') {
+    const lines = node.text.replace('\\n', '<br>');
+    content = `<div class="dive-note">
+      <div class="dive-note-sentence">${applyInline(lines)}</div>
+      <div class="dive-note-body">
+        <span style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);">${CLUSTERS[node.cluster]?.label} · ${node.type}</span>
+      </div>
+      <div class="dive-note-write">
+        <textarea class="dive-note-input" placeholder="Add a thought…" rows="3"></textarea>
+      </div>
+    </div>`;
+  } else if (node.type === 'spec') {
+    content = `<div class="dive-tasks">
+      <div class="task-row">
+        <div class="task-check ${node.done ? 'done' : ''}" onclick="toggleTask(${node.id}, this)"></div>
+        <div>
+          <div class="task-text ${node.done ? 'done' : ''}" id="task-text-${node.id}">${node.key} · ${node.val}</div>
+          <div class="task-meta">${CLUSTERS[node.cluster]?.label}</div>
+        </div>
+      </div>
+      <div style="padding:20px 0;">
+        <textarea class="dive-note-input" placeholder="Add context…" rows="3" style="border-top:1px solid var(--border);padding-top:14px;"></textarea>
+      </div>
+    </div>`;
+  } else if (node.type === 'media') {
+    content = `<div>
+      <div class="dive-media-frame">
+        <div class="dive-media-placeholder">
+          <div class="dive-media-placeholder-icon">▶</div>
+          <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)">Tap to load</span>
+        </div>
+      </div>
+      <div class="dive-media-meta">
+        <div class="dive-media-title">${node.title}</div>
+        <div class="dive-media-sub">${node.caption}</div>
+      </div>
+    </div>`;
+  } else if (node.type === 'longform') {
+    const innerNodes = (node.nodes || []).map(n => {
+      if (n.type === 'poster') {
+        return `<div class="node poster" style="padding-left:0;padding-right:0">${applyInline(n.text.replace('\\n','<br>'))}</div>`;
+      } else if (n.type === 'body') {
+        return `<div class="node body" style="padding-left:0;padding-right:0">${applyInline(n.text)}</div>`;
+      } else if (n.type === 'pull') {
+        return `<div class="node pull" style="margin-left:0">${applyInline(n.text)}</div>`;
+      }
+      return '';
+    }).join('');
+
+    content = `<div class="dive-longform">
+      <div style="margin-bottom:20px;">
+        <div style="font-size:8px;letter-spacing:0.16em;text-transform:uppercase;color:var(--c-long);margin-bottom:8px">Long-form</div>
+        <div style="font-family:var(--disp);font-size:22px;color:var(--ink);margin-bottom:6px">${node.title}</div>
+        <div style="font-size:12px;color:var(--ink-2);font-weight:300;line-height:1.6">${node.excerpt}</div>
+      </div>
+      <div style="height:1px;background:var(--border);margin-bottom:20px;"></div>
+      <div class="dive-longform-stream">${innerNodes}</div>
+    </div>`;
+  }
+
+  body.innerHTML = content;
+  document.body.classList.add('dive-open');
+
+  // Haptic if available
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+function closeDive() {
+  document.body.classList.remove('dive-open');
+  currentDiveNode = null;
+}
+
+function toggleTask(nodeId, el) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  node.done = !node.done;
+  el.classList.toggle('done', node.done);
+  const textEl = document.getElementById('task-text-' + nodeId);
+  if (textEl) textEl.classList.toggle('done', node.done);
+  renderStream();
+  saveState();
+  if (navigator.vibrate) navigator.vibrate(12);
+}
+
+// ═══════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════
+
+const STORAGE_KEY = 'cortex_v1';
+
+function saveState() {
+  try {
+    const state = {
+      taskDone: nodes.filter(n => n.type === 'spec' && n.done).map(n => n.id),
+      userNodes: nodes.filter(n => n._user),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    // Restore task done states
+    if (state.taskDone) {
+      state.taskDone.forEach(id => {
+        const node = nodes.find(n => n.id === id);
+        if (node) node.done = true;
+      });
+    }
+    // Restore user-composed nodes
+    if (state.userNodes && state.userNodes.length) {
+      state.userNodes.forEach(n => { n._user = true; nodes.push(n); });
+    }
+  } catch(e) {}
+}
+
+function saveScrollPos() {
+  try {
+    const stream = document.getElementById('stream');
+    localStorage.setItem(STORAGE_KEY + '_scroll', stream.scrollTop);
+  } catch(e) {}
+}
+
+function restoreScrollPos() {
+  try {
+    const pos = parseInt(localStorage.getItem(STORAGE_KEY + '_scroll') || '0');
+    if (pos > 0) {
+      const stream = document.getElementById('stream');
+      stream.scrollTop = pos;
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+// FIELD SYSTEM
+// ═══════════════════════════════════════
+
+function openField() {
+  document.body.classList.add('field-open');
+  document.getElementById('field').classList.add('field-focused');
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function closeField() {
+  document.body.classList.remove('field-open');
+  document.getElementById('field').classList.remove('field-focused');
+}
+
+function openCluster(cluster) {
+  closeField();
+  // Brief delay then open cluster dive
+  setTimeout(() => {
+    const clusterNodes = nodes.filter(n => n.cluster === cluster && n.type !== 'ch' && n.type !== 'label');
+    const c = CLUSTERS[cluster];
+
+    const body = document.getElementById('dive-body');
+    const typeLabel = document.getElementById('dive-type-label');
+    const typeDot = document.getElementById('dive-type-dot');
+
+    typeLabel.textContent = c.label + ' Cluster';
+    typeDot.style.background = c.color;
+
+    let items = clusterNodes.map(n => {
+      let preview = '';
+      if (n.type === 'body') preview = n.text.substring(0, 60) + '…';
+      else if (n.type === 'poster') preview = n.text.replace('\\n', ' ').substring(0, 60) + '…';
+      else if (n.type === 'spec') preview = n.key + ' :: ' + n.val;
+      else if (n.type === 'media' || n.type === 'longform') preview = n.title;
+      else if (n.type === 'pull') preview = n.text.substring(0, 60) + '…';
+      return `<div class="cluster-node-item" onclick="closeDive();setTimeout(()=>diveInto(${n.id}),200)">
+        <span class="cni-type">${n.type}</span>
+        <span class="cni-text">${preview}</span>
+        <span class="cni-arrow">›</span>
+      </div>`;
+    }).join('');
+
+    body.innerHTML = `<div class="dive-cluster-header" style="border-left:2px solid ${c.color};padding-left:18px;">
+      <div class="dive-cluster-name" style="color:${c.color}">${c.label}</div>
+      <div class="dive-cluster-count">${clusterNodes.length} nodes</div>
+    </div>
+    <div class="cluster-node-list">${items}</div>`;
+
+    document.body.classList.add('dive-open');
+  }, 320);
+}
+
+// ═══════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════
+
+const filters = ['all', 'media', 'notes', 'tasks', 'long'];
+let filterIdx = 0;
+
+function cycleFilter() {
+  filterIdx = (filterIdx + 1) % filters.length;
+  activeFilter = filters[filterIdx];
+  document.getElementById('filter-btn').textContent = activeFilter;
+  updateDockActive();
+  renderStream();
+}
+
+function filterCluster(cluster) {
+  if (activeFilter === cluster) {
+    activeFilter = 'all';
+    filterIdx = 0;
+    document.getElementById('filter-btn').textContent = 'all';
+  } else {
+    activeFilter = cluster;
+    filterIdx = filters.indexOf(cluster);
+    document.getElementById('filter-btn').textContent = cluster;
+  }
+  updateDockActive();
+  renderStream();
+  if (navigator.vibrate) navigator.vibrate(6);
+}
+
+function updateDockActive() {
+  document.querySelectorAll('.dock-cluster').forEach(el => {
+    const c = el.onclick?.toString().match(/'(\w+)'/)?.[1];
+    el.classList.toggle('active', c === activeFilter || activeFilter === 'all');
+  });
+}
+
+// ═══════════════════════════════════════
+// COMPOSE — mode-aware
+// ═══════════════════════════════════════
+
+let composeMode = 'note';    // note | task | media | longform
+let noteType    = 'body';    // body | poster | pull | label
+let noteCluster = 'notes';
+let taskCluster = 'tasks';
+let taskPriority = 'med';
+let mediaDataUrl = null;
+let mediaFileName = null;
+
+const MODE_TITLES = { note:'New Note', task:'New Task', media:'New Media', longform:'Long-form' };
+const MODE_CLUSTERS = { note: 'noteCluster', task: 'taskCluster' };
+
+function openCompose(preMode) {
+  const mode = preMode || composeMode;
+  switchComposeMode(mode, true);
+  document.body.classList.add('compose-open');
+  setTimeout(() => focusComposeMode(mode), 420);
+}
+
+function focusComposeMode(mode) {
+  const map = { note:'note-input', task:'task-title-input', media:'media-title-input', longform:'longform-title-input' };
+  const el = document.getElementById(map[mode]);
+  if (el) el.focus();
+}
+
+function closeCompose() {
+  document.body.classList.remove('compose-open','compose-longform');
+  // Clear all inputs
+  ['note-input','task-title-input','task-detail-input',
+   'media-title-input','media-desc-input','media-url-input',
+   'longform-title-input','longform-body-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  clearMediaFile();
+  updateWordCount();
+}
+
+function switchComposeMode(mode, skipBodyClass) {
+  composeMode = mode;
+  document.querySelectorAll('.compose-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  document.querySelectorAll('.compose-mode-body').forEach(b => b.classList.toggle('active', b.id === 'mode-'+mode));
+  document.getElementById('compose-title').textContent = MODE_TITLES[mode];
+  document.body.classList.toggle('compose-longform', mode === 'longform');
+  updateComposeHint();
+  if (mode === 'task') populateTaskExisting();
+}
+
+function selectNoteType(btn) {
+  document.querySelectorAll('.note-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  noteType = btn.dataset.ntype;
+  updateComposeHint();
+}
+
+function selectComposeCluster(btn, scope) {
+  const panel = btn.closest('.compose-mode-body');
+  panel.querySelectorAll('.compose-cluster-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (scope === 'note') noteCluster = btn.dataset.cluster;
+  else taskCluster = btn.dataset.cluster;
+  updateComposeHint();
+}
+
+function selectTaskPri(btn) {
+  document.querySelectorAll('.task-pri-btn').forEach(b => {
+    b.classList.remove('active-high','active-med','active-low');
+  });
+  taskPriority = btn.dataset.pri;
+  btn.classList.add('active-' + taskPriority);
+  updateComposeHint();
+}
+
+function updateComposeHint() {
+  const hint = document.getElementById('compose-commit-hint');
+  if (!hint) return;
+  if (composeMode === 'note') hint.textContent = noteType + ' · ' + noteCluster;
+  else if (composeMode === 'task') hint.textContent = 'task · ' + taskPriority + ' priority';
+  else if (composeMode === 'media') hint.textContent = 'media node';
+  else if (composeMode === 'longform') hint.textContent = 'long-form · long cluster';
+}
+
+function populateTaskExisting() {
+  const container = document.getElementById('task-existing');
+  const tasks = nodes.filter(n => n.type === 'spec');
+  if (!tasks.length) { container.innerHTML = '<div class="task-existing-label">No tasks yet</div>'; return; }
+  container.innerHTML = '<div class="task-existing-label">In queue</div>' + tasks.map(t =>
+    `<div class="task-existing-item">
+      <div class="tei-check ${t.done?'done':''}" onclick="toggleTaskInline(${t.id},this)">
+        ${t.done?'✓':''}
+      </div>
+      <span class="tei-text ${t.done?'done':''}" id="tei-${t.id}">${t.key}: ${t.val}</span>
+    </div>`
+  ).join('');
+}
+
+function toggleTaskInline(id, el) {
+  const node = nodes.find(n => n.id === id);
+  if (!node) return;
+  node.done = !node.done;
+  el.classList.toggle('done', node.done);
+  el.textContent = node.done ? '✓' : '';
+  const text = document.getElementById('tei-' + id);
+  if (text) text.classList.toggle('done', node.done);
+  renderStream();
+  saveState();
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ── Media upload ──
+function handleMediaFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  mediaFileName = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    mediaDataUrl = e.target.result;
+    const img = document.getElementById('media-preview-img');
+    const wrap = document.getElementById('media-preview-wrap');
+    const zone = document.getElementById('media-drop-zone');
+    if (file.type.startsWith('image/')) {
+      img.src = mediaDataUrl;
+      wrap.classList.add('has-media');
+      zone.style.display = 'none';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearMediaFile() {
+  mediaDataUrl = null; mediaFileName = null;
+  const img = document.getElementById('media-preview-img');
+  const wrap = document.getElementById('media-preview-wrap');
+  const zone = document.getElementById('media-drop-zone');
+  const inp = document.getElementById('media-file-input');
+  if (img) img.src = '';
+  if (wrap) wrap.classList.remove('has-media');
+  if (zone) zone.style.display = '';
+  if (inp) inp.value = '';
+}
+
+// Drag-over styling
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('media-drop-zone');
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('media-file-input').files = dt.files;
+        handleMediaFile(document.getElementById('media-file-input'));
+      }
+    });
+  }
+});
+
+// ── Longform toolbar ──
+function lfInsert(before, after) {
+  const ta = document.getElementById('longform-body-input');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.substring(s, e);
+  ta.setRangeText(before + sel + after, s, e, 'select');
+  ta.focus();
+  updateWordCount();
+}
+
+function lfInsertLine(prefix) {
+  const ta = document.getElementById('longform-body-input');
+  const s = ta.selectionStart;
+  const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+  ta.setRangeText(prefix, lineStart, lineStart, 'end');
+  ta.focus();
+  updateWordCount();
+}
+
+function updateWordCount() {
+  const ta = document.getElementById('longform-body-input');
+  const wc = document.getElementById('longform-wordcount');
+  if (!ta || !wc) return;
+  const count = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+  wc.textContent = count + ' word' + (count !== 1 ? 's' : '');
+}
+
+// ── Commit ──
+function commitNode() {
+  let newNode = { id: Date.now(), _user: true };
+
+  if (composeMode === 'note') {
+    const text = document.getElementById('note-input').value.trim();
+    if (!text) return;
+    newNode.type = noteType;
+    newNode.cluster = noteCluster;
+    newNode.text = text;
+
+  } else if (composeMode === 'task') {
+    const title = document.getElementById('task-title-input').value.trim();
+    if (!title) return;
+    const detail = document.getElementById('task-detail-input').value.trim();
+    newNode.type = 'spec';
+    newNode.cluster = 'tasks';
+    newNode.key = title;
+    newNode.val = detail || '—';
+    newNode.done = false;
+    newNode._priority = taskPriority;
+
+  } else if (composeMode === 'media') {
+    const title = document.getElementById('media-title-input').value.trim();
+    const desc  = document.getElementById('media-desc-input').value.trim();
+    const url   = document.getElementById('media-url-input').value.trim();
+    if (!title && !mediaDataUrl) return;
+    newNode.type = 'media';
+    newNode.cluster = 'media';
+    newNode.title = title || 'Untitled Media';
+    newNode.caption = desc;
+    newNode.src = mediaDataUrl;
+    newNode.thumbBg = '#1a1e2a';
+    if (url) newNode.url = url;
+
+  } else if (composeMode === 'longform') {
+    const title = document.getElementById('longform-title-input').value.trim();
+    const body  = document.getElementById('longform-body-input').value.trim();
+    if (!title && !body) return;
+    const bodyNodes = body ? body.split('\n\n').filter(Boolean).map(t => ({ type:'body', text:t })) : [];
+    newNode.type = 'longform';
+    newNode.cluster = 'long';
+    newNode.title = title || 'Untitled';
+    newNode.excerpt = body.substring(0, 120) + (body.length > 120 ? '…' : '');
+    newNode.nodes = bodyNodes;
+  }
+
+  nodes.push(newNode);
+  closeCompose();
+  renderStream();
+  saveState();
+
+  setTimeout(() => {
+    const stream = document.getElementById('stream');
+    stream.scrollTo({ top: stream.scrollHeight, behavior: 'smooth' });
+  }, 100);
+  if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+}
+
+// ═══════════════════════════════════════
+// PROGRESS
+// ═══════════════════════════════════════
+
+function updateProgress() {
+  const stream = document.getElementById('stream');
+  const progress = document.getElementById('progress');
+  const nudge = document.getElementById('scroll-nudge');
+
+  stream.addEventListener('scroll', () => {
+    const pct = stream.scrollTop / (stream.scrollHeight - stream.clientHeight);
+    progress.style.width = (pct * 100) + '%';
+    nudge.classList.toggle('visible', stream.scrollTop < 40);
+  }, { passive: true });
+}
+
+// ═══════════════════════════════════════
+// SWIPE TO CLOSE DIVE
+// ═══════════════════════════════════════
+
+(function() {
+  let startY = 0;
+  const panel = document.getElementById('dive-panel');
+
+  panel.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  panel.addEventListener('touchmove', e => {
+    const dy = e.touches[0].clientY - startY;
+    if (dy > 0 && panel.querySelector('.dive-body').scrollTop === 0) {
+      panel.style.transform = `translateY(${dy}px)`;
+      panel.style.transition = 'none';
+    }
+  }, { passive: true });
+
+  panel.addEventListener('touchend', e => {
+    const dy = e.changedTouches[0].clientY - startY;
+    panel.style.transition = '';
+    panel.style.transform = '';
+    if (dy > 80) closeDive();
+  });
+})();
+
+// ═══════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeDive();
+    closeCompose();
+    closeField();
+  }
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+
+loadState();
+renderStream();
+restoreScrollPos();
+
+// Save scroll position periodically
+document.getElementById('stream').addEventListener('scroll', saveScrollPos, { passive:true });
+
+// Longform word count
+const lfBody = document.getElementById('longform-body-input');
+if (lfBody) lfBody.addEventListener('input', updateWordCount);
+
+// Show scroll nudge briefly on load
+setTimeout(() => {
+  document.getElementById('scroll-nudge').classList.add('visible');
+  setTimeout(() => document.getElementById('scroll-nudge').classList.remove('visible'), 2200);
+}, 800);
+</script>
+</body>
+</html>

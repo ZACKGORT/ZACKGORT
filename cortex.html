@@ -551,6 +551,153 @@ body::after {
 .kbd { display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-family:var(--mono); background:var(--bg-3); border:1px solid var(--border-2); border-radius:3px; padding:1px 5px; color:var(--ink-3); letter-spacing:0; }
 
 /* ══════════════════════════════════════════
+   NOTES GHOST OVERLAY — inline sentence editor
+   Appears floating over the nc-stream when a
+   sentence node is clicked.
+══════════════════════════════════════════ */
+#nc-ghost-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0); pointer-events: none;
+  transition: background 0.2s ease;
+}
+#nc-ghost-overlay.open {
+  display: block;
+  background: rgba(10,9,8,0.38);
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+}
+#nc-ghost-panel {
+  position: absolute;
+  /* Positioned dynamically by JS near the clicked node */
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-left: 2px solid var(--c-notes);
+  border-radius: 6px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.12);
+  width: min(580px, calc(100vw - 48px));
+  max-height: 72vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  transform: translateY(-4px);
+  transition: transform 0.2s ease, opacity 0.18s ease;
+  opacity: 0;
+}
+#nc-ghost-overlay.open #nc-ghost-panel {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Ghost header: type pills + delete btn */
+.nc-ghost-header {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nc-ghost-type-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 8px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.12s;
+}
+.nc-ghost-type-btn:hover { border-color: var(--c-notes); color: var(--c-notes); }
+.nc-ghost-type-btn.active {
+  color: var(--c-notes); border-color: var(--c-notes);
+  background: rgba(196,98,58,0.08);
+}
+.dark .nc-ghost-type-btn.active { background: rgba(217,119,87,0.10); }
+
+/* Ghost format toolbar */
+.nc-ghost-fmt-bar {
+  display: flex; align-items: center; gap: 2px;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nc-ghost-fmt-btn {
+  background: none; border: 1px solid transparent; border-radius: 3px;
+  padding: 2px 6px; font-size: 10px; font-family: var(--mono);
+  color: var(--ink-3); cursor: pointer; line-height: 1; transition: all 0.1s;
+}
+.nc-ghost-fmt-btn:hover { border-color: var(--border-2); color: var(--ink-2); }
+.nc-ghost-fmt-sep { width: 1px; height: 12px; background: var(--border-2); margin: 0 3px; flex-shrink: 0; }
+.nc-ghost-undo-btn {
+  background: none; border: none; font-size: 10px;
+  color: var(--ink-3); cursor: pointer; padding: 2px 5px; line-height: 1;
+  transition: color 0.1s;
+}
+.nc-ghost-undo-btn:hover { color: var(--ink); }
+
+/* Ghost delete — pushed to the right, shows on panel hover */
+.nc-ghost-del-btn {
+  margin-left: auto;
+  background: none; border: 1px solid transparent; border-radius: 3px;
+  padding: 3px 8px; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,80,60,0.4); cursor: pointer; transition: all 0.15s;
+  font-family: var(--mono);
+}
+.nc-ghost-del-btn:hover {
+  border-color: rgba(255,80,60,0.5);
+  color: rgba(255,80,60,0.8);
+  background: rgba(255,80,60,0.05);
+}
+
+/* Ghost editable area */
+#nc-ghost-input {
+  padding: 14px 16px 10px;
+  min-height: 64px; max-height: 260px;
+  overflow-y: auto;
+  outline: none;
+  color: var(--ink); caret-color: var(--c-notes);
+  line-height: 1.75;
+  transition: font-size 0.18s, font-family 0.18s, font-style 0.18s;
+}
+#nc-ghost-input::-webkit-scrollbar { width: 3px; }
+#nc-ghost-input::-webkit-scrollbar-thumb { background: var(--border-2); }
+#nc-ghost-input.style-body   { font-family: var(--mono); font-size: 15px; }
+#nc-ghost-input.style-poster { font-family: var(--disp); font-size: 26px; line-height: 1.2; }
+#nc-ghost-input.style-pull   { font-family: var(--disp); font-style: italic; font-size: 19px; line-height: 1.45; color: var(--ink-2); border-left: 2px solid var(--c-notes); padding-left: 14px; }
+#nc-ghost-input.style-label  { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--c-notes); }
+
+/* Ghost footer: hint + save */
+.nc-ghost-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nc-ghost-hint {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.nc-ghost-save-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--c-notes); color: #fff; border: none;
+  padding: 6px 14px; border-radius: 3px; cursor: pointer; transition: opacity 0.15s;
+}
+.nc-ghost-save-btn:hover { opacity: 0.85; }
+
+/* Node hover — show subtle delete affordance */
+.node.nc-deletable { position: relative; }
+.node.nc-deletable .nc-node-del {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: 1px solid transparent; border-radius: 3px;
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--ink-3); cursor: pointer;
+  opacity: 0; transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+}
+.node.nc-deletable:hover .nc-node-del {
+  opacity: 1;
+  border-color: rgba(255,80,60,0.3);
+  color: rgba(255,80,60,0.6);
+}
+.node.nc-deletable .nc-node-del:hover {
+  border-color: rgba(255,80,60,0.7) !important;
+  color: rgba(255,80,60,0.9) !important;
+  background: rgba(255,80,60,0.05) !important;
+}
+
+/* ══════════════════════════════════════════
    NOTES CANVAS — full writing surface
 ══════════════════════════════════════════ */
 #notes-canvas {
@@ -899,89 +1046,122 @@ body.cluster-long #long-beckon-wrap { display: block; }
 /* Sentence parse review widget */
 #parse-widget {
   display: none;
-  position: fixed; inset: 0; z-index: 700;
-  background: rgba(10,9,8,0.72); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center;
+  position: fixed;
+  left: 50%; bottom: 72px;
+  transform: translateX(-50%);
+  z-index: 700;
+  width: min(780px, calc(100vw - 40px));
+  max-height: 52vh;
+  pointer-events: none;
 }
-#parse-widget.open { display: flex; }
+#parse-widget.open { display: flex; flex-direction: column; pointer-events: auto; }
 #parse-panel {
-  background: var(--bg-2); border: 1px solid var(--border-2);
-  border-radius: 10px;
-  width: min(680px, calc(100vw - 32px));
-  max-height: 82vh;
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
   display: flex; flex-direction: column;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  max-height: 52vh;
   overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.08);
 }
 .parse-header {
-  padding: 18px 24px 14px;
+  padding: 10px 16px 10px 12px;
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; gap: 8px;
   flex-shrink: 0;
+  cursor: grab; user-select: none;
 }
-.parse-header-title { font-family: var(--disp); font-size: 18px; color: var(--ink); }
-.parse-header-sub { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 3px; }
-.parse-close { background: none; border: 1px solid var(--border-2); color: var(--ink-2); font-size: 11px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.parse-header:active { cursor: grabbing; }
+.parse-drag-grip {
+  color: var(--ink-3); font-size: 11px; letter-spacing: -2px;
+  opacity: 0.5; flex-shrink: 0; line-height: 1;
+}
+.parse-header-title {
+  font-family: var(--disp); font-size: 15px; color: var(--ink);
+  flex: 1;
+}
+.parse-header-sub {
+  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); flex-shrink: 0;
+}
+.parse-close {
+  background: none; border: 1px solid var(--border-2); color: var(--ink-2);
+  font-size: 11px; width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
 .parse-close:hover { border-color: var(--accent); color: var(--accent); }
 
 /* Batch bar */
 .parse-batch-bar {
-  padding: 8px 24px;
+  padding: 6px 16px;
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 6px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 5px;
+  flex-shrink: 0; flex-wrap: wrap;
+  background: var(--bg-4);
 }
-.parse-batch-label { font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin-right: 4px; }
+.parse-batch-label {
+  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-3); margin-right: 2px;
+}
 .parse-batch-btn {
   font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  padding: 3px 9px; border: 1px solid var(--border-2); border-radius: 20px;
   color: var(--ink-3); background: none; cursor: pointer; transition: all 0.14s;
 }
-.parse-batch-btn:hover { border-color: var(--ink-2); color: var(--ink-2); }
+.parse-batch-btn:hover { border-color: var(--c-long); color: var(--c-long); }
 
+/* Sentence list */
 .parse-sentences {
-  flex: 1; overflow-y: auto; padding: 16px 24px;
+  flex: 1; overflow-y: auto; padding: 0;
 }
 .parse-sentences::-webkit-scrollbar { width: 3px; }
 .parse-sentences::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
 
 .parse-row {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px;
   border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
 }
 .parse-row:last-child { border-bottom: none; }
+.parse-row:hover { background: var(--bg-2); }
 .parse-row-num {
-  font-size: 8px; letter-spacing: 0.1em; color: var(--ink-3);
-  padding-top: 3px; flex-shrink: 0; min-width: 18px;
-  font-family: var(--mono);
+  font-size: 7px; letter-spacing: 0.1em; color: var(--ink-3);
+  flex-shrink: 0; min-width: 14px; font-family: var(--mono);
+  padding-top: 1px;
 }
 .parse-row-text {
-  flex: 1; font-family: var(--text); font-size: 15px; line-height: 1.65; color: var(--ink);
+  flex: 1; font-family: var(--text); font-size: 14px;
+  line-height: 1.55; color: var(--ink);
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 .parse-row-types {
-  display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;
-  max-width: 140px;
+  display: flex; gap: 3px; flex-shrink: 0;
 }
 .parse-type-btn {
-  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 3px 7px; border: 1px solid var(--border-2); border-radius: 20px;
-  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.12s;
+  font-size: 6px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 9px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer;
+  transition: all 0.12s; white-space: nowrap;
 }
-.parse-type-btn.active { color: var(--c-long); border-color: var(--c-long); background: rgba(128,96,168,0.08); }
+.parse-type-btn:hover { border-color: var(--c-long); color: var(--c-long); }
+.parse-type-btn.active {
+  color: #fff; border-color: var(--c-long);
+  background: var(--c-long);
+}
 
 .parse-footer {
-  padding: 14px 24px;
+  padding: 10px 16px;
   border-top: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
+  background: var(--bg-4);
 }
-.parse-count { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
 .parse-commit-btn {
   font-family: var(--mono); font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
   background: var(--c-long); color: #fff; border: none;
-  padding: 10px 22px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+  padding: 9px 20px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
 }
 .parse-commit-btn:hover { opacity: 0.85; }
 
@@ -1261,6 +1441,16 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 .minimap-orb { animation: orbPulse 4s ease-in-out infinite; }
 
 /* ═══════════════════════════════════════
+   DESKTOP-ONLY elements (hide on mobile)
+═══════════════════════════════════════ */
+#dock { display: none; }
+.scroll-nudge { display: none; }
+#dive-sheet { display: none; }
+.compose-backdrop-mobile { display: none; }
+.compose-handle { display: none; }
+#hud-brand { display: none; }
+
+/* ═══════════════════════════════════════
    MOBILE OVERRIDES (< 768px)
 ═══════════════════════════════════════ */
 @media (max-width: 767px) {
@@ -1427,16 +1617,6 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
   .field-overlay-close { font-size: 8px; padding: 6px 12px; }
 }
 
-/* ═══════════════════════════════════════
-   DESKTOP-ONLY elements (hide on mobile)
-═══════════════════════════════════════ */
-#dock { display: none; }
-.scroll-nudge { display: none; }
-#dive-sheet { display: none; }
-.compose-backdrop-mobile { display: none; }
-.compose-handle { display: none; }
-#hud-brand { display: none; }
-
 @media (max-width: 767px) {
   .scroll-nudge { display: flex; }
   #dive-sheet { display: block; }
@@ -1470,6 +1650,34 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
   <div class="field-canvas-wrap" id="field-canvas-wrap">
     <div class="field-canvas-inner" id="field-canvas-inner">
       <div id="field-nodes-layer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NC GHOST OVERLAY — inline sentence editor for Notes canvas ═══ -->
+<div id="nc-ghost-overlay" onclick="ncGhostBackdropClick(event)">
+  <div id="nc-ghost-panel">
+    <div class="nc-ghost-header">
+      <button class="nc-ghost-type-btn active" data-ghosttype="body"   onclick="ncGhostSetType(this)">body</button>
+      <button class="nc-ghost-type-btn"         data-ghosttype="poster" onclick="ncGhostSetType(this)">poster</button>
+      <button class="nc-ghost-type-btn"         data-ghosttype="pull"   onclick="ncGhostSetType(this)">pull</button>
+      <button class="nc-ghost-type-btn"         data-ghosttype="label"  onclick="ncGhostSetType(this)">label</button>
+      <button class="nc-ghost-del-btn" onclick="ncGhostDelete()">✕ delete</button>
+    </div>
+    <div class="nc-ghost-fmt-bar">
+      <button class="nc-ghost-fmt-btn" title="Bold (⌘B)" onclick="ncGhostFmt('bold')"><b>B</b></button>
+      <button class="nc-ghost-fmt-btn" title="Italic (⌘I)" onclick="ncGhostFmt('italic')"><i>I</i></button>
+      <button class="nc-ghost-fmt-btn" title="Underline (⌘U)" onclick="ncGhostFmt('underline')"><u>U</u></button>
+      <button class="nc-ghost-fmt-btn" title="Strikethrough" onclick="ncGhostFmt('strikeThrough')"><s>S</s></button>
+      <div class="nc-ghost-fmt-sep"></div>
+      <button class="nc-ghost-undo-btn" title="Undo" onclick="document.execCommand('undo')">↩</button>
+      <button class="nc-ghost-undo-btn" title="Redo" onclick="document.execCommand('redo')">↪</button>
+    </div>
+    <div id="nc-ghost-input" class="style-body" contenteditable="true"
+      onkeydown="ncGhostKeydown(event)"></div>
+    <div class="nc-ghost-footer">
+      <span class="nc-ghost-hint"><kbd class="kbd">⌘↵</kbd> save &middot; <kbd class="kbd">Esc</kbd> cancel</span>
+      <button class="nc-ghost-save-btn" onclick="ncGhostSave()">Save →</button>
     </div>
   </div>
 </div>
@@ -1529,11 +1737,13 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       </div>
     </div>
 
-    <!-- TASK -->
+    <!-- TASK — purpose-built capture widget -->
     <div class="compose-mode-body" id="mode-task">
       <div class="task-input-wrap">
-        <input class="task-title-input" id="task-title-input" type="text" placeholder="What needs to happen?" autocomplete="off">
-        <textarea class="task-detail-input" id="task-detail-input" placeholder="Detail or context (optional)" rows="3"></textarea>
+        <input class="task-title-input" id="task-title-input" type="text"
+          placeholder="What needs to happen?"
+          autocomplete="off"
+          onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();commitTask();}">
       </div>
       <div class="task-priority-row">
         <span class="task-priority-label">Priority</span>
@@ -1546,7 +1756,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       </div>
       <div class="compose-commit-bar">
         <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> to add</span>
-        <button class="compose-commit-btn" onclick="commitTask()">Add Task</button>
+        <button class="compose-commit-btn" style="background:var(--c-tasks)" onclick="commitTask()">Add Task ◎</button>
       </div>
     </div>
 
@@ -1567,18 +1777,32 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       <input class="media-url-input" id="media-url-input" type="url" placeholder="URL or source (optional)">
       <div class="compose-commit-bar">
         <span class="compose-commit-hint">title required</span>
-        <button class="compose-commit-btn" onclick="commitMedia()">Save Media</button>
+        <button class="compose-commit-btn" style="background:var(--c-media)" onclick="commitMedia()">Save Media ▶</button>
       </div>
     </div>
 
-    <!-- LONGFORM -->
+    <!-- LONGFORM — sentence parse protocol integrated -->
     <div class="compose-mode-body" id="mode-longform">
-      <input class="longform-title-input" id="longform-title-input" type="text" placeholder="Document title…" autocomplete="off"
-        onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();commitLongform();}">
-      <div class="longform-excerpt-hint">A new long-form document. Open it after creating to build its node structure in the editor.</div>
+      <div style="padding:10px 20px 0;flex-shrink:0;">
+        <input class="longform-title-input" id="longform-title-input" type="text"
+          placeholder="Document title (optional)…" autocomplete="off"
+          style="padding:8px 0 10px;font-size:15px;border-bottom:1px solid var(--border);width:100%;background:none;border-left:none;border-right:none;border-top:none;outline:none;color:var(--ink);font-family:var(--disp);caret-color:var(--c-long);">
+      </div>
+      <div style="padding:6px 20px 0;flex-shrink:0;display:flex;align-items:center;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--border);">
+        <span style="font-size:7px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);margin-right:6px;">format</span>
+        <button class="note-fmt-btn" title="Bold" onclick="noteFmtTextarea('longform-ta','**','**')"><b>B</b></button>
+        <button class="note-fmt-btn" title="Italic" onclick="noteFmtTextarea('longform-ta','*','*')"><i>I</i></button>
+        <div class="note-fmt-sep"></div>
+        <span style="font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);margin-left:4px;">write freely · sentences parsed on commit</span>
+      </div>
+      <textarea class="longform-body" id="longform-ta" rows="7"
+        placeholder="The thought arrives whole. Write it. Don't stop to classify it.&#10;&#10;Sentences will be split and typed on parse."
+        onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){event.preventDefault();triggerLongformParse();}"
+        oninput="updateLongformCount()"></textarea>
+      <div class="longform-wordcount" id="longform-wordcount">0 words</div>
       <div class="compose-commit-bar">
-        <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> create</span>
-        <button class="compose-commit-btn" onclick="commitLongform()">Create Document →</button>
+        <span class="compose-commit-hint"><kbd class="kbd">⌘↵</kbd> parse sentences</span>
+        <button class="compose-commit-btn" style="background:var(--c-long)" onclick="triggerLongformParse()">Parse &amp; Review →</button>
       </div>
     </div>
   </div>
@@ -1682,7 +1906,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 
     <!-- Tasks beckon — shown when cluster=tasks -->
     <div id="tasks-beckon-wrap">
-      <div class="beckon-bar" id="tasks-beckon-bar" onclick="openTasksPanel()">
+      <div class="beckon-bar" id="tasks-beckon-bar" onclick="openCompose('task')">
         <div class="beckon-dot tasks-dot"></div>
         <span class="beckon-prompt-text">What needs to happen?</span>
         <span class="beckon-hint-text">click to add</span>
@@ -1691,7 +1915,7 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 
     <!-- Long-form beckon — shown when cluster=long -->
     <div id="long-beckon-wrap">
-      <div class="beckon-bar" id="long-beckon-bar" onclick="openLongPanel()">
+      <div class="beckon-bar" id="long-beckon-bar" onclick="openCompose('longform')">
         <div class="beckon-dot long-dot"></div>
         <span class="beckon-prompt-text">Write freely — sentences will be parsed on submit.</span>
         <span class="beckon-hint-text">click to write</span>
@@ -1872,15 +2096,14 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 <!-- ── Sentence parse widget ── -->
 <div id="parse-widget">
   <div id="parse-panel">
-    <div class="parse-header">
-      <div>
-        <div class="parse-header-title">Review sentences</div>
-        <div class="parse-header-sub">Assign a node type — or batch-set all</div>
-      </div>
+    <div class="parse-header" id="parse-drag-handle">
+      <span class="parse-drag-grip">⋮⋮</span>
+      <div class="parse-header-title">Review sentences</div>
+      <span class="parse-header-sub" id="parse-count">0 sentences</span>
       <button class="parse-close" onclick="closeParse()">✕</button>
     </div>
     <div class="parse-batch-bar">
-      <span class="parse-batch-label">Set all to</span>
+      <span class="parse-batch-label">Set all →</span>
       <button class="parse-batch-btn" onclick="batchSetType('body')">body</button>
       <button class="parse-batch-btn" onclick="batchSetType('poster')">poster</button>
       <button class="parse-batch-btn" onclick="batchSetType('pull')">pull</button>
@@ -1888,8 +2111,8 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
     </div>
     <div class="parse-sentences" id="parse-sentences"></div>
     <div class="parse-footer">
-      <span class="parse-count" id="parse-count">0 sentences</span>
-      <button class="parse-commit-btn" onclick="commitParsed()">Commit to stream →</button>
+      <span style="font-family:var(--mono);font-size:7px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3)">Drag to reposition</span>
+      <button class="parse-commit-btn" onclick="commitParsed()">Package as document →</button>
     </div>
   </div>
 </div>
@@ -2302,18 +2525,31 @@ function renderNcStream() {
     const cc = CLUSTERS.notes.color;
     const dot = `<div class="node-cluster-dot" style="background:${cc}"></div>`;
     const click = `onclick="ncNodeClick(${id})"`;
+    const delBtn = `<button class="nc-node-del" onclick="event.stopPropagation();deleteNcNode(${id})" title="Delete node">✕</button>`;
     if (node.type === 'label') {
-      html += `<div class="node label" data-id="${id}" ${click}>${node.text}${dot}</div>`;
+      html += `<div class="node label nc-deletable" data-id="${id}" ${click}>${node.text}${dot}${delBtn}</div>`;
     } else if (node.type === 'poster') {
       const lines = node.text.split('\n').map(l => applyInline(l)).join('<br>');
-      html += `<div class="node poster" data-id="${id}" ${click}>${lines}${dot}</div>`;
+      html += `<div class="node poster nc-deletable" data-id="${id}" ${click}>${lines}${dot}${delBtn}</div>`;
     } else if (node.type === 'body') {
-      html += `<div class="node body" data-id="${id}" ${click}>${applyInline(node.text)}${dot}</div>`;
+      html += `<div class="node body nc-deletable" data-id="${id}" ${click}>${applyInline(node.text)}${dot}${delBtn}</div>`;
     } else if (node.type === 'pull') {
-      html += `<div class="node pull" data-id="${id}" ${click}>${applyInline(node.text)}</div>`;
+      html += `<div class="node pull nc-deletable" data-id="${id}" ${click}>${applyInline(node.text)}${delBtn}</div>`;
     }
   });
   inner.innerHTML = html || '<div class="stream-empty" style="padding:40px 0">Notes canvas is empty.<br><span style="opacity:0.5">Begin writing below.</span></div>';
+}
+
+function deleteNcNode(nodeId) {
+  const idx = nodes.findIndex(n => n.id === nodeId);
+  if (idx < 0) return;
+  nodes.splice(idx, 1);
+  renderNcStream();
+  renderStream();
+  renderSpine();
+  updateNavCounts();
+  saveState();
+  if (navigator.vibrate) navigator.vibrate(20);
 }
 
 function ncExport() {
@@ -2461,7 +2697,7 @@ function renderParseWidget() {
     ).join('');
     return `<div class="parse-row" data-parse-idx="${i}">
       <div class="parse-row-num">${i+1}</div>
-      <div class="parse-row-text">${s.text}</div>
+      <div class="parse-row-text" title="${s.text.replace(/"/g,'&quot;')}">${s.text}</div>
       <div class="parse-row-types">${typeBtns}</div>
     </div>`;
   }).join('');
@@ -2477,16 +2713,92 @@ function batchSetType(type) {
   renderParseWidget();
 }
 function commitParsed() {
-  parsedSentences.forEach(s => {
-    nodes.push({ id: nextId++, type: s.type, cluster: 'long', text: s.text, _user: true });
-  });
+  if (!parsedSentences.length) return;
+  // Package all parsed sentences as inner nodes of a new longform group
+  const innerNodes = parsedSentences.map(s => ({
+    id: Date.now() + Math.random(),
+    type: s.type,
+    text: s.text
+  }));
+  // Derive a title from the first poster or first sentence
+  const firstPoster = parsedSentences.find(s => s.type === 'poster');
+  const titleSource = firstPoster ? firstPoster.text : parsedSentences[0].text;
+  const autoTitle = titleSource.replace(/\*\*/g,'').replace(/\*/g,'').slice(0, 60).trim();
+  const newNode = {
+    id: nextId++, type: 'longform', cluster: 'long',
+    title: autoTitle,
+    excerpt: parsedSentences.filter(s => s.type === 'body').map(s => s.text).join(' ').slice(0, 140),
+    nodes: innerNodes,
+    _user: true
+  };
+  nodes.push(newNode);
   parsedSentences = [];
   closeParse();
   renderStream(); renderSpine(); updateNavCounts(); saveState();
-  setTimeout(() => { const s = document.getElementById('stream'); s.scrollTo({ top: s.scrollHeight, behavior: 'smooth' }); }, 100);
   if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+  // Open the newly created group in LFE so user lands inside it
+  setTimeout(() => openLFE(newNode.id), 220);
 }
-function closeParse() { document.getElementById('parse-widget').classList.remove('open'); }
+function closeParse() {
+  const w = document.getElementById('parse-widget');
+  w.classList.remove('open');
+  // Reset position so it starts fresh next time
+  w.style.left = '';
+  w.style.bottom = '';
+  w.style.transform = '';
+  w.style.top = '';
+}
+
+// ── Parse widget drag ──
+(function() {
+  let dragging = false, ox = 0, oy = 0;
+
+  function onDown(e) {
+    const handle = document.getElementById('parse-drag-handle');
+    if (!handle || !handle.contains(e.target)) return;
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    dragging = true;
+    const w = document.getElementById('parse-widget');
+    const rect = w.getBoundingClientRect();
+    const cx = e.clientX || (e.touches && e.touches[0].clientX);
+    const cy = e.clientY || (e.touches && e.touches[0].clientY);
+    ox = cx - rect.left;
+    oy = cy - rect.top;
+    // Switch from bottom-anchor to top-anchor
+    w.style.transform = 'none';
+    w.style.left = rect.left + 'px';
+    w.style.top  = rect.top  + 'px';
+    w.style.bottom = 'auto';
+    document.body.style.userSelect = 'none';
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const cx = e.clientX || (e.touches && e.touches[0].clientX);
+    const cy = e.clientY || (e.touches && e.touches[0].clientY);
+    const w = document.getElementById('parse-widget');
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const pr = w.getBoundingClientRect();
+    let nx = cx - ox, ny = cy - oy;
+    nx = Math.max(0, Math.min(nx, vw - pr.width));
+    ny = Math.max(0, Math.min(ny, vh - pr.height));
+    w.style.left = nx + 'px';
+    w.style.top  = ny + 'px';
+  }
+
+  function onUp() {
+    dragging = false;
+    document.body.style.userSelect = '';
+  }
+
+  document.addEventListener('mousedown',  onDown, { passive: false });
+  document.addEventListener('mousemove',  onMove, { passive: true });
+  document.addEventListener('mouseup',    onUp);
+  document.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('touchmove',  onMove, { passive: true });
+  document.addEventListener('touchend',   onUp);
+})();
 
 // ═══ SPINE NODE EDITOR ═══
 let _speNodeId = null;
@@ -2855,7 +3167,12 @@ function initFieldPan() {
 function openCompose(mode) {
   _clearNoteEditMode();
   document.body.classList.add('compose-open');
-  if (mode) switchComposeMode(mode);
+  // Auto-route to the right tab based on active cluster (unless mode is forced)
+  if (!mode) {
+    const clusterToMode = { notes:'note', tasks:'task', media:'media', long:'longform', all:'note' };
+    mode = clusterToMode[activeFilter] || 'note';
+  }
+  switchComposeMode(mode);
   refreshTaskExisting();
 }
 function closeCompose() {
@@ -2868,10 +3185,136 @@ function handleOverlayClick(e) { if (e.target === document.getElementById('compo
 function switchComposeMode(mode) {
   document.querySelectorAll('.compose-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
   document.querySelectorAll('.compose-mode-body').forEach(b => b.classList.remove('active'));
-  document.getElementById('mode-'+mode).classList.add('active');
-  document.getElementById('compose-title').textContent = 'New ' + mode;
+  const modeEl = document.getElementById('mode-'+mode);
+  if (modeEl) modeEl.classList.add('active');
+  const modeLabels = { note:'New note', task:'New task', media:'New media', longform:'New long-form' };
+  document.getElementById('compose-title').textContent = modeLabels[mode] || 'New node';
   document.body.classList.toggle('compose-longform', mode === 'longform');
   refreshTaskExisting();
+}
+
+// ═══ NOTES GHOST OVERLAY — inline editor for nc-stream nodes ═══
+let _ghostNodeId = null;
+let _ghostType = 'body';
+
+function ncNodeClick(nodeId) {
+  if (isMobile()) {
+    // Mobile: use compose panel
+    openNoteEdit(nodeId);
+    return;
+  }
+  openNcGhost(nodeId);
+}
+
+function openNcGhost(nodeId) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) return;
+
+  _ghostNodeId = nodeId;
+  _ghostType = node.type;
+
+  // Set type buttons
+  document.querySelectorAll('.nc-ghost-type-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.ghosttype === _ghostType)
+  );
+
+  // Load content into editable
+  const inp = document.getElementById('nc-ghost-input');
+  if (inp) {
+    inp.className = 'style-' + _ghostType;
+    inp.innerHTML = node.text || '';
+  }
+
+  // Position the panel near where the node sits in nc-stream
+  const nodeEl = document.querySelector(`#nc-stream-inner [data-id="${nodeId}"]`);
+  const panel = document.getElementById('nc-ghost-panel');
+
+  if (nodeEl && panel) {
+    const rect = nodeEl.getBoundingClientRect();
+    const panelW = Math.min(580, window.innerWidth - 48);
+    let left = rect.left;
+    let top = rect.bottom + 8;
+
+    // Keep within viewport
+    if (left + panelW > window.innerWidth - 16) left = window.innerWidth - panelW - 16;
+    if (left < 16) left = 16;
+    if (top + 300 > window.innerHeight - 16) top = rect.top - 16; // above if no room below
+
+    panel.style.left = left + 'px';
+    panel.style.top = top + 'px';
+    panel.style.bottom = 'auto';
+  } else if (panel) {
+    // Fallback: center
+    panel.style.left = '50%';
+    panel.style.top = '50%';
+    panel.style.transform = 'translate(-50%,-50%)';
+  }
+
+  document.getElementById('nc-ghost-overlay').classList.add('open');
+  setTimeout(() => inp?.focus(), 40);
+}
+
+function closeNcGhost() {
+  _ghostNodeId = null;
+  document.getElementById('nc-ghost-overlay').classList.remove('open');
+  const panel = document.getElementById('nc-ghost-panel');
+  if (panel) { panel.style.transform = ''; }
+}
+
+function ncGhostBackdropClick(e) {
+  if (e.target === document.getElementById('nc-ghost-overlay')) closeNcGhost();
+}
+
+function ncGhostSetType(btn) {
+  _ghostType = btn.dataset.ghosttype;
+  document.querySelectorAll('.nc-ghost-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const inp = document.getElementById('nc-ghost-input');
+  if (inp) inp.className = 'style-' + _ghostType;
+  inp?.focus();
+}
+
+function ncGhostFmt(cmd) {
+  document.getElementById('nc-ghost-input')?.focus();
+  document.execCommand(cmd);
+}
+
+function ncGhostKeydown(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); ncGhostSave(); }
+  if (e.key === 'Escape') { e.preventDefault(); closeNcGhost(); }
+  if (e.metaKey && e.key === 'b') { e.preventDefault(); ncGhostFmt('bold'); }
+  if (e.metaKey && e.key === 'i') { e.preventDefault(); ncGhostFmt('italic'); }
+  if (e.metaKey && e.key === 'u') { e.preventDefault(); ncGhostFmt('underline'); }
+}
+
+function ncGhostSave() {
+  if (_ghostNodeId === null) return;
+  const inp = document.getElementById('nc-ghost-input');
+  if (!inp) return;
+  const rawText = inp.innerText.trim();
+  if (!rawText) { closeNcGhost(); return; }
+
+  const node = nodes.find(n => n.id === _ghostNodeId);
+  if (node) {
+    const hasFormatting = /<(b|i|u|s|strong|em)[^>]*>/i.test(inp.innerHTML);
+    node.text = hasFormatting ? inp.innerHTML.trim() : rawText;
+    node.type = _ghostType;
+  }
+
+  closeNcGhost();
+  renderNcStream();
+  renderStream();
+  renderSpine();
+  saveState();
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function ncGhostDelete() {
+  if (_ghostNodeId === null) return;
+  const id = _ghostNodeId;
+  closeNcGhost();
+  deleteNode(id);
+  renderNcStream();
 }
 
 function selectNoteStyle(btn) {
@@ -3009,16 +3452,43 @@ function commitMedia() {
 }
 
 function commitLongform() {
-  const title = document.getElementById('longform-title-input').value.trim();
-  if (!title) { document.getElementById('longform-title-input').focus(); return; }
+  const title = document.getElementById('longform-title-input')?.value.trim() || '';
   const newNode = { id:nextId++, type:'longform', cluster:'long',
-    title, excerpt:'', nodes:[], _user:true };
+    title: title || 'Untitled draft', excerpt:'', nodes:[], _user:true };
   nodes.push(newNode);
-  document.getElementById('longform-title-input').value = '';
+  if (document.getElementById('longform-title-input')) document.getElementById('longform-title-input').value = '';
   renderStream(); updateNavCounts(); saveState();
   closeCompose();
-  // Open LFE immediately so user can build the document
   setTimeout(() => openLFE(newNode.id), 300);
+}
+
+function triggerLongformParse() {
+  const ta = document.getElementById('longform-ta');
+  if (!ta) return;
+  const raw = ta.value.trim();
+  if (!raw) return;
+  ta.value = '';
+  document.getElementById('longform-wordcount').textContent = '0 words';
+  closeCompose();
+  parseLongInput(raw);
+}
+
+function updateLongformCount() {
+  const ta = document.getElementById('longform-ta');
+  const wc = document.getElementById('longform-wordcount');
+  if (!ta || !wc) return;
+  const count = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+  wc.textContent = count + ' word' + (count !== 1 ? 's' : '');
+}
+
+function noteFmtTextarea(taId, pre, post) {
+  const ta = document.getElementById(taId);
+  if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const sel = ta.value.slice(s, e);
+  const wrapped = pre + sel + post;
+  ta.setRangeText(wrapped, s, e, 'select');
+  ta.focus();
 }
 
 function finishCommit() {
@@ -3152,12 +3622,12 @@ function initScrollNudge() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeDetail(); closeDive(); closeField(); closeCompose(); closeParse();
-    closeTasksPanel(); closeLongPanel(); closeSpineEditor();
+    closeTasksPanel(); closeLongPanel(); closeSpineEditor(); closeNcGhost();
   }
   if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !document.activeElement.matches('input,textarea,[contenteditable]')) {
     if (activeFilter === 'notes') document.getElementById('nc-input')?.focus();
-    else if (activeFilter === 'tasks') openTasksPanel();
-    else if (activeFilter === 'long') openLongPanel();
+    else if (activeFilter === 'tasks') openCompose('task');
+    else if (activeFilter === 'long') openCompose('longform');
     else openCompose();
   }
   if ((e.metaKey||e.ctrlKey) && e.key === 'Enter') {
@@ -3167,7 +3637,7 @@ document.addEventListener('keydown', e => {
       const mode = document.querySelector('.compose-tab.active')?.dataset.mode;
       if (mode==='note') commitNote();
       else if (mode==='task') commitTask();
-      else if (mode==='longform') commitLongform();
+      else if (mode==='longform') triggerLongformParse();
     }
   }
 });
@@ -3260,9 +3730,10 @@ body.lfe-open #layout { pointer-events: none; }
   text-transform: uppercase; color: var(--ink-3);
 }
 #lfe-stream {
-  flex: 1; overflow-y: auto; padding: 32px 48px 48px 48px;
+  flex: 1; overflow-y: auto; padding: 32px 48px 180px 48px;
   overflow-x: visible;
 }
+#lfe-preview.ghost-active #lfe-type-widget { opacity: 0; pointer-events: none; }
 #lfe-stream::-webkit-scrollbar { width: 2px; }
 #lfe-stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
 #lfe-stream .node { padding-left: 0; padding-right: 0; }
@@ -3387,7 +3858,6 @@ body.lfe-open #layout { pointer-events: none; }
 #lfe-arrange-wrap::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
 #lfe-rail.mode-arrange #lfe-canvas-wrap { display: none; }
 #lfe-rail.mode-arrange #lfe-arrange-wrap { display: block; }
-#lfe-rail.mode-arrange #lfe-palette { display: none; }
 
 .lfe-canvas-empty {
   display: flex; flex-direction: column; align-items: center;
@@ -3451,29 +3921,108 @@ body.lfe-open #layout { pointer-events: none; }
 }
 .lfe-del:hover { color: var(--accent); }
 
-/* Palette */
-#lfe-palette {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 4px; padding: 8px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-3); flex-shrink: 0;
+/* ── LFE Node Type Widget — compact draggable card ── */
+#lfe-type-widget {
+  position: absolute;
+  bottom: 80px; right: 20px;
+  z-index: 150;
+  display: none;
+  width: 220px;
+  background: var(--bg);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: opacity 0.18s;
 }
-.lfe-pal-btn {
-  position: relative; background: var(--bg-2);
-  border: 1px solid var(--border); border-radius: 2px;
-  padding: 8px 10px; cursor: pointer; text-align: left;
-  transition: border-color 0.14s, background 0.14s;
-  min-height: 44px; display: flex; flex-direction: column; justify-content: space-between;
-}
-.lfe-pal-btn:hover { border-color: var(--c-long); background: rgba(128,96,168,0.06); }
-.lfe-pal-btn.wide { grid-column: 1/-1; min-height: 32px; padding: 6px 10px; }
-.lfe-pal-type {
-  font-family: var(--mono); font-size: 8px; color: var(--c-long);
-  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1px;
-}
-.lfe-pal-hint { font-size: 7px; color: var(--ink-3); font-family: var(--mono); }
+body.lfe-open #lfe-type-widget { display: block; }
+#lfe-type-widget.hidden { opacity: 0; pointer-events: none; }
 
-/* Arrange view (simplified chip list) */
+#lfe-tw-handle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px 5px;
+  border-bottom: 1px solid var(--border);
+  cursor: grab; user-select: none;
+  background: var(--bg-3);
+}
+#lfe-tw-handle:active { cursor: grabbing; }
+#lfe-tw-grip {
+  color: var(--ink-3); font-size: 9px; letter-spacing: -2px; opacity: 0.6; line-height: 1;
+}
+#lfe-tw-label {
+  font-family: var(--mono); font-size: 6px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3); flex: 1; padding: 0 6px;
+}
+#lfe-tw-toggle {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-3); font-size: 10px; line-height: 1; padding: 1px 2px;
+  transition: color 0.12s;
+}
+#lfe-tw-toggle:hover { color: var(--c-long); }
+
+#lfe-tw-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px; padding: 6px;
+}
+#lfe-type-widget.collapsed #lfe-tw-body { display: none; }
+
+.lfe-tw-btn {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px 7px;
+  cursor: pointer; text-align: left;
+  transition: border-color 0.12s, background 0.12s;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.lfe-tw-btn:hover { border-color: var(--c-long); background: rgba(128,96,168,0.06); }
+.lfe-tw-btn:active { transform: scale(0.97); }
+.lfe-tw-btn.wide {
+  grid-column: 1/-1; flex-direction: row; align-items: center;
+  gap: 8px; padding: 6px 10px;
+}
+.lfe-tw-type {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--c-long); line-height: 1;
+}
+.lfe-tw-hint {
+  font-family: var(--mono); font-size: 7px; color: var(--ink-3); line-height: 1.2;
+}
+.lfe-tw-dash {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.16em;
+  color: var(--ink-3); opacity: 0.55;
+}
+
+/* Hide widget when ghost is active */
+#lfe-preview.ghost-active #lfe-type-widget { opacity: 0; pointer-events: none; }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #lfe { flex-direction: column; }
+  #lfe-preview {
+    flex: 1; min-height: 0;
+    border-right: none; border-bottom: 1px solid var(--border);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  #lfe-stream { padding: 20px 20px 160px; }
+  #lfe-rail {
+    width: 100%; flex-shrink: 0;
+    height: auto; max-height: 44vh;
+    display: flex; flex-direction: column;
+  }
+  #lfe-ghost { display: none !important; }
+  /* On mobile, float the type widget bottom-center instead of bottom-right */
+  #lfe-type-widget {
+    bottom: 56px; right: auto;
+    left: 50%; transform: translateX(-50%);
+    width: calc(100vw - 32px); max-width: 380px;
+  }
+  #lfe-type-widget.dragged { transform: none; }
+  #lfe-tw-body { grid-template-columns: 1fr 1fr 1fr; }
+  /* Beckon bar bigger tap target on mobile */
+  #lfe-beckon-bar { padding: 14px 20px; }
+  #lfe-bc-ta { font-size: 17px; }
+}
 .lfe-ar-chip {
   display: flex; align-items: center; gap: 5px;
   padding: 5px 8px; cursor: grab; user-select: none;
@@ -3522,14 +4071,68 @@ body.lfe-open #layout { pointer-events: none; }
 .lfe-copy-btn:hover { background: var(--c-long); }
 .lfe-copy-btn:active { transform: scale(0.95); }
 
-/* Mobile adjustments */
-@media (max-width: 768px) {
-  #lfe { flex-direction: column; }
-  #lfe-preview { flex: 1; border-right: none; border-bottom: 1px solid var(--border); min-height: 0; }
-  #lfe-rail { width: 100%; height: 55vh; flex-shrink: 0; }
-  #lfe-stream { padding: 20px 24px 24px; }
-  #lfe-ghost { display: none !important; }
+/* ── LFE Beckon (continue-writing field at bottom of preview) ── */
+#lfe-beckon {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg-4);
+  display: flex; flex-direction: column;
 }
+#lfe-beckon-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px; cursor: text;
+  transition: background 0.14s;
+}
+#lfe-beckon-bar:hover { background: var(--bg-3); }
+#lfe-beckon-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--c-long); opacity: 0.5; flex-shrink: 0;
+}
+#lfe-beckon-prompt {
+  font-family: var(--text); font-size: 14px; font-style: italic;
+  color: var(--ink-3); flex: 1; user-select: none;
+}
+#lfe-beckon-hint {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink-3); opacity: 0; flex-shrink: 0;
+  transition: opacity 0.18s;
+}
+#lfe-beckon-bar:hover #lfe-beckon-hint { opacity: 1; }
+
+/* Expanded compose state */
+#lfe-beckon-compose {
+  display: none; flex-direction: column; gap: 0;
+  padding: 0 20px 12px;
+  animation: lfe-bc-in 0.16s ease both;
+}
+@keyframes lfe-bc-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; } }
+#lfe-beckon.open #lfe-beckon-bar { display: none; }
+#lfe-beckon.open #lfe-beckon-compose { display: flex; }
+
+#lfe-bc-ta {
+  width: 100%; background: none; border: none; outline: none; resize: none;
+  color: var(--ink); caret-color: var(--c-long);
+  font-family: var(--text); font-style: italic; font-size: 16px; line-height: 1.75;
+  padding: 14px 0 8px; min-height: 72px;
+}
+#lfe-bc-ta::placeholder { color: var(--ink-3); }
+#lfe-bc-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+#lfe-bc-wc {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.lfe-bc-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 2px; cursor: pointer;
+  transition: all 0.14s; border: 1px solid var(--border-2); background: none; color: var(--ink-3);
+}
+.lfe-bc-btn:hover { color: var(--ink-2); border-color: var(--ink-3); }
+.lfe-bc-btn.primary {
+  background: var(--c-long); color: #fff; border-color: transparent;
+}
+.lfe-bc-btn.primary:hover { opacity: 0.85; }
 
 /* ── LFE Ghost Type Layer ── */
 #lfe-ghost {
@@ -3617,6 +4220,40 @@ body.lfe-open #layout { pointer-events: none; }
     <div id="lfe-stream">
       <div class="lfe-empty-preview" id="lfe-empty-preview">Begin writing.</div>
     </div>
+    <!-- Node type widget — compact draggable card -->
+    <div id="lfe-type-widget">
+      <div id="lfe-tw-handle">
+        <span id="lfe-tw-grip">⋮⋮</span>
+        <span id="lfe-tw-label">Add node</span>
+        <button id="lfe-tw-toggle" onclick="lfeTwToggle()" title="Collapse">−</button>
+      </div>
+      <div id="lfe-tw-body">
+        <button class="lfe-tw-btn" onclick="lfeAddNode('poster')">
+          <div class="lfe-tw-type">Poster</div>
+          <div class="lfe-tw-hint">The declaration</div>
+        </button>
+        <button class="lfe-tw-btn" onclick="lfeAddNode('body')">
+          <div class="lfe-tw-type">Body</div>
+          <div class="lfe-tw-hint">The argument</div>
+        </button>
+        <button class="lfe-tw-btn" onclick="lfeAddNode('pull')">
+          <div class="lfe-tw-type">Pull</div>
+          <div class="lfe-tw-hint">The truest sentence</div>
+        </button>
+        <button class="lfe-tw-btn" onclick="lfeAddNode('label')">
+          <div class="lfe-tw-type">Label</div>
+          <div class="lfe-tw-hint">Section marker</div>
+        </button>
+        <button class="lfe-tw-btn" onclick="lfeAddNode('spec')">
+          <div class="lfe-tw-type">Spec</div>
+          <div class="lfe-tw-hint">key :: value</div>
+        </button>
+        <button class="lfe-tw-btn wide" onclick="lfeAddNode('break')">
+          <div class="lfe-tw-type">Break</div>
+          <div class="lfe-tw-dash">— — — — — —</div>
+        </button>
+      </div>
+    </div>
     <!-- Ghost type layer — surfaces over preview when a node input is focused -->
     <div id="lfe-ghost">
       <div id="lfe-ghost-backdrop"></div>
@@ -3631,6 +4268,26 @@ body.lfe-open #layout { pointer-events: none; }
             <span><kbd>Shift↵</kbd> line break</span>
           </div>
           <button id="lfe-ghost-submit" onclick="lfeGhostCommit()">Commit →</button>
+        </div>
+      </div>
+    </div>
+    <!-- Beckon: continue writing into this document -->
+    <div id="lfe-beckon">
+      <div id="lfe-beckon-bar" onclick="lfeBeckonOpen()">
+        <div id="lfe-beckon-dot"></div>
+        <div id="lfe-beckon-prompt">Continue writing…</div>
+        <div id="lfe-beckon-hint">click to write</div>
+      </div>
+      <div id="lfe-beckon-compose">
+        <textarea id="lfe-bc-ta" rows="4" spellcheck="true"
+          placeholder="Write freely — sentences will be parsed and appended as nodes."
+          oninput="lfeBeckonCount()"></textarea>
+        <div id="lfe-bc-footer">
+          <div id="lfe-bc-wc">0 words</div>
+          <div style="display:flex;gap:6px">
+            <button class="lfe-bc-btn" onclick="lfeBeckonClose()">Cancel</button>
+            <button class="lfe-bc-btn primary" onclick="lfeBeckonSubmit()">Parse &amp; Append →</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3651,31 +4308,6 @@ body.lfe-open #layout { pointer-events: none; }
     </div>
     <div id="lfe-canvas-wrap"></div>
     <div id="lfe-arrange-wrap"></div>
-    <div id="lfe-palette">
-      <button class="lfe-pal-btn" onclick="lfeAddNode('poster')">
-        <div class="lfe-pal-type">Poster</div>
-        <div class="lfe-pal-hint">The declaration</div>
-      </button>
-      <button class="lfe-pal-btn" onclick="lfeAddNode('body')">
-        <div class="lfe-pal-type">Body</div>
-        <div class="lfe-pal-hint">The argument</div>
-      </button>
-      <button class="lfe-pal-btn" onclick="lfeAddNode('pull')">
-        <div class="lfe-pal-type">Pull</div>
-        <div class="lfe-pal-hint">The truest sentence</div>
-      </button>
-      <button class="lfe-pal-btn" onclick="lfeAddNode('label')">
-        <div class="lfe-pal-type">Label</div>
-        <div class="lfe-pal-hint">Section marker</div>
-      </button>
-      <button class="lfe-pal-btn" onclick="lfeAddNode('spec')">
-        <div class="lfe-pal-type">Spec</div>
-        <div class="lfe-pal-hint">key :: value</div>
-      </button>
-      <button class="lfe-pal-btn wide" onclick="lfeAddNode('break')">
-        <div class="lfe-pal-type">Break  — — — —</div>
-      </button>
-    </div>
     <div id="lfe-compile-bar">
       <div id="lfe-compile-preview" style="color:var(--ink-3);font-style:italic">Start writing…</div>
       <button class="lfe-copy-btn" onclick="lfeCopy()">⎘ Copy</button>
@@ -3705,7 +4337,6 @@ function openLFE(nodeId) {
   rail.className = 'mode-compose';
   document.getElementById('lfe-btn-compose').classList.add('active');
   document.getElementById('lfe-btn-arrange').classList.remove('active');
-  document.getElementById('lfe-palette').style.display = '';
 
   // Open overlay
   document.body.classList.add('lfe-open');
@@ -3719,6 +4350,14 @@ function openLFE(nodeId) {
 function closeLFE() {
   document.body.classList.remove('lfe-open');
   lfeNodeId = null;
+  // Reset type widget position + state
+  const tw = document.getElementById('lfe-type-widget');
+  if (tw) {
+    tw.style.cssText = '';
+    tw.classList.remove('dragged', 'collapsed', 'hidden');
+    const btn = document.getElementById('lfe-tw-toggle');
+    if (btn) btn.textContent = '−';
+  }
 }
 
 function lfeNode() {
@@ -4107,6 +4746,7 @@ function lfeScheduleCommit() {
     _ghostSource = inp;
     _ghostType   = type || 'body';
     _ghostOpen   = true;
+    document.getElementById('lfe-preview')?.classList.add('ghost-active');
 
     const overlay = document.getElementById('lfe-ghost');
     const ta      = document.getElementById('lfe-ghost-ta');
@@ -4138,6 +4778,7 @@ function lfeScheduleCommit() {
     _ghostOpen = false;
     const overlay = document.getElementById('lfe-ghost');
     overlay.classList.remove('open');
+    document.getElementById('lfe-preview')?.classList.remove('ghost-active');
     if (refocus && _ghostSource) {
       _ghostSource.focus();
       _ghostSource.setSelectionRange?.(_ghostSource.value.length, _ghostSource.value.length);
@@ -4205,6 +4846,151 @@ function lfeScheduleCommit() {
   window.openLfeGhost  = openGhost;
   window.closeLfeGhost = closeGhost;
 })();
+
+// ═══ TYPE WIDGET: collapse + drag ═══
+function lfeTwToggle() {
+  const w = document.getElementById('lfe-type-widget');
+  const btn = document.getElementById('lfe-tw-toggle');
+  const collapsed = w.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '+' : '−';
+}
+
+(function() {
+  let dragging = false, ox = 0, oy = 0;
+
+  function onDown(e) {
+    const handle = document.getElementById('lfe-tw-handle');
+    if (!handle || !handle.contains(e.target)) return;
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    dragging = true;
+    const w = document.getElementById('lfe-type-widget');
+    const rect = w.getBoundingClientRect();
+    const cx = (e.touches ? e.touches[0] : e).clientX;
+    const cy = (e.touches ? e.touches[0] : e).clientY;
+    ox = cx - rect.left;
+    oy = cy - rect.top;
+    // Switch to absolute top/left positioning
+    w.style.right = 'auto';
+    w.style.bottom = 'auto';
+    w.style.transform = 'none';
+    w.style.left = rect.left + 'px';
+    w.style.top  = rect.top  + 'px';
+    w.classList.add('dragged');
+    document.body.style.userSelect = 'none';
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const cx = (e.touches ? e.touches[0] : e).clientX;
+    const cy = (e.touches ? e.touches[0] : e).clientY;
+    const w  = document.getElementById('lfe-type-widget');
+    const pr = w.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let nx = cx - ox, ny = cy - oy;
+    nx = Math.max(0, Math.min(nx, vw - pr.width));
+    ny = Math.max(0, Math.min(ny, vh - pr.height));
+    w.style.left = nx + 'px';
+    w.style.top  = ny + 'px';
+  }
+
+  function onUp() {
+    dragging = false;
+    document.body.style.userSelect = '';
+  }
+
+  document.addEventListener('mousedown',  onDown, { passive: false });
+  document.addEventListener('mousemove',  onMove, { passive: true });
+  document.addEventListener('mouseup',    onUp);
+  document.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('touchmove',  onMove, { passive: true });
+  document.addEventListener('touchend',   onUp);
+})();
+
+// ═══ LFE BECKON (continue-writing field) ═══
+function lfeBeckonOpen() {
+  const bc = document.getElementById('lfe-beckon');
+  if (!bc) return;
+  bc.classList.add('open');
+  document.getElementById('lfe-type-widget')?.classList.add('hidden');
+  setTimeout(() => {
+    const ta = document.getElementById('lfe-bc-ta');
+    if (ta) { ta.focus(); ta.selectionStart = ta.value.length; }
+  }, 40);
+}
+
+function lfeBeckonClose() {
+  const bc = document.getElementById('lfe-beckon');
+  if (bc) bc.classList.remove('open');
+  document.getElementById('lfe-type-widget')?.classList.remove('hidden');
+  const ta = document.getElementById('lfe-bc-ta');
+  if (ta) ta.value = '';
+  const wc = document.getElementById('lfe-bc-wc');
+  if (wc) wc.textContent = '0 words';
+}
+
+function lfeBeckonCount() {
+  const ta = document.getElementById('lfe-bc-ta');
+  const wc = document.getElementById('lfe-bc-wc');
+  if (!ta || !wc) return;
+  const n = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+  wc.textContent = n + ' word' + (n !== 1 ? 's' : '');
+}
+
+function lfeBeckonSubmit() {
+  const ta = document.getElementById('lfe-bc-ta');
+  if (!ta || !ta.value.trim()) return;
+  const raw = ta.value.trim();
+  const node = lfeNode();
+  if (!node) return;
+  if (!node.nodes) node.nodes = [];
+
+  // Parse into sentences exactly like parseLongInput
+  const sentenceRegex = /[^.!?]*[.!?]+(?:\s|$)/g;
+  const matches = raw.match(sentenceRegex) || [];
+  const joined = matches.join('');
+  const remainder = raw.slice(joined.length).trim();
+  const parsed = [
+    ...matches.map(s => s.trim()).filter(Boolean),
+    ...(remainder ? [remainder] : [])
+  ];
+
+  parsed.forEach(text => {
+    node.nodes.push({ id: Date.now() + Math.random(), type: 'body', text });
+  });
+
+  // Update excerpt if empty
+  if (!node.excerpt) {
+    node.excerpt = parsed.join(' ').slice(0, 140);
+  }
+
+  lfeBeckonClose();
+  lfeRenderCanvas();
+  lfeRenderPreview();
+  lfeUpdateCompileBar();
+  lfeScheduleCommit();
+
+  // Scroll preview to bottom
+  setTimeout(() => {
+    const stream = document.getElementById('lfe-stream');
+    if (stream) stream.scrollTo({ top: stream.scrollHeight, behavior: 'smooth' });
+  }, 80);
+  if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+}
+
+// Keyboard: ⌘↵ submits from beckon textarea
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    const bc = document.getElementById('lfe-beckon');
+    if (bc && bc.classList.contains('open') && document.activeElement === document.getElementById('lfe-bc-ta')) {
+      e.preventDefault(); lfeBeckonSubmit();
+    }
+  }
+  if (e.key === 'Escape') {
+    const bc = document.getElementById('lfe-beckon');
+    if (bc && bc.classList.contains('open')) lfeBeckonClose();
+  }
+}, true);
 </script>
 </body>
 </html>

@@ -14,6 +14,37 @@
 html { height:100%; overflow:hidden; }
 
 :root {
+  /* ── Light theme (default) ── */
+  --bg:        #f5f2ec;
+  --bg-2:      #ede9e0;
+  --bg-3:      #e4dfd4;
+  --bg-4:      #f9f7f3;
+  --ink:       #1a1612;
+  --ink-2:     #6b6560;
+  --ink-3:     #a09890;
+  --accent:    #c4623a;
+  --accent-l:  rgba(196,98,58,0.10);
+  --border:    rgba(20,14,8,0.09);
+  --border-2:  rgba(20,14,8,0.16);
+  --border-3:  rgba(20,14,8,0.26);
+  --disp:      'DM Serif Display', serif;
+  --text:      'DM Serif Text', serif;
+  --mono:      'DM Mono', monospace;
+
+  --c-media:   #4a7eaf;
+  --c-notes:   #c4623a;
+  --c-tasks:   #5a7040;
+  --c-long:    #8060a8;
+
+  --sidebar-w: 260px;
+  --detail-w:  380px;
+
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Dark theme ── */
+body.dark {
   --bg:        #0f0e0c;
   --bg-2:      #141310;
   --bg-3:      #1a1916;
@@ -26,21 +57,10 @@ html { height:100%; overflow:hidden; }
   --border:    rgba(240,237,230,0.06);
   --border-2:  rgba(240,237,230,0.11);
   --border-3:  rgba(240,237,230,0.18);
-  --disp:      'DM Serif Display', serif;
-  --text:      'DM Serif Text', serif;
-  --mono:      'DM Mono', monospace;
-
   --c-media:   #6a9bcc;
   --c-notes:   #d97757;
   --c-tasks:   #78895d;
   --c-long:    #a07cc0;
-
-  --sidebar-w: 260px;
-  --detail-w:  380px;
-
-  /* mobile safe areas */
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
 }
 
 body {
@@ -88,10 +108,22 @@ body::after {
   display: flex; align-items: baseline; gap: 0;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
 }
+.sidebar-brand:hover { opacity: 0.72; }
 .sidebar-brand-word { font-family: var(--disp); font-size: 20px; color: var(--ink); letter-spacing: -0.01em; }
 .sidebar-brand-dot  { font-family: var(--mono); font-size: 12px; color: var(--accent); margin-left: 1px; }
 .sidebar-brand-sub  { font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin-left: auto; align-self: center; }
+/* theme pip — tiny indicator next to sub */
+.sidebar-brand-theme {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-3); margin-left: 6px; align-self: center;
+  border: 1px solid var(--border-2); border-radius: 2px; padding: 2px 5px;
+  transition: all 0.2s;
+}
+.sidebar-brand:hover .sidebar-brand-theme { border-color: var(--accent); color: var(--accent); }
 .sidebar-section-label { font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); padding: 14px 20px 6px; flex-shrink: 0; }
 .cluster-nav-item {
   display: flex; align-items: center; gap: 10px;
@@ -322,6 +354,7 @@ body::after {
   background: var(--bg-4);
   transform: translateX(var(--detail-w));
   transition: transform 0.44s cubic-bezier(0.32,0.72,0,1);
+  overflow: hidden;
 }
 #detail.open { transform: translateX(0); }
 .detail-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
@@ -356,7 +389,42 @@ body::after {
 .detail-lf-excerpt { font-size:13px; color:var(--ink-2); line-height:1.7; font-weight:300; margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--border); }
 .detail-lf-stream .node { padding:10px 0; }
 .detail-lf-stream .node.pull { margin:4px 0; }
-
+/* ── Inline compose in detail panel (notes + longform) ── */
+.detail-inline-compose { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+.dic-eyebrow { font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+.dic-style-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.dic-style-btn {
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.14s;
+}
+.dic-style-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-l); }
+.dic-cluster-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+.dic-cluster-btn {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.14s;
+}
+.dic-cluster-btn.active { color: var(--ink); border-color: var(--ink-2); background: rgba(0,0,0,0.04); }
+.dark .dic-cluster-btn.active { background: rgba(255,255,255,0.04); }
+.dic-textarea {
+  width: 100%; background: none; border: none; border-bottom: 1px solid var(--border-2);
+  outline: none; resize: none; color: var(--ink); font-family: var(--mono);
+  font-size: 15px; line-height: 1.75; caret-color: var(--accent);
+  padding: 8px 0; min-height: 80px; transition: font-size 0.2s, font-family 0.2s, font-style 0.2s;
+}
+.dic-textarea::placeholder { color: var(--ink-3); font-style: italic; }
+.dic-textarea:focus { border-bottom-color: var(--accent); }
+.dic-textarea.style-poster { font-family: var(--disp) !important; font-size: 24px !important; line-height: 1.2 !important; }
+.dic-textarea.style-pull   { font-family: var(--disp) !important; font-style: italic !important; font-size: 18px !important; color: var(--ink-2) !important; border-left: 2px solid var(--accent) !important; padding-left: 14px !important; }
+.dic-textarea.style-label  { font-size: 10px !important; letter-spacing: 0.22em !important; text-transform: uppercase !important; color: var(--accent) !important; }
+.dic-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.dic-add-btn {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--accent); color: #fff; border: none;
+  padding: 8px 16px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+}
+.dic-add-btn:hover { opacity: 0.85; }
 /* ── Keyboard badge ── */
 .kbd { display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-family:var(--mono); background:var(--bg-3); border:1px solid var(--border-2); border-radius:3px; padding:1px 5px; color:var(--ink-3); letter-spacing:0; }
 
@@ -372,57 +440,62 @@ body::after {
   display: flex; flex-direction: column;
 }
 body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
-.field-overlay-hud { display:flex; align-items:center; justify-content:space-between; padding:18px 28px; border-bottom:1px solid var(--border); flex-shrink:0; }
-.field-overlay-title { font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-2); }
-.field-overlay-close { font-family:var(--mono); font-size:7px; letter-spacing:0.16em; text-transform:uppercase; background:none; border:1px solid var(--border-2); color:var(--ink-2); padding:7px 14px; cursor:pointer; border-radius:3px; transition:all 0.2s; }
-.field-overlay-close:hover { border-color:var(--accent); color:var(--accent); }
-.field-canvas-wrap { flex:1; position:relative; overflow:hidden; cursor:grab; }
-.field-canvas-wrap:active { cursor:grabbing; }
 
-/* Large canvas — same pattern as sandbox */
+/* ── Field HUD ── */
+.field-overlay-hud {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 22px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.field-cycle-btn {
+  background: none; border: 1px solid var(--border-2); color: var(--ink-2);
+  font-size: 18px; line-height: 1; width: 32px; height: 32px;
+  border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-family: var(--mono); flex-shrink: 0;
+}
+.field-cycle-btn:hover { border-color: var(--accent); color: var(--accent); }
+.field-hud-center {
+  flex: 1; display: flex; align-items: baseline; gap: 10px;
+}
+.field-cluster-name {
+  font-family: var(--disp); font-size: 20px; color: var(--ink);
+  letter-spacing: -0.01em; transition: color 0.25s;
+}
+.field-overlay-count {
+  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3);
+}
+.field-overlay-close {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border-2); color: var(--ink-2);
+  padding: 7px 14px; cursor: pointer; border-radius: 3px; transition: all 0.2s; flex-shrink: 0;
+}
+.field-overlay-close:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Cluster pip row ── */
+.field-cluster-pips {
+  display: flex; gap: 8px; align-items: center;
+  padding: 8px 22px 10px; flex-shrink: 0;
+}
+.fcp {
+  width: 8px; height: 8px; border-radius: 50%;
+  opacity: 0.28; cursor: pointer; transition: all 0.2s;
+  border: 1.5px solid transparent;
+}
+.fcp:hover { opacity: 0.7; transform: scale(1.2); }
+.fcp.active { opacity: 1; transform: scale(1.3); border-color: var(--bg); box-shadow: 0 0 0 1.5px currentColor; }
+
+/* ── Canvas ── */
+.field-canvas-wrap { flex:1; position:relative; overflow:hidden; cursor:default; }
 .field-canvas-inner {
   position:absolute;
-  width:3200px; height:3200px;
-  top:50%; left:50%;
-  transform-origin:center center;
+  width:100%; height:100%;
+  top:0; left:0;
 }
-/* Dot grid */
+/* Subtle dot grid */
 .field-canvas-inner::before {
   content:''; position:absolute; inset:0;
-  background-image:radial-gradient(circle, rgba(240,237,230,0.055) 1px, transparent 1px);
-  background-size:40px 40px;
+  background-image:radial-gradient(circle, var(--border-2) 1px, transparent 1px);
+  background-size:32px 32px; opacity:0.5;
 }
-/* Ambient water shimmer */
-.field-canvas-inner::after {
-  content:''; position:absolute; inset:0;
-  background:
-    radial-gradient(ellipse 60% 40% at 28% 55%, rgba(106,155,204,0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 60% at 72% 45%, rgba(120,137,93,0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 50% at 50% 50%, rgba(160,124,192,0.03) 0%, transparent 60%);
-  animation:fieldShimmer 14s ease-in-out infinite alternate;
-  pointer-events:none;
-}
-@keyframes fieldShimmer {
-  0%   { opacity:0.5; transform:scale(1) translate(0,0); }
-  33%  { opacity:1;   transform:scale(1.03) translate(0.8%,-0.4%); }
-  66%  { opacity:0.65; transform:scale(0.98) translate(-0.6%,0.4%); }
-  100% { opacity:0.85; transform:scale(1.015) translate(0.3%,-0.2%); }
-}
-
-/* ── Cluster orbs (large anchor labels) ── */
-.field-cluster-orb {
-  position:absolute; transform:translate(-50%,-50%);
-  border-radius:50%; border:1px solid currentColor;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-  cursor:pointer; opacity:0.75;
-  background:radial-gradient(circle at 38% 32%, rgba(255,255,255,0.05), transparent 60%);
-  transition:opacity 0.3s, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-}
-.field-cluster-orb:hover { opacity:1; transform:translate(-50%,-50%) scale(1.07); }
-.field-cluster-orb::after { content:''; position:absolute; inset:-14px; border-radius:50%; border:1px solid currentColor; opacity:0.12; pointer-events:none; animation:orbPulse 4s ease-in-out infinite; }
-.fco-count { font-family:var(--disp); font-size:28px; color:currentColor; line-height:1; }
-.fco-label { font-size:7px; letter-spacing:0.16em; text-transform:uppercase; color:currentColor; opacity:0.7; }
-.fco-name { position:absolute; top:calc(100% + 14px); font-size:8px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-2); white-space:nowrap; }
 
 /* ── Lily pad node dots ── */
 .field-node-dot {
@@ -449,7 +522,7 @@ body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
 .fnd-ripple-3 { animation:fndRipple 3.4s ease-out infinite 1.9s; }
 @keyframes fndRipple {
   0%   { width:16px; height:16px; margin-left:-8px; margin-top:-8px; opacity:0.5; }
-  100% { width:90px; height:90px; margin-left:-45px; margin-top:-45px; opacity:0; }
+  100% { width:80px; height:80px; margin-left:-40px; margin-top:-40px; opacity:0; }
 }
 .fnd-wrap.major .fnd-ripple { width:24px; height:24px; margin-left:-12px; margin-top:-12px; }
 .fnd-wrap.major .fnd-ripple-1 { animation:fndRippleMajor 3.8s ease-out infinite; }
@@ -457,14 +530,13 @@ body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
 .fnd-wrap.major .fnd-ripple-3 { animation:fndRippleMajor 3.8s ease-out infinite 2.2s; }
 @keyframes fndRippleMajor {
   0%   { width:24px; height:24px; margin-left:-12px; margin-top:-12px; opacity:0.55; }
-  100% { width:120px; height:120px; margin-left:-60px; margin-top:-60px; opacity:0; }
+  100% { width:110px; height:110px; margin-left:-55px; margin-top:-55px; opacity:0; }
 }
 .fnd-label {
   font-size:7px; letter-spacing:0.1em; text-transform:uppercase;
   color:currentColor; opacity:0.55; white-space:nowrap; margin-top:10px;
   font-family:var(--mono); pointer-events:none; transition:opacity 0.25s; position:relative; z-index:2;
 }
-/* hover bloom */
 .field-node-dot:hover .fnd-pad { opacity:1; transform:scale(1.4); }
 .field-node-dot:hover .fnd-label { opacity:1; }
 /* ghost tooltip */
@@ -473,7 +545,7 @@ body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
   transform:translateX(-50%) translateY(4px);
   width:200px; background:var(--bg-2); border:1px solid var(--border-2);
   border-radius:6px; padding:10px 12px;
-  box-shadow:0 8px 28px rgba(0,0,0,0.25);
+  box-shadow:0 8px 28px rgba(0,0,0,0.15);
   opacity:0; pointer-events:none;
   transition:opacity 0.2s ease, transform 0.2s ease; z-index:100;
 }
@@ -483,73 +555,107 @@ body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
 .fnd-ghost-text { font-family:var(--text); font-style:italic; font-size:10px; color:var(--ink-2); line-height:1.5; }
 .field-node-dot:hover .fnd-ghost { opacity:1; transform:translateX(-50%) translateY(0); }
 
-.field-zoom-hint { position:absolute; bottom:18px; right:22px; font-size:7px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-3); display:flex; gap:10px; align-items:center; }
-
 /* ═══════════════════════════════════════
    COMPOSE — DESKTOP (side panel)
 ═══════════════════════════════════════ */
+/* ── Compose widget (beckon-style, bottom-anchored) ── */
+@keyframes compose-heartbeat {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  40%       { opacity: 0.35; transform: scale(0.5); }
+  60%       { opacity: 0.75; transform: scale(0.85); }
+}
+
 #compose-overlay {
   position: fixed; inset: 0; z-index: 800;
-  background: rgba(10,9,8,0);
-  backdrop-filter: blur(0px);
-  opacity: 0; pointer-events: none;
-  transition: all 0.3s ease;
-  display: flex; align-items: flex-start; justify-content: flex-end;
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.3s ease;
 }
-body.compose-open #compose-overlay { opacity:1; pointer-events:auto; background:rgba(10,9,8,0.6); backdrop-filter:blur(3px); }
+body.compose-open #compose-overlay {
+  pointer-events: auto;
+  background: rgba(10,9,8,0.55);
+  backdrop-filter: blur(3px);
+}
 
 #compose-panel {
-  width: 480px;
-  height: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(110%);
+  width: min(600px, calc(100vw - 40px));
+  z-index: 900;
   background: var(--bg-2);
-  border-left: 1px solid var(--border-2);
+  border: 1px solid var(--border-2);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -1px 0 var(--accent), 0 -20px 60px rgba(0,0,0,0.6);
   display: flex; flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+  max-height: 72vh;
   overflow: hidden;
+  opacity: 0; pointer-events: none;
+  transition: transform 0.38s cubic-bezier(0.25,1,0.5,1), opacity 0.26s ease;
 }
-body.compose-open #compose-panel { transform: translateX(0); }
-body.compose-open.compose-longform #compose-panel { width: 640px; }
+body.compose-open #compose-panel {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1; pointer-events: auto;
+}
+body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
+
+@media (max-width: 767px) {
+  #compose-panel {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    border-left: none; border-right: none;
+    bottom: 56px;
+  }
+}
+
+/* compose heartbeat dot */
+.compose-rec-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: compose-heartbeat 3.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
 
 /* ── Shared compose elements ── */
-.compose-header { padding:18px 22px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); flex-shrink:0; }
-.compose-title { font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink-2); }
-.compose-close-btn { background:none; border:1px solid var(--border-2); color:var(--ink-2); font-size:11px; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; }
+.compose-header { padding:14px 20px 12px; display:flex; align-items:center; gap:10px; justify-content:space-between; border-bottom:1px solid var(--border); flex-shrink:0; }
+.compose-title { font-size:8px; letter-spacing:0.2em; text-transform:uppercase; color:var(--ink-2); flex:1; }
+.compose-close-btn { background:none; border:1px solid var(--border-2); color:var(--ink-2); font-size:11px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; }
 .compose-close-btn:hover { border-color:var(--accent); color:var(--accent); }
 .compose-mode-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
-.compose-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:11px 6px; font-size:7px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:all 0.15s; }
-.compose-tab .tab-icon { font-size:14px; }
+.compose-tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 6px; font-size:7px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:all 0.15s; }
+.compose-tab .tab-icon { font-size:13px; }
 .compose-tab.active { color:var(--ink); border-bottom-color:var(--accent); }
 .compose-mode-body { display:none; flex:1; flex-direction:column; overflow-y:auto; overflow-x:hidden; }
 .compose-mode-body::-webkit-scrollbar { width:3px; }
 .compose-mode-body::-webkit-scrollbar-thumb { background:var(--border-2); }
 .compose-mode-body.active { display:flex; }
-.compose-cluster-row { display:flex; gap:6px; padding:12px 20px; border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
-.compose-cluster-btn { font-size:7px; letter-spacing:0.1em; text-transform:uppercase; padding:5px 12px; border:1px solid var(--border-2); border-radius:20px; color:var(--ink-3); background:none; cursor:pointer; transition:all 0.15s; }
+.compose-cluster-row { display:flex; gap:6px; padding:10px 18px; border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+.compose-cluster-btn { font-size:7px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 11px; border:1px solid var(--border-2); border-radius:20px; color:var(--ink-3); background:none; cursor:pointer; transition:all 0.15s; }
 .compose-cluster-btn.active { color:var(--ink); border-color:var(--ink-2); background:rgba(255,255,255,0.04); }
-.note-style-row { display:flex; gap:6px; padding:10px 20px 0; flex-shrink:0; flex-wrap:wrap; }
-.note-style-btn { font-size:7px; letter-spacing:0.12em; text-transform:uppercase; padding:5px 12px; border:1px solid var(--border-2); border-radius:20px; color:var(--ink-3); background:none; cursor:pointer; transition:all 0.15s; }
+.note-style-row { display:flex; gap:6px; padding:10px 18px 0; flex-shrink:0; flex-wrap:wrap; }
+.note-style-btn { font-size:7px; letter-spacing:0.12em; text-transform:uppercase; padding:4px 11px; border:1px solid var(--border-2); border-radius:20px; color:var(--ink-3); background:none; cursor:pointer; transition:all 0.15s; }
 .note-style-btn.active { color:var(--accent); border-color:var(--accent); background:var(--accent-l); }
-/* Textarea morphs to show selected style live */
-.note-textarea { flex:1; width:100%; background:none; border:none; outline:none; resize:none; color:var(--ink); font-family:var(--mono); font-size:15px; line-height:1.8; caret-color:var(--accent); padding:16px 22px; min-height:160px; transition:font-size 0.2s, font-family 0.2s, font-style 0.2s, border-left 0.2s, color 0.2s; }
-.note-textarea::placeholder { color:var(--ink-3); }
+.note-textarea { flex:1; width:100%; background:none; border:none; outline:none; resize:none; color:var(--ink); font-family:var(--mono); font-size:15px; line-height:1.8; caret-color:var(--accent); padding:14px 20px; min-height:100px; transition:font-size 0.2s, font-family 0.2s, font-style 0.2s, border-left 0.2s, color 0.2s; }
+.note-textarea::placeholder { color:var(--ink-3); font-style:italic; }
 .note-textarea.style-poster { font-family:var(--disp) !important; font-size:26px !important; line-height:1.2 !important; }
 .note-textarea.style-pull   { font-family:var(--disp) !important; font-style:italic !important; font-size:19px !important; line-height:1.45 !important; color:var(--ink-2) !important; border-left:2px solid var(--accent) !important; padding-left:20px !important; }
 .note-textarea.style-label  { font-size:10px !important; letter-spacing:0.22em !important; text-transform:uppercase !important; color:var(--accent) !important; }
-.task-input-wrap { display:flex; flex-direction:column; padding:16px 22px; gap:12px; }
+.task-input-wrap { display:flex; flex-direction:column; padding:14px 20px; gap:10px; }
 .task-title-input { background:none; border:none; outline:none; color:var(--ink); font-family:var(--mono); font-size:17px; line-height:1.6; caret-color:var(--accent); width:100%; border-bottom:1px solid var(--border); padding-bottom:10px; }
 .task-title-input::placeholder { color:var(--ink-3); }
-.task-detail-input { background:none; border:none; outline:none; resize:none; color:var(--ink-2); font-family:var(--mono); font-size:13px; line-height:1.7; caret-color:var(--accent); width:100%; min-height:60px; }
+.task-detail-input { background:none; border:none; outline:none; resize:none; color:var(--ink-2); font-family:var(--mono); font-size:13px; line-height:1.7; caret-color:var(--accent); width:100%; min-height:50px; }
 .task-detail-input::placeholder { color:var(--ink-3); }
-.task-priority-row { display:flex; gap:6px; align-items:center; padding:0 22px 12px; flex-shrink:0; }
+.task-priority-row { display:flex; gap:6px; align-items:center; padding:0 20px 10px; flex-shrink:0; }
 .task-priority-label { font-size:7px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-3); margin-right:4px; }
-.task-pri-btn { font-size:7px; letter-spacing:0.1em; text-transform:uppercase; padding:5px 12px; border:1px solid var(--border-2); border-radius:20px; color:var(--ink-3); background:none; cursor:pointer; transition:all 0.15s; }
+.task-pri-btn { font-size:7px; letter-spacing:0.1em; text-transform:uppercase; padding:4px 11px; border:1px solid var(--border-2); border-radius:20px; color:var(--ink-3); background:none; cursor:pointer; transition:all 0.15s; }
 .task-pri-btn.active-high { color:#d97757; border-color:#d97757; background:rgba(217,119,87,0.08); }
 .task-pri-btn.active-med  { color:#c4a882; border-color:#c4a882; background:rgba(196,168,130,0.08); }
 .task-pri-btn.active-low  { color:var(--ink-3); border-color:var(--ink-3); background:rgba(255,255,255,0.03); }
-.task-existing { border-top:1px solid var(--border); padding:12px 22px; flex:1; overflow-y:auto; }
-.task-existing-label { font-size:7px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:10px; }
-.task-existing-item { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+.task-existing { border-top:1px solid var(--border); padding:10px 20px; flex:1; overflow-y:auto; }
+.task-existing-label { font-size:7px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; }
+.task-existing-item { display:flex; align-items:center; gap:12px; padding:7px 0; border-bottom:1px solid var(--border); }
 .task-existing-item:last-child { border-bottom:none; }
 .tei-check { width:16px; height:16px; border-radius:50%; border:1px solid var(--border-2); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:8px; color:var(--accent); transition:all 0.15s; }
 .tei-check.done { background:var(--accent-l); border-color:var(--accent); }
@@ -557,37 +663,35 @@ body.compose-open.compose-longform #compose-panel { width: 640px; }
 .tei-text.done { text-decoration:line-through; opacity:0.5; }
 .tei-delete { background:none; border:none; color:var(--ink-3); cursor:pointer; font-size:14px; padding:0 3px; opacity:0.4; line-height:1; flex-shrink:0; transition:opacity 0.15s, color 0.15s; }
 .tei-delete:hover { opacity:1; color:rgba(255,80,60,0.8); }
-/* detail panel task delete */
 .detail-task-delete { margin-top:16px; font-family:var(--mono); font-size:7px; letter-spacing:0.12em; text-transform:uppercase; background:none; border:1px solid rgba(255,80,60,0.25); color:rgba(255,80,60,0.55); padding:7px 14px; border-radius:3px; cursor:pointer; transition:all 0.2s; }
 .detail-task-delete:hover { border-color:rgba(255,80,60,0.7); color:rgba(255,80,60,0.9); background:rgba(255,80,60,0.05); }
-/* detail extend submit */
 .detail-submit-btn { margin-top:10px; font-family:var(--mono); font-size:8px; letter-spacing:0.14em; text-transform:uppercase; background:var(--accent); color:#fff; border:none; padding:9px 18px; border-radius:3px; cursor:pointer; transition:opacity 0.2s; }
 .detail-submit-btn:hover { opacity:0.85; }
-.media-drop-zone { margin:16px 22px; border:1px dashed var(--border-2); border-radius:8px; padding:32px 20px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; flex-shrink:0; }
+.media-drop-zone { margin:14px 20px; border:1px dashed var(--border-2); border-radius:8px; padding:28px 20px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; flex-shrink:0; }
 .media-drop-zone:hover, .media-drop-zone.drag-over { border-color:var(--accent); background:var(--accent-l); }
 .media-drop-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
 .media-drop-icon { font-size:24px; color:var(--ink-3); margin-bottom:8px; }
 .media-drop-hint { font-size:11px; color:var(--ink-2); margin-bottom:4px; }
 .media-drop-sub { font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-3); }
-.media-preview-wrap { display:none; margin:0 22px 8px; position:relative; border-radius:6px; overflow:hidden; border:1px solid var(--border-2); flex-shrink:0; }
+.media-preview-wrap { display:none; margin:0 20px 8px; position:relative; border-radius:6px; overflow:hidden; border:1px solid var(--border-2); flex-shrink:0; }
 .media-preview-wrap.has-file, .media-preview-wrap.has-media { display:block; }
 .media-preview-img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
 .media-preview-clear { position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; background:rgba(10,9,8,0.7); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--ink); cursor:pointer; }
-.media-title-input, .media-url-input { width:calc(100% - 44px); margin:0 22px 8px; background:none; border:none; border-bottom:1px solid var(--border-2); outline:none; color:var(--ink); font-family:var(--mono); font-size:14px; padding:8px 0; caret-color:var(--accent); flex-shrink:0; }
+.media-title-input, .media-url-input { width:calc(100% - 40px); margin:0 20px 8px; background:none; border:none; border-bottom:1px solid var(--border-2); outline:none; color:var(--ink); font-family:var(--mono); font-size:14px; padding:8px 0; caret-color:var(--accent); flex-shrink:0; }
 .media-title-input::placeholder, .media-url-input::placeholder { color:var(--ink-3); }
-.media-desc-input { width:calc(100% - 44px); margin:0 22px; background:none; border:none; outline:none; resize:none; color:var(--ink-2); font-family:var(--mono); font-size:13px; line-height:1.7; caret-color:var(--accent); min-height:80px; flex-shrink:0; }
+.media-desc-input { width:calc(100% - 40px); margin:0 20px; background:none; border:none; outline:none; resize:none; color:var(--ink-2); font-family:var(--mono); font-size:13px; line-height:1.7; caret-color:var(--accent); min-height:60px; flex-shrink:0; }
 .media-desc-input::placeholder { color:var(--ink-3); }
-.longform-title-input { background:none; border:none; outline:none; color:var(--ink); font-family:var(--disp); font-size:22px; line-height:1.3; caret-color:var(--accent); width:100%; padding:18px 22px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.longform-title-input { background:none; border:none; outline:none; color:var(--ink); font-family:var(--disp); font-size:22px; line-height:1.3; caret-color:var(--accent); width:100%; padding:16px 20px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
 .longform-title-input::placeholder { color:var(--ink-3); font-style:italic; }
-.longform-toolbar { display:flex; gap:3px; padding:8px 18px; border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+.longform-toolbar { display:flex; gap:3px; padding:8px 16px; border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
 .lf-tool { background:none; border:1px solid var(--border-2); border-radius:3px; color:var(--ink-2); font-size:10px; font-family:var(--mono); padding:4px 10px; cursor:pointer; transition:all 0.15s; letter-spacing:0.06em; }
 .lf-tool:hover { border-color:var(--ink-2); color:var(--ink); }
-.longform-body { flex:1; width:100%; background:none; border:none; outline:none; resize:none; color:var(--ink); font-family:var(--text); font-size:16px; line-height:1.85; caret-color:var(--accent); padding:18px 22px; min-height:300px; }
+.longform-body { flex:1; width:100%; background:none; border:none; outline:none; resize:none; color:var(--ink); font-family:var(--text); font-size:16px; line-height:1.85; caret-color:var(--accent); padding:16px 20px; min-height:200px; }
 .longform-body::placeholder { color:var(--ink-3); font-style:italic; }
-.longform-wordcount { font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-3); padding:0 22px 10px; flex-shrink:0; }
-.compose-commit-bar { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-top:1px solid var(--border); flex-shrink:0; background:var(--bg-2); }
+.longform-wordcount { font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-3); padding:0 20px 8px; flex-shrink:0; }
+.compose-commit-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border); flex-shrink:0; background:var(--bg-2); }
 .compose-commit-hint { font-size:9px; color:var(--ink-3); letter-spacing:0.06em; }
-.compose-commit-btn { font-family:var(--mono); font-size:8px; letter-spacing:0.16em; text-transform:uppercase; background:var(--accent); color:#fff; border:none; padding:10px 22px; border-radius:3px; cursor:pointer; transition:opacity 0.2s; }
+.compose-commit-btn { font-family:var(--mono); font-size:8px; letter-spacing:0.16em; text-transform:uppercase; background:var(--accent); color:#fff; border:none; padding:9px 20px; border-radius:3px; cursor:pointer; transition:opacity 0.2s; }
 .compose-commit-btn:hover { opacity:0.88; }
 
 /* ═══════════════════════════════════════
@@ -775,53 +879,38 @@ body.compose-open.compose-longform #compose-panel { width: 640px; }
 #hud-brand { display: none; }
 
 @media (max-width: 767px) {
-  #dock { display: flex; }
   .scroll-nudge { display: flex; }
   #dive-sheet { display: block; }
   .compose-backdrop-mobile { display: block; }
   .compose-handle { display: block; }
   #hud-brand { display: flex; }
-  /* hide desktop stream hud, show mobile one */
   #stream-hud { display: flex; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ FIELD OVERLAY (shared) ═══ -->
+<!-- ═══ FIELD OVERLAY (single-cluster scatter) ═══ -->
 <div id="field-overlay">
   <div class="field-overlay-hud">
-    <span class="field-overlay-title">Spatial Field · <span id="field-node-count">16</span> nodes</span>
-    <button class="field-overlay-close" onclick="closeField()">✕ Return to Stream</button>
+    <button class="field-cycle-btn" id="field-cycle-prev" onclick="cycleFieldCluster(-1)">‹</button>
+    <div class="field-hud-center">
+      <span class="field-cluster-name" id="field-cluster-name">Media</span>
+      <span class="field-overlay-count"><span id="field-node-count">4</span> nodes</span>
+    </div>
+    <button class="field-cycle-btn" id="field-cycle-next" onclick="cycleFieldCluster(1)">›</button>
+    <button class="field-overlay-close" onclick="closeField()">✕</button>
+  </div>
+  <!-- cluster pip dots -->
+  <div class="field-cluster-pips" id="field-cluster-pips">
+    <span class="fcp" data-cluster="media" style="background:var(--c-media)" onclick="setFieldCluster('media')"></span>
+    <span class="fcp" data-cluster="notes" style="background:var(--c-notes)" onclick="setFieldCluster('notes')"></span>
+    <span class="fcp" data-cluster="tasks" style="background:var(--c-tasks)" onclick="setFieldCluster('tasks')"></span>
+    <span class="fcp" data-cluster="long"  style="background:var(--c-long)"  onclick="setFieldCluster('long')"></span>
   </div>
   <div class="field-canvas-wrap" id="field-canvas-wrap">
     <div class="field-canvas-inner" id="field-canvas-inner">
-      <div class="field-cluster-orb" style="left:28%;top:30%;width:110px;height:110px;color:var(--c-media)" onclick="filterAndClose('media')">
-        <span class="fco-count" id="fco-media">4</span>
-        <span class="fco-label">nodes</span>
-        <span class="fco-name">Media</span>
-      </div>
-      <div class="field-cluster-orb" style="left:70%;top:26%;width:120px;height:120px;color:var(--c-notes)" onclick="filterAndClose('notes')">
-        <span class="fco-count" id="fco-notes">7</span>
-        <span class="fco-label">nodes</span>
-        <span class="fco-name">Notes</span>
-      </div>
-      <div class="field-cluster-orb" style="left:25%;top:68%;width:100px;height:100px;color:var(--c-tasks)" onclick="filterAndClose('tasks')">
-        <span class="fco-count" id="fco-tasks">3</span>
-        <span class="fco-label">nodes</span>
-        <span class="fco-name">Tasks</span>
-      </div>
-      <div class="field-cluster-orb" style="left:73%;top:70%;width:110px;height:110px;color:var(--c-long)" onclick="filterAndClose('long')">
-        <span class="fco-count" id="fco-long">2</span>
-        <span class="fco-label">nodes</span>
-        <span class="fco-name">Long-form</span>
-      </div>
-      <!-- Lily-pad node dots — rendered by renderFieldNodes() JS -->
       <div id="field-nodes-layer"></div>
-    </div>
-    <div class="field-zoom-hint">
-      <span><kbd class="kbd">scroll</kbd> zoom</span>
-      <span><kbd class="kbd">drag</kbd> pan</span>
     </div>
   </div>
 </div>
@@ -832,6 +921,7 @@ body.compose-open.compose-longform #compose-panel { width: 640px; }
   <div id="compose-panel">
     <div class="compose-handle"></div>
     <div class="compose-header">
+      <div class="compose-rec-dot"></div>
       <span class="compose-title" id="compose-title">New Node</span>
       <button class="compose-close-btn" onclick="closeCompose()">✕</button>
     </div>
@@ -940,10 +1030,11 @@ body.compose-open.compose-longform #compose-panel { width: 640px; }
 
   <!-- ── LEFT SIDEBAR (desktop) ── -->
   <div id="sidebar">
-    <div class="sidebar-brand">
+    <div class="sidebar-brand" onclick="toggleTheme()" title="Toggle light / dark">
       <span class="sidebar-brand-word">cortex</span>
       <span class="sidebar-brand-dot">·</span>
-      <span class="sidebar-brand-sub">wolfie.love</span>
+      <span class="sidebar-brand-sub">wolfie.life</span>
+      <span class="sidebar-brand-theme" id="theme-badge">dark</span>
     </div>
     <div class="sidebar-section-label">Clusters</div>
     <div class="cluster-nav-item all-item active" data-cluster="all" onclick="filterCluster('all')">
@@ -1154,18 +1245,36 @@ let nodes = [
 
 let activeFilter = 'all';
 let currentDetailNode = null;
+let _lastDetailNodeId = null;
 let nextId = 23;
 let composeNoteType = 'body';
 let composeNoteCluster = 'notes';
 let composeTaskPri = 'med';
+let fieldCluster = 'media'; // active cluster shown in field view
+
+// ═══ THEME ═══
+function toggleTheme() {
+  const dark = document.body.classList.toggle('dark');
+  document.getElementById('theme-badge').textContent = dark ? 'light' : 'dark';
+  try { localStorage.setItem('cortex_theme', dark ? 'dark' : 'light'); } catch(e){}
+}
+function loadTheme() {
+  const saved = localStorage.getItem('cortex_theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    const b = document.getElementById('theme-badge'); if (b) b.textContent = 'light';
+  }
+  // default is light, badge says 'dark' (what clicking will switch TO)
+}
 
 // ═══ PERSISTENCE ═══
-const STORAGE_KEY = 'cortex_v2';
+const STORAGE_KEY = 'cortex_v3';
 function saveState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       taskDone: nodes.filter(n=>n.type==='spec'&&n.done).map(n=>n.id),
       userNodes: nodes.filter(n=>n._user),
+      activeFilter,
     }));
   } catch(e){}
 }
@@ -1178,6 +1287,7 @@ function loadState() {
     if (state.userNodes?.length) state.userNodes.forEach(n => {
       if (!nodes.find(x=>x.id===n.id)) { n._user=true; nodes.push(n); nextId=Math.max(nextId,n.id+1); }
     });
+    if (state.activeFilter) activeFilter = state.activeFilter;
   } catch(e){}
 }
 
@@ -1262,7 +1372,7 @@ function renderStream() {
   updateProgress();
 }
 
-// ═══ NODE CLICK — desktop = detail, mobile = dive ═══
+// ═══ NODE CLICK — desktop = detail rail, mobile = dive ═══
 function nodeClick(nodeId) {
   if (isMobile()) openDive(nodeId);
   else openDetail(nodeId);
@@ -1306,12 +1416,34 @@ function updateNavCounts() {
     const el = document.getElementById('nav-count-'+k);
     if (el) el.textContent = v + ' node' + (v!==1?'s':'');
   });
-  ['media','notes','tasks','long'].forEach(k => {
-    const el = document.getElementById('fco-'+k);
-    if (el) el.textContent = counts[k]||0;
-  });
   const fnc = document.getElementById('field-node-count');
-  if (fnc) fnc.textContent = total;
+  if (fnc) fnc.textContent = nodes.filter(n=>n.cluster===fieldCluster&&n.type!=='ch'&&n.type!=='label').length;
+}
+
+// ═══ MEDIA RENDERER (shared) ═══
+function buildMediaEl(node) {
+  if (node.src) {
+    const mt = node.mediaType || '';
+    if (mt.startsWith('video') || /\.(mp4|webm|ogg|mov)$/i.test(node.src))
+      return `<video controls style="width:100%;display:block;background:#000" src="${node.src}"></video>`;
+    if (mt.startsWith('audio') || /\.(mp3|wav|ogg|m4a|flac)$/i.test(node.src))
+      return `<div style="padding:28px 20px;display:flex;align-items:center;justify-content:center;background:var(--bg-3)"><audio controls style="width:100%" src="${node.src}"></audio></div>`;
+    return `<img src="${node.src}" style="width:100%;display:block" alt="${node.title}">`;
+  }
+  if (node.url) {
+    const ytMatch = node.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    const vmMatch = node.url.match(/vimeo\.com\/(\d+)/);
+    if (ytMatch)
+      return `<div style="position:relative;aspect-ratio:16/9"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div>`;
+    if (vmMatch)
+      return `<div style="position:relative;aspect-ratio:16/9"><iframe src="https://player.vimeo.com/video/${vmMatch[1]}" style="position:absolute;inset:0;width:100%;height:100%;border:none" allowfullscreen></iframe></div>`;
+    return `<div style="aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg-3);cursor:pointer" onclick="window.open('${node.url}','_blank')">
+      <div style="width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff">↗</div>
+      <div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)">Open source</div></div>`;
+  }
+  return `<div style="aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg-3)">
+    <div style="width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;opacity:0.5">▶</div>
+    <div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)">No source</div></div>`;
 }
 
 // ═══ DESKTOP DETAIL PANEL ═══
@@ -1319,11 +1451,37 @@ function openDetail(nodeId) {
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
   currentDetailNode = node;
+  _lastDetailNodeId = nodeId;
   const detail = document.getElementById('detail');
   const body = document.getElementById('detail-body');
   const cc = CLUSTERS[node.cluster]?.color || 'var(--accent)';
   document.getElementById('detail-type-dot').style.background = cc;
   document.getElementById('detail-type-label').textContent = node.type === 'longform' ? 'long-form' : node.type;
+
+  // Seed inline compose state for this node
+  _dicCluster = node.cluster;
+  _dicStyle = 'body';
+
+  // Inline compose cluster + current node's cluster pre-selected
+  const clusterBtns = Object.entries(CLUSTERS).map(([k,v]) =>
+    `<button class="dic-cluster-btn${k===node.cluster?' active':''}" onclick="dicSetCluster(this,'${k}')">${v.label}</button>`
+  ).join('');
+
+  // Inline compose style selectors for notes
+  const styleBtns = ['body','poster','pull','label'].map(s =>
+    `<button class="dic-style-btn${s==='body'?' active':''}" onclick="dicSetStyle(this,'${s}')">${s}</button>`
+  ).join('');
+
+  const inlineCompose = `
+    <div class="detail-inline-compose">
+      <div class="dic-eyebrow">Add a node</div>
+      <div class="dic-style-row">${styleBtns}</div>
+      <div class="dic-cluster-row">${clusterBtns}</div>
+      <textarea class="dic-textarea" id="dic-ta-${nodeId}" placeholder="Write the next sentence…" rows="4"></textarea>
+      <div class="dic-actions">
+        <button class="dic-add-btn" onclick="dicCommit(${nodeId})">Add node</button>
+      </div>
+    </div>`;
 
   let content = '';
   if (['body','poster','pull'].includes(node.type)) {
@@ -1331,10 +1489,7 @@ function openDetail(nodeId) {
     content = `
       <div class="detail-sentence">${applyInline(lines)}</div>
       <div class="detail-meta">${CLUSTERS[node.cluster]?.label} · ${node.type}</div>
-      <div class="detail-write-label">Add a thought</div>
-      <textarea class="detail-textarea" id="detail-extend-ta" placeholder="Extend this node…" rows="5"></textarea>
-      <button class="detail-submit-btn" onclick="submitExtend(${node.id})">Save Thought</button>
-    `;
+      ${inlineCompose}`;
   } else if (node.type === 'spec') {
     content = `
       <div class="detail-task-row">
@@ -1344,21 +1499,14 @@ function openDetail(nodeId) {
           <div style="font-size:10px;color:var(--ink-3);margin-top:3px;letter-spacing:0.08em">${CLUSTERS[node.cluster]?.label}</div>
         </div>
       </div>
-      <div style="margin-top:16px"><div class="detail-write-label">Context</div>
-      <textarea class="detail-textarea" placeholder="Add context or notes…" rows="4"></textarea></div>
-      <button class="detail-task-delete" onclick="deleteNode(${node.id})">✕ Delete task</button>
-    `;
+      <button class="detail-task-delete" onclick="deleteNode(${node.id})">✕ Delete task</button>`;
   } else if (node.type === 'media') {
+    const mediaEl = buildMediaEl(node);
     content = `
-      <div class="detail-media-frame">
-        <div class="detail-media-placeholder">
-          <div class="detail-media-play-icon">▶</div>
-          <div class="detail-media-hint">Click to load</div>
-        </div>
-      </div>
+      <div style="border-radius:6px;overflow:hidden;margin-bottom:14px">${mediaEl}</div>
       <div class="detail-media-title">${node.title}</div>
-      <div class="detail-media-sub">${node.caption||''}</div>
-    `;
+      <div class="detail-media-sub">${node.caption||node.description||''}</div>
+      ${node.url?`<a href="${node.url}" target="_blank" style="display:inline-block;margin-top:12px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);text-decoration:none;border-bottom:1px solid var(--border-2)">Source ↗</a>`:''}`;
   } else if (node.type === 'longform') {
     const innerNodes = (node.nodes||[]).map(n => {
       if (n.type==='poster') return `<div class="node poster" style="padding:16px 0">${applyInline(n.text.replace(/\\n/g,'<br>'))}</div>`;
@@ -1371,10 +1519,39 @@ function openDetail(nodeId) {
       <div class="detail-lf-title">${node.title}</div>
       <div class="detail-lf-excerpt">${node.excerpt}</div>
       <div class="detail-lf-stream">${innerNodes}</div>
-    `;
+      ${inlineCompose}`;
   }
   body.innerHTML = content;
   detail.classList.add('open');
+}
+
+// ═══ INLINE COMPOSE (detail panel) ═══
+let _dicStyle = 'body';
+let _dicCluster = null; // set when detail opens
+
+function dicSetStyle(btn, style) {
+  _dicStyle = style;
+  btn.closest('.dic-style-row').querySelectorAll('.dic-style-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const ta = btn.closest('.detail-inline-compose').querySelector('.dic-textarea');
+  if (ta) ta.className = 'dic-textarea style-' + style;
+}
+function dicSetCluster(btn, cl) {
+  _dicCluster = cl;
+  btn.closest('.dic-cluster-row').querySelectorAll('.dic-cluster-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function dicCommit(sourceNodeId) {
+  const ta = document.querySelector('.dic-textarea');
+  if (!ta || !ta.value.trim()) return;
+  const style = _dicStyle || 'body';
+  const cluster = _dicCluster || (nodes.find(n=>n.id===sourceNodeId)?.cluster || 'notes');
+  nodes.push({ id:nextId++, type:style, cluster, text:ta.value.trim(), _user:true });
+  ta.value = '';
+  ta.placeholder = 'Saved ✓';
+  setTimeout(() => { if (ta) ta.placeholder = 'Write the next sentence…'; }, 1400);
+  renderStream(); updateNavCounts(); saveState();
+  if (navigator.vibrate) navigator.vibrate(12);
 }
 
 function closeDetail() {
@@ -1422,13 +1599,13 @@ function openDive(nodeId) {
       </div>
     </div>`;
   } else if (node.type === 'media') {
+    const mEl = buildMediaEl(node);
     content = `
-      <div class="dive-media-frame"><div class="dive-media-placeholder">
-        <div class="dive-media-placeholder-icon">▶</div>
-      </div></div>
+      <div>${mEl}</div>
       <div class="dive-media-meta">
         <div class="dive-media-title">${node.title}</div>
-        <div class="dive-media-sub">${node.caption||''}</div>
+        <div class="dive-media-sub">${node.caption||node.description||''}</div>
+        ${node.url?`<a href="${node.url}" target="_blank" style="display:inline-block;margin-top:10px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);text-decoration:none;border-bottom:1px solid var(--border-2)">Source ↗</a>`:''}
       </div>`;
   } else if (node.type === 'longform') {
     const innerNodes = (node.nodes||[]).map(n => {
@@ -1473,155 +1650,168 @@ function submitDiveExtend(nodeId) {
   if (navigator.vibrate) navigator.vibrate(12);
 }
 
-// ═══ FIELD LILY PAD RENDERING ═══
-const FIELD_SCATTER = {
-  media: [[0.22,0.22],[0.32,0.38],[0.19,0.40],[0.29,0.44],[0.24,0.30]],
-  notes: [[0.64,0.18],[0.74,0.16],[0.78,0.28],[0.70,0.33],[0.63,0.31],[0.77,0.21],[0.67,0.37],[0.73,0.24]],
-  tasks: [[0.19,0.62],[0.27,0.74],[0.18,0.76],[0.23,0.68]],
-  long:  [[0.71,0.64],[0.79,0.77],[0.74,0.72]],
+// ═══ FIELD LILY PAD RENDERING — dynamic force-aware placement ═══
+// Cluster anchor zones (cx, cy, radius) — nodes orbit their cluster center
+const CLUSTER_ZONES = {
+  media: { cx:0.25, cy:0.28, r:0.12 },
+  notes: { cx:0.71, cy:0.24, r:0.14 },
+  tasks: { cx:0.22, cy:0.70, r:0.11 },
+  long:  { cx:0.75, cy:0.71, r:0.10 },
 };
+
+// Seeded pseudo-random for stable positions per node id
+function seededRand(seed) {
+  let s = seed;
+  return () => { s = (s * 16807 + 0) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+// Place nodes with repulsion to avoid overlap
+function computeFieldPositions(contentNodes) {
+  const positions = [];
+  const MIN_DIST = 0.055;
+
+  contentNodes.forEach((node, i) => {
+    const zone = CLUSTER_ZONES[node.cluster];
+    if (!zone) { positions.push(null); return; }
+    const rand = seededRand(node.id * 2654435761);
+
+    // Try up to 12 candidate positions, keep one with best min-dist to existing
+    let best = null, bestDist = -1;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const angle = rand() * Math.PI * 2;
+      const radius = zone.r * (0.3 + rand() * 0.7);
+      const cx = zone.cx + Math.cos(angle) * radius;
+      const cy = zone.cy + Math.sin(angle) * radius;
+      // Clamp to canvas
+      const fx = Math.max(0.05, Math.min(0.93, cx));
+      const fy = Math.max(0.05, Math.min(0.93, cy));
+      // Min distance to all placed nodes
+      let minD = Infinity;
+      positions.forEach(p => {
+        if (!p) return;
+        const d = Math.hypot(fx - p.fx, fy - p.fy);
+        if (d < minD) minD = d;
+      });
+      if (minD > bestDist) { bestDist = minD; best = {fx, fy}; }
+      if (minD > MIN_DIST) break; // good enough
+    }
+    positions.push(best || { fx: zone.cx + (rand()-0.5)*0.1, fy: zone.cy + (rand()-0.5)*0.1 });
+  });
+  return positions;
+}
 
 function renderFieldNodes() {
   const layer = document.getElementById('field-nodes-layer');
   if (!layer) return;
-  const contentNodes = nodes.filter(n => n.type !== 'ch' && n.type !== 'label');
-  const clusterIdx = {media:0,notes:0,tasks:0,long:0};
-  let html = '';
 
-  contentNodes.forEach((node, i) => {
-    const cl = node.cluster;
-    const scatter = FIELD_SCATTER[cl]; if (!scatter) return;
-    const idx = clusterIdx[cl] % scatter.length;
-    clusterIdx[cl]++;
-    const [fx, fy] = scatter[idx];
-    const color = `var(--c-${cl})`;
+  // Filter to active cluster only — the guardrail
+  const clusterNodes = nodes.filter(n => n.type !== 'ch' && n.type !== 'label' && n.cluster === fieldCluster);
+
+  // Positions distributed across the full visible canvas
+  const SINGLE_ZONE = { cx:0.5, cy:0.5, r:0.35 };
+  const positions = [];
+  const MIN_DIST = 0.07;
+
+  clusterNodes.forEach((node, i) => {
+    const rand = seededRand(node.id * 2654435761);
+    let best = null, bestDist = -1;
+    for (let attempt = 0; attempt < 16; attempt++) {
+      const angle = rand() * Math.PI * 2;
+      const radius = SINGLE_ZONE.r * (0.2 + rand() * 0.8);
+      const cx = SINGLE_ZONE.cx + Math.cos(angle) * radius;
+      const cy = SINGLE_ZONE.cy + Math.sin(angle) * radius;
+      const fx = Math.max(0.08, Math.min(0.90, cx));
+      const fy = Math.max(0.10, Math.min(0.88, cy));
+      let minD = Infinity;
+      positions.forEach(p => { if (!p) return; const d = Math.hypot(fx-p.fx, fy-p.fy); if (d<minD) minD=d; });
+      if (minD > bestDist) { bestDist = minD; best = {fx, fy}; }
+      if (minD > MIN_DIST) break;
+    }
+    positions.push(best || { fx: 0.3 + rand()*0.4, fy: 0.2 + rand()*0.6 });
+  });
+
+  const cc = CLUSTERS[fieldCluster]?.color || 'var(--accent)';
+  let html = '';
+  clusterNodes.forEach((node, i) => {
+    const pos = positions[i]; if (!pos) return;
     const isMajor = node.type === 'poster' || node.type === 'longform';
     const wrapClass = isMajor ? 'fnd-wrap major' : 'fnd-wrap';
     const ghostTitle = (node.title || node.text || node.key || '').substring(0, 40);
     const ghostText  = (node.text || node.val || node.excerpt || '').substring(0, 60);
-    const delay1 = ((i * 0.37) % 3.4).toFixed(2);
-    const delay2 = (+delay1 + 0.95).toFixed(2);
-    const delay3 = (+delay1 + 1.90).toFixed(2);
-
-    html += `<div class="field-node-dot" style="left:${(fx*100).toFixed(1)}%;top:${(fy*100).toFixed(1)}%;color:${color}" onclick="filterAndClose('${cl}')">
+    const d1 = ((i * 0.37) % 3.4).toFixed(2);
+    const d2 = (+d1 + 0.95).toFixed(2);
+    const d3 = (+d1 + 1.90).toFixed(2);
+    html += `<div class="field-node-dot" style="left:${(pos.fx*100).toFixed(1)}%;top:${(pos.fy*100).toFixed(1)}%;color:${cc}" onclick="fieldNodeClick(${node.id})">
       <div class="${wrapClass}">
         <div class="fnd-pad"></div>
-        <div class="fnd-ripple fnd-ripple-1" style="animation-delay:${delay1}s"></div>
-        <div class="fnd-ripple fnd-ripple-2" style="animation-delay:${delay2}s"></div>
-        <div class="fnd-ripple fnd-ripple-3" style="animation-delay:${delay3}s"></div>
+        <div class="fnd-ripple fnd-ripple-1" style="animation-delay:${d1}s"></div>
+        <div class="fnd-ripple fnd-ripple-2" style="animation-delay:${d2}s"></div>
+        <div class="fnd-ripple fnd-ripple-3" style="animation-delay:${d3}s"></div>
       </div>
       <div class="fnd-label">${node.type}</div>
       <div class="fnd-ghost">
-        <div class="fnd-ghost-type">${CLUSTERS[cl]?.label||cl} · ${node.type}</div>
+        <div class="fnd-ghost-type">${CLUSTERS[fieldCluster]?.label||fieldCluster} · ${node.type}</div>
         <div class="fnd-ghost-title">${ghostTitle}</div>
         ${ghostText ? `<div class="fnd-ghost-text">${ghostText}</div>` : ''}
       </div>
     </div>`;
   });
   layer.innerHTML = html;
+
+  // Update HUD
+  const nameEl = document.getElementById('field-cluster-name');
+  const countEl = document.getElementById('field-node-count');
+  if (nameEl) { nameEl.textContent = CLUSTERS[fieldCluster]?.label || fieldCluster; nameEl.style.color = cc; }
+  if (countEl) countEl.textContent = clusterNodes.length;
+
+  // Update pips
+  document.querySelectorAll('.fcp').forEach(el => {
+    el.classList.toggle('active', el.dataset.cluster === fieldCluster);
+  });
+}
+
+function fieldNodeClick(nodeId) {
+  // Filter stream to this cluster and close field, then open detail
+  filterAndClose(fieldCluster);
+  setTimeout(() => openDetail(nodeId), 300);
+}
+
+const CLUSTER_ORDER = ['media','notes','tasks','long'];
+function setFieldCluster(cl) {
+  fieldCluster = cl;
+  renderFieldNodes();
+}
+function cycleFieldCluster(dir) {
+  const idx = CLUSTER_ORDER.indexOf(fieldCluster);
+  fieldCluster = CLUSTER_ORDER[(idx + dir + CLUSTER_ORDER.length) % CLUSTER_ORDER.length];
+  renderFieldNodes();
 }
 
 // ═══ FIELD OPEN/CLOSE ═══
 function openField() {
+  closeBeckon();
+  closeDetail();
+  // Seed field to active cluster (default media if showing 'all')
+  if (activeFilter !== 'all') fieldCluster = activeFilter;
+  renderFieldNodes();
   document.body.classList.add('field-open');
-  // Stagger ripple phases — pond life
-  document.querySelectorAll('.field-node-dot').forEach((dot, i) => {
-    const offset = ((i * 0.37) % 3.4).toFixed(2);
-    dot.querySelectorAll('.fnd-ripple-1').forEach(r => r.style.animationDelay = offset + 's');
-    dot.querySelectorAll('.fnd-ripple-2').forEach(r => r.style.animationDelay = (+offset + 0.95).toFixed(2) + 's');
-    dot.querySelectorAll('.fnd-ripple-3').forEach(r => r.style.animationDelay = (+offset + 1.90).toFixed(2) + 's');
-  });
-  setTimeout(() => {
-    document.getElementById('field-overlay').dispatchEvent(new Event('transitionend'));
-  }, 420);
 }
-function closeField() { document.body.classList.remove('field-open'); }
+function closeField() {
+  document.body.classList.remove('field-open');
+  if (_lastDetailNodeId !== null) {
+    setTimeout(() => openDetail(_lastDetailNodeId), 180);
+  }
+}
 
-// ═══ FIELD PAN + ZOOM (sandbox-style) ═══
+// ═══ FIELD PAN + ZOOM — disabled (single-cluster mode uses full viewport) ═══
 function initFieldPan() {
-  const wrap  = document.getElementById('field-canvas-wrap');
-  const inner = document.getElementById('field-canvas-inner');
-  const CANVAS = 3200;
-  let panX = 0, panY = 0, scale = 1;
-  let isPanning = false, startX = 0, startY = 0;
-
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-  function applyTransform() {
-    const ww = wrap.offsetWidth;
-    panX = clamp(panX, ww / 2 - CANVAS * scale + ww * 0.1, ww * 0.9);
-    inner.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${scale})`;
-  }
-  function initScale() {
-    const ww = wrap.offsetWidth;
-    scale = (ww * 2.6) / CANVAS;
-    panX = 0; panY = 0;
-    applyTransform();
-  }
-
-  // Wait for overlay transition before measuring
-  document.getElementById('field-overlay').addEventListener('transitionend', () => {
-    if (document.body.classList.contains('field-open')) initScale();
+  // No-op: the new field view uses a fixed viewport canvas, no pan needed.
+  // Keyboard navigation for cycle
+  document.addEventListener('keydown', e => {
+    if (!document.body.classList.contains('field-open')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') cycleFieldCluster(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') cycleFieldCluster(-1);
   });
-
-  // Mouse pan
-  wrap.addEventListener('mousedown', e => {
-    if (e.target.closest('.field-cluster-orb') || e.target.closest('.field-node-dot')) return;
-    isPanning = true; startX = e.clientX - panX; startY = e.clientY - panY;
-    wrap.style.cursor = 'grabbing'; e.preventDefault();
-  });
-  document.addEventListener('mousemove', e => {
-    if (!isPanning) return; panX = e.clientX - startX; panY = e.clientY - startY; applyTransform();
-  });
-  document.addEventListener('mouseup', () => { isPanning = false; wrap.style.cursor = 'grab'; });
-
-  // Wheel zoom
-  wrap.addEventListener('wheel', e => {
-    e.preventDefault();
-    const prev = scale;
-    scale = clamp(scale * (1 - e.deltaY * 0.001), 0.2, 3);
-    const rect = wrap.getBoundingClientRect();
-    const mx = e.clientX - rect.left - rect.width / 2;
-    const my = e.clientY - rect.top - rect.height / 2;
-    panX = mx - (mx - panX) * (scale / prev);
-    panY = my - (my - panY) * (scale / prev);
-    applyTransform();
-  }, {passive:false});
-
-  // Touch pan + pinch zoom
-  let tx = 0, ty = 0, pinchD = 0, pinchS = 1, isTouching = false, isPinching = false;
-  function touchDist(t) { const dx=t[0].clientX-t[1].clientX,dy=t[0].clientY-t[1].clientY; return Math.hypot(dx,dy); }
-  wrap.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
-      if (e.target.closest('.field-cluster-orb') || e.target.closest('.field-node-dot')) return;
-      isTouching = true; isPinching = false;
-      tx = e.touches[0].clientX - panX; ty = e.touches[0].clientY - panY;
-    } else if (e.touches.length === 2) {
-      isTouching = false; isPinching = true;
-      pinchD = touchDist(e.touches); pinchS = scale;
-    }
-    e.preventDefault();
-  }, {passive:false});
-  wrap.addEventListener('touchmove', e => {
-    if (isPinching && e.touches.length === 2) {
-      const d = touchDist(e.touches); const prev = scale;
-      scale = clamp(pinchS * (d / pinchD), 0.2, 4);
-      const rect = wrap.getBoundingClientRect();
-      const mx = (e.touches[0].clientX+e.touches[1].clientX)/2 - rect.left - rect.width/2;
-      const my = (e.touches[0].clientY+e.touches[1].clientY)/2 - rect.top - rect.height/2;
-      panX = mx-(mx-panX)*(scale/prev); panY = my-(my-panY)*(scale/prev);
-      applyTransform();
-    } else if (isTouching && e.touches.length === 1) {
-      panX = e.touches[0].clientX - tx; panY = e.touches[0].clientY - ty; applyTransform();
-    }
-    e.preventDefault();
-  }, {passive:false});
-  wrap.addEventListener('touchend', e => {
-    if (e.touches.length === 0) { isTouching = false; isPinching = false; }
-    else if (e.touches.length === 1) {
-      isPinching = false; isTouching = true;
-      tx = e.touches[0].clientX - panX; ty = e.touches[0].clientY - panY;
-    }
-  }, {passive:true});
 }
 
 // ═══ COMPOSE ═══
@@ -1631,6 +1821,7 @@ function openCompose(mode) {
   refreshTaskExisting();
 }
 function closeCompose() { document.body.classList.remove('compose-open','compose-longform'); }
+function closeBeckon() {} // stub — beckon is now compose only
 function handleOverlayClick(e) { if (e.target === document.getElementById('compose-overlay')) closeCompose(); }
 
 function switchComposeMode(mode) {
@@ -1688,9 +1879,16 @@ function commitMedia() {
   const title = document.getElementById('media-title-input').value.trim();
   if (!title) return;
   const mediaImg = document.getElementById('media-preview-img');
+  const fileInput = document.getElementById('media-file-input');
+  const mediaType = fileInput.files[0]?.type || '';
+  const url = document.getElementById('media-url-input').value.trim();
   nodes.push({ id:nextId++, type:'media', cluster:'media', title, thumbBg:'#1a1a1a',
-    src: mediaImg.src || null,
-    caption: document.getElementById('media-desc-input').value.trim(), _user:true });
+    src: (mediaImg.src && mediaImg.src !== window.location.href) ? mediaImg.src : null,
+    mediaType,
+    url: url || null,
+    caption: document.getElementById('media-desc-input').value.trim(),
+    description: document.getElementById('media-desc-input').value.trim(),
+    _user:true });
   document.getElementById('media-title-input').value = '';
   document.getElementById('media-desc-input').value = '';
   document.getElementById('media-url-input').value = '';
@@ -1701,11 +1899,19 @@ function commitMedia() {
 function commitLongform() {
   const title = document.getElementById('longform-title-input').value.trim();
   const body = document.getElementById('longform-body').value.trim();
-  if (!title && !body) return; // need at least something
+  if (!title && !body) return;
+  // Parse body into typed nodes using markdown syntax
+  const parsedNodes = body ? body.split('\n\n').filter(Boolean).map(block => {
+    const t = block.trim();
+    if (t.startsWith('### ')) return { type:'poster', text: t.slice(4) };
+    if (t.startsWith('> '))   return { type:'pull',   text: t.slice(2) };
+    if (t.startsWith('— '))  return { type:'body',   text: t };
+    return { type:'body', text: t };
+  }) : [];
   nodes.push({ id:nextId++, type:'longform', cluster:'long',
     title: title || 'Untitled draft',
-    excerpt: body.slice(0,140)+(body.length>140?'…':''),
-    nodes: body ? body.split('\n\n').filter(Boolean).map(t=>({type:'body',text:t})) : [],
+    excerpt: body.replace(/#{1,6}\s|>\s|[*_~]+/g,'').slice(0,140) + (body.length>140?'…':''),
+    nodes: parsedNodes,
     _user:true });
   document.getElementById('longform-title-input').value = '';
   document.getElementById('longform-body').value = '';
@@ -1883,7 +2089,14 @@ function updateSidebarDate() {
 
 // ═══ INIT ═══
 function init() {
+  loadTheme();
   loadState();
+  // Restore filter UI state
+  if (activeFilter !== 'all') {
+    document.querySelectorAll('.cluster-nav-item').forEach(el => el.classList.toggle('active', el.dataset.cluster === activeFilter));
+    const dockEl = document.getElementById('dock-' + activeFilter);
+    if (dockEl) { document.querySelectorAll('.dock-cluster').forEach(e=>e.classList.remove('active')); dockEl.classList.add('active'); }
+  }
   renderStream();
   updateNavCounts();
   updateSidebarDate();

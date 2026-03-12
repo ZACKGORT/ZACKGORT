@@ -343,90 +343,575 @@ body::after {
 .dim { opacity: 0.45; }
 .stream-empty { padding:60px 0; text-align:center; color:var(--ink-3); font-size:13px; font-weight:300; line-height:2; }
 
-/* ── Right detail panel ── */
-#detail {
-  width: var(--detail-w);
+/* ══════════════════════════════════════════
+   CHAPTER SPINE — right rail, always visible
+   Shows chapters + subchapters per active cluster
+══════════════════════════════════════════ */
+#spine {
+  width: 220px;
   flex-shrink: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
   border-left: 1px solid var(--border);
   background: var(--bg-4);
-  transform: translateX(var(--detail-w));
-  transition: transform 0.44s cubic-bezier(0.32,0.72,0,1);
-  overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
 }
-#detail.open { transform: translateX(0); }
-.detail-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
-.detail-type-tag { display:flex; align-items:center; gap:6px; font-size:8px; letter-spacing:0.16em; text-transform:uppercase; color:var(--ink-2); }
-.detail-type-dot { width:6px; height:6px; border-radius:50%; }
-.detail-close { background:none; border:1px solid var(--border-2); color:var(--ink-2); font-size:11px; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; }
-.detail-close:hover { border-color:var(--accent); color:var(--accent); }
-.detail-body { flex:1; overflow-y:auto; overflow-x:hidden; padding:24px 22px; }
-.detail-body::-webkit-scrollbar { width:3px; }
-.detail-body::-webkit-scrollbar-track { background:transparent; }
-.detail-body::-webkit-scrollbar-thumb { background:var(--border-2); border-radius:2px; }
-.detail-sentence { font-family:var(--disp); font-size:21px; line-height:1.45; color:var(--ink); margin-bottom:20px; }
-.detail-meta { font-size:8px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border); }
-.detail-write-label { font-size:7px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; }
-.detail-textarea { width:100%; background:var(--bg-3); border:1px solid var(--border-2); border-radius:5px; outline:none; resize:none; color:var(--ink); font-family:var(--mono); font-size:13px; line-height:1.7; caret-color:var(--accent); padding:12px 14px; min-height:120px; transition:border-color 0.15s; }
-.detail-textarea:focus { border-color:var(--border-3); }
-.detail-textarea::placeholder { color:var(--ink-3); }
-.detail-task-row { display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
-.detail-task-check { width:18px; height:18px; border-radius:50%; border:1px solid var(--border-3); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--accent); transition:all 0.15s; margin-top:2px; }
-.detail-task-check.done { background:var(--accent-l); border-color:var(--accent); }
-.detail-task-text { font-size:15px; line-height:1.6; color:var(--ink); }
-.detail-task-text.done { text-decoration:line-through; opacity:0.4; }
-.detail-media-frame { width:100%; aspect-ratio:16/9; border-radius:6px; overflow:hidden; background:var(--bg-3); border:1px solid var(--border-2); display:flex; align-items:center; justify-content:center; margin-bottom:16px; cursor:pointer; transition:border-color 0.2s; }
-.detail-media-frame:hover { border-color:var(--accent); }
-.detail-media-placeholder { display:flex; flex-direction:column; align-items:center; gap:8px; }
-.detail-media-play-icon { width:44px; height:44px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; opacity:0.8; }
-.detail-media-hint { font-size:8px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink-3); }
-.detail-media-title { font-family:var(--disp); font-size:18px; color:var(--ink); margin-bottom:8px; }
-.detail-media-sub { font-size:13px; color:var(--ink-2); line-height:1.65; font-weight:300; }
-.detail-lf-label { font-size:7px; letter-spacing:0.16em; text-transform:uppercase; color:var(--c-long); margin-bottom:10px; }
-.detail-lf-title { font-family:var(--disp); font-size:24px; color:var(--ink); margin-bottom:8px; }
-.detail-lf-excerpt { font-size:13px; color:var(--ink-2); line-height:1.7; font-weight:300; margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--border); }
-.detail-lf-stream .node { padding:10px 0; }
-.detail-lf-stream .node.pull { margin:4px 0; }
-/* ── Inline compose in detail panel (notes + longform) ── */
-.detail-inline-compose { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
-.dic-eyebrow { font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
-.dic-style-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-.dic-style-btn {
+.spine-header {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.spine-label {
+  font-size: 7px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.spine-cluster-name {
+  font-family: var(--disp); font-size: 15px; color: var(--ink);
+  margin-top: 3px;
+}
+.spine-body {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 10px 0 20px;
+}
+.spine-body::-webkit-scrollbar { width: 2px; }
+.spine-body::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 1px; }
+
+/* Chapter entry */
+.spine-ch {
+  padding: 12px 18px 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+.spine-ch::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: transparent; transition: background 0.2s;
+}
+.spine-ch:hover { background: rgba(255,255,255,0.018); }
+.spine-ch.active::before { background: var(--accent); }
+.spine-ch-num {
+  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 3px;
+}
+.spine-ch-title {
+  font-family: var(--disp); font-size: 13px; color: var(--ink);
+  line-height: 1.3;
+}
+.spine-ch-count {
+  font-size: 7px; letter-spacing: 0.1em; color: var(--ink-3);
+  margin-top: 3px;
+}
+
+/* Subchapter / label entries */
+.spine-sub {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 18px 6px 28px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.spine-sub:hover { background: rgba(255,255,255,0.014); }
+.spine-sub.active { background: rgba(255,255,255,0.025); }
+.spine-sub-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  flex-shrink: 0; opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.spine-sub.active .spine-sub-dot { opacity: 1; }
+.spine-sub-label {
+  font-size: 9px; letter-spacing: 0.06em;
+  color: var(--ink-2); line-height: 1.3;
+  flex: 1;
+}
+.spine-sub.active .spine-sub-label { color: var(--ink); }
+
+/* Node entry — individual lines in spine */
+.spine-node {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 3px 18px 3px 32px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.12s;
+  font-size: 9px; color: var(--ink-2);
+  line-height: 1.45;
+}
+.spine-node:hover { opacity: 0.85; }
+.spine-node.active { opacity: 1; color: var(--ink); }
+.spine-node-type {
+  font-size: 6px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); flex-shrink: 0; min-width: 28px;
+}
+.spine-node-text {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  flex: 1;
+}
+
+.spine-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 18px;
+  opacity: 0.6;
+}
+
+/* ── Spine node editor (shows when a note node is selected) ── */
+#spine.editing .spine-body { display: none; }
+#spine-editor {
+  display: none;
+  flex: 1; flex-direction: column; overflow: hidden;
+}
+#spine.editing #spine-editor { display: flex; }
+
+.spe-header {
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.spe-label {
+  font-size: 7px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-3);
+}
+.spe-close {
+  background: none; border: 1px solid var(--border-2); color: var(--ink-2);
+  font-size: 10px; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.spe-close:hover { border-color: var(--accent); color: var(--accent); }
+
+.spe-type-row {
+  display: flex; gap: 4px; padding: 10px 18px 0; flex-wrap: wrap; flex-shrink: 0;
+}
+.spe-type-btn {
   font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 9px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.14s;
+}
+.spe-type-btn.active { color: var(--c-notes); border-color: var(--c-notes); background: rgba(196,98,58,0.07); }
+
+.spe-fmt-row {
+  display: flex; align-items: center; gap: 2px;
+  padding: 7px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.spe-fmt-btn {
+  background: none; border: 1px solid transparent; border-radius: 3px;
+  padding: 2px 6px; font-size: 10px; color: var(--ink-3);
+  cursor: pointer; line-height: 1; transition: all 0.12s;
+}
+.spe-fmt-btn:hover { border-color: var(--border-2); color: var(--ink-2); }
+.spe-fmt-sep { width: 1px; height: 12px; background: var(--border-2); margin: 0 2px; flex-shrink: 0; }
+
+.spe-body {
+  flex: 1; overflow-y: auto; padding: 14px 18px;
+}
+#spe-input {
+  width: 100%; background: none; border: none; outline: none;
+  color: var(--ink); caret-color: var(--c-notes);
+  line-height: 1.75; min-height: 80px;
+  transition: font-size 0.2s, font-family 0.2s, font-style 0.2s;
+}
+#spe-input.style-body   { font-family: var(--mono); font-size: 13px; }
+#spe-input.style-poster { font-family: var(--disp); font-size: 22px; line-height: 1.2; }
+#spe-input.style-pull   { font-family: var(--disp); font-style: italic; font-size: 17px; line-height: 1.45; color: var(--ink-2); border-left: 2px solid var(--c-notes); padding-left: 14px; }
+#spe-input.style-label  { font-family: var(--mono); font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--c-notes); }
+
+.spe-footer {
+  padding: 10px 18px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.spe-delete-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  background: none; border: 1px solid rgba(255,80,60,0.25); color: rgba(255,80,60,0.55);
+  padding: 5px 10px; border-radius: 3px; cursor: pointer; transition: all 0.2s;
+}
+.spe-delete-btn:hover { border-color: rgba(255,80,60,0.7); color: rgba(255,80,60,0.9); }
+.spe-save-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--c-notes); color: #fff; border: none;
+  padding: 6px 14px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+}
+.spe-save-btn:hover { opacity: 0.85; }
+
+/* ── Keyboard badge ── */
+.kbd { display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-family:var(--mono); background:var(--bg-3); border:1px solid var(--border-2); border-radius:3px; padding:1px 5px; color:var(--ink-3); letter-spacing:0; }
+
+/* ══════════════════════════════════════════
+   NOTES CANVAS — full writing surface
+══════════════════════════════════════════ */
+#notes-canvas {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+}
+body.cluster-notes #notes-canvas { display: flex; }
+body.cluster-notes #stream { display: none; }
+
+/* Floating type bar — hovers above the input line */
+#nc-type-bar {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 32px 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.nc-type-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
   padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
   color: var(--ink-3); background: none; cursor: pointer; transition: all 0.14s;
 }
-.dic-style-btn.active { color: var(--accent); border-color: var(--accent); background: var(--accent-l); }
-.dic-cluster-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
-.dic-cluster-btn {
+.nc-type-btn:hover { border-color: var(--ink-2); color: var(--ink-2); }
+.nc-type-btn.active { color: var(--c-notes); border-color: var(--c-notes); background: rgba(196,98,58,0.07); }
+.dark .nc-type-btn.active { background: rgba(217,119,87,0.10); }
+
+/* Format toolbar */
+#nc-fmt-bar {
+  display: flex; align-items: center; gap: 3px;
+  padding: 6px 32px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nc-fmt-btn {
+  background: none; border: 1px solid transparent;
+  border-radius: 3px; padding: 3px 7px;
+  font-size: 11px; font-family: var(--mono);
+  color: var(--ink-3); cursor: pointer; line-height: 1;
+  transition: all 0.12s;
+}
+.nc-fmt-btn:hover { border-color: var(--border-2); color: var(--ink-2); }
+.nc-fmt-btn.pressed { border-color: var(--c-notes); color: var(--c-notes); background: rgba(196,98,58,0.06); }
+.nc-fmt-sep {
+  width: 1px; height: 14px; background: var(--border-2);
+  margin: 0 3px; flex-shrink: 0;
+}
+.nc-undo-btn {
+  background: none; border: none;
+  font-size: 11px; font-family: var(--mono);
+  color: var(--ink-3); cursor: pointer; padding: 3px 6px;
+  transition: color 0.12s; line-height: 1;
+}
+.nc-undo-btn:hover { color: var(--ink); }
+@keyframes nc-heartbeat {
+  0%,100% { opacity:1; transform:scale(1); }
+  40%      { opacity:0.35; transform:scale(0.5); }
+  60%      { opacity:0.75; transform:scale(0.85); }
+}
+
+/* Writing surface — scrolls above */
+#nc-stream {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 24px 32px 0;
+}
+#nc-stream::-webkit-scrollbar { width: 3px; }
+#nc-stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+#nc-stream-inner { max-width: 620px; margin: 0 auto; }
+
+/* The write line — contenteditable sentence input */
+#nc-input-wrap {
+  padding: 0 32px 28px;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+#nc-input-inner {
+  max-width: 620px; margin: 0 auto;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  position: relative;
+}
+.nc-input-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px;
+}
+.nc-commit-hint {
+  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink-3); pointer-events: none;
+}
+.nc-commit-btn {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--c-notes); color: #fff; border: none;
+  padding: 6px 14px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+}
+.nc-commit-btn:hover { opacity: 0.85; }
+
+#nc-input {
+  width: 100%; background: none; border: none; outline: none;
+  resize: none; color: var(--ink); caret-color: var(--c-notes);
+  line-height: 1.75; min-height: 48px;
+  transition: font-size 0.2s, font-family 0.2s, font-style 0.2s, color 0.2s;
+}
+#nc-input.style-body   { font-family: var(--mono); font-size: 15px; }
+#nc-input.style-poster { font-family: var(--disp); font-size: 28px; line-height: 1.15; }
+#nc-input.style-pull   { font-family: var(--disp); font-style: italic; font-size: 20px; line-height: 1.45; color: var(--ink-2); border-left: 2px solid var(--c-notes); padding-left: 16px; }
+#nc-input.style-label  { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--c-notes); }
+#nc-input[data-placeholder]:empty::before {
+  content: attr(data-placeholder); color: var(--ink-3); pointer-events: none; font-style: italic;
+}
+
+/* ══════════════════════════════════════════
+   TASKS BECKON + PANEL — frank capture pattern
+══════════════════════════════════════════ */
+#tasks-beckon-wrap {
+  padding: 14px 32px 10px;
+  flex-shrink: 0;
+  display: none;
+  position: relative;
+}
+body.cluster-tasks #tasks-beckon-wrap { display: block; }
+body.cluster-long  #tasks-beckon-wrap { display: none; }
+
+.beckon-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px 9px 14px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 2px; cursor: text;
+  transition: border-color 0.22s, box-shadow 0.22s, background 0.18s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  max-width: 620px; margin: 0 auto;
+  user-select: none;
+}
+.beckon-bar:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  background: var(--bg-3);
+}
+.beckon-bar.active-state { display: none; }
+.beckon-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  flex-shrink: 0; opacity: 0.7;
+  animation: nc-heartbeat 3.4s ease-in-out infinite;
+}
+.beckon-dot.tasks-dot { background: var(--c-tasks); }
+.beckon-dot.long-dot  { background: var(--c-long); }
+.beckon-prompt-text {
+  flex: 1; font-family: var(--text); font-size: 15px; font-style: italic;
+  font-weight: 300; color: var(--ink-3); letter-spacing: 0.01em;
+  position: relative;
+}
+.beckon-prompt-text::after {
+  content: ''; display: inline-block; width: 1px; height: 0.9em;
+  background: var(--accent); margin-left: 1px; vertical-align: text-bottom;
+  opacity: 0; animation: beckon-blink 1.8s ease-in-out infinite;
+}
+@keyframes beckon-blink { 0%,100%{opacity:0} 45%,55%{opacity:0.6} }
+.beckon-hint-text {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3); flex-shrink: 0;
+}
+
+/* Shared capture panel — tasks and long both use this */
+.capture-panel-base {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(110%);
+  width: min(600px, calc(100vw - 24px));
+  z-index: 820;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-bottom: none; border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 0 var(--accent), 0 -12px 48px rgba(0,0,0,0.3);
+  overflow: hidden;
+  transition: transform 0.34s cubic-bezier(0.25,1,0.5,1), opacity 0.24s ease;
+  opacity: 0; pointer-events: none;
+}
+.capture-panel-base.open {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1; pointer-events: auto;
+}
+.cp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px 8px; border-bottom: 1px solid var(--border);
+}
+.cp-label {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink-3);
+  display: flex; align-items: center; gap: 8px;
+}
+.cp-rec {
+  width: 5px; height: 5px; border-radius: 50%;
+  animation: nc-heartbeat 1.8s ease-in-out infinite;
+}
+.cp-rec.tasks-rec { background: var(--c-tasks); }
+.cp-rec.long-rec  { background: var(--c-long); }
+.cp-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-3); font-size: 16px; line-height: 1;
+  padding: 0; transition: color 0.12s;
+}
+.cp-close:hover { color: var(--ink); }
+.cp-toolbar {
+  display: flex; align-items: center; gap: 2px;
+  padding: 6px 14px 2px; border-bottom: 1px solid var(--border); flex-wrap: wrap;
+}
+.cp-fmt-btn {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.06em;
+  background: none; border: 1px solid transparent;
+  color: var(--ink-3); padding: 3px 7px; border-radius: 2px;
+  cursor: pointer; transition: all 0.12s; line-height: 1.4; white-space: nowrap;
+}
+.cp-fmt-btn:hover { border-color: var(--border-2); color: var(--ink-2); background: var(--bg-3); }
+.cp-fmt-btn.active { border-color: var(--c-notes); color: var(--c-notes); background: rgba(196,98,58,0.07); }
+.cp-fmt-sep { width: 1px; height: 14px; background: var(--border-2); margin: 0 3px; flex-shrink: 0; }
+.cp-textarea {
+  width: 100%; background: none; border: none; outline: none;
+  resize: none; padding: 16px 20px 10px;
+  font-family: var(--text); font-size: 17px; font-style: italic;
+  font-weight: 300; line-height: 1.65;
+  color: var(--ink); caret-color: var(--accent);
+  min-height: 80px; max-height: 200px; overflow-y: auto;
+}
+.cp-textarea::placeholder { color: var(--ink-3); font-style: italic; }
+.cp-footer {
+  display: flex; align-items: center;
+  padding: 8px 18px 12px; border-top: 1px solid var(--border); gap: 10px;
+}
+.cp-charcount {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.08em;
+  color: var(--ink-3); flex-shrink: 0;
+}
+.cp-keys {
+  display: flex; gap: 12px; flex: 1;
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.07em; color: var(--ink-3);
+}
+.cp-keys kbd {
+  font-family: var(--mono); font-size: 7px;
+  background: var(--bg-3); border: 1px solid var(--border-2);
+  padding: 1px 5px; border-radius: 2px; color: var(--ink-2);
+}
+.cp-submit {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: none; color: var(--ink-3);
+  border: 1px solid var(--border-2); padding: 5px 11px; border-radius: 2px;
+  cursor: pointer; transition: border-color 0.14s, color 0.14s;
+  white-space: nowrap; flex-shrink: 0; margin-left: auto;
+}
+.cp-submit:hover { border-color: var(--ink-2); color: var(--ink-2); }
+.cp-submit:active { transform: scale(0.97); }
+
+/* Tasks panel — overlay on top of beckon */
+#tasks-panel { }
+.tasks-panel-list {
+  max-height: 140px; overflow-y: auto;
+  border-top: 1px solid var(--border);
+  padding: 6px 0;
+}
+.tasks-panel-list::-webkit-scrollbar { width: 2px; }
+.tasks-panel-list::-webkit-scrollbar-thumb { background: var(--border-2); }
+.tasks-panel-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 20px;
+}
+.tpi-check {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 1px solid var(--border-2); flex-shrink: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; color: var(--c-tasks); transition: all 0.15s;
+}
+.tpi-check.done { background: rgba(90,112,64,0.12); border-color: var(--c-tasks); }
+.tpi-text { font-size: 11px; color: var(--ink-2); flex: 1; }
+.tpi-text.done { text-decoration: line-through; opacity: 0.5; }
+.tpi-del { background: none; border: none; color: var(--ink-3); cursor: pointer; font-size: 12px; padding: 0 3px; opacity: 0.4; transition: opacity 0.15s; }
+.tpi-del:hover { opacity: 1; color: rgba(255,80,60,0.8); }
+
+/* ══════════════════════════════════════════
+   LONG-FORM BECKON — shown in long cluster
+══════════════════════════════════════════ */
+#long-beckon-wrap {
+  padding: 14px 32px 10px;
+  flex-shrink: 0;
+  display: none;
+}
+body.cluster-long #long-beckon-wrap { display: block; }
+#long-panel { }
+#long-panel .cp-textarea { font-style: normal; font-size: 16px; line-height: 1.8; }
+
+/* Sentence parse review widget */
+#parse-widget {
+  display: none;
+  position: fixed; inset: 0; z-index: 700;
+  background: rgba(10,9,8,0.72); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+#parse-widget.open { display: flex; }
+#parse-panel {
+  background: var(--bg-2); border: 1px solid var(--border-2);
+  border-radius: 10px;
+  width: min(680px, calc(100vw - 32px));
+  max-height: 82vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+.parse-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.parse-header-title { font-family: var(--disp); font-size: 18px; color: var(--ink); }
+.parse-header-sub { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-top: 3px; }
+.parse-close { background: none; border: 1px solid var(--border-2); color: var(--ink-2); font-size: 11px; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.parse-close:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Batch bar */
+.parse-batch-bar {
+  padding: 8px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.parse-batch-label { font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); margin-right: 4px; }
+.parse-batch-btn {
   font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 20px;
   color: var(--ink-3); background: none; cursor: pointer; transition: all 0.14s;
 }
-.dic-cluster-btn.active { color: var(--ink); border-color: var(--ink-2); background: rgba(0,0,0,0.04); }
-.dark .dic-cluster-btn.active { background: rgba(255,255,255,0.04); }
-.dic-textarea {
-  width: 100%; background: none; border: none; border-bottom: 1px solid var(--border-2);
-  outline: none; resize: none; color: var(--ink); font-family: var(--mono);
-  font-size: 15px; line-height: 1.75; caret-color: var(--accent);
-  padding: 8px 0; min-height: 80px; transition: font-size 0.2s, font-family 0.2s, font-style 0.2s;
+.parse-batch-btn:hover { border-color: var(--ink-2); color: var(--ink-2); }
+
+.parse-sentences {
+  flex: 1; overflow-y: auto; padding: 16px 24px;
 }
-.dic-textarea::placeholder { color: var(--ink-3); font-style: italic; }
-.dic-textarea:focus { border-bottom-color: var(--accent); }
-.dic-textarea.style-poster { font-family: var(--disp) !important; font-size: 24px !important; line-height: 1.2 !important; }
-.dic-textarea.style-pull   { font-family: var(--disp) !important; font-style: italic !important; font-size: 18px !important; color: var(--ink-2) !important; border-left: 2px solid var(--accent) !important; padding-left: 14px !important; }
-.dic-textarea.style-label  { font-size: 10px !important; letter-spacing: 0.22em !important; text-transform: uppercase !important; color: var(--accent) !important; }
-.dic-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
-.dic-add-btn {
-  font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
-  background: var(--accent); color: #fff; border: none;
-  padding: 8px 16px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+.parse-sentences::-webkit-scrollbar { width: 3px; }
+.parse-sentences::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+
+.parse-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
 }
-.dic-add-btn:hover { opacity: 0.85; }
-/* ── Keyboard badge ── */
-.kbd { display:inline-flex; align-items:center; justify-content:center; font-size:8px; font-family:var(--mono); background:var(--bg-3); border:1px solid var(--border-2); border-radius:3px; padding:1px 5px; color:var(--ink-3); letter-spacing:0; }
+.parse-row:last-child { border-bottom: none; }
+.parse-row-num {
+  font-size: 8px; letter-spacing: 0.1em; color: var(--ink-3);
+  padding-top: 3px; flex-shrink: 0; min-width: 18px;
+  font-family: var(--mono);
+}
+.parse-row-text {
+  flex: 1; font-family: var(--text); font-size: 15px; line-height: 1.65; color: var(--ink);
+}
+.parse-row-types {
+  display: flex; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;
+  max-width: 140px;
+}
+.parse-type-btn {
+  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 7px; border: 1px solid var(--border-2); border-radius: 20px;
+  color: var(--ink-3); background: none; cursor: pointer; transition: all 0.12s;
+}
+.parse-type-btn.active { color: var(--c-long); border-color: var(--c-long); background: rgba(128,96,168,0.08); }
+
+.parse-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.parse-count { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.parse-commit-btn {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
+  background: var(--c-long); color: #fff; border: none;
+  padding: 10px 22px; border-radius: 3px; cursor: pointer; transition: opacity 0.2s;
+}
+.parse-commit-btn:hover { opacity: 0.85; }
 
 /* ═══════════════════════════════════════
    FIELD OVERLAY — Lily Pad Treatment
@@ -1118,10 +1603,66 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
       <span class="hud-filter" id="hud-filter-label">All clusters · <span id="hud-count">16</span> nodes</span>
       <div class="hud-right-controls">
         <button class="hud-ctrl-btn" onclick="openField()">◈ Field</button>
-        <button class="hud-ctrl-btn" onclick="openCompose()">+ New</button>
+        <button class="hud-ctrl-btn" id="hud-new-btn" onclick="hudNewAction()">+ New</button>
       </div>
     </div>
 
+    <!-- Tasks beckon — shown when cluster=tasks -->
+    <div id="tasks-beckon-wrap">
+      <div class="beckon-bar" id="tasks-beckon-bar" onclick="openTasksPanel()">
+        <div class="beckon-dot tasks-dot"></div>
+        <span class="beckon-prompt-text">What needs to happen?</span>
+        <span class="beckon-hint-text">click to add</span>
+      </div>
+    </div>
+
+    <!-- Long-form beckon — shown when cluster=long -->
+    <div id="long-beckon-wrap">
+      <div class="beckon-bar" id="long-beckon-bar" onclick="openLongPanel()">
+        <div class="beckon-dot long-dot"></div>
+        <span class="beckon-prompt-text">Write freely — sentences will be parsed on submit.</span>
+        <span class="beckon-hint-text">click to write</span>
+      </div>
+    </div>
+
+    <!-- Notes canvas — shown when cluster=notes -->
+    <div id="notes-canvas">
+      <!-- Type selector -->
+      <div id="nc-type-bar">
+        <button class="nc-type-btn active" data-ntype="body"   onclick="ncSetType(this)">body</button>
+        <button class="nc-type-btn"         data-ntype="poster" onclick="ncSetType(this)">poster</button>
+        <button class="nc-type-btn"         data-ntype="pull"   onclick="ncSetType(this)">pull</button>
+        <button class="nc-type-btn"         data-ntype="label"  onclick="ncSetType(this)">label</button>
+      </div>
+      <!-- Format toolbar -->
+      <div id="nc-fmt-bar">
+        <button class="nc-fmt-btn" title="Bold (⌘B)" onclick="ncFmt('bold')"><b>B</b></button>
+        <button class="nc-fmt-btn" title="Italic (⌘I)" onclick="ncFmt('italic')"><i>I</i></button>
+        <button class="nc-fmt-btn" title="Underline (⌘U)" onclick="ncFmt('underline')"><u>U</u></button>
+        <button class="nc-fmt-btn" title="Strikethrough" onclick="ncFmt('strikeThrough')"><s>S</s></button>
+        <div class="nc-fmt-sep"></div>
+        <button class="nc-undo-btn" title="Undo" onclick="document.execCommand('undo')">↩</button>
+        <button class="nc-undo-btn" title="Redo" onclick="document.execCommand('redo')">↪</button>
+      </div>
+      <!-- Stream (viewing surface) -->
+      <div id="nc-stream">
+        <div id="nc-stream-inner"></div>
+      </div>
+      <!-- Write line (writing surface) -->
+      <div id="nc-input-wrap">
+        <div id="nc-input-inner">
+          <div id="nc-input" class="style-body" contenteditable="true"
+            data-placeholder="Write the sentence."
+            onkeydown="ncKeydown(event)"></div>
+          <div class="nc-input-foot">
+            <span class="nc-commit-hint"><kbd class="kbd">⌘↵</kbd> to commit</span>
+            <button class="nc-commit-btn" onclick="ncCommit()">Commit node</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All / media / tasks / long stream -->
     <div id="stream">
       <div class="stream-inner" id="stream-inner">
         <!-- Rendered by JS -->
@@ -1129,16 +1670,44 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
     </div>
   </div>
 
-  <!-- ── RIGHT DETAIL (desktop) ── -->
-  <div id="detail">
-    <div class="detail-header">
-      <div class="detail-type-tag">
-        <div class="detail-type-dot" id="detail-type-dot"></div>
-        <span id="detail-type-label">node</span>
-      </div>
-      <button class="detail-close" onclick="closeDetail()">✕</button>
+  <!-- ── CHAPTER SPINE (right rail, desktop) ── -->
+  <div id="spine">
+    <div class="spine-header">
+      <div class="spine-label">Structure</div>
+      <div class="spine-cluster-name" id="spine-cluster-name">All clusters</div>
     </div>
-    <div class="detail-body" id="detail-body"></div>
+    <div class="spine-body" id="spine-body">
+      <!-- Rendered by JS -->
+    </div>
+    <!-- Node editor — shown when a note is selected -->
+    <div id="spine-editor">
+      <div class="spe-header">
+        <div class="spe-label">Edit node</div>
+        <button class="spe-close" onclick="closeSpineEditor()">✕</button>
+      </div>
+      <div class="spe-type-row" id="spe-type-row">
+        <button class="spe-type-btn active" data-spetype="body"   onclick="speSetType(this)">body</button>
+        <button class="spe-type-btn"         data-spetype="poster" onclick="speSetType(this)">poster</button>
+        <button class="spe-type-btn"         data-spetype="pull"   onclick="speSetType(this)">pull</button>
+        <button class="spe-type-btn"         data-spetype="label"  onclick="speSetType(this)">label</button>
+      </div>
+      <div class="spe-fmt-row">
+        <button class="spe-fmt-btn" onclick="speFmt('bold')"><b>B</b></button>
+        <button class="spe-fmt-btn" onclick="speFmt('italic')"><i>I</i></button>
+        <button class="spe-fmt-btn" onclick="speFmt('underline')"><u>U</u></button>
+        <button class="spe-fmt-btn" onclick="speFmt('strikeThrough')"><s>S</s></button>
+        <div class="spe-fmt-sep"></div>
+        <button class="spe-fmt-btn" onclick="document.execCommand('undo')" style="font-size:9px">↩</button>
+        <button class="spe-fmt-btn" onclick="document.execCommand('redo')" style="font-size:9px">↪</button>
+      </div>
+      <div class="spe-body">
+        <div id="spe-input" class="style-body" contenteditable="true"></div>
+      </div>
+      <div class="spe-footer">
+        <button class="spe-delete-btn" onclick="speDeleteNode()">✕ Delete</button>
+        <button class="spe-save-btn" onclick="speSave()">Save</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -1168,6 +1737,81 @@ body.compose-open.compose-longform #compose-panel { max-height: 90vh; }
 <div class="scroll-nudge" id="scroll-nudge">
   <span>scroll</span>
   <span>↓</span>
+</div>
+
+<!-- ── Tasks capture panel ── -->
+<div id="tasks-panel" class="capture-panel-base">
+  <div class="cp-header">
+    <span class="cp-label">
+      <span class="cp-rec tasks-rec"></span>
+      One task per line
+    </span>
+    <button class="cp-close" onclick="closeTasksPanel()">×</button>
+  </div>
+  <textarea class="cp-textarea" id="tasks-cp-ta" rows="4"
+    placeholder="Ship cortex&#10;Write the architecture doc&#10;Send /institute post"></textarea>
+  <div class="cp-footer">
+    <span class="cp-charcount" id="tasks-cp-count">0</span>
+    <span class="cp-keys">
+      <span><kbd>Ctrl+↵</kbd> add tasks</span>
+      <span><kbd>Esc</kbd> close</span>
+    </span>
+    <button class="cp-submit" onclick="submitTasksPanel()">add tasks</button>
+  </div>
+  <div class="tasks-panel-list" id="tasks-panel-list"></div>
+</div>
+
+<!-- ── Long-form capture panel ── -->
+<div id="long-panel" class="capture-panel-base">
+  <div class="cp-header">
+    <span class="cp-label">
+      <span class="cp-rec long-rec"></span>
+      Write freely — name it after
+    </span>
+    <button class="cp-close" onclick="closeLongPanel()">×</button>
+  </div>
+  <div class="cp-toolbar">
+    <button class="cp-fmt-btn" data-fmt="bold"   onclick="longFmt('bold')"  ><b>B</b></button>
+    <button class="cp-fmt-btn" data-fmt="italic" onclick="longFmt('italic')"><i>I</i></button>
+    <button class="cp-fmt-btn" data-fmt="under"  onclick="longFmt('under')" ><u>U</u></button>
+    <div class="cp-fmt-sep"></div>
+    <button class="cp-fmt-btn" data-fmt="bullet" onclick="longFmt('bullet')">· List</button>
+  </div>
+  <textarea class="cp-textarea" id="long-cp-ta" rows="4"
+    placeholder="The thought, as it arrives. Don't stop to name it."></textarea>
+  <div class="cp-footer">
+    <span class="cp-charcount" id="long-cp-count">0</span>
+    <span class="cp-keys">
+      <span><kbd>Ctrl+↵</kbd> parse</span>
+      <span><kbd>Esc</kbd> close</span>
+    </span>
+    <button class="cp-submit" onclick="submitLongPanel()">parse →</button>
+  </div>
+</div>
+
+<!-- ── Sentence parse widget ── -->
+<div id="parse-widget">
+  <div id="parse-panel">
+    <div class="parse-header">
+      <div>
+        <div class="parse-header-title">Review sentences</div>
+        <div class="parse-header-sub">Assign a node type — or batch-set all</div>
+      </div>
+      <button class="parse-close" onclick="closeParse()">✕</button>
+    </div>
+    <div class="parse-batch-bar">
+      <span class="parse-batch-label">Set all to</span>
+      <button class="parse-batch-btn" onclick="batchSetType('body')">body</button>
+      <button class="parse-batch-btn" onclick="batchSetType('poster')">poster</button>
+      <button class="parse-batch-btn" onclick="batchSetType('pull')">pull</button>
+      <button class="parse-batch-btn" onclick="batchSetType('label')">label</button>
+    </div>
+    <div class="parse-sentences" id="parse-sentences"></div>
+    <div class="parse-footer">
+      <span class="parse-count" id="parse-count">0 sentences</span>
+      <button class="parse-commit-btn" onclick="commitParsed()">Commit to stream →</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Mobile dive sheet ── -->
@@ -1335,8 +1979,10 @@ function renderStream() {
       html += `<div class="node pull" data-id="${node.id}" ${click}>${applyInline(node.text)}</div>`;
     } else if (node.type === 'spec') {
       const ds = node.done ? ' style="text-decoration:line-through;opacity:0.4"' : '';
-      html += `<div class="node spec" data-id="${node.id}" ${click}>
-        <span class="spec-key">${node.key}</span>
+      const checkDone = node.done ? 'done' : '';
+      html += `<div class="node spec" data-id="${node.id}">
+        <span class="spec-key" style="cursor:pointer;user-select:none" onclick="toggleTaskInline(${node.id})" title="Toggle done">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--border-3);margin-right:6px;font-size:8px;color:var(--c-tasks);vertical-align:middle;${node.done?'background:rgba(90,112,64,0.12);border-color:var(--c-tasks)':''}">${node.done?'✓':''}</span>${node.key}</span>
         <span class="spec-sep">::</span>
         <span class="spec-val"${ds}>${node.val}</span>
         ${dot}
@@ -1369,6 +2015,7 @@ function renderStream() {
 
   inner.innerHTML = html || '<div class="stream-empty">No nodes in this cluster yet.<br>Press <strong>N</strong> or <strong>+</strong> to compose one.</div>';
   renderFieldNodes();
+  renderSpine();
   updateProgress();
 }
 
@@ -1385,9 +2032,13 @@ function updateProgress() {
   document.getElementById('progress').style.width = Math.min(100, pct || 0) + '%';
 }
 
-// ═══ FILTER ═══
+// ═══ FILTER / MENTAL STATE ═══
 function filterCluster(cluster) {
   activeFilter = cluster;
+  // Remove all cluster body classes
+  document.body.classList.remove('cluster-all','cluster-media','cluster-notes','cluster-tasks','cluster-long');
+  document.body.classList.add('cluster-' + cluster);
+
   // Sidebar nav
   document.querySelectorAll('.cluster-nav-item').forEach(el => el.classList.toggle('active', el.dataset.cluster === cluster));
   // Mobile dock
@@ -1395,15 +2046,379 @@ function filterCluster(cluster) {
   const dockEl = document.getElementById('dock-' + cluster);
   if (dockEl) dockEl.classList.add('active');
   if (cluster === 'all') document.querySelectorAll('.dock-cluster').forEach(e => e.classList.remove('active'));
+
+  // HUD new button label
+  const newBtn = document.getElementById('hud-new-btn');
+  if (newBtn) {
+    if (cluster === 'notes') newBtn.style.display = 'none'; // canvas handles it
+    else { newBtn.style.display = ''; newBtn.textContent = cluster === 'tasks' ? '' : cluster === 'long' ? '' : '+ New'; }
+  }
+
+  // Notes canvas: render notes stream
+  if (cluster === 'notes') {
+    renderNcStream();
+    setTimeout(() => document.getElementById('nc-input')?.focus(), 80);
+  }
+
+  // Spine
+  renderSpine();
   closeDetail();
   closeDive();
   renderStream();
   document.getElementById('stream').scrollTop = 0;
+  saveState();
 }
 
 function filterAndClose(cluster) {
   filterCluster(cluster);
   closeField();
+}
+
+// ═══ HUD NEW ACTION — context-aware ═══
+function hudNewAction() {
+  if (activeFilter === 'tasks') {
+    document.getElementById('tasks-beckon-input')?.focus();
+  } else if (activeFilter === 'long') {
+    document.getElementById('long-beckon-ta')?.focus();
+  } else {
+    openCompose();
+  }
+}
+
+// ═══ CHAPTER SPINE ═══
+function renderSpine() {
+  const body = document.getElementById('spine-body');
+  const nameEl = document.getElementById('spine-cluster-name');
+  if (!body) return;
+
+  const clusterLabel = activeFilter === 'all' ? 'All clusters' : CLUSTERS[activeFilter]?.label || activeFilter;
+  if (nameEl) nameEl.textContent = clusterLabel;
+
+  const filtered = activeFilter === 'all' ? nodes : nodes.filter(n => n.cluster === activeFilter);
+
+  let html = '';
+  let lastCh = null;
+
+  filtered.forEach(node => {
+    if (node.type === 'ch') {
+      if (lastCh !== null) html += '<div class="spine-divider"></div>';
+      lastCh = node;
+      const c = CLUSTERS[node.cluster];
+      html += `<div class="spine-ch" onclick="spineScrollTo(${node.id})">
+        <div class="spine-ch-num">${c?.icon || '·'} Ch. 0${node.ch}</div>
+        <div class="spine-ch-title">${node.title}</div>
+      </div>`;
+    } else if (node.type === 'label') {
+      const cc = CLUSTERS[node.cluster]?.color || 'var(--accent)';
+      html += `<div class="spine-sub" onclick="spineScrollTo(${node.id})">
+        <div class="spine-sub-dot" style="background:${cc}"></div>
+        <div class="spine-sub-label">${node.text}</div>
+      </div>`;
+    } else if (['body','poster','pull'].includes(node.type)) {
+      const preview = (node.text || '').replace(/\*\*/g,'').replace(/\*/g,'').substring(0, 38);
+      html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
+        <span class="spine-node-type">${node.type}</span>
+        <span class="spine-node-text">${preview}…</span>
+      </div>`;
+    } else if (node.type === 'spec') {
+      html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
+        <span class="spine-node-type">task</span>
+        <span class="spine-node-text">${node.val.substring(0,36)}</span>
+      </div>`;
+    } else if (node.type === 'longform') {
+      html += `<div class="spine-node" onclick="spineScrollTo(${node.id})">
+        <span class="spine-node-type">long</span>
+        <span class="spine-node-text">${node.title.substring(0,36)}</span>
+      </div>`;
+    }
+  });
+
+  body.innerHTML = html || '<div style="padding:20px 18px;font-size:10px;color:var(--ink-3)">No structure yet.</div>';
+}
+
+function spineScrollTo(nodeId) {
+  // In notes canvas mode, scroll nc-stream
+  const stream = activeFilter === 'notes' ? document.getElementById('nc-stream') : document.getElementById('stream');
+  const el = (stream || document).querySelector(`[data-id="${nodeId}"]`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Highlight briefly
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 1200);
+}
+
+// ═══ NOTES CANVAS ═══
+let ncType = 'body';
+
+function ncSetType(btn) {
+  ncType = btn.dataset.ntype;
+  document.querySelectorAll('.nc-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Morph input style
+  const inp = document.getElementById('nc-input');
+  if (!inp) return;
+  inp.className = 'style-' + ncType;
+  const placeholders = {
+    body: 'Write the sentence.',
+    poster: 'A statement. Large.',
+    pull: 'A line worth pulling out…',
+    label: 'SECTION LABEL',
+  };
+  inp.dataset.placeholder = placeholders[ncType] || 'Write.';
+  inp.focus();
+}
+
+function ncFmt(cmd) {
+  document.getElementById('nc-input')?.focus();
+  document.execCommand(cmd);
+}
+
+function ncKeydown(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    ncCommit();
+  }
+  // ⌘B/I/U shortcuts
+  if (e.metaKey && e.key === 'b') { e.preventDefault(); ncFmt('bold'); }
+  if (e.metaKey && e.key === 'i') { e.preventDefault(); ncFmt('italic'); }
+  if (e.metaKey && e.key === 'u') { e.preventDefault(); ncFmt('underline'); }
+}
+
+function ncCommit() {
+  const inp = document.getElementById('nc-input');
+  if (!inp) return;
+  // Get innerHTML for formatted content, text for plain
+  const rawText = inp.innerText.trim();
+  const html = inp.innerHTML.trim();
+  if (!rawText) return;
+
+  // Store html if formatted, otherwise plain text
+  const hasFormatting = /<(b|i|u|s|strong|em)[^>]*>/i.test(html);
+  const text = hasFormatting ? html : rawText;
+
+  nodes.push({ id: nextId++, type: ncType, cluster: 'notes', text, _user: true });
+
+  inp.innerHTML = '';
+  renderNcStream();
+  renderSpine();
+  updateNavCounts();
+  saveState();
+
+  // Scroll nc-stream to bottom
+  const s = document.getElementById('nc-stream');
+  if (s) setTimeout(() => s.scrollTo({ top: s.scrollHeight, behavior: 'smooth' }), 40);
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function renderNcStream() {
+  const inner = document.getElementById('nc-stream-inner');
+  if (!inner) return;
+  const noteNodes = nodes.filter(n => n.cluster === 'notes' && n.type !== 'ch' && n.type !== 'label');
+  let html = '';
+  noteNodes.forEach(node => {
+    const id = node.id;
+    const cc = CLUSTERS.notes.color;
+    const dot = `<div class="node-cluster-dot" style="background:${cc}"></div>`;
+    const click = `onclick="openSpineEditor(${id})"`;
+    if (node.type === 'label') {
+      html += `<div class="node label" data-id="${id}" ${click}>${node.text}${dot}</div>`;
+    } else if (node.type === 'poster') {
+      const lines = node.text.split('\n').map(l => applyInline(l)).join('<br>');
+      html += `<div class="node poster" data-id="${id}" ${click}>${lines}${dot}</div>`;
+    } else if (node.type === 'body') {
+      html += `<div class="node body" data-id="${id}" ${click}>${applyInline(node.text)}${dot}</div>`;
+    } else if (node.type === 'pull') {
+      html += `<div class="node pull" data-id="${id}" ${click}>${applyInline(node.text)}</div>`;
+    }
+  });
+  inner.innerHTML = html || '<div class="stream-empty" style="padding:40px 0">Notes canvas is empty.<br><span style="opacity:0.5">Begin writing below.</span></div>';
+}
+
+// ═══ TASKS PANEL (frank pattern) ═══
+let tasksPanelOpen = false;
+
+function openTasksPanel() {
+  tasksPanelOpen = true;
+  document.getElementById('tasks-panel').classList.add('open');
+  document.getElementById('tasks-beckon-bar').classList.add('active-state');
+  refreshTasksPanelList();
+  setTimeout(() => document.getElementById('tasks-cp-ta')?.focus(), 60);
+}
+function closeTasksPanel() {
+  tasksPanelOpen = false;
+  document.getElementById('tasks-panel').classList.remove('open');
+  document.getElementById('tasks-beckon-bar').classList.remove('active-state');
+}
+function submitTasksPanel() {
+  const ta = document.getElementById('tasks-cp-ta');
+  if (!ta) return;
+  const raw = ta.value.trim();
+  if (!raw) { closeTasksPanel(); return; }
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  lines.forEach(line => {
+    nodes.push({ id: nextId++, type: 'spec', cluster: 'tasks', key: 'TASK', val: line, done: false, _user: true });
+  });
+  ta.value = '';
+  document.getElementById('tasks-cp-count').textContent = '0';
+  refreshTasksPanelList();
+  renderStream(); renderSpine(); updateNavCounts(); saveState();
+  if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+}
+function refreshTasksPanelList() {
+  const container = document.getElementById('tasks-panel-list');
+  if (!container) return;
+  const tasks = nodes.filter(n => n.type === 'spec' && n.cluster === 'tasks');
+  if (!tasks.length) { container.innerHTML = ''; return; }
+  container.innerHTML = tasks.map(t => `
+    <div class="tasks-panel-item">
+      <div class="tpi-check ${t.done?'done':''}" onclick="toggleTaskInline(${t.id})" title="Toggle">${t.done?'✓':''}</div>
+      <span class="tpi-text ${t.done?'done':''}">${t.val}</span>
+      <button class="tpi-del" onclick="deleteNode(${t.id})" title="Delete">✕</button>
+    </div>`).join('');
+}
+
+// ═══ LONG PANEL (frank pattern) ═══
+let longPanelOpen = false;
+let _longFmt = null;
+
+function openLongPanel() {
+  longPanelOpen = true;
+  document.getElementById('long-panel').classList.add('open');
+  document.getElementById('long-beckon-bar').classList.add('active-state');
+  setTimeout(() => document.getElementById('long-cp-ta')?.focus(), 60);
+}
+function closeLongPanel() {
+  longPanelOpen = false;
+  document.getElementById('long-panel').classList.remove('open');
+  document.getElementById('long-beckon-bar').classList.remove('active-state');
+  _longFmt = null;
+  document.querySelectorAll('#long-panel .cp-fmt-btn').forEach(b => b.classList.remove('active'));
+}
+function longFmt(fmt) {
+  _longFmt = _longFmt === fmt ? null : fmt;
+  document.querySelectorAll('#long-panel .cp-fmt-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.fmt === _longFmt)
+  );
+}
+function submitLongPanel() {
+  const ta = document.getElementById('long-cp-ta');
+  if (!ta) return;
+  const raw = ta.value.trim();
+  if (!raw) { closeLongPanel(); return; }
+  ta.value = '';
+  document.getElementById('long-cp-count').textContent = '0';
+  closeLongPanel();
+  parseLongInput(raw);
+}
+
+// ═══ LONG-FORM SENTENCE PARSER ═══
+let parsedSentences = [];
+
+function parseLongInput(raw) {
+  if (!raw) return;
+  const sentenceRegex = /[^.!?]*[.!?]+(?:\s|$)/g;
+  const matches = raw.match(sentenceRegex) || [];
+  const joined = matches.join('');
+  const remainder = raw.slice(joined.length).trim();
+  parsedSentences = [
+    ...matches.map(s => ({ text: s.trim(), type: 'body' })),
+    ...(remainder ? [{ text: remainder, type: 'body' }] : []),
+  ].filter(s => s.text.length > 0);
+  if (!parsedSentences.length) return;
+  renderParseWidget();
+  document.getElementById('parse-widget').classList.add('open');
+}
+function renderParseWidget() {
+  const container = document.getElementById('parse-sentences');
+  const countEl = document.getElementById('parse-count');
+  if (!container) return;
+  const types = ['body','poster','pull','label'];
+  container.innerHTML = parsedSentences.map((s, i) => {
+    const typeBtns = types.map(t =>
+      `<button class="parse-type-btn${s.type===t?' active':''}" onclick="parseSetType(${i},'${t}',this)">${t}</button>`
+    ).join('');
+    return `<div class="parse-row" data-parse-idx="${i}">
+      <div class="parse-row-num">${i+1}</div>
+      <div class="parse-row-text">${s.text}</div>
+      <div class="parse-row-types">${typeBtns}</div>
+    </div>`;
+  }).join('');
+  if (countEl) countEl.textContent = parsedSentences.length + ' sentence' + (parsedSentences.length!==1?'s':'');
+}
+function parseSetType(idx, type, btn) {
+  parsedSentences[idx].type = type;
+  btn.closest('.parse-row').querySelectorAll('.parse-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function batchSetType(type) {
+  parsedSentences.forEach(s => s.type = type);
+  renderParseWidget();
+}
+function commitParsed() {
+  parsedSentences.forEach(s => {
+    nodes.push({ id: nextId++, type: s.type, cluster: 'long', text: s.text, _user: true });
+  });
+  parsedSentences = [];
+  closeParse();
+  renderStream(); renderSpine(); updateNavCounts(); saveState();
+  setTimeout(() => { const s = document.getElementById('stream'); s.scrollTo({ top: s.scrollHeight, behavior: 'smooth' }); }, 100);
+  if (navigator.vibrate) navigator.vibrate([8, 40, 12]);
+}
+function closeParse() { document.getElementById('parse-widget').classList.remove('open'); }
+
+// ═══ SPINE NODE EDITOR ═══
+let _speNodeId = null;
+let _speType = 'body';
+
+function openSpineEditor(nodeId) {
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node) return;
+  _speNodeId = nodeId;
+  _speType = node.type;
+  const spine = document.getElementById('spine');
+  spine.classList.add('editing');
+  // Set type buttons
+  document.querySelectorAll('.spe-type-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.spetype === _speType)
+  );
+  // Load content
+  const inp = document.getElementById('spe-input');
+  if (inp) {
+    inp.className = 'style-' + _speType;
+    // Strip simple HTML for display, preserve basic formatting
+    inp.innerHTML = node.text || '';
+    setTimeout(() => inp.focus(), 40);
+  }
+}
+function closeSpineEditor() {
+  _speNodeId = null;
+  document.getElementById('spine').classList.remove('editing');
+}
+function speSetType(btn) {
+  _speType = btn.dataset.spetype;
+  document.querySelectorAll('.spe-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const inp = document.getElementById('spe-input');
+  if (inp) inp.className = 'style-' + _speType;
+}
+function speFmt(cmd) {
+  document.getElementById('spe-input')?.focus();
+  document.execCommand(cmd);
+}
+function speSave() {
+  const node = nodes.find(n => n.id === _speNodeId);
+  if (!node) return;
+  const inp = document.getElementById('spe-input');
+  if (!inp) return;
+  node.type = _speType;
+  node.text = inp.innerHTML.trim() || inp.innerText.trim();
+  closeSpineEditor();
+  renderNcStream(); renderStream(); renderSpine(); saveState();
+}
+function speDeleteNode() {
+  if (_speNodeId === null) return;
+  deleteNode(_speNodeId);
+  closeSpineEditor();
 }
 
 // ═══ NAV COUNTS ═══
@@ -1446,127 +2461,31 @@ function buildMediaEl(node) {
     <div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3)">No source</div></div>`;
 }
 
-// ═══ DESKTOP DETAIL PANEL ═══
+// ═══ DESKTOP NODE CLICK — spine highlights, no panel needed ═══
 function openDetail(nodeId) {
-  const node = nodes.find(n => n.id === nodeId);
-  if (!node) return;
-  currentDetailNode = node;
+  // Just scroll to and highlight the node in the stream
+  spineScrollTo(nodeId);
+  // Mark active in spine
+  document.querySelectorAll('.spine-ch,.spine-sub,.spine-node').forEach(el => el.classList.remove('active'));
+  // For now this is a no-op detail rail — the canvas/stream IS the detail
   _lastDetailNodeId = nodeId;
-  const detail = document.getElementById('detail');
-  const body = document.getElementById('detail-body');
-  const cc = CLUSTERS[node.cluster]?.color || 'var(--accent)';
-  document.getElementById('detail-type-dot').style.background = cc;
-  document.getElementById('detail-type-label').textContent = node.type === 'longform' ? 'long-form' : node.type;
-
-  // Seed inline compose state for this node
-  _dicCluster = node.cluster;
-  _dicStyle = 'body';
-
-  // Inline compose cluster + current node's cluster pre-selected
-  const clusterBtns = Object.entries(CLUSTERS).map(([k,v]) =>
-    `<button class="dic-cluster-btn${k===node.cluster?' active':''}" onclick="dicSetCluster(this,'${k}')">${v.label}</button>`
-  ).join('');
-
-  // Inline compose style selectors for notes
-  const styleBtns = ['body','poster','pull','label'].map(s =>
-    `<button class="dic-style-btn${s==='body'?' active':''}" onclick="dicSetStyle(this,'${s}')">${s}</button>`
-  ).join('');
-
-  const inlineCompose = `
-    <div class="detail-inline-compose">
-      <div class="dic-eyebrow">Add a node</div>
-      <div class="dic-style-row">${styleBtns}</div>
-      <div class="dic-cluster-row">${clusterBtns}</div>
-      <textarea class="dic-textarea" id="dic-ta-${nodeId}" placeholder="Write the next sentence…" rows="4"></textarea>
-      <div class="dic-actions">
-        <button class="dic-add-btn" onclick="dicCommit(${nodeId})">Add node</button>
-      </div>
-    </div>`;
-
-  let content = '';
-  if (['body','poster','pull'].includes(node.type)) {
-    const lines = node.text.replace(/\\n/g,'<br>').split('\n').join('<br>');
-    content = `
-      <div class="detail-sentence">${applyInline(lines)}</div>
-      <div class="detail-meta">${CLUSTERS[node.cluster]?.label} · ${node.type}</div>
-      ${inlineCompose}`;
-  } else if (node.type === 'spec') {
-    content = `
-      <div class="detail-task-row">
-        <div class="detail-task-check ${node.done?'done':''}" onclick="toggleTask(${node.id},this)" id="dtc-${node.id}"></div>
-        <div>
-          <div class="detail-task-text ${node.done?'done':''}" id="dtt-${node.id}">${node.key} · ${node.val}</div>
-          <div style="font-size:10px;color:var(--ink-3);margin-top:3px;letter-spacing:0.08em">${CLUSTERS[node.cluster]?.label}</div>
-        </div>
-      </div>
-      <button class="detail-task-delete" onclick="deleteNode(${node.id})">✕ Delete task</button>`;
-  } else if (node.type === 'media') {
-    const mediaEl = buildMediaEl(node);
-    content = `
-      <div style="border-radius:6px;overflow:hidden;margin-bottom:14px">${mediaEl}</div>
-      <div class="detail-media-title">${node.title}</div>
-      <div class="detail-media-sub">${node.caption||node.description||''}</div>
-      ${node.url?`<a href="${node.url}" target="_blank" style="display:inline-block;margin-top:12px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);text-decoration:none;border-bottom:1px solid var(--border-2)">Source ↗</a>`:''}`;
-  } else if (node.type === 'longform') {
-    const innerNodes = (node.nodes||[]).map(n => {
-      if (n.type==='poster') return `<div class="node poster" style="padding:16px 0">${applyInline(n.text.replace(/\\n/g,'<br>'))}</div>`;
-      if (n.type==='body')   return `<div class="node body" style="padding:10px 0">${applyInline(n.text)}</div>`;
-      if (n.type==='pull')   return `<div class="node pull" style="margin:6px 0">${applyInline(n.text)}</div>`;
-      return '';
-    }).join('');
-    content = `
-      <div class="detail-lf-label">Long-form</div>
-      <div class="detail-lf-title">${node.title}</div>
-      <div class="detail-lf-excerpt">${node.excerpt}</div>
-      <div class="detail-lf-stream">${innerNodes}</div>
-      ${inlineCompose}`;
-  }
-  body.innerHTML = content;
-  detail.classList.add('open');
-}
-
-// ═══ INLINE COMPOSE (detail panel) ═══
-let _dicStyle = 'body';
-let _dicCluster = null; // set when detail opens
-
-function dicSetStyle(btn, style) {
-  _dicStyle = style;
-  btn.closest('.dic-style-row').querySelectorAll('.dic-style-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const ta = btn.closest('.detail-inline-compose').querySelector('.dic-textarea');
-  if (ta) ta.className = 'dic-textarea style-' + style;
-}
-function dicSetCluster(btn, cl) {
-  _dicCluster = cl;
-  btn.closest('.dic-cluster-row').querySelectorAll('.dic-cluster-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-function dicCommit(sourceNodeId) {
-  const ta = document.querySelector('.dic-textarea');
-  if (!ta || !ta.value.trim()) return;
-  const style = _dicStyle || 'body';
-  const cluster = _dicCluster || (nodes.find(n=>n.id===sourceNodeId)?.cluster || 'notes');
-  nodes.push({ id:nextId++, type:style, cluster, text:ta.value.trim(), _user:true });
-  ta.value = '';
-  ta.placeholder = 'Saved ✓';
-  setTimeout(() => { if (ta) ta.placeholder = 'Write the next sentence…'; }, 1400);
-  renderStream(); updateNavCounts(); saveState();
-  if (navigator.vibrate) navigator.vibrate(12);
 }
 
 function closeDetail() {
-  document.getElementById('detail').classList.remove('open');
-  currentDetailNode = null;
+  _lastDetailNodeId = null;
 }
 
 function toggleTask(nodeId, el) {
+  toggleTaskInline(nodeId);
+}
+
+function toggleTaskInline(nodeId) {
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
   node.done = !node.done;
-  el.classList.toggle('done', node.done);
-  const textEl = document.getElementById('dtt-' + nodeId);
-  if (textEl) textEl.classList.toggle('done', node.done);
-  renderStream(); saveState();
+  renderStream();
+  saveState();
+  if (navigator.vibrate) navigator.vibrate(10);
 }
 
 // ═══ MOBILE DIVE SHEET ═══
@@ -2071,13 +2990,25 @@ function initScrollNudge() {
 
 // ═══ KEYBOARD ═══
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeDetail(); closeDive(); closeField(); closeCompose(); }
-  if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !document.activeElement.matches('input,textarea')) openCompose();
+  if (e.key === 'Escape') {
+    closeDetail(); closeDive(); closeField(); closeCompose(); closeParse();
+    closeTasksPanel(); closeLongPanel(); closeSpineEditor();
+  }
+  if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !document.activeElement.matches('input,textarea,[contenteditable]')) {
+    if (activeFilter === 'notes') document.getElementById('nc-input')?.focus();
+    else if (activeFilter === 'tasks') openTasksPanel();
+    else if (activeFilter === 'long') openLongPanel();
+    else openCompose();
+  }
   if ((e.metaKey||e.ctrlKey) && e.key === 'Enter') {
-    const mode = document.querySelector('.compose-tab.active')?.dataset.mode;
-    if (mode==='note') commitNote();
-    else if (mode==='task') commitTask();
-    else if (mode==='longform') commitLongform();
+    if (tasksPanelOpen) { e.preventDefault(); submitTasksPanel(); }
+    else if (longPanelOpen) { e.preventDefault(); submitLongPanel(); }
+    else {
+      const mode = document.querySelector('.compose-tab.active')?.dataset.mode;
+      if (mode==='note') commitNote();
+      else if (mode==='task') commitTask();
+      else if (mode==='longform') commitLongform();
+    }
   }
 });
 
@@ -2091,6 +3022,8 @@ function updateSidebarDate() {
 function init() {
   loadTheme();
   loadState();
+  // Set initial mental state body class
+  document.body.classList.add('cluster-' + activeFilter);
   // Restore filter UI state
   if (activeFilter !== 'all') {
     document.querySelectorAll('.cluster-nav-item').forEach(el => el.classList.toggle('active', el.dataset.cluster === activeFilter));
@@ -2098,13 +3031,23 @@ function init() {
     if (dockEl) { document.querySelectorAll('.dock-cluster').forEach(e=>e.classList.remove('active')); dockEl.classList.add('active'); }
   }
   renderStream();
+  renderSpine();
+  if (activeFilter === 'notes') renderNcStream();
   updateNavCounts();
   updateSidebarDate();
   initFieldPan();
   initScrollNudge();
   document.getElementById('stream').addEventListener('scroll', updateProgress, {passive:true});
-  const lfBody = document.getElementById('longform-body');
-  if (lfBody) lfBody.addEventListener('input', updateWordCount);
+
+  // Charcount for panels
+  const tasksTa = document.getElementById('tasks-cp-ta');
+  if (tasksTa) tasksTa.addEventListener('input', () => {
+    document.getElementById('tasks-cp-count').textContent = tasksTa.value.length;
+  });
+  const longTa = document.getElementById('long-cp-ta');
+  if (longTa) longTa.addEventListener('input', () => {
+    document.getElementById('long-cp-count').textContent = longTa.value.length;
+  });
 
   // Show scroll nudge briefly on mobile
   if (isMobile()) {

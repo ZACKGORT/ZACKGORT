@@ -1099,6 +1099,172 @@ body.detail-panel-open #era-spine {
 .chain-arrow { color:var(--ink-3); font-size:12px; flex-shrink:0; padding:0 4px; }
 
 /* zoom-ctrl now inside #era-spine */
+
+/* ── MOBILE ≤ 700px ────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+
+  /* Topbar: single row, no scatter strip */
+  #topbar {
+    height: 44px;
+    right: 0 !important; /* never shrink on mobile */
+  }
+  #topbar-row {
+    border-bottom: none;
+  }
+  #topbar-scatter {
+    display: none;
+  }
+
+  /* Canvas fills from 44px topbar to 44px spine */
+  #canvas-wrap {
+    top: 44px !important;
+    bottom: 44px !important;
+  }
+
+  /* Brand — single line */
+  .tb-brand {
+    font-size: 13px;
+  }
+  .tb-brand span {
+    display: none;
+  }
+
+  /* Action buttons — compact */
+  .tb-btn {
+    padding: 5px 7px;
+    font-size: 7px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Detail panel — full screen bottom sheet */
+  #detail-panel {
+    top: 0 !important;
+    width: 100% !important;
+    transform: translateY(100%);
+    border-left: none;
+    border-top: 1px solid var(--border);
+    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    z-index: 1100;
+  }
+  #detail-panel.open {
+    transform: translateY(0);
+  }
+  /* Don't shift topbar/spine on mobile when panel opens */
+  body.detail-panel-open #topbar,
+  body.detail-panel-open #era-spine {
+    right: 0 !important;
+  }
+
+  /* Compose widget full width */
+  #compose-widget {
+    width: 100%;
+    left: 0;
+    transform: translateX(0) translateY(100%);
+    border-radius: 12px 12px 0 0;
+  }
+  #compose-widget.open {
+    transform: translateX(0) translateY(0);
+  }
+
+  /* Era spine — compact, shorter labels */
+  #era-spine {
+    height: 44px;
+    right: 0 !important;
+  }
+  .era-seg-label {
+    font-size: 5.5px;
+    letter-spacing: 0.08em;
+  }
+  .era-seg {
+    padding-bottom: 6px;
+  }
+
+  /* Zoom inside spine — hide pct label on mobile */
+  .zoom-pct {
+    display: none;
+  }
+  .zoom-btn {
+    padding: 6px 10px;
+  }
+
+  /* Chain strip above spine */
+  #chain-strip {
+    bottom: 44px;
+  }
+
+  /* Node cards — fit narrow viewport with margin */
+  .node-card {
+    width: calc(100vw - 40px);
+    max-width: 320px;
+  }
+  /* --node-w used in JS for port positioning — override via inline style not needed
+     since mobile layout sets x:20 and cards fill to edge */
+
+  /* Ports — bigger hit targets on touch */
+  .port {
+    width: 14px;
+    height: 14px;
+  }
+  /* Hide left/right ports on mobile — top/bottom only for vertical layout */
+  .port-left, .port-right {
+    display: none;
+  }
+
+  /* Connection lines — slightly thicker for touch legibility */
+  .conn-line {
+    stroke-width: 2;
+  }
+
+  /* Node title slightly smaller */
+  .node-title {
+    font-size: 13px;
+  }
+  .node-body {
+    font-size: 9.5px;
+  }
+
+  /* Detail panel — drag handle at top */
+  .dp-hero-header-wrap::before {
+    content: '';
+    display: block;
+    width: 36px; height: 4px;
+    background: var(--border-3);
+    border-radius: 2px;
+    margin: 10px auto 0;
+  }
+
+  /* Minimap — smaller, bottom-left so it clears the spine */
+  #minimap {
+    bottom: 54px;
+    right: 8px;
+    width: 90px;
+    height: 60px;
+  }
+
+  /* Mode badge */
+  #mode-badge {
+    top: 54px;
+  }
+}
+
+/* ── VERY SMALL ≤ 390px ─────────────────────────────────────────────── */
+@media (max-width: 390px) {
+  .tb-actions {
+    gap: 4px;
+  }
+  .tb-btn {
+    padding: 4px 6px;
+    font-size: 6.5px;
+  }
+  .era-seg-label {
+    display: none;
+  }
+  .era-seg-bar {
+    height: 4px;
+    margin-bottom: 4px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1107,8 +1273,8 @@ body.detail-panel-open #era-spine {
 <div id="topbar">
   <div id="topbar-row">
     <div class="tb-brand">
-      ZCKGRT · narrative as nodes
-      <span>· wolfie.love*</span>
+      ZCKGRT
+      <span>· Narrative as Nodes</span>
     </div>
     <div class="tb-actions">
       <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
@@ -1291,6 +1457,21 @@ let mouseCanvas   = { x: 0, y: 0 }; // mouse in canvas coords
 const DEFAULT_NODES = [
 
   // ── ERA 0: ORIGINS ───────────────────────────────────────────────────
+  {
+    id:'n0', x:-280, y:300, type:'launch',
+    title:'wolfie.love',
+    sentences:['A memorial. A platform. The impetus for everything that followed.'],
+    content:[
+      { type:'chapter', value:'The impetus.' },
+      { type:'sentence', value:'Wolfgang was a blind mini poodle mix. Rescued. Irreplaceable.' },
+      { type:'sentence', value:'He died. The grief became infrastructure.' },
+      { type:'divider', value:'' },
+      { type:'sentence', value:'wolfie.love is a memorial and a platform built on the sentence engine — the same engine that powers every platform in this canvas.' },
+      { type:'pullquote', value:'Everything I have built since is, in some way, a response to losing him.' },
+    ],
+    era:'2022', z:0, url:'https://wolfie.love',
+    headerImg:'https://i.ibb.co/ym1z1pyb/DSC05994.webp'
+  },
   {
     id:'n1', x:120, y:300, type:'concept',
     title:'This is opinionated.',
@@ -1687,6 +1868,8 @@ const DEFAULT_NODES = [
 ];
 
 const DEFAULT_CONNECTIONS = [
+  // Impetus → Origins
+  { id:'c0',  from:'n0',  to:'n1',  label:'' },
   // Origins thread
   { id:'c1',  from:'n1',  to:'n2',  label:'' },
   { id:'c2',  from:'n1',  to:'n3',  label:'' },
@@ -1723,7 +1906,7 @@ const DEFAULT_CONNECTIONS = [
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v7';
+const DATA_VERSION = 'v8';
 
 function save() {
   try {
@@ -2997,7 +3180,7 @@ document.addEventListener('keydown', e => {
 // ── ERA SPINE ─────────────────────────────────────────────────────────
 // Era x-ranges as fractions of full canvas width (node x positions / CANVAS_W)
 const ERA_SPINE = [
-  { era:0, label:'Origins',       nodeIds:['n1','n2','n3','n4'],                         color:'--era-pre'   },
+  { era:0, label:'Origins',       nodeIds:['n0','n1','n2','n3','n4'],                    color:'--era-pre'   },
   { era:1, label:'Suburbia',      nodeIds:['n5','n6','n7','n8','n9'],                     color:'--era-loss'  },
   { era:2, label:'Agency',        nodeIds:['n10','n11','n12','n13'],                      color:'--era-build' },
   { era:3, label:'New York',      nodeIds:['n14','n15','n16','n17','n18','n19','n20'],    color:'--era-now'   },
@@ -3055,7 +3238,8 @@ function updateSpineActive() {
 // Static node positions as fractions — maps directly to sandbox SCATTER_NODES
 const SCATTER_DATA = [
   // [nodeId, xFrac, yFrac, colorVar, label, isMajor]
-  ['n1',  0.02, 0.50, '--c-concept', 'This is opinionated.', true],
+  ['n0',  0.00, 0.50, '--c-launch',  'wolfie.love',          true],
+  ['n1',  0.03, 0.50, '--c-concept', 'This is opinionated.', true],
   ['n2',  0.07, 0.32, '--c-process', 'First Build',          false],
   ['n3',  0.07, 0.68, '--c-reflect', 'Self-Curriculum',      false],
   ['n4',  0.12, 0.50, '--c-launch',  'Craigslist Post',      false],
@@ -3247,6 +3431,53 @@ function initScatterMap() {
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────
+// ── MOBILE LAYOUT ─────────────────────────────────────────────────────
+function isMobileViewport() {
+  return window.innerWidth <= 700;
+}
+
+// Walk the connection graph from a start node in narrative order (BFS)
+function narrativeOrder() {
+  const visited = new Set();
+  const order = [];
+  // Find root: node with no incoming connections
+  const hasIncoming = new Set(connections.map(c => c.to));
+  let roots = nodes.filter(n => !hasIncoming.has(n.id));
+  if (!roots.length) roots = [nodes[0]];
+
+  const queue = [...roots];
+  roots.forEach(r => visited.add(r.id));
+
+  while (queue.length) {
+    const node = queue.shift();
+    order.push(node);
+    // Follow outgoing connections in id order for determinism
+    const outgoing = connections
+      .filter(c => c.from === node.id && !visited.has(c.to))
+      .sort((a, b) => a.to.localeCompare(b.to));
+    for (const c of outgoing) {
+      const next = nodes.find(n => n.id === c.to);
+      if (next) { visited.add(next.id); queue.push(next); }
+    }
+  }
+  // Catch any disconnected nodes
+  nodes.forEach(n => { if (!visited.has(n.id)) order.push(n); });
+  return order;
+}
+
+function applyMobileLayout() {
+  // All nodes at x:0 — transform.x provides the left margin.
+  // Card width is CSS-controlled (100vw - 40px), so no centering math needed.
+  const START_Y = 20;
+  const GAP_Y   = 220;
+
+  const ordered = narrativeOrder();
+  ordered.forEach((node, i) => {
+    node.x = 0;
+    node.y = START_Y + i * GAP_Y;
+  });
+}
+
 function firstNodeView() {
   // 151% zoom, centered on the first node — 151 weeks with Wolfie
   const firstNode = nodes[0];
@@ -3262,24 +3493,47 @@ function firstNodeView() {
   applyTransform();
 }
 
+function firstNodeViewMobile() {
+  // x:20 left margin, y:16 top padding. Scale 1. Cards fill width via CSS.
+  transform.scale = 1.0;
+  transform.x = 20;
+  transform.y = 16;
+  applyTransform();
+}
+
 let scatterDraw = null;
+let _mobileLayout = false;
 
 function init() {
   const savedTheme = localStorage.getItem('nc_theme') || '';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
   load();
-  renderAllNodes();
-  renderConnections();
 
+  const mobile = isMobileViewport();
   const hasUserTransform = !!localStorage.getItem('nc_transform');
-  if (hasUserTransform) {
-    applyTransform();
-  } else {
+
+  if (mobile) {
+    // Always reflow to vertical on mobile — don't preserve desktop transform
+    applyMobileLayout();
+    _mobileLayout = true;
+    renderAllNodes();
+    renderConnections();
     requestAnimationFrame(() => {
-      firstNodeView();
-      save();
+      firstNodeViewMobile();
+      // Don't save mobile transform — desktop position stays pristine
     });
+  } else {
+    renderAllNodes();
+    renderConnections();
+    if (hasUserTransform) {
+      applyTransform();
+    } else {
+      requestAnimationFrame(() => {
+        firstNodeView();
+        save();
+      });
+    }
   }
 
   drawMinimap();
@@ -3301,9 +3555,16 @@ function init() {
     requestAnimationFrame(() => { if (scatterDraw) scatterDraw(); });
   };
 
-  // Resize
+  // Re-layout on resize crossing the mobile boundary
+  let _lastMobile = mobile;
   window.addEventListener('resize', () => {
-    applyTransform();
+    const nowMobile = isMobileViewport();
+    if (nowMobile !== _lastMobile) {
+      _lastMobile = nowMobile;
+      // Reload to apply correct layout — clean state
+      window.location.reload();
+      return;
+    }
     drawMinimap();
   });
 }

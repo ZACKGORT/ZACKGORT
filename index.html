@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>narrative canvas · wolfie.life</title>
+<title>zackgort · narrative canvas · wolfie.love*</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -1100,58 +1100,142 @@ body.detail-panel-open #era-spine {
 
 /* zoom-ctrl now inside #era-spine */
 
+/* ── MOBILE LEFT RAIL (hidden on desktop) ── */
+#mobile-rail {
+  display: none;
+}
+
+/* ── MOBILE CONNECT DIALOGUE (hidden on desktop always) ── */
+#mobile-connect-dlg {
+  display: none !important;
+}
+#mobile-connect-dlg.open {
+  display: block !important;
+}
+
 /* ── MOBILE ≤ 700px ────────────────────────────────────────────────── */
 @media (max-width: 700px) {
 
   /* Topbar: single row, no scatter strip */
   #topbar {
     height: 44px;
-    right: 0 !important; /* never shrink on mobile */
+    right: 0 !important;
   }
-  #topbar-row {
-    border-bottom: none;
-  }
-  #topbar-scatter {
-    display: none;
-  }
+  #topbar-row { border-bottom: none; }
+  #topbar-scatter { display: none; }
 
-  /* Canvas fills from 44px topbar to 44px spine */
+  /* Hide topbar connect button — mobile uses rail connect */
+  #btn-connect { display: none; }
+
+  /* Canvas: full width, just clear topbar and spine */
   #canvas-wrap {
     top: 44px !important;
-    bottom: 44px !important;
+    bottom: 52px !important;
+    left: 0 !important;
   }
 
-  /* Brand — single line */
-  .tb-brand {
-    font-size: 13px;
+  /* Brand */
+  .tb-brand { font-size: 13px; }
+  .tb-brand span { display: none; }
+
+  /* Action buttons */
+  .tb-btn { padding: 5px 7px; font-size: 7px; letter-spacing: 0.06em; }
+
+  /* ── RIGHT RAIL — floating pill widget ── */
+  #mobile-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: fixed;
+    right: 8px;
+    left: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    background: var(--bg-4);
+    border: 1px solid var(--border-2);
+    border-radius: 20px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    z-index: 800;
+    padding: 6px 0;
   }
-  .tb-brand span {
-    display: none;
+  [data-theme="dark"] #mobile-rail {
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  }
+  .rail-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink-2); font-family: var(--mono);
+    font-size: 16px; line-height: 1;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .rail-btn:active { background: var(--accent-l); color: var(--accent); }
+  .rail-btn.connect-active { background: var(--accent); color: var(--bg); border-radius: 6px; }
+  .rail-zoom-pct {
+    font-family: var(--mono); font-size: 7px; letter-spacing: 0.06em;
+    color: var(--ink-3); text-align: center; line-height: 1;
+    padding: 2px 0; min-width: 30px;
+  }
+  .rail-divider {
+    width: 20px; height: 1px; background: var(--border-2);
+    margin: 4px 0; flex-shrink: 0;
   }
 
-  /* Action buttons — compact */
-  .tb-btn {
-    padding: 5px 7px;
-    font-size: 7px;
-    letter-spacing: 0.06em;
+  /* Era spine — full width */
+  #era-spine {
+    height: 52px;
+    left: 0 !important;
+    right: 0 !important;
+  }
+  /* Hide zoom inside spine on mobile — it lives in left rail */
+  #era-spine #zoom-ctrl { display: none; }
+  .era-seg-label { font-size: 5.5px; letter-spacing: 0.08em; }
+  .era-seg { padding-bottom: 7px; }
+
+  /* Chain strip above spine */
+  #chain-strip {
+    bottom: 52px;
+    left: 0;
   }
 
-  /* Detail panel — full screen bottom sheet */
+  /* Detail panel — bottom sheet, leaves 80px at top for esc */
   #detail-panel {
-    top: 0 !important;
+    top: 80px !important;
+    left: 0 !important;
     width: 100% !important;
     transform: translateY(100%);
     border-left: none;
     border-top: 1px solid var(--border);
-    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    border-radius: 16px 16px 0 0;
+    transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
     z-index: 1100;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
   }
-  #detail-panel.open {
-    transform: translateY(0);
+  #detail-panel.open { transform: translateY(0); }
+
+  /* Scrim behind panel — tapping it closes */
+  #detail-panel.open::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: -1;
+    top: -80px; /* extend scrim above the sheet */
   }
+
+  /* Esc zone above sheet — visible 80px strip */
+  #dp-esc-zone {
+    display: flex;
+  }
+
   /* Don't shift topbar/spine on mobile when panel opens */
   body.detail-panel-open #topbar,
-  body.detail-panel-open #era-spine {
+  body.detail-panel-open #era-spine,
+  body.detail-panel-open #mobile-rail {
     right: 0 !important;
   }
 
@@ -1162,68 +1246,37 @@ body.detail-panel-open #era-spine {
     transform: translateX(0) translateY(100%);
     border-radius: 12px 12px 0 0;
   }
-  #compose-widget.open {
-    transform: translateX(0) translateY(0);
+  #compose-widget.open { transform: translateX(0) translateY(0); }
+
+  /* Minimap — smaller */
+  #minimap {
+    bottom: 62px;
+    right: 8px;
+    left: auto;
+    width: 90px; height: 60px;
   }
 
-  /* Era spine — compact, shorter labels */
-  #era-spine {
-    height: 44px;
-    right: 0 !important;
-  }
-  .era-seg-label {
-    font-size: 5.5px;
-    letter-spacing: 0.08em;
-  }
-  .era-seg {
-    padding-bottom: 6px;
-  }
+  /* Mode badge */
+  #mode-badge { top: 54px; }
 
-  /* Zoom inside spine — hide pct label on mobile */
-  .zoom-pct {
-    display: none;
-  }
-  .zoom-btn {
-    padding: 6px 10px;
-  }
-
-  /* Chain strip above spine */
-  #chain-strip {
-    bottom: 44px;
-  }
-
-  /* Node cards — fit narrow viewport with margin */
+  /* Node cards — full width with margins */
   .node-card {
     width: calc(100vw - 40px);
-    max-width: 320px;
-  }
-  /* --node-w used in JS for port positioning — override via inline style not needed
-     since mobile layout sets x:20 and cards fill to edge */
-
-  /* Ports — bigger hit targets on touch */
-  .port {
-    width: 14px;
-    height: 14px;
-  }
-  /* Hide left/right ports on mobile — top/bottom only for vertical layout */
-  .port-left, .port-right {
-    display: none;
+    max-width: 340px;
   }
 
-  /* Connection lines — slightly thicker for touch legibility */
-  .conn-line {
-    stroke-width: 2;
-  }
+  /* Ports */
+  .port { width: 14px; height: 14px; }
+  .port-left, .port-right { display: none; }
 
-  /* Node title slightly smaller */
-  .node-title {
-    font-size: 13px;
-  }
-  .node-body {
-    font-size: 9.5px;
-  }
+  /* Connection lines */
+  .conn-line { stroke-width: 2; }
 
-  /* Detail panel — drag handle at top */
+  /* Node text */
+  .node-title { font-size: 13px; }
+  .node-body  { font-size: 9.5px; }
+
+  /* Detail drag handle */
   .dp-hero-header-wrap::before {
     content: '';
     display: block;
@@ -1233,36 +1286,117 @@ body.detail-panel-open #era-spine {
     margin: 10px auto 0;
   }
 
-  /* Minimap — smaller, bottom-left so it clears the spine */
-  #minimap {
-    bottom: 54px;
-    right: 8px;
-    width: 90px;
-    height: 60px;
+  /* ── MOBILE CONNECT DIALOGUE ── */
+  #mobile-connect-dlg {
+    display: none !important;
   }
-
-  /* Mode badge */
-  #mode-badge {
-    top: 54px;
+  #mobile-connect-dlg.open {
+    display: block !important;
+    position: fixed;
+    bottom: 52px; left: 0; right: 0;
+    z-index: 1200;
+    pointer-events: auto;
+    animation: mcdSlideUp 0.35s cubic-bezier(0.32,0.72,0,1) both;
+  }
+  @keyframes mcdSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  #mcd-inner {
+    background: var(--bg-4);
+    border-top: 1px solid var(--border);
+    border-radius: 12px 12px 0 0;
+    box-shadow: 0 -4px 32px rgba(0,0,0,0.15);
+    padding: 0 0 8px;
+    max-height: 52vh;
+    display: flex; flex-direction: column;
+  }
+  #mcd-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #mcd-source-label {
+    font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  #mcd-source-label.has-source { color: var(--accent); }
+  #mcd-close {
+    background: none; border: 1px solid var(--border-2); border-radius: 4px;
+    font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-3); padding: 4px 8px;
+    cursor: pointer;
+  }
+  #mcd-done {
+    background: var(--accent); color: var(--bg);
+    border: none; border-radius: 4px;
+    font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 4px 10px;
+    cursor: pointer;
+  }
+  #mcd-instruction {
+    font-family: var(--mono); font-size: 9px; color: var(--ink-3);
+    padding: 10px 16px 4px; flex-shrink: 0;
+  }
+  #mcd-source-display {
+    padding: 8px 16px 4px; flex-shrink: 0;
+  }
+  #mcd-source-name {
+    font-family: var(--disp); font-size: 14px; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  #mcd-instruction2 {
+    font-family: var(--mono); font-size: 8px; color: var(--ink-3);
+  }
+  #mcd-list-label {
+    font-family: var(--mono); font-size: 7px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-3);
+    padding: 8px 16px 4px; flex-shrink: 0;
+  }
+  #mcd-node-list {
+    overflow-y: auto; flex: 1;
+    padding: 0 10px 8px;
+    display: flex; flex-direction: column; gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mcd-node-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 6px;
+    background: var(--bg-3); border: 1px solid var(--border-2);
+    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  }
+  .mcd-node-item:active { background: var(--accent-l); border-color: var(--accent); }
+  .mcd-node-item.already-connected { opacity: 0.4; pointer-events: none; }
+  .mcd-node-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .mcd-node-title {
+    font-family: var(--mono); font-size: 10px; color: var(--ink-2);
+    flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .mcd-node-era {
+    font-family: var(--mono); font-size: 8px; color: var(--ink-3);
+    flex-shrink: 0;
+  }
+  #mcd-connections-made {
+    padding: 4px 16px;
+    display: flex; flex-wrap: wrap; gap: 5px;
+    flex-shrink: 0;
+  }
+  .mcd-conn-chip {
+    font-family: var(--mono); font-size: 8px; color: var(--accent);
+    background: var(--accent-l); border: 1px solid var(--accent);
+    border-radius: 12px; padding: 3px 8px;
   }
 }
 
 /* ── VERY SMALL ≤ 390px ─────────────────────────────────────────────── */
 @media (max-width: 390px) {
-  .tb-actions {
-    gap: 4px;
-  }
-  .tb-btn {
-    padding: 4px 6px;
-    font-size: 6.5px;
-  }
-  .era-seg-label {
-    display: none;
-  }
-  .era-seg-bar {
-    height: 4px;
-    margin-bottom: 4px;
-  }
+  .tb-actions { gap: 4px; }
+  .tb-btn { padding: 4px 6px; font-size: 6.5px; }
+  .era-seg-label { display: none; }
+  .era-seg-bar { height: 4px; margin-bottom: 4px; }
 }
 
 </style>
@@ -1273,8 +1407,8 @@ body.detail-panel-open #era-spine {
 <div id="topbar">
   <div id="topbar-row">
     <div class="tb-brand">
-      narrative canvas
-      <span>· wolfie.life</span>
+      zackgort
+      <span>· narrative as nodes</span>
     </div>
     <div class="tb-actions">
       <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
@@ -1288,8 +1422,40 @@ body.detail-panel-open #era-spine {
   </div>
 </div>
 
-<!-- Mode badge -->
+<!-- Mode badge (desktop) -->
 <div id="mode-badge">connecting — click source, then target</div>
+
+<!-- Mobile left rail (zoom binder) -->
+<div id="mobile-rail">
+  <button class="rail-btn" onclick="doZoom(0.15)" title="Zoom in">+</button>
+  <div class="rail-zoom-pct" id="rail-zoom-pct">100%</div>
+  <button class="rail-btn" onclick="doZoom(-0.15)" title="Zoom out">−</button>
+  <div class="rail-divider"></div>
+  <button class="rail-btn" onclick="fitAll()" title="Fit">⊡</button>
+  <div class="rail-divider"></div>
+  <button class="rail-btn" id="rail-connect-btn" onclick="toggleConnectMode()" title="Connect nodes">⌁</button>
+</div>
+
+<!-- Mobile connect dialogue -->
+<div id="mobile-connect-dlg">
+  <div id="mcd-inner">
+    <div id="mcd-header">
+      <div id="mcd-source-label">select source node</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="mcd-done" onclick="doneMobileConnect()" style="display:none">done ✓</button>
+        <button id="mcd-close" onclick="closeMobileConnect()">✕ cancel</button>
+      </div>
+    </div>
+    <div id="mcd-instruction">Tap a node on the canvas to set as source.</div>
+    <div id="mcd-source-display" style="display:none">
+      <div id="mcd-source-name"></div>
+      <div id="mcd-instruction2">Now tap any node to connect. Tap again to add more.</div>
+    </div>
+    <div id="mcd-list-label" style="display:none">or pick from list:</div>
+    <div id="mcd-node-list" style="display:none"></div>
+    <div id="mcd-connections-made"></div>
+  </div>
+</div>
 
 <!-- Canvas -->
 <div id="canvas-wrap">
@@ -1397,6 +1563,11 @@ body.detail-panel-open #era-spine {
     <button class="cw-cancel-btn" onclick="closeCompose()">Cancel</button>
     <button class="cw-create-btn" onclick="cwCreateNode()">Create node &#x2192;</button>
   </div>
+</div>
+
+<!-- Esc zone (mobile only — sits above detail sheet) -->
+<div id="dp-esc-zone" style="display:none;position:fixed;top:44px;left:0;right:0;height:36px;z-index:1099;align-items:center;justify-content:center;" onclick="closeDetailPanel()">
+  <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7);background:rgba(0,0,0,0.35);padding:5px 14px;border-radius:20px;backdrop-filter:blur(4px);">&#x2715; close</div>
 </div>
 
 <!-- Detail Panel (right rail) -->
@@ -1906,7 +2077,7 @@ const DEFAULT_CONNECTIONS = [
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v8';
+const DATA_VERSION = 'v9';
 
 function save() {
   try {
@@ -1953,7 +2124,10 @@ function toggleTheme() {
 // ── CANVAS TRANSFORM ───────────────────────────────────────────────────
 function applyTransform() {
   canvasEl.style.transform = `translate(${transform.x}px,${transform.y}px) scale(${transform.scale})`;
-  document.getElementById('zoom-pct').textContent = Math.round(transform.scale * 100) + '%';
+  const pct = Math.round(transform.scale * 100) + '%';
+  document.getElementById('zoom-pct').textContent = pct;
+  const railPct = document.getElementById('rail-zoom-pct');
+  if (railPct) railPct.textContent = pct;
   drawMinimap();
 }
 
@@ -2286,21 +2460,181 @@ function toggleConnectMode() {
   const btn = document.getElementById('btn-connect');
   const badge = document.getElementById('mode-badge');
   if (connectMode) {
-    btn.classList.add('connect-mode');
-    badge.classList.add('visible');
+    closeDetailPanel(); // always close detail when entering connect mode
+    if (btn) btn.classList.add('connect-mode');
+    if (badge) badge.classList.add('visible');
     document.querySelectorAll('.node-card').forEach(el => el.classList.remove('connect-source'));
-    toast('Click first node (source)');
+    const railBtn = document.getElementById('rail-connect-btn');
+    if (railBtn) railBtn.classList.add('connect-active');
+    if (isMobileViewport()) {
+      openMobileConnect(null);
+    } else {
+      toast('Click first node (source)');
+    }
   } else {
-    btn.classList.remove('connect-mode');
-    badge.classList.remove('visible');
+    if (btn) btn.classList.remove('connect-mode');
+    if (badge) badge.classList.remove('visible');
+    const railBtnOff = document.getElementById('rail-connect-btn');
+    if (railBtnOff) railBtnOff.classList.remove('connect-active');
     document.querySelectorAll('.node-card').forEach(el => {
       el.classList.remove('connect-source', 'connect-target-hover');
     });
     previewLine.style.display = 'none';
+    closeMobileConnect();
   }
 }
 
+// ── Mobile connect dialogue ────────────────────────────────────────────
+let mobileConnectSource = null;
+let mobileConnectionsMade = [];
+
+function openMobileConnect(sourceNodeId) {
+  mobileConnectSource = sourceNodeId;
+  mobileConnectionsMade = [];
+  const dlg = document.getElementById('mobile-connect-dlg');
+  if (!dlg) return;
+  dlg.classList.add('open');
+  renderMobileConnectDlg();
+}
+
+function closeMobileConnect() {
+  mobileConnectSource = null;
+  mobileConnectionsMade = [];
+  const dlg = document.getElementById('mobile-connect-dlg');
+  if (dlg) dlg.classList.remove('open');
+  if (connectMode) {
+    connectMode = false;
+    connectSourceId = null;
+    const btn = document.getElementById('btn-connect');
+    if (btn) btn.classList.remove('connect-mode');
+    const badge = document.getElementById('mode-badge');
+    if (badge) badge.classList.remove('visible');
+    document.querySelectorAll('.node-card').forEach(el =>
+      el.classList.remove('connect-source','connect-target-hover'));
+    previewLine.style.display = 'none';
+  }
+}
+
+function renderMobileConnectDlg() {
+  const srcLabel = document.getElementById('mcd-source-label');
+  const instr    = document.getElementById('mcd-instruction');
+  const srcDisp  = document.getElementById('mcd-source-display');
+  const srcName  = document.getElementById('mcd-source-name');
+  const listLabel = document.getElementById('mcd-list-label');
+  const nodeList  = document.getElementById('mcd-node-list');
+  const connsMade = document.getElementById('mcd-connections-made');
+  if (!srcLabel) return;
+
+  const typeColors = {work:'var(--c-work)',concept:'var(--c-concept)',media:'var(--c-media)',
+    process:'var(--c-process)',launch:'var(--c-launch)',reflect:'var(--c-reflect)'};
+
+  if (!mobileConnectSource) {
+    srcLabel.textContent = 'tap source node on canvas';
+    srcLabel.classList.remove('has-source');
+    instr.style.display = '';
+    instr.textContent = 'Tap any node on the canvas to select it as the source.';
+    srcDisp.style.display = 'none';
+    listLabel.style.display = 'none';
+    nodeList.style.display = 'none';
+    nodeList.innerHTML = '';
+    connsMade.innerHTML = '';
+  } else {
+    const src = nodes.find(n => n.id === mobileConnectSource);
+    srcLabel.textContent = 'connecting from:';
+    srcLabel.classList.add('has-source');
+    instr.style.display = 'none';
+    srcDisp.style.display = '';
+    srcName.textContent = src ? src.title : mobileConnectSource;
+    listLabel.style.display = '';
+    nodeList.style.display = '';
+
+    // Build node list — all nodes except source
+    nodeList.innerHTML = '';
+    nodes
+      .filter(n => n.id !== mobileConnectSource)
+      .forEach(n => {
+        const alreadyConn = connections.some(c =>
+          (c.from === mobileConnectSource && c.to === n.id) ||
+          (c.from === n.id && c.to === mobileConnectSource)
+        );
+        const item = document.createElement('div');
+        item.className = 'mcd-node-item' + (alreadyConn ? ' already-connected' : '');
+        const color = typeColors[n.type] || 'var(--ink-3)';
+        item.innerHTML = `
+          <div class="mcd-node-dot" style="background:${color}"></div>
+          <div class="mcd-node-title">${n.title}</div>
+          <div class="mcd-node-era">${n.era || ''}</div>`;
+        if (!alreadyConn) {
+          item.addEventListener('click', () => mobileConnectTo(n.id));
+        }
+        nodeList.appendChild(item);
+      });
+
+    // Show connections made this session
+    connsMade.innerHTML = mobileConnectionsMade.map(id => {
+      const n = nodes.find(x => x.id === id);
+      return `<div class="mcd-conn-chip">→ ${n ? n.title.slice(0,20) : id}</div>`;
+    }).join('');
+
+    // Show done button once at least one connection has been made
+    const doneBtn = document.getElementById('mcd-done');
+    if (doneBtn) doneBtn.style.display = mobileConnectionsMade.length ? '' : 'none';
+  }
+}
+
+function doneMobileConnect() {
+  const count = mobileConnectionsMade.length;
+  closeMobileConnect();
+  if (count === 1) {
+    toast('Connection made');
+  } else if (count > 1) {
+    toast(count + ' connections made');
+  } else {
+    toast('No connections made');
+  }
+}
+
+function mobileConnectSetSource(nodeId) {
+  // Called from touch tap in connect mode (before source is set)
+  mobileConnectSource = nodeId;
+  connectSourceId = nodeId;
+  getNodeEl(nodeId)?.classList.add('connect-source');
+  renderMobileConnectDlg();
+}
+
+function mobileConnectTo(targetId) {
+  if (!mobileConnectSource || mobileConnectSource === targetId) return;
+  const exists = connections.find(c =>
+    (c.from === mobileConnectSource && c.to === targetId) ||
+    (c.from === targetId && c.to === mobileConnectSource)
+  );
+  if (!exists) {
+    const conn = { id: cuid(), from: mobileConnectSource, to: targetId, label: '' };
+    connections.push(conn);
+    mobileConnectionsMade.push(targetId);
+    renderConnections();
+    renderNode(nodes.find(n => n.id === mobileConnectSource));
+    renderNode(nodes.find(n => n.id === targetId));
+    save();
+    const targetNode = nodes.find(n => n.id === targetId);
+    toast('Connected → ' + (targetNode ? targetNode.title.slice(0,24) : targetId));
+  } else {
+    toast('Already connected');
+  }
+  renderMobileConnectDlg();
+}
+
 function handleConnectClick(nodeId) {
+  if (isMobileViewport()) {
+    // Mobile: tap sets source if not set, otherwise connects
+    if (!mobileConnectSource) {
+      mobileConnectSetSource(nodeId);
+    } else if (mobileConnectSource !== nodeId) {
+      mobileConnectTo(nodeId);
+    }
+    return;
+  }
+  // Desktop flow
   if (!connectSourceId) {
     connectSourceId = nodeId;
     getNodeEl(nodeId).classList.add('connect-source');
@@ -2308,7 +2642,6 @@ function handleConnectClick(nodeId) {
   } else if (connectSourceId === nodeId) {
     toast('Cannot connect node to itself');
   } else {
-    // Check duplicate
     const exists = connections.find(c =>
       (c.from === connectSourceId && c.to === nodeId) ||
       (c.from === nodeId && c.to === connectSourceId)
@@ -2733,6 +3066,7 @@ function migrateNodeContent(node) {
 }
 
 function openDetailPanel(nodeId) {
+  if (connectMode) return; // connect mode blocks detail panel
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
   migrateNodeContent(node);
@@ -2742,6 +3076,10 @@ function openDetailPanel(nodeId) {
   renderDetailPanel(nodeId);
   document.getElementById('detail-panel').classList.add('open');
   document.body.classList.add('detail-panel-open');
+  if (isMobileViewport()) {
+    const esc = document.getElementById('dp-esc-zone');
+    if (esc) esc.style.display = 'flex';
+  }
   if (scatterDraw) requestAnimationFrame(scatterDraw);
 }
 
@@ -3103,6 +3441,8 @@ function closeDetailPanel() {
   document.getElementById('detail-panel').classList.remove('open');
   document.body.classList.remove('detail-panel-open');
   detailEditMode = false;
+  const esc = document.getElementById('dp-esc-zone');
+  if (esc) esc.style.display = 'none';
   if (scatterDraw) requestAnimationFrame(scatterDraw);
 }
 

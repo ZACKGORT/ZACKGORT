@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>zackgort · narrative canvas · wolfie.love*</title>
+<title>zackgort · narrative as nodes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -1100,6 +1100,36 @@ body.detail-panel-open #era-spine {
 
 /* zoom-ctrl now inside #era-spine */
 
+/* ── ARRANGE TOGGLE ── */
+#btn-arrange {
+  position: relative;
+}
+.arrange-icon {
+  display:inline-block; line-height:1; font-size:11px;
+  transition: transform 0.3s ease;
+}
+body.layout-portrait .arrange-icon {
+  transform: rotate(90deg);
+}
+
+/* Portrait layout: era column headers drawn as canvas overlays */
+#portrait-era-headers {
+  position:absolute; top:0; left:0; right:0;
+  pointer-events:none; z-index:2;
+  display:none;
+}
+body.layout-portrait #portrait-era-headers { display:block; }
+
+/* Smooth node transitions when layout changes */
+.node-card {
+  transition: left 0.4s cubic-bezier(0.32,0.72,0,1),
+              top  0.4s cubic-bezier(0.32,0.72,0,1),
+              box-shadow 0.2s, border-color 0.2s;
+}
+.node-card.is-dragging {
+  transition: box-shadow 0.1s, border-color 0.2s !important;
+}
+
 /* ── MOBILE LEFT RAIL (hidden on desktop) ── */
 #mobile-rail {
   display: none;
@@ -1407,12 +1437,13 @@ body.detail-panel-open #era-spine {
 <div id="topbar">
   <div id="topbar-row">
     <div class="tb-brand">
-      zackgort · narrative canvas
-      <span>· wolfie.love*</span>
+      zackgort
+      <span> · narrative as nodes</span>
     </div>
     <div class="tb-actions">
       <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
       <button class="tb-btn" id="btn-connect" onclick="toggleConnectMode()">connect</button>
+      <button class="tb-btn" id="btn-arrange" onclick="toggleArrange()" title="Toggle landscape / portrait layout"><span class="arrange-icon">&#x2913;</span></button>
       <button class="tb-btn" id="btn-fit" onclick="fitAll()">fit</button>
       <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">◐</button>
     </div>
@@ -2077,13 +2108,18 @@ const DEFAULT_CONNECTIONS = [
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v9';
+const DATA_VERSION = 'v10';
 
 function save() {
   try {
     localStorage.setItem('nc_nodes', JSON.stringify(nodes));
     localStorage.setItem('nc_conns', JSON.stringify(connections));
-    localStorage.setItem('nc_transform', JSON.stringify(transform));
+    const wrap = document.getElementById('canvas-wrap');
+    const saved = Object.assign({}, transform, {
+      _vpW: wrap ? wrap.clientWidth  : window.innerWidth,
+      _vpH: wrap ? wrap.clientHeight : window.innerHeight,
+    });
+    localStorage.setItem('nc_transform', JSON.stringify(saved));
     localStorage.setItem('nc_version', DATA_VERSION);
   } catch(e) {}
 }
@@ -3924,12 +3960,93 @@ function narrativeOrder() {
   return order;
 }
 
+// ── ARRANGE / LAYOUT ENGINE ───────────────────────────────────────────
+// Two desktop layouts: 'landscape' (horizontal scatter) | 'portrait' (era columns)
+// Mobile always uses single-column BFS portrait, ignoring the desktop preference.
+
+let currentLayout = 'landscape'; // 'landscape' | 'portrait'
+
+function loadLayoutPref() {
+  return localStorage.getItem('nc_layout') || 'landscape';
+}
+function saveLayoutPref(v) {
+  localStorage.setItem('nc_layout', v);
+}
+
+function toggleArrange() {
+  if (isMobileViewport()) return; // mobile has its own layout
+  currentLayout = currentLayout === 'landscape' ? 'portrait' : 'landscape';
+  saveLayoutPref(currentLayout);
+  applyLayout(currentLayout, true);
+}
+
+// ── LANDSCAPE: restore original DEFAULT node positions ────────────────
+function applyLandscapeLayout(animate) {
+  document.body.classList.remove('layout-portrait');
+  // Restore each node to its default x/y from DEFAULT_NODES
+  nodes.forEach(node => {
+    const def = DEFAULT_NODES.find(d => d.id === node.id);
+    if (def) { node.x = def.x; node.y = def.y; }
+  });
+  if (animate) {
+    renderAllNodes();
+    renderConnections();
+    requestAnimationFrame(() => { fitAll(); });
+  }
+}
+
+// ── PORTRAIT: era columns, nodes stacked vertically within each era ───
+function applyPortraitLayout(animate) {
+  document.body.classList.add('layout-portrait');
+
+  const NW = 280;   // node card width in portrait
+  const NH = 180;   // estimated node card height
+  const COL_PAD_X = 32;  // gap between columns
+  const COL_PAD_Y = 28;  // gap between nodes within a column
+  const START_Y   = 40;  // top padding
+  const START_X   = 40;  // left padding
+
+  let colX = START_X;
+
+  ERA_SPINE.forEach((era, eraIdx) => {
+    // Collect actual nodes for this era that exist
+    const eraNodes = era.nodeIds
+      .map(id => nodes.find(n => n.id === id))
+      .filter(Boolean);
+
+    if (!eraNodes.length) return;
+
+    // Stack nodes vertically within this column
+    eraNodes.forEach((node, i) => {
+      node.x = colX;
+      node.y = START_Y + i * (NH + COL_PAD_Y);
+    });
+
+    // Advance to next column — width is max of NW + gap
+    colX += NW + COL_PAD_X;
+  });
+
+  if (animate) {
+    renderAllNodes();
+    renderConnections();
+    requestAnimationFrame(() => { fitAll(); });
+  }
+}
+
+function applyLayout(layout, animate) {
+  if (layout === 'portrait') {
+    applyPortraitLayout(animate);
+  } else {
+    applyLandscapeLayout(animate);
+  }
+  if (scatterDraw) requestAnimationFrame(scatterDraw);
+  updateSpineActive();
+}
+
 function applyMobileLayout() {
-  // All nodes at x:0 — transform.x provides the left margin.
-  // Card width is CSS-controlled (100vw - 40px), so no centering math needed.
+  // Single column BFS — CSS handles width
   const START_Y = 20;
   const GAP_Y   = 220;
-
   const ordered = narrativeOrder();
   ordered.forEach((node, i) => {
     node.x = 0;
@@ -3938,22 +4055,18 @@ function applyMobileLayout() {
 }
 
 function firstNodeView() {
-  // 151% zoom, centered on the first node — 151 weeks with Wolfie
   const firstNode = nodes[0];
   if (!firstNode) { fitAll(); return; }
   const wrap = document.getElementById('canvas-wrap');
   const scale = 1.51;
   const nw = 260, nh = 160;
-  const nodeCx = firstNode.x + nw / 2;
-  const nodeCy = firstNode.y + nh / 2;
   transform.scale = scale;
-  transform.x = wrap.clientWidth  / 2 - nodeCx * scale;
-  transform.y = wrap.clientHeight / 2 - nodeCy * scale;
+  transform.x = wrap.clientWidth  / 2 - (firstNode.x + nw/2) * scale;
+  transform.y = wrap.clientHeight / 2 - (firstNode.y + nh/2) * scale;
   applyTransform();
 }
 
 function firstNodeViewMobile() {
-  // x:20 left margin, y:16 top padding. Scale 1. Cards fill width via CSS.
   transform.scale = 1.0;
   transform.x = 20;
   transform.y = 16;
@@ -3973,19 +4086,40 @@ function init() {
   const hasUserTransform = !!localStorage.getItem('nc_transform');
 
   if (mobile) {
-    // Always reflow to vertical on mobile — don't preserve desktop transform
     applyMobileLayout();
     _mobileLayout = true;
     renderAllNodes();
     renderConnections();
     requestAnimationFrame(() => {
       firstNodeViewMobile();
-      // Don't save mobile transform — desktop position stays pristine
     });
   } else {
+    // Load and apply layout preference before rendering
+    currentLayout = loadLayoutPref();
+    if (currentLayout === 'portrait') {
+      applyPortraitLayout(false);
+      document.body.classList.add('layout-portrait');
+    }
+    // else landscape: node positions already at defaults from load()
+
     renderAllNodes();
     renderConnections();
+
+    let transformValid = false;
     if (hasUserTransform) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('nc_transform'));
+        const wrap = document.getElementById('canvas-wrap');
+        const curW = wrap ? wrap.clientWidth  : window.innerWidth;
+        const curH = wrap ? wrap.clientHeight : window.innerHeight;
+        const savedW = saved._vpW || 0;
+        const savedH = saved._vpH || 0;
+        const wDiff = savedW ? Math.abs(curW - savedW) / savedW : 1;
+        const hDiff = savedH ? Math.abs(curH - savedH) / savedH : 1;
+        transformValid = wDiff < 0.15 && hDiff < 0.15;
+      } catch(e) {}
+    }
+    if (transformValid) {
       applyTransform();
     } else {
       requestAnimationFrame(() => {

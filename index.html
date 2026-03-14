@@ -1099,6 +1099,104 @@ body.detail-panel-open #era-spine {
 .chain-arrow { color:var(--ink-3); font-size:12px; flex-shrink:0; padding:0 4px; }
 
 /* zoom-ctrl now inside #era-spine */
+/* ── SANDBOX MODE ── */
+#sandbox-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: var(--bg);
+  display: none;
+  font-family: var(--mono);
+}
+#sandbox-overlay.open {
+  display: flex;
+  animation: sbFadeIn 0.4s ease both;
+}
+@keyframes sbFadeIn { from { opacity:0; } to { opacity:1; } }
+#sb-sidebar {
+  width: 220px; flex-shrink: 0; height: 100vh;
+  background: var(--bg-2); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#sb-sidebar-header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+#sb-sidebar-brand { font-size: 11px; letter-spacing: 0.1em; color: var(--ink-2); margin-bottom: 10px; }
+#sb-sidebar-brand strong { color: var(--ink); }
+#sb-sidebar-brand em { color: var(--accent); font-style: normal; }
+#sb-close-btn {
+  background: none; border: 1px solid var(--border-2); border-radius: 3px;
+  font-family: var(--mono); font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); padding: 5px 10px; cursor: pointer; width: 100%;
+  transition: border-color 0.15s, color 0.15s;
+}
+#sb-close-btn:hover { border-color: var(--accent); color: var(--accent); }
+#sb-era-nav { flex: 1; overflow-y: auto; padding: 10px 0; }
+.sb-era-item {
+  padding: 8px 20px; cursor: pointer;
+  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3); transition: color 0.15s, background 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.sb-era-item:hover { color: var(--ink-2); background: var(--bg-3); }
+.sb-era-item.active { color: var(--accent); }
+.sb-era-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+#sb-types-section { padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.sb-types-label { font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+.sb-type-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.sb-type-pill {
+  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 2px; background: var(--bg-3); color: var(--ink-3);
+  cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+}
+.sb-type-pill.active { border-color: currentColor; }
+#sb-main { flex: 1; min-width: 0; height: 100vh; display: flex; flex-direction: column; }
+#sb-hud {
+  height: 50px; flex-shrink: 0;
+  display: flex; align-items: center; padding: 0 24px; gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+#sb-hud-title { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+#sb-hud-count { font-size: 8px; color: var(--ink-3); margin-left: auto; }
+#sb-era-bar { height: 3px; flex-shrink: 0; display: flex; }
+.sb-era-bar-seg { flex: 1; }
+#sb-stream { flex: 1; overflow-y: auto; padding: 0 0 80px; -webkit-overflow-scrolling: touch; }
+#sb-stream::-webkit-scrollbar { width: 3px; }
+#sb-stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+.sb-stream-inner { max-width: 600px; margin: 0 auto; padding: 0 32px; }
+.sb-era-section { padding: 48px 0 16px; }
+.sb-era-section:first-child { padding-top: 36px; }
+.sb-era-eyebrow { font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.sb-era-heading { font-family: var(--disp); font-size: 28px; color: var(--ink); margin-bottom: 6px; line-height: 1.1; }
+.sb-era-dates { font-size: 8px; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 20px; }
+.sb-era-rule { height: 1px; margin-bottom: 20px; background: linear-gradient(to right, var(--border-2) 40%, transparent); }
+.sb-artifact { margin-bottom: 12px; cursor: pointer; }
+.sb-artifact-type { font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+.sb-artifact-dot { width: 5px; height: 5px; border-radius: 50%; }
+.sb-card { border: 1px solid var(--border-2); border-radius: 5px; background: var(--bg-3); overflow: hidden; transition: border-color 0.15s, background 0.15s; position: relative; }
+.sb-artifact:hover .sb-card { border-color: var(--border-3); background: var(--bg-2); }
+.sb-card-stripe { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.sb-card-body { padding: 14px 16px 12px 20px; }
+.sb-card-title { font-family: var(--text); font-size: 16px; color: var(--ink); line-height: 1.25; margin-bottom: 5px; }
+.sb-card-sentence { font-family: var(--text); font-style: italic; font-size: 12px; color: var(--ink-2); line-height: 1.6; font-weight: 300; }
+.sb-card-foot { padding: 7px 16px 9px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
+.sb-card-meta { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.sb-card-hint { font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); transition: color 0.15s; }
+.sb-artifact:hover .sb-card-hint { color: var(--accent); }
+#sb-detail {
+  width: 340px; flex-shrink: 0; height: 100vh;
+  background: var(--bg-4); border-left: 1px solid var(--border);
+  transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  overflow-y: auto; display: flex; flex-direction: column;
+}
+#sb-detail.open { transform: translateX(0); }
+#sb-detail-header { padding: 16px 16px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0; }
+#sb-detail-type { font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+#sb-detail-title { font-family: var(--disp); font-size: 18px; color: var(--ink); line-height: 1.2; }
+#sb-detail-close { background: none; border: none; cursor: pointer; color: var(--ink-3); font-size: 14px; flex-shrink: 0; padding: 2px 4px; transition: color 0.15s; margin-left: 8px; }
+#sb-detail-close:hover { color: var(--accent); }
+#sb-detail-body { padding: 16px; flex: 1; }
+.sb-detail-sentence { font-family: var(--text); font-size: 14px; color: var(--ink-2); line-height: 1.7; margin-bottom: 10px; }
+.sb-detail-pull { font-family: var(--text); font-style: italic; font-size: 15px; line-height: 1.5; color: var(--ink-2); border-left: 2px solid var(--accent); padding-left: 14px; margin: 12px 0; }
+.sb-detail-link { display: block; margin-top: 16px; font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
+.sb-detail-link:hover { text-decoration: underline; }
+#sb-detail-era { font-size: 8px; color: var(--ink-3); letter-spacing: 0.08em; padding: 10px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
 
 /* ── ARRANGE TOGGLE ── */
 #btn-arrange {
@@ -1436,7 +1534,7 @@ body.layout-portrait #portrait-era-headers { display:block; }
 <!-- Top Bar -->
 <div id="topbar">
   <div id="topbar-row">
-    <div class="tb-brand">
+    <div class="tb-brand" onclick="toggleSandboxMode()" title="&#x2022; easter egg" style="cursor:pointer;user-select:none;">
       zackgort
       <span> · narrative as nodes</span>
     </div>
@@ -1635,6 +1733,37 @@ body.layout-portrait #portrait-era-headers { display:block; }
 
 <!-- Toast -->
 <div id="toast"></div>
+
+<!-- Sandbox Mode Easter Egg -->
+<div id="sandbox-overlay">
+  <div id="sb-sidebar">
+    <div id="sb-sidebar-header">
+      <div id="sb-sidebar-brand"><strong>zackgort</strong> · <em>sandbox</em></div>
+      <button id="sb-close-btn" onclick="closeSandboxMode()">&#x2715; back to canvas</button>
+    </div>
+    <div id="sb-era-nav"></div>
+    <div id="sb-types-section">
+      <div class="sb-types-label">Types</div>
+      <div class="sb-type-pills" id="sb-type-pills"></div>
+    </div>
+  </div>
+  <div id="sb-main">
+    <div id="sb-hud">
+      <div id="sb-hud-title">narrative as document</div>
+      <div id="sb-hud-count"></div>
+    </div>
+    <div id="sb-era-bar"></div>
+    <div id="sb-stream"><div class="sb-stream-inner" id="sb-stream-inner"></div></div>
+  </div>
+  <div id="sb-detail">
+    <div id="sb-detail-header">
+      <div><div id="sb-detail-type"></div><div id="sb-detail-title"></div></div>
+      <button id="sb-detail-close" onclick="closeSbDetail()">&#x2715;</button>
+    </div>
+    <div id="sb-detail-body"></div>
+    <div id="sb-detail-era"></div>
+  </div>
+</div>
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────────
@@ -2168,7 +2297,7 @@ const DEFAULT_CONNECTIONS = [
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v12';
+const DATA_VERSION = 'v13';
 
 function save() {
   try {
@@ -4227,6 +4356,150 @@ function init() {
 }
 
 window.addEventListener('load', init);
+// ── SANDBOX MODE EASTER EGG ────────────────────────────────────────────
+const SB_ERAS = [
+  { label:'Origins',       ids:['n0','n1','n2','n3','n4'],                     color:'--era-pre',   dates:'2005–13' },
+  { label:'Suburbia',      ids:['n5','n6','n7','n8','n9'],                     color:'--era-loss',  dates:'2013–16' },
+  { label:'Agency',        ids:['n10','n11','n12','n13'],                      color:'--era-build', dates:'2016–18' },
+  { label:'New York',      ids:['n14','n15','n16','n17','n18','n19','n20'],    color:'--era-now',   dates:'2018–21' },
+  { label:'Remote',        ids:['n21','n22','n23'],                            color:'--c-launch',  dates:'2021–23' },
+  { label:'Seek & Employ', ids:['n24','n25','n26','n27','n28','n29','n30'],    color:'--c-concept', dates:'2023–' },
+];
+const SB_TYPE_COLORS = {
+  work:'var(--c-work)',concept:'var(--c-concept)',media:'var(--c-media)',
+  process:'var(--c-process)',launch:'var(--c-launch)',reflect:'var(--c-reflect)'
+};
+let sbOpen = false, sbActiveEra = null, sbActiveTypes = new Set();
+
+function toggleSandboxMode() { sbOpen ? closeSandboxMode() : openSandboxMode(); }
+
+function openSandboxMode() {
+  sbOpen = true; sbActiveEra = null; sbActiveTypes = new Set();
+  buildSandboxOverlay();
+  document.getElementById('sandbox-overlay').classList.add('open');
+}
+
+function closeSandboxMode() {
+  sbOpen = false;
+  const ov = document.getElementById('sandbox-overlay');
+  ov.style.animation = 'sbFadeIn 0.3s ease reverse both';
+  setTimeout(() => { ov.classList.remove('open'); ov.style.animation = ''; }, 320);
+}
+
+function closeSbDetail() { document.getElementById('sb-detail').classList.remove('open'); }
+
+function buildSandboxOverlay() {
+  // Era nav
+  const eraNav = document.getElementById('sb-era-nav');
+  eraNav.innerHTML = '';
+  SB_ERAS.forEach((era, i) => {
+    const el = document.createElement('div');
+    el.className = 'sb-era-item' + (sbActiveEra === i ? ' active' : '');
+    el.innerHTML = `<div class="sb-era-dot" style="background:var(${era.color})"></div>${era.label}`;
+    el.addEventListener('click', () => {
+      sbActiveEra = sbActiveEra === i ? null : i;
+      buildSandboxOverlay();
+      if (sbActiveEra !== null) {
+        const sec = document.getElementById('sb-era-' + i);
+        if (sec) sec.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    });
+    eraNav.appendChild(el);
+  });
+  // Type pills
+  const allTypes = [...new Set(nodes.map(n => n.type))].sort();
+  const pillsEl = document.getElementById('sb-type-pills');
+  pillsEl.innerHTML = '';
+  allTypes.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'sb-type-pill' + (sbActiveTypes.has(t) ? ' active' : '');
+    el.textContent = t; el.style.color = SB_TYPE_COLORS[t] || 'var(--ink-3)';
+    el.addEventListener('click', () => {
+      sbActiveTypes.has(t) ? sbActiveTypes.delete(t) : sbActiveTypes.add(t);
+      buildSandboxOverlay();
+    });
+    pillsEl.appendChild(el);
+  });
+  // Era bar
+  const eraBar = document.getElementById('sb-era-bar');
+  eraBar.innerHTML = '';
+  SB_ERAS.forEach(era => {
+    const seg = document.createElement('div');
+    seg.className = 'sb-era-bar-seg';
+    seg.style.background = `var(${era.color})`;
+    eraBar.appendChild(seg);
+  });
+  // Stream
+  const stream = document.getElementById('sb-stream-inner');
+  stream.innerHTML = '';
+  let count = 0;
+  SB_ERAS.forEach((era, i) => {
+    if (sbActiveEra !== null && sbActiveEra !== i) return;
+    const eraNodes = era.ids
+      .map(id => nodes.find(n => n.id === id))
+      .filter(n => n && (sbActiveTypes.size === 0 || sbActiveTypes.has(n.type)));
+    if (!eraNodes.length) return;
+    count += eraNodes.length;
+    const sec = document.createElement('div');
+    sec.className = 'sb-era-section'; sec.id = 'sb-era-' + i;
+    sec.innerHTML = `
+      <div class="sb-era-eyebrow">${String(i+1).padStart(2,'0')}</div>
+      <div class="sb-era-heading">${era.label}</div>
+      <div class="sb-era-dates">— ${era.dates}</div>
+      <div class="sb-era-rule"></div>`;
+    eraNodes.forEach(node => {
+      const color = SB_TYPE_COLORS[node.type] || 'var(--ink-3)';
+      const snippet = (node.content || []).find(b => b.type === 'sentence')?.value || node.sentences?.[0] || '';
+      const art = document.createElement('div');
+      art.className = 'sb-artifact';
+      art.innerHTML = `
+        <div class="sb-artifact-type">
+          <div class="sb-artifact-dot" style="background:${color}"></div>
+          <span style="color:${color}">${node.type}</span>
+        </div>
+        <div class="sb-card">
+          <div class="sb-card-stripe" style="background:${color}"></div>
+          <div class="sb-card-body">
+            <div class="sb-card-title">${node.title}</div>
+            <div class="sb-card-sentence">${snippet}</div>
+          </div>
+          <div class="sb-card-foot">
+            <div class="sb-card-meta">${node.era || ''}</div>
+            <div class="sb-card-hint">open ›</div>
+          </div>
+        </div>`;
+      art.addEventListener('click', () => openSbDetail(node));
+      sec.appendChild(art);
+    });
+    stream.appendChild(sec);
+  });
+  document.getElementById('sb-hud-count').textContent = count + ' nodes';
+}
+
+function openSbDetail(node) {
+  document.getElementById('sb-detail-type').textContent = node.type.toUpperCase();
+  document.getElementById('sb-detail-title').textContent = node.title;
+  document.getElementById('sb-detail-era').textContent = node.era || '';
+  const body = document.getElementById('sb-detail-body');
+  body.innerHTML = '';
+  (node.content || []).forEach(b => {
+    if (b.type === 'sentence') {
+      const p = document.createElement('p'); p.className = 'sb-detail-sentence'; p.textContent = b.value; body.appendChild(p);
+    } else if (b.type === 'pullquote') {
+      const p = document.createElement('p'); p.className = 'sb-detail-pull'; p.textContent = b.value; body.appendChild(p);
+    }
+  });
+  if (node.url) {
+    const a = document.createElement('a'); a.className = 'sb-detail-link';
+    a.href = node.url; a.target = '_blank';
+    a.textContent = '→ ' + node.url.replace('https://','');
+    body.appendChild(a);
+  }
+  document.getElementById('sb-detail').classList.add('open');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sbOpen) closeSandboxMode(); });
+
 </script>
 </body>
 </html>

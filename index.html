@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>zack gort · narrative as nodes · wolfie.life</title>
+<title>ZCKGRT · narrative as nodes · wolfie.love*</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -36,6 +36,11 @@ html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
   --c-launch: #c05f38;
   --c-reflect:#8a6858;
 
+  --era-pre:   #7a7870;
+  --era-loss:  #9a6858;
+  --era-build: #5a7850;
+  --era-now:   #c05f38;
+
   --node-w:   260px;
 }
 
@@ -59,6 +64,11 @@ html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
   --c-process:#c4a882;
   --c-launch: #d97757;
   --c-reflect:#c08060;
+
+  --era-pre:   #6a6860;
+  --era-loss:  #8a6858;
+  --era-build: #6a7858;
+  --era-now:   #d97757;
 }
 
 body {
@@ -80,14 +90,47 @@ body::after {
 
 /* ── TOPBAR ── */
 #topbar {
-  position:fixed; top:0; left:0; right:0; height:44px;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 16px;
+  position:fixed; top:0; left:0; right:0;
+  height:78px; /* 44px brand row + 34px scatter */
+  display:flex; flex-direction:column;
   background: var(--bg-4);
   border-bottom: 1px solid var(--border);
   z-index:1000;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+#topbar-row {
+  height:44px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px;
+  border-bottom:1px solid var(--border);
+}
+/* Scatter strip row */
+#topbar-scatter {
+  height:34px; flex-shrink:0;
+  padding:0 16px;
+  position:relative;
+  cursor:crosshair;
+  /* Right edge set by JS when detail panel opens */
+  transition:padding-right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+#scatter-canvas {
+  width:100%; height:100%; display:block;
+}
+/* Also shrink the topbar itself so it doesn't bleed under the panel */
+#topbar {
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+body.detail-panel-open #topbar {
+  right:360px;
+}
+/* Era spine also stops at panel edge */
+body.detail-panel-open #era-spine {
+  right:360px;
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+#era-spine {
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
 }
 .tb-brand {
   font-family: var(--disp);
@@ -109,9 +152,72 @@ body::after {
 .tb-btn.primary:hover { background:var(--accent); color:var(--bg); }
 .tb-btn.connect-mode { background:var(--accent); color:var(--bg); border-color:var(--accent); }
 
+/* ── ERA SPINE (bottom rail) ── */
+#era-spine {
+  position:fixed; bottom:0; left:0; right:0; height:48px;
+  background:var(--bg-4); border-top:1px solid var(--border);
+  display:flex; align-items:stretch;
+  z-index:700;
+  box-shadow:0 -2px 16px rgba(0,0,0,0.06);
+}
+[data-theme="dark"] #era-spine { box-shadow:0 -2px 16px rgba(0,0,0,0.25); }
+.era-seg {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:flex-end;
+  padding-bottom:7px; gap:4px;
+  cursor:pointer; position:relative;
+  border-right:1px solid var(--border);
+  transition:background 0.15s;
+}
+.era-seg:last-child { border-right:none; }
+.era-seg:hover { background:var(--accent-l); }
+.era-seg.active { background:var(--accent-l); }
+.era-seg-bar {
+  width:calc(100% - 12px); height:3px; border-radius:2px;
+  opacity:0.35; transition:opacity 0.2s, height 0.2s;
+  flex-shrink:0;
+}
+.era-seg.active .era-seg-bar,
+.era-seg:hover .era-seg-bar { opacity:1; height:4px; }
+.era-seg-label {
+  font-family:var(--mono); font-size:6.5px; letter-spacing:0.13em; text-transform:uppercase;
+  color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:calc(100% - 8px); text-align:center;
+  transition:color 0.15s;
+}
+.era-seg.active .era-seg-label,
+.era-seg:hover .era-seg-label { color:var(--ink-2); }
+/* Viewport indicator tick on spine */
+.era-seg-tick {
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  width:2px; height:3px; background:var(--accent);
+  border-radius:0 0 1px 1px;
+  opacity:0; transition:opacity 0.2s;
+}
+.era-seg.in-view .era-seg-tick { opacity:1; }
+
+/* Zoom lives inside the spine, right side */
+#zoom-ctrl {
+  display:flex; align-items:center; gap:0;
+  border-left:1px solid var(--border);
+  flex-shrink:0;
+}
+.zoom-btn {
+  background:none; border:none; cursor:pointer; color:var(--ink-2);
+  font-size:13px; padding:6px 12px; font-family:var(--mono);
+  transition:color 0.15s, background 0.15s; height:100%;
+}
+.zoom-btn:hover { color:var(--ink); background:var(--border); }
+.zoom-pct {
+  font-family:var(--mono); font-size:8px; letter-spacing:0.08em;
+  color:var(--ink-3); padding:0 8px;
+  border-left:1px solid var(--border); border-right:1px solid var(--border);
+  min-width:46px; text-align:center;
+}
+
 /* Mode badge */
 #mode-badge {
-  position:fixed; top:54px; left:50%; transform:translateX(-50%);
+  position:fixed; top:88px; left:50%; transform:translateX(-50%);
   background:var(--accent); color:var(--bg);
   font-family:var(--mono); font-size:8px; letter-spacing:0.12em; text-transform:uppercase;
   padding:4px 12px; border-radius:20px;
@@ -122,7 +228,7 @@ body::after {
 
 /* ── CANVAS CONTAINER ── */
 #canvas-wrap {
-  position:fixed; inset:0; top:44px;
+  position:fixed; inset:0; top:78px; bottom:48px;
   overflow:hidden;
   cursor:default;
 }
@@ -446,7 +552,7 @@ body::after {
 
 /* ── DETAIL PANEL (right rail — read-only case study view) ── */
 #detail-panel {
-  position:fixed; top:44px; right:0; bottom:0;
+  position:fixed; top:78px; right:0; bottom:0;
   width:360px;
   background:var(--bg-4);
   border-left:1px solid var(--border);
@@ -965,16 +1071,17 @@ body::after {
 }
 #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-/* ── CHAIN PANEL (bottom strip) ── */
+/* ── CHAIN PANEL (floats above era spine) ── */
 #chain-strip {
-  position:fixed; bottom:0; left:0; right:0; height:48px;
+  position:fixed; bottom:48px; left:0; right:0; height:40px;
   background:var(--bg-4); border-top:1px solid var(--border);
   display:flex; align-items:center; gap:0;
   overflow-x:auto; overflow-y:hidden;
-  z-index:700; padding:0 12px;
+  z-index:698; padding:0 12px;
   transform:translateY(100%);
   transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
   scrollbar-width:none;
+  box-shadow:0 -1px 8px rgba(0,0,0,0.06);
 }
 #chain-strip::-webkit-scrollbar { display:none; }
 #chain-strip.visible { transform:translateY(0); }
@@ -991,40 +1098,27 @@ body::after {
 .chain-node-chip.active { border-color:var(--accent); color:var(--accent); background:var(--accent-l); }
 .chain-arrow { color:var(--ink-3); font-size:12px; flex-shrink:0; padding:0 4px; }
 
-/* ── ZOOM CONTROLS ── */
-#zoom-ctrl {
-  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-  display:flex; align-items:center; gap:0;
-  background:var(--bg-4); border:1px solid var(--border-2);
-  border-radius:20px; overflow:hidden;
-  z-index:900; box-shadow:0 2px 12px rgba(0,0,0,0.08);
-}
-.zoom-btn {
-  background:none; border:none; cursor:pointer; color:var(--ink-2);
-  font-size:13px; padding:6px 12px; font-family:var(--mono);
-  transition:color 0.15s, background 0.15s;
-}
-.zoom-btn:hover { color:var(--ink); background:var(--border); }
-.zoom-pct {
-  font-family:var(--mono); font-size:8px; letter-spacing:0.08em;
-  color:var(--ink-3); padding:0 8px; border-left:1px solid var(--border); border-right:1px solid var(--border);
-  min-width:46px; text-align:center;
-}
+/* zoom-ctrl now inside #era-spine */
 </style>
 </head>
 <body>
 
 <!-- Top Bar -->
 <div id="topbar">
-  <div class="tb-brand">
-    zack gort · narrative as nodes
-    <span>· wolfie.love*</span>
+  <div id="topbar-row">
+    <div class="tb-brand">
+      ZCKGRT · narrative as nodes
+      <span>· wolfie.love*</span>
+    </div>
+    <div class="tb-actions">
+      <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
+      <button class="tb-btn" id="btn-connect" onclick="toggleConnectMode()">connect</button>
+      <button class="tb-btn" id="btn-fit" onclick="fitAll()">fit</button>
+      <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">◐</button>
+    </div>
   </div>
-  <div class="tb-actions">
-    <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
-    <button class="tb-btn" id="btn-connect" onclick="toggleConnectMode()">connect</button>
-    <button class="tb-btn" id="btn-fit" onclick="fitAll()">fit</button>
-    <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">◐</button>
+  <div id="topbar-scatter">
+    <canvas id="scatter-canvas"></canvas>
   </div>
 </div>
 
@@ -1050,8 +1144,47 @@ body::after {
   </div>
 </div>
 
-<!-- Chain strip -->
+<!-- Chain strip (floats above spine) -->
 <div id="chain-strip"></div>
+
+<!-- Era Spine (bottom rail) -->
+<div id="era-spine">
+  <div class="era-seg active" data-era="0" data-first="n1" onclick="spineJump(0)">
+    <div class="era-seg-tick"></div>
+    <div class="era-seg-bar" style="background:var(--era-pre)"></div>
+    <div class="era-seg-label">Origins</div>
+  </div>
+  <div class="era-seg" data-era="1" data-first="n5" onclick="spineJump(1)">
+    <div class="era-seg-tick"></div>
+    <div class="era-seg-bar" style="background:var(--era-loss)"></div>
+    <div class="era-seg-label">Suburbia</div>
+  </div>
+  <div class="era-seg" data-era="2" data-first="n10" onclick="spineJump(2)">
+    <div class="era-seg-tick"></div>
+    <div class="era-seg-bar" style="background:var(--era-build)"></div>
+    <div class="era-seg-label">Agency</div>
+  </div>
+  <div class="era-seg" data-era="3" data-first="n14" onclick="spineJump(3)">
+    <div class="era-seg-tick"></div>
+    <div class="era-seg-bar" style="background:var(--era-now)"></div>
+    <div class="era-seg-label">New York</div>
+  </div>
+  <div class="era-seg" data-era="4" data-first="n21" onclick="spineJump(4)">
+    <div class="era-seg-tick"></div>
+    <div class="era-seg-bar" style="background:var(--c-launch)"></div>
+    <div class="era-seg-label">Remote</div>
+  </div>
+  <div class="era-seg" data-era="5" data-first="n24" onclick="spineJump(5)">
+    <div class="era-seg-tick"></div>
+    <div class="era-seg-bar" style="background:var(--c-concept)"></div>
+    <div class="era-seg-label">Seek &amp; Employ</div>
+  </div>
+  <div id="zoom-ctrl">
+    <button class="zoom-btn" onclick="doZoom(-0.15)">&#x2212;</button>
+    <div class="zoom-pct" id="zoom-pct">100%</div>
+    <button class="zoom-btn" onclick="doZoom(0.15)">+</button>
+  </div>
+</div>
 
 <!-- Compose Widget (floating bottom, new nodes only) -->
 <div id="compose-widget">
@@ -1127,12 +1260,7 @@ body::after {
   <div id="minimap-viewport"></div>
 </div>
 
-<!-- Zoom -->
-<div id="zoom-ctrl">
-  <button class="zoom-btn" onclick="doZoom(-0.15)">−</button>
-  <div class="zoom-pct" id="zoom-pct">100%</div>
-  <button class="zoom-btn" onclick="doZoom(0.15)">+</button>
-</div>
+<!-- zoom-ctrl moved into #era-spine -->
 
 <!-- Context Menu -->
 <div id="ctx-menu"></div>
@@ -1595,7 +1723,7 @@ const DEFAULT_CONNECTIONS = [
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v5';
+const DATA_VERSION = 'v7';
 
 function save() {
   try {
@@ -2311,6 +2439,8 @@ function openDetailPanel(nodeId) {
   detailEditMode = false;
   renderDetailPanel(nodeId);
   document.getElementById('detail-panel').classList.add('open');
+  document.body.classList.add('detail-panel-open');
+  if (scatterDraw) requestAnimationFrame(scatterDraw);
 }
 
 // ── READ VIEW renderer ─────────────────────────────────────────────────
@@ -2669,7 +2799,9 @@ function deleteNode(nodeId) {
 
 function closeDetailPanel() {
   document.getElementById('detail-panel').classList.remove('open');
+  document.body.classList.remove('detail-panel-open');
   detailEditMode = false;
+  if (scatterDraw) requestAnimationFrame(scatterDraw);
 }
 
 function getNodeConnections(nodeId) {
@@ -2862,6 +2994,258 @@ document.addEventListener('keydown', e => {
   if (e.key === '0') fitAll();
 });
 
+// ── ERA SPINE ─────────────────────────────────────────────────────────
+// Era x-ranges as fractions of full canvas width (node x positions / CANVAS_W)
+const ERA_SPINE = [
+  { era:0, label:'Origins',       nodeIds:['n1','n2','n3','n4'],                         color:'--era-pre'   },
+  { era:1, label:'Suburbia',      nodeIds:['n5','n6','n7','n8','n9'],                     color:'--era-loss'  },
+  { era:2, label:'Agency',        nodeIds:['n10','n11','n12','n13'],                      color:'--era-build' },
+  { era:3, label:'New York',      nodeIds:['n14','n15','n16','n17','n18','n19','n20'],    color:'--era-now'   },
+  { era:4, label:'Remote',        nodeIds:['n21','n22','n23'],                            color:'--c-launch'  },
+  { era:5, label:'Seek & Employ', nodeIds:['n24','n25','n26'],                            color:'--c-concept' },
+];
+
+function spineJump(eraIdx) {
+  const era = ERA_SPINE[eraIdx];
+  if (!era) return;
+  // Find the first node of that era that exists
+  let target = null;
+  for (const id of era.nodeIds) {
+    target = nodes.find(n => n.id === id);
+    if (target) break;
+  }
+  if (!target) return;
+  const wrap = document.getElementById('canvas-wrap');
+  const nw = 260, nh = 160;
+  const scale = 1.51;
+  transform.scale = scale;
+  transform.x = wrap.clientWidth  / 2 - (target.x + nw/2) * scale;
+  transform.y = wrap.clientHeight / 2 - (target.y + nh/2) * scale;
+  applyTransform();
+  save();
+  updateSpineActive();
+  toast(era.label);
+}
+
+function updateSpineActive() {
+  // Determine which era's nodes are most visible in the current viewport
+  const wrap = document.getElementById('canvas-wrap');
+  const vpW = wrap.clientWidth, vpH = wrap.clientHeight;
+  // Canvas coords of viewport center
+  const cx = (-transform.x + vpW  / 2) / transform.scale;
+  const cy = (-transform.y + vpH / 2) / transform.scale;
+
+  let closestEra = 0, closestDist = Infinity;
+  ERA_SPINE.forEach((era, i) => {
+    for (const id of era.nodeIds) {
+      const node = nodes.find(n => n.id === id);
+      if (!node) continue;
+      const nx = node.x + 130, ny = node.y + 80;
+      const dist = Math.hypot(cx - nx, cy - ny);
+      if (dist < closestDist) { closestDist = dist; closestEra = i; }
+    }
+  });
+
+  document.querySelectorAll('.era-seg').forEach((seg, i) => {
+    seg.classList.toggle('active', i === closestEra);
+  });
+}
+
+// ── SCATTER MAP ────────────────────────────────────────────────────────
+// Static node positions as fractions — maps directly to sandbox SCATTER_NODES
+const SCATTER_DATA = [
+  // [nodeId, xFrac, yFrac, colorVar, label, isMajor]
+  ['n1',  0.02, 0.50, '--c-concept', 'This is opinionated.', true],
+  ['n2',  0.07, 0.32, '--c-process', 'First Build',          false],
+  ['n3',  0.07, 0.68, '--c-reflect', 'Self-Curriculum',      false],
+  ['n4',  0.12, 0.50, '--c-launch',  'Craigslist Post',      false],
+  ['n5',  0.19, 0.28, '--c-work',    'Turn5',                false],
+  ['n6',  0.19, 0.72, '--c-media',   'Photography',          false],
+  ['n7',  0.24, 0.50, '--c-work',    'Design by Data',       false],
+  ['n8',  0.29, 0.28, '--c-reflect', 'Leadnomics',           false],
+  ['n9',  0.29, 0.72, '--c-reflect', 'Clavicle',             false],
+  ['n10', 0.37, 0.28, '--c-work',    '160/90',               false],
+  ['n11', 0.37, 0.72, '--c-work',    'Interactive Work',     false],
+  ['n12', 0.42, 0.50, '--c-work',    'O3 World',             false],
+  ['n13', 0.47, 0.28, '--c-work',    'Workarea',             false],
+  ['n14', 0.53, 0.50, '--c-reflect', 'The Commute',          true ],
+  ['n15', 0.58, 0.28, '--c-work',    'FlightPath',           false],
+  ['n16', 0.58, 0.72, '--c-work',    'LiveArea',             false],
+  ['n17', 0.63, 0.40, '--c-work',    'GNC',                  false],
+  ['n18', 0.63, 0.72, '--c-concept', 'Cards Against Bad UX', false],
+  ['n19', 0.68, 0.28, '--c-work',    'Code & Theory',        false],
+  ['n20', 0.68, 0.72, '--c-work',    'BNY Mellon',           false],
+  ['n21', 0.76, 0.50, '--c-reflect', 'Remote',               true ],
+  ['n22', 0.81, 0.28, '--c-process', 'Low Voltage',          false],
+  ['n23', 0.81, 0.72, '--c-launch',  'Side Builds',          false],
+  ['n24', 0.88, 0.50, '--c-concept', 'What I Offer',         true ],
+  ['n25', 0.93, 0.28, '--c-launch',  'intoview.pro',         false],
+  ['n26', 0.93, 0.72, '--c-reflect', 'Beyond the Work',      false],
+];
+
+const SCATTER_ERAS = [
+  { x0:0,    x1:0.16, colorVar:'--era-pre'   },
+  { x0:0.16, x1:0.34, colorVar:'--era-loss'  },
+  { x0:0.34, x1:0.51, colorVar:'--era-build' },
+  { x0:0.51, x1:0.74, colorVar:'--era-now'   },
+  { x0:0.74, x1:0.86, colorVar:'--c-launch'  },
+  { x0:0.86, x1:1.00, colorVar:'--c-concept' },
+];
+
+function initScatterMap() {
+  const canvas = document.getElementById('scatter-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, hovered = -1;
+  let tipEl = null;
+
+  function resolveVar(v) {
+    return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  }
+
+  function draw() {
+    const dpr = window.devicePixelRatio || 1;
+    W = canvas.offsetWidth;
+    H = canvas.offsetHeight;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const inkA = isDark ? 'rgba(237,233,224,' : 'rgba(26,24,21,';
+
+    // Era bands
+    SCATTER_ERAS.forEach(era => {
+      const c = resolveVar(era.colorVar);
+      ctx.fillStyle = c + (isDark ? '18' : '0c');
+      ctx.beginPath();
+      ctx.roundRect(era.x0 * W + 1, 0, (era.x1 - era.x0) * W - 2, H, 2);
+      ctx.fill();
+    });
+
+    // Centre axis
+    ctx.strokeStyle = inkA + '0.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, H * 0.5); ctx.lineTo(W, H * 0.5);
+    ctx.stroke();
+
+    // Era dividers
+    [0.16, 0.34, 0.51, 0.74, 0.86].forEach(x => {
+      ctx.strokeStyle = inkA + '0.10)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(x * W, 3); ctx.lineTo(x * W, H - 3);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // Viewport indicator — show where the canvas is currently framed
+    // Map canvas x-range to scatter x-fraction
+    const nodeXs = nodes.map(n => n.x);
+    const minX = Math.min(...nodeXs), maxX = Math.max(...nodeXs) + 260;
+    const totalSpan = maxX - minX;
+    const wrapEl = document.getElementById('canvas-wrap');
+    if (wrapEl && totalSpan > 0) {
+      const vpLeft  = (-transform.x / transform.scale - minX) / totalSpan;
+      const vpRight = ((-transform.x + wrapEl.clientWidth)  / transform.scale - minX) / totalSpan;
+      const vx1 = Math.max(0, vpLeft)  * W;
+      const vx2 = Math.min(1, vpRight) * W;
+      ctx.fillStyle = isDark ? 'rgba(217,119,87,0.10)' : 'rgba(192,95,56,0.08)';
+      ctx.fillRect(vx1, 0, vx2 - vx1, H);
+      ctx.strokeStyle = isDark ? 'rgba(217,119,87,0.4)' : 'rgba(192,95,56,0.35)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([]);
+      ctx.strokeRect(vx1, 0, vx2 - vx1, H);
+    }
+
+    // Nodes
+    SCATTER_DATA.forEach((n, i) => {
+      const [id, nx, ny, colorVar, label, isMajor] = n;
+      const x = nx * W, y = ny * H;
+      const r = isMajor ? 4.5 : 3;
+      const color = resolveVar(colorVar);
+      const isHov = i === hovered;
+
+      if (isHov) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 5, 0, Math.PI * 2);
+        ctx.fillStyle = color + '30';
+        ctx.fill();
+      }
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = isHov ? 1 : (isMajor ? 0.8 : 0.55);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+  }
+
+  function getTip() {
+    if (!tipEl) {
+      tipEl = document.createElement('div');
+      tipEl.style.cssText = 'position:fixed;background:var(--bg-4);border:1px solid var(--border-2);border-radius:4px;padding:4px 9px;font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:var(--ink-2);pointer-events:none;z-index:9999;opacity:0;transition:opacity 0.12s;white-space:nowrap;';
+      document.body.appendChild(tipEl);
+    }
+    return tipEl;
+  }
+
+  function getNodeAt(mx, my) {
+    return SCATTER_DATA.findIndex(n => Math.hypot(mx - n[1]*W, my - n[2]*H) <= 7);
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const idx = getNodeAt(mx, my);
+    if (idx !== hovered) { hovered = idx; draw(); }
+    const tip = getTip();
+    if (idx >= 0) {
+      tip.textContent = SCATTER_DATA[idx][4];
+      tip.style.opacity = '1';
+      tip.style.left = (e.clientX + 12) + 'px';
+      tip.style.top  = (e.clientY - 28) + 'px';
+      canvas.style.cursor = 'pointer';
+    } else {
+      tip.style.opacity = '0';
+      canvas.style.cursor = 'crosshair';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    hovered = -1; draw();
+    if (tipEl) tipEl.style.opacity = '0';
+    canvas.style.cursor = 'crosshair';
+  });
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
+    if (idx < 0) return;
+    const nodeId = SCATTER_DATA[idx][0];
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    const wrap = document.getElementById('canvas-wrap');
+    const scale = 1.51;
+    transform.scale = scale;
+    transform.x = wrap.clientWidth  / 2 - (node.x + 130) * scale;
+    transform.y = wrap.clientHeight / 2 - (node.y +  80) * scale;
+    applyTransform();
+    save();
+    updateSpineActive();
+    openDetailPanel(nodeId);
+  });
+
+  const ro = new ResizeObserver(draw);
+  ro.observe(canvas);
+  requestAnimationFrame(draw);
+
+  return draw;
+}
+
 // ── INIT ───────────────────────────────────────────────────────────────
 function firstNodeView() {
   // 151% zoom, centered on the first node — 151 weeks with Wolfie
@@ -2878,6 +3262,8 @@ function firstNodeView() {
   applyTransform();
 }
 
+let scatterDraw = null;
+
 function init() {
   const savedTheme = localStorage.getItem('nc_theme') || '';
   document.documentElement.setAttribute('data-theme', savedTheme);
@@ -2886,20 +3272,34 @@ function init() {
   renderAllNodes();
   renderConnections();
 
-  // If the user has a saved transform (they've been here before and moved around),
-  // honour it. Otherwise land on the first node at 151%.
   const hasUserTransform = !!localStorage.getItem('nc_transform');
   if (hasUserTransform) {
     applyTransform();
   } else {
-    // Defer until layout is painted so clientWidth/Height are real
     requestAnimationFrame(() => {
       firstNodeView();
-      save(); // persist so next visit uses their own pref from here
+      save();
     });
   }
 
   drawMinimap();
+  scatterDraw = initScatterMap();
+  updateSpineActive();
+
+  // Redraw scatter and spine on pan/zoom
+  const origApply = applyTransform;
+  applyTransform = function() {
+    origApply();
+    if (scatterDraw) scatterDraw();
+    updateSpineActive();
+  };
+
+  // Theme toggle redraws scatter
+  const origTheme = window.toggleTheme;
+  window.toggleTheme = function() {
+    origTheme();
+    requestAnimationFrame(() => { if (scatterDraw) scatterDraw(); });
+  };
 
   // Resize
   window.addEventListener('resize', () => {

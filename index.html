@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>ZCKGRT · narrative as nodes · wolfie.love*</title>
+<title>narrative canvas · wolfie.life</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -1273,8 +1273,8 @@ body.detail-panel-open #era-spine {
 <div id="topbar">
   <div id="topbar-row">
     <div class="tb-brand">
-      ZCKGRT
-      <span>· Narrative as Nodes</span>
+      narrative canvas
+      <span>· wolfie.life</span>
     </div>
     <div class="tb-actions">
       <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
@@ -2195,6 +2195,7 @@ function getNodeChainInfo(id) {
 // ── NODE DRAG ──────────────────────────────────────────────────────────
 function attachNodeEvents(el, node) {
   el.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') return; // touch handled by wrap touchstart
     if (e.target.closest('.port') || e.target.closest('.node-act-btn')) return;
     if (connectMode) {
       handleConnectClick(node.id);
@@ -2220,8 +2221,10 @@ function attachNodeEvents(el, node) {
 
 function startNodeDrag(e, el, node) {
   if (e.button !== 0) return;
-  e.preventDefault();
-  e.stopPropagation();
+  if (e.pointerType !== 'touch') {
+    e.preventDefault();
+    e.stopPropagation();
+  }
 
   const wrap = document.getElementById('canvas-wrap').getBoundingClientRect();
   const startClient = { x: e.clientX, y: e.clientY };
@@ -2423,11 +2426,13 @@ function renderConnections() {
   });
 }
 
-// ── PANNING ────────────────────────────────────────────────────────────
+// ── PANNING & TOUCH ───────────────────────────────────────────────────
 const wrap = document.getElementById('canvas-wrap');
 let panStart = null;
 
+// ── Desktop pointer pan ────────────────────────────────────────────────
 wrap.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'touch') return; // touch handled below
   if (e.target.closest('.node-card') || e.target.closest('.port')) return;
   if (e.button !== 0) return;
   panStart = { x: e.clientX - transform.x, y: e.clientY - transform.y };
@@ -2437,7 +2442,7 @@ wrap.addEventListener('pointerdown', e => {
 });
 
 document.addEventListener('pointermove', e => {
-  // Track mouse for preview line
+  if (e.pointerType === 'touch') return;
   const pt = clientToCanvas(e.clientX, e.clientY);
   mouseCanvas = pt;
 
@@ -2455,11 +2460,8 @@ document.addEventListener('pointermove', e => {
     previewLine.style.display = 'none';
   }
 
-  // Hover feedback in connect mode
   if (connectMode) {
-    document.querySelectorAll('.node-card').forEach(el => {
-      el.classList.remove('connect-target-hover');
-    });
+    document.querySelectorAll('.node-card').forEach(el => el.classList.remove('connect-target-hover'));
     const hovered = document.elementFromPoint(e.clientX, e.clientY)?.closest('.node-card');
     if (hovered && hovered.dataset.id !== connectSourceId) {
       hovered.classList.add('connect-target-hover');
@@ -2473,6 +2475,7 @@ document.addEventListener('pointermove', e => {
 });
 
 document.addEventListener('pointerup', e => {
+  if (e.pointerType === 'touch') return;
   if (!isPanning) return;
   isPanning = false;
   panStart = null;
@@ -2480,22 +2483,138 @@ document.addEventListener('pointerup', e => {
   save();
 });
 
-// Wheel zoom
+// ── Touch: 1-finger pan + 2-finger pinch zoom ─────────────────────────
+(function initTouch() {
+  let t1 = null, t2 = null;
+  let panOrigin  = null;
+  let pinchOrigin = null;
+  let pinchDist0  = 0;
+  let pinchScale0 = 1;
+  let touchMoved  = false;
+  let touchTarget = null;
+  let tapTimer    = null;
+
+  function dist(a, b) {
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+  function mid(a, b) {
+    return { x:(a.clientX+b.clientX)/2, y:(a.clientY+b.clientY)/2 };
+  }
+
+  wrap.addEventListener('touchstart', e => {
+    touchMoved = false;
+    if (e.touches.length === 1) {
+      t1 = e.touches[0];
+      t2 = null;
+      touchTarget = document.elementFromPoint(t1.clientX, t1.clientY);
+      panOrigin = { x: t1.clientX - transform.x, y: t1.clientY - transform.y };
+      pinchOrigin = null;
+
+      // Tap-to-open node — set a timer, cancel if moved
+      const nodeEl = touchTarget?.closest('.node-card');
+      if (nodeEl) {
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => {}, 300); // placeholder; handled in touchend
+      }
+    } else if (e.touches.length === 2) {
+      t1 = e.touches[0];
+      t2 = e.touches[1];
+      panOrigin = null;
+      pinchDist0  = dist(t1, t2);
+      pinchScale0 = transform.scale;
+      const m = mid(t1, t2);
+      pinchOrigin = { x: m.x, y: m.y };
+      e.preventDefault(); // prevent page zoom
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchmove', e => {
+    e.preventDefault(); // always prevent browser scroll/zoom on canvas
+
+    if (e.touches.length === 2) {
+      // Pinch zoom
+      const ta = e.touches[0], tb = e.touches[1];
+      const d = dist(ta, tb);
+      const newScale = Math.max(0.2, Math.min(3, pinchScale0 * (d / pinchDist0)));
+      const m = mid(ta, tb);
+      // Zoom toward pinch midpoint
+      const ratio = newScale / transform.scale;
+      const wrapRect = wrap.getBoundingClientRect();
+      const ox = m.x - wrapRect.left;
+      const oy = m.y - wrapRect.top;
+      transform.x = ox - (ox - transform.x) * ratio;
+      transform.y = oy - (oy - transform.y) * ratio;
+      transform.scale = newScale;
+      applyTransform();
+      touchMoved = true;
+
+    } else if (e.touches.length === 1 && panOrigin) {
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - panOrigin.x - transform.x);
+      const dy = Math.abs(t.clientY - panOrigin.y - transform.y);
+      if (dx > 4 || dy > 4) touchMoved = true;
+      transform.x = t.clientX - panOrigin.x;
+      transform.y = t.clientY - panOrigin.y;
+      applyTransform();
+    }
+  }, { passive: false });
+
+  wrap.addEventListener('touchend', e => {
+    clearTimeout(tapTimer);
+
+    if (!touchMoved && e.changedTouches.length === 1) {
+      // It was a tap — handle node open or deselect
+      const touch = e.changedTouches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY);
+      const nodeEl = el?.closest('.node-card');
+      if (nodeEl) {
+        const nodeId = nodeEl.dataset.id;
+        if (nodeId) {
+          selectNode(nodeId);
+          openDetailPanel(nodeId);
+        }
+      } else {
+        // Tap on empty canvas — deselect
+        selectedNodeId = null;
+        document.querySelectorAll('.node-card').forEach(el => el.classList.remove('selected'));
+        closeDetailPanel();
+        activeChain = [];
+        renderConnections();
+        updateChainStrip();
+      }
+    }
+
+    if (e.touches.length === 0) {
+      // All fingers lifted
+      if (touchMoved) save();
+      t1 = null; t2 = null; panOrigin = null; pinchOrigin = null;
+    } else if (e.touches.length === 1) {
+      // Dropped from pinch back to one finger — re-anchor pan
+      t1 = e.touches[0];
+      panOrigin = { x: t1.clientX - transform.x, y: t1.clientY - transform.y };
+      t2 = null;
+    }
+  }, { passive: true });
+})();
+
+// Wheel zoom (desktop)
 wrap.addEventListener('wheel', e => {
   e.preventDefault();
   const delta = e.deltaY < 0 ? 0.12 : -0.12;
   doZoom(delta, e.clientX, e.clientY);
 }, { passive: false });
 
-// Canvas dblclick → add node
+// Canvas dblclick → add node (desktop only)
 wrap.addEventListener('dblclick', e => {
+  if (isMobileViewport()) return;
   if (e.target.closest('.node-card') || e.target.closest('.port')) return;
   if (connectMode) return;
   addNode(e.clientX, e.clientY);
 });
 
-// Canvas click → deselect
+// Canvas click → deselect (desktop)
 wrap.addEventListener('click', e => {
+  if (e.pointerType === 'touch') return; // touch handled in touchend
   if (connectMode) return;
   if (!e.target.closest('.node-card')) {
     selectedNodeId = null;

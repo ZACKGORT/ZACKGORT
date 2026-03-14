@@ -1407,8 +1407,8 @@ body.detail-panel-open #era-spine {
 <div id="topbar">
   <div id="topbar-row">
     <div class="tb-brand">
-      zackgort
-      <span>· narrative as nodes</span>
+      zackgort · narrative canvas
+      <span>· wolfie.love*</span>
     </div>
     <div class="tb-actions">
       <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
@@ -3659,8 +3659,8 @@ function spineJump(eraIdx) {
   if (!target) return;
   const wrap = document.getElementById('canvas-wrap');
   const nw = 260, nh = 160;
-  const scale = 1.51;
-  transform.scale = scale;
+  // Preserve whatever zoom the user has set — only pan, don't rescale
+  const scale = transform.scale;
   transform.x = wrap.clientWidth  / 2 - (target.x + nw/2) * scale;
   transform.y = wrap.clientHeight / 2 - (target.y + nh/2) * scale;
   applyTransform();
@@ -3872,8 +3872,8 @@ function initScatterMap() {
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
     const wrap = document.getElementById('canvas-wrap');
-    const scale = 1.51;
-    transform.scale = scale;
+    // Preserve user zoom — only pan to node
+    const scale = transform.scale;
     transform.x = wrap.clientWidth  / 2 - (node.x + 130) * scale;
     transform.y = wrap.clientHeight / 2 - (node.y +  80) * scale;
     applyTransform();

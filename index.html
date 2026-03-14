@@ -2067,6 +2067,60 @@ const DEFAULT_NODES = [
     era:'2025–', z:26, url:'https://raw.githubusercontent.com/ZACKGORT/ZACKGORT/main/waitingontheworldtochange_zackgort_v1720p.mp4'
   },
 
+  // ── LIVE WORK: branching from What I Offer ───────────────────────────
+  {
+    id:'n27', x:5380, y:640, type:'launch',
+    title:'ifimaybefrank.com',
+    sentences:['A writing model. The philosophical argument.'],
+    content:[
+      { type:'chapter', value:'The philosophical argument.' },
+      { type:'sentence', value:'Built entirely from scratch in vanilla HTML, CSS, and JS. No frameworks. No derivatives.' },
+      { type:'sentence', value:'A sentence-by-sentence reading paradigm. Four themes. Flow mode. Bracket annotations. An imageMap system linking hundreds of phrases to contextual images.' },
+      { type:'divider', value:'thesis' },
+      { type:'pullquote', value:'Format shapes attention. The sentence is the interface. This was the proof.' },
+    ],
+    era:'2020–', z:27, url:'https://ifimaybefrank.com'
+  },
+  {
+    id:'n28', x:5700, y:280, type:'process',
+    title:'reasonably.cc',
+    sentences:['A thinking model. Sentence-progressive ideation.'],
+    content:[
+      { type:'chapter', value:'A thinking model.' },
+      { type:'sentence', value:'Sentence-progressive thinking tool. Single HTML file. No dependencies.' },
+      { type:'sentence', value:'Undo/redo architecture. Bracket annotation system. Canvas palette interaction model.' },
+      { type:'divider', value:'architecture' },
+      { type:'sentence', value:'The tool eats its own philosophy — built with the same sentence-first approach it enables.' },
+      { type:'pullquote', value:'Not a notes app. A thinking surface.' },
+    ],
+    era:'2024–', z:28, url:'https://reasonably.cc'
+  },
+  {
+    id:'n29', x:5700, y:500, type:'launch',
+    title:'intoview.pro',
+    sentences:['A narrative engine. The platform demonstrating itself.'],
+    content:[
+      { type:'chapter', value:'The platform demonstrating itself.' },
+      { type:'sentence', value:'A portfolio that refuses to be a portfolio.' },
+      { type:'sentence', value:'Single-page narrative engine with right-rail resume panel, multi-theme toggle, ghost overlay system, dark chapter moments, and sentence-progressive navigation.' },
+      { type:'divider', value:'the receipt' },
+      { type:'pullquote', value:'The medium is the argument. The site is the case study.' },
+    ],
+    era:'2023–', z:29, url:'https://intoview.pro'
+  },
+  {
+    id:'n30', x:5700, y:720, type:'concept',
+    title:'emdash.click',
+    sentences:['A utility. The em dash, properly sourced.'],
+    content:[
+      { type:'sentence', value:'A utility built out of a genuine need — the em dash, properly sourced and instantly accessible.' },
+      { type:'sentence', value:'Small things done right are also a design argument.' },
+      { type:'divider', value:'' },
+      { type:'pullquote', value:'All em—dashes seen herein were sourced from emdash.click.' },
+    ],
+    era:'2023–', z:30, url:'https://emdash.click'
+  },
+
 ];
 
 const DEFAULT_CONNECTIONS = [
@@ -2105,10 +2159,15 @@ const DEFAULT_CONNECTIONS = [
   { id:'c25', from:'n23', to:'n24', label:'' },
   { id:'c26', from:'n24', to:'n25', label:'' },
   { id:'c27', from:'n24', to:'n26', label:'' },
+  // Live work — branching from What I Offer
+  { id:'c28', from:'n24', to:'n27', label:'' },
+  { id:'c29', from:'n24', to:'n28', label:'' },
+  { id:'c30', from:'n24', to:'n29', label:'' },
+  { id:'c31', from:'n24', to:'n30', label:'' },
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v10';
+const DATA_VERSION = 'v11';
 
 function save() {
   try {
@@ -3680,7 +3739,7 @@ const ERA_SPINE = [
   { era:2, label:'Agency',        nodeIds:['n10','n11','n12','n13'],                      color:'--era-build' },
   { era:3, label:'New York',      nodeIds:['n14','n15','n16','n17','n18','n19','n20'],    color:'--era-now'   },
   { era:4, label:'Remote',        nodeIds:['n21','n22','n23'],                            color:'--c-launch'  },
-  { era:5, label:'Seek & Employ', nodeIds:['n24','n25','n26'],                            color:'--c-concept' },
+  { era:5, label:'Seek & Employ', nodeIds:['n24','n25','n26','n27','n28','n29','n30'],    color:'--c-concept' },
 ];
 
 function spineJump(eraIdx) {
@@ -3760,6 +3819,10 @@ const SCATTER_DATA = [
   ['n24', 0.88, 0.50, '--c-concept', 'What I Offer',         true ],
   ['n25', 0.93, 0.28, '--c-launch',  'intoview.pro',         false],
   ['n26', 0.93, 0.72, '--c-reflect', 'Beyond the Work',      false],
+  ['n27', 0.95, 0.84, '--c-launch',  'ifimaybefrank.com',    false],
+  ['n28', 0.97, 0.40, '--c-process', 'reasonably.cc',        false],
+  ['n29', 0.97, 0.60, '--c-launch',  'intoview.pro',         false],
+  ['n30', 0.97, 0.80, '--c-concept', 'emdash.click',         false],
 ];
 
 const SCATTER_ERAS = [

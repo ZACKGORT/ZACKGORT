@@ -1017,8 +1017,8 @@ body::after {
 <!-- Top Bar -->
 <div id="topbar">
   <div class="tb-brand">
-    zackgort.com | narrative as nodes
-    <span>· wolfie.love*</span>
+    narrative canvas
+    <span>· wolfie.life</span>
   </div>
   <div class="tb-actions">
     <button class="tb-btn" id="btn-add-node" onclick="addNode()">+ node</button>
@@ -1553,7 +1553,7 @@ const DEFAULT_NODES = [
       { type:'sentence', value:'The work I do, in any medium, attempts to earn its place. It seeks to earn the moment in which it exists.' },
       { type:'pullquote', value:'What follows, I hope, is more of that spirit continuously re-energizing and re-invigorating its concept of itself.' },
     ],
-    era:'2025–', z:26
+    era:'2025–', z:26, url:'https://raw.githubusercontent.com/ZACKGORT/ZACKGORT/main/waitingontheworldtochange_zackgort_v1720p.mp4'
   },
 
 ];
@@ -1578,9 +1578,9 @@ const DEFAULT_CONNECTIONS = [
   // Into New York
   { id:'c14', from:'n13', to:'n14', label:'' },
   { id:'c15', from:'n14', to:'n15', label:'' },
-  { id:'c16', from:'n14', to:'n16', label:'' },
+  { id:'c16', from:'n15', to:'n16', label:'' },
   { id:'c17', from:'n16', to:'n17', label:'' },
-  { id:'c18', from:'n16', to:'n18', label:'' },
+  { id:'c18', from:'n17', to:'n18', label:'' },
   { id:'c19', from:'n17', to:'n19', label:'' },
   { id:'c20', from:'n18', to:'n19', label:'' },
   { id:'c21', from:'n19', to:'n20', label:'' },
@@ -1595,7 +1595,7 @@ const DEFAULT_CONNECTIONS = [
 ];
 
 // ── PERSISTENCE ────────────────────────────────────────────────────────
-const DATA_VERSION = 'v4';
+const DATA_VERSION = 'v5';
 
 function save() {
   try {
@@ -2449,10 +2449,18 @@ function renderDetailPanel(nodeId) {
       }).join('')
     : `<div style="font-size:9px;color:var(--ink-3);padding:4px 0 2px;">No connections yet.</div>`;
 
-  // iframe HTML (shared)
+  // Preview HTML — video for .mp4, iframe for everything else
+  const isVideo = url && url.match(/\.mp4(\?|$)/i);
   const iframeHTML = url
-    ? `<div class="dp-iframe-wrap"><iframe src="${escHTML(url)}" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe></div>
-       <button style="margin-top:6px;background:none;border:none;font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);cursor:pointer;padding:0;" onclick="window.open('${escHTML(url)}','_blank')">&#x2197; open in new tab</button>`
+    ? isVideo
+      ? `<div class="dp-iframe-wrap" style="aspect-ratio:16/9">
+           <video src="${escHTML(url)}" controls autoplay muted loop playsinline
+             style="width:100%;height:100%;object-fit:cover;display:block;border:none;">
+           </video>
+         </div>
+         <button style="margin-top:6px;background:none;border:none;font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);cursor:pointer;padding:0;" onclick="window.open('${escHTML(url)}','_blank')">&#x2197; open in new tab</button>`
+      : `<div class="dp-iframe-wrap"><iframe src="${escHTML(url)}" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe></div>
+         <button style="margin-top:6px;background:none;border:none;font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-3);cursor:pointer;padding:0;" onclick="window.open('${escHTML(url)}','_blank')">&#x2197; open in new tab</button>`
     : `<div class="dp-iframe-wrap"><div class="dp-iframe-placeholder"><div class="dp-iframe-placeholder-icon">&#x1F517;</div><div class="dp-iframe-placeholder-text">no preview url</div></div></div>`;
 
   if (detailEditMode) {

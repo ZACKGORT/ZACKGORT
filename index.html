@@ -603,12 +603,14 @@ body.detail-panel-open #era-spine {
 
 /* Hero header image */
 .dp-hero {
-  width:100%; aspect-ratio:16/9;
+  width:100%;
   overflow:hidden; flex-shrink:0; position:relative;
   background:var(--bg-3);
 }
 .dp-hero img {
-  width:100%; height:100%; object-fit:cover; display:block;
+  width:100%;
+  height:auto;
+  display:block;
   transition:opacity 0.3s;
 }
 .dp-hero.empty { display:none; }
@@ -622,23 +624,17 @@ body.detail-panel-open #era-spine {
 /* When hero present, pull header down on top of it */
 #detail-panel.has-hero .dp-header {
   position:relative;
-  border-bottom:none;
-  background:transparent;
+  border-bottom:1px solid var(--border);
+  background:var(--bg-4);
   padding-bottom:10px;
 }
-#detail-panel.has-hero .dp-node-type { color:rgba(255,255,255,0.7); }
-#detail-panel.has-hero .dp-node-title { color:#fff; text-shadow:0 1px 6px rgba(0,0,0,0.4); }
-#detail-panel.has-hero .dp-node-era { color:rgba(255,255,255,0.55); }
-#detail-panel.has-hero .dp-action-btn { border-color:rgba(255,255,255,0.3); color:rgba(255,255,255,0.8); }
-#detail-panel.has-hero .dp-action-btn:hover { background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.6); }
-#detail-panel.has-hero .dp-close { color:rgba(255,255,255,0.7); }
-#detail-panel.has-hero .dp-close:hover { color:#fff; }
+/* header sits below hero — inherits normal text colors */
 /* Overlay the header on the bottom of the hero */
 .dp-hero-header-wrap {
   display:flex; flex-direction:column; flex-shrink:0;
 }
 #detail-panel.has-hero .dp-hero-header-wrap {
-  position:relative; margin-top:-56px;
+  position:relative;
 }
 
 /* Scrollable body */

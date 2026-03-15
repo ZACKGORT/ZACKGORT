@@ -2008,7 +2008,7 @@ const DEFAULT_NODES = [
       { type:'pullquote', value:'I have been the designer who could not explain the spec — and I became the one who could build it.' },
     ],
     era:'2023–24', z:24, url:'https://zackgort.com',
-    headerImg:'https://i.ibb.co/zh5tVC8R/dogdays.webp'
+    headerImg:'https://i.ibb.co/840YDJMT/1-6ft-VCi9-Pi-L1q47-Vskw-Mb-WA.webp'
   },
   {
     id:'n25', x:5380, y:160, type:'launch',
@@ -3814,6 +3814,108 @@ function initScatterMap() {
   let W = 0, H = 0, hovered = -1;
   let tipEl = null;
 
+  // ── Image hover layer ──────────────────────────────────────────────
+  // Preload all node header images into a cache keyed by SCATTER_DATA index
+  const imgCache = {};
+  let hovAlpha = 0;         // current rendered alpha (0..1)
+  let hovTarget = 0;        // target alpha
+  let hovImgIdx = -1;       // which image is showing
+  let animFrame = null;
+
+  function preloadImages() {
+    SCATTER_DATA.forEach((entry, i) => {
+      const nodeId = entry[0];
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node || !node.headerImg) return;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = node.headerImg;
+      imgCache[i] = img;
+    });
+  }
+  // Kick off preload after a short delay so it doesn't block initial render
+  setTimeout(preloadImages, 800);
+
+  function animateAlpha() {
+    animFrame = null;
+    const speed = 0.08;
+    const diff = hovTarget - hovAlpha;
+    if (Math.abs(diff) < 0.004) {
+      hovAlpha = hovTarget;
+    } else {
+      hovAlpha += diff * speed;
+      animFrame = requestAnimationFrame(animateAlpha);
+    }
+    drawImgLayer();
+  }
+
+  function setHover(idx) {
+    if (idx === hovImgIdx && hovTarget === (idx >= 0 ? 1 : 0)) return;
+    hovImgIdx = idx;
+    hovTarget = idx >= 0 ? 1 : 0;
+    if (!animFrame) animFrame = requestAnimationFrame(animateAlpha);
+  }
+
+  // Draws just the image layer onto the canvas at current hovAlpha
+  // Called by animation loop AND by main draw()
+  function drawImgLayer() {
+    if (hovAlpha < 0.004 || hovImgIdx < 0) return;
+    const img = imgCache[hovImgIdx];
+    if (!img || !img.complete || !img.naturalWidth) return;
+
+    const nx = SCATTER_DATA[hovImgIdx][1]; // x fraction 0..1
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const isPortrait = imgAspect < 1;
+
+    let drawW, drawH, drawX, drawY;
+
+    if (isPortrait) {
+      // Portrait: fit to height, center horizontally near the dot
+      drawH = H;
+      drawW = drawH * imgAspect;
+      drawX = nx * W - drawW / 2;
+      drawX = Math.max(0, Math.min(W - drawW, drawX));
+      drawY = 0;
+    } else {
+      // Landscape: cover full width, center vertically
+      drawW = W;
+      drawH = W / imgAspect;
+      drawX = 0;
+      drawY = (H - drawH) / 2;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = hovAlpha * (isDark ? 0.20 : 0.16);
+    ctx.filter = 'blur(0.5px)';
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+    ctx.filter = 'none';
+
+    // Vignette — horizontal fade for portrait, full for landscape
+    const bg = isDark ? '12,11,9,' : '245,242,236,';
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, `rgba(${bg}0.9)`);
+    grad.addColorStop(Math.max(0, nx - 0.18), `rgba(${bg}0)`);
+    grad.addColorStop(Math.min(1, nx + 0.18), `rgba(${bg}0)`);
+    grad.addColorStop(1, `rgba(${bg}0.9)`);
+    ctx.globalAlpha = hovAlpha * (isDark ? 0.65 : 0.72);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Top and bottom fade
+    const gradV = ctx.createLinearGradient(0, 0, 0, H);
+    gradV.addColorStop(0,   `rgba(${bg}0.5)`);
+    gradV.addColorStop(0.2, `rgba(${bg}0)`);
+    gradV.addColorStop(0.8, `rgba(${bg}0)`);
+    gradV.addColorStop(1,   `rgba(${bg}0.5)`);
+    ctx.globalAlpha = hovAlpha * (isDark ? 0.5 : 0.55);
+    ctx.fillStyle = gradV;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.restore();
+  }
+
   function resolveVar(v) {
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   }
@@ -3839,6 +3941,9 @@ function initScatterMap() {
       ctx.fill();
     });
 
+    // ── Image hover layer (drawn above era bands, below everything else) ──
+    drawImgLayer();
+
     // Centre axis
     ctx.strokeStyle = inkA + '0.07)';
     ctx.lineWidth = 1;
@@ -3857,8 +3962,7 @@ function initScatterMap() {
       ctx.setLineDash([]);
     });
 
-    // Viewport indicator — show where the canvas is currently framed
-    // Map canvas x-range to scatter x-fraction
+    // Viewport indicator
     const nodeXs = nodes.map(n => n.x);
     const minX = Math.min(...nodeXs), maxX = Math.max(...nodeXs) + 260;
     const totalSpan = maxX - minX;
@@ -3916,7 +4020,14 @@ function initScatterMap() {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left, my = e.clientY - rect.top;
     const idx = getNodeAt(mx, my);
-    if (idx !== hovered) { hovered = idx; draw(); }
+    if (idx !== hovered) {
+      hovered = idx;
+      // Trigger image fade — only show if node has a headerImg
+      const nodeId = idx >= 0 ? SCATTER_DATA[idx][0] : null;
+      const node = nodeId ? nodes.find(n => n.id === nodeId) : null;
+      setHover(node && node.headerImg && imgCache[idx] ? idx : -1);
+      draw();
+    }
     const tip = getTip();
     if (idx >= 0) {
       tip.textContent = SCATTER_DATA[idx][4];
@@ -3931,7 +4042,9 @@ function initScatterMap() {
   });
 
   canvas.addEventListener('mouseleave', () => {
-    hovered = -1; draw();
+    hovered = -1;
+    setHover(-1);
+    draw();
     if (tipEl) tipEl.style.opacity = '0';
     canvas.style.cursor = 'crosshair';
   });

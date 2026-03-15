@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>zackgort · study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
+
+:root {
+  --bg:       #f5f2ec;
+  --bg-2:     #ede9e1;
+  --bg-3:     #e6e1d8;
+  --bg-4:     #f9f7f3;
+  --ink:      #1a1815;
+  --ink-2:    #6a6660;
+  --ink-3:    #9a958e;
+  --accent:   #c05f38;
+  --accent-l: rgba(192,95,56,0.08);
+  --border:   rgba(26,24,21,0.08);
+  --border-2: rgba(26,24,21,0.13);
+  --border-3: rgba(26,24,21,0.22);
+  --disp:     'DM Serif Display', serif;
+  --text:     'DM Serif Text', serif;
+  --mono:     'DM Mono', monospace;
+
+  /* Node type colors */
+  --c-engine:  #c05f38;
+  --c-tool:    #5a7850;
+  --c-utility: #3a6ea0;
+  --c-writing: #7a52a8;
+  --c-vertical:#9a7040;
+  --c-identity:#8a6858;
+
+  /* Era colors */
+  --era-memorial: #9a6858;
+  --era-platform: #5a7850;
+  --era-build:    #c05f38;
+}
+
+[data-theme="dark"] {
+  --bg:       #0c0b09;
+  --bg-2:     #111009;
+  --bg-3:     #161410;
+  --bg-4:     #090807;
+  --ink:      #ede9e0;
+  --ink-2:    #7a7870;
+  --ink-3:    #58544e;
+  --accent:   #d97757;
+  --accent-l: rgba(217,119,87,0.09);
+  --border:   rgba(237,233,224,0.06);
+  --border-2: rgba(237,233,224,0.11);
+  --border-3: rgba(237,233,224,0.19);
+  --c-engine:  #d97757;
+  --c-tool:    #7a9e7e;
+  --c-utility: #6a9bcc;
+  --c-writing: #9b7cc0;
+  --c-vertical:#c4a882;
+  --c-identity:#c08060;
+}
+
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--ink);
+  transition: background 0.4s, color 0.4s;
+}
+
+/* Grain overlay */
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:9998;
+  pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px;
+  opacity:.015;
+}
+[data-theme="dark"] body::after { opacity:.03; }
+
+/* ── TOPBAR ── */
+#topbar {
+  position:fixed; top:0; left:0; right:0;
+  height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px;
+  background:var(--bg-4);
+  border-bottom:1px solid var(--border);
+  z-index:1000;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+body.panel-open #topbar { right:380px; }
+
+.tb-left { display:flex; align-items:center; gap:14px; }
+.tb-brand {
+  font-family:var(--disp);
+  font-size:14px;
+  color:var(--ink);
+  letter-spacing:-0.01em;
+  text-decoration:none;
+  display:flex; align-items:center; gap:8px;
+}
+.tb-brand .sep { color:var(--ink-3); font-family:var(--mono); font-size:10px; }
+.tb-page {
+  font-family:var(--mono); font-size:8px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--accent);
+}
+.tb-actions { display:flex; align-items:center; gap:6px; }
+.tb-btn {
+  background:none; border:1px solid var(--border-2); border-radius:4px;
+  font-family:var(--mono); font-size:8px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--ink-2); padding:5px 9px; cursor:pointer;
+  transition:border-color 0.15s, color 0.15s, background 0.15s;
+}
+.tb-btn:hover { border-color:var(--border-3); color:var(--ink); background:var(--accent-l); }
+.tb-btn.accent { border-color:var(--accent); color:var(--accent); }
+.tb-btn.accent:hover { background:var(--accent); color:var(--bg); }
+
+/* ── BOTTOM SPINE ── */
+#spine {
+  position:fixed; bottom:0; left:0; right:0; height:44px;
+  background:var(--bg-4); border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px;
+  z-index:700;
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+body.panel-open #spine { right:380px; }
+
+.spine-legend { display:flex; align-items:center; gap:14px; }
+.legend-item {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--mono); font-size:7px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--ink-3); cursor:pointer;
+  transition:color 0.15s;
+}
+.legend-item:hover { color:var(--ink-2); }
+.legend-item.active { color:var(--ink); }
+.legend-dot {
+  width:7px; height:7px; border-radius:50%;
+  flex-shrink:0;
+}
+.spine-zoom { display:flex; align-items:center; gap:0; border-left:1px solid var(--border); }
+.zoom-btn {
+  background:none; border:none; cursor:pointer; color:var(--ink-2);
+  font-size:13px; padding:5px 10px; font-family:var(--mono);
+  transition:color 0.15s, background 0.15s; height:44px;
+  display:flex; align-items:center;
+}
+.zoom-btn:hover { color:var(--ink); background:var(--border); }
+.zoom-pct {
+  font-family:var(--mono); font-size:8px; letter-spacing:0.08em;
+  color:var(--ink-3); padding:0 10px;
+  border-left:1px solid var(--border); border-right:1px solid var(--border);
+}
+
+/* ── CANVAS ── */
+#canvas-wrap {
+  position:fixed; inset:0; top:44px; bottom:44px;
+  overflow:hidden; cursor:default;
+}
+#canvas-wrap::before {
+  content:'';
+  position:absolute; inset:0;
+  background-image:radial-gradient(var(--border-2) 1px, transparent 1px);
+  background-size:32px 32px;
+  pointer-events:none;
+}
+#canvas {
+  position:absolute; top:0; left:0;
+  width:5000px; height:3000px;
+  transform-origin:0 0;
+  will-change:transform;
+}
+
+/* ── SVG CONNECTIONS ── */
+#connections-svg {
+  position:absolute; top:0; left:0;
+  width:5000px; height:3000px;
+  pointer-events:none; overflow:visible;
+}
+.conn-line {
+  stroke:var(--ink-3);
+  stroke-width:1.5;
+  fill:none;
+  stroke-dasharray:4 3;
+  opacity:0.4;
+  transition:stroke 0.2s, opacity 0.2s, stroke-width 0.2s;
+}
+.conn-line.highlighted { stroke:var(--accent); opacity:0.85; stroke-width:2; stroke-dasharray:none; }
+.conn-line.dimmed { opacity:0.12; }
+
+/* ── NODE CARDS ── */
+.node-card {
+  position:absolute;
+  width:240px;
+  background:var(--bg-4);
+  border:1px solid var(--border-2);
+  border-radius:8px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  cursor:pointer;
+  user-select:none;
+  transition:box-shadow 0.2s, border-color 0.2s, transform 0.18s;
+  will-change:transform;
+}
+.node-card:hover {
+  box-shadow:0 6px 28px rgba(0,0,0,0.12);
+  border-color:var(--border-3);
+  transform:translateY(-2px);
+}
+.node-card.active {
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-l), 0 6px 28px rgba(0,0,0,0.14);
+}
+.node-card.dimmed { opacity:0.3; }
+[data-theme="dark"] .node-card { box-shadow:0 2px 12px rgba(0,0,0,0.35); }
+[data-theme="dark"] .node-card:hover { box-shadow:0 6px 28px rgba(0,0,0,0.5); }
+
+.node-colorbar {
+  height:3px;
+  border-radius:8px 8px 0 0;
+}
+
+.node-inner { padding:12px 14px 10px; }
+
+.node-type-tag {
+  font-size:7px; letter-spacing:0.14em; text-transform:uppercase;
+  font-family:var(--mono); margin-bottom:6px;
+}
+
+.node-title {
+  font-family:var(--disp);
+  font-size:14px;
+  color:var(--ink);
+  line-height:1.25;
+  letter-spacing:-0.01em;
+  margin-bottom:6px;
+}
+
+.node-tagline {
+  font-family:var(--mono);
+  font-size:9.5px;
+  line-height:1.6;
+  color:var(--ink-2);
+}
+
+.node-footer {
+  padding:7px 14px 9px;
+  border-top:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.node-domain {
+  font-size:7.5px; letter-spacing:0.06em;
+  color:var(--ink-3); font-family:var(--mono);
+}
+.node-arrow {
+  font-size:10px; color:var(--ink-3);
+  transition:color 0.15s, transform 0.15s;
+}
+.node-card:hover .node-arrow { color:var(--accent); transform:translateX(2px); }
+
+/* ── DETAIL PANEL ── */
+#detail-panel {
+  position:fixed; top:0; right:0; bottom:0;
+  width:380px;
+  background:var(--bg-4);
+  border-left:1px solid var(--border);
+  transform:translateX(100%);
+  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  z-index:800;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+#detail-panel.open { transform:translateX(0); }
+
+.dp-stripe {
+  height:4px;
+  flex-shrink:0;
+}
+.dp-topbar {
+  height:44px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px;
+  border-bottom:1px solid var(--border);
+}
+.dp-topbar-label {
+  font-family:var(--mono); font-size:7.5px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.dp-close {
+  background:none; border:none; cursor:pointer; color:var(--ink-3);
+  font-size:16px; padding:2px 4px; border-radius:3px;
+  transition:color 0.15s;
+}
+.dp-close:hover { color:var(--ink); }
+
+.dp-scroll {
+  flex:1; overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.dp-scroll::-webkit-scrollbar { width:3px; }
+.dp-scroll::-webkit-scrollbar-thumb { background:var(--border-3); border-radius:2px; }
+
+.dp-hero {
+  width:100%; aspect-ratio:16/9;
+  background:var(--bg-3);
+  overflow:hidden;
+  position:relative;
+  flex-shrink:0;
+}
+.dp-hero img {
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.dp-hero-live {
+  width:100%; height:100%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:8px; cursor:pointer;
+  background:var(--bg-3);
+  transition:background 0.2s;
+}
+.dp-hero-live:hover { background:var(--bg-2); }
+.dp-hero-live-icon {
+  font-size:22px; color:var(--ink-3);
+}
+.dp-hero-live-hint {
+  font-family:var(--mono); font-size:8px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+
+.dp-body { padding:20px 20px 0; }
+.dp-type-tag {
+  font-size:7px; letter-spacing:0.14em; text-transform:uppercase;
+  font-family:var(--mono); margin-bottom:6px;
+}
+.dp-title {
+  font-family:var(--disp); font-size:22px; line-height:1.18;
+  color:var(--ink); letter-spacing:-0.015em; margin-bottom:12px;
+}
+.dp-sentence {
+  font-family:var(--mono); font-size:10.5px; line-height:1.72;
+  color:var(--ink-2); margin-bottom:10px;
+}
+.dp-pullquote {
+  font-family:var(--text); font-style:italic;
+  font-size:14px; line-height:1.55;
+  color:var(--ink-2);
+  border-left:2px solid var(--accent);
+  padding-left:14px;
+  margin:14px 0;
+}
+.dp-divider {
+  border:none;
+  border-top:1px solid var(--border);
+  margin:14px 0;
+  position:relative;
+}
+.dp-divider-label {
+  font-family:var(--mono); font-size:7px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--ink-3);
+  position:absolute; top:-8px; left:0;
+  background:var(--bg-4); padding-right:8px;
+}
+.dp-connections {
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.dp-connections-label {
+  font-family:var(--mono); font-size:7px; letter-spacing:0.14em;
+  text-transform:uppercase; color:var(--ink-3); margin-bottom:10px;
+}
+.dp-conn-chip {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--bg-2); border:1px solid var(--border-2);
+  border-radius:20px; padding:4px 10px; margin:0 4px 6px 0;
+  font-family:var(--mono); font-size:8px; letter-spacing:0.06em;
+  color:var(--ink-2); cursor:pointer;
+  transition:border-color 0.15s, color 0.15s, background 0.15s;
+}
+.dp-conn-chip:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-l); }
+.dp-conn-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+.dp-footer {
+  padding:16px 20px 24px;
+  margin-top:16px;
+  border-top:1px solid var(--border);
+  display:flex; gap:8px; flex-shrink:0;
+}
+.dp-open-btn {
+  flex:1; background:var(--accent); color:var(--bg);
+  border:none; border-radius:4px; font-family:var(--mono);
+  font-size:8.5px; letter-spacing:0.12em; text-transform:uppercase;
+  padding:9px; cursor:pointer; text-decoration:none;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  transition:opacity 0.15s;
+}
+.dp-open-btn:hover { opacity:0.85; }
+.dp-focus-btn {
+  background:none; border:1px solid var(--border-2);
+  border-radius:4px; font-family:var(--mono);
+  font-size:8.5px; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--ink-2); padding:9px 14px; cursor:pointer;
+  transition:border-color 0.15s, color 0.15s;
+}
+.dp-focus-btn:hover { border-color:var(--border-3); color:var(--ink); }
+
+/* ── INTRO TOAST ── */
+#intro-toast {
+  position:fixed; top:56px; left:50%; transform:translateX(-50%);
+  background:var(--bg-4); border:1px solid var(--border-2);
+  border-radius:6px; padding:8px 16px;
+  font-family:var(--mono); font-size:8px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3);
+  z-index:900; pointer-events:none;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  opacity:1; transition:opacity 0.6s;
+}
+#intro-toast.gone { opacity:0; }
+
+/* ── MINIMAP ── */
+#minimap {
+  position:fixed; bottom:56px; right:12px;
+  width:110px; height:70px;
+  background:var(--bg-4);
+  border:1px solid var(--border-2);
+  border-radius:5px;
+  overflow:hidden;
+  z-index:900;
+  box-shadow:0 2px 12px rgba(0,0,0,0.08);
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+body.panel-open #minimap { right:392px; }
+#minimap-canvas { width:100%; height:100%; }
+#minimap-vp {
+  position:absolute; top:0; left:0;
+  border:1px solid var(--accent);
+  background:rgba(192,95,56,0.06);
+  pointer-events:none; border-radius:1px;
+}
+
+/* ── NODE COUNT BADGE ── */
+#node-count {
+  position:fixed; top:56px; right:16px;
+  font-family:var(--mono); font-size:7px; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-3);
+  z-index:900;
+  transition:right 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+body.panel-open #node-count { right:396px; }
+
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tb-left">
+    <a class="tb-brand" href="https://zackgort.com">
+      zackgort
+      <span class="sep">/</span>
+    </a>
+    <span class="tb-page">study</span>
+  </div>
+  <div class="tb-actions">
+    <button class="tb-btn" onclick="fitAll()">⊡ fit</button>
+    <button class="tb-btn" onclick="toggleTheme()">◐</button>
+    <a class="tb-btn accent" href="https://zackgort.com" style="text-decoration:none">← back</a>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div id="canvas-wrap">
+  <div id="canvas">
+    <svg id="connections-svg">
+      <defs>
+        <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L6,3 z" fill="var(--ink-3)" opacity="0.5"/>
+        </marker>
+        <marker id="arrow-accent" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L6,3 z" fill="var(--accent)" opacity="0.85"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+<!-- BOTTOM SPINE -->
+<div id="spine">
+  <div class="spine-legend" id="legend">
+    <div class="legend-item active" data-type="all" onclick="filterType('all')">
+      <div class="legend-dot" style="background:var(--ink-3)"></div>
+      all
+    </div>
+    <div class="legend-item" data-type="engine" onclick="filterType('engine')">
+      <div class="legend-dot" style="background:var(--c-engine)"></div>
+      engine
+    </div>
+    <div class="legend-item" data-type="tool" onclick="filterType('tool')">
+      <div class="legend-dot" style="background:var(--c-tool)"></div>
+      tool
+    </div>
+    <div class="legend-item" data-type="utility" onclick="filterType('utility')">
+      <div class="legend-dot" style="background:var(--c-utility)"></div>
+      utility
+    </div>
+    <div class="legend-item" data-type="writing" onclick="filterType('writing')">
+      <div class="legend-dot" style="background:var(--c-writing)"></div>
+      writing
+    </div>
+    <div class="legend-item" data-type="vertical" onclick="filterType('vertical')">
+      <div class="legend-dot" style="background:var(--c-vertical)"></div>
+      vertical
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:0;">
+    <div class="spine-zoom">
+      <button class="zoom-btn" onclick="doZoom(-0.1)">−</button>
+      <span class="zoom-pct" id="zoom-pct">100%</span>
+      <button class="zoom-btn" onclick="doZoom(0.1)">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div id="detail-panel">
+  <div class="dp-stripe" id="dp-stripe"></div>
+  <div class="dp-topbar">
+    <span class="dp-topbar-label" id="dp-label">node detail</span>
+    <button class="dp-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="dp-scroll" id="dp-scroll">
+    <div class="dp-hero" id="dp-hero"></div>
+    <div class="dp-body" id="dp-body"></div>
+    <div id="dp-connections-wrap" style="padding:0 20px;"></div>
+    <div class="dp-footer" id="dp-footer"></div>
+  </div>
+</div>
+
+<!-- MINIMAP -->
+<div id="minimap">
+  <canvas id="minimap-canvas"></canvas>
+  <div id="minimap-vp"></div>
+</div>
+
+<div id="node-count"></div>
+<div id="intro-toast">tap any node to explore</div>
+
+<script>
+// ── NODE DATA ─────────────────────────────────────────────────────────────
+const TYPE_META = {
+  engine:  { label:'Engine',  color:'var(--c-engine)'  },
+  tool:    { label:'Tool',    color:'var(--c-tool)'    },
+  utility: { label:'Utility', color:'var(--c-utility)' },
+  writing: { label:'Writing', color:'var(--c-writing)' },
+  vertical:{ label:'Vertical',color:'var(--c-vertical)'},
+  identity:{ label:'Identity',color:'var(--c-identity)'},
+};
+
+const NODES = [
+  // ── CORE ENGINE ───────────────────────────────────────────────
+  {
+    id:'wolfie',
+    x:1400, y:600,
+    type:'engine',
+    title:'wolfie.love',
+    tagline:'The sentence engine. Origin of everything.',
+    domain:'wolfie.love',
+    url:'https://wolfie.love',
+    headerImg:'https://i.ibb.co/B5hk87fv/flower.webp',
+    content:[
+      { type:'sentence', value:'A memorial for Wolfgang — a blind mini poodle mix, rescued, irreplaceable.' },
+      { type:'sentence', value:'He died. The grief became infrastructure.' },
+      { type:'pullquote', value:'Every platform in this canvas runs on what was built here.' },
+      { type:'divider', value:'what it is' },
+      { type:'sentence', value:'Sentence-progressive narrative engine. No frameworks. No derivatives. Entirely from scratch.' },
+      { type:'sentence', value:'Compose mode. Focus mode. Grid mode. Chapter system. Image mapping. Theme engine. Music player.' },
+    ],
+    connects:['reasonably','ifimaybefrank','zackgort','reasonandresolution','wolfie-net','wolfie-food','wolfie-real'],
+  },
+
+  // ── TOOLS ─────────────────────────────────────────────────────
+  {
+    id:'reasonably',
+    x:800, y:320,
+    type:'tool',
+    title:'reasonably.cc',
+    tagline:'A thinking surface. Not a notes app.',
+    domain:'reasonably.cc',
+    url:'https://reasonably.cc',
+    content:[
+      { type:'sentence', value:'Sentence-progressive thinking tool. Single HTML file. No dependencies.' },
+      { type:'sentence', value:'Undo/redo architecture. Bracket annotation system. Canvas palette interaction model.' },
+      { type:'pullquote', value:'The tool eats its own philosophy — built with the sentence-first approach it enables.' },
+      { type:'divider', value:'node types' },
+      { type:'sentence', value:'Note · Task · Long · Media — each with Spatial, Gallery, and Compose views. Package as document.' },
+    ],
+    connects:['wolfie','ifimaybefrank'],
+  },
+  {
+    id:'ifimaybefrank',
+    x:760, y:820,
+    type:'writing',
+    title:'ifimaybefrank.com',
+    tagline:'The philosophical argument. Built from scratch.',
+    domain:'ifimaybefrank.com',
+    url:'https://ifimaybefrank.com',
+    content:[
+      { type:'sentence', value:'Built entirely in vanilla HTML, CSS, and JS. No frameworks. No derivatives.' },
+      { type:'sentence', value:'Sentence-by-sentence reading paradigm. Chapter system. Four themes. Flow mode. Bracket annotations.' },
+      { type:'sentence', value:'An imageMap system linking hundreds of phrases to contextual images.' },
+      { type:'pullquote', value:'Format shapes attention. The sentence is the interface. This was the proof.' },
+    ],
+    connects:['wolfie','reasonably'],
+  },
+
+  // ── IDENTITY NODE ─────────────────────────────────────────────
+  {
+    id:'zackgort',
+    x:1600, y:260,
+    type:'identity',
+    title:'zackgort.com',
+    tagline:'Narrative as nodes. The canvas biography.',
+    domain:'zackgort.com',
+    url:'https://zackgort.com',
+    content:[
+      { type:'sentence', value:'Built on the wolfie.love engine. The professional canvas — era by era, node by node.' },
+      { type:'sentence', value:'Scatter map. Sandbox mode. Minimap. Detail panel. Full node + connection topology.' },
+      { type:'pullquote', value:'The biography written in the format it argues for.' },
+    ],
+    connects:['wolfie','reasonandresolution'],
+  },
+
+  // ── R&R ───────────────────────────────────────────────────────
+  {
+    id:'reasonandresolution',
+    x:2200, y:560,
+    type:'engine',
+    title:'reasonandresolution.com',
+    tagline:'Anthropic RSP v3 — a governance narrative.',
+    domain:'reasonandresolution.com',
+    url:'https://reasonandresolution.com',
+    content:[
+      { type:'sentence', value:'A sentence-progressive narrative engine framed as an Anthropic RSP v3 governance interface.' },
+      { type:'sentence', value:'Six chapters. Studio mode. Compose mode. Dispatch mode. 100+ photo archive.' },
+      { type:'pullquote', value:'The platform demonstrating itself, at institutional scale.' },
+      { type:'divider', value:'also at' },
+      { type:'sentence', value:'intoview.pro/cv · narrative resume. Same engine, different content payload.' },
+    ],
+    connects:['wolfie','zackgort','intoview'],
+  },
+
+  // ── INTOVIEW CLUSTER ──────────────────────────────────────────
+  {
+    id:'intoview',
+    x:2100, y:240,
+    type:'tool',
+    title:'intoview.pro',
+    tagline:'Platform for explorative experiential builds.',
+    domain:'intoview.pro',
+    url:'https://intoview.pro',
+    content:[
+      { type:'sentence', value:'A platform for exploration — not a portfolio, but a live R&D environment.' },
+      { type:'sentence', value:'Framework first, libraries optional, single-source content to support evolution.' },
+      { type:'divider', value:'active builds' },
+      { type:'sentence', value:'/note · /node · /kanban · /cv — each a distinct proof of craft.' },
+    ],
+    connects:['reasonandresolution','intoview-note','intoview-node','intoview-kanban'],
+  },
+  {
+    id:'intoview-note',
+    x:2560, y:100,
+    type:'tool',
+    title:'intoview.pro/note',
+    tagline:'Visual note-taking. React · Three.js · GSAP.',
+    domain:'intoview.pro/note',
+    url:'https://intoview.pro/note',
+    content:[
+      { type:'sentence', value:'v1.4.1 — isometric grid, 3D graphics layer, animation system.' },
+      { type:'sentence', value:'Take a photo → Make a note → Carry along.' },
+      { type:'pullquote', value:'A note-taking app built as a proof that imagination should outpace convention.' },
+    ],
+    connects:['intoview'],
+  },
+  {
+    id:'intoview-node',
+    x:2560, y:360,
+    type:'tool',
+    title:'intoview.pro/node',
+    tagline:'N.O.D.E. — provider tracking & cooldown cycles.',
+    domain:'intoview.pro/node',
+    url:'https://intoview.pro/node',
+    content:[
+      { type:'sentence', value:'v3.3 — AI provider identity tracking with cooldown timers.' },
+      { type:'sentence', value:'Four themes: Dark, Light, Rose, Nerd. Canvas context menu. Keyboard shortcuts.' },
+      { type:'pullquote', value:'You are an infinite machine in a finite prompt cycle.' },
+    ],
+    connects:['intoview','emdash'],
+  },
+  {
+    id:'intoview-kanban',
+    x:2560, y:620,
+    type:'tool',
+    title:'intoview.pro/kanban',
+    tagline:'Kitchen Operations — SMS-powered service board.',
+    domain:'intoview.pro/kanban',
+    url:'https://intoview.pro/kanban',
+    content:[
+      { type:'sentence', value:'Multi-user task manager built around a kitchen operations metaphor.' },
+      { type:'sentence', value:'Explored variable themes, right-click utility, and data-density display preferences.' },
+    ],
+    connects:['intoview'],
+  },
+
+  // ── UTILITY ───────────────────────────────────────────────────
+  {
+    id:'emdash',
+    x:2900, y:360,
+    type:'utility',
+    title:'emdash.click',
+    tagline:'The em dash. Properly sourced.',
+    domain:'emdash.click',
+    url:'https://emdash.click',
+    content:[
+      { type:'sentence', value:'A utility built out of a genuine need — the em dash, instantly accessible, zero friction.' },
+      { type:'sentence', value:'Em Dash · En Dash · Hyphen · Double Em · Tilde. Copy and go.' },
+      { type:'pullquote', value:'All em\u2014dashes seen herein were sourced from emdash.click.' },
+      { type:'divider', value:'manifesto' },
+      { type:'sentence', value:'The Manifesto of Em: conveyance over convenience. Small things done right are also a design argument.' },
+    ],
+    connects:['intoview-node'],
+  },
+
+  // ── WOLFIE VERTICALS ──────────────────────────────────────────
+  {
+    id:'wolfie-net',
+    x:900, y:1120,
+    type:'vertical',
+    title:'wolfie.love/net',
+    tagline:'The sentence engine at network scale.',
+    domain:'wolfie.love/net',
+    url:'https://wolfie.love/net',
+    content:[
+      { type:'sentence', value:'Wolfgang & Co. as a network concept — the engine deployed across verticals.' },
+      { type:'sentence', value:'Platform infrastructure as a commercial argument.' },
+    ],
+    connects:['wolfie'],
+  },
+  {
+    id:'wolfie-food',
+    x:1300, y:1150,
+    type:'vertical',
+    title:'wolfie.love/food',
+    tagline:'Hospitality vertical. Fine dining, sentence-led.',
+    domain:'wolfie.love/food',
+    url:'https://wolfie.love/food',
+    content:[
+      { type:'sentence', value:'A hospitality vertical demo running the sentence engine infrastructure.' },
+      { type:'sentence', value:'Menu as narrative. Reservation as encounter.' },
+    ],
+    connects:['wolfie'],
+  },
+  {
+    id:'wolfie-real',
+    x:1720, y:1100,
+    type:'vertical',
+    title:'wolfie.love/real',
+    tagline:'Luxury real estate. Cinematic chapter theming.',
+    domain:'wolfie.love/real',
+    url:'https://wolfie.love/real',
+    content:[
+      { type:'sentence', value:'Luxury real estate demo — cinematic dark chapter reveals, spatial narrative.' },
+      { type:'sentence', value:'The property presented as a story, not a listing.' },
+    ],
+    connects:['wolfie'],
+  },
+];
+
+// connections derived from node.connects arrays
+const CONNECTIONS = [];
+NODES.forEach(n => {
+  (n.connects || []).forEach(tid => {
+    const exists = CONNECTIONS.find(c =>
+      (c.from === n.id && c.to === tid) || (c.from === tid && c.to === n.id)
+    );
+    if (!exists) CONNECTIONS.push({ from:n.id, to:tid });
+  });
+});
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let transform = { x:0, y:0, scale:1 };
+let activeFilter = 'all';
+let activeNode = null;
+let isPanning = false;
+let panStart = { x:0, y:0 };
+let panOrigin = { x:0, y:0 };
+
+// ── DOM REFS ──────────────────────────────────────────────────────────────
+const canvasEl = document.getElementById('canvas');
+const svgEl    = document.getElementById('connections-svg');
+const wrap     = document.getElementById('canvas-wrap');
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+function init() {
+  // Theme
+  const savedTheme = localStorage.getItem('study_theme') || '';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  // Build nodes
+  NODES.forEach(renderNode);
+
+  // Build connections
+  renderConnections();
+
+  // Fit
+  setTimeout(() => {
+    fitAll();
+    drawMinimap();
+  }, 60);
+
+  // Node count
+  document.getElementById('node-count').textContent = NODES.length + ' builds';
+
+  // Pan events
+  wrap.addEventListener('mousedown', onPanStart);
+  window.addEventListener('mousemove', onPanMove);
+  window.addEventListener('mouseup', onPanEnd);
+  wrap.addEventListener('touchstart', onTouchStart, { passive:false });
+  wrap.addEventListener('touchmove', onTouchMove, { passive:false });
+  wrap.addEventListener('touchend', onTouchEnd);
+  wrap.addEventListener('wheel', onWheel, { passive:false });
+
+  // Dismiss toast
+  setTimeout(() => {
+    const t = document.getElementById('intro-toast');
+    if (t) t.classList.add('gone');
+  }, 3200);
+}
+
+// ── RENDER NODE ───────────────────────────────────────────────────────────
+function renderNode(nd) {
+  const tm = TYPE_META[nd.type] || TYPE_META.engine;
+  const card = document.createElement('div');
+  card.className = 'node-card';
+  card.id = 'node-' + nd.id;
+  card.setAttribute('data-type', nd.type);
+  card.style.left = nd.x + 'px';
+  card.style.top  = nd.y + 'px';
+
+  card.innerHTML = `
+    <div class="node-colorbar" style="background:${tm.color}"></div>
+    <div class="node-inner">
+      <div class="node-type-tag" style="color:${tm.color}">${tm.label}</div>
+      <div class="node-title">${nd.title}</div>
+      <div class="node-tagline">${nd.tagline}</div>
+    </div>
+    <div class="node-footer">
+      <span class="node-domain">${nd.domain}</span>
+      <span class="node-arrow">↗</span>
+    </div>
+  `;
+
+  card.addEventListener('click', e => {
+    e.stopPropagation();
+    openPanel(nd);
+  });
+
+  canvasEl.appendChild(card);
+}
+
+// ── RENDER CONNECTIONS ────────────────────────────────────────────────────
+function renderConnections() {
+  // Clear existing paths (keep defs)
+  svgEl.querySelectorAll('.conn-line').forEach(l => l.remove());
+
+  CONNECTIONS.forEach(conn => {
+    const fromNode = NODES.find(n => n.id === conn.from);
+    const toNode   = NODES.find(n => n.id === conn.to);
+    if (!fromNode || !toNode) return;
+
+    const x1 = fromNode.x + 120;
+    const y1 = fromNode.y + 70;
+    const x2 = toNode.x + 120;
+    const y2 = toNode.y + 70;
+
+    const dx = x2 - x1, dy = y2 - y1;
+    const cx = x1 + dx * 0.35 + dy * 0.18;
+    const cy = y1 + dy * 0.35 - dx * 0.05;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.classList.add('conn-line');
+    path.setAttribute('d', `M${x1},${y1} Q${cx},${cy} ${x2},${y2}`);
+    path.setAttribute('data-from', conn.from);
+    path.setAttribute('data-to', conn.to);
+    path.setAttribute('marker-end', 'url(#arrow)');
+    svgEl.appendChild(path);
+  });
+}
+
+// ── OPEN PANEL ────────────────────────────────────────────────────────────
+function openPanel(nd) {
+  activeNode = nd;
+  const tm = TYPE_META[nd.type] || TYPE_META.engine;
+
+  // Stripe
+  document.getElementById('dp-stripe').style.background = tm.color;
+  document.getElementById('dp-label').textContent = tm.label;
+
+  // Hero
+  const heroEl = document.getElementById('dp-hero');
+  if (nd.headerImg) {
+    heroEl.innerHTML = `<img src="${nd.headerImg}" alt="${nd.title}" loading="lazy">`;
+    heroEl.style.display = '';
+  } else {
+    heroEl.innerHTML = `<div class="dp-hero-live" onclick="loadIframe(this,'${nd.url}')">
+      <div class="dp-hero-live-icon">↗</div>
+      <div class="dp-hero-live-hint">click to load · ${nd.url.replace('https://','')}</div>
+    </div>`;
+    heroEl.style.display = '';
+  }
+
+  // Body
+  const bodyEl = document.getElementById('dp-body');
+  let html = `
+    <div class="dp-type-tag" style="color:${tm.color}">${tm.label}</div>
+    <div class="dp-title">${nd.title}</div>
+  `;
+  (nd.content || []).forEach(block => {
+    if (block.type === 'sentence') html += `<p class="dp-sentence">${block.value}</p>`;
+    if (block.type === 'pullquote') html += `<p class="dp-pullquote">${block.value}</p>`;
+    if (block.type === 'divider') html += `
+      <div class="dp-divider">
+        ${block.value ? `<span class="dp-divider-label">${block.value}</span>` : ''}
+      </div>`;
+  });
+  bodyEl.innerHTML = html;
+
+  // Connected nodes
+  const connWrap = document.getElementById('dp-connections-wrap');
+  const connectedIds = CONNECTIONS
+    .filter(c => c.from === nd.id || c.to === nd.id)
+    .map(c => c.from === nd.id ? c.to : c.from);
+  const connectedNodes = connectedIds.map(id => NODES.find(n => n.id === id)).filter(Boolean);
+
+  if (connectedNodes.length) {
+    let chips = connectedNodes.map(cn => {
+      const ctm = TYPE_META[cn.type] || TYPE_META.engine;
+      return `<span class="dp-conn-chip" onclick="openPanel(NODES.find(n=>n.id==='${cn.id}'))">
+        <span class="dp-conn-dot" style="background:${ctm.color}"></span>
+        ${cn.title}
+      </span>`;
+    }).join('');
+    connWrap.innerHTML = `<div class="dp-connections">
+      <div class="dp-connections-label">connected builds</div>
+      <div>${chips}</div>
+    </div>`;
+  } else {
+    connWrap.innerHTML = '';
+  }
+
+  // Footer
+  document.getElementById('dp-footer').innerHTML = nd.url
+    ? `<a class="dp-open-btn" href="${nd.url}" target="_blank" rel="noopener">↗ open · ${nd.url.replace('https://','')}</a>
+       <button class="dp-focus-btn" onclick="focusNode('${nd.id}')">focus</button>`
+    : `<button class="dp-focus-btn" onclick="focusNode('${nd.id}')">focus on canvas</button>`;
+
+  // Highlight connected lines
+  highlightConnections(nd.id);
+
+  // Open panel
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('dp-scroll').scrollTop = 0;
+  document.body.classList.add('panel-open');
+
+  // Mark active card
+  document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active'));
+  const card = document.getElementById('node-' + nd.id);
+  if (card) card.classList.add('active');
+}
+
+function closePanel() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.body.classList.remove('panel-open');
+  activeNode = null;
+  resetHighlights();
+  document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active'));
+}
+
+function loadIframe(el, url) {
+  el.parentElement.innerHTML = `<iframe src="${url}" loading="lazy"
+    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+    style="width:100%;height:100%;border:none"></iframe>`;
+}
+
+// ── HIGHLIGHT ─────────────────────────────────────────────────────────────
+function highlightConnections(nodeId) {
+  const connectedIds = CONNECTIONS
+    .filter(c => c.from === nodeId || c.to === nodeId)
+    .map(c => c.from === nodeId ? c.to : c.from);
+
+  document.querySelectorAll('.node-card').forEach(card => {
+    const id = card.id.replace('node-', '');
+    if (id === nodeId) { card.classList.remove('dimmed'); }
+    else if (connectedIds.includes(id)) { card.classList.remove('dimmed'); }
+    else { card.classList.add('dimmed'); }
+  });
+
+  svgEl.querySelectorAll('.conn-line').forEach(line => {
+    const from = line.getAttribute('data-from');
+    const to   = line.getAttribute('data-to');
+    if (from === nodeId || to === nodeId) {
+      line.classList.add('highlighted');
+      line.classList.remove('dimmed');
+      line.setAttribute('marker-end', 'url(#arrow-accent)');
+    } else {
+      line.classList.add('dimmed');
+      line.classList.remove('highlighted');
+      line.setAttribute('marker-end', 'url(#arrow)');
+    }
+  });
+}
+
+function resetHighlights() {
+  document.querySelectorAll('.node-card').forEach(c => c.classList.remove('dimmed'));
+  svgEl.querySelectorAll('.conn-line').forEach(line => {
+    line.classList.remove('highlighted', 'dimmed');
+    line.setAttribute('marker-end', 'url(#arrow)');
+  });
+}
+
+// ── FOCUS NODE ───────────────────────────────────────────────────────────
+function focusNode(id) {
+  const nd = NODES.find(n => n.id === id);
+  if (!nd) return;
+  const vpW = wrap.clientWidth;
+  const vpH = wrap.clientHeight;
+  const panelW = document.body.classList.contains('panel-open') ? 380 : 0;
+  const availW = vpW - panelW;
+  const scale = Math.min(1.4, transform.scale);
+  transform.scale = scale;
+  transform.x = availW / 2 - (nd.x + 120) * scale;
+  transform.y = vpH / 2 - (nd.y + 70) * scale;
+  applyTransform();
+}
+
+// ── FILTER ────────────────────────────────────────────────────────────────
+function filterType(type) {
+  activeFilter = type;
+  document.querySelectorAll('.legend-item').forEach(li => {
+    li.classList.toggle('active', li.dataset.type === type);
+  });
+
+  if (type === 'all') {
+    document.querySelectorAll('.node-card').forEach(c => c.classList.remove('dimmed'));
+    svgEl.querySelectorAll('.conn-line').forEach(l => { l.classList.remove('dimmed'); });
+    return;
+  }
+
+  document.querySelectorAll('.node-card').forEach(card => {
+    const t = card.getAttribute('data-type');
+    card.classList.toggle('dimmed', t !== type);
+  });
+  svgEl.querySelectorAll('.conn-line').forEach(line => {
+    const from = NODES.find(n => n.id === line.getAttribute('data-from'));
+    const to   = NODES.find(n => n.id === line.getAttribute('data-to'));
+    const relevant = (from && from.type === type) || (to && to.type === type);
+    line.classList.toggle('dimmed', !relevant);
+  });
+}
+
+// ── CANVAS TRANSFORM ──────────────────────────────────────────────────────
+function applyTransform() {
+  canvasEl.style.transform = `translate(${transform.x}px,${transform.y}px) scale(${transform.scale})`;
+  document.getElementById('zoom-pct').textContent = Math.round(transform.scale * 100) + '%';
+  drawMinimap();
+}
+
+function doZoom(delta, cx, cy) {
+  const rect = wrap.getBoundingClientRect();
+  cx = cx ?? rect.width / 2;
+  cy = cy ?? rect.height / 2;
+  const newScale = Math.max(0.12, Math.min(3, transform.scale + delta));
+  if (newScale === transform.scale) return;
+  const ratio = newScale / transform.scale;
+  transform.x = cx - (cx - transform.x) * ratio;
+  transform.y = cy - (cy - transform.y) * ratio;
+  transform.scale = newScale;
+  applyTransform();
+}
+
+function fitAll() {
+  if (!NODES.length) return;
+  const pad = 80;
+  const panelW = document.body.classList.contains('panel-open') ? 380 : 0;
+  const vpW = wrap.clientWidth - panelW;
+  const vpH = wrap.clientHeight;
+  const nw = 240, nh = 120;
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  NODES.forEach(n => {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + nw);
+    maxY = Math.max(maxY, n.y + nh);
+  });
+  const cW = maxX - minX + pad * 2;
+  const cH = maxY - minY + pad * 2;
+  const scale = Math.min(vpW / cW, vpH / cH, 1.2);
+  transform.scale = scale;
+  transform.x = (vpW - (maxX + minX) * scale) / 2;
+  transform.y = (vpH - (maxY + minY) * scale) / 2;
+  applyTransform();
+}
+
+// ── PAN ───────────────────────────────────────────────────────────────────
+function onPanStart(e) {
+  if (e.target.closest('.node-card') || e.target.closest('#detail-panel')) return;
+  if (e.button !== 0) return;
+  isPanning = true;
+  panStart = { x:e.clientX, y:e.clientY };
+  panOrigin = { x:transform.x, y:transform.y };
+  wrap.style.cursor = 'grabbing';
+}
+function onPanMove(e) {
+  if (!isPanning) return;
+  transform.x = panOrigin.x + (e.clientX - panStart.x);
+  transform.y = panOrigin.y + (e.clientY - panStart.y);
+  applyTransform();
+}
+function onPanEnd() {
+  isPanning = false;
+  wrap.style.cursor = 'default';
+}
+
+let touchLast = null;
+let touchDist0 = 0;
+function onTouchStart(e) {
+  if (e.touches.length === 1) {
+    touchLast = { x:e.touches[0].clientX, y:e.touches[0].clientY };
+    panOrigin = { x:transform.x, y:transform.y };
+  } else if (e.touches.length === 2) {
+    touchDist0 = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+}
+function onTouchMove(e) {
+  e.preventDefault();
+  if (e.touches.length === 1 && touchLast) {
+    const dx = e.touches[0].clientX - touchLast.x;
+    const dy = e.touches[0].clientY - touchLast.y;
+    touchLast = { x:e.touches[0].clientX, y:e.touches[0].clientY };
+    transform.x += dx;
+    transform.y += dy;
+    applyTransform();
+  } else if (e.touches.length === 2) {
+    const dist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    const delta = (dist - touchDist0) * 0.006;
+    touchDist0 = dist;
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    doZoom(delta, cx, cy);
+  }
+}
+function onTouchEnd() { touchLast = null; }
+
+function onWheel(e) {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.08 : 0.08;
+  doZoom(delta, e.clientX, e.clientY);
+}
+
+// Canvas click to close panel
+wrap.addEventListener('click', e => {
+  if (e.target === wrap || e.target === canvasEl || e.target.id === 'connections-svg') {
+    closePanel();
+    filterType('all');
+  }
+});
+
+// ESC
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closePanel(); filterType('all'); }
+  if (e.key === 'f' || e.key === 'F') fitAll();
+});
+
+// ── MINIMAP ───────────────────────────────────────────────────────────────
+function drawMinimap() {
+  const canvas = document.getElementById('minimap-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const nw = 240, nh = 120;
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  NODES.forEach(n => {
+    minX = Math.min(minX, n.x);
+    minY = Math.min(minY, n.y);
+    maxX = Math.max(maxX, n.x + nw);
+    maxY = Math.max(maxY, n.y + nh);
+  });
+
+  const pad = 20;
+  const scaleX = (W - pad * 2) / (maxX - minX || 1);
+  const scaleY = (H - pad * 2) / (maxY - minY || 1);
+  const sc = Math.min(scaleX, scaleY);
+
+  function mx(x) { return pad + (x - minX) * sc; }
+  function my(y) { return pad + (y - minY) * sc; }
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  // Draw connections
+  CONNECTIONS.forEach(conn => {
+    const from = NODES.find(n => n.id === conn.from);
+    const to   = NODES.find(n => n.id === conn.to);
+    if (!from || !to) return;
+    ctx.beginPath();
+    ctx.moveTo(mx(from.x + 120), my(from.y + 60));
+    ctx.lineTo(mx(to.x + 120), my(to.y + 60));
+    ctx.strokeStyle = isDark ? 'rgba(237,233,224,0.12)' : 'rgba(26,24,21,0.1)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  });
+
+  // Draw nodes
+  NODES.forEach(nd => {
+    const tm = TYPE_META[nd.type];
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(
+      '--c-' + nd.type
+    ).trim() || '#888';
+    ctx.beginPath();
+    ctx.roundRect(mx(nd.x), my(nd.y), nw * sc, nh * sc * 0.5, 1);
+    ctx.globalAlpha = 0.65;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // Viewport rect
+  const vpEl = document.getElementById('minimap-vp');
+  const vpW = wrap.clientWidth;
+  const vpH = wrap.clientHeight;
+  const vx = (-transform.x / transform.scale);
+  const vy = (-transform.y / transform.scale);
+  const vw = vpW / transform.scale;
+  const vh = vpH / transform.scale;
+  vpEl.style.left   = mx(vx) + 'px';
+  vpEl.style.top    = my(vy) + 'px';
+  vpEl.style.width  = (vw * sc) + 'px';
+  vpEl.style.height = (vh * sc) + 'px';
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? '' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('study_theme', next);
+  renderConnections();
+  drawMinimap();
+}
+
+// expose NODES globally for inline onclick in chips
+window.NODES = NODES;
+
+init();
+</script>
+</body>
+</html>

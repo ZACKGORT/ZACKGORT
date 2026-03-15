@@ -1345,6 +1345,114 @@ body.sb-detail-open #sb-main { padding-right: 400px; }
 [data-theme="dark"] #sandbox-overlay::after { opacity: .025; }
 
 
+/* ── MINIFIED UI MODE ── */
+body.ui-min #topbar {
+  height: 32px;
+  background: transparent;
+  border-bottom: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.ui-min #topbar-row {
+  height: 32px; padding: 0 12px; border-bottom: none;
+}
+body.ui-min .tb-brand {
+  font-size: 11px; opacity: 0.35; letter-spacing: 0.06em;
+}
+body.ui-min .tb-brand span { display: none; }
+body.ui-min .tb-actions > *:not(#btn-minify):not(#btn-theme) { display: none; }
+body.ui-min #topbar-scatter { display: none; }
+body.ui-min #canvas-wrap { top: 32px !important; }
+body.ui-min #era-spine { display: none; }
+body.ui-min #chain-strip { display: none; }
+body.ui-min #minimap { display: none; }
+body.ui-min #canvas-wrap::before { opacity: 0.18; }
+
+/* Connection lines — solid hairlines */
+body.ui-min .conn-line {
+  stroke: var(--ink-3);
+  stroke-width: 0.75;
+  stroke-dasharray: none;
+  opacity: 0.2;
+}
+body.ui-min .conn-line.active-chain {
+  stroke: var(--accent); stroke-width: 1; opacity: 0.6; stroke-dasharray: none;
+}
+
+/* Node cards — invisible container */
+body.ui-min .node-card {
+  background: transparent; border: none;
+  box-shadow: none; border-radius: 0; width: 220px;
+  transition: none;
+}
+body.ui-min .node-card:hover,
+body.ui-min .node-card.selected {
+  background: transparent; border: none; box-shadow: none;
+}
+body.ui-min .node-colorbar,
+body.ui-min .node-header,
+body.ui-min .node-footer { display: none; }
+
+/* Title — always visible */
+body.ui-min .node-title {
+  font-family: var(--disp); font-size: 13px;
+  color: var(--ink); padding: 0;
+  line-height: 1.2; opacity: 0.7; transition: opacity 0.2s;
+}
+/* Body — hidden by default, shown on hover AND selected */
+body.ui-min .node-body {
+  display: block; font-size: 8px; line-height: 1.5;
+  color: var(--ink-3); padding: 4px 0 0;
+  opacity: 0; transition: opacity 0.25s;
+  max-height: 48px; overflow: hidden;
+}
+
+/* Hover state — title brightens, body fades in, connections highlight */
+body.ui-min .node-card:hover .node-title { opacity: 1; color: var(--ink); }
+body.ui-min .node-card:hover .node-body { opacity: 0.8; }
+body.ui-min .node-card:hover ~ * .conn-line { opacity: 0.4; }
+
+/* Selected/click state — title accent, body visible */
+body.ui-min .node-card.selected .node-title { opacity: 1; color: var(--accent); }
+body.ui-min .node-card.selected .node-body { opacity: 1; }
+
+/* Ports hidden by default, tiny on hover */
+body.ui-min .port { display: none; }
+body.ui-min .node-card:hover .port {
+  display: block; width: 6px; height: 6px;
+  opacity: 0.4;
+}
+
+/* Parallax hero — full canvas bg on node hover */
+#min-hero-bg {
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(2px) saturate(0.7);
+  transform: scale(1.06); /* slight overscale so blur edges don't show */
+}
+body.ui-min #min-hero-bg { z-index: 0; }
+body.ui-min #canvas-wrap { z-index: 1; }
+#min-hero-bg.visible { opacity: 1; }
+
+/* Dim overlay so text stays legible over image */
+#min-hero-dim {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+  background: rgba(245,242,236,0.82);
+  opacity: 0; transition: opacity 0.5s ease;
+}
+[data-theme="dark"] #min-hero-dim { background: rgba(12,11,9,0.80); }
+body.ui-min #min-hero-dim { z-index: 0; }
+#min-hero-dim.visible { opacity: 1; }
+
+/* Minify button active */
+#btn-minify.active { border-color: var(--accent); color: var(--accent); }
+
 /* ── ALWAYS-HIDDEN UNTIL ACTIVATED ── */
 #mobile-connect-dlg { display: none !important; }
 #mobile-connect-dlg.open { display: block !important; }
@@ -1366,6 +1474,7 @@ body.sb-detail-open #sb-main { padding-right: 400px; }
       <button class="tb-btn" id="btn-connect" onclick="toggleConnectMode()">connect</button>
       <button class="tb-btn" id="btn-arrange" onclick="toggleArrange()" title="Toggle landscape / portrait layout"><span class="arrange-icon">&#x2913;</span></button>
       <button class="tb-btn" id="btn-fit" onclick="fitAll()">fit</button>
+      <button class="tb-btn" id="btn-minify" onclick="toggleMinUI()" title="Minified UI">⊟</button>
       <button class="tb-btn" id="btn-theme" onclick="toggleTheme()">◐</button>
     </div>
   </div>
@@ -1373,6 +1482,10 @@ body.sb-detail-open #sb-main { padding-right: 400px; }
     <canvas id="scatter-canvas"></canvas>
   </div>
 </div>
+
+<!-- Minified UI hero background -->
+<div id="min-hero-bg"></div>
+<div id="min-hero-dim"></div>
 
 <!-- Mode badge (desktop) -->
 <div id="mode-badge">connecting — click source, then target</div>
@@ -2432,6 +2545,8 @@ function getNodeChainInfo(id) {
 
 // ── NODE DRAG ──────────────────────────────────────────────────────────
 function attachNodeEvents(el, node) {
+  el.addEventListener('mouseenter', () => showMinHero(node.id));
+  el.addEventListener('mouseleave', () => hideMinHero());
   el.addEventListener('pointerdown', e => {
     if (e.pointerType === 'touch') return; // touch handled by wrap touchstart
     if (e.target.closest('.port') || e.target.closest('.node-act-btn')) return;
@@ -4283,6 +4398,7 @@ function init() {
 
   drawMinimap();
   scatterDraw = initScatterMap();
+  initMinHero();
   updateSpineActive();
 
   // Redraw scatter and spine on pan/zoom
@@ -4315,6 +4431,81 @@ function init() {
 }
 
 window.addEventListener('load', init);
+
+// ── MINIFIED UI TOGGLE ────────────────────────────────────────────────
+// ── MINIFIED UI ──────────────────────────────────────────────────────
+function toggleMinUI() {
+  const isMin = document.body.classList.toggle('ui-min');
+  const btn = document.getElementById('btn-minify');
+  if (btn) btn.classList.toggle('active', isMin);
+  // Don't persist — intentionally ephemeral, resets on reload
+  if (!isMin) {
+    // Exiting min mode — hide parallax bg
+    const bg  = document.getElementById('min-hero-bg');
+    const dim = document.getElementById('min-hero-dim');
+    if (bg)  { bg.classList.remove('visible');  bg.style.backgroundImage = ''; }
+    if (dim) { dim.classList.remove('visible'); }
+    minHeroActive = null;
+  }
+  renderConnections();
+  drawMinimap();
+  if (scatterDraw) scatterDraw();
+}
+
+// ── Parallax hero background on node hover in min mode ────────────────
+let minHeroActive = null;
+let minHeroTimer  = null;
+
+function initMinHero() {
+  const bg  = document.getElementById('min-hero-bg');
+  const dim = document.getElementById('min-hero-dim');
+  if (!bg || !dim) return;
+
+  // Track mousemove over canvas for parallax shift
+  const wrap = document.getElementById('canvas-wrap');
+  wrap.addEventListener('mousemove', e => {
+    if (!document.body.classList.contains('ui-min')) return;
+    if (!bg.classList.contains('visible')) return;
+    const rx = (e.clientX / window.innerWidth  - 0.5) * 12; // px
+    const ry = (e.clientY / window.innerHeight - 0.5) * 8;
+    bg.style.transform = `scale(1.06) translate(${rx}px, ${ry}px)`;
+  });
+}
+
+function showMinHero(nodeId) {
+  if (!document.body.classList.contains('ui-min')) return;
+  if (minHeroActive === nodeId) return;
+  const node = nodes.find(n => n.id === nodeId);
+  if (!node || !node.headerImg) return;
+
+  clearTimeout(minHeroTimer);
+  minHeroActive = nodeId;
+
+  const bg  = document.getElementById('min-hero-bg');
+  const dim = document.getElementById('min-hero-dim');
+  if (!bg || !dim) return;
+
+  // Preload then show
+  const img = new Image();
+  img.onload = () => {
+    bg.style.backgroundImage = `url(${node.headerImg})`;
+    bg.classList.add('visible');
+    dim.classList.add('visible');
+  };
+  img.src = node.headerImg;
+}
+
+function hideMinHero() {
+  if (!document.body.classList.contains('ui-min')) return;
+  clearTimeout(minHeroTimer);
+  minHeroTimer = setTimeout(() => {
+    minHeroActive = null;
+    const bg  = document.getElementById('min-hero-bg');
+    const dim = document.getElementById('min-hero-dim');
+    if (bg)  bg.classList.remove('visible');
+    if (dim) dim.classList.remove('visible');
+  }, 120); // small delay prevents flicker when moving between nodes
+}
 
 // Suppress ResizeObserver loop warnings — benign browser notification
 // Patch ResizeObserver globally to debounce all callbacks

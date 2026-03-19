@@ -37,6 +37,324 @@ body::after{content:'';position:fixed;inset:0;z-index:9999;pointer-events:none;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px;
   opacity:.025;mix-blend-mode:screen;}
 
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT THEME — hiring manager / recruiter mode
+   Every surface, every shadow, every border, every text token.
+   Slides stay cinematic (dark) — canvas and UI go full editorial.
+═══════════════════════════════════════════════════════════════════ */
+body.light-theme{
+  /* Core palette — warm linen ground, near-black ink */
+  --bg:#f4f1eb;
+  --bg-2:#ece8e0;
+  --bg-3:#e2ddd4;
+  --bg-4:#d8d2c8;
+  --ink:#1a1816;
+  --ink-2:#52504a;
+  --ink-3:#9a9488;
+  --accent:#b85c32;
+  --accent-l:rgba(184,92,50,0.09);
+  --border:rgba(26,24,22,0.07);
+  --border-2:rgba(26,24,22,0.13);
+  --border-3:rgba(26,24,22,0.24);
+}
+
+/* ── Body + grain ───────────────────────────────────────────────── */
+body.light-theme{background:var(--bg);}
+body.light-theme::after{opacity:0;} /* kill grain */
+
+/* ── Canvas dot grid ────────────────────────────────────────────── */
+body.light-theme #canvas-wrap::before{
+  background-image:radial-gradient(rgba(26,24,22,0.1) 1px,transparent 1px);
+}
+
+/* ── Topbar ─────────────────────────────────────────────────────── */
+body.light-theme #topbar{
+  background:rgba(244,241,235,0.96);
+  border-bottom-color:var(--border-2);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+body.light-theme .tb-brand{color:var(--ink);}
+body.light-theme .tb-brand em{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme #tb-title{color:var(--ink-2);}
+body.light-theme #tb-title:focus{color:var(--ink);}
+body.light-theme .tb-btn{color:var(--ink-2);border-color:var(--border-2);background:none;}
+body.light-theme .tb-btn:hover{color:var(--ink);border-color:var(--border-3);background:var(--accent-l);}
+body.light-theme .tb-btn.active{background:var(--accent);color:#f4f1eb;border-color:var(--accent);}
+body.light-theme .tb-btn.accent{color:var(--accent);border-color:var(--accent);}
+body.light-theme .tb-btn.accent:hover{background:var(--accent);color:#f4f1eb;}
+body.light-theme .tb-div{background:var(--border-2);}
+body.light-theme #arrange-bar{background:var(--bg-3);border-color:var(--border-2);}
+body.light-theme .arr-btn{color:var(--ink-3);}
+body.light-theme .arr-btn:hover{color:var(--ink);background:var(--accent-l);}
+body.light-theme .arr-btn.active{background:var(--accent);color:#f4f1eb;}
+body.light-theme #btn-theme{border-color:var(--border-2);color:var(--ink-3);}
+
+/* ── Mode badge ─────────────────────────────────────────────────── */
+body.light-theme #mode-badge{background:var(--accent);color:#f4f1eb;}
+
+/* ── Node cards ─────────────────────────────────────────────────── */
+body.light-theme .node-card{
+  background:#faf8f3;
+  border-color:var(--border-2);
+  box-shadow:0 1px 6px rgba(26,24,22,0.06),0 3px 14px rgba(26,24,22,0.04);
+}
+body.light-theme .node-card:hover{border-color:var(--border-3);}
+body.light-theme .node-card.is-dragging{
+  box-shadow:0 8px 32px rgba(26,24,22,0.15);
+}
+body.light-theme .node-card.active-slide{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-l),0 4px 20px rgba(26,24,22,0.08);
+}
+body.light-theme .node-card.connect-source{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-l);
+}
+body.light-theme .node-card.connect-target-hover{background:var(--accent-l);}
+body.light-theme .node-title{color:var(--ink);}
+body.light-theme .node-body-txt{color:var(--ink-2);}
+body.light-theme .node-meta{color:var(--ink-3);}
+body.light-theme .node-links{color:var(--ink-3);}
+body.light-theme .node-links.on{color:var(--accent);}
+body.light-theme .node-foot{border-top-color:var(--border-2);}
+body.light-theme .node-seq{color:var(--accent);}
+body.light-theme .node-act{color:var(--ink-3);}
+body.light-theme .node-act:hover{color:var(--ink);background:var(--border-2);}
+
+/* Ports */
+body.light-theme .port{background:var(--bg-2);border-color:var(--border-3);}
+body.light-theme .port:hover,.port.active{border-color:var(--accent);background:var(--accent);}
+
+/* ── Connections ────────────────────────────────────────────────── */
+body.light-theme .conn-nn{stroke:var(--ink-3);opacity:0.35;}
+body.light-theme .conn-nn:hover{stroke:var(--accent);opacity:0.9;}
+body.light-theme .conn-nn.in-chain{stroke:var(--accent);opacity:0.85;}
+body.light-theme .conn-np{stroke:var(--border-3);opacity:0.6;}
+body.light-theme .conn-np.active{stroke:var(--accent);opacity:0.5;}
+body.light-theme .conn-drag{stroke:var(--accent);}
+
+/* Arrow markers — need inline override via JS, but CSS covers the SVG fill */
+body.light-theme #arr path{fill:rgba(154,148,136,0.9);}
+body.light-theme #arr-on path{fill:var(--accent);}
+
+/* ── Preview widgets ────────────────────────────────────────────── */
+body.light-theme .preview-widget{
+  border-color:var(--border-2);
+  box-shadow:0 2px 12px rgba(26,24,22,0.08),0 6px 28px rgba(26,24,22,0.05);
+}
+body.light-theme .preview-widget:hover{border-color:var(--border-3);}
+body.light-theme .preview-widget.active-prev{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-l),0 6px 28px rgba(26,24,22,0.1);
+}
+/* Preview footer bar */
+body.light-theme .pw-bar{background:rgba(244,241,235,0.95);border-top-color:var(--border-2);}
+body.light-theme .pw-bar-label{color:var(--ink-3);}
+body.light-theme .pw-bar-seq{color:var(--accent);}
+body.light-theme .pw-row-btn{color:var(--ink-3);}
+
+/* ── Lane labels + dividers ─────────────────────────────────────── */
+body.light-theme .lane-label{
+  background:var(--bg-2);
+  border:1px solid var(--border-2);
+  color:var(--ink-3);
+  opacity:0.7;
+}
+/* Lane dividers injected by JS — their background gradient stays in CSS vars */
+
+/* ── Unified nav HUD ────────────────────────────────────────────── */
+body.light-theme #nav-hud{
+  background:rgba(244,241,235,0.94);
+  border-color:var(--border-2);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 2px 16px rgba(26,24,22,0.1);
+}
+body.light-theme .hud-btn{color:var(--ink-2);border-color:var(--border-2);}
+body.light-theme .hud-btn:hover,body.light-theme .hud-btn:active{
+  color:var(--ink);background:var(--accent-l);
+}
+body.light-theme #hud-counter{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme #hud-dots{border-color:var(--border-2);}
+body.light-theme .hud-dot{background:var(--border-3);}
+body.light-theme .hud-dot.active{background:var(--accent);}
+body.light-theme .hud-dot.visited{background:var(--ink-3);}
+
+/* ── Zoom HUD ───────────────────────────────────────────────────── */
+body.light-theme #zoom-hud{
+  background:rgba(244,241,235,0.94);
+  border-color:var(--border-2);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 2px 12px rgba(26,24,22,0.08);
+}
+body.light-theme .zoom-btn{color:var(--ink-2);}
+body.light-theme .zoom-btn:hover{color:var(--ink);background:var(--accent-l);}
+body.light-theme #zoom-pct{color:var(--ink-3);border-color:var(--border-2);}
+
+/* ── Present surface (ps-nav, ps-exit) ─────────────────────────── */
+/* Slides themselves stay dark — they have their own backgrounds */
+body.light-theme #ps-nav{
+  background:rgba(244,241,235,0.88);
+  border-color:var(--border-2);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 2px 20px rgba(26,24,22,0.12);
+}
+body.light-theme .ps-nb{color:var(--ink-2);border-color:var(--border-2);}
+body.light-theme .ps-nb:hover{color:var(--ink);background:var(--accent-l);}
+body.light-theme #ps-counter{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme #ps-dots{border-color:var(--border-2);}
+body.light-theme .ps-dot{background:var(--border-3);}
+body.light-theme .ps-dot.active{background:var(--accent);}
+body.light-theme .ps-dot.visited{background:var(--ink-3);}
+body.light-theme #ps-exit{
+  background:rgba(244,241,235,0.88);
+  border-color:var(--border-2);
+  color:var(--ink-2);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+body.light-theme #ps-exit:hover{color:var(--ink);border-color:var(--border-3);}
+/* Branch overlay */
+body.light-theme #ps-branch{background:rgba(244,241,235,0.88);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+body.light-theme .psb-prompt{color:var(--ink-3);}
+body.light-theme .psb-card{background:rgba(26,24,22,0.04);border-color:var(--border-2);}
+body.light-theme .psb-card:hover{border-color:var(--accent);background:var(--accent-l);}
+body.light-theme .psb-era{color:var(--ink-3);}
+body.light-theme .psb-title{color:var(--ink);}
+body.light-theme .psb-snippet{color:var(--ink-2);}
+
+/* ── FX Panel ───────────────────────────────────────────────────── */
+body.light-theme #fx-panel{background:var(--bg-2);border-left-color:var(--border-2);}
+body.light-theme .fxp-hdr{border-bottom-color:var(--border-2);}
+body.light-theme .fxp-title{color:var(--ink-3);}
+body.light-theme .fxp-x{color:var(--ink-3);}
+body.light-theme .fxp-x:hover{color:var(--ink);}
+body.light-theme .fxp-sec{color:var(--ink-3);}
+body.light-theme .fx-opt{color:var(--ink-2);}
+body.light-theme .fx-opt:hover{background:var(--accent-l);}
+body.light-theme .fx-opt.active{background:var(--accent-l);}
+body.light-theme .fx-opt-lbl{color:var(--ink-2);}
+body.light-theme .fx-opt.active .fx-opt-lbl{color:var(--ink);}
+body.light-theme .fx-chk{border-color:var(--border-2);}
+body.light-theme .fx-sl-lbl{color:var(--ink-2);}
+body.light-theme .fx-sl-lbl span{color:var(--ink-3);}
+
+/* ── Compose studio ─────────────────────────────────────────────── */
+body.light-theme #compose-scrim{background:rgba(26,24,22,0.55);}
+body.light-theme #compose-studio{background:var(--bg);}
+body.light-theme #cs-left{background:var(--bg-2);border-right-color:var(--border-2);}
+body.light-theme #cs-right{background:var(--bg);}
+body.light-theme #cs-hdr{border-bottom-color:var(--border-2);}
+body.light-theme #cs-hdr-title{color:var(--ink-3);}
+body.light-theme #cs-close{color:var(--ink-3);}
+body.light-theme #cs-close:hover{color:var(--ink);background:var(--border-2);}
+body.light-theme .cs-label{color:var(--ink-3);}
+body.light-theme #cs-title{color:var(--ink);border-bottom-color:var(--border-2);}
+body.light-theme #cs-title::placeholder{color:var(--ink-3);}
+body.light-theme #cs-body{color:var(--ink-2);border-bottom-color:var(--border-2);}
+body.light-theme #cs-body::placeholder{color:var(--ink-3);}
+body.light-theme #cs-pq{color:var(--ink-2);border-left-color:var(--border-2);}
+body.light-theme #cs-pq::placeholder{color:var(--ink-3);}
+body.light-theme #cs-data{color:var(--ink-2);border-bottom-color:var(--border-2);}
+body.light-theme #cs-data::placeholder{color:var(--ink-3);}
+body.light-theme #cs-era{color:var(--ink-3);border-bottom-color:var(--border-2);}
+body.light-theme #cs-era::placeholder{color:var(--ink-3);}
+body.light-theme .cs-type-pill{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme .cs-type-pill:hover{color:var(--ink);border-color:var(--border-3);}
+body.light-theme .cs-type-pill.active{background:var(--accent-l);border-color:var(--accent);color:var(--ink);}
+body.light-theme .cs-bg-sw-label{color:var(--ink-3);}
+body.light-theme #cs-foot{border-top-color:var(--border-2);}
+body.light-theme #cs-create{color:#f4f1eb;}
+body.light-theme #cs-discard{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme #cs-discard:hover{color:var(--ink);border-color:var(--border-3);}
+/* Drop zone */
+body.light-theme #cs-drop-zone{
+  border-color:var(--border-2);
+  background:rgba(26,24,22,0.02);
+}
+body.light-theme #cs-drop-zone:hover,
+body.light-theme #cs-drop-zone.drag-over{border-color:var(--accent);background:var(--accent-l);}
+body.light-theme #cs-drop-icon{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme #cs-drop-label{color:var(--ink-2);}
+body.light-theme #cs-drop-hint{color:var(--ink-3);}
+body.light-theme #cs-img-preview{background:var(--bg-3);border-color:var(--border-2);}
+body.light-theme #cs-img-thumb{border-color:var(--border-2);}
+body.light-theme #cs-img-remove{color:var(--ink-3);border-color:var(--border-2);}
+body.light-theme #cs-img-remove:hover{color:var(--ink);border-color:var(--border-3);}
+
+/* ── Toast ──────────────────────────────────────────────────────── */
+body.light-theme #toast{
+  background:var(--bg-3);
+  border-color:var(--border-2);
+  color:var(--ink);
+  box-shadow:0 2px 14px rgba(26,24,22,0.12);
+}
+
+/* ── Mobile tab bar ─────────────────────────────────────────────── */
+body.light-theme #mob-tabs{background:rgba(244,241,235,0.96);border-top-color:var(--border-2);}
+body.light-theme .mob-tab{color:var(--ink-3);}
+body.light-theme .mob-tab.active{color:var(--accent);}
+
+/* ── Mobile view surface ────────────────────────────────────────── */
+body.light-theme #mob-view{background:var(--bg);}
+/* Slides in mob-view stay dark — their bg is set per-node */
+
+/* ── Node context menu ──────────────────────────────────────────── */
+body.light-theme #mob-node-menu{
+  background:var(--bg-2);
+  border-top-color:var(--border-2);
+  box-shadow:0 -4px 24px rgba(26,24,22,0.12);
+}
+body.light-theme #mob-node-menu-handle{background:var(--border-3);}
+body.light-theme #mob-node-menu-title{color:var(--ink);}
+body.light-theme #mob-node-menu-era{color:var(--ink-3);}
+body.light-theme .mob-node-menu-divider{background:var(--border-2);}
+body.light-theme .mob-node-action:active{background:var(--accent-l);}
+body.light-theme .mob-node-action-icon{background:var(--bg-3);border-color:var(--border-2);color:var(--ink-2);}
+body.light-theme .mob-node-action-label{color:var(--ink-2);}
+body.light-theme .mob-node-action-desc{color:var(--ink-3);}
+body.light-theme #mob-node-menu-cancel{
+  background:var(--bg-3);border-color:var(--border-2);color:var(--ink-2);
+}
+body.light-theme #mob-node-menu-cancel:active{background:var(--accent-l);}
+
+/* ── Connect menu ───────────────────────────────────────────────── */
+body.light-theme #mob-connect-menu{
+  background:var(--bg-2);border-top-color:var(--border-2);
+  box-shadow:0 -4px 24px rgba(26,24,22,0.12);
+}
+body.light-theme #mob-connect-hdr{border-bottom-color:var(--border-2);}
+body.light-theme #mob-connect-title{color:var(--ink-3);}
+body.light-theme #mob-connect-cancel-btn{color:var(--ink-3);}
+body.light-theme #mob-connect-from{color:var(--accent);border-bottom-color:var(--border-2);}
+body.light-theme .mob-connect-target{border-bottom-color:var(--border);}
+body.light-theme .mob-connect-target:active{background:var(--accent-l);}
+body.light-theme .mob-connect-name{color:var(--ink);}
+body.light-theme .mob-connect-era{color:var(--ink-3);}
+body.light-theme .mob-connect-existing{color:var(--accent);}
+
+/* ── Arrange sheet ──────────────────────────────────────────────── */
+body.light-theme #mob-arrange{background:var(--bg-2);border-top-color:var(--border-2);}
+body.light-theme .mob-arr-hdr{background:var(--bg-2);border-bottom-color:var(--border-2);}
+body.light-theme .mob-arr-hdr-title{color:var(--ink-3);}
+body.light-theme .mob-arr-close{color:var(--ink-3);}
+body.light-theme .mob-arr-card{background:var(--bg-3);border-color:var(--border-2);}
+body.light-theme .mob-arr-card:active{background:var(--accent-l);}
+body.light-theme .mob-arr-card.active{border-color:var(--accent);}
+body.light-theme .mob-arr-name{color:var(--ink-2);}
+body.light-theme .mob-arr-desc{color:var(--ink-3);}
+body.light-theme .mob-arr-ghost{background:var(--bg-3);}
+body.light-theme .mob-arr-action{background:var(--bg-3);border-color:var(--border-2);color:var(--ink-2);}
+body.light-theme .mob-arr-action:active{background:var(--accent-l);border-color:var(--accent);color:var(--ink);}
+body.light-theme .mob-arr-action.primary{background:var(--accent);border-color:var(--accent);color:#f4f1eb;}
+
+/* ── Theme button state indicator ───────────────────────────────── */
+/* btn-theme removed from topbar — theme toggle lives in cmd-menu */
+
+/* ── Scrollbars in light mode ───────────────────────────────────── */
+body.light-theme *{scrollbar-color:var(--border-3) transparent;}
+body.light-theme *::-webkit-scrollbar-thumb{background:var(--border-3);}
+
+/* ── iOS theme-color (set via JS _applyTheme) ───────────────────── */
+
 /* ─────────────────────────────────────────────
    TOPBAR
 ───────────────────────────────────────────── */
@@ -696,6 +1014,121 @@ body.is-mobile #cs-body{font-size:16px;}
 .bg-sw.active{border-color:var(--accent);}
 
 /* ─────────────────────────────────────────────
+   COMMAND MENU — unified desktop + mobile sheet
+───────────────────────────────────────────── */
+#cmd-scrim{
+  display:none;position:fixed;inset:0;z-index:1499;
+  background:rgba(0,0,0,0);
+  transition:background 0.22s ease;
+}
+#cmd-scrim.open{display:block;background:rgba(0,0,0,0.32);}
+
+#cmd-menu{
+  display:none;
+  position:fixed;
+  top:54px;right:14px;
+  width:min(380px,calc(100vw - 28px));
+  background:var(--bg-2);
+  border:1px solid var(--border-2);
+  border-radius:10px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.2);
+  z-index:1500;
+  overflow:hidden;
+  opacity:0;transform:translateY(-6px) scale(0.98);
+  transition:opacity 0.18s ease,transform 0.18s ease;
+}
+#cmd-menu.open{display:block;}
+#cmd-menu.visible{opacity:1;transform:translateY(0) scale(1);}
+
+/* Section header */
+.cmd-section{
+  padding:10px 14px 6px;
+  font-family:var(--mono);font-size:6.5px;letter-spacing:0.2em;
+  text-transform:uppercase;color:var(--ink-3);
+  border-bottom:1px solid var(--border);
+}
+.cmd-section:first-child{padding-top:12px;}
+
+/* Action row */
+.cmd-action{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;cursor:pointer;
+  transition:background 0.1s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cmd-action:hover,.cmd-action:active{background:var(--accent-l);}
+.cmd-action.active-state{background:var(--accent-l);}
+.cmd-action-icon{
+  width:28px;height:28px;border-radius:6px;flex-shrink:0;
+  background:var(--bg-3);border:1px solid var(--border-2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--ink-2);
+  transition:background 0.1s,border-color 0.1s,color 0.1s;
+}
+.cmd-action.active-state .cmd-action-icon{
+  background:var(--accent-l);border-color:var(--accent);color:var(--accent);
+}
+.cmd-action-body{flex:1;min-width:0;}
+.cmd-action-label{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--ink-2);
+}
+.cmd-action.active-state .cmd-action-label{color:var(--ink);}
+.cmd-action-desc{
+  font-family:var(--mono);font-size:7.5px;color:var(--ink-3);
+  margin-top:1px;line-height:1.4;
+}
+.cmd-action-kbd{
+  font-family:var(--mono);font-size:7px;color:var(--ink-3);
+  background:var(--bg-3);border:1px solid var(--border-2);
+  border-radius:3px;padding:2px 5px;flex-shrink:0;
+  letter-spacing:0.06em;
+}
+
+/* Arrangement grid inside command menu */
+.cmd-arr-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  gap:6px;padding:8px 14px 10px;
+}
+.cmd-arr-card{
+  background:var(--bg-3);border:1px solid var(--border-2);border-radius:6px;
+  padding:7px 5px 6px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:border-color 0.12s,background 0.12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cmd-arr-card:hover,.cmd-arr-card:active{background:var(--accent-l);border-color:var(--accent);}
+.cmd-arr-card.active{border-color:var(--accent);background:var(--accent-l);}
+.cmd-arr-ghost-sm{width:100%;height:28px;}
+.cmd-arr-ghost-sm svg{width:100%;height:100%;}
+.cmd-arr-label{
+  font-family:var(--mono);font-size:6px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--ink-3);text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;
+}
+.cmd-arr-card.active .cmd-arr-label{color:var(--accent);}
+
+/* Divider inside menu */
+.cmd-divider{height:1px;background:var(--border);margin:2px 0;}
+
+/* Light theme overrides */
+body.light-theme #cmd-menu{
+  background:var(--bg-2);border-color:var(--border-2);
+  box-shadow:0 8px 40px rgba(26,24,22,0.14),0 2px 8px rgba(26,24,22,0.08);
+}
+body.light-theme .cmd-section{color:var(--ink-3);border-bottom-color:var(--border-2);}
+body.light-theme .cmd-action:hover{background:var(--accent-l);}
+body.light-theme .cmd-action-icon{background:var(--bg-3);border-color:var(--border-2);color:var(--ink-2);}
+body.light-theme .cmd-action-label{color:var(--ink-2);}
+body.light-theme .cmd-action-desc{color:var(--ink-3);}
+body.light-theme .cmd-action-kbd{background:var(--bg-3);border-color:var(--border-2);color:var(--ink-3);}
+body.light-theme .cmd-arr-card{background:var(--bg-3);border-color:var(--border-2);}
+body.light-theme .cmd-arr-label{color:var(--ink-3);}
+body.light-theme .cmd-divider{background:var(--border-2);}
+body.light-theme #cmd-scrim{background:rgba(26,24,22,0);}
+body.light-theme #cmd-scrim.open{background:rgba(26,24,22,0.18);}
+
+/* ─────────────────────────────────────────────
    FX PANEL
 ───────────────────────────────────────────── */
 #fx-panel{position:fixed;top:46px;right:0;bottom:0;width:260px;background:var(--bg-2);border-left:1px solid var(--border);transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);z-index:800;display:flex;flex-direction:column;overflow:hidden;}
@@ -1007,9 +1440,10 @@ body.is-mobile #cs-left{flex:none;border-right:none;border-top:1px solid var(--b
 body.is-mobile #cs-right{flex:1;order:1;}
 body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-mobile #cs-data,body.is-mobile #cs-era{font-size:16px;}
 
-/* Topbar: mobile shows brand + present only */
-@media(max-width:700px){
-  #tb-title,.tb-div,.tb-pres,.tb-btn:not(#btn-present),#arrange-bar{display:none;}
+/* Topbar: all screen sizes show brand + title + menu + present
+   On narrow screens, hide only the title input */
+@media(max-width:480px){
+  .tb-pres{display:none;}
 }
 *{scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;}
 *::-webkit-scrollbar{width:2px;height:2px;}
@@ -1024,23 +1458,69 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
   <div class="tb-div"></div>
   <div class="tb-pres"><input id="tb-title" value="Zack Gort · Experience &amp; Outlook" spellcheck="false"></div>
   <div class="tb-actions">
-    <button class="tb-btn" onclick="addNode()">+ Node</button>
-    <button class="tb-btn" id="btn-connect" onclick="toggleConnectMode()">Connect</button>
-    <div class="tb-div"></div>
-    <!-- Arrangement presets -->
-    <div id="arrange-bar">
-      <button class="arr-btn active" data-arr="timeline" onclick="applyArrangement('timeline')">Timeline</button>
-      <button class="arr-btn" data-arr="narrative" onclick="applyArrangement('narrative')">Narrative</button>
-      <button class="arr-btn" data-arr="broadcast" onclick="applyArrangement('broadcast')">Broadcast</button>
-      <button class="arr-btn" data-arr="author" onclick="applyArrangement('author')">Author</button>
-      <button class="arr-btn" data-arr="overview" onclick="applyArrangement('overview')">Overview</button>
-    </div>
-    <div class="tb-div"></div>
-    <button class="tb-btn" onclick="fitAll()">Fit</button>
-    <button class="tb-btn" id="btn-fx" onclick="openFxPanel()">Effects</button>
+    <button class="tb-btn" id="btn-menu" onclick="toggleCmdMenu()" title="Menu">⋮ Menu</button>
     <div class="tb-div"></div>
     <button class="tb-btn accent" id="btn-present" onclick="togglePresent()">▶ Present</button>
   </div>
+</div>
+
+<!-- CMD SCRIM -->
+<div id="cmd-scrim" onclick="closeCmdMenu()"></div>
+
+<!-- COMMAND MENU -->
+<div id="cmd-menu">
+
+  <div class="cmd-section">Arrange</div>
+  <div class="cmd-arr-grid" id="cmd-arr-grid"></div>
+
+  <div class="cmd-divider"></div>
+  <div class="cmd-section">Canvas</div>
+
+  <div class="cmd-action" onclick="addNode();closeCmdMenu()">
+    <div class="cmd-action-icon">+</div>
+    <div class="cmd-action-body">
+      <div class="cmd-action-label">New Node</div>
+      <div class="cmd-action-desc">Add a slide node to the canvas</div>
+    </div>
+    <div class="cmd-action-kbd">⌘N</div>
+  </div>
+
+  <div class="cmd-action" id="cmd-connect-action" onclick="toggleConnectMode();closeCmdMenu()">
+    <div class="cmd-action-icon">⟶</div>
+    <div class="cmd-action-body">
+      <div class="cmd-action-label">Connect Mode</div>
+      <div class="cmd-action-desc">Draw connections between nodes</div>
+    </div>
+  </div>
+
+  <div class="cmd-action" onclick="fitAll();closeCmdMenu()">
+    <div class="cmd-action-icon">⊡</div>
+    <div class="cmd-action-body">
+      <div class="cmd-action-label">Fit All</div>
+      <div class="cmd-action-desc">Zoom to fit all nodes in view</div>
+    </div>
+    <div class="cmd-action-kbd">⌘0</div>
+  </div>
+
+  <div class="cmd-divider"></div>
+  <div class="cmd-section">View</div>
+
+  <div class="cmd-action" id="cmd-theme-action" onclick="toggleTheme();_syncCmdMenu()">
+    <div class="cmd-action-icon" id="cmd-theme-icon">☀︎</div>
+    <div class="cmd-action-body">
+      <div class="cmd-action-label" id="cmd-theme-label">Light Theme</div>
+      <div class="cmd-action-desc">Switch to editorial light mode</div>
+    </div>
+  </div>
+
+  <div class="cmd-action" onclick="openFxPanel();closeCmdMenu()">
+    <div class="cmd-action-icon">✦</div>
+    <div class="cmd-action-body">
+      <div class="cmd-action-label">Cinematic Effects</div>
+      <div class="cmd-action-desc">Ambient glow, atmosphere settings</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- CANVAS -->
@@ -1853,10 +2333,12 @@ function deleteNode(id){
 // ══════════════════════════════════════════════════
 function toggleConnectMode(){
   connectMode=!connectMode;connectSourceId=null;
-  document.getElementById('btn-connect').classList.toggle('active',connectMode);
+  const bcn=document.getElementById('btn-connect');
+  if(bcn) bcn.classList.toggle('active',connectMode);
   document.getElementById('mode-badge').classList.toggle('visible',connectMode);
   if(!connectMode){DRAG_LINE.style.display='none';CVS.querySelectorAll('.connect-source,.connect-target-hover').forEach(el=>el.classList.remove('connect-source','connect-target-hover'));}
   else toast('Click source node, then target');
+  _syncCmdMenu();
 }
 function handleConnect(nodeId){
   if(!connectSourceId){connectSourceId=nodeId;getEl(nodeId)?.classList.add('connect-source');toast('Now click target');}
@@ -2230,6 +2712,99 @@ function submitCompose(){
 }
 
 // ══════════════════════════════════════════════════
+// COMMAND MENU
+// ══════════════════════════════════════════════════
+let cmdOpen = false;
+
+function toggleCmdMenu(){
+  cmdOpen ? closeCmdMenu() : openCmdMenu();
+}
+
+function openCmdMenu(){
+  cmdOpen = true;
+  _buildCmdArrGrid();
+  _syncCmdMenu();
+  const menu = document.getElementById('cmd-menu');
+  const scrim = document.getElementById('cmd-scrim');
+  const btn = document.getElementById('btn-menu');
+  menu.style.display = 'block';
+  scrim.classList.add('open');
+  btn.classList.add('active');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>menu.classList.add('visible','open')));
+}
+
+function closeCmdMenu(){
+  cmdOpen = false;
+  const menu = document.getElementById('cmd-menu');
+  const scrim = document.getElementById('cmd-scrim');
+  const btn = document.getElementById('btn-menu');
+  menu.classList.remove('visible');
+  scrim.classList.remove('open');
+  btn.classList.remove('active');
+  setTimeout(()=>{ menu.classList.remove('open'); menu.style.display='none'; }, 200);
+}
+
+function _buildCmdArrGrid(){
+  const grid = document.getElementById('cmd-arr-grid');
+  if(!grid) return;
+  grid.innerHTML = ARR_DEFS.map(d=>`
+    <div class="cmd-arr-card ${currentArrangement===d.name?'active':''}" data-arr="${d.name}"
+         onclick="applyArrangement('${d.name}');_syncCmdMenu()" title="${d.desc}">
+      <div class="cmd-arr-ghost-sm">${d.ghost}</div>
+      <div class="cmd-arr-label">${d.label}</div>
+    </div>`).join('');
+}
+
+function _syncCmdMenu(){
+  // Sync arrangement grid active state
+  document.querySelectorAll('.cmd-arr-card').forEach(c=>
+    c.classList.toggle('active', c.dataset.arr===currentArrangement));
+  // Sync desktop arr-btn (keep in sync for keyboard shortcuts)
+  document.querySelectorAll('.arr-btn').forEach(b=>
+    b.classList.toggle('active', b.dataset.arr===currentArrangement));
+  // Sync connect action
+  const ca = document.getElementById('cmd-connect-action');
+  if(ca) ca.classList.toggle('active-state', connectMode);
+  // Sync theme action
+  const ti = document.getElementById('cmd-theme-icon');
+  const tl = document.getElementById('cmd-theme-label');
+  const td = ti?.nextElementSibling?.querySelector('.cmd-action-desc');
+  if(ti) ti.textContent = lightTheme ? '◑' : '☀︎';
+  if(tl) tl.textContent = lightTheme ? 'Dark Theme' : 'Light Theme';
+  const desc = document.querySelector('#cmd-theme-action .cmd-action-desc');
+  if(desc) desc.textContent = lightTheme ? 'Switch back to cinematic dark mode' : 'Switch to editorial light mode';
+}
+
+// ══════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════
+let lightTheme=false;
+
+function toggleTheme(){
+  lightTheme=!lightTheme;
+  _applyTheme();
+  try{localStorage.setItem('nrt_theme',lightTheme?'light':'dark');}catch(e){}
+}
+
+function _applyTheme(){
+  document.body.classList.toggle('light-theme',lightTheme);
+  // iOS status bar tint
+  let mt=document.querySelector('meta[name="theme-color"]');
+  if(!mt){mt=document.createElement('meta');mt.name='theme-color';document.head.appendChild(mt);}
+  mt.content=lightTheme?'#ece8e0':'#0f0e0c';
+  // Sync cmd menu if open
+  if(typeof _syncCmdMenu==='function') _syncCmdMenu();
+}
+
+function _loadTheme(){
+  try{
+    const saved=localStorage.getItem('nrt_theme');
+    lightTheme=saved==='light';
+  }catch(e){lightTheme=false;}
+  _applyTheme();
+}
+
+// ══════════════════════════════════════════════════
 // FX PANEL
 // ══════════════════════════════════════════════════
 function _buildFx(){
@@ -2250,8 +2825,8 @@ function _buildFx(){
     </div>`;
 }
 function toggleFx(key,el){fxState[key]=!fxState[key];el.classList.toggle('active',fxState[key]);}
-function openFxPanel(){_buildFx();document.getElementById('fx-panel').classList.add('open');document.getElementById('btn-fx').classList.add('active');}
-function closeFxPanel(){document.getElementById('fx-panel').classList.remove('open');document.getElementById('btn-fx').classList.remove('active');}
+function openFxPanel(){_buildFx();document.getElementById('fx-panel').classList.add('open');}
+function closeFxPanel(){document.getElementById('fx-panel').classList.remove('open');}
 
 // ══════════════════════════════════════════════════
 // MOBILE — portrait/landscape, iOS/Android
@@ -2623,7 +3198,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
   if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();nextSlide();}
   if(e.key==='ArrowLeft'){e.preventDefault();prevSlide();}
-  if(e.key==='Escape'){if(presentMode)togglePresent();if(connectMode)toggleConnectMode();closeFxPanel();}
+  if(e.key==='Escape'){if(presentMode)togglePresent();if(connectMode)toggleConnectMode();closeFxPanel();closeCmdMenu();}
   if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();addNode();}
   if((e.metaKey||e.ctrlKey)&&e.key==='0'){e.preventDefault();fitAll();}
   if(e.key==='1')applyArrangement('timeline');
@@ -2645,6 +3220,7 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 // ══════════════════════════════════════════════════
 function init(){
   load();
+  _loadTheme();
   // Apply timeline positions to loaded nodes if they have col data
   nodes.forEach(n=>{
     if(n.x===undefined||n.y===undefined){const p=nodeXY(n);n.x=p.x;n.y=p.y;}
@@ -2662,12 +3238,12 @@ function init(){
     mobInit();
     _csInitDropZone();
     _buildDesktopArrTooltips();
-    // Apply saved arrangement UI state (desktop)
-    document.querySelectorAll('.arr-btn').forEach(b=>b.classList.toggle('active',b.dataset.arr===currentArrangement));
+    // Apply saved arrangement UI state
     document.body.classList.toggle('view-broadcast',currentArrangement==='broadcast');
     document.body.classList.toggle('view-author',currentArrangement==='author');
-    // Sync mobile arrange sheet
     _buildMobArrGrid();
+    _buildCmdArrGrid();
+    _syncCmdMenu();
     // Initial mobile view render
     if(isMob()&&nodes[0]){_renderMobView(nodes[0],true);}
   });

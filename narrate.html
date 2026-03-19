@@ -258,21 +258,60 @@ body.view-author .preview-widget{opacity:0.06;pointer-events:none;}
 }
 
 /* ─────────────────────────────────────────────
-   CANVAS HUD
+   UNIFIED HUD — one component, desktop + mobile
+   Desktop: floating pill at bottom-center
+   Mobile:  docked strip above tab bar
 ───────────────────────────────────────────── */
-#canvas-hud{
-  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+#nav-hud{
+  position:fixed;
+  bottom:16px;left:50%;transform:translateX(-50%);
   display:flex;align-items:center;
   background:var(--bg-2);border:1px solid var(--border-2);border-radius:8px;
   overflow:hidden;z-index:500;
   box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  transition:bottom 0.2s,border-radius 0.2s,box-shadow 0.2s,transform 0.2s,left 0.2s;
 }
-.hud-btn{background:none;border:none;cursor:pointer;color:var(--ink-2);padding:8px 16px;font-size:14px;transition:color 0.12s,background 0.12s;border-right:1px solid var(--border);}
+/* Mobile docking — flush to edge, full-width, sits above tab bar */
+body.is-mobile #nav-hud{
+  bottom:calc(var(--mob-tab) + var(--sab));
+  left:0;right:0;
+  transform:none;
+  border-radius:0;
+  border-left:none;border-right:none;border-bottom:none;
+  box-shadow:none;
+  border-top:1px solid var(--border);
+}
+/* Present mode — hide the nav HUD entirely (ps-nav takes over) */
+body.present-mode #nav-hud{display:none;}
+
+.hud-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-2);padding:9px 18px;font-size:15px;
+  transition:color 0.12s,background 0.12s;
+  border-right:1px solid var(--border);
+  flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
 .hud-btn:last-child{border-right:none;border-left:1px solid var(--border);}
-.hud-btn:hover{color:var(--ink);background:var(--accent-l);}
-#hud-counter{font-family:var(--mono);font-size:8px;letter-spacing:0.1em;color:var(--ink-3);padding:0 14px;border-right:1px solid var(--border);white-space:nowrap;}
-#hud-dots{display:flex;gap:5px;align-items:center;padding:0 12px;}
-.hud-dot{width:5px;height:5px;border-radius:50%;background:var(--border-3);transition:background 0.3s,transform 0.3s;cursor:pointer;}
+.hud-btn:hover,.hud-btn:active{color:var(--ink);background:var(--accent-l);}
+/* Larger tap target on mobile */
+body.is-mobile .hud-btn{padding:12px 22px;font-size:18px;}
+
+#hud-counter{
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  color:var(--ink-3);padding:0 14px;border-right:1px solid var(--border);
+  white-space:nowrap;flex-shrink:0;
+}
+#hud-dots{
+  display:flex;gap:6px;align-items:center;
+  padding:0 14px;flex-wrap:wrap;max-width:260px;
+  justify-content:center;
+}
+.hud-dot{
+  width:5px;height:5px;border-radius:50%;background:var(--border-3);
+  transition:background 0.3s,transform 0.3s;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
 .hud-dot.active{background:var(--accent);transform:scale(1.5);}
 .hud-dot.visited{background:var(--ink-3);}
 
@@ -367,20 +406,286 @@ body.present-mode #ps-exit{display:block;}
 #ps-exit:hover{color:var(--ink);border-color:var(--border-3);}
 
 /* ─────────────────────────────────────────────
-   COMPOSE WIDGET
+   COMPOSE STUDIO — full viewport takeover
 ───────────────────────────────────────────── */
-#compose-widget{position:fixed;bottom:0;left:0;width:min(500px,100vw);background:var(--bg-4);border:1px solid var(--border-2);border-bottom:none;border-radius:10px 10px 0 0;box-shadow:0 -4px 40px rgba(0,0,0,0.5);z-index:1100;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);overflow:hidden;}
-#compose-widget.open{transform:translateY(0);}
-.cw-handle{width:30px;height:3px;background:var(--border-2);border-radius:2px;margin:9px auto 0;}
-.cw-hdr{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.cw-lbl{font-family:var(--mono);font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3);}
-.cw-x{background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:14px;padding:2px 4px;border-radius:3px;transition:color 0.12s;}
-.cw-x:hover{color:var(--ink);}
-.cw-body2{padding:10px 14px;max-height:60vh;overflow-y:auto;}
-.cw-fl{margin-bottom:10px;}
-.cw-fl-lbl{font-family:var(--mono);font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px;}
-.cw-in,.cw-ta{width:100%;background:var(--bg-2);border:1px solid var(--border-2);border-radius:4px;color:var(--ink);font-family:var(--mono);font-size:10px;padding:7px 9px;outline:none;resize:none;transition:border-color 0.12s;}
-.cw-in:focus,.cw-ta:focus{border-color:var(--accent);}
+#compose-studio{
+  position:fixed;inset:0;z-index:1200;
+  display:none;
+  background:var(--bg);
+  opacity:0;
+  transition:opacity 0.28s ease;
+}
+#compose-studio.open{display:flex;opacity:0;}
+#compose-studio.visible{opacity:1;}
+
+/* Canvas scrim — behind studio, above canvas */
+#compose-scrim{
+  position:fixed;inset:0;z-index:1199;
+  display:none;
+  background:rgba(10,9,8,0.88);
+  backdrop-filter:blur(3px);
+  opacity:0;transition:opacity 0.28s ease;
+}
+#compose-scrim.open{display:block;}
+#compose-scrim.visible{opacity:1;}
+
+/* Two-column layout */
+#cs-left{
+  flex:0 0 340px;
+  display:flex;flex-direction:column;
+  background:var(--bg-2);
+  border-right:1px solid var(--border);
+  overflow:hidden;
+}
+#cs-right{
+  flex:1;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  background:var(--bg);
+  overflow:hidden;
+}
+
+/* Ambient glow behind preview */
+#cs-ambient{
+  position:absolute;inset:0;pointer-events:none;
+  opacity:0;transition:opacity 1.2s ease;
+  background:radial-gradient(ellipse 70% 55% at 50% 50%,var(--cs-amb,#c8704a) 0%,transparent 70%);
+}
+
+/* Left panel — header */
+#cs-hdr{
+  padding:14px 18px 12px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+#cs-hdr-title{
+  font-family:var(--mono);font-size:7.5px;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+#cs-close{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-3);font-size:16px;line-height:1;
+  padding:3px 6px;border-radius:3px;
+  transition:color 0.12s,background 0.12s;
+}
+#cs-close:hover{color:var(--ink);background:var(--border);}
+
+/* Left panel — scrollable fields */
+#cs-fields{
+  flex:1;overflow-y:auto;padding:18px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.cs-field{display:flex;flex-direction:column;gap:5px;}
+.cs-label{
+  font-family:var(--mono);font-size:7px;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+
+/* Headline — large, feels like a title */
+#cs-title{
+  background:none;border:none;border-bottom:1px solid var(--border-2);
+  color:var(--ink);font-family:var(--disp);font-size:22px;
+  letter-spacing:-0.01em;outline:none;width:100%;
+  padding:4px 0 8px;
+  transition:border-color 0.12s;
+  line-height:1.2;
+}
+#cs-title:focus{border-color:var(--accent);}
+#cs-title::placeholder{color:var(--ink-3);}
+
+/* Body — clean textarea */
+#cs-body{
+  background:none;border:none;border-bottom:1px solid var(--border-2);
+  color:var(--ink-2);font-family:var(--text);font-size:13px;
+  outline:none;width:100%;resize:none;
+  padding:4px 0 8px;line-height:1.7;
+  transition:border-color 0.12s;
+}
+#cs-body:focus{border-color:var(--accent);}
+#cs-body::placeholder{color:var(--ink-3);}
+
+/* Pull quote */
+#cs-pq{
+  background:none;border:none;border-left:3px solid var(--border-2);
+  color:var(--ink-2);font-family:var(--disp);font-style:italic;font-size:13px;
+  outline:none;width:100%;resize:none;
+  padding:4px 0 4px 12px;line-height:1.6;
+  transition:border-color 0.12s;
+}
+#cs-pq:focus{border-left-color:var(--accent);}
+#cs-pq::placeholder{color:var(--ink-3);}
+
+/* Data values */
+#cs-data{
+  background:none;border:none;border-bottom:1px solid var(--border-2);
+  color:var(--ink-2);font-family:var(--mono);font-size:10px;
+  outline:none;width:100%;
+  padding:4px 0 8px;
+  transition:border-color 0.12s;
+}
+#cs-data:focus{border-color:var(--accent);}
+#cs-data::placeholder{color:var(--ink-3);}
+
+/* Era */
+#cs-era{
+  background:none;border:none;border-bottom:1px solid var(--border-2);
+  color:var(--ink-3);font-family:var(--mono);font-size:9px;letter-spacing:0.08em;
+  outline:none;width:100%;
+  padding:4px 0 8px;
+  transition:border-color 0.12s;
+}
+#cs-era:focus{border-color:var(--accent);color:var(--ink-2);}
+#cs-era::placeholder{color:var(--ink-3);}
+
+/* Type selector — horizontal color-bar pills */
+#cs-type-row{display:flex;gap:5px;flex-wrap:wrap;}
+.cs-type-pill{
+  padding:5px 10px;border-radius:4px;cursor:pointer;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ink-3);border:1px solid var(--border-2);
+  transition:all 0.12s;display:flex;align-items:center;gap:6px;
+}
+.cs-type-pill::before{
+  content:'';width:8px;height:8px;border-radius:2px;flex-shrink:0;
+  background:var(--pill-color,var(--ink-3));
+}
+.cs-type-pill:hover{border-color:var(--border-3);color:var(--ink);}
+.cs-type-pill.active{
+  background:var(--accent-l);border-color:var(--accent);
+  color:var(--ink);
+}
+.cs-type-pill[data-t="work"]::before{background:var(--c-work);}
+.cs-type-pill[data-t="concept"]::before{background:var(--c-concept);}
+.cs-type-pill[data-t="story"]::before{background:var(--c-story);}
+.cs-type-pill[data-t="data"]::before{background:var(--c-data);}
+.cs-type-pill[data-t="reflect"]::before{background:var(--c-reflect);}
+.cs-type-pill[data-t="launch"]::before{background:var(--c-launch);}
+.cs-type-pill[data-t="intro"]::before{background:var(--c-intro);}
+
+/* Background swatches — larger, visual row */
+#cs-bg-row{display:flex;gap:8px;flex-wrap:wrap;}
+.cs-bg-sw{
+  width:36px;height:36px;border-radius:5px;cursor:pointer;
+  border:2px solid transparent;
+  transition:border-color 0.12s,transform 0.12s,box-shadow 0.12s;
+  position:relative;
+}
+.cs-bg-sw:hover{transform:scale(1.08);}
+.cs-bg-sw.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent-l);
+}
+.cs-bg-sw-label{
+  position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:6px;letter-spacing:0.1em;
+  color:var(--ink-3);white-space:nowrap;
+}
+
+/* Left panel — footer actions */
+#cs-foot{
+  padding:14px 18px;border-top:1px solid var(--border);
+  display:flex;gap:8px;flex-shrink:0;
+}
+#cs-create{
+  flex:1;background:var(--accent);border:none;border-radius:5px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--bg);padding:10px 16px;cursor:pointer;
+  transition:opacity 0.12s;
+}
+#cs-create:hover{opacity:0.88;}
+#cs-discard{
+  background:none;border:1px solid var(--border-2);border-radius:5px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:10px 14px;cursor:pointer;
+  transition:all 0.12s;
+}
+#cs-discard:hover{border-color:var(--border-3);color:var(--ink);}
+
+/* Right panel — live preview */
+#cs-preview{
+  position:relative;
+  width:min(calc(100% - 80px), calc((100vh - 120px) * 16/9));
+  aspect-ratio:16/9;
+  border-radius:8px;overflow:hidden;
+  box-shadow:0 0 0 1px var(--border-2),0 24px 80px rgba(0,0,0,0.7);
+}
+#cs-prev-bg{position:absolute;inset:0;transition:background 0.5s ease;}
+#cs-prev-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s ease,transform 8s ease;transform:scale(1.04);}
+#cs-prev-img.vis{opacity:0.22;transform:scale(1);}
+#cs-prev-scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.54) 0%,rgba(0,0,0,0.06) 55%,rgba(0,0,0,0.44) 100%);}
+#cs-prev-content{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;padding:6% 7%;}
+
+/* Preview text — full scale, reads at preview size */
+.csp-era{font-family:var(--mono);font-size:clamp(6px,0.75vw,9px);letter-spacing:0.22em;text-transform:uppercase;color:rgba(240,236,226,0.3);margin-bottom:1.5%;}
+.csp-tag{font-family:var(--mono);font-size:clamp(7px,0.85vw,10px);letter-spacing:0.2em;text-transform:uppercase;color:var(--csp-accent,#c8704a);margin-bottom:2.5%;}
+.csp-hl{font-family:var(--disp);font-size:clamp(20px,4.4vw,58px);color:#f0ece2;line-height:1.06;letter-spacing:-0.025em;margin-bottom:3%;}
+.csp-body{font-family:var(--text);font-size:clamp(10px,1.35vw,17px);color:rgba(240,236,226,0.68);line-height:1.7;max-width:72%;}
+.csp-pq{font-family:var(--disp);font-style:italic;font-size:clamp(12px,2.1vw,28px);color:#f0ece2;line-height:1.38;border-left:3px solid var(--csp-accent,#c8704a);padding-left:5%;max-width:82%;margin-top:3%;}
+.csp-dg{display:flex;gap:5%;}
+.csp-dv{font-family:var(--disp);font-size:clamp(18px,3.8vw,50px);color:var(--csp-accent,#c8704a);line-height:1;margin-bottom:4px;}
+.csp-dl{font-family:var(--mono);font-size:clamp(6px,0.78vw,10px);letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,236,226,0.55);}
+.csp-corner{position:absolute;width:30px;height:30px;pointer-events:none;}
+.csp-corner.tl{top:5%;left:5%;border-top:1px solid rgba(240,236,226,0.1);border-left:1px solid rgba(240,236,226,0.1);}
+.csp-corner.br{bottom:5%;right:5%;border-bottom:1px solid rgba(240,236,226,0.1);border-right:1px solid rgba(240,236,226,0.1);}
+
+/* Image drop zone */
+#cs-drop{
+  margin-top:16px;
+  width:min(calc(100% - 80px), calc((100vh - 120px) * 16/9));
+}
+#cs-drop-zone{
+  border:1px dashed var(--border-2);border-radius:6px;
+  padding:14px 20px;cursor:pointer;
+  display:flex;align-items:center;gap:14px;
+  transition:border-color 0.15s,background 0.15s;
+  background:rgba(255,255,255,0.02);
+}
+#cs-drop-zone:hover,#cs-drop-zone.drag-over{
+  border-color:var(--accent);background:var(--accent-l);
+}
+#cs-drop-icon{
+  font-size:18px;color:var(--ink-3);flex-shrink:0;
+  width:32px;height:32px;border:1px solid var(--border-2);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  transition:border-color 0.15s,color 0.15s;
+}
+#cs-drop-zone:hover #cs-drop-icon{border-color:var(--accent);color:var(--accent);}
+#cs-drop-label{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--ink-2);
+}
+#cs-drop-hint{
+  font-family:var(--mono);font-size:7.5px;color:var(--ink-3);
+  margin-top:3px;line-height:1.5;
+}
+#cs-img-preview{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;
+  background:var(--bg-3);border:1px solid var(--border-2);border-radius:6px;
+}
+#cs-img-thumb{
+  width:64px;height:36px;object-fit:cover;border-radius:3px;
+  border:1px solid var(--border-2);flex-shrink:0;
+}
+#cs-img-remove{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:7.5px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--ink-3);padding:4px 8px;
+  border:1px solid var(--border-2);border-radius:3px;
+  transition:all 0.12s;margin-left:auto;
+}
+#cs-img-remove:hover{color:var(--ink);border-color:var(--border-3);}
+
+/* Mobile compose — stack vertically, preview above fields */
+body.is-mobile #compose-studio{flex-direction:column;}
+body.is-mobile #cs-left{flex:none;border-right:none;border-top:1px solid var(--border);order:2;max-height:55vh;overflow-y:auto;}
+body.is-mobile #cs-right{flex:1;order:1;min-height:40vw;}
+body.is-mobile #cs-preview{width:calc(100% - 32px);aspect-ratio:16/9;}
+body.is-mobile #cs-title{font-size:16px;}
+body.is-mobile #cs-body{font-size:16px;}
+
+/* Keep old type-pills class working for mobile arrange sheet */
 .type-pills{display:flex;gap:5px;flex-wrap:wrap;}
 .type-pill{padding:4px 9px;border:1px solid var(--border-2);border-radius:20px;font-family:var(--mono);font-size:7px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;color:var(--ink-3);transition:all 0.12s;}
 .type-pill:hover{border-color:var(--border-3);color:var(--ink);}
@@ -389,11 +694,6 @@ body.present-mode #ps-exit{display:block;}
 .bg-sw{width:26px;height:26px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:border-color 0.12s,transform 0.12s;}
 .bg-sw:hover{transform:scale(1.1);}
 .bg-sw.active{border-color:var(--accent);}
-.cw-foot{padding:10px 14px 14px;display:flex;gap:6px;}
-.cw-ok{flex:1;background:var(--accent);border:none;border-radius:5px;font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--bg);padding:8px 14px;cursor:pointer;transition:opacity 0.12s;}
-.cw-ok:hover{opacity:0.88;}
-.cw-cancel{background:none;border:1px solid var(--border-2);border-radius:5px;font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 14px;cursor:pointer;transition:all 0.12s;}
-.cw-cancel:hover{border-color:var(--border-3);color:var(--ink);}
 
 /* ─────────────────────────────────────────────
    FX PANEL
@@ -451,42 +751,7 @@ body.present-mode #ps-exit{display:block;}
 .mob-tab.active{color:var(--accent);}
 .mob-tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
 
-/* ── Navigation HUD strip — sits above tab bar ── */
-#mob-hud{
-  display:none;
-  position:fixed;left:0;right:0;
-  bottom:calc(var(--mob-tab) + var(--sab));
-  height:var(--mob-hud);
-  background:var(--bg-2);border-top:1px solid var(--border);
-  z-index:1999;
-  align-items:center;justify-content:space-between;
-  padding:0 0;
-}
-.mob-hud-prev,.mob-hud-next{
-  display:flex;align-items:center;justify-content:center;
-  width:60px;height:100%;
-  background:none;border:none;cursor:pointer;
-  color:var(--ink-2);font-size:22px;
-  -webkit-tap-highlight-color:transparent;flex-shrink:0;
-  transition:background 0.12s;
-}
-.mob-hud-prev:active,.mob-hud-next:active{background:var(--accent-l);color:var(--ink);}
-.mob-hud-center{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:5px;min-width:0;
-}
-#mob-counter{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--ink-3);}
-#mob-dots{
-  display:flex;gap:5px;align-items:center;
-  flex-wrap:wrap;justify-content:center;max-width:240px;
-}
-.mob-dot{
-  width:6px;height:6px;border-radius:50%;background:var(--border-3);
-  transition:background 0.3s,transform 0.3s;cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-.mob-dot.active{background:var(--accent);transform:scale(1.4);}
-.mob-dot.visited{background:var(--ink-3);}
+/* ── mob-hud removed — replaced by unified #nav-hud ── */
 
 /* ── Mobile View surface — slide fills full viewport ── */
 #mob-view{
@@ -586,10 +851,10 @@ body.present-mode #ps-exit{display:block;}
 .mob-arr-action.primary:active{opacity:0.85;}
 
 /* ── Global mobile body states ── */
-body.is-mobile #canvas-hud{display:none;}
 body.is-mobile #zoom-hud{display:none;}
 body.is-mobile #mob-tabs{display:flex;}
-body.is-mobile #mob-hud{display:flex;}
+/* nav-hud is always visible; on mobile it docks above tab bar */
+/* canvas-wrap clears both the tab bar and the docked nav-hud */
 body.is-mobile #canvas-wrap{bottom:calc(var(--mob-tab) + var(--mob-hud) + var(--sab));}
 body.is-mobile .node-card{cursor:default;}
 body.is-mobile .port{width:20px;height:20px;}
@@ -608,7 +873,7 @@ body.mob-mode-canvas #mob-arrange{display:none;}
 
 /* Present mode on mobile */
 body.is-mobile.present-mode #mob-tabs{display:none;}
-body.is-mobile.present-mode #mob-hud{display:none;}
+/* nav-hud already hidden in present-mode via body.present-mode #nav-hud{display:none} */
 body.is-mobile.present-mode #mob-view{display:none;}
 body.is-mobile.present-mode #mob-arrange{display:none;}
 body.is-mobile.present-mode #canvas-wrap{display:none;}
@@ -669,20 +934,16 @@ body.is-mobile .cw-in,body.is-mobile .cw-ta{font-size:16px;} /* prevent iOS zoom
       </defs>
       <line id="drag-line" class="conn-drag" style="display:none"/>
     </svg>
-    <!-- Lane labels injected by JS -->
-    <div id="spec-label" class="lane-label">Spec Lane</div>
-    <div id="render-label" class="lane-label">Render Lane</div>
-    <!-- Lane divider -->
-    <div id="lane-divider"></div>
+    <!-- Lane labels and dividers injected dynamically by updateLaneLabels() -->
   </div>
 </div>
 
-<!-- CANVAS HUD -->
-<div id="canvas-hud">
-  <button class="hud-btn" onclick="prevSlide()">‹</button>
+<!-- UNIFIED NAV HUD — desktop floats, mobile docks above tab bar -->
+<div id="nav-hud">
+  <button class="hud-btn" onclick="prevSlide()" aria-label="Previous">‹</button>
   <div id="hud-counter">—</div>
   <div id="hud-dots"></div>
-  <button class="hud-btn" onclick="nextSlide()">›</button>
+  <button class="hud-btn" onclick="nextSlide()" aria-label="Next">›</button>
 </div>
 
 <!-- ZOOM HUD -->
@@ -719,29 +980,102 @@ body.is-mobile .cw-in,body.is-mobile .cw-ta{font-size:16px;} /* prevent iOS zoom
 <button id="ps-exit" onclick="togglePresent()">✕ Exit</button>
 
 <!-- COMPOSE -->
-<div id="compose-widget">
-  <div class="cw-handle"></div>
-  <div class="cw-hdr"><div class="cw-lbl">New Slide Node</div><button class="cw-x" onclick="closeCompose()">×</button></div>
-  <div class="cw-body2">
-    <div class="cw-fl"><div class="cw-fl-lbl">Headline</div><input class="cw-in" id="cw-title" placeholder="Slide headline…" autocomplete="off"></div>
-    <div class="cw-fl"><div class="cw-fl-lbl">Body Text</div><textarea class="cw-ta" id="cw-body" rows="2" placeholder="Supporting text…"></textarea></div>
-    <div class="cw-fl"><div class="cw-fl-lbl">Type</div>
-      <div class="type-pills" id="cw-pills">
-        <div class="type-pill active" data-t="intro">intro</div>
-        <div class="type-pill" data-t="concept">concept</div>
-        <div class="type-pill" data-t="work">work</div>
-        <div class="type-pill" data-t="story">story</div>
-        <div class="type-pill" data-t="reflect">reflect</div>
-        <div class="type-pill" data-t="launch">launch</div>
-        <div class="type-pill" data-t="data">data</div>
+<!-- COMPOSE STUDIO — full viewport authoring surface -->
+<div id="compose-scrim"></div>
+<div id="compose-studio">
+
+  <!-- LEFT: authoring panel -->
+  <div id="cs-left">
+    <div id="cs-hdr">
+      <div id="cs-hdr-title">New Slide Node</div>
+      <button id="cs-close" onclick="closeCompose()">×</button>
+    </div>
+    <div id="cs-fields">
+
+      <!-- Era -->
+      <div class="cs-field">
+        <div class="cs-label">Era / Period</div>
+        <input id="cs-era" placeholder="2019–20, Now, Origins…" autocomplete="off" oninput="_csPreview()">
+      </div>
+
+      <!-- Type -->
+      <div class="cs-field">
+        <div class="cs-label">Type</div>
+        <div id="cs-type-row">
+          <div class="cs-type-pill active" data-t="intro">intro</div>
+          <div class="cs-type-pill" data-t="concept">concept</div>
+          <div class="cs-type-pill" data-t="work">work</div>
+          <div class="cs-type-pill" data-t="story">story</div>
+          <div class="cs-type-pill" data-t="reflect">reflect</div>
+          <div class="cs-type-pill" data-t="launch">launch</div>
+          <div class="cs-type-pill" data-t="data">data</div>
+        </div>
+      </div>
+
+      <!-- Background -->
+      <div class="cs-field" style="padding-bottom:20px">
+        <div class="cs-label">Background</div>
+        <div id="cs-bg-row"></div>
+      </div>
+
+      <!-- Headline -->
+      <div class="cs-field">
+        <div class="cs-label">Headline</div>
+        <input id="cs-title" placeholder="The slide's primary statement…" autocomplete="off" oninput="_csPreview()">
+      </div>
+
+      <!-- Body -->
+      <div class="cs-field">
+        <div class="cs-label">Body</div>
+        <textarea id="cs-body" rows="3" placeholder="Supporting context…" oninput="_csPreview()"></textarea>
+      </div>
+
+      <!-- Pull Quote -->
+      <div class="cs-field">
+        <div class="cs-label">Pull Quote</div>
+        <textarea id="cs-pq" rows="2" placeholder="The line worth remembering…" oninput="_csPreview()"></textarea>
+      </div>
+
+      <!-- Data Values -->
+      <div class="cs-field">
+        <div class="cs-label">Data Values</div>
+        <input id="cs-data" placeholder="$40M,Revenue,98%,Conversion…" autocomplete="off" oninput="_csPreview()">
+        <div style="font-family:var(--mono);font-size:7px;color:var(--ink-3);margin-top:4px;line-height:1.6">val,label pairs · comma-separated · replaces body when present</div>
+      </div>
+
+    </div>
+    <div id="cs-foot">
+      <button id="cs-discard" onclick="closeCompose()">Discard</button>
+      <button id="cs-create" onclick="submitCompose()">Create Node →</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: live preview -->
+  <div id="cs-right">
+    <div id="cs-ambient"></div>
+    <div id="cs-preview">
+      <div id="cs-prev-bg"></div>
+      <img id="cs-prev-img" alt="">
+      <div id="cs-prev-scrim"></div>
+      <div id="cs-prev-content"></div>
+      <div class="csp-corner tl"></div>
+      <div class="csp-corner br"></div>
+    </div>
+    <!-- Image drop zone -->
+    <div id="cs-drop">
+      <input type="file" id="cs-file-input" accept="image/*" style="display:none">
+      <div id="cs-drop-zone" onclick="document.getElementById('cs-file-input').click()">
+        <div id="cs-drop-icon">↑</div>
+        <div id="cs-drop-label">Drop photo or click to upload</div>
+        <div id="cs-drop-hint">Renders as atmospheric layer behind content</div>
+      </div>
+      <div id="cs-img-preview" style="display:none">
+        <img id="cs-img-thumb" alt="">
+        <button id="cs-img-remove" onclick="_csRemoveImg()">Remove</button>
       </div>
     </div>
-    <div class="cw-fl"><div class="cw-fl-lbl">Background</div><div class="bg-opts" id="cw-bgs"></div></div>
-    <div class="cw-fl"><div class="cw-fl-lbl">Pull Quote</div><input class="cw-in" id="cw-pq" placeholder="Memorable line…" autocomplete="off"></div>
-    <div class="cw-fl"><div class="cw-fl-lbl">Data (val,label,…)</div><input class="cw-in" id="cw-data" placeholder="$40M,Revenue…" autocomplete="off"></div>
-    <div class="cw-fl"><div class="cw-fl-lbl">Era</div><input class="cw-in" id="cw-era" placeholder="2019–20" autocomplete="off"></div>
   </div>
-  <div class="cw-foot"><button class="cw-cancel" onclick="closeCompose()">Cancel</button><button class="cw-ok" onclick="submitCompose()">Create Node</button></div>
+
 </div>
 
 <!-- FX PANEL -->
@@ -808,15 +1142,7 @@ body.is-mobile .cw-in,body.is-mobile .cw-ta{font-size:16px;} /* prevent iOS zoom
   </div>
 </div>
 
-<!-- MOBILE NAV HUD -->
-<div id="mob-hud">
-  <button class="mob-hud-prev" onclick="prevSlide()">‹</button>
-  <div class="mob-hud-center">
-    <div id="mob-counter">—</div>
-    <div id="mob-dots"></div>
-  </div>
-  <button class="mob-hud-next" onclick="nextSlide()">›</button>
-</div>
+<!-- mob-hud removed — unified #nav-hud handles both contexts -->
 
 <!-- MOBILE TAB BAR -->
 <div id="mob-tabs">
@@ -852,31 +1178,41 @@ const TA={
 };
 
 // Spatial zone constants
-const NODE_W    = 220;  // node card width — tighter, more editorial
-const NODE_H    = 160;  // node card height estimate
-const ROW_GAP   = 32;   // breathing room between spec rows
-const ROW_STEP  = NODE_H + ROW_GAP; // 192px per spec row
+// ── Spatial constants — three independent spec+render lane pairs ──────
+const NODE_W    = 220;  // node card width
+const NODE_H    = 160;  // node card height (conservative estimate)
 
-const SPEC_Y    = 60;   // Y top of spec lane — tighter to topbar
-const SPEC_ROWS = 2;
-const SPEC_BAND = SPEC_ROWS * ROW_STEP;
+const PREV_W    = 260;  // preview widget width
+const PREV_H    = Math.round(PREV_W * 9/16); // ~146px
+const PREV_BASE = 960;  // internal render resolution
+const PREV_BAR  = 24;   // pw-bar height in pixels
 
-// Render lane — much more vertical separation from spec lane
-// This is what creates the "dark canvas breathing room" between zones
-const LANE_SEP   = 240; // generous gap — this is the space from image 1
-const TETHER_H   = 40;  // short tether, just enough to read the connection
-const PREV_W     = 260; // preview widgets significantly smaller — thumbnail scale
-const PREV_H     = Math.round(PREV_W * 9/16); // ~146px
-const PREV_BASE  = 960;
-const PREV_GAP   = 60;  // generous gap between render rows too
-const PREV_ROW_H = PREV_H + 24 + PREV_GAP; // 24px = pw-bar height
+const COL_STEP  = 320;  // horizontal column pitch
 
-// Render lane row Y positions
-const RENDER_Y   = SPEC_Y + SPEC_BAND + LANE_SEP + TETHER_H;
-const RENDER_Y2  = RENDER_Y + PREV_ROW_H;
-const RENDER_Y3  = RENDER_Y + PREV_ROW_H*2;
+// Vertical rhythm within each lane pair
+const LANE_SEP  = 220;  // dark gap between spec lane bottom and render lane top
+const TETHER_H  = 40;   // tether line drop from node bottom to render lane top
 
-const COL_STEP  = 320;  // column pitch — node cards 220px, previews 260px, 60px horizontal air
+// Gap between lane pairs (bottom of render lane N → top of spec lane N+1)
+const PAIR_GAP  = 160;
+
+// Each lane pair height = NODE_H + LANE_SEP + TETHER_H + PREV_H + PREV_BAR
+const PAIR_H    = NODE_H + LANE_SEP + TETHER_H + PREV_H + PREV_BAR;
+
+// Three spec lane Y positions (top of each spec lane)
+const SPEC_Y    = 60;
+const SPEC_Y2   = SPEC_Y  + PAIR_H + PAIR_GAP;
+const SPEC_Y3   = SPEC_Y2 + PAIR_H + PAIR_GAP;
+
+// Three render lane Y positions (top of each render lane)
+const RENDER_Y  = SPEC_Y  + NODE_H + LANE_SEP + TETHER_H;
+const RENDER_Y2 = SPEC_Y2 + NODE_H + LANE_SEP + TETHER_H;
+const RENDER_Y3 = SPEC_Y3 + NODE_H + LANE_SEP + TETHER_H;
+
+// Lane divider Y positions (midpoint of each LANE_SEP gap)
+const DIV_Y1    = SPEC_Y  + NODE_H + LANE_SEP/2;
+const DIV_Y2    = SPEC_Y2 + NODE_H + LANE_SEP/2;
+const DIV_Y3    = SPEC_Y3 + NODE_H + LANE_SEP/2;
 
 // ══════════════════════════════════════════════════
 // NODE DATA
@@ -957,7 +1293,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v8';
+const VER='nrt_v9';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   try{
@@ -973,57 +1309,68 @@ function _reset(){nodes=DEFAULT_NODES.map(n=>({...n}));connections=DEFAULT_CONNE
 // ══════════════════════════════════════════════════
 // SPATIAL ZONE HELPERS
 // ══════════════════════════════════════════════════
-// Node x,y from col + row
+// Node x,y — each row occupies its own dedicated spec lane
 function nodeXY(node){
-  const col=node.col||0, row=node.row||0;
+  const col=node.col||0, row=Math.min(node.row||0,2);
+  const specYs=[SPEC_Y, SPEC_Y2, SPEC_Y3];
   return{
     x:60+col*COL_STEP,
-    y:SPEC_Y+row*ROW_STEP
+    y:specYs[row]
   };
 }
-// Preview widget position — supports renderRow 0 (primary), 1 (secondary), 2 (tertiary)
+// Preview widget: centered under node, in the render lane for its row
+// renderRow explicit override still supported for manual lane reassignment
 function prevXY(node){
   const{x}=nodeXY(node);
   const nx=node.x!==undefined?node.x:x;
   const offsetX=Math.round((NODE_W-PREV_W)/2);
-  const renderRowYs=[RENDER_Y, RENDER_Y2, RENDER_Y3];
-  // renderRow explicit override takes priority; otherwise inherit from spec row
-  const rr=node.renderRow!==undefined ? node.renderRow : (node.row||0);
-  return{
-    x:nx+offsetX,
-    y:renderRowYs[Math.min(rr,2)]
-  };
+  const renderYs=[RENDER_Y, RENDER_Y2, RENDER_Y3];
+  const rr=node.renderRow!==undefined?Math.min(node.renderRow,2):(node.row||0);
+  return{x:nx+offsetX, y:renderYs[rr]};
 }
 
-function laneDividerY(){ return SPEC_Y + SPEC_BAND + LANE_SEP/2; }
-
 function updateLaneLabels(){
-  const sl=document.getElementById('spec-label');
-  const rl=document.getElementById('render-label');
-  const ld=document.getElementById('lane-divider');
-  if(sl){sl.style.top=(SPEC_Y-20)+'px';sl.style.left='8px';}
-  if(rl){rl.style.top=(RENDER_Y-20)+'px';rl.style.left='8px';}
-  if(ld){ld.style.top=laneDividerY()+'px';}
+  const CVSel=document.getElementById('canvas');
 
-  // Secondary/tertiary lane labels — injected once, updated each time
-  ['render-label-2','render-label-3'].forEach((id,i)=>{
-    let el=document.getElementById(id);
-    const hasRow=nodes.some(n=>(n.renderRow||0)===i+1);
-    if(!hasRow){if(el)el.style.display='none';return;}
-    if(!el){el=document.createElement('div');el.id=id;el.className='lane-label';document.getElementById('canvas').appendChild(el);}
-    el.style.display='block';
-    el.style.top=([RENDER_Y2,RENDER_Y3][i]-20)+'px';
-    el.style.left='8px';
-    el.textContent=['Secondary Render Lane','Tertiary Render Lane'][i];
+  // Spec labels: row 0 always visible, row 1+2 only if any node uses them
+  const hasRow=[0,1,2].map(r=>nodes.some(n=>(n.row||0)===r));
+  const specYs=[SPEC_Y,SPEC_Y2,SPEC_Y3];
+  const renderYs=[RENDER_Y,RENDER_Y2,RENDER_Y3];
+  const divYs=[DIV_Y1,DIV_Y2,DIV_Y3];
+  const specLabels=['Primary','Secondary','Tertiary'];
+
+  [0,1,2].forEach(i=>{
+    const show=hasRow[i];
+
+    // Spec lane label
+    const slId='spec-label-'+(i+1);
+    let sl=document.getElementById(slId);
+    if(!show){if(sl)sl.style.display='none';return;}
+    if(!sl){sl=document.createElement('div');sl.id=slId;sl.className='lane-label';CVSel.appendChild(sl);}
+    sl.style.display='block';
+    sl.style.top=(specYs[i]-20)+'px';sl.style.left='8px';
+    sl.textContent=specLabels[i]+' Spec Lane';
+
+    // Render lane label
+    const rlId='render-label-'+(i+1);
+    let rl=document.getElementById(rlId);
+    if(!rl){rl=document.createElement('div');rl.id=rlId;rl.className='lane-label';CVSel.appendChild(rl);}
+    rl.style.display='block';
+    rl.style.top=(renderYs[i]-20)+'px';rl.style.left='8px';
+    rl.textContent=specLabels[i]+' Render Lane';
+
+    // Lane divider
+    const ldId='lane-divider-'+(i+1);
+    let ld=document.getElementById(ldId);
+    if(!ld){
+      ld=document.createElement('div');ld.id=ldId;
+      ld.style.cssText='position:absolute;left:0;right:0;height:1px;pointer-events:none;z-index:1;';
+      ld.style.background='linear-gradient(to right,transparent 0%,var(--border-2) 6%,var(--border-2) 94%,transparent 100%)';
+      CVSel.appendChild(ld);
+    }
+    ld.style.display='block';
+    ld.style.top=divYs[i]+'px';
   });
-
-  // Secondary lane divider
-  let ld2=document.getElementById('lane-divider-2');
-  const hasRow1=nodes.some(n=>(n.renderRow||0)>=1);
-  if(hasRow1){
-    if(!ld2){ld2=document.createElement('div');ld2.id='lane-divider-2';ld2.style.cssText=document.getElementById('lane-divider').style.cssText;ld2.className='';ld2.style.background='linear-gradient(to right,transparent 0%,var(--border-2) 8%,var(--border-2) 92%,transparent 100%)';ld2.style.height='1px';ld2.style.position='absolute';ld2.style.left='0';ld2.style.right='0';ld2.style.pointerEvents='none';document.getElementById('canvas').appendChild(ld2);}
-    ld2.style.top=(RENDER_Y2-PREV_GAP/2)+'px';
-  } else if(ld2) ld2.style.display='none';
 }
 
 // ══════════════════════════════════════════════════
@@ -1053,12 +1400,11 @@ function fitAll(){
   nodes.forEach(n=>{
     x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);
     x1=Math.max(x1,n.x+NODE_W);y1=Math.max(y1,n.y+NODE_H);
-    // Render lane — account for whichever row this preview is on
     const pp=prevXY(n);
-    const py=n.prevY||pp.y;
-    y1=Math.max(y1,py+PREV_H+26);
-    x0=Math.min(x0,n.prevX!==undefined?n.prevX:pp.x);
-    x1=Math.max(x1,(n.prevX!==undefined?n.prevX:pp.x)+PREV_W);
+    const px=n.prevX!==undefined?n.prevX:pp.x;
+    const py=n.prevY!==undefined?n.prevY:pp.y;
+    x0=Math.min(x0,px);x1=Math.max(x1,px+PREV_W);
+    y1=Math.max(y1,py+PREV_H+PREV_BAR);
   });
   const sc=Math.min(vpW/(x1-x0+pad*2),vpH/(y1-y0+pad*2),1.5);
   transform.scale=sc;transform.x=(vpW-(x1+x0)*sc)/2;transform.y=(vpH-(y1+y0)*sc)/2;
@@ -1070,7 +1416,8 @@ function panTo(id){
   const wrap=document.getElementById('canvas-wrap');
   const vpW=wrap.clientWidth,vpH=wrap.clientHeight;
   // Pan to center on the node-preview pair
-  const cx=n.x+NODE_W/2, cy=n.y+(NODE_H+PREV_H)/2;
+  const pp=prevXY(n);const midY=(n.y+NODE_H+(pp.y+PREV_H))/2;
+  const cx=n.x+NODE_W/2, cy=midY;
   CVS.style.transition='transform 0.44s cubic-bezier(0.32,0.72,0,1)';
   transform.x=vpW/2-cx*transform.scale;
   transform.y=vpH/2-cy*transform.scale;
@@ -1350,7 +1697,6 @@ function _flushConns(){
     const pw=getPW(node.id);if(!pw)return;
     // Node bottom center
     const nx=node.x+NODE_W/2, ny=node.y+NODE_H;
-    // Preview top center — use stored position or compute from renderRow
     const pp=prevXY(node);
     const ppx=(node.prevX!==undefined?node.prevX:pp.x)+PREV_W/2;
     const ppy=(node.prevY!==undefined?node.prevY:pp.y);
@@ -1557,13 +1903,17 @@ function togglePresent(){
 // ══════════════════════════════════════════════════
 function _updHUDs(){
   const txt=chainPath.length?`${chainIndex+1} / ${chainPath.length}`:'—';
-  const dotFn=(cls)=>chainPath.length<=1?'':
-    chainPath.map((id,i)=>`<div class="${cls} ${i===chainIndex?'active':i<chainIndex?'visited':''}" onclick="setSlide('${id}')"></div>`).join('');
-  ['hud-counter','ps-counter','mob-counter'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=txt;});
-  const hd=document.getElementById('hud-dots');if(hd)hd.innerHTML=dotFn('hud-dot');
-  const pd=document.getElementById('ps-dots');if(pd)pd.innerHTML=dotFn('ps-dot');
-  const md=document.getElementById('mob-dots');if(md)md.innerHTML=dotFn('mob-dot');
-  // Sync mob-view index badge
+  const dotHtml=chainPath.length<=1?'':
+    chainPath.map((id,i)=>`<div class="hud-dot ${i===chainIndex?'active':i<chainIndex?'visited':''}" onclick="setSlide('${id}')"></div>`).join('');
+  const psDotHtml=chainPath.length<=1?'':
+    chainPath.map((id,i)=>`<div class="ps-dot ${i===chainIndex?'active':i<chainIndex?'visited':''}" onclick="setSlide('${id}')"></div>`).join('');
+  // Unified nav-hud
+  const hc=document.getElementById('hud-counter');if(hc)hc.textContent=txt;
+  const hd=document.getElementById('hud-dots');if(hd)hd.innerHTML=dotHtml;
+  // Present surface nav
+  const pc=document.getElementById('ps-counter');if(pc)pc.textContent=txt;
+  const pd=document.getElementById('ps-dots');if(pd)pd.innerHTML=psDotHtml;
+  // Mob-view badge
   const mvidx=document.getElementById('mob-view-idx');
   if(mvidx)mvidx.textContent=chainPath.length?`${chainIndex+1} / ${chainPath.length}`:'';
 }
@@ -1571,40 +1921,183 @@ function _updHUDs(){
 // ══════════════════════════════════════════════════
 // COMPOSE
 // ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+// COMPOSE STUDIO
+// ══════════════════════════════════════════════════
+
+let composeImgUrl = null; // base64 data URL or null
+
+function _csGetState(){
+  const type=document.querySelector('#cs-type-row .cs-type-pill.active')?.dataset.t||'intro';
+  const bg=document.querySelector('#cs-bg-row .cs-bg-sw.active')?.dataset.bg||'night';
+  return{
+    type,bg,
+    imgUrl:composeImgUrl||undefined,
+    title:document.getElementById('cs-title').value.trim(),
+    body:document.getElementById('cs-body').value.trim(),
+    pullquote:document.getElementById('cs-pq').value.trim(),
+    dataValues:document.getElementById('cs-data').value.trim(),
+    era:document.getElementById('cs-era').value.trim(),
+  };
+}
+
+function _csPreview(){
+  const s=_csGetState();
+  const bgDef=BGS.find(b=>b.id===s.bg)||BGS[0];
+  const accent=TA[s.type]||'#c8704a';
+
+  document.getElementById('cs-prev-bg').style.background=bgDef.bg;
+  document.getElementById('cs-preview').style.background=bgDef.bg;
+  document.getElementById('cs-preview').style.setProperty('--csp-accent',accent);
+  const amb=document.getElementById('cs-ambient');
+  amb.style.setProperty('--cs-amb',accent);
+  amb.style.opacity='0.22';
+
+  // Image
+  const img=document.getElementById('cs-prev-img');
+  if(s.imgUrl){
+    img.src=s.imgUrl;
+    img.onload=()=>img.classList.add('vis');
+    if(img.complete) img.classList.add('vis');
+  } else {
+    img.classList.remove('vis');
+    img.src='';
+  }
+
+  // Content
+  let html='';
+  if(s.era)  html+=`<div class="csp-era">${esc(s.era)}</div>`;
+  if(s.type) html+=`<div class="csp-tag">${esc(s.type)}</div>`;
+  if(s.dataValues){
+    if(s.title) html+=`<div class="csp-hl">${esc(s.title)||'<span style="opacity:0.18">Headline…</span>'}</div>`;
+    const parts=s.dataValues.split(',');
+    let g='<div class="csp-dg">';
+    for(let i=0;i<parts.length;i+=2){
+      const v=parts[i]?.trim(),l=parts[i+1]?.trim();
+      if(v) g+=`<div><div class="csp-dv">${esc(v)}</div>${l?`<div class="csp-dl">${esc(l)}</div>`:''}</div>`;
+    }
+    html+=g+'</div>';
+    if(s.body) html+=`<div class="csp-body">${esc(s.body)}</div>`;
+  } else {
+    html+=`<div class="csp-hl">${s.title?esc(s.title):'<span style="opacity:0.18">Headline…</span>'}</div>`;
+    if(s.body) html+=`<div class="csp-body">${esc(s.body)}</div>`;
+    if(s.pullquote) html+=`<div class="csp-pq">${esc(s.pullquote)}</div>`;
+  }
+  document.getElementById('cs-prev-content').innerHTML=html;
+}
+
+function _csLoadImg(file){
+  if(!file||!file.type.startsWith('image/')) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    composeImgUrl=e.target.result;
+    // Show thumbnail
+    const thumb=document.getElementById('cs-img-thumb');
+    thumb.src=composeImgUrl;
+    document.getElementById('cs-drop-zone').style.display='none';
+    document.getElementById('cs-img-preview').style.display='flex';
+    _csPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function _csRemoveImg(){
+  composeImgUrl=null;
+  document.getElementById('cs-img-thumb').src='';
+  document.getElementById('cs-drop-zone').style.display='flex';
+  document.getElementById('cs-img-preview').style.display='none';
+  _csPreview();
+}
+
+function _csInitDropZone(){
+  const dz=document.getElementById('cs-drop-zone');
+  const fi=document.getElementById('cs-file-input');
+
+  fi.onchange=e=>{ if(e.target.files[0]) _csLoadImg(e.target.files[0]); fi.value=''; };
+
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.classList.remove('drag-over');
+    const f=e.dataTransfer.files[0];if(f) _csLoadImg(f);
+  });
+}
+
 function addNode(cx,cy){
   const wrap=document.getElementById('canvas-wrap');
   const pt=cx!==undefined?{x:cx,y:cy}:c2c(wrap.clientWidth/2,wrap.clientHeight/2);
-  composeXY={x:Math.round((pt.x||200)-120),y:Math.round((pt.y||SPEC_Y)-75)};
-  const bgs=document.getElementById('cw-bgs');
-  bgs.innerHTML=BGS.map((b,i)=>`<div class="bg-sw ${i===0?'active':''}" data-bg="${b.id}" style="background:${b.bg}" title="${b.id}"></div>`).join('');
-  bgs.querySelectorAll('.bg-sw').forEach(sw=>sw.addEventListener('click',()=>{bgs.querySelectorAll('.bg-sw').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}));
-  document.querySelectorAll('#cw-pills .type-pill').forEach(p=>p.classList.toggle('active',p.dataset.t==='intro'));
-  ['cw-title','cw-body','cw-pq','cw-data','cw-era'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('compose-widget').classList.add('open');
-  setTimeout(()=>document.getElementById('cw-title').focus(),360);
+  composeXY={x:Math.round((pt.x||200)-110),y:Math.round((pt.y||SPEC_Y)-80)};
+
+  // Reset
+  composeImgUrl=null;
+  ['cs-title','cs-body','cs-pq','cs-data','cs-era'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#cs-type-row .cs-type-pill').forEach(p=>p.classList.toggle('active',p.dataset.t==='intro'));
+  document.getElementById('cs-drop-zone').style.display='flex';
+  document.getElementById('cs-img-preview').style.display='none';
+  document.getElementById('cs-img-thumb').src='';
+
+  // Build bg swatches
+  const bgRow=document.getElementById('cs-bg-row');
+  bgRow.innerHTML=BGS.map((b,i)=>`
+    <div class="cs-bg-sw ${i===0?'active':''}" data-bg="${b.id}" style="background:${b.bg}" title="${b.id}">
+      <div class="cs-bg-sw-label">${b.id}</div>
+    </div>`).join('');
+  bgRow.querySelectorAll('.cs-bg-sw').forEach(sw=>sw.addEventListener('click',()=>{
+    bgRow.querySelectorAll('.cs-bg-sw').forEach(s=>s.classList.remove('active'));
+    sw.classList.add('active');
+    _csPreview();
+  }));
+
+  // Wire type pills
+  document.querySelectorAll('#cs-type-row .cs-type-pill').forEach(p=>p.addEventListener('click',()=>{
+    document.querySelectorAll('#cs-type-row .cs-type-pill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    _csPreview();
+  }));
+
+  // Open with animation
+  const studio=document.getElementById('compose-studio');
+  const scrim=document.getElementById('compose-scrim');
+  studio.classList.add('open');
+  scrim.classList.add('open');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    studio.classList.add('visible');
+    scrim.classList.add('visible');
+  }));
+
+  _csPreview();
+  setTimeout(()=>document.getElementById('cs-title').focus(),320);
 }
-function closeCompose(){document.getElementById('compose-widget').classList.remove('open');}
+
+function closeCompose(){
+  const studio=document.getElementById('compose-studio');
+  const scrim=document.getElementById('compose-scrim');
+  studio.classList.remove('visible');
+  scrim.classList.remove('visible');
+  setTimeout(()=>{studio.classList.remove('open');scrim.classList.remove('open');},300);
+}
+
 function submitCompose(){
-  const title=document.getElementById('cw-title').value.trim();
-  if(!title){toast('Add a headline first');return;}
+  const s=_csGetState();
+  if(!s.title){toast('Add a headline first');document.getElementById('cs-title').focus();return;}
   const maxCol=nodes.reduce((m,n)=>Math.max(m,n.col||0),0);
   const node={
     id:'n'+Date.now(),col:maxCol+1,row:0,
     x:composeXY?.x||200,y:composeXY?.y||SPEC_Y,
-    type:document.querySelector('#cw-pills .type-pill.active')?.dataset.t||'intro',
-    title,bg:document.querySelector('#cw-bgs .bg-sw.active')?.dataset.bg||'night',
-    body:document.getElementById('cw-body').value.trim()||undefined,
-    pullquote:document.getElementById('cw-pq').value.trim()||undefined,
-    dataValues:document.getElementById('cw-data').value.trim()||undefined,
-    era:document.getElementById('cw-era').value.trim()||undefined,
+    type:s.type,title:s.title,bg:s.bg,
+    imgUrl:s.imgUrl||undefined,
+    body:s.body||undefined,
+    pullquote:s.pullquote||undefined,
+    dataValues:s.dataValues||undefined,
+    era:s.era||undefined,
     z:nodes.length+1
   };
-  nodes.push(node);mA();closeCompose();dSave();setSlide(node.id);toast('Node created');
+  nodes.push(node);mA();
+  closeCompose();
+  dSave();
+  setSlide(node.id);
+  toast('Node created');
 }
-document.getElementById('cw-pills').addEventListener('click',e=>{
-  const p=e.target.closest('.type-pill');if(!p)return;
-  document.querySelectorAll('#cw-pills .type-pill').forEach(x=>x.classList.remove('active'));p.classList.add('active');
-});
 
 // ══════════════════════════════════════════════════
 // FX PANEL
@@ -1909,6 +2402,7 @@ function init(){
       _rebuildChain();_updHUDs();mN();_sched();
     }
     mobInit();
+    _csInitDropZone();
     // Apply saved arrangement UI state (desktop)
     document.querySelectorAll('.arr-btn').forEach(b=>b.classList.toggle('active',b.dataset.arr===currentArrangement));
     document.body.classList.toggle('view-broadcast',currentArrangement==='broadcast');

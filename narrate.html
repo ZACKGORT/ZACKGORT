@@ -22,7 +22,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;}
   --spec-y:200;     /* px — base Y for spec lane */
   --render-gap:320; /* px — vertical distance from node bottom to preview top */
   --node-w:240px;
-  --prev-w:340px;
+  --prev-w:300px;
   --prev-base:960;  /* internal render width */
 
   --c-work:#c8704a;--c-concept:#7a8ecc;--c-story:#c87060;--c-data:#6ab09a;
@@ -423,36 +423,205 @@ body.present-mode #ps-exit{display:block;}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg-4);border:1px solid var(--border-2);border-radius:5px;font-family:var(--mono);font-size:8px;letter-spacing:0.1em;color:var(--ink-2);padding:6px 14px;z-index:9000;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* ─────────────────────────────────────────────
-   MOBILE
-───────────────────────────────────────────── */
-:root{--mob-tab:54px;--mob-hud:50px;}
-#mob-tabs{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(var(--mob-tab) + var(--sab));padding-bottom:var(--sab);background:var(--bg-2);border-top:1px solid var(--border);z-index:2000;}
-.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 0;font-family:var(--mono);font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);transition:color 0.15s;-webkit-tap-highlight-color:transparent;min-height:44px;}
+/* ══════════════════════════════════════════════════════
+   MOBILE — full surface system
+══════════════════════════════════════════════════════ */
+:root{
+  --mob-tab:58px;
+  --mob-hud:52px;
+}
+
+/* ── Bottom tab bar ── */
+#mob-tabs{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--mob-tab) + var(--sab));
+  padding-bottom:var(--sab);
+  background:var(--bg-2);
+  border-top:1px solid var(--border);
+  z-index:2000;
+}
+.mob-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;cursor:pointer;
+  font-family:var(--mono);font-size:6.5px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ink-3);transition:color 0.15s;
+  -webkit-tap-highlight-color:transparent;min-height:44px;padding:6px 0;
+}
 .mob-tab.active{color:var(--accent);}
-.mob-tab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
-#mob-hud{display:none;position:fixed;left:0;right:0;bottom:calc(var(--mob-tab) + var(--sab));height:var(--mob-hud);background:var(--bg-2);border-top:1px solid var(--border);z-index:1999;align-items:center;justify-content:space-between;padding:0 4px;}
-.hud-prev,.hud-next{display:flex;align-items:center;justify-content:center;width:52px;height:44px;background:none;border:none;cursor:pointer;color:var(--ink-2);font-size:20px;-webkit-tap-highlight-color:transparent;border-radius:6px;flex-shrink:0;}
-.hud-prev:active,.hud-next:active{background:var(--accent-l);}
-.hud-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+.mob-tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── Navigation HUD strip — sits above tab bar ── */
+#mob-hud{
+  display:none;
+  position:fixed;left:0;right:0;
+  bottom:calc(var(--mob-tab) + var(--sab));
+  height:var(--mob-hud);
+  background:var(--bg-2);border-top:1px solid var(--border);
+  z-index:1999;
+  align-items:center;justify-content:space-between;
+  padding:0 0;
+}
+.mob-hud-prev,.mob-hud-next{
+  display:flex;align-items:center;justify-content:center;
+  width:60px;height:100%;
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-2);font-size:22px;
+  -webkit-tap-highlight-color:transparent;flex-shrink:0;
+  transition:background 0.12s;
+}
+.mob-hud-prev:active,.mob-hud-next:active{background:var(--accent-l);color:var(--ink);}
+.mob-hud-center{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;min-width:0;
+}
 #mob-counter{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;color:var(--ink-3);}
-#mob-dots{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:220px;}
-.mob-dot{width:5px;height:5px;border-radius:50%;background:var(--border-3);transition:background 0.3s,transform 0.3s;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.mob-dot.active{background:var(--accent);transform:scale(1.5);}
+#mob-dots{
+  display:flex;gap:5px;align-items:center;
+  flex-wrap:wrap;justify-content:center;max-width:240px;
+}
+.mob-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--border-3);
+  transition:background 0.3s,transform 0.3s;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-dot.active{background:var(--accent);transform:scale(1.4);}
 .mob-dot.visited{background:var(--ink-3);}
 
+/* ── Mobile View surface — slide fills full viewport ── */
+#mob-view{
+  display:none;
+  position:fixed;
+  top:46px;left:0;right:0;
+  bottom:calc(var(--mob-tab) + var(--mob-hud) + var(--sab));
+  background:var(--bg);z-index:100;
+  flex-direction:column;
+  overflow:hidden;
+}
+/* Active preview fills the view surface */
+#mob-view-slide{
+  flex:1;position:relative;overflow:hidden;
+}
+#mob-view-slide .mv-bg{position:absolute;inset:0;transition:background 0.9s ease;}
+#mob-view-slide .mv-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s,transform 8s;transform:scale(1.04);}
+#mob-view-slide .mv-img.vis{opacity:0.22;transform:scale(1);}
+#mob-view-slide .mv-scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.54) 0%,rgba(0,0,0,0.06) 55%,rgba(0,0,0,0.44) 100%);}
+#mob-view-slide .mv-ambient{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1.6s;background:radial-gradient(ellipse 80% 60% at 50% 50%,var(--mv-amb,#c8704a) 0%,transparent 70%);}
+#mob-view-slide .mv-content{
+  position:absolute;inset:0;z-index:3;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:8% 7% 6%;
+}
+/* Slide text scaled for mobile viewport */
+.mv-era{font-family:var(--mono);font-size:clamp(7px,2.5vw,10px);letter-spacing:0.22em;text-transform:uppercase;color:rgba(240,236,226,0.3);margin-bottom:10px;opacity:0;transform:translateY(8px);transition:opacity 0.5s,transform 0.5s;}
+.mv-tag{font-family:var(--mono);font-size:clamp(8px,2.8vw,11px);letter-spacing:0.2em;text-transform:uppercase;color:var(--mv-accent,#c8704a);margin-bottom:14px;opacity:0;transform:translateY(10px);transition:opacity 0.55s 0.08s,transform 0.55s 0.08s;}
+.mv-hl{font-family:var(--disp);font-size:clamp(26px,8vw,52px);color:#f0ece2;line-height:1.06;letter-spacing:-0.02em;margin-bottom:14px;opacity:0;transform:translateY(16px);transition:opacity 0.62s 0.18s,transform 0.62s 0.18s;}
+.mv-body{font-family:var(--text);font-size:clamp(13px,3.8vw,18px);color:rgba(240,236,226,0.7);line-height:1.65;opacity:0;transform:translateY(12px);transition:opacity 0.6s 0.32s,transform 0.6s 0.32s;}
+.mv-pq{font-family:var(--disp);font-style:italic;font-size:clamp(16px,4.8vw,26px);color:#f0ece2;line-height:1.38;border-left:3px solid var(--mv-accent,#c8704a);padding-left:6%;margin-top:12px;opacity:0;transform:translateY(12px);transition:opacity 0.62s 0.36s,transform 0.62s 0.36s;}
+.mv-dg{display:flex;gap:8%;opacity:0;transform:translateY(12px);transition:opacity 0.6s 0.26s,transform 0.6s 0.26s;}
+.mv-dv{font-family:var(--disp);font-size:clamp(28px,9vw,48px);color:var(--mv-accent,#c8704a);line-height:1;margin-bottom:4px;}
+.mv-dl{font-family:var(--mono);font-size:clamp(7px,2vw,10px);letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,236,226,0.55);}
+#mob-view-slide.anim .mv-era,
+#mob-view-slide.anim .mv-tag,
+#mob-view-slide.anim .mv-hl,
+#mob-view-slide.anim .mv-body,
+#mob-view-slide.anim .mv-pq,
+#mob-view-slide.anim .mv-dg{opacity:1;transform:translateY(0);}
+.mv-corner{position:absolute;width:28px;height:28px;pointer-events:none;}
+.mv-corner.tl{top:5%;left:5%;border-top:1px solid rgba(240,236,226,0.1);border-left:1px solid rgba(240,236,226,0.1);}
+.mv-corner.br{bottom:5%;right:5%;border-bottom:1px solid rgba(240,236,226,0.1);border-right:1px solid rgba(240,236,226,0.1);}
+#mob-view-idx{position:absolute;top:12px;right:14px;z-index:5;font-family:var(--mono);font-size:7px;letter-spacing:0.12em;color:rgba(240,236,226,0.22);}
+
+/* Swipe hint arrows */
+#mob-swipe-hint{
+  position:absolute;inset:0;pointer-events:none;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;padding:0 12px;
+}
+.mob-swipe-arr{font-size:24px;color:rgba(240,236,226,0.1);font-family:var(--mono);}
+
+/* ── Arrange bottom sheet ── */
+#mob-arrange{
+  display:none;
+  position:fixed;bottom:calc(var(--mob-tab) + var(--sab));left:0;right:0;
+  background:var(--bg-2);border-top:1px solid var(--border);
+  z-index:1998;
+  flex-direction:column;
+  max-height:70vh;overflow-y:auto;
+}
+.mob-arr-hdr{
+  padding:12px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.mob-arr-hdr-title{font-family:var(--mono);font-size:7.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-3);}
+.mob-arr-close{background:none;border:none;color:var(--ink-3);font-size:16px;cursor:pointer;padding:2px 6px;-webkit-tap-highlight-color:transparent;}
+
+/* Arrangement grid */
+.mob-arr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;}
+.mob-arr-card{
+  background:var(--bg-3);border:1px solid var(--border-2);border-radius:8px;
+  padding:14px 12px;cursor:pointer;
+  display:flex;flex-direction:column;gap:4px;
+  transition:border-color 0.15s,background 0.15s;
+  -webkit-tap-highlight-color:transparent;min-height:70px;
+}
+.mob-arr-card:active{background:var(--accent-l);}
+.mob-arr-card.active{border-color:var(--accent);background:var(--accent-l);}
+.mob-arr-icon{font-size:18px;margin-bottom:2px;}
+.mob-arr-name{font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-2);}
+.mob-arr-desc{font-family:var(--mono);font-size:7px;color:var(--ink-3);line-height:1.5;}
+
+/* Edit actions row */
+.mob-arr-actions{
+  display:flex;gap:8px;padding:0 14px 14px;flex-shrink:0;
+}
+.mob-arr-action{
+  flex:1;padding:11px 8px;background:var(--bg-3);border:1px solid var(--border-2);
+  border-radius:6px;font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--ink-2);cursor:pointer;text-align:center;
+  transition:all 0.12s;-webkit-tap-highlight-color:transparent;
+}
+.mob-arr-action:active{background:var(--accent-l);border-color:var(--accent);color:var(--ink);}
+.mob-arr-action.primary{background:var(--accent);border-color:var(--accent);color:var(--bg);}
+.mob-arr-action.primary:active{opacity:0.85;}
+
+/* ── Global mobile body states ── */
 body.is-mobile #canvas-hud{display:none;}
-body.is-mobile #zoom-hud{bottom:calc(var(--mob-tab) + var(--mob-hud) + var(--sab) + 8px);}
+body.is-mobile #zoom-hud{display:none;}
 body.is-mobile #mob-tabs{display:flex;}
 body.is-mobile #mob-hud{display:flex;}
 body.is-mobile #canvas-wrap{bottom:calc(var(--mob-tab) + var(--mob-hud) + var(--sab));}
 body.is-mobile .node-card{cursor:default;}
-body.is-mobile .port{width:18px;height:18px;}
-body.is-mobile .port-r{right:-9px;}body.is-mobile .port-l{left:-9px;}
-body.is-mobile .port-t{top:-9px;}body.is-mobile .port-b{bottom:-9px;}
+body.is-mobile .port{width:20px;height:20px;}
+body.is-mobile .port-r{right:-10px;}body.is-mobile .port-l{left:-10px;}
+body.is-mobile .port-t{top:-10px;}body.is-mobile .port-b{bottom:-10px;}
+
+/* Tap targets */
+body.is-mobile .node-act{width:28px;height:28px;font-size:14px;}
+body.is-mobile .prev-act-btn{width:28px;height:28px;font-size:14px;}
+
+/* Mobile surface modes */
+body.mob-mode-view #mob-view{display:flex;}
+body.mob-mode-view #canvas-wrap{display:none;}
+body.mob-mode-arrange #mob-arrange{display:flex;}
+body.mob-mode-canvas #mob-arrange{display:none;}
+
+/* Present mode on mobile */
 body.is-mobile.present-mode #mob-tabs{display:none;}
 body.is-mobile.present-mode #mob-hud{display:none;}
+body.is-mobile.present-mode #mob-view{display:none;}
+body.is-mobile.present-mode #mob-arrange{display:none;}
+body.is-mobile.present-mode #canvas-wrap{display:none;}
 
+/* Compose widget: full width on mobile, respects safe areas */
+body.is-mobile #compose-widget{
+  width:100%;left:0;
+  border-radius:14px 14px 0 0;
+}
+body.is-mobile .cw-body2{max-height:55vh;}
+body.is-mobile .cw-in,body.is-mobile .cw-ta{font-size:16px;} /* prevent iOS zoom on input */
+
+/* Topbar: mobile shows only brand + present */
 @media(max-width:700px){
   #tb-title,.tb-div,.tb-pres{display:none;}
   .tb-btn:not(#btn-present){display:none;}
@@ -581,20 +750,87 @@ body.is-mobile.present-mode #mob-hud{display:none;}
   <div class="fxp-body" id="fxp-body"></div>
 </div>
 
-<!-- MOBILE HUD + TABS -->
-<div id="mob-hud">
-  <button class="hud-prev" onclick="prevSlide()">‹</button>
-  <div class="hud-center"><div id="mob-counter">—</div><div id="mob-dots"></div></div>
-  <button class="hud-next" onclick="nextSlide()">›</button>
+<!-- MOBILE VIEW SURFACE -->
+<div id="mob-view">
+  <div id="mob-view-slide">
+    <div class="mv-bg"></div>
+    <img class="mv-img" alt="">
+    <div class="mv-scrim"></div>
+    <div class="mv-ambient"></div>
+    <div class="mv-content"></div>
+    <div class="mv-corner tl"></div>
+    <div class="mv-corner br"></div>
+    <div id="mob-view-idx"></div>
+    <div id="mob-swipe-hint">
+      <div class="mob-swipe-arr">‹</div>
+      <div class="mob-swipe-arr">›</div>
+    </div>
+  </div>
 </div>
+
+<!-- MOBILE ARRANGE SHEET -->
+<div id="mob-arrange">
+  <div class="mob-arr-hdr">
+    <div class="mob-arr-hdr-title">Arrange</div>
+    <button class="mob-arr-close" onclick="mobSetMode('canvas')">×</button>
+  </div>
+  <div class="mob-arr-grid">
+    <div class="mob-arr-card active" data-arr="narrative" onclick="mobArrSelect(this,'narrative')">
+      <div class="mob-arr-icon">↕</div>
+      <div class="mob-arr-name">Narrative</div>
+      <div class="mob-arr-desc">Single column, node → preview, linear reading</div>
+    </div>
+    <div class="mob-arr-card" data-arr="timeline" onclick="mobArrSelect(this,'timeline')">
+      <div class="mob-arr-icon">⟷</div>
+      <div class="mob-arr-name">Timeline</div>
+      <div class="mob-arr-desc">Two lanes, spec above, render below</div>
+    </div>
+    <div class="mob-arr-card" data-arr="broadcast" onclick="mobArrSelect(this,'broadcast')">
+      <div class="mob-arr-icon">◎</div>
+      <div class="mob-arr-name">Broadcast</div>
+      <div class="mob-arr-desc">Previews dominant, nodes recede</div>
+    </div>
+    <div class="mob-arr-card" data-arr="author" onclick="mobArrSelect(this,'author')">
+      <div class="mob-arr-icon">✎</div>
+      <div class="mob-arr-name">Author</div>
+      <div class="mob-arr-desc">Nodes dominant, edit-focused</div>
+    </div>
+    <div class="mob-arr-card" data-arr="overview" onclick="mobArrSelect(this,'overview')">
+      <div class="mob-arr-icon">⊞</div>
+      <div class="mob-arr-name">Overview</div>
+      <div class="mob-arr-desc">Everything visible, overview scale</div>
+    </div>
+  </div>
+  <div class="mob-arr-actions">
+    <div class="mob-arr-action" onclick="addNode();mobSetMode('canvas')">+ Node</div>
+    <div class="mob-arr-action" onclick="fitAll();mobSetMode('canvas')">Fit</div>
+    <div class="mob-arr-action primary" onclick="togglePresent()">▶ Present</div>
+  </div>
+</div>
+
+<!-- MOBILE NAV HUD -->
+<div id="mob-hud">
+  <button class="mob-hud-prev" onclick="prevSlide()">‹</button>
+  <div class="mob-hud-center">
+    <div id="mob-counter">—</div>
+    <div id="mob-dots"></div>
+  </div>
+  <button class="mob-hud-next" onclick="nextSlide()">›</button>
+</div>
+
+<!-- MOBILE TAB BAR -->
 <div id="mob-tabs">
-  <div class="mob-tab active" id="tab-canvas" onclick="mobSetTab('canvas')">
-    <svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><circle cx="12" cy="17" r="2.5"/><line x1="9.5" y1="8" x2="14.5" y2="8"/><line x1="8.5" y1="10.2" x2="11" y2="15"/><line x1="15.5" y1="10.2" x2="13" y2="15"/></svg>
+  <div class="mob-tab active" id="tab-view" onclick="mobSetMode('view')">
+    <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="9" y1="19" x2="15" y2="19"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    View
+  </div>
+  <div class="mob-tab" id="tab-canvas" onclick="mobSetMode('canvas')">
+    <svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="2.2"/><circle cx="17" cy="8" r="2.2"/><circle cx="12" cy="17" r="2.2"/><line x1="9.2" y1="8" x2="14.8" y2="8"/><line x1="8.2" y1="10" x2="11" y2="15"/><line x1="15.8" y1="10" x2="13" y2="15"/></svg>
     Canvas
   </div>
-  <div class="mob-tab" id="tab-present" onclick="togglePresent()">
-    <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
-    Present
+  <div class="mob-tab" id="tab-arrange" onclick="mobSetMode('arrange')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="5" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="3" y="11" width="8" height="5" rx="1"/><rect x="13" y="11" width="8" height="5" rx="1"/><line x1="7" y1="8" x2="7" y2="11"/><line x1="17" y1="8" x2="17" y2="11"/></svg>
+    Arrange
   </div>
 </div>
 
@@ -616,16 +852,30 @@ const TA={
 };
 
 // Spatial zone constants
-const SPEC_Y   = 80;   // Y baseline for spec lane nodes
-const SPEC_H   = 160;  // approx node card height
-const LANE_GAP = 100;  // gap between lane divider and first lane content
-const RENDER_Y = SPEC_Y + SPEC_H + LANE_GAP + 60; // Y baseline for render lane previews
-const TETHER_H = RENDER_Y - (SPEC_Y + SPEC_H);    // tether line height
-const PREV_W   = 340;
-const PREV_H   = Math.round(PREV_W * 9/16);
-const PREV_BASE = 960; // internal render width
-const NODE_W   = 240;
-const COL_STEP = 320;  // horizontal spacing between columns
+const NODE_W    = 240;  // node card width
+const NODE_H    = 175;  // conservative node card max height (with pullquote)
+const ROW_GAP   = 24;   // vertical gap between spec rows
+const ROW_STEP  = NODE_H + ROW_GAP; // 199px per spec row
+
+const SPEC_Y    = 80;   // Y top of spec lane
+const SPEC_ROWS = 2;    // max rows in spec lane
+const SPEC_BAND = SPEC_ROWS * ROW_STEP; // total spec lane height
+
+// Render lane geometry — supports up to 3 render rows (primary, secondary, tertiary)
+const LANE_SEP   = 80;  // gap from spec band bottom to first render lane top
+const TETHER_H   = 50;  // tether line height between spec bottom and render top
+const PREV_W     = 300; // preview widget width
+const PREV_H     = Math.round(PREV_W * 9/16); // ~169px
+const PREV_BASE  = 960; // internal render width (scaled down by CSS)
+const PREV_GAP   = 40;  // vertical gap between render rows
+const PREV_ROW_H = PREV_H + 26 + PREV_GAP; // 26px = pw-bar height
+
+// Render lane row Y positions (computed once)
+const RENDER_Y   = SPEC_Y + SPEC_BAND + LANE_SEP + TETHER_H; // primary render row
+const RENDER_Y2  = RENDER_Y + PREV_ROW_H;   // secondary render row
+const RENDER_Y3  = RENDER_Y + PREV_ROW_H*2; // tertiary render row
+
+const COL_STEP  = 360;  // column pitch — wider than PREV_W for horizontal clearance
 
 // ══════════════════════════════════════════════════
 // NODE DATA
@@ -706,7 +956,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v5';
+const VER='nrt_v6';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   try{
@@ -722,37 +972,56 @@ function _reset(){nodes=DEFAULT_NODES.map(n=>({...n}));connections=DEFAULT_CONNE
 // ══════════════════════════════════════════════════
 // SPATIAL ZONE HELPERS
 // ══════════════════════════════════════════════════
-// Compute node x,y from col + row for timeline arrangement
+// Node x,y from col + row
 function nodeXY(node){
   const col=node.col||0, row=node.row||0;
   return{
     x:60+col*COL_STEP,
-    y:SPEC_Y+row*200
+    y:SPEC_Y+row*ROW_STEP
   };
 }
-// Preview widget position: directly below its source node, centered
+// Preview widget position — supports renderRow 0 (primary), 1 (secondary), 2 (tertiary)
 function prevXY(node){
   const{x}=nodeXY(node);
   const nx=node.x!==undefined?node.x:x;
+  const offsetX=Math.round((NODE_W-PREV_W)/2);
+  const renderRowYs=[RENDER_Y, RENDER_Y2, RENDER_Y3];
+  const rr=node.renderRow||0;
   return{
-    x:nx+(NODE_W-PREV_W)/2,  // centered under node
-    y:RENDER_Y
+    x:nx+offsetX,
+    y:renderRowYs[Math.min(rr,2)]
   };
 }
 
-// Lane divider Y — midpoint between spec and render lanes
-function laneDividerY(){
-  return SPEC_Y + SPEC_H + LANE_GAP/2;
-}
+function laneDividerY(){ return SPEC_Y + SPEC_BAND + LANE_SEP/2; }
 
 function updateLaneLabels(){
-  const divY=laneDividerY();
   const sl=document.getElementById('spec-label');
   const rl=document.getElementById('render-label');
-  if(sl){sl.style.top=(SPEC_Y-18)+'px';sl.style.left='8px';}
-  if(rl){rl.style.top=(RENDER_Y-18)+'px';rl.style.left='8px';}
   const ld=document.getElementById('lane-divider');
-  if(ld){ld.style.top=divY+'px';}
+  if(sl){sl.style.top=(SPEC_Y-20)+'px';sl.style.left='8px';}
+  if(rl){rl.style.top=(RENDER_Y-20)+'px';rl.style.left='8px';}
+  if(ld){ld.style.top=laneDividerY()+'px';}
+
+  // Secondary/tertiary lane labels — injected once, updated each time
+  ['render-label-2','render-label-3'].forEach((id,i)=>{
+    let el=document.getElementById(id);
+    const hasRow=nodes.some(n=>(n.renderRow||0)===i+1);
+    if(!hasRow){if(el)el.style.display='none';return;}
+    if(!el){el=document.createElement('div');el.id=id;el.className='lane-label';document.getElementById('canvas').appendChild(el);}
+    el.style.display='block';
+    el.style.top=([RENDER_Y2,RENDER_Y3][i]-20)+'px';
+    el.style.left='8px';
+    el.textContent=['Secondary Render Lane','Tertiary Render Lane'][i];
+  });
+
+  // Secondary lane divider
+  let ld2=document.getElementById('lane-divider-2');
+  const hasRow1=nodes.some(n=>(n.renderRow||0)>=1);
+  if(hasRow1){
+    if(!ld2){ld2=document.createElement('div');ld2.id='lane-divider-2';ld2.style.cssText=document.getElementById('lane-divider').style.cssText;ld2.className='';ld2.style.background='linear-gradient(to right,transparent 0%,var(--border-2) 8%,var(--border-2) 92%,transparent 100%)';ld2.style.height='1px';ld2.style.position='absolute';ld2.style.left='0';ld2.style.right='0';ld2.style.pointerEvents='none';document.getElementById('canvas').appendChild(ld2);}
+    ld2.style.top=(RENDER_Y2-PREV_GAP/2)+'px';
+  } else if(ld2) ld2.style.display='none';
 }
 
 // ══════════════════════════════════════════════════
@@ -781,12 +1050,13 @@ function fitAll(){
   let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
   nodes.forEach(n=>{
     x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);
-    x1=Math.max(x1,n.x+NODE_W);y1=Math.max(y1,n.y+SPEC_H);
-    // Render lane bottom
-    const py=n.prevY||prevXY(n).y;
+    x1=Math.max(x1,n.x+NODE_W);y1=Math.max(y1,n.y+NODE_H);
+    // Render lane — account for whichever row this preview is on
+    const pp=prevXY(n);
+    const py=n.prevY||pp.y;
     y1=Math.max(y1,py+PREV_H+26);
-    x0=Math.min(x0,n.prevX||prevXY(n).x);
-    x1=Math.max(x1,(n.prevX||prevXY(n).x)+PREV_W);
+    x0=Math.min(x0,n.prevX!==undefined?n.prevX:pp.x);
+    x1=Math.max(x1,(n.prevX!==undefined?n.prevX:pp.x)+PREV_W);
   });
   const sc=Math.min(vpW/(x1-x0+pad*2),vpH/(y1-y0+pad*2),1.5);
   transform.scale=sc;transform.x=(vpW-(x1+x0)*sc)/2;transform.y=(vpH-(y1+y0)*sc)/2;
@@ -798,7 +1068,7 @@ function panTo(id){
   const wrap=document.getElementById('canvas-wrap');
   const vpW=wrap.clientWidth,vpH=wrap.clientHeight;
   // Pan to center on the node-preview pair
-  const cx=n.x+NODE_W/2, cy=n.y+(SPEC_H+PREV_H)/2;
+  const cx=n.x+NODE_W/2, cy=n.y+(NODE_H+PREV_H)/2;
   CVS.style.transition='transform 0.44s cubic-bezier(0.32,0.72,0,1)';
   transform.x=vpW/2-cx*transform.scale;
   transform.y=vpH/2-cy*transform.scale;
@@ -829,7 +1099,7 @@ function applyArrangement(name){
     let curY=80;
     sorted.forEach(n=>{
       n.x=colX;n.y=curY;
-      n.prevX=colX+(NODE_W-PREV_W)/2;n.prevY=curY+SPEC_H+40;
+      n.prevX=colX+(NODE_W-PREV_W)/2;n.prevY=curY+NODE_H+LANE_SEP;
       curY=n.prevY+PREV_H+26+60;
     });
     document.body.classList.remove('view-broadcast','view-author');
@@ -965,7 +1235,10 @@ function _paintPreview(node){
     </div>
     <div class="pw-bar">
       <div class="pw-bar-label">${esc(node.title||'')}</div>
-      <div class="pw-bar-seq">${ci>=0?'#'+(ci+1):''}</div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div class="pw-bar-seq">${ci>=0?'#'+(ci+1):''}</div>
+        <button class="pw-row-btn" data-rowcycle title="Move to next render lane" style="background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:9px;padding:2px 4px;border-radius:2px;font-family:var(--mono);letter-spacing:0.08em;">L${(node.renderRow||0)+1}</button>
+      </div>
     </div>`;
 
   // Animate content in
@@ -975,6 +1248,18 @@ function _paintPreview(node){
 
   // Image fade in
   if(node.imgUrl){const img=pw.querySelector('.pw-img');if(img){img.addEventListener('load',()=>img.classList.add('vis'),{once:true});if(img.complete)img.classList.add('vis');}}
+
+  // Wire row-cycle button (always re-attach since innerHTML resets it)
+  const rowBtn=pw.querySelector('[data-rowcycle]');
+  if(rowBtn){
+    rowBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      node.renderRow=((node.renderRow||0)+1)%3;
+      // Reset manual prevY so it recalculates for new row
+      node.prevY=undefined;
+      _paintPreview(node);mC();updateLaneLabels();dSave();
+    });
+  }
 
   // Click to activate
   if(isNew){
@@ -1062,10 +1347,11 @@ function _flushConns(){
     const tid='tether_'+node.id;live.add(tid);
     const pw=getPW(node.id);if(!pw)return;
     // Node bottom center
-    const nx=node.x+NODE_W/2, ny=node.y+SPEC_H;
-    // Preview top center
-    const ppx=(node.prevX!==undefined?node.prevX:prevXY(node).x)+PREV_W/2;
-    const ppy=(node.prevY!==undefined?node.prevY:prevXY(node).y);
+    const nx=node.x+NODE_W/2, ny=node.y+NODE_H;
+    // Preview top center — use stored position or compute from renderRow
+    const pp=prevXY(node);
+    const ppx=(node.prevX!==undefined?node.prevX:pp.x)+PREV_W/2;
+    const ppy=(node.prevY!==undefined?node.prevY:pp.y);
     const isActive=activeSlideId===node.id;
     let t=_pm[tid];
     if(!t){t=document.createElementNS('http://www.w3.org/2000/svg','line');t.classList.add('conn-np');SVG.insertBefore(t,DRAG_LINE);_pm[tid]=t;}
@@ -1170,8 +1456,9 @@ function setSlide(id,skipAnim){
   _navGoTo(id);activeSlideId=id;mN();
   const node=nodes.find(n=>n.id===id);if(!node)return;
   _rebuildChain();
-  _paintPreview(node); // re-render with anim
+  _paintPreview(node);
   if(presentMode)_renderPS(node,skipAnim);
+  if(isMob())_renderMobView(node,skipAnim);
   _updHUDs();panTo(id);dSave();
 }
 
@@ -1179,7 +1466,10 @@ function prevSlide(){
   if(navIndex<=0)return;
   navIndex--;activeSlideId=navHistory[navIndex];mN();
   const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
-  _rebuildChain();_paintPreview(n);if(presentMode)_renderPS(n,false);_updHUDs();panTo(activeSlideId);dSave();
+  _rebuildChain();_paintPreview(n);
+  if(presentMode)_renderPS(n,false);
+  if(isMob())_renderMobView(n,false);
+  _updHUDs();panTo(activeSlideId);dSave();
 }
 
 function nextSlide(){
@@ -1192,7 +1482,10 @@ function nextSlide(){
     const nid=nx[0].to;navHistory.push(nid);navIndex++;activeSlideId=nid;
   }
   mN();const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
-  _rebuildChain();_paintPreview(n);if(presentMode)_renderPS(n,false);_updHUDs();panTo(activeSlideId);dSave();
+  _rebuildChain();_paintPreview(n);
+  if(presentMode)_renderPS(n,false);
+  if(isMob())_renderMobView(n,false);
+  _updHUDs();panTo(activeSlideId);dSave();
 }
 
 // ══════════════════════════════════════════════════
@@ -1251,6 +1544,9 @@ function togglePresent(){
   if(presentMode){
     if(!activeSlideId&&nodes.length)setSlide(nodes[0].id);
     const n=nodes.find(nd=>nd.id===activeSlideId);if(n)_renderPS(n,true);
+  } else {
+    // On mobile, return to view surface after exiting present
+    if(isMob()) mobSetMode('view');
   }
 }
 
@@ -1265,6 +1561,9 @@ function _updHUDs(){
   const hd=document.getElementById('hud-dots');if(hd)hd.innerHTML=dotFn('hud-dot');
   const pd=document.getElementById('ps-dots');if(pd)pd.innerHTML=dotFn('ps-dot');
   const md=document.getElementById('mob-dots');if(md)md.innerHTML=dotFn('mob-dot');
+  // Sync mob-view index badge
+  const mvidx=document.getElementById('mob-view-idx');
+  if(mvidx)mvidx.textContent=chainPath.length?`${chainIndex+1} / ${chainPath.length}`:'';
 }
 
 // ══════════════════════════════════════════════════
@@ -1330,58 +1629,237 @@ function openFxPanel(){_buildFx();document.getElementById('fx-panel').classList.
 function closeFxPanel(){document.getElementById('fx-panel').classList.remove('open');document.getElementById('btn-fx').classList.remove('active');}
 
 // ══════════════════════════════════════════════════
-// MOBILE
+// MOBILE — three-surface system
 // ══════════════════════════════════════════════════
 const isMob=()=>window.innerWidth<=700||('ontouchstart' in window&&window.innerWidth<1024);
+let mobMode='view'; // 'view' | 'canvas' | 'arrange'
+
 function mobInit(){
-  if(!isMob())return;
+  if(!isMob()) return;
   document.body.classList.add('is-mobile');
-  _initTouch();_initSwipe();
+  // Default arrangement for mobile is narrative (single column)
+  if(currentArrangement==='timeline') applyArrangement('narrative');
+  _initTouchCanvas();
+  _initTouchView();
+  _initSwipePresent();
+  mobSetMode('view');
 }
-function mobSetTab(tab){document.getElementById('tab-canvas').classList.toggle('active',tab==='canvas');}
-function _initTouch(){
+
+function mobSetMode(mode){
+  mobMode=mode;
+  // Tab active states
+  ['view','canvas','arrange'].forEach(m=>{
+    const tab=document.getElementById('tab-'+m);
+    if(tab) tab.classList.toggle('active',m===mode);
+  });
+  // Body classes drive surface visibility via CSS
+  document.body.classList.remove('mob-mode-view','mob-mode-canvas','mob-mode-arrange');
+  document.body.classList.add('mob-mode-'+mode);
+  // Arrange sheet toggle
+  const arr=document.getElementById('mob-arrange');
+  if(arr) arr.style.display=mode==='arrange'?'flex':'none';
+  // When switching to canvas, ensure canvas-wrap is visible
+  const cw=document.getElementById('canvas-wrap');
+  if(cw) cw.style.display=mode==='view'?'none':'';
+}
+
+// Update arrange sheet active card
+function mobArrSelect(el,name){
+  document.querySelectorAll('.mob-arr-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  applyArrangement(name);
+  // After applying, switch to canvas to show result
+  setTimeout(()=>mobSetMode('canvas'),300);
+}
+
+// ── Mobile view surface renderer ────────────────────────────────────────
+function _renderMobView(node, skipAnim){
+  if(!node) return;
+  const sl=document.getElementById('mob-view-slide');
+  if(!sl) return;
+  const bg=BGS.find(b=>b.id===node.bg)||BGS[0];
+  const accent=TA[node.type]||'#c8704a';
+  sl.querySelector('.mv-bg').style.background=bg.bg;
+  sl.style.setProperty('--mv-accent',accent);
+
+  // Ambient glow
+  const amb=sl.querySelector('.mv-ambient');
+  amb.style.setProperty('--mv-amb',accent);
+  amb.style.opacity=fxState.ambientGlow?fxState.ambientIntensity:0;
+
+  // Image
+  const img=sl.querySelector('.mv-img');
+  img.classList.remove('vis');
+  if(node.imgUrl){
+    if(img.src!==node.imgUrl) img.src=node.imgUrl;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>img.classList.add('vis')));
+  }
+
+  // Content
+  let html='';
+  if(node.era) html+=`<div class="mv-era">${esc(node.era)}</div>`;
+  if(node.type) html+=`<div class="mv-tag">${esc(node.type)}</div>`;
+  if(node.dataValues){
+    html+=`<div class="mv-hl">${esc(node.title||'')}</div>`;
+    const parts=node.dataValues.split(',');
+    let g='<div class="mv-dg">';
+    for(let i=0;i<parts.length;i+=2){
+      const v=parts[i]?.trim(),l=parts[i+1]?.trim();
+      if(v) g+=`<div><div class="mv-dv">${esc(v)}</div>${l?`<div class="mv-dl">${esc(l)}</div>`:''}</div>`;
+    }
+    html+=g+'</div>';
+    if(node.body) html+=`<div class="mv-body">${esc(node.body)}</div>`;
+  } else {
+    html+=`<div class="mv-hl">${esc(node.title||'')}</div>`;
+    if(node.body) html+=`<div class="mv-body">${esc(node.body)}</div>`;
+    if(node.pullquote) html+=`<div class="mv-pq">${esc(node.pullquote)}</div>`;
+  }
+  sl.querySelector('.mv-content').innerHTML=html;
+
+  // Index badge
+  const idx=chainPath.indexOf(node.id);
+  const idxEl=document.getElementById('mob-view-idx');
+  if(idxEl) idxEl.textContent=chainPath.length?`${idx>=0?idx+1:'?'} / ${chainPath.length}`:'';
+
+  // Animate in
+  sl.classList.remove('anim');
+  if(!skipAnim){void sl.offsetWidth;setTimeout(()=>sl.classList.add('anim'),16);}
+  else sl.classList.add('anim');
+}
+
+// ── Touch canvas: pan, pinch-zoom, tap-to-select, long-press-to-drag ───
+function _initTouchCanvas(){
   const wrap=document.getElementById('canvas-wrap');
   let t0=null,t1=null,iD=0,iS=1,iTx=0,iTy=0,iM={x:0,y:0};
-  let _ps={x:0,y:0},_txS=0,_tyS=0,_dn=null,_ns={x:0,y:0},tapT=0,tapId=null;
+  let _panStart={x:0,y:0},_txS=0,_tyS=0;
+  let _dragNode=null,_dragNodeStart={x:0,y:0};
+  let _tapTime=0,_tapTarget=null,_longPressTimer=null;
+  let _gestureStarted=false;
+
   wrap.addEventListener('touchstart',e=>{
     const ts=e.touches;
-    if(ts.length===1){t0={x:ts[0].clientX,y:ts[0].clientY};t1=null;tapT=Date.now();
+    _gestureStarted=true;
+
+    if(ts.length===1){
+      t0={x:ts[0].clientX,y:ts[0].clientY};t1=null;
+      _tapTime=Date.now();
+      _panStart={x:ts[0].clientX,y:ts[0].clientY};
+      _txS=transform.x;_tyS=transform.y;
+
+      // Identify target
       const nc=e.target.closest('.node-card');
-      tapId=nc?nc.dataset.id:null;
-      if(nc){const n=nodes.find(nd=>nd.id===nc.dataset.id);if(n){_dn=n;_ns={x:n.x,y:n.y};}}
-      else{_dn=null;_ps={x:ts[0].clientX,y:ts[0].clientY};_txS=transform.x;_tyS=transform.y;}
-    }else if(ts.length===2){t0={x:ts[0].clientX,y:ts[0].clientY};t1={x:ts[1].clientX,y:ts[1].clientY};
-      iD=Math.hypot(t1.x-t0.x,t1.y-t0.y);iS=transform.scale;iTx=transform.x;iTy=transform.y;iM={x:(t0.x+t1.x)/2,y:(t0.y+t1.y)/2};}
+      const pw=e.target.closest('.preview-widget');
+      _tapTarget=nc?nc.dataset.id:(pw?pw.id.replace('pw_',''):null);
+
+      // Long-press to drag node
+      if(nc){
+        const n=nodes.find(nd=>nd.id===nc.dataset.id);
+        if(n){
+          _longPressTimer=setTimeout(()=>{
+            _dragNode=n;_dragNodeStart={x:n.x,y:n.y};
+            _panStart={x:ts[0].clientX,y:ts[0].clientY};
+            toast('Drag to reposition');
+          },500);
+        }
+      } else {
+        _dragNode=null;
+      }
+    }
+    else if(ts.length===2){
+      clearTimeout(_longPressTimer);_longPressTimer=null;_dragNode=null;
+      t0={x:ts[0].clientX,y:ts[0].clientY};t1={x:ts[1].clientX,y:ts[1].clientY};
+      iD=Math.hypot(t1.x-t0.x,t1.y-t0.y);iS=transform.scale;
+      iTx=transform.x;iTy=transform.y;iM={x:(t0.x+t1.x)/2,y:(t0.y+t1.y)/2};
+    }
   },{passive:true});
+
   wrap.addEventListener('touchmove',e=>{
-    e.preventDefault();const ts=e.touches;
+    e.preventDefault();
+    const ts=e.touches;
+
     if(ts.length===2&&t1){
+      // Pinch zoom
+      clearTimeout(_longPressTimer);_longPressTimer=null;_dragNode=null;
       const nt0={x:ts[0].clientX,y:ts[0].clientY},nt1={x:ts[1].clientX,y:ts[1].clientY};
       const dist=Math.hypot(nt1.x-nt0.x,nt1.y-nt0.y);
       const ns=Math.max(0.08,Math.min(3,iS*(dist/iD)));
       const mid={x:(nt0.x+nt1.x)/2,y:(nt0.y+nt1.y)/2};
       const r=ns/iS;const rect=wrap.getBoundingClientRect();
       const cx=iM.x-rect.left,cy=iM.y-rect.top;
-      transform.scale=ns;transform.x=mid.x-rect.left-(cx-iTx)*r;transform.y=mid.y-rect.top-(cy-iTy)*r;applyTransform();
-    }else if(ts.length===1){
-      const dx=ts[0].clientX-_ps.x,dy=ts[0].clientY-_ps.y;
-      if(_dn){_dn.x=Math.round((_ns.x+dx/transform.scale)/20)*20;_dn.y=Math.round((_ns.y+dy/transform.scale)/20)*20;const el=getEl(_dn.id);if(el){el.style.left=_dn.x+'px';el.style.top=_dn.y+'px';}mC();}
-      else{transform.x=_txS+dx;transform.y=_tyS+dy;applyTransform();}
+      transform.scale=ns;
+      transform.x=mid.x-rect.left-(cx-iTx)*r;
+      transform.y=mid.y-rect.top-(cy-iTy)*r;
+      applyTransform();
+    }
+    else if(ts.length===1){
+      const dx=ts[0].clientX-_panStart.x;
+      const dy=ts[0].clientY-_panStart.y;
+      // Cancel long press if moved
+      if(Math.hypot(dx,dy)>8&&!_dragNode){
+        clearTimeout(_longPressTimer);_longPressTimer=null;
+      }
+      if(_dragNode){
+        // Drag node
+        _dragNode.x=Math.round((_dragNodeStart.x+dx/transform.scale)/20)*20;
+        _dragNode.y=Math.round((_dragNodeStart.y+dy/transform.scale)/20)*20;
+        const el=getEl(_dragNode.id);
+        if(el){el.style.left=_dragNode.x+'px';el.style.top=_dragNode.y+'px';}
+        mC();
+      } else {
+        // Pan canvas
+        transform.x=_txS+dx;transform.y=_tyS+dy;
+        applyTransform();
+      }
     }
   },{passive:false});
+
   wrap.addEventListener('touchend',e=>{
-    const ch=e.changedTouches[0];const mv=Math.hypot(ch.clientX-(t0?.x||0),ch.clientY-(t0?.y||0));
-    if(Date.now()-tapT<250&&mv<12&&tapId)setSlide(tapId);
-    if(_dn){dSave();_dn=null;}t0=null;t1=null;
+    clearTimeout(_longPressTimer);_longPressTimer=null;
+    const ch=e.changedTouches[0];
+    const mv=Math.hypot(ch.clientX-(t0?.x||0),ch.clientY-(t0?.y||0));
+    const dt=Date.now()-_tapTime;
+
+    if(_dragNode){dSave();_dragNode=null;}
+    else if(dt<280&&mv<14&&_tapTarget){
+      // Tap: select slide, switch to view
+      setSlide(_tapTarget);
+      if(isMob()) mobSetMode('view');
+    }
+    t0=null;t1=null;_gestureStarted=false;
   },{passive:true});
 }
-function _initSwipe(){
+
+// ── Swipe left/right on view surface to navigate ────────────────────────
+function _initTouchView(){
+  const view=document.getElementById('mob-view');
+  if(!view) return;
+  let sx=0,sy=0,st=0,moved=false;
+
+  view.addEventListener('touchstart',e=>{
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();moved=false;
+  },{passive:true});
+  view.addEventListener('touchmove',e=>{
+    if(Math.abs(e.touches[0].clientX-sx)>10) moved=true;
+  },{passive:true});
+  view.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    const dt=Date.now()-st;
+    if(dt<420&&Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.4){
+      dx<0?nextSlide():prevSlide();
+    }
+  },{passive:true});
+}
+
+// ── Swipe on present surface ─────────────────────────────────────────────
+function _initSwipePresent(){
   const surf=document.getElementById('present-surface');
+  if(!surf) return;
   let sx=0,sy=0,st=0;
   surf.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();},{passive:true});
   surf.addEventListener('touchend',e=>{
     const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-    if(Date.now()-st<400&&Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){dx<0?nextSlide():prevSlide();}
+    if(Date.now()-st<420&&Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.4){dx<0?nextSlide():prevSlide();}
   },{passive:true});
 }
 
@@ -1429,10 +1907,14 @@ function init(){
       _rebuildChain();_updHUDs();mN();_sched();
     }
     mobInit();
-    // Apply saved arrangement UI state
+    // Apply saved arrangement UI state (desktop)
     document.querySelectorAll('.arr-btn').forEach(b=>b.classList.toggle('active',b.dataset.arr===currentArrangement));
     document.body.classList.toggle('view-broadcast',currentArrangement==='broadcast');
     document.body.classList.toggle('view-author',currentArrangement==='author');
+    // Sync mobile arrange sheet active card
+    document.querySelectorAll('.mob-arr-card').forEach(c=>c.classList.toggle('active',c.dataset.arr===currentArrangement));
+    // Initial mobile view render
+    if(isMob()&&nodes[0]){_renderMobView(nodes[0],true);}
   });
   window.addEventListener('resize',()=>{if(isMob()&&!document.body.classList.contains('is-mobile'))mobInit();});
 }

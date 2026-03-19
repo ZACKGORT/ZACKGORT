@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>narrate · nodes as presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;}
+
+:root {
+  --bg:       #0a0908;
+  --bg-2:     #0f0e0c;
+  --bg-3:     #161410;
+  --bg-4:     #1c1a16;
+  --bg-5:     #232018;
+  --ink:      #f0ece2;
+  --ink-2:    #8a8680;
+  --ink-3:    #3e3a34;
+  --accent:   #c8704a;
+  --accent-l: rgba(200,112,74,0.09);
+  --border:   rgba(240,236,226,0.06);
+  --border-2: rgba(240,236,226,0.10);
+  --border-3: rgba(240,236,226,0.18);
+  --disp:     'DM Serif Display', serif;
+  --text:     'DM Serif Text', serif;
+  --mono:     'DM Mono', monospace;
+  --node-w:   240px;
+
+  --c-concept:  #7a8ecc;
+  --c-story:    #c8704a;
+  --c-data:     #6ab09a;
+  --c-media:    #b07acc;
+  --c-cta:      #d4a84a;
+  --c-intro:    #8a9e6a;
+}
+
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* Grain overlay */
+body::after {
+  content:'';
+  position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px;
+  opacity:.028;
+  mix-blend-mode:screen;
+}
+
+/* ── TOPBAR ── */
+#topbar {
+  position:fixed;top:0;left:0;right:0;height:46px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;
+  background:var(--bg-2);
+  border-bottom:1px solid var(--border);
+  z-index:1000;
+  gap:10px;
+}
+.tb-brand {
+  font-family:var(--disp);font-size:14px;color:var(--ink);
+  letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;
+  flex-shrink:0;
+}
+.tb-brand em {
+  font-family:var(--mono);font-size:7px;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--ink-3);font-style:normal;
+  border:1px solid var(--border-2);padding:2px 6px;border-radius:20px;
+}
+.tb-divider { width:1px;height:20px;background:var(--border);flex-shrink:0; }
+.tb-pres-name {
+  font-family:var(--mono);font-size:9px;letter-spacing:0.06em;
+  color:var(--ink-2);flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#tb-pres-title { background:none;border:none;color:var(--ink-2);font-family:var(--mono);font-size:9px;letter-spacing:0.06em;cursor:text;outline:none;width:100%;padding:0; }
+#tb-pres-title:focus { color:var(--ink); }
+.tb-actions { display:flex;align-items:center;gap:5px;flex-shrink:0; }
+.tb-btn {
+  background:none;border:1px solid var(--border-2);border-radius:4px;
+  font-family:var(--mono);font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink-2);padding:5px 9px;cursor:pointer;white-space:nowrap;
+  transition:border-color 0.15s,color 0.15s,background 0.15s;
+}
+.tb-btn:hover { border-color:var(--border-3);color:var(--ink);background:var(--accent-l); }
+.tb-btn.accent { border-color:var(--accent);color:var(--accent); }
+.tb-btn.accent:hover { background:var(--accent);color:var(--bg); }
+.tb-btn.active { background:var(--accent);color:var(--bg);border-color:var(--accent); }
+
+/* ── LAYOUT: canvas left, poster right ── */
+#layout {
+  position:fixed;top:46px;left:0;right:0;bottom:0;
+  display:flex;
+}
+
+/* ── NODE CANVAS PANEL ── */
+#canvas-panel {
+  flex:0 0 var(--canvas-w, 420px);
+  min-width:200px;max-width:70%;
+  position:relative;
+  border-right:1px solid var(--border);
+  overflow:hidden;
+  transition:flex-basis 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+
+/* Resize handle */
+#resize-handle {
+  position:absolute;top:0;right:-4px;bottom:0;width:8px;
+  cursor:col-resize;z-index:50;
+}
+#resize-handle::after {
+  content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:2px;height:40px;border-radius:2px;background:var(--border-2);
+  transition:background 0.15s;
+}
+#resize-handle:hover::after { background:var(--accent); }
+
+/* Dot grid */
+#canvas-panel::before {
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(var(--border) 1px,transparent 1px);
+  background-size:28px 28px;z-index:0;
+}
+#canvas { position:absolute;top:0;left:0;width:4000px;height:4000px;transform-origin:0 0;will-change:transform; }
+
+/* SVG connections */
+#connections-svg {
+  position:absolute;top:0;left:0;width:4000px;height:4000px;
+  pointer-events:none;overflow:visible;
+}
+.conn-line {
+  stroke:var(--ink-3);stroke-width:1.5;fill:none;
+  stroke-dasharray:4 3;opacity:0.5;
+  transition:stroke 0.2s,opacity 0.2s,stroke-width 0.2s;
+  cursor:pointer;pointer-events:stroke;
+}
+.conn-line:hover { opacity:1;stroke:var(--accent);stroke-width:2; }
+.conn-line.in-chain { stroke:var(--accent);opacity:0.9;stroke-width:2;stroke-dasharray:none; }
+.conn-line.preview { stroke:var(--accent);stroke-dasharray:6 4;opacity:0.5;stroke-width:1.5;pointer-events:none; }
+
+/* ── NODE CARDS ── */
+.node-card {
+  position:absolute;width:var(--node-w);
+  background:var(--bg-3);border:1px solid var(--border-2);
+  border-radius:8px;
+  box-shadow:0 2px 14px rgba(0,0,0,0.35);
+  cursor:grab;user-select:none;
+  transition:box-shadow 0.2s,border-color 0.2s;
+  will-change:transform;
+}
+.node-card:hover { border-color:var(--border-3);box-shadow:0 4px 28px rgba(0,0,0,0.5); }
+.node-card.is-dragging { cursor:grabbing;box-shadow:0 14px 44px rgba(0,0,0,0.7);z-index:500!important; }
+.node-card.selected { border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-l),0 4px 28px rgba(0,0,0,0.5); }
+.node-card.active-slide { border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,112,74,0.22),0 4px 28px rgba(0,0,0,0.5); }
+.node-card.connect-source { border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,112,74,0.28); }
+.node-card.connect-target-hover { border-color:var(--accent);background:var(--accent-l); }
+
+.node-colorbar { height:3px;border-radius:8px 8px 0 0; }
+.node-card[data-type="concept"]  .node-colorbar { background:var(--c-concept); }
+.node-card[data-type="story"]    .node-colorbar { background:var(--c-story); }
+.node-card[data-type="data"]     .node-colorbar { background:var(--c-data); }
+.node-card[data-type="media"]    .node-colorbar { background:var(--c-media); }
+.node-card[data-type="cta"]      .node-colorbar { background:var(--c-cta); }
+.node-card[data-type="intro"]    .node-colorbar { background:var(--c-intro); }
+
+.node-type-tag {
+  font-size:6.5px;letter-spacing:0.16em;text-transform:uppercase;font-family:var(--mono);
+}
+.node-card[data-type="concept"]  .node-type-tag { color:var(--c-concept); }
+.node-card[data-type="story"]    .node-type-tag { color:var(--c-story); }
+.node-card[data-type="data"]     .node-type-tag { color:var(--c-data); }
+.node-card[data-type="media"]    .node-type-tag { color:var(--c-media); }
+.node-card[data-type="cta"]      .node-type-tag { color:var(--c-cta); }
+.node-card[data-type="intro"]    .node-type-tag { color:var(--c-intro); }
+
+.node-header {
+  padding:9px 10px 5px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:6px;
+}
+.node-actions { display:flex;gap:3px;flex-shrink:0; }
+.node-act-btn {
+  background:none;border:none;cursor:pointer;color:var(--ink-3);
+  width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+  border-radius:3px;transition:color 0.15s,background 0.15s;font-size:10px;
+}
+.node-act-btn:hover { color:var(--ink);background:var(--border); }
+
+.node-slide-num {
+  position:absolute;top:6px;right:32px;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.1em;
+  color:var(--accent);opacity:0;transition:opacity 0.2s;
+}
+.node-card.active-slide .node-slide-num { opacity:1; }
+
+.node-title {
+  font-family:var(--disp);font-size:14px;color:var(--ink);
+  line-height:1.25;padding:0 10px 5px;letter-spacing:-0.01em;
+}
+.node-body {
+  padding:0 10px 8px;font-family:var(--mono);font-size:9.5px;
+  line-height:1.65;color:var(--ink-2);
+}
+.node-footer {
+  padding:5px 10px 8px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.node-meta { font-size:7px;letter-spacing:0.08em;color:var(--ink-3);text-transform:uppercase; }
+.node-chain { font-size:7px;letter-spacing:0.06em;color:var(--ink-3); }
+.node-chain.linked { color:var(--accent); }
+
+/* Ports */
+.port {
+  position:absolute;width:9px;height:9px;border-radius:50%;
+  background:var(--bg-3);border:2px solid var(--border-3);
+  cursor:crosshair;transition:border-color 0.15s,transform 0.15s,background 0.15s;z-index:10;
+}
+.port:hover,.port.active { border-color:var(--accent);background:var(--accent);transform:scale(1.4)!important; }
+.port-right  { right:-5px; top:50%;transform:translateY(-50%); }
+.port-left   { left:-5px;  top:50%;transform:translateY(-50%); }
+.port-bottom { bottom:-5px;left:50%;transform:translateX(-50%); }
+.port-top    { top:-5px;   left:50%;transform:translateX(-50%); }
+
+/* Preview line for connect drag */
+#preview-line { display:none; }
+
+/* Canvas zoom pill */
+#zoom-hud {
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:0;
+  background:var(--bg-4);border:1px solid var(--border-2);border-radius:6px;
+  overflow:hidden;z-index:100;
+}
+.zoom-btn {
+  background:none;border:none;cursor:pointer;color:var(--ink-2);
+  font-size:12px;padding:5px 11px;transition:color 0.15s,background 0.15s;
+}
+.zoom-btn:hover { color:var(--ink);background:var(--accent-l); }
+#zoom-pct {
+  font-family:var(--mono);font-size:8px;letter-spacing:0.08em;color:var(--ink-3);
+  padding:0 9px;border-left:1px solid var(--border);border-right:1px solid var(--border);
+}
+
+/* Chain navigator */
+#chain-nav {
+  position:absolute;bottom:12px;right:12px;
+  background:var(--bg-4);border:1px solid var(--border-2);border-radius:6px;
+  padding:6px 10px;z-index:100;display:none;
+  font-family:var(--mono);font-size:7.5px;letter-spacing:0.08em;color:var(--ink-3);
+}
+#chain-nav.visible { display:block; }
+.cn-label { color:var(--accent);margin-bottom:4px;letter-spacing:0.12em;text-transform:uppercase;font-size:7px; }
+.cn-row { display:flex;align-items:center;gap:6px;padding:2px 0; }
+.cn-dot { width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex-shrink:0; }
+.cn-dot.active { background:var(--accent); }
+.cn-text { color:var(--ink-2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+
+/* ── POSTER / SLIDE VIEWPORT ── */
+#poster-panel {
+  flex:1;min-width:0;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  overflow:hidden;
+}
+
+/* Ambient background bleeds from poster */
+#poster-ambient {
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+  opacity:0;transition:opacity 1.4s ease;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%, var(--amb-color, #c8704a) 0%, transparent 70%);
+}
+
+/* Slide frame */
+#slide-frame {
+  position:relative;z-index:2;
+  aspect-ratio:16/9;
+  width:min(calc(100% - 48px), calc((100vh - 46px - 80px) * 16/9));
+  background:var(--slide-bg, #0a0908);
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:0 0 0 1px var(--border-2), 0 24px 80px rgba(0,0,0,0.7);
+  transition:background 0.8s ease;
+}
+
+/* Slide inner layers */
+#slide-bg-layer {
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--slide-bg, #0a0908);
+  transition:background 0.8s ease;
+}
+#slide-img-layer {
+  position:absolute;inset:0;pointer-events:none;
+  overflow:hidden;
+}
+#slide-img-layer img {
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  opacity:0;transition:opacity 1.0s ease,transform 8s ease;
+  transform:scale(1.04);
+}
+#slide-img-layer img.visible { opacity:var(--img-opacity, 0.22);transform:scale(1.0); }
+#slide-img-scrim {
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.4) 100%);
+  z-index:2;
+}
+
+/* Slide text content */
+#slide-content {
+  position:absolute;inset:0;z-index:3;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:6% 7%;
+}
+.slide-tag {
+  font-family:var(--mono);font-size:clamp(7px,0.9vw,11px);
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--slide-accent, var(--accent));
+  margin-bottom:3%;
+  opacity:0;transform:translateY(10px);
+  transition:opacity 0.55s 0.05s ease,transform 0.55s 0.05s ease;
+}
+.slide-headline {
+  font-family:var(--disp);font-size:clamp(22px,4.8vw,64px);
+  color:var(--ink);line-height:1.1;letter-spacing:-0.02em;
+  margin-bottom:4%;
+  opacity:0;transform:translateY(16px);
+  transition:opacity 0.6s 0.18s ease,transform 0.6s 0.18s ease;
+}
+.slide-body {
+  font-family:var(--text);font-size:clamp(10px,1.5vw,20px);
+  color:rgba(240,236,226,0.72);line-height:1.65;
+  max-width:72%;
+  opacity:0;transform:translateY(12px);
+  transition:opacity 0.6s 0.32s ease,transform 0.6s 0.32s ease;
+}
+.slide-pullquote {
+  font-family:var(--disp);font-style:italic;
+  font-size:clamp(14px,2.4vw,32px);
+  color:var(--ink);line-height:1.4;
+  border-left:3px solid var(--slide-accent, var(--accent));
+  padding-left:5%;max-width:80%;
+  opacity:0;transform:translateY(12px);
+  transition:opacity 0.6s 0.22s ease,transform 0.6s 0.22s ease;
+}
+.slide-data-grid {
+  display:flex;gap:4%;
+  opacity:0;transform:translateY(12px);
+  transition:opacity 0.6s 0.28s ease,transform 0.6s 0.28s ease;
+}
+.slide-data-item { flex:1;min-width:0; }
+.slide-data-value {
+  font-family:var(--disp);font-size:clamp(20px,4vw,54px);
+  color:var(--slide-accent, var(--accent));line-height:1;margin-bottom:4px;
+}
+.slide-data-label {
+  font-family:var(--mono);font-size:clamp(7px,0.85vw,11px);
+  letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-2);
+}
+
+/* Animate in */
+#slide-frame.animating .slide-tag,
+#slide-frame.animating .slide-headline,
+#slide-frame.animating .slide-body,
+#slide-frame.animating .slide-pullquote,
+#slide-frame.animating .slide-data-grid {
+  opacity:1;transform:translateY(0);
+}
+
+/* Slide corner decoration */
+.slide-corner {
+  position:absolute;
+  width:40px;height:40px;pointer-events:none;
+}
+.slide-corner.tl { top:5%;left:5%;border-top:1px solid rgba(240,236,226,0.12);border-left:1px solid rgba(240,236,226,0.12); }
+.slide-corner.br { bottom:5%;right:5%;border-bottom:1px solid rgba(240,236,226,0.12);border-right:1px solid rgba(240,236,226,0.12); }
+
+/* Slide index badge */
+#slide-idx-badge {
+  position:absolute;top:12px;right:12px;z-index:5;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.12em;
+  color:rgba(240,236,226,0.3);
+}
+
+/* Poster controls bar */
+#poster-controls {
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:6px;z-index:10;
+}
+.pc-btn {
+  background:var(--bg-4);border:1px solid var(--border-2);border-radius:5px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink-2);padding:5px 10px;cursor:pointer;
+  transition:all 0.15s;
+}
+.pc-btn:hover { border-color:var(--border-3);color:var(--ink);background:var(--accent-l); }
+.pc-btn:disabled { opacity:0.3;cursor:not-allowed; }
+#pc-slide-counter {
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;color:var(--ink-3);
+  padding:0 4px;
+}
+
+/* Present mode dots (chain path indicator) */
+#chain-dots {
+  position:absolute;bottom:52px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:10;
+  opacity:0.6;
+}
+.chain-dot {
+  width:5px;height:5px;border-radius:50%;background:var(--border-3);
+  transition:background 0.3s,transform 0.3s;cursor:pointer;
+}
+.chain-dot.active { background:var(--accent);transform:scale(1.5); }
+.chain-dot.visited { background:var(--ink-3); }
+
+/* Branch indicator on poster */
+#branch-indicator {
+  position:absolute;top:16px;left:16px;z-index:10;
+  display:none;
+  font-family:var(--mono);font-size:7.5px;letter-spacing:0.1em;color:var(--ink-3);
+}
+#branch-indicator.visible { display:flex;align-items:center;gap:8px; }
+.bi-option {
+  padding:4px 8px;border:1px solid var(--border-2);border-radius:4px;
+  cursor:pointer;transition:all 0.15s;background:var(--bg-4);
+}
+.bi-option:hover { border-color:var(--accent);color:var(--accent); }
+.bi-label { color:var(--ink-3);margin-right:4px; }
+
+/* Dispatch ghost overlay (from anthropic.html concept) */
+#dispatch-ghost {
+  position:absolute;inset:0;z-index:4;pointer-events:none;
+  opacity:0;transition:opacity 0.4s;
+  background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,0.5) 100%);
+}
+#dispatch-ghost.visible { opacity:1; }
+#dispatch-readout {
+  position:absolute;top:5%;right:5%;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:rgba(240,236,226,0.45);
+  text-align:right;line-height:2;
+}
+
+/* Fullscreen / present mode */
+body.present-mode #canvas-panel { display:none; }
+body.present-mode #layout { top:46px; }
+body.present-mode #topbar { right:0; }
+body.present-mode #poster-panel { width:100%;flex:1; }
+body.present-mode #slide-frame {
+  width:min(100%, calc((100vh - 46px) * 16/9));
+  border-radius:0;
+}
+
+/* ── NEW NODE COMPOSE ── */
+#compose-widget {
+  position:fixed;bottom:0;left:var(--compose-left,0);
+  width:min(500px,calc(var(--canvas-w,420px) - 20px));
+  background:var(--bg-4);border:1px solid var(--border-2);border-bottom:none;
+  border-radius:10px 10px 0 0;box-shadow:0 -4px 40px rgba(0,0,0,0.5);
+  z-index:1100;transform:translateY(100%);
+  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);overflow:hidden;
+}
+#compose-widget.open { transform:translateY(0); }
+.cw-handle { width:30px;height:3px;background:var(--border-2);border-radius:2px;margin:9px auto 0; }
+.cw-header {
+  padding:8px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cw-label { font-family:var(--mono);font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3); }
+.cw-close { background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:14px;padding:2px 4px;border-radius:3px;transition:color 0.15s; }
+.cw-close:hover { color:var(--ink); }
+.cw-body { padding:10px 14px; }
+.cw-field { margin-bottom:10px; }
+.cw-field-label { font-family:var(--mono);font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px; }
+.cw-input,.cw-textarea {
+  width:100%;background:var(--bg-2);border:1px solid var(--border-2);
+  border-radius:4px;color:var(--ink);font-family:var(--mono);font-size:10px;
+  padding:7px 9px;outline:none;resize:none;
+  transition:border-color 0.15s;
+}
+.cw-input:focus,.cw-textarea:focus { border-color:var(--accent); }
+.cw-type-pills { display:flex;gap:5px;flex-wrap:wrap; }
+.type-pill {
+  padding:4px 9px;border:1px solid var(--border-2);border-radius:20px;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.1em;text-transform:uppercase;
+  cursor:pointer;color:var(--ink-3);transition:all 0.15s;
+}
+.type-pill:hover { border-color:var(--border-3);color:var(--ink); }
+.type-pill.active { background:var(--accent);border-color:var(--accent);color:var(--bg); }
+.cw-bg-options { display:flex;gap:6px;flex-wrap:wrap; }
+.bg-swatch {
+  width:26px;height:26px;border-radius:4px;cursor:pointer;border:2px solid transparent;
+  transition:border-color 0.15s,transform 0.15s;
+}
+.bg-swatch:hover { transform:scale(1.1); }
+.bg-swatch.active { border-color:var(--accent); }
+.cw-footer { padding:10px 14px 14px;display:flex;gap:6px; }
+.cw-create-btn {
+  flex:1;background:var(--accent);border:none;border-radius:5px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--bg);padding:8px 14px;cursor:pointer;transition:opacity 0.15s;
+}
+.cw-create-btn:hover { opacity:0.88; }
+.cw-cancel-btn {
+  background:none;border:1px solid var(--border-2);border-radius:5px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--ink-3);padding:8px 14px;cursor:pointer;transition:border-color 0.15s,color 0.15s;
+}
+.cw-cancel-btn:hover { border-color:var(--border-3);color:var(--ink); }
+
+/* ── CINEMATIC EFFECTS PANEL ── */
+#fx-panel {
+  position:fixed;top:46px;right:0;bottom:0;width:260px;
+  background:var(--bg-2);border-left:1px solid var(--border);
+  transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  z-index:800;display:flex;flex-direction:column;overflow:hidden;
+}
+#fx-panel.open { transform:translateX(0); }
+body.fx-open #poster-panel { right:260px; }
+.fxp-header {
+  padding:12px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.fxp-title { font-family:var(--mono);font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-3); }
+.fxp-close { background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:14px;padding:2px 4px;border-radius:3px;transition:color 0.15s; }
+.fxp-close:hover { color:var(--ink); }
+.fxp-body { flex:1;overflow-y:auto;padding:12px 14px; }
+.fxp-section-label { font-family:var(--mono);font-size:6.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;margin-top:14px; }
+.fxp-section-label:first-child { margin-top:0; }
+.fx-option {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 8px;border-radius:4px;cursor:pointer;
+  transition:background 0.15s;margin-bottom:3px;
+}
+.fx-option:hover { background:var(--accent-l); }
+.fx-option.active { background:var(--accent-l); }
+.fx-option-label { font-family:var(--mono);font-size:9px;color:var(--ink-2); }
+.fx-option.active .fx-option-label { color:var(--ink); }
+.fx-check { width:14px;height:14px;border:1px solid var(--border-2);border-radius:2px;
+  display:flex;align-items:center;justify-content:center;font-size:8px;color:transparent;
+  transition:all 0.15s;flex-shrink:0;
+}
+.fx-option.active .fx-check { background:var(--accent);border-color:var(--accent);color:var(--bg); }
+.fx-slider-row { padding:4px 0 8px; }
+.fx-slider-label { font-family:var(--mono);font-size:8.5px;color:var(--ink-2);margin-bottom:4px;display:flex;justify-content:space-between; }
+.fx-slider-label span { color:var(--ink-3);font-size:8px; }
+.fx-slider { width:100%;accent-color:var(--accent);cursor:pointer; }
+
+.fxp-palette-row { display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px; }
+.fxp-palette-swatch {
+  width:28px;height:28px;border-radius:4px;cursor:pointer;
+  border:2px solid transparent;transition:border-color 0.15s,transform 0.15s;
+  position:relative;
+}
+.fxp-palette-swatch:hover { transform:scale(1.1); }
+.fxp-palette-swatch.active { border-color:var(--accent); }
+.fxp-palette-label { font-family:var(--mono);font-size:7px;letter-spacing:0.08em;color:var(--ink-3);margin-top:2px;text-align:center; }
+
+/* ── TOAST ── */
+#toast {
+  position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--bg-4);border:1px solid var(--border-2);border-radius:5px;
+  font-family:var(--mono);font-size:8px;letter-spacing:0.1em;
+  color:var(--ink-2);padding:6px 14px;z-index:9000;
+  opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;
+}
+#toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+
+/* ── IMPORT CSV GHOST OVERLAY ── */
+#csv-import-zone {
+  position:absolute;inset:0;z-index:200;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(10,9,8,0.85);backdrop-filter:blur(8px);
+  flex-direction:column;gap:12px;
+}
+#csv-import-zone.visible { display:flex; }
+.csv-drop-box {
+  width:min(360px,80%);padding:32px;
+  border:2px dashed var(--border-3);border-radius:8px;
+  text-align:center;background:var(--bg-3);
+  cursor:pointer;transition:border-color 0.2s,background 0.2s;
+}
+.csv-drop-box:hover,.csv-drop-box.drag-over { border-color:var(--accent);background:var(--accent-l); }
+.csv-drop-icon { font-size:32px;margin-bottom:10px;opacity:0.4; }
+.csv-drop-title { font-family:var(--disp);font-size:18px;color:var(--ink);margin-bottom:6px; }
+.csv-drop-hint { font-family:var(--mono);font-size:8.5px;letter-spacing:0.08em;color:var(--ink-3); }
+.csv-cancel { font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-3);cursor:pointer;padding:8px;transition:color 0.15s; }
+.csv-cancel:hover { color:var(--ink); }
+
+/* ── MINIMAP ── */
+#minimap {
+  position:absolute;bottom:50px;left:12px;
+  width:100px;height:66px;
+  background:var(--bg-4);border:1px solid var(--border-2);border-radius:4px;
+  overflow:hidden;z-index:100;opacity:0.7;transition:opacity 0.15s;
+}
+#minimap:hover { opacity:1; }
+#minimap-canvas { width:100%;height:100%; }
+#minimap-viewport {
+  position:absolute;top:0;left:0;
+  border:1px solid var(--accent);background:rgba(200,112,74,0.05);
+  pointer-events:none;border-radius:1px;
+}
+
+/* Connect mode badge */
+#mode-badge {
+  position:fixed;top:56px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:var(--bg);
+  font-family:var(--mono);font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;z-index:999;opacity:0;pointer-events:none;
+  transition:opacity 0.2s;
+}
+#mode-badge.visible { opacity:1; }
+
+/* Scrollbar */
+*{scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;}
+*::-webkit-scrollbar{width:2px;height:2px;}
+*::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:0;}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div id="topbar">
+  <div class="tb-brand">narrate <em>β</em></div>
+  <div class="tb-divider"></div>
+  <div class="tb-pres-name">
+    <input id="tb-pres-title" value="Untitled Presentation" placeholder="Presentation title…" spellcheck="false">
+  </div>
+  <div class="tb-actions">
+    <button class="tb-btn" onclick="addNode()">+ Node</button>
+    <button class="tb-btn" id="btn-connect" onclick="toggleConnectMode()">Connect</button>
+    <button class="tb-btn" onclick="fitAll()">Fit</button>
+    <div class="tb-divider"></div>
+    <button class="tb-btn" onclick="openFxPanel()" id="btn-fx">Effects</button>
+    <button class="tb-btn" onclick="showCsvImport()">Import CSV</button>
+    <div class="tb-divider"></div>
+    <button class="tb-btn accent" onclick="togglePresentMode()" id="btn-present">▶ Present</button>
+  </div>
+</div>
+
+<!-- ── LAYOUT ── -->
+<div id="layout">
+
+  <!-- ── NODE CANVAS ── -->
+  <div id="canvas-panel">
+    <div id="resize-handle"></div>
+    <div id="canvas">
+      <svg id="connections-svg">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="var(--ink-3)" opacity="0.5"/>
+          </marker>
+          <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <line id="preview-line" class="conn-line preview"/>
+      </svg>
+    </div>
+
+    <!-- Minimap -->
+    <div id="minimap"><canvas id="minimap-canvas"></canvas><div id="minimap-viewport"></div></div>
+
+    <!-- Zoom HUD -->
+    <div id="zoom-hud">
+      <button class="zoom-btn" onclick="doZoom(-0.15)">−</button>
+      <div id="zoom-pct">100%</div>
+      <button class="zoom-btn" onclick="doZoom(0.15)">+</button>
+    </div>
+
+    <!-- Chain nav -->
+    <div id="chain-nav"></div>
+  </div>
+
+  <!-- ── POSTER ── -->
+  <div id="poster-panel">
+    <div id="poster-ambient"></div>
+
+    <!-- Slide frame -->
+    <div id="slide-frame">
+      <div id="slide-bg-layer"></div>
+      <div id="slide-img-layer"><img id="slide-img" alt=""></div>
+      <div id="slide-img-scrim"></div>
+      <div id="slide-content"></div>
+      <div class="slide-corner tl"></div>
+      <div class="slide-corner br"></div>
+      <div id="slide-idx-badge"></div>
+      <div id="dispatch-ghost"><div id="dispatch-readout"></div></div>
+    </div>
+
+    <!-- Chain progress dots -->
+    <div id="chain-dots"></div>
+
+    <!-- Branch indicator -->
+    <div id="branch-indicator"></div>
+
+    <!-- Poster controls -->
+    <div id="poster-controls">
+      <button class="pc-btn" id="pc-prev" onclick="prevSlide()">← Prev</button>
+      <span id="pc-slide-counter">—</span>
+      <button class="pc-btn" id="pc-next" onclick="nextSlide()">Next →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── MODE BADGE ── -->
+<div id="mode-badge">Connect Mode · Click source node</div>
+
+<!-- ── COMPOSE WIDGET ── -->
+<div id="compose-widget">
+  <div class="cw-handle"></div>
+  <div class="cw-header">
+    <div class="cw-label">New Slide Node</div>
+    <button class="cw-close" onclick="closeCompose()">×</button>
+  </div>
+  <div class="cw-body">
+    <div class="cw-field">
+      <div class="cw-field-label">Headline</div>
+      <input class="cw-input" id="cw-title" placeholder="Slide headline…" autocomplete="off">
+    </div>
+    <div class="cw-field">
+      <div class="cw-field-label">Body Text</div>
+      <textarea class="cw-textarea" id="cw-body" rows="2" placeholder="Supporting text…"></textarea>
+    </div>
+    <div class="cw-field">
+      <div class="cw-field-label">Type</div>
+      <div class="cw-type-pills" id="cw-type-pills">
+        <div class="type-pill active" data-t="intro">intro</div>
+        <div class="type-pill" data-t="concept">concept</div>
+        <div class="type-pill" data-t="story">story</div>
+        <div class="type-pill" data-t="data">data</div>
+        <div class="type-pill" data-t="media">media</div>
+        <div class="type-pill" data-t="cta">cta</div>
+      </div>
+    </div>
+    <div class="cw-field">
+      <div class="cw-field-label">Slide Background</div>
+      <div class="cw-bg-options" id="cw-bg-options"></div>
+    </div>
+    <div class="cw-field">
+      <div class="cw-field-label">Pull Quote (optional)</div>
+      <input class="cw-input" id="cw-pullquote" placeholder="Memorable line…" autocomplete="off">
+    </div>
+    <div class="cw-field">
+      <div class="cw-field-label">Data Values (comma-sep, e.g. 42%,Revenue,120k,Users)</div>
+      <input class="cw-input" id="cw-data" placeholder="val1,label1,val2,label2…" autocomplete="off">
+    </div>
+  </div>
+  <div class="cw-footer">
+    <button class="cw-cancel-btn" onclick="closeCompose()">Cancel</button>
+    <button class="cw-create-btn" onclick="submitCompose()">Create Slide Node</button>
+  </div>
+</div>
+
+<!-- ── CINEMATIC FX PANEL ── -->
+<div id="fx-panel">
+  <div class="fxp-header">
+    <div class="fxp-title">Cinematic & Ambient Effects</div>
+    <button class="fxp-close" onclick="closeFxPanel()">×</button>
+  </div>
+  <div class="fxp-body" id="fxp-body"></div>
+</div>
+
+<!-- ── CSV IMPORT ── -->
+<div id="csv-import-zone">
+  <div class="csv-drop-box" id="csv-drop-box" onclick="document.getElementById('csv-file-input').click()">
+    <div class="csv-drop-icon">⬆</div>
+    <div class="csv-drop-title">Import CSV as Nodes</div>
+    <div class="csv-drop-hint">Columns: title, body, type, pullquote, bg<br>Drag & drop or click to choose file</div>
+    <input type="file" id="csv-file-input" accept=".csv" style="display:none">
+  </div>
+  <div class="csv-cancel" onclick="hideCsvImport()">Cancel</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const SLIDE_BACKGROUNDS = [
+  { id:'night',   bg:'#080706',    label:'Night' },
+  { id:'noir',    bg:'#060810',    label:'Noir' },
+  { id:'forest',  bg:'#060d08',    label:'Forest' },
+  { id:'ember',   bg:'#0d0603',    label:'Ember' },
+  { id:'slate',   bg:'#080c10',    label:'Slate' },
+  { id:'dusk',    bg:'#0c0810',    label:'Dusk' },
+  { id:'ash',     bg:'#10100e',    label:'Ash' },
+  { id:'bone',    bg:'#f5f2ec',    label:'Bone' },
+];
+
+const AMBIENT_COLORS = {
+  concept: '#7a8ecc', story: '#c8704a', data: '#6ab09a',
+  media: '#b07acc', cta: '#d4a84a', intro: '#8a9e6a'
+};
+
+const DEFAULT_NODES = [
+  {
+    id:'n1', x:80, y:60, type:'intro', title:'The Premise',
+    body:'Every great presentation is a story. Not a deck — a journey with narrative tension, branching paths, and an emotional arc.',
+    bg:'night', z:1
+  },
+  {
+    id:'n2', x:380, y:60, type:'concept', title:'Non-Linear Flow',
+    body:'Topics can branch and reconnect. The presenter follows the audience — not a fixed sequence.',
+    pullquote:'Respond to the room, not the slide number.',
+    bg:'noir', z:2
+  },
+  {
+    id:'n3', x:80, y:280, type:'story', title:'Narrative Engine',
+    body:'Each node carries its own visual vocabulary — headline, body, pull quote, data grid — composed in a cinematic poster format.',
+    bg:'ember', z:3
+  },
+  {
+    id:'n4', x:380, y:280, type:'data', title:'Signal & Presence',
+    body:'The dispatch layer reads the room and adjusts the flow. Audience attention data drives the sequence.',
+    dataValues:'4.2s,Avg Dwell,68%,Re-read Rate,91%,Engagement',
+    bg:'slate', z:4
+  },
+  {
+    id:'n5', x:680, y:170, type:'cta', title:'Build Something',
+    body:'Add nodes, draw connections, set your branching paths. Then present — the canvas becomes the teleprompter.',
+    pullquote:'The tool disappears. Only the story remains.',
+    bg:'dusk', z:5
+  },
+];
+
+const DEFAULT_CONNECTIONS = [
+  { id:'c1', from:'n1', to:'n2' },
+  { id:'c2', from:'n1', to:'n3' },
+  { id:'c3', from:'n2', to:'n4' },
+  { id:'c4', from:'n3', to:'n4' },
+  { id:'c5', from:'n4', to:'n5' },
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let nodes = [];
+let connections = [];
+let transform = { x:0, y:0, scale:1 };
+let selectedNodeId = null;
+let activeSlideId = null;
+let connectMode = false;
+let connectSourceId = null;
+let isDragging = false;
+let composeXY = null;
+let presentMode = false;
+let chainPath = []; // current presentation path
+let chainIndex = 0;
+
+// FX state
+let fxState = {
+  ambientGlow: true,
+  grain: true,
+  kenBurns: true,
+  transitionSpeed: 0.6,
+  ambientIntensity: 0.3,
+  dispatchMode: false,
+};
+
+const canvasEl = document.getElementById('canvas');
+const connSvg  = document.getElementById('connections-svg');
+const previewLine = document.getElementById('preview-line');
+
+// ═══════════════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════════════
+const VER = 'narrate_v1';
+function save() {
+  try {
+    localStorage.setItem(VER+'_nodes', JSON.stringify(nodes));
+    localStorage.setItem(VER+'_conns', JSON.stringify(connections));
+    localStorage.setItem(VER+'_tx', JSON.stringify(transform));
+    localStorage.setItem(VER+'_title', document.getElementById('tb-pres-title').value);
+  } catch(e){}
+}
+function load() {
+  try {
+    const n = localStorage.getItem(VER+'_nodes');
+    const c = localStorage.getItem(VER+'_conns');
+    const t = localStorage.getItem(VER+'_tx');
+    const title = localStorage.getItem(VER+'_title');
+    if (n) nodes = JSON.parse(n);
+    if (c) connections = JSON.parse(c);
+    if (t) transform = JSON.parse(t);
+    if (title) document.getElementById('tb-pres-title').value = title;
+    if (!n) {
+      nodes = DEFAULT_NODES.map(nd=>({...nd}));
+      connections = DEFAULT_CONNECTIONS.map(cn=>({...cn}));
+    }
+  } catch(e) {
+    nodes = DEFAULT_NODES.map(nd=>({...nd}));
+    connections = DEFAULT_CONNECTIONS.map(cn=>({...cn}));
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TRANSFORM
+// ═══════════════════════════════════════════════════════
+function applyTransform() {
+  canvasEl.style.transform = `translate(${transform.x}px,${transform.y}px) scale(${transform.scale})`;
+  document.getElementById('zoom-pct').textContent = Math.round(transform.scale*100)+'%';
+  drawMinimap();
+}
+function doZoom(delta, cx, cy) {
+  const panel = document.getElementById('canvas-panel');
+  const rect = panel.getBoundingClientRect();
+  cx = cx ?? rect.width/2;
+  cy = cy ?? rect.height/2;
+  const newScale = Math.max(0.12, Math.min(3, transform.scale+delta));
+  if (newScale === transform.scale) return;
+  const ratio = newScale/transform.scale;
+  transform.x = cx-(cx-transform.x)*ratio;
+  transform.y = cy-(cy-transform.y)*ratio;
+  transform.scale = newScale;
+  applyTransform(); save();
+}
+function fitAll() {
+  if (!nodes.length) return;
+  const panel = document.getElementById('canvas-panel');
+  const vpW = panel.clientWidth, vpH = panel.clientHeight;
+  const pad = 80, nw=240, nh=150;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  nodes.forEach(n=>{
+    minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
+    maxX=Math.max(maxX,n.x+nw); maxY=Math.max(maxY,n.y+nh);
+  });
+  const cW=maxX-minX+pad*2, cH=maxY-minY+pad*2;
+  const scale=Math.min(vpW/cW, vpH/cH, 1.2);
+  transform.scale=scale;
+  transform.x=(vpW-(maxX+minX)*scale)/2;
+  transform.y=(vpH-(maxY+minY)*scale)/2;
+  applyTransform(); save();
+}
+
+function clientToCanvas(cx, cy) {
+  const rect = document.getElementById('canvas-panel').getBoundingClientRect();
+  return { x:(cx-rect.left-transform.x)/transform.scale, y:(cy-rect.top-transform.y)/transform.scale };
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER NODES
+// ═══════════════════════════════════════════════════════
+function renderAll() {
+  renderNodes();
+  renderConnections();
+}
+function renderNodes() {
+  nodes.forEach(n => renderNode(n));
+  // remove stale
+  canvasEl.querySelectorAll('.node-card').forEach(el => {
+    if (!nodes.find(n=>n.id===el.dataset.id)) el.remove();
+  });
+}
+function getNodeEl(id) { return canvasEl.querySelector(`.node-card[data-id="${id}"]`); }
+
+function renderNode(node) {
+  let el = getNodeEl(node.id);
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'node-card';
+    el.dataset.id = node.id;
+    canvasEl.appendChild(el);
+    attachNodeEvents(el, node);
+  }
+  el.dataset.type = node.type;
+  el.style.left = node.x+'px';
+  el.style.top  = node.y+'px';
+  el.style.zIndex = node.z || 1;
+  el.classList.toggle('selected', selectedNodeId === node.id);
+  el.classList.toggle('active-slide', activeSlideId === node.id);
+
+  const chainInfo = getChainInfo(node.id);
+  const chainIdx  = chainPath.indexOf(node.id);
+
+  el.innerHTML = `
+    <div class="node-colorbar"></div>
+    <div class="port port-left"   data-side="left"   data-node-id="${node.id}"></div>
+    <div class="port port-right"  data-side="right"  data-node-id="${node.id}"></div>
+    <div class="port port-top"    data-side="top"    data-node-id="${node.id}"></div>
+    <div class="port port-bottom" data-side="bottom" data-node-id="${node.id}"></div>
+    <div class="node-slide-num">${chainIdx>=0 ? '#'+(chainIdx+1) : ''}</div>
+    <div class="node-header">
+      <div class="node-type-tag">${node.type}</div>
+      <div class="node-actions">
+        <button class="node-act-btn" data-action="del" title="Delete">✕</button>
+      </div>
+    </div>
+    <div class="node-title">${node.title||'Untitled'}</div>
+    <div class="node-body">${node.body||''}</div>
+    <div class="node-footer">
+      <div class="node-meta">${(SLIDE_BACKGROUNDS.find(b=>b.id===node.bg)||SLIDE_BACKGROUNDS[0]).label}</div>
+      <div class="node-chain ${chainInfo.count?'linked':''}">${chainInfo.label}</div>
+    </div>
+  `;
+  el.querySelectorAll('.port').forEach(p=>{
+    p.dataset.nodeId = node.id;
+    p.addEventListener('pointerdown', onPortDown);
+  });
+  el.querySelector('[data-action="del"]').addEventListener('click', e=>{
+    e.stopPropagation();
+    deleteNode(node.id);
+  });
+  attachNodeEvents(el, node);
+}
+
+function getChainInfo(id) {
+  const inc = connections.filter(c=>c.to===id).length;
+  const out = connections.filter(c=>c.from===id).length;
+  const total = inc+out;
+  if (!total) return {count:0,label:''};
+  return {count:total,label:`${inc}← →${out}`};
+}
+
+function attachNodeEvents(el, node) {
+  el.addEventListener('pointerdown', e=>{
+    if (e.target.closest('.port')||e.target.closest('.node-act-btn')) return;
+    if (connectMode) { handleConnectClick(node.id); return; }
+    startNodeDrag(e, el, node);
+  });
+  el.addEventListener('click', e=>{
+    if (isDragging||e.target.closest('.port')||e.target.closest('.node-act-btn')||connectMode) return;
+    selectNode(node.id);
+    setActiveSlide(node.id);
+  });
+}
+
+function selectNode(id) {
+  selectedNodeId = id;
+  renderNodes();
+  renderConnections();
+}
+
+// ═══════════════════════════════════════════════════════
+// NODE DRAG
+// ═══════════════════════════════════════════════════════
+function startNodeDrag(e, el, node) {
+  if (e.button!==0) return;
+  e.preventDefault(); e.stopPropagation();
+  const startClient = {x:e.clientX, y:e.clientY};
+  const startNode   = {x:node.x, y:node.y};
+  let moved = false;
+  el.setPointerCapture(e.pointerId);
+  el.classList.add('is-dragging');
+  node.z = (Math.max(...nodes.map(n=>n.z||1))+1);
+
+  const onMove = ev=>{
+    const dx=(ev.clientX-startClient.x)/transform.scale;
+    const dy=(ev.clientY-startClient.y)/transform.scale;
+    if(Math.hypot(dx,dy)>3) moved=true;
+    node.x=Math.round((startNode.x+dx)/20)*20;
+    node.y=Math.round((startNode.y+dy)/20)*20;
+    el.style.left=node.x+'px'; el.style.top=node.y+'px';
+    renderConnections(); drawMinimap();
+  };
+  const onUp=()=>{
+    el.classList.remove('is-dragging');
+    el.releasePointerCapture(e.pointerId);
+    el.removeEventListener('pointermove', onMove);
+    el.removeEventListener('pointerup', onUp);
+    isDragging=moved; save();
+    setTimeout(()=>{isDragging=false;},80);
+  };
+  el.addEventListener('pointermove', onMove);
+  el.addEventListener('pointerup', onUp);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONNECTIONS
+// ═══════════════════════════════════════════════════════
+function renderConnections() {
+  // Remove old lines
+  connSvg.querySelectorAll('.conn-line:not(#preview-line)').forEach(l=>l.remove());
+  connections.forEach(conn=>{
+    const from = nodes.find(n=>n.id===conn.from);
+    const to   = nodes.find(n=>n.id===conn.to);
+    if (!from||!to) return;
+    const fw=240, fh=130;
+    const x1=from.x+fw, y1=from.y+fh/2;
+    const x2=to.x,      y2=to.y+fh/2;
+    const mx=(x1+x2)/2;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+    line.classList.add('conn-line');
+    const inChain = chainPath.includes(conn.from)&&chainPath.includes(conn.to);
+    if (inChain) line.classList.add('in-chain');
+    line.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+    line.setAttribute('marker-end', inChain ? 'url(#arrow-active)' : 'url(#arrow)');
+    line.dataset.connId = conn.id;
+    line.addEventListener('click', ()=>{ deleteConnection(conn.id); });
+    connSvg.insertBefore(line, previewLine);
+  });
+}
+
+function deleteConnection(id) {
+  connections = connections.filter(c=>c.id!==id);
+  renderConnections(); updateChainNav(); save();
+  toast('Connection removed');
+}
+function deleteNode(id) {
+  nodes = nodes.filter(n=>n.id!==id);
+  connections = connections.filter(c=>c.from!==id&&c.to!==id);
+  if (activeSlideId===id) { activeSlideId=null; clearSlide(); }
+  if (selectedNodeId===id) selectedNodeId=null;
+  renderAll(); updateChainNav(); save();
+  toast('Node removed');
+}
+
+// ═══════════════════════════════════════════════════════
+// CONNECT MODE
+// ═══════════════════════════════════════════════════════
+function toggleConnectMode() {
+  connectMode=!connectMode; connectSourceId=null;
+  const btn=document.getElementById('btn-connect');
+  const badge=document.getElementById('mode-badge');
+  btn.classList.toggle('active', connectMode);
+  badge.classList.toggle('visible', connectMode);
+  if (!connectMode) {
+    previewLine.style.display='none';
+    canvasEl.querySelectorAll('.node-card').forEach(el=>el.classList.remove('connect-source','connect-target-hover'));
+  } else {
+    toast('Click source node, then target');
+  }
+}
+function handleConnectClick(nodeId) {
+  if (!connectSourceId) {
+    connectSourceId=nodeId;
+    getNodeEl(nodeId)?.classList.add('connect-source');
+    toast('Now click target node');
+  } else if (connectSourceId===nodeId) {
+    connectSourceId=null;
+    canvasEl.querySelectorAll('.node-card').forEach(el=>el.classList.remove('connect-source'));
+    toast('Cancelled');
+  } else {
+    const exists = connections.find(c=>c.from===connectSourceId&&c.to===nodeId);
+    if (!exists) {
+      const conn={id:'c'+Date.now(),from:connectSourceId,to:nodeId};
+      connections.push(conn);
+      toast('Connected!');
+    } else {
+      toast('Already connected');
+    }
+    canvasEl.querySelectorAll('.node-card').forEach(el=>el.classList.remove('connect-source','connect-target-hover'));
+    connectSourceId=null;
+    toggleConnectMode();
+    renderAll(); updateChainNav(); save();
+  }
+}
+
+function onPortDown(e) {
+  e.preventDefault(); e.stopPropagation();
+  const nodeId=e.currentTarget.dataset.nodeId;
+  if (!connectMode) {
+    connectMode=true; connectSourceId=nodeId;
+    document.getElementById('btn-connect').classList.add('active');
+    document.getElementById('mode-badge').classList.add('visible');
+    getNodeEl(nodeId)?.classList.add('connect-source');
+    toast('Click target node to connect');
+  } else {
+    handleConnectClick(nodeId);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CANVAS PAN
+// ═══════════════════════════════════════════════════════
+(function(){
+  const panel = document.getElementById('canvas-panel');
+  let panning=false, px=0,py=0;
+  panel.addEventListener('mousedown', e=>{
+    if (e.target!==panel&&!e.target.id.includes('canvas')) return;
+    if (connectMode) return;
+    panning=true; px=e.clientX-transform.x; py=e.clientY-transform.y;
+    panel.style.cursor='grabbing';
+  });
+  window.addEventListener('mousemove', e=>{
+    if (!panning) return;
+    transform.x=e.clientX-px; transform.y=e.clientY-py;
+    applyTransform();
+    if (connectMode&&connectSourceId) {
+      const src=nodes.find(n=>n.id===connectSourceId);
+      if (src) {
+        const x1=src.x+240, y1=src.y+65;
+        const pt=clientToCanvas(e.clientX, e.clientY);
+        previewLine.style.display='block';
+        previewLine.setAttribute('x1',x1); previewLine.setAttribute('y1',y1);
+        previewLine.setAttribute('x2',pt.x); previewLine.setAttribute('y2',pt.y);
+      }
+    }
+  });
+  window.addEventListener('mouseup', ()=>{ panning=false; panel.style.cursor='default'; });
+  panel.addEventListener('wheel', e=>{
+    e.preventDefault();
+    const rect=panel.getBoundingClientRect();
+    doZoom(-e.deltaY*0.001, e.clientX-rect.left, e.clientY-rect.top);
+  }, {passive:false});
+
+  // Connect mode: track mouse for preview line
+  panel.addEventListener('mousemove', e=>{
+    if (!connectMode||!connectSourceId) return;
+    const src=nodes.find(n=>n.id===connectSourceId);
+    if (!src) return;
+    const x1=src.x+240, y1=src.y+65;
+    const pt=clientToCanvas(e.clientX, e.clientY);
+    previewLine.style.display='block';
+    previewLine.setAttribute('x1',x1); previewLine.setAttribute('y1',y1);
+    previewLine.setAttribute('x2',pt.x); previewLine.setAttribute('y2',pt.y);
+    // hover targets
+    canvasEl.querySelectorAll('.node-card').forEach(el=>{
+      const nid=el.dataset.id;
+      el.classList.toggle('connect-target-hover', nid!==connectSourceId&&Math.hypot(
+        (nodes.find(n=>n.id===nid)?.x||0)+120-pt.x,
+        (nodes.find(n=>n.id===nid)?.y||0)+75-pt.y
+      )<80);
+    });
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// POSTER / SLIDE ENGINE
+// ═══════════════════════════════════════════════════════
+function setActiveSlide(nodeId, skipAnim) {
+  activeSlideId = nodeId;
+  const node = nodes.find(n=>n.id===nodeId);
+  renderNodes();
+  if (!node) return;
+  renderSlide(node, skipAnim);
+  updateChainNav(nodeId);
+  updateChainDots();
+  save();
+}
+
+function renderSlide(node, skipAnim) {
+  const frame = document.getElementById('slide-frame');
+  const bgDef = SLIDE_BACKGROUNDS.find(b=>b.id===node.bg)||SLIDE_BACKGROUNDS[0];
+  const accentColor = AMBIENT_COLORS[node.type]||'#c8704a';
+
+  // BG
+  document.getElementById('slide-bg-layer').style.background = bgDef.bg;
+  frame.style.background = bgDef.bg;
+
+  // Ambient
+  if (fxState.ambientGlow) {
+    const amb = document.getElementById('poster-ambient');
+    amb.style.setProperty('--amb-color', accentColor);
+    amb.style.opacity = fxState.ambientIntensity;
+  }
+
+  // Image (if any)
+  const img = document.getElementById('slide-img');
+  img.classList.remove('visible');
+  if (node.imgUrl) {
+    img.src = node.imgUrl;
+    setTimeout(()=>img.classList.add('visible'), 80);
+    img.style.setProperty('--img-opacity', '0.22');
+  }
+
+  // Content
+  const content = document.getElementById('slide-content');
+  let html = '';
+
+  if (node.type) {
+    html += `<div class="slide-tag" style="color:${accentColor}">${node.type}</div>`;
+  }
+
+  if (node.pullquote) {
+    html += `<div class="slide-pullquote">${escHtml(node.pullquote)}</div>`;
+  } else {
+    if (node.title) {
+      html += `<div class="slide-headline">${escHtml(node.title)}</div>`;
+    }
+    if (node.dataValues) {
+      const parts = node.dataValues.split(',');
+      let gridHtml = '<div class="slide-data-grid">';
+      for (let i=0;i<parts.length;i+=2) {
+        const val=parts[i]?.trim(), lbl=parts[i+1]?.trim();
+        if (val) gridHtml+=`<div class="slide-data-item">
+          <div class="slide-data-value" style="color:${accentColor}">${escHtml(val)}</div>
+          ${lbl?`<div class="slide-data-label">${escHtml(lbl)}</div>`:''}
+        </div>`;
+      }
+      gridHtml+='</div>';
+      html += gridHtml;
+    } else if (node.body) {
+      html += `<div class="slide-body">${escHtml(node.body)}</div>`;
+    }
+  }
+
+  content.innerHTML = html;
+
+  // Index badge
+  const idx = chainPath.indexOf(node.id||activeSlideId);
+  document.getElementById('slide-idx-badge').textContent = idx>=0 ? `${idx+1} / ${chainPath.length}` : '';
+
+  // Dispatch readout
+  if (fxState.dispatchMode) {
+    document.getElementById('dispatch-readout').innerHTML =
+      `TYPE · ${node.type.toUpperCase()}<br>CONNECTIONS · ${getChainInfo(node.id).count}<br>SIGNAL ···`;
+    document.getElementById('dispatch-ghost').classList.add('visible');
+  } else {
+    document.getElementById('dispatch-ghost').classList.remove('visible');
+  }
+
+  // Animate in
+  frame.classList.remove('animating');
+  if (!skipAnim) {
+    void frame.offsetWidth;
+    setTimeout(()=>frame.classList.add('animating'), 20);
+  } else {
+    frame.classList.add('animating');
+  }
+}
+
+function clearSlide() {
+  const frame = document.getElementById('slide-frame');
+  frame.classList.remove('animating');
+  document.getElementById('slide-content').innerHTML='';
+  document.getElementById('slide-img').classList.remove('visible');
+  document.getElementById('poster-ambient').style.opacity=0;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHAIN / PATH NAVIGATION
+// ═══════════════════════════════════════════════════════
+function buildChainFrom(startId) {
+  // BFS to build a flattened path from startId through connections
+  const path=[];
+  const visited=new Set();
+  let queue=[startId];
+  while (queue.length) {
+    const id=queue.shift();
+    if (visited.has(id)) continue;
+    visited.add(id); path.push(id);
+    const nexts=connections.filter(c=>c.from===id).map(c=>c.to);
+    nexts.forEach(n=>{ if(!visited.has(n)) queue.push(n); });
+  }
+  return path;
+}
+
+function updateChainNav(fromId) {
+  if (fromId) chainPath = buildChainFrom(fromId);
+  chainIndex = chainPath.indexOf(activeSlideId);
+  updateChainDots();
+  updateBranchIndicator();
+  renderNodes(); // refresh slide numbers
+  renderConnections();
+
+  const nav = document.getElementById('chain-nav');
+  if (chainPath.length<=1) { nav.classList.remove('visible'); return; }
+  nav.classList.add('visible');
+  let html=`<div class="cn-label">path from here</div>`;
+  chainPath.slice(0,6).forEach((id,i)=>{
+    const n=nodes.find(nd=>nd.id===id);
+    if (!n) return;
+    html+=`<div class="cn-row">
+      <div class="cn-dot ${id===activeSlideId?'active':''}"></div>
+      <div class="cn-text">${n.title||'Untitled'}</div>
+    </div>`;
+  });
+  if (chainPath.length>6) html+=`<div class="cn-row"><div class="cn-dot"></div><div class="cn-text">+${chainPath.length-6} more</div></div>`;
+  nav.innerHTML=html;
+}
+
+function updateChainDots() {
+  const dots=document.getElementById('chain-dots');
+  if (chainPath.length<=1) { dots.innerHTML=''; return; }
+  dots.innerHTML = chainPath.map((id,i)=>`
+    <div class="chain-dot ${id===activeSlideId?'active':chainPath.indexOf(id)<chainIndex?'visited':''}"
+         onclick="setActiveSlide('${id}')"></div>
+  `).join('');
+}
+
+function updateBranchIndicator() {
+  const bi=document.getElementById('branch-indicator');
+  if (!activeSlideId) { bi.classList.remove('visible'); return; }
+  const nexts=connections.filter(c=>c.from===activeSlideId);
+  if (nexts.length<=1) { bi.classList.remove('visible'); return; }
+  bi.classList.add('visible');
+  bi.innerHTML=`<span class="bi-label">Branch →</span>`+
+    nexts.map(c=>{
+      const n=nodes.find(nd=>nd.id===c.to);
+      return `<div class="bi-option" onclick="setActiveSlide('${c.to}')">${n?.title||c.to}</div>`;
+    }).join('');
+}
+
+function prevSlide() {
+  if (!chainPath.length) return;
+  const idx=chainPath.indexOf(activeSlideId);
+  const prev=idx>0?idx-1:chainPath.length-1;
+  setActiveSlide(chainPath[prev]);
+  chainIndex=prev;
+}
+function nextSlide() {
+  if (!chainPath.length) return;
+  // Check branches
+  const nexts=connections.filter(c=>c.from===activeSlideId);
+  if (nexts.length>1) {
+    updateBranchIndicator(); return;
+  }
+  const idx=chainPath.indexOf(activeSlideId);
+  const next=(idx+1)%chainPath.length;
+  setActiveSlide(chainPath[next]);
+  chainIndex=next;
+}
+function updateSlideCounter() {
+  const idx=chainPath.indexOf(activeSlideId);
+  document.getElementById('pc-slide-counter').textContent = chainPath.length?`${idx>=0?idx+1:'?'} / ${chainPath.length}`:'—';
+}
+
+// ═══════════════════════════════════════════════════════
+// PRESENT MODE
+// ═══════════════════════════════════════════════════════
+function togglePresentMode() {
+  presentMode=!presentMode;
+  document.body.classList.toggle('present-mode', presentMode);
+  document.getElementById('btn-present').textContent = presentMode ? '✕ Exit' : '▶ Present';
+  document.getElementById('btn-present').classList.toggle('active', presentMode);
+  if (presentMode && !activeSlideId && nodes.length) {
+    setActiveSlide(nodes[0].id);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// COMPOSE
+// ═══════════════════════════════════════════════════════
+function addNode(cx, cy) {
+  if (!cx) {
+    const panel=document.getElementById('canvas-panel');
+    const pt=clientToCanvas(panel.clientWidth/2, panel.clientHeight/2);
+    composeXY={x:Math.round(pt.x-120), y:Math.round(pt.y-75)};
+  } else {
+    composeXY={x:cx,y:cy};
+  }
+  // Build bg swatches
+  const opt=document.getElementById('cw-bg-options');
+  opt.innerHTML=SLIDE_BACKGROUNDS.map((b,i)=>`
+    <div>
+      <div class="bg-swatch ${i===0?'active':''}" data-bg="${b.id}" style="background:${b.bg}" title="${b.label}"></div>
+    </div>
+  `).join('');
+  opt.querySelectorAll('.bg-swatch').forEach(sw=>{
+    sw.addEventListener('click',()=>{
+      opt.querySelectorAll('.bg-swatch').forEach(s=>s.classList.remove('active'));
+      sw.classList.add('active');
+    });
+  });
+  document.getElementById('cw-type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.toggle('active',p.dataset.t==='intro'));
+  document.getElementById('cw-title').value='';
+  document.getElementById('cw-body').value='';
+  document.getElementById('cw-pullquote').value='';
+  document.getElementById('cw-data').value='';
+  document.getElementById('compose-widget').classList.add('open');
+  setTimeout(()=>document.getElementById('cw-title').focus(),360);
+}
+function closeCompose() {
+  document.getElementById('compose-widget').classList.remove('open');
+}
+function submitCompose() {
+  const title=document.getElementById('cw-title').value.trim();
+  if (!title) { toast('Add a headline first'); return; }
+  const type=document.querySelector('#cw-type-pills .type-pill.active')?.dataset.t||'intro';
+  const bg=document.querySelector('#cw-bg-options .bg-swatch.active')?.dataset.bg||'night';
+  const node={
+    id:'n'+Date.now()+Math.random().toString(36).slice(2,5),
+    x:composeXY?.x||200, y:composeXY?.y||200,
+    type, title, bg,
+    body:document.getElementById('cw-body').value.trim()||undefined,
+    pullquote:document.getElementById('cw-pullquote').value.trim()||undefined,
+    dataValues:document.getElementById('cw-data').value.trim()||undefined,
+    z:nodes.length+1
+  };
+  nodes.push(node);
+  renderNode(node);
+  updateChainNav();
+  closeCompose(); save();
+  setActiveSlide(node.id);
+  toast('Node created');
+}
+
+// Type pill clicks
+document.getElementById('cw-type-pills').addEventListener('click', e=>{
+  const pill=e.target.closest('.type-pill');
+  if (!pill) return;
+  document.querySelectorAll('#cw-type-pills .type-pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+});
+
+// Double-click canvas to add node
+document.getElementById('canvas-panel').addEventListener('dblclick', e=>{
+  if (e.target.closest('.node-card')||e.target.closest('.port')) return;
+  const pt=clientToCanvas(e.clientX, e.clientY);
+  composeXY={x:Math.round(pt.x-120), y:Math.round(pt.y-75)};
+  addNode(composeXY.x, composeXY.y);
+});
+
+// ═══════════════════════════════════════════════════════
+// FX PANEL
+// ═══════════════════════════════════════════════════════
+function buildFxPanel() {
+  document.getElementById('fxp-body').innerHTML = `
+    <div class="fxp-section-label">Slide Transitions</div>
+    <div class="fx-option ${fxState.ambientGlow?'active':''}" onclick="toggleFx('ambientGlow', this)">
+      <span class="fx-option-label">Ambient Color Glow</span>
+      <div class="fx-check">✓</div>
+    </div>
+    <div class="fx-option ${fxState.grain?'active':''}" onclick="toggleFx('grain', this)">
+      <span class="fx-option-label">Film Grain Overlay</span>
+      <div class="fx-check">✓</div>
+    </div>
+    <div class="fx-option ${fxState.kenBurns?'active':''}" onclick="toggleFx('kenBurns', this)">
+      <span class="fx-option-label">Ken Burns on Images</span>
+      <div class="fx-check">✓</div>
+    </div>
+    <div class="fx-slider-row">
+      <div class="fx-slider-label">Transition Speed <span id="fx-speed-val">${fxState.transitionSpeed}s</span></div>
+      <input class="fx-slider" type="range" min="0.2" max="1.5" step="0.05" value="${fxState.transitionSpeed}"
+        oninput="fxState.transitionSpeed=+this.value;document.getElementById('fx-speed-val').textContent=this.value+'s';applyFxCss()">
+    </div>
+    <div class="fx-slider-row">
+      <div class="fx-slider-label">Ambient Intensity <span id="fx-amb-val">${Math.round(fxState.ambientIntensity*100)}%</span></div>
+      <input class="fx-slider" type="range" min="0" max="0.7" step="0.05" value="${fxState.ambientIntensity}"
+        oninput="fxState.ambientIntensity=+this.value;document.getElementById('fx-amb-val').textContent=Math.round(+this.value*100)+'%';if(activeSlideId){const n=nodes.find(nd=>nd.id===activeSlideId);if(n)document.getElementById('poster-ambient').style.opacity=fxState.ambientGlow?fxState.ambientIntensity:0;}">
+    </div>
+
+    <div class="fxp-section-label">Dispatch Layer</div>
+    <div class="fx-option ${fxState.dispatchMode?'active':''}" onclick="toggleFx('dispatchMode', this)">
+      <span class="fx-option-label">Dispatch Overlay (AI cue layer)</span>
+      <div class="fx-check">✓</div>
+    </div>
+
+    <div class="fxp-section-label">Slide Palette Overrides</div>
+    <div class="fxp-palette-row">
+      ${SLIDE_BACKGROUNDS.map(b=>`
+        <div>
+          <div class="fxp-palette-swatch" style="background:${b.bg}" title="${b.label}"></div>
+          <div class="fxp-palette-label">${b.label}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.7;margin-top:8px;">
+      Palette overrides apply per-node via the compose widget.
+      Ambient glow color follows node type automatically.
+    </div>
+  `;
+}
+
+function toggleFx(key, el) {
+  fxState[key]=!fxState[key];
+  el.classList.toggle('active', fxState[key]);
+  applyFxCss();
+  if (activeSlideId) setActiveSlide(activeSlideId, true);
+}
+function applyFxCss() {
+  document.body.style.setProperty('--slide-transition', fxState.transitionSpeed+'s');
+  document.querySelector('body::after');
+  if (!fxState.ambientGlow) document.getElementById('poster-ambient').style.opacity=0;
+}
+
+function openFxPanel() {
+  buildFxPanel();
+  document.getElementById('fx-panel').classList.add('open');
+  document.getElementById('btn-fx').classList.add('active');
+}
+function closeFxPanel() {
+  document.getElementById('fx-panel').classList.remove('open');
+  document.getElementById('btn-fx').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// CSV IMPORT
+// ═══════════════════════════════════════════════════════
+function showCsvImport() { document.getElementById('csv-import-zone').classList.add('visible'); }
+function hideCsvImport() { document.getElementById('csv-import-zone').classList.remove('visible'); }
+
+function importCsv(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));
+  const imported=[];
+  let startX=80, startY=600;
+  lines.slice(1).forEach((line,i)=>{
+    const vals = parseCsvLine(line);
+    const obj={};
+    headers.forEach((h,j)=>{ obj[h]=vals[j]||''; });
+    const node={
+      id:'csv_'+Date.now()+'_'+i,
+      x:startX+(i%4)*280, y:startY+Math.floor(i/4)*220,
+      type:obj.type||'concept',
+      title:obj.title||'Imported Node',
+      body:obj.body||obj.description||'',
+      pullquote:obj.pullquote||obj.quote||'',
+      dataValues:obj.data||obj.values||'',
+      bg:obj.bg||SLIDE_BACKGROUNDS[i%SLIDE_BACKGROUNDS.length].id,
+      z:nodes.length+i+1,
+      _ghost:true
+    };
+    nodes.push(node);
+    imported.push(node.id);
+  });
+  hideCsvImport();
+  renderAll();
+  fitAll();
+  toast(`Imported ${imported.length} nodes from CSV`);
+  save();
+}
+
+function parseCsvLine(line) {
+  const res=[]; let cur='', inQ=false;
+  for (let i=0;i<line.length;i++) {
+    if (line[i]==='"') { inQ=!inQ; }
+    else if (line[i]===','&&!inQ) { res.push(cur.trim()); cur=''; }
+    else cur+=line[i];
+  }
+  res.push(cur.trim());
+  return res;
+}
+
+document.getElementById('csv-file-input').addEventListener('change', e=>{
+  const file=e.target.files[0]; if (!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>importCsv(ev.target.result);
+  reader.readAsText(file);
+  e.target.value='';
+});
+
+// Drag-drop on csv zone
+(function(){
+  const box=document.getElementById('csv-drop-box');
+  box.addEventListener('dragover',e=>{e.preventDefault();box.classList.add('drag-over');});
+  box.addEventListener('dragleave',()=>box.classList.remove('drag-over'));
+  box.addEventListener('drop',e=>{
+    e.preventDefault(); box.classList.remove('drag-over');
+    const file=e.dataTransfer.files[0]; if (!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>importCsv(ev.target.result);
+    reader.readAsText(file);
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// MINIMAP
+// ═══════════════════════════════════════════════════════
+function drawMinimap() {
+  const canvas=document.getElementById('minimap-canvas');
+  const vp=document.getElementById('minimap-viewport');
+  if (!canvas) return;
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+
+  if (!nodes.length) return;
+  const nw=240,nh=130,pad=60;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  nodes.forEach(n=>{
+    minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
+    maxX=Math.max(maxX,n.x+nw); maxY=Math.max(maxY,n.y+nh);
+  });
+  const sw=W/(maxX-minX+pad*2), sh=H/(maxY-minY+pad*2);
+  const sc=Math.min(sw,sh);
+  const ox=(W-(maxX-minX)*sc)/2-minX*sc, oy=(H-(maxY-minY)*sc)/2-minY*sc;
+
+  // Connections
+  ctx.strokeStyle='rgba(240,236,226,0.12)'; ctx.lineWidth=1;
+  connections.forEach(c=>{
+    const f=nodes.find(n=>n.id===c.from), t=nodes.find(n=>n.id===c.to);
+    if (!f||!t) return;
+    ctx.beginPath();
+    ctx.moveTo(f.x*sc+ox+nw*sc/2, f.y*sc+oy+nh*sc/2);
+    ctx.lineTo(t.x*sc+ox+nw*sc/2, t.y*sc+oy+nh*sc/2);
+    ctx.stroke();
+  });
+
+  // Nodes
+  nodes.forEach(n=>{
+    const x=n.x*sc+ox, y=n.y*sc+oy, w=nw*sc, h=nh*sc;
+    ctx.fillStyle = n.id===activeSlideId ? 'rgba(200,112,74,0.5)' : 'rgba(240,236,226,0.08)';
+    ctx.strokeStyle = n.id===activeSlideId ? 'var(--accent)' : 'rgba(240,236,226,0.15)';
+    ctx.lineWidth=0.5;
+    ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h);
+  });
+
+  // Viewport
+  const panel=document.getElementById('canvas-panel');
+  const vpW=panel.clientWidth, vpH=panel.clientHeight;
+  const vx=(-transform.x/transform.scale)*sc+ox;
+  const vy=(-transform.y/transform.scale)*sc+oy;
+  const vw=(vpW/transform.scale)*sc;
+  const vh=(vpH/transform.scale)*sc;
+  vp.style.left=vx+'px'; vp.style.top=vy+'px';
+  vp.style.width=vw+'px'; vp.style.height=vh+'px';
+}
+
+// ═══════════════════════════════════════════════════════
+// RESIZE HANDLE
+// ═══════════════════════════════════════════════════════
+(function(){
+  const handle=document.getElementById('resize-handle');
+  let resizing=false, startX=0, startW=0;
+  handle.addEventListener('mousedown', e=>{
+    resizing=true; startX=e.clientX;
+    startW=document.getElementById('canvas-panel').clientWidth;
+    document.body.style.cursor='col-resize'; e.preventDefault();
+  });
+  window.addEventListener('mousemove', e=>{
+    if (!resizing) return;
+    const w=Math.max(200, Math.min(window.innerWidth*0.7, startW+(e.clientX-startX)));
+    document.getElementById('canvas-panel').style.flexBasis=w+'px';
+    document.getElementById('compose-widget').style.setProperty('--compose-left','0');
+    document.getElementById('compose-widget').style.width=Math.min(500,w-20)+'px';
+    drawMinimap();
+  });
+  window.addEventListener('mouseup', ()=>{ resizing=false; document.body.style.cursor=''; });
+})();
+
+// ═══════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); nextSlide(); }
+  if (e.key==='ArrowLeft') { e.preventDefault(); prevSlide(); }
+  if (e.key==='Escape') {
+    if (presentMode) togglePresentMode();
+    if (connectMode) toggleConnectMode();
+    closeFxPanel();
+    hideCsvImport();
+  }
+  if (e.key==='n'&&(e.metaKey||e.ctrlKey)) { e.preventDefault(); addNode(); }
+});
+
+// ═══════════════════════════════════════════════════════
+// TITLE BAR SAVE
+// ═══════════════════════════════════════════════════════
+document.getElementById('tb-pres-title').addEventListener('input', ()=>save());
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer=null;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  load();
+  renderAll();
+  applyTransform();
+  setTimeout(fitAll, 80);
+
+  // Set first node as active slide
+  if (nodes.length) {
+    const startNode = nodes[0];
+    activeSlideId = startNode.id;
+    chainPath = buildChainFrom(startNode.id);
+    chainIndex = 0;
+    renderSlide(startNode, true);
+    updateChainDots();
+    renderNodes();
+    renderConnections();
+    updateChainNav(startNode.id);
+    updateSlideCounter();
+  }
+
+  // Periodic slide counter update
+  setInterval(updateSlideCounter, 500);
+
+  toast('Double-click canvas to add node · Click node to preview slide · Arrow keys to navigate');
+}
+
+init();
+</script>
+</body>
+</html>

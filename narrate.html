@@ -21,8 +21,8 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;}
   /* Spatial zones — spec lane Y base, render lane Y offset below */
   --spec-y:200;     /* px — base Y for spec lane */
   --render-gap:320; /* px — vertical distance from node bottom to preview top */
-  --node-w:240px;
-  --prev-w:300px;
+  --node-w:220px;
+  --prev-w:260px;
   --prev-base:960;  /* internal render width */
 
   --c-work:#c8704a;--c-concept:#7a8ecc;--c-story:#c87060;--c-data:#6ab09a;
@@ -852,30 +852,31 @@ const TA={
 };
 
 // Spatial zone constants
-const NODE_W    = 240;  // node card width
-const NODE_H    = 175;  // conservative node card max height (with pullquote)
-const ROW_GAP   = 24;   // vertical gap between spec rows
-const ROW_STEP  = NODE_H + ROW_GAP; // 199px per spec row
+const NODE_W    = 220;  // node card width — tighter, more editorial
+const NODE_H    = 160;  // node card height estimate
+const ROW_GAP   = 32;   // breathing room between spec rows
+const ROW_STEP  = NODE_H + ROW_GAP; // 192px per spec row
 
-const SPEC_Y    = 80;   // Y top of spec lane
-const SPEC_ROWS = 2;    // max rows in spec lane
-const SPEC_BAND = SPEC_ROWS * ROW_STEP; // total spec lane height
+const SPEC_Y    = 60;   // Y top of spec lane — tighter to topbar
+const SPEC_ROWS = 2;
+const SPEC_BAND = SPEC_ROWS * ROW_STEP;
 
-// Render lane geometry — supports up to 3 render rows (primary, secondary, tertiary)
-const LANE_SEP   = 80;  // gap from spec band bottom to first render lane top
-const TETHER_H   = 50;  // tether line height between spec bottom and render top
-const PREV_W     = 300; // preview widget width
-const PREV_H     = Math.round(PREV_W * 9/16); // ~169px
-const PREV_BASE  = 960; // internal render width (scaled down by CSS)
-const PREV_GAP   = 40;  // vertical gap between render rows
-const PREV_ROW_H = PREV_H + 26 + PREV_GAP; // 26px = pw-bar height
+// Render lane — much more vertical separation from spec lane
+// This is what creates the "dark canvas breathing room" between zones
+const LANE_SEP   = 240; // generous gap — this is the space from image 1
+const TETHER_H   = 40;  // short tether, just enough to read the connection
+const PREV_W     = 260; // preview widgets significantly smaller — thumbnail scale
+const PREV_H     = Math.round(PREV_W * 9/16); // ~146px
+const PREV_BASE  = 960;
+const PREV_GAP   = 60;  // generous gap between render rows too
+const PREV_ROW_H = PREV_H + 24 + PREV_GAP; // 24px = pw-bar height
 
-// Render lane row Y positions (computed once)
-const RENDER_Y   = SPEC_Y + SPEC_BAND + LANE_SEP + TETHER_H; // primary render row
-const RENDER_Y2  = RENDER_Y + PREV_ROW_H;   // secondary render row
-const RENDER_Y3  = RENDER_Y + PREV_ROW_H*2; // tertiary render row
+// Render lane row Y positions
+const RENDER_Y   = SPEC_Y + SPEC_BAND + LANE_SEP + TETHER_H;
+const RENDER_Y2  = RENDER_Y + PREV_ROW_H;
+const RENDER_Y3  = RENDER_Y + PREV_ROW_H*2;
 
-const COL_STEP  = 360;  // column pitch — wider than PREV_W for horizontal clearance
+const COL_STEP  = 320;  // column pitch — node cards 220px, previews 260px, 60px horizontal air
 
 // ══════════════════════════════════════════════════
 // NODE DATA
@@ -956,7 +957,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v6';
+const VER='nrt_v8';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   try{
@@ -986,7 +987,8 @@ function prevXY(node){
   const nx=node.x!==undefined?node.x:x;
   const offsetX=Math.round((NODE_W-PREV_W)/2);
   const renderRowYs=[RENDER_Y, RENDER_Y2, RENDER_Y3];
-  const rr=node.renderRow||0;
+  // renderRow explicit override takes priority; otherwise inherit from spec row
+  const rr=node.renderRow!==undefined ? node.renderRow : (node.row||0);
   return{
     x:nx+offsetX,
     y:renderRowYs[Math.min(rr,2)]

@@ -204,6 +204,114 @@ body.present-mode #poster-ambient{position:fixed;inset:46px 0 0 0;}
 .csv-cancel:hover{color:var(--ink);}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg-4);border:1px solid var(--border-2);border-radius:5px;font-family:var(--mono);font-size:8px;letter-spacing:0.1em;color:var(--ink-2);padding:6px 14px;z-index:9000;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE — dedicated surfaces, touch-optimized
+   ══════════════════════════════════════════════════════ */
+:root { --mob-tab:54px; --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px); --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px); }
+
+/* ── Mobile tab bar ── */
+#mob-tabs {
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--mob-tab) + var(--sab));
+  padding-bottom:var(--sab);
+  background:var(--bg-2);
+  border-top:1px solid var(--border);
+  z-index:2000;
+  flex-shrink:0;
+}
+.mob-tab {
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;padding:8px 0;
+  font-family:var(--mono);font-size:7px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ink-3);transition:color 0.15s;
+  -webkit-tap-highlight-color:transparent;
+  min-height:44px;
+}
+.mob-tab.active { color:var(--accent); }
+.mob-tab svg { width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round; }
+#mob-present-btn {
+  display:none;position:fixed;bottom:calc(var(--mob-tab) + var(--sab) + 12px);right:16px;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--accent);border:none;color:var(--bg);
+  font-size:18px;cursor:pointer;z-index:2100;
+  box-shadow:0 4px 20px rgba(200,112,74,0.5);
+  -webkit-tap-highlight-color:transparent;
+  align-items:center;justify-content:center;
+}
+
+/* ── Swipe hint overlay ── */
+#swipe-hint {
+  display:none;position:absolute;inset:0;z-index:20;pointer-events:none;
+  align-items:center;justify-content:space-between;padding:0 16px;
+}
+#swipe-hint .sh-arrow {
+  font-size:22px;color:rgba(240,236,226,0.18);font-family:var(--mono);
+}
+
+/* Mobile viewer full-screen overrides */
+body.mobile-view #topbar { padding-left:calc(14px + var(--sal)); padding-right:calc(14px + var(--sar)); padding-top:var(--sat); height:calc(46px + var(--sat)); }
+body.mobile-view #layout { top:calc(46px + var(--sat)); }
+body.mobile-map  #poster-panel { display:none; }
+body.mobile-view #canvas-panel { display:none; }
+body.mobile-view #mob-tabs { display:flex; }
+body.mobile-view #mob-present-btn { display:flex; }
+body.mobile-map  #mob-tabs { display:flex; }
+body.mobile-map  #canvas-panel { flex:0 0 100%; max-width:100%; border-right:none; }
+body.mobile-map  #layout { top:46px; bottom:var(--mob-tab); }
+body.mobile-view #layout { top:46px; bottom:var(--mob-tab); }
+
+body.mobile-view #poster-panel {
+  display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+  width:100%;flex:1;
+}
+body.mobile-view #slide-frame {
+  width:100%;border-radius:0;
+  flex:1;
+  aspect-ratio:unset;
+  height:100%;
+}
+body.mobile-view #poster-controls { margin-top:0;padding:10px 0 4px;justify-content:center; }
+body.mobile-view #chain-dots { margin-top:4px;justify-content:center; }
+body.mobile-view #branch-indicator { margin-top:4px;justify-content:center; }
+
+/* Larger tap targets on mobile */
+body.is-mobile .pc-btn { padding:11px 22px;font-size:9px; }
+body.is-mobile .node-act-btn { width:28px;height:28px;font-size:14px; }
+body.is-mobile .tb-btn { padding:7px 10px; }
+
+/* Swipe indicator */
+body.mobile-view #swipe-hint { display:flex; }
+
+/* Present mode on mobile — true full screen */
+body.mobile-view.present-mode #poster-panel { display:flex;position:fixed;inset:0;z-index:1500; }
+body.mobile-view.present-mode #mob-tabs { display:none; }
+body.mobile-view.present-mode #mob-present-btn { display:none; }
+body.mobile-view.present-mode #topbar { display:none; }
+body.mobile-view.present-mode #layout { display:none; }
+body.mobile-view.present-mode #slide-frame { border-radius:0; }
+body.mobile-view.present-mode #poster-controls { position:absolute;bottom:calc(16px + var(--sab));left:50%;transform:translateX(-50%);margin-top:0;background:rgba(10,9,8,0.6);backdrop-filter:blur(8px);padding:8px 16px;border-radius:30px;border:1px solid var(--border-2); }
+body.mobile-view.present-mode #chain-dots { position:absolute;bottom:calc(60px + var(--sab));left:50%;transform:translateX(-50%);margin-top:0; }
+body.mobile-view.present-mode #branch-indicator { position:absolute;bottom:calc(100px + var(--sab));left:50%;transform:translateX(-50%);margin-top:0; }
+/* Exit present button in top-right */
+body.mobile-view.present-mode #btn-present { display:flex;position:absolute;top:calc(12px + var(--sat));right:16px;z-index:10;background:rgba(10,9,8,0.6);border:1px solid var(--border-2);color:var(--ink);font-size:9px;padding:8px 12px;border-radius:6px; }
+
+/* Touch-friendly node cards */
+body.is-mobile .node-card { cursor:default; }
+body.is-mobile .port { width:18px;height:18px;border-width:2px; }
+body.is-mobile .port-right { right:-9px; }
+body.is-mobile .port-left  { left:-9px; }
+body.is-mobile .port-top   { top:-9px; }
+body.is-mobile .port-bottom{ bottom:-9px; }
+
+@media (max-width:700px) {
+  #tb-title { display:none; }
+  .tb-div { display:none; }
+  .tb-pres { display:none; }
+  .tb-btn:not(#btn-present) { display:none; }
+}
+
 *{scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;}
 *::-webkit-scrollbar{width:2px;height:2px;}
 *::-webkit-scrollbar-thumb{background:var(--border-2);}
@@ -263,8 +371,27 @@ body.present-mode #poster-ambient{position:fixed;inset:46px 0 0 0;}
       <button class="pc-btn" onclick="nextSlide()">Next →</button>
     </div>
     <div id="branch-indicator"></div>
+    <div id="swipe-hint">
+      <div class="sh-arrow">←</div>
+      <div class="sh-arrow">→</div>
+    </div>
   </div>
 </div>
+
+<!-- Mobile tab bar -->
+<div id="mob-tabs">
+  <div class="mob-tab active" id="tab-view" onclick="mobSetTab('view')">
+    <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/></svg>
+    View
+  </div>
+  <div class="mob-tab" id="tab-map" onclick="mobSetTab('map')">
+    <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><circle cx="16" cy="8" r="3"/><line x1="11" y1="8" x2="13" y2="8"/><line x1="16" y1="11" x2="16" y2="13"/></svg>
+    Map
+  </div>
+</div>
+<!-- Mobile present FAB -->
+<button id="mob-present-btn" onclick="togglePresent()" title="Present">▶</button>
+
 <div id="mode-badge">Connect Mode · Click source node</div>
 <div id="compose-widget">
   <div class="cw-handle"></div>
@@ -1202,6 +1329,153 @@ let _tt=null;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2200);}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+
+// ══════════════════════════════════════════════════════
+// MOBILE — device detection, tab switching, touch events
+// ══════════════════════════════════════════════════════
+const isMob = ()=> window.innerWidth <= 700 || ('ontouchstart' in window && window.innerWidth < 1024);
+let mobTab = 'view'; // 'view' | 'map'
+
+function mobInit(){
+  if(!isMob()) return;
+  document.body.classList.add('is-mobile','mobile-view');
+  mobSetTab('view');
+  _initTouchCanvas();
+  _initSwipeGesture();
+}
+
+function mobSetTab(tab){
+  mobTab = tab;
+  document.body.classList.toggle('mobile-view', tab==='view');
+  document.body.classList.toggle('mobile-map',  tab==='map');
+  document.getElementById('tab-view').classList.toggle('active', tab==='view');
+  document.getElementById('tab-map').classList.toggle('active',  tab==='map');
+  // When switching to map, pan to active node
+  if(tab==='map' && activeSlideId) panToNode(activeSlideId);
+}
+
+// ── Touch pan + pinch-zoom on canvas ────────────────────
+function _initTouchCanvas(){
+  const panel = document.getElementById('canvas-panel');
+  let t0=null, t1=null, initDist=0, initScale=1, initTx=0, initTy=0;
+  let initMid={x:0,y:0}, tapTime=0, tapNode=null;
+
+  panel.addEventListener('touchstart', e=>{
+    if(connectMode) return;
+    const touches = e.touches;
+    if(touches.length===1){
+      t0={x:touches[0].clientX, y:touches[0].clientY};
+      t1=null;
+      tapTime=Date.now();
+      // Check if touching a node
+      const el=e.target.closest('.node-card');
+      tapNode = el ? el.dataset.id : null;
+    } else if(touches.length===2){
+      t0={x:touches[0].clientX,y:touches[0].clientY};
+      t1={x:touches[1].clientX,y:touches[1].clientY};
+      initDist=Math.hypot(t1.x-t0.x,t1.y-t0.y);
+      initScale=transform.scale;
+      initTx=transform.x; initTy=transform.y;
+      initMid={x:(t0.x+t1.x)/2, y:(t0.y+t1.y)/2};
+    }
+  },{passive:true});
+
+  let _panStart={x:0,y:0}, _txStart=0, _tyStart=0, _draggingNode=null, _nodeStart={x:0,y:0};
+  panel.addEventListener('touchstart', e=>{
+    if(e.touches.length===1 && !connectMode){
+      const el=e.target.closest('.node-card');
+      if(el){
+        const node=nodes.find(n=>n.id===el.dataset.id);
+        if(node){ _draggingNode=node; _nodeStart={x:node.x,y:node.y}; }
+      } else {
+        _draggingNode=null;
+        _panStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
+        _txStart=transform.x; _tyStart=transform.y;
+      }
+    }
+  },{passive:true});
+
+  panel.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    const touches=e.touches;
+    if(touches.length===2 && t1){
+      const nt0={x:touches[0].clientX,y:touches[0].clientY};
+      const nt1={x:touches[1].clientX,y:touches[1].clientY};
+      const dist=Math.hypot(nt1.x-nt0.x,nt1.y-nt0.y);
+      const newScale=Math.max(0.1,Math.min(3,initScale*(dist/initDist)));
+      const mid={x:(nt0.x+nt1.x)/2,y:(nt0.y+nt1.y)/2};
+      const r=newScale/initScale;
+      const rect=panel.getBoundingClientRect();
+      const cx=initMid.x-rect.left, cy=initMid.y-rect.top;
+      transform.scale=newScale;
+      transform.x=mid.x-rect.left-(cx-initTx)*r;
+      transform.y=mid.y-rect.top -(cy-initTy)*r;
+      applyTransform();
+    } else if(touches.length===1){
+      const dx=touches[0].clientX-_panStart.x;
+      const dy=touches[0].clientY-_panStart.y;
+      if(_draggingNode){
+        _draggingNode.x=Math.round((_nodeStart.x+dx/transform.scale)/20)*20;
+        _draggingNode.y=Math.round((_nodeStart.y+dy/transform.scale)/20)*20;
+        const el=getEl(_draggingNode.id);
+        if(el){el.style.left=_draggingNode.x+'px';el.style.top=_draggingNode.y+'px';}
+        markConns();
+      } else {
+        transform.x=_txStart+dx; transform.y=_tyStart+dy;
+        applyTransform();
+      }
+    }
+  },{passive:false});
+
+  panel.addEventListener('touchend', e=>{
+    const elapsed=Date.now()-tapTime;
+    if(elapsed<250 && tapNode && e.changedTouches.length===1){
+      const moved=Math.hypot(
+        e.changedTouches[0].clientX-(t0?.x||0),
+        e.changedTouches[0].clientY-(t0?.y||0)
+      );
+      if(moved<12){
+        setSlide(tapNode);
+        // Switch to view tab on node tap
+        if(isMob()) mobSetTab('view');
+      }
+    }
+    if(_draggingNode){ dSave(); _draggingNode=null; }
+    t0=null; t1=null;
+  },{passive:true});
+}
+
+// ── Swipe left/right on poster to navigate ──────────────
+function _initSwipeGesture(){
+  const poster=document.getElementById('poster-panel');
+  let sx=0, sy=0, stime=0;
+
+  poster.addEventListener('touchstart', e=>{
+    sx=e.touches[0].clientX; sy=e.touches[0].clientY; stime=Date.now();
+  },{passive:true});
+
+  poster.addEventListener('touchend', e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    const dt=Date.now()-stime;
+    // Swipe: fast, mostly horizontal, enough distance
+    if(dt<400 && Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5){
+      if(dx<0) nextSlide();
+      else      prevSlide();
+    }
+  },{passive:true});
+}
+
+// Override togglePresent for mobile — hide/show topbar
+const _origTogglePresent = togglePresent;
+function togglePresent(){
+  _origTogglePresent();
+  if(isMob()){
+    const inPresent = document.body.classList.contains('present-mode');
+    // topbar handled via CSS class present-mode on mobile-view
+  }
+}
+
 // ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
@@ -1226,6 +1500,14 @@ function init(){
       renderSlide(start,true);
       _updateDots(); _updateBranch(); _updateCounter();
       markNodes(); _scheduleRender();
+    }
+    mobInit();
+  });
+  // Re-check on resize (tablet rotation etc)
+  window.addEventListener('resize',()=>{
+    if(isMob() && !document.body.classList.contains('is-mobile')){
+      document.body.classList.add('is-mobile');
+      mobInit();
     }
   });
 }

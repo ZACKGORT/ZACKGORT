@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>anon.pro — greentext case studies</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #1a1a1a;
+    --panel: #222222;
+    --border: #333;
+    --green: #789922;
+    --green-bright: #99bb33;
+    --text: #d9d9d9;
+    --muted: #666;
+    --accent: #789922;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green-bright);
+    margin-bottom: 6px;
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .panel-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Courier Prime', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  textarea::placeholder {
+    color: var(--muted);
+  }
+
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--green);
+    color: #111;
+    border: none;
+    padding: 14px 28px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .btn:hover { background: var(--green-bright); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 13px 20px;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: #555; background: transparent; }
+
+  .output-area {
+    display: none;
+    flex-direction: column;
+  }
+
+  .output-area.visible { display: flex; }
+
+  .greentext-block {
+    padding: 20px 18px;
+    line-height: 2;
+    font-size: 15px;
+  }
+
+  .greentext-line {
+    display: block;
+    color: var(--green-bright);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .greentext-line.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .copy-toast {
+    display: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--green-bright);
+    text-transform: uppercase;
+    align-self: center;
+  }
+
+  .loading-indicator {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    padding: 20px 18px;
+  }
+
+  .loading-indicator.visible { display: flex; }
+
+  .dots span {
+    animation: blink 1.2s infinite;
+    opacity: 0;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+
+  .footer-row {
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .error-msg {
+    display: none;
+    color: #cc4444;
+    font-size: 13px;
+    padding: 14px 18px;
+  }
+  .error-msg.visible { display: block; }
+
+  /* scanline effect */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">anon.pro</div>
+  <h1>&gt; greentext your wins</h1>
+  <p class="tagline">paste your story. get a case study that doesn't suck.</p>
+</header>
+
+<div class="container">
+
+  <!-- Input -->
+  <div class="panel">
+    <div class="panel-label">// your story</div>
+    <textarea id="input" placeholder="e.g. I was a dev at a startup with a slow, buggy checkout flow. Customers were dropping off at 40%. I rewrote the payment module and added better error handling. Conversion went up 28% in the first month and we kept the client."></textarea>
+    <div style="padding: 0 14px 14px;">
+      <div class="btn-row">
+        <button class="btn" id="generateBtn" onclick="generate()">Generate &gt;&gt;</button>
+        <span class="copy-toast" id="copyToast">copied!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="panel output-area" id="outputPanel">
+    <div class="panel-label">// greentext output</div>
+    <div class="loading-indicator" id="loading">
+      <span>generating</span>
+      <span class="dots"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="greentext-block" id="greentextOutput"></div>
+    <div class="divider"></div>
+    <div class="footer-row">
+      <span style="font-size:11px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing:1px;">anon // case study</span>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyText()">copy</button>
+        <button class="btn btn-secondary" onclick="reset()">reset</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentText = '';
+
+  async function generate() {
+    const input = document.getElementById('input').value.trim();
+    if (!input) return;
+
+    const btn = document.getElementById('generateBtn');
+    const outputPanel = document.getElementById('outputPanel');
+    const loading = document.getElementById('loading');
+    const output = document.getElementById('greentextOutput');
+    const errorMsg = document.getElementById('errorMsg');
+
+    btn.disabled = true;
+    outputPanel.classList.add('visible');
+    loading.classList.add('visible');
+    output.innerHTML = '';
+    errorMsg.classList.remove('visible');
+    currentText = '';
+
+    const prompt = `Convert this professional story into greentext format, like 4chan anon greentext but for a portfolio/case study context.
+
+Rules:
+- Start with ">be me"
+- Each line starts with ">"
+- Short, punchy lines (max ~8 words each)
+- Tell the story: context → problem → action → result
+- Keep the actual achievement/numbers if present
+- End with a result line or "mfw" punchline
+- 8-14 lines total
+- No commentary, just the greentext lines
+
+Story: ${input}
+
+Output only the greentext lines, one per line, each starting with >.`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      const data = await response.json();
+      const text = data.content?.map(b => b.text || '').join('') || '';
+
+      loading.classList.remove('visible');
+
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l.startsWith('>'));
+      currentText = lines.join('\n');
+
+      lines.forEach((line, i) => {
+        const el = document.createElement('span');
+        el.className = 'greentext-line';
+        el.textContent = line;
+        output.appendChild(el);
+        output.appendChild(document.createTextNode('\n'));
+        setTimeout(() => el.classList.add('show'), i * 80);
+      });
+
+    } catch (err) {
+      loading.classList.remove('visible');
+      errorMsg.textContent = 'something went wrong. try again.';
+      errorMsg.classList.add('visible');
+    }
+
+    btn.disabled = false;
+  }
+
+  function copyText() {
+    if (!currentText) return;
+    navigator.clipboard.writeText(currentText).then(() => {
+      const toast = document.getElementById('copyToast');
+      toast.style.display = 'inline';
+      setTimeout(() => toast.style.display = 'none', 1800);
+    });
+  }
+
+  function reset() {
+    document.getElementById('input').value = '';
+    document.getElementById('outputPanel').classList.remove('visible');
+    document.getElementById('greentextOutput').innerHTML = '';
+    currentText = '';
+  }
+
+  document.getElementById('input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate();
+  });
+</script>
+
+</body>
+</html>

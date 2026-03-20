@@ -2441,7 +2441,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v17';
+const VER='nrt_v18';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   // ?reset clears all saved state and reloads clean from defaults
@@ -3018,34 +3018,17 @@ function setSlide(id,skipAnim){
 
 function prevSlide(){
   if(navIndex<=0){
-    // If inside a deck, go back to main path
     if(_deckStack.length){_exitDeck();return;}
     return;
   }
-  navIndex--;activeSlideId=navHistory[navIndex];mN();
-  const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
-  _rebuildChain();_paintPreview(n);
-  if(presentMode){
-    if(n.type==='deck'){_renderPS(n,false);_showDeckFork(n);}
-    else _renderPS(n,false);
-  }
-  if(isMob())_renderMobView(n,false);
-  _updHUDs();panTo(activeSlideId);dSave();
+  navIndex--;activeSlideId=navHistory[navIndex];
+  setSlide(activeSlideId,false);
 }
 
 function nextSlide(){
   if(navIndex<navHistory.length-1){
     navIndex++;activeSlideId=navHistory[navIndex];
-    mN();const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
-    _rebuildChain();_paintPreview(n);
-    if(presentMode){
-      if(n.type==='deck'){_renderPS(n,false);_showDeckFork(n);}
-      else _renderPS(n,false);
-    } else if(n.type==='deck'){
-      _showDeckFork(n);
-    }
-    if(isMob())_renderMobView(n,false);
-    _updHUDs();panTo(activeSlideId);dSave();
+    setSlide(activeSlideId,false);
     return;
   }
   // If inside a deck, always exit via _exitDeck (don't follow loop-back connection directly)
@@ -3056,24 +3039,13 @@ function nextSlide(){
   const nonDeck=nx.filter(c=>{const n=nodes.find(nd=>nd.id===c.to);return n&&n.type!=='deck';});
   const targets=nonDeck.length?nonDeck:nx;
   if(targets.length>1){if(presentMode)_showBranch();return;}
-  // Single target — check if it's a deck node; always show fork, not just in present mode
   const target=nodes.find(n=>n.id===targets[0].to);
   if(target&&target.type==='deck'){
-    // Navigate to deck node so it's the active slide, then show fork
-    activeSlideId=target.id;navHistory.push(target.id);navIndex=navHistory.length-1;
-    mN();_rebuildChain();_paintPreview(target);
-    if(presentMode)_renderPS(target,false);
-    if(isMob())_renderMobView(target,false);
-    _updHUDs();panTo(target.id);dSave();
+    setSlide(target.id,false);
     _showDeckFork(target);
     return;
   }
-  const nid=targets[0].to;navHistory.push(nid);navIndex++;activeSlideId=nid;
-  mN();const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
-  _rebuildChain();_paintPreview(n);
-  if(presentMode)_renderPS(n,false);
-  if(isMob())_renderMobView(n,false);
-  _updHUDs();panTo(activeSlideId);dSave();
+  setSlide(targets[0].to,false);
 }
 
 function _showBranch(){

@@ -1593,10 +1593,16 @@ body.light-theme #cmd-scrim.open{background:rgba(26,24,22,0.18);}
    MOBILE — portrait + landscape, iOS + Android
 ══════════════════════════════════════════════════════ */
 :root{
-  --mob-tab:44px;        /* slimmer tab bar */
-  --mob-hud:36px;        /* minimal nav strip */
-  --mob-chrome:calc(var(--mob-tab) + var(--mob-hud) + var(--sab));
+  --mob-tab:0px;         /* tab bar gone */
+  --mob-hud:36px;
+  --mob-chrome:calc(var(--mob-hud) + var(--sab));
 }
+
+/* Spatial toggle button — only visible on mobile */
+#btn-spatial-toggle{display:none;}
+body.is-mobile #btn-spatial-toggle{display:flex!important;}
+body.is-mobile.mob-mode-canvas #btn-spatial-toggle{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+body.light-theme.is-mobile.mob-mode-canvas #btn-spatial-toggle{color:#f4f1eb;}
 
 /* ────────────────────────────────────────────────────
    TAB BAR — icon-only in portrait, icon+label in landscape
@@ -1666,7 +1672,7 @@ body.is-mobile.mob-mode-view #hud-map{display:none!important;}
   display:none;
   position:fixed;
   top:46px;left:0;right:0;
-  bottom:var(--mob-chrome);
+  bottom:0;
   background:var(--bg);z-index:100;
   flex-direction:column;overflow:hidden;
 }
@@ -1730,7 +1736,7 @@ body.is-mobile.mob-mode-view #hud-map{display:none!important;}
   position:absolute;
   bottom:calc(var(--sab) + 24px);
   left:50%;transform:translateX(-50%);
-  z-index:20;
+  z-index:200;
   display:flex;align-items:center;gap:0;
   background:rgba(10,9,8,0.72);
   border:1px solid rgba(240,236,226,0.12);
@@ -1739,6 +1745,7 @@ body.is-mobile.mob-mode-view #hud-map{display:none!important;}
   overflow:hidden;
   box-shadow:0 4px 24px rgba(0,0,0,0.5);
   pointer-events:all;
+  -webkit-tap-highlight-color:transparent;
 }
 .mob-nav-btn{
   background:none;border:none;color:rgba(240,236,226,0.7);
@@ -1904,8 +1911,8 @@ body.is-mobile.mob-mode-view #hud-map{display:none!important;}
    GLOBAL MOBILE STATES
 ────────────────────────────────────────────────────── */
 body.is-mobile #zoom-hud{display:none;}
-body.is-mobile #mob-tabs{display:flex;}
-body.is-mobile #canvas-wrap{bottom:var(--mob-chrome);}
+body.is-mobile #mob-tabs{display:none;}
+body.is-mobile #canvas-wrap{bottom:0;}
 body.is-mobile .node-card{cursor:default;}
 /* Hide ports on mobile — connection via menu instead */
 body.is-mobile .port{display:none;}
@@ -1915,6 +1922,9 @@ body.is-mobile .node-act{width:32px;height:32px;font-size:14px;}
 /* Surface modes */
 body.mob-mode-view #mob-view{display:flex;}
 body.mob-mode-view #canvas-wrap{display:none;}
+/* Default mobile state before JS runs — show view, hide canvas */
+body.is-mobile:not(.mob-mode-canvas) #mob-view{display:flex;}
+body.is-mobile:not(.mob-mode-canvas) #canvas-wrap{display:none;}
 body.mob-mode-arrange #mob-arrange{display:flex;}
 
 /* Long-press dragging visual feedback */
@@ -1962,6 +1972,7 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
   <div class="tb-pres" id="tb-title-wrap"><span id="tb-title-static">Zack Gort · Experience &amp; Outlook</span><input id="tb-title" value="Zack Gort · Experience &amp; Outlook" spellcheck="false" style="display:none"></div>
   <div class="tb-actions">
     <button class="tb-btn" id="btn-theme-inline" onclick="toggleTheme()" title="Toggle theme">☀︎</button>
+    <button class="tb-btn" id="btn-spatial-toggle" onclick="mobToggleSpatial()" title="Spatial canvas" style="display:none">⊞</button>
     <button class="tb-btn edit-only" id="btn-menu" onclick="toggleCmdMenu()" title="Menu" style="display:none">⋮ Menu</button>
     <div class="tb-div"></div>
     <button class="tb-btn accent" id="btn-present" onclick="togglePresent()">▶ Present</button>
@@ -2246,12 +2257,12 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
       <div class="mob-swipe-arr">‹</div>
       <div class="mob-swipe-arr">›</div>
     </div>
-    <!-- Standalone nav pill -->
-    <div id="mob-nav-pill">
-      <button class="mob-nav-btn" onclick="prevSlide()" aria-label="Previous">‹</button>
-      <div id="mob-nav-counter">— / —</div>
-      <button class="mob-nav-btn" onclick="nextSlide()" aria-label="Next">›</button>
-    </div>
+  </div>
+  <!-- Nav pill outside the slide surface to avoid touch capture -->
+  <div id="mob-nav-pill">
+    <button class="mob-nav-btn" id="mob-nav-prev" aria-label="Previous">‹</button>
+    <div id="mob-nav-counter">— / —</div>
+    <button class="mob-nav-btn" id="mob-nav-next" aria-label="Next">›</button>
   </div>
 </div>
 
@@ -2307,21 +2318,8 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
 
 <!-- mob-hud removed — unified #nav-hud handles both contexts -->
 
-<!-- MOBILE TAB BAR -->
-<div id="mob-tabs">
-  <div class="mob-tab active" id="tab-view" onclick="mobSetMode('view')">
-    <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="9" y1="19" x2="15" y2="19"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-    Present
-  </div>
-  <div class="mob-tab" id="tab-canvas" onclick="mobSetMode('canvas')">
-    <svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="2.2"/><circle cx="17" cy="8" r="2.2"/><circle cx="12" cy="17" r="2.2"/><line x1="9.2" y1="8" x2="14.8" y2="8"/><line x1="8.2" y1="10" x2="11" y2="15"/><line x1="15.8" y1="10" x2="13" y2="15"/></svg>
-    Spatial
-  </div>
-  <div class="mob-tab edit-only" id="tab-arrange" onclick="mobSetMode('arrange')" style="display:none">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="5" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="3" y="11" width="8" height="5" rx="1"/><rect x="13" y="11" width="8" height="5" rx="1"/><line x1="7" y1="8" x2="7" y2="11"/><line x1="17" y1="8" x2="17" y2="11"/></svg>
-    Compose
-  </div>
-</div>
+<!-- mob-tabs removed — spatial toggle lives in topbar -->
+
 
 <div id="toast"></div>
 
@@ -2548,7 +2546,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v27';
+const VER='nrt_v31';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   // ?reset clears all saved state and reloads clean from defaults
@@ -3187,7 +3185,13 @@ function nextSlide(){
   // Filter out deck portal nodes from auto-advance (require explicit opt-in)
   const nonDeck=nx.filter(c=>{const n=nodes.find(nd=>nd.id===c.to);return n&&n.type!=='deck';});
   const targets=nonDeck.length?nonDeck:nx;
-  if(targets.length>1){if(presentMode)_showBranch();return;}
+  if(targets.length>1){
+    // In present mode or desktop, show branch overlay
+    if(presentMode||!isMob()){_showBranch();return;}
+    // On mobile view, auto-advance to first target
+    setSlide(targets[0].to,false);
+    return;
+  }
   const target=nodes.find(n=>n.id===targets[0].to);
   if(target&&target.type==='deck'){
     setSlide(target.id,false);
@@ -3764,11 +3768,24 @@ function mobInit(){
   _initTouchCanvas();
   _initTouchView();
   _initSwipePresent();
+  _initMobNavPill();
   mobSetMode('view');
-  // Landscape/portrait listener
   window.matchMedia('(orientation:landscape)').addEventListener('change',()=>{
     setTimeout(()=>{ if(mobMode==='canvas') _mobFitActive(); },200);
   });
+}
+
+function _initMobNavPill(){
+  const prev=document.getElementById('mob-nav-prev');
+  const next=document.getElementById('mob-nav-next');
+  if(!prev||!next) return;
+  // Use touchend for reliable mobile response
+  const onPrev=e=>{e.preventDefault();e.stopPropagation();prevSlide();};
+  const onNext=e=>{e.preventDefault();e.stopPropagation();nextSlide();};
+  prev.addEventListener('touchend',onPrev,{passive:false});
+  next.addEventListener('touchend',onNext,{passive:false});
+  prev.addEventListener('click',onPrev);
+  next.addEventListener('click',onNext);
 }
 
 // Mobile canvas: zoom to active node at a comfortable reading scale
@@ -3795,8 +3812,14 @@ function _buildMobArrGrid(){
     </div>`).join('');
 }
 
+function mobToggleSpatial(){
+  if(mobMode==='canvas') mobSetMode('view');
+  else mobSetMode('canvas');
+}
+
 function mobSetMode(mode){
   mobMode=mode;
+  // Update tab active states (tabs may be gone but keep for compat)
   ['view','canvas','arrange'].forEach(m=>{
     const t=document.getElementById('tab-'+m);
     if(t) t.classList.toggle('active',m===mode);
@@ -3807,6 +3830,9 @@ function mobSetMode(mode){
   if(arr) arr.style.display=mode==='arrange'?'flex':'none';
   const cw=document.getElementById('canvas-wrap');
   if(cw) cw.style.display=mode==='view'?'none':'';
+  // Update spatial toggle button active state
+  const stBtn=document.getElementById('btn-spatial-toggle');
+  if(stBtn) stBtn.textContent=mode==='canvas'?'⊟':'⊞';
   // In canvas mode, zoom to active node at comfortable scale
   if(mode==='canvas'&&activeSlideId){
     setTimeout(()=>_mobFitActive(),100);
@@ -4052,16 +4078,13 @@ function _initTouchCanvas(){
 
 // ── Swipe left/right on view surface ─────────────────────────────────────
 function _initTouchView(){
-  const view=document.getElementById('mob-view');
+  const view=document.getElementById('mob-view-slide');
   if(!view) return;
-  let sx=0,sy=0,st=0,skip=false;
+  let sx=0,sy=0,st=0;
   view.addEventListener('touchstart',e=>{
-    // Ignore touches that start on the nav pill
-    skip=!!e.target.closest('#mob-nav-pill');
     sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();
   },{passive:true});
   view.addEventListener('touchend',e=>{
-    if(skip)return;
     const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
     if(Date.now()-st<380&&Math.abs(dx)>44&&Math.abs(dx)>Math.abs(dy)*1.3){dx<0?nextSlide():prevSlide();}
   },{passive:true});

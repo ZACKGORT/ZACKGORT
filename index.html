@@ -1880,6 +1880,12 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
 *{scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;}
 *::-webkit-scrollbar{width:2px;height:2px;}
 *::-webkit-scrollbar-thumb{background:var(--border-2);}
+
+/* ── Viewer mode — hide all author tooling by default ── */
+#zoom-hud{display:none;}
+#fx-panel{display:none;}
+.node-acts{display:none;}
+#arrange-bar{display:none;}
 </style>
 </head>
 <body>
@@ -1888,9 +1894,10 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
 <div id="topbar">
   <div class="tb-brand">ZCKGRT<em>made with wolfie.love*</em></div>
   <div class="tb-div"></div>
-  <div class="tb-pres"><input id="tb-title" value="Zack Gort · Experience &amp; Outlook" spellcheck="false"></div>
+  <div class="tb-pres" id="tb-title-wrap"><span id="tb-title-static">Zack Gort · Experience &amp; Outlook</span><input id="tb-title" value="Zack Gort · Experience &amp; Outlook" spellcheck="false" style="display:none"></div>
   <div class="tb-actions">
-    <button class="tb-btn" id="btn-menu" onclick="toggleCmdMenu()" title="Menu">⋮ Menu</button>
+    <button class="tb-btn" id="btn-theme-inline" onclick="toggleTheme()" title="Toggle theme">☀︎</button>
+    <button class="tb-btn edit-only" id="btn-menu" onclick="toggleCmdMenu()" title="Menu" style="display:none">⋮ Menu</button>
     <div class="tb-div"></div>
     <button class="tb-btn accent" id="btn-present" onclick="togglePresent()">▶ Present</button>
   </div>
@@ -2239,7 +2246,7 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
     <svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="2.2"/><circle cx="17" cy="8" r="2.2"/><circle cx="12" cy="17" r="2.2"/><line x1="9.2" y1="8" x2="14.8" y2="8"/><line x1="8.2" y1="10" x2="11" y2="15"/><line x1="15.8" y1="10" x2="13" y2="15"/></svg>
     Spatial
   </div>
-  <div class="mob-tab" id="tab-arrange" onclick="mobSetMode('arrange')">
+  <div class="mob-tab edit-only" id="tab-arrange" onclick="mobSetMode('arrange')" style="display:none">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="5" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="3" y="11" width="8" height="5" rx="1"/><rect x="13" y="11" width="8" height="5" rx="1"/><line x1="7" y1="8" x2="7" y2="11"/><line x1="17" y1="8" x2="17" y2="11"/></svg>
     Compose
   </div>
@@ -2248,6 +2255,27 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
 <div id="toast"></div>
 
 <script>
+// ══════════════════════════════════════════════════
+// VIEWER vs EDIT MODE
+// Add ?edit to URL to unlock author tooling
+// ══════════════════════════════════════════════════
+const EDIT_MODE = new URLSearchParams(window.location.search).has('edit');
+function _applyViewerMode(){
+  if(EDIT_MODE){
+    // Show all edit-only elements
+    document.querySelectorAll('.edit-only').forEach(el=>el.style.display='');
+    // Restore title input, hide static label
+    const ti=document.getElementById('tb-title');
+    const ts=document.getElementById('tb-title-static');
+    if(ti)ti.style.display='';
+    if(ts)ts.style.display='none';
+    // Restore author UI hidden by default CSS
+    const style=document.createElement('style');
+    style.textContent='#zoom-hud{display:flex!important;} .node-acts{display:flex!important;} #arrange-bar{display:flex!important;}';
+    document.head.appendChild(style);
+  }
+}
+
 // ══════════════════════════════════════════════════
 // CONSTANTS
 // ══════════════════════════════════════════════════
@@ -2390,10 +2418,18 @@ const DEFAULT_CONNECTIONS=[
   {id:'c22',from:'s16',to:'s17'},{id:'c23',from:'s17',to:'s18'},
   {id:'c25',from:'s19',to:'s20'},{id:'c26',from:'s19',to:'s21'},
   {id:'c27',from:'s20',to:'s22'},{id:'c28',from:'s21',to:'s22'},
-  {id:'c29',from:'s22',to:'s23'},{id:'c30',from:'s22',to:'s24'},{id:'c31',from:'s22',to:'s25'},
-  {id:'c32',from:'s22',to:'s26'},{id:'c33',from:'s22',to:'s27'},{id:'c34',from:'s24',to:'s27'},
-  {id:'c35',from:'s25',to:'s27'},{id:'c36',from:'s22',to:'s28'},{id:'c37',from:'s27',to:'s29'},{id:'c38',from:'s28',to:'s29'},
-  {id:'c39',from:'s22',to:'s30'},{id:'c40',from:'s30',to:'s29'},
+  {id:'c29',from:'s22',to:'s23'},
+  {id:'c31',from:'s22',to:'s27'},
+  {id:'c39',from:'s22',to:'s29'},
+  // Project nodes reachable from wolfie.life branch
+  {id:'c30',from:'s27',to:'s24'},
+  {id:'c36',from:'s27',to:'s28'},
+  {id:'c32',from:'s27',to:'s26'},
+  {id:'c33',from:'s23',to:'s25'},
+  {id:'c37',from:'s28',to:'s29'},
+  {id:'c38',from:'s25',to:'s29'},
+  {id:'c35',from:'s24',to:'s29'},
+  {id:'c40',from:'s26',to:'s29'},
   {id:'c41',from:'s25',to:'s31'},{id:'c42',from:'s31',to:'s24'},
   // Deck portals branch off their parent work nodes
   {id:'cd1',from:'s15',to:'gnc_deck'},
@@ -2441,7 +2477,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v19';
+const VER='nrt_v20';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   // ?reset clears all saved state and reloads clean from defaults
@@ -3931,18 +3967,21 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(document.getElementById('ps-carousel').classList.contains('on')){closePsCarousel();return;}
     if(presentMode)togglePresent();
-    if(connectMode)toggleConnectMode();
-    closeFxPanel();closeCmdMenu();
+    if(EDIT_MODE&&connectMode)toggleConnectMode();
+    if(EDIT_MODE)closeFxPanel();
+    closeCmdMenu();
     document.getElementById('deck-fork').classList.remove('on');
     closePsToc();
   }
-  if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();addNode();}
+  if(EDIT_MODE){
+    if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();addNode();}
+    if(e.key==='1')applyArrangement('timeline');
+    if(e.key==='2')applyArrangement('narrative');
+    if(e.key==='3')applyArrangement('broadcast');
+    if(e.key==='4')applyArrangement('author');
+    if(e.key==='5')applyArrangement('overview');
+  }
   if((e.metaKey||e.ctrlKey)&&e.key==='0'){e.preventDefault();fitAll();}
-  if(e.key==='1')applyArrangement('timeline');
-  if(e.key==='2')applyArrangement('narrative');
-  if(e.key==='3')applyArrangement('broadcast');
-  if(e.key==='4')applyArrangement('author');
-  if(e.key==='5')applyArrangement('overview');
 });
 
 // ══════════════════════════════════════════════════
@@ -4349,6 +4388,7 @@ function closeMobMinimap(){
 function init(){
   load();
   _loadTheme();
+  _applyViewerMode();
   // Apply timeline positions to loaded nodes if they have col data
   nodes.forEach(n=>{
     if(n.x===undefined||n.y===undefined){const p=nodeXY(n);n.x=p.x;n.y=p.y;}
@@ -4364,14 +4404,16 @@ function init(){
       _rebuildChain();_updHUDs();mN();_sched();
     }
     mobInit();
-    _csInitDropZone();
-    _buildDesktopArrTooltips();
+    if(EDIT_MODE){
+      _csInitDropZone();
+      _buildDesktopArrTooltips();
+      _buildMobArrGrid();
+      _buildCmdArrGrid();
+      _syncCmdMenu();
+    }
     // Apply saved arrangement UI state
     document.body.classList.toggle('view-broadcast',currentArrangement==='broadcast');
     document.body.classList.toggle('view-author',currentArrangement==='author');
-    _buildMobArrGrid();
-    _buildCmdArrGrid();
-    _syncCmdMenu();
     // Initial mobile view render
     if(isMob()&&nodes[0]){_renderMobView(nodes[0],true);setTimeout(()=>_mobFitActive(),80);}
   });

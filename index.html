@@ -2442,6 +2442,12 @@ const DRAG_LINE=document.getElementById('drag-line');
 const VER='nrt_v12';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
+  // ?reset clears all saved state and reloads clean from defaults
+  if(new URLSearchParams(window.location.search).has('reset')){
+    Object.keys(localStorage).filter(k=>k.startsWith('nrt_')).forEach(k=>localStorage.removeItem(k));
+    history.replaceState(null,'',window.location.pathname);
+    _reset();return;
+  }
   try{
     const n=localStorage.getItem(VER+'_n'),c=localStorage.getItem(VER+'_c'),t=localStorage.getItem(VER+'_t'),a=localStorage.getItem(VER+'_arr');
     if(n)nodes=JSON.parse(n);else _reset();

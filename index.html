@@ -1646,6 +1646,7 @@ body.is-mobile #nav-hud{
 body.is-mobile .hud-btn{padding:0 18px;height:var(--mob-hud);font-size:16px;min-width:44px;}
 body.is-mobile #hud-counter{font-size:9px;padding:0 10px;}
 /* Dots hidden on mobile — too small to tap reliably */
+body.is-mobile #hud-map{display:flex!important;}
 body.is-mobile #hud-dots{display:none;}
 /* Landscape: reduce further */
 @media(orientation:landscape) and (max-height:500px){
@@ -1974,6 +1975,7 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
   <div id="hud-counter">—</div>
   <div id="hud-dots"></div>
   <button id="hud-reset" onclick="fitAll();toast('Canvas reset')" title="Reset view">⊡</button>
+  <button id="hud-map" class="hud-btn" onclick="openMobMinimap()" aria-label="Navigate" title="Map" style="display:none;font-size:13px;border-right:none;border-left:1px solid var(--border);">⊞</button>
   <button class="hud-btn" onclick="nextSlide()" aria-label="Next">›</button>
 </div>
 
@@ -2222,7 +2224,6 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
   <div class="mob-arr-actions">
     <div class="mob-arr-action" onclick="addNode();mobSetMode('canvas')">+ Node</div>
     <div class="mob-arr-action" onclick="fitAll();mobSetMode('canvas')">Fit</div>
-    <div class="mob-arr-action primary" onclick="togglePresent()">▶ Present</div>
   </div>
 </div>
 
@@ -2232,15 +2233,15 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
 <div id="mob-tabs">
   <div class="mob-tab active" id="tab-view" onclick="mobSetMode('view')">
     <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="9" y1="19" x2="15" y2="19"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-    View
+    Present
   </div>
   <div class="mob-tab" id="tab-canvas" onclick="mobSetMode('canvas')">
     <svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="2.2"/><circle cx="17" cy="8" r="2.2"/><circle cx="12" cy="17" r="2.2"/><line x1="9.2" y1="8" x2="14.8" y2="8"/><line x1="8.2" y1="10" x2="11" y2="15"/><line x1="15.8" y1="10" x2="13" y2="15"/></svg>
-    Canvas
+    Spatial
   </div>
   <div class="mob-tab" id="tab-arrange" onclick="mobSetMode('arrange')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="5" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="3" y="11" width="8" height="5" rx="1"/><rect x="13" y="11" width="8" height="5" rx="1"/><line x1="7" y1="8" x2="7" y2="11"/><line x1="17" y1="8" x2="17" y2="11"/></svg>
-    Arrange
+    Compose
   </div>
 </div>
 
@@ -3621,8 +3622,22 @@ function mobInit(){
   // Landscape/portrait listener
   window.matchMedia('(orientation:landscape)').addEventListener('change',()=>{
     // Re-fit when orientation changes
-    setTimeout(()=>{ if(mobMode==='canvas') fitAll(); },200);
+    setTimeout(()=>{ if(mobMode==='canvas') _mobFitActive(); },200);
   });
+}
+
+// Mobile canvas: zoom to active node at a comfortable reading scale
+function _mobFitActive(){
+  const id=activeSlideId;
+  const node=id&&nodes.find(n=>n.id===id);
+  if(!node){ fitAll(); return; }
+  const wrap=document.getElementById('canvas-wrap');
+  const vpW=wrap.clientWidth, vpH=wrap.clientHeight;
+  const scale=0.72; // comfortable mobile reading scale
+  transform.scale=scale;
+  transform.x=vpW/2 - (node.x + 110)*scale;
+  transform.y=vpH/2 - (node.y + 60)*scale;
+  applyTransform();
 }
 
 function _buildMobArrGrid(){
@@ -3649,8 +3664,8 @@ function mobSetMode(mode){
   const cw=document.getElementById('canvas-wrap');
   if(cw) cw.style.display=mode==='view'?'none':'';
   // In narrative on canvas mode, zoom to active node
-  if(mode==='canvas'&&currentArrangement==='narrative'&&activeSlideId){
-    setTimeout(()=>panTo(activeSlideId),100);
+  if(mode==='canvas'&&activeSlideId){
+    setTimeout(()=>_mobFitActive(),100);
   }
 }
 
@@ -4353,7 +4368,7 @@ function init(){
     _buildCmdArrGrid();
     _syncCmdMenu();
     // Initial mobile view render
-    if(isMob()&&nodes[0]){_renderMobView(nodes[0],true);}
+    if(isMob()&&nodes[0]){_renderMobView(nodes[0],true);setTimeout(()=>_mobFitActive(),80);}
   });
   window.addEventListener('resize',()=>{if(isMob()&&!document.body.classList.contains('is-mobile'))mobInit();});
 }

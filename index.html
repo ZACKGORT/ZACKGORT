@@ -1646,8 +1646,8 @@ body.is-mobile #nav-hud{
 body.is-mobile .hud-btn{padding:0 18px;height:var(--mob-hud);font-size:16px;min-width:44px;}
 body.is-mobile #hud-counter{font-size:9px;padding:0 10px;}
 /* Dots hidden on mobile — too small to tap reliably */
-body.is-mobile #hud-map{display:flex!important;}
 body.is-mobile #hud-dots{display:none;}
+body.is-mobile #hud-map{display:flex!important;}
 /* Landscape: reduce further */
 @media(orientation:landscape) and (max-height:500px){
   :root{--mob-hud:32px;}
@@ -3621,22 +3621,20 @@ function mobInit(){
   mobSetMode('view');
   // Landscape/portrait listener
   window.matchMedia('(orientation:landscape)').addEventListener('change',()=>{
-    // Re-fit when orientation changes
     setTimeout(()=>{ if(mobMode==='canvas') _mobFitActive(); },200);
   });
 }
 
 // Mobile canvas: zoom to active node at a comfortable reading scale
 function _mobFitActive(){
-  const id=activeSlideId;
-  const node=id&&nodes.find(n=>n.id===id);
+  const node=activeSlideId&&nodes.find(n=>n.id===activeSlideId);
   if(!node){ fitAll(); return; }
   const wrap=document.getElementById('canvas-wrap');
   const vpW=wrap.clientWidth, vpH=wrap.clientHeight;
-  const scale=0.72; // comfortable mobile reading scale
+  const scale=0.72;
   transform.scale=scale;
-  transform.x=vpW/2 - (node.x + 110)*scale;
-  transform.y=vpH/2 - (node.y + 60)*scale;
+  transform.x=vpW/2-(node.x+110)*scale;
+  transform.y=vpH/2-(node.y+60)*scale;
   applyTransform();
 }
 
@@ -3663,7 +3661,7 @@ function mobSetMode(mode){
   if(arr) arr.style.display=mode==='arrange'?'flex':'none';
   const cw=document.getElementById('canvas-wrap');
   if(cw) cw.style.display=mode==='view'?'none':'';
-  // In narrative on canvas mode, zoom to active node
+  // In canvas mode, zoom to active node at comfortable scale
   if(mode==='canvas'&&activeSlideId){
     setTimeout(()=>_mobFitActive(),100);
   }

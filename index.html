@@ -3169,8 +3169,8 @@ function _buildFwd(fromId){
     v.add(cur);p.push(cur);
     const nx=connections.filter(c=>c.from===cur).filter(c=>{
       const t=nodes.find(n=>n.id===c.to);
-      // Skip deck portals and loop-back connections to already-visited nodes
-      return t&&t.type!=='deck'&&!v.has(c.to);
+      // Skip loop-back connections to already-visited nodes
+      return t&&!v.has(c.to);
     });
     // Always follow first connection to build a primary path — don't stop at branches
     cur=nx.length>=1?nx[0].to:null;
@@ -3227,12 +3227,14 @@ function nextSlide(){
     return;
   }
   const nx=connections.filter(c=>c.from===activeSlideId);
-  // If inside a deck and no more connections (or only the loop-back to main), exit
+  // If inside a deck and no more internal connections, exit
   if(_deckStack.length){
     const deckInternalNext=nx.filter(c=>{
       const n=nodes.find(nd=>nd.id===c.to);
-      // exclude the loop-back connection (target is a main-path node, not a deck-chain node)
-      return n&&n.type!=='deck'&&!_isMainNode(c.to);
+      // exclude loop-back connections (target is main or is the declared deckReturn)
+      const deck=_deckStack[_deckStack.length-1];
+      const returnId=deck?deck.returnId:null;
+      return n&&n.type!=='deck'&&c.to!==returnId&&!_isMainNode(c.to);
     });
     if(!deckInternalNext.length){_exitDeck();return;}
     // Still inside deck — advance normally
@@ -3259,9 +3261,23 @@ function nextSlide(){
   setSlide(targets[0].to,false);
 }
 
-// Returns true if a node id belongs to the main narrative (not a deck chain node)
+// Returns true if a node id belongs to the main narrative (not inside a deck chain)
 function _isMainNode(id){
-  return !!(id.match(/^s\d+$/) || nodes.find(n=>n.id===id&&(n.type==='deck')));
+  // A node is a deck-chain node if it can only be reached via a deck entry
+  // Collect all deck-internal node ids by walking from each deck's deckEntry
+  const deckInternals=new Set();
+  nodes.filter(n=>n.type==='deck'&&n.deckEntry).forEach(deck=>{
+    let cur=deck.deckEntry; const v=new Set();
+    while(cur&&!v.has(cur)){
+      v.add(cur);deckInternals.add(cur);
+      const nx=connections.filter(c=>c.from===cur);
+      // Stop at loop-back connections (target is a deck portal or would be main)
+      const cont=nx.find(c=>{const t=nodes.find(n=>n.id===c.to);return t&&t.type!=='deck'&&!deckInternals.has(c.to)&&c.to!==deck.deckReturn;});
+      cur=cont?cont.to:null;
+    }
+  });
+  if(deckInternals.has(id))return false;
+  return true;
 }
 
 function _showBranch(){
@@ -3307,15 +3323,9 @@ function _showDeckFork(deckNode){
 function _closeDeckFork(){
   document.getElementById('deck-fork').classList.remove('on');
   // Skip the deck node and advance to next main-path node
-  const deckConns=connections.filter(c=>c.from===activeSlideId&&nodes.find(n=>n.id===c.to&&n.type==='deck'));
-  // Find non-deck next or just move on
   const nx=connections.filter(c=>c.from===activeSlideId&&(!nodes.find(n=>n.id===c.to&&n.type==='deck')));
   if(nx.length){
-    const nid=nx[0].to;navHistory.push(nid);navIndex++;activeSlideId=nid;
-    mN();const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
-    _rebuildChain();_paintPreview(n);
-    if(presentMode)_renderPS(n,false);
-    _updHUDs();panTo(activeSlideId);dSave();
+    setSlide(nx[0].to, false);
   }
 }
 
@@ -4178,12 +4188,21 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key==='Escape'){
     if(document.getElementById('ps-carousel').classList.contains('on')){closePsCarousel();return;}
-    if(presentMode)togglePresent();
+    if(document.getElementById('ps-toc').classList.contains('on')){closePsToc();return;}
+    if(document.getElementById('deck-fork').classList.contains('on')){document.getElementById('deck-fork').classList.remove('on');return;}
+    if(presentMode){togglePresent();return;}
     if(EDIT_MODE&&connectMode)toggleConnectMode();
     if(EDIT_MODE)closeFxPanel();
     closeCmdMenu();
-    document.getElementById('deck-fork').classList.remove('on');
-    closePsToc();
+  }
+  if(e.key==='p'||e.key==='P'){
+    if(e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){
+      e.preventDefault();togglePresent();
+    }
+  }
+  if((e.key==='t'||e.key==='T')&&presentMode){
+    e.preventDefault();
+    document.getElementById('ps-toc').classList.contains('on')?closePsToc():openPsToc();
   }
   if(EDIT_MODE){
     if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();addNode();}
@@ -4279,7 +4298,6 @@ const TOC_GROUPS=[
   {label:'Remote · Pivot · Build',ids:['s19','s20','s21','s22']},
   {label:'Method · Workflow',ids:['s23']},
   {label:'Projects',ids:['s24','s25','s26','s27','s28','s29','s30','s31']},
-  {label:'Reason & Resolution',ids:['s30']},
 ];
 
 function openPsToc(){
@@ -4304,7 +4322,7 @@ function _buildToc(){
     <div id="ps-toc-hdr">
       <div>
         <div id="ps-toc-title">Table of Contents</div>
-        <div id="ps-toc-hint">Right-click · Esc to close</div>
+        <div id="ps-toc-hint">T or right-click · Esc to close</div>
       </div>
       <button id="ps-toc-close" onclick="closePsToc()">×</button>
     </div>

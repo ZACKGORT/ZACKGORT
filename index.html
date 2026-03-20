@@ -2441,7 +2441,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v18';
+const VER='nrt_v19';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   // ?reset clears all saved state and reloads clean from defaults
@@ -3031,9 +3031,19 @@ function nextSlide(){
     setSlide(activeSlideId,false);
     return;
   }
-  // If inside a deck, always exit via _exitDeck (don't follow loop-back connection directly)
-  if(_deckStack.length){_exitDeck();return;}
   const nx=connections.filter(c=>c.from===activeSlideId);
+  // If inside a deck and no more connections (or only the loop-back to main), exit
+  if(_deckStack.length){
+    const deckInternalNext=nx.filter(c=>{
+      const n=nodes.find(nd=>nd.id===c.to);
+      // exclude the loop-back connection (target is a main-path node, not a deck-chain node)
+      return n&&n.type!=='deck'&&!_isMainNode(c.to);
+    });
+    if(!deckInternalNext.length){_exitDeck();return;}
+    // Still inside deck — advance normally
+    setSlide(deckInternalNext[0].to,false);
+    return;
+  }
   if(!nx.length) return;
   // Filter out deck portal nodes from auto-advance (require explicit opt-in)
   const nonDeck=nx.filter(c=>{const n=nodes.find(nd=>nd.id===c.to);return n&&n.type!=='deck';});
@@ -3046,6 +3056,11 @@ function nextSlide(){
     return;
   }
   setSlide(targets[0].to,false);
+}
+
+// Returns true if a node id belongs to the main narrative (not a deck chain node)
+function _isMainNode(id){
+  return !!(id.match(/^s\d+$/) || nodes.find(n=>n.id===id&&(n.type==='deck')));
 }
 
 function _showBranch(){

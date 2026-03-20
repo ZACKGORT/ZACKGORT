@@ -2387,8 +2387,8 @@ const DEFAULT_CONNECTIONS=[
   {id:'c11',from:'s8',to:'s9'},{id:'c12',from:'s9',to:'s10'},{id:'c13',from:'s9',to:'s11'},{id:'c14',from:'s10',to:'s11'},
   {id:'c15',from:'s11',to:'s12'},{id:'c16',from:'s12',to:'s13'},{id:'c17',from:'s12',to:'s14'},
   {id:'c18',from:'s13',to:'s15'},{id:'c19',from:'s14',to:'s15'},{id:'c20',from:'s14',to:'s16'},
-  {id:'c21',from:'s15',to:'s17'},{id:'c22',from:'s16',to:'s17'},{id:'c23',from:'s17',to:'s18'},
-  {id:'c24',from:'s18',to:'s19'},{id:'c25',from:'s19',to:'s20'},{id:'c26',from:'s19',to:'s21'},
+  {id:'c22',from:'s16',to:'s17'},{id:'c23',from:'s17',to:'s18'},
+  {id:'c25',from:'s19',to:'s20'},{id:'c26',from:'s19',to:'s21'},
   {id:'c27',from:'s20',to:'s22'},{id:'c28',from:'s21',to:'s22'},
   {id:'c29',from:'s22',to:'s23'},{id:'c30',from:'s22',to:'s24'},{id:'c31',from:'s22',to:'s25'},
   {id:'c32',from:'s22',to:'s26'},{id:'c33',from:'s22',to:'s27'},{id:'c34',from:'s24',to:'s27'},
@@ -2403,11 +2403,13 @@ const DEFAULT_CONNECTIONS=[
   {id:'cg1',from:'gnc1',to:'gnc2'},{id:'cg2',from:'gnc2',to:'gnc3'},
   {id:'cg3',from:'gnc3',to:'gnc4'},{id:'cg4',from:'gnc4',to:'gnc5'},
   {id:'cg5',from:'gnc5',to:'gnc_ss'},
+  {id:'cg6',from:'gnc_ss',to:'s18'},  // loop back → BNY work node
   // BNY deck internal chain
   {id:'cb0',from:'bny_deck',to:'bny1'},
   {id:'cb1',from:'bny1',to:'bny2'},{id:'cb2',from:'bny2',to:'bny3'},
   {id:'cb3',from:'bny3',to:'bny4'},{id:'cb4',from:'bny4',to:'bny5'},
   {id:'cb5',from:'bny5',to:'bny_ss'},
+  {id:'cb6',from:'bny_ss',to:'s19'},  // loop back → narrative resumes
 ];
 
 // ══════════════════════════════════════════════════
@@ -2439,7 +2441,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v14';
+const VER='nrt_v17';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   // ?reset clears all saved state and reloads clean from defaults
@@ -3039,24 +3041,33 @@ function nextSlide(){
     if(presentMode){
       if(n.type==='deck'){_renderPS(n,false);_showDeckFork(n);}
       else _renderPS(n,false);
+    } else if(n.type==='deck'){
+      _showDeckFork(n);
     }
     if(isMob())_renderMobView(n,false);
     _updHUDs();panTo(activeSlideId);dSave();
     return;
   }
+  // If inside a deck, always exit via _exitDeck (don't follow loop-back connection directly)
+  if(_deckStack.length){_exitDeck();return;}
   const nx=connections.filter(c=>c.from===activeSlideId);
-  if(!nx.length){
-    // End of deck? Pop back if we're inside one
-    if(_deckStack.length){_exitDeck();return;}
-    return;
-  }
+  if(!nx.length) return;
   // Filter out deck portal nodes from auto-advance (require explicit opt-in)
   const nonDeck=nx.filter(c=>{const n=nodes.find(nd=>nd.id===c.to);return n&&n.type!=='deck';});
   const targets=nonDeck.length?nonDeck:nx;
   if(targets.length>1){if(presentMode)_showBranch();return;}
-  // Single target — check if it's a deck node
+  // Single target — check if it's a deck node; always show fork, not just in present mode
   const target=nodes.find(n=>n.id===targets[0].to);
-  if(target&&target.type==='deck'&&presentMode){_showDeckFork(target);return;}
+  if(target&&target.type==='deck'){
+    // Navigate to deck node so it's the active slide, then show fork
+    activeSlideId=target.id;navHistory.push(target.id);navIndex=navHistory.length-1;
+    mN();_rebuildChain();_paintPreview(target);
+    if(presentMode)_renderPS(target,false);
+    if(isMob())_renderMobView(target,false);
+    _updHUDs();panTo(target.id);dSave();
+    _showDeckFork(target);
+    return;
+  }
   const nid=targets[0].to;navHistory.push(nid);navIndex++;activeSlideId=nid;
   mN();const n=nodes.find(nd=>nd.id===activeSlideId);if(!n)return;
   _rebuildChain();_paintPreview(n);
@@ -3101,7 +3112,6 @@ function _showDeckFork(deckNode){
     ${count?`<div class="dfk-count">▣ ${count} slides</div>`:''}
     <div class="dfk-actions">
       <button class="dfk-btn dfk-btn-enter" onclick="_enterDeck('${deckNode.id}')">Enter Case Study →</button>
-      <button class="dfk-btn dfk-btn-skip" onclick="_closeDeckFork()">Continue Main Path</button>
     </div>`;
   fork.classList.add('on');
 }
@@ -3150,8 +3160,18 @@ function _exitDeck(){
   mN();const n=nodes.find(nd=>nd.id===landId);if(!n)return;
   _rebuildChain();_paintPreview(n);
   if(presentMode)_renderPS(n,false);
+  if(isMob())_renderMobView(n,false);
   _updHUDs();panTo(landId);dSave();
-  toast('Back to main path');
+  // If landing node leads into another deck, present that fork automatically
+  if(presentMode){
+    setTimeout(()=>{
+      const nextDeckConn=connections.find(c=>c.from===landId&&nodes.find(nd=>nd.id===c.to&&nd.type==='deck'));
+      if(nextDeckConn){
+        const nextDeck=nodes.find(nd=>nd.id===nextDeckConn.to);
+        if(nextDeck) _showDeckFork(nextDeck);
+      }
+    },600);
+  }
 }
 
 // ══════════════════════════════════════════════════

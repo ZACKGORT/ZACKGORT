@@ -2477,7 +2477,7 @@ const DRAG_LINE=document.getElementById('drag-line');
 // ══════════════════════════════════════════════════
 // PERSISTENCE
 // ══════════════════════════════════════════════════
-const VER='nrt_v20';
+const VER='nrt_v23';
 function save(){try{localStorage.setItem(VER+'_n',JSON.stringify(nodes));localStorage.setItem(VER+'_c',JSON.stringify(connections));localStorage.setItem(VER+'_t',JSON.stringify(transform));localStorage.setItem(VER+'_arr',currentArrangement);}catch(e){}}
 function load(){
   // ?reset clears all saved state and reloads clean from defaults
@@ -2584,6 +2584,21 @@ function doZoom(d,cx,cy){
 }
 function fitAll(){
   if(!nodes.length)return;
+  // Viewer mode: center on active node at a comfortable scale rather than fitting the whole canvas
+  if(!EDIT_MODE){
+    const id=activeSlideId||nodes[0].id;
+    const n=nodes.find(nd=>nd.id===id)||nodes[0];
+    const wrap=document.getElementById('canvas-wrap');
+    const vpW=wrap.clientWidth,vpH=wrap.clientHeight;
+    const scale=0.9;
+    const pp=prevXY(n);
+    const midY=(n.y+NODE_H+(pp.y+PREV_H))/2;
+    transform.scale=scale;
+    transform.x=vpW/2-(n.x+NODE_W/2)*scale;
+    transform.y=vpH/2-midY*scale;
+    applyTransform();dSave();
+    return;
+  }
   const wrap=document.getElementById('canvas-wrap');
   const vpW=wrap.clientWidth,vpH=wrap.clientHeight,pad=80;
   let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
@@ -2605,12 +2620,22 @@ function panTo(id){
   const n=nodes.find(nd=>nd.id===id);if(!n)return;
   const wrap=document.getElementById('canvas-wrap');
   const vpW=wrap.clientWidth,vpH=wrap.clientHeight;
-  // Pan to center on the node-preview pair
-  const pp=prevXY(n);const midY=(n.y+NODE_H+(pp.y+PREV_H))/2;
-  const cx=n.x+NODE_W/2, cy=midY;
+  const pp=prevXY(n);
+  const pairX=n.x;
+  const pairTop=n.y-20;
+  const pairBottom=(n.prevY!==undefined?n.prevY:pp.y)+PREV_H+PREV_BAR+20;
+  const pairW=Math.max(NODE_W,PREV_W);
+  const pairH=pairBottom-pairTop;
+  // Scale to fit the pair with padding, but don't exceed current scale or go above 1.1
+  const pad=60;
+  const scaleToFit=Math.min((vpW-pad*2)/pairW,(vpH-pad*2)/pairH,1.1);
+  const scale=EDIT_MODE?Math.min(transform.scale,scaleToFit):scaleToFit;
+  const cx=pairX+pairW/2;
+  const cy=pairTop+pairH/2;
   CVS.style.transition='transform 0.44s cubic-bezier(0.32,0.72,0,1)';
-  transform.x=vpW/2-cx*transform.scale;
-  transform.y=vpH/2-cy*transform.scale;
+  transform.scale=scale;
+  transform.x=vpW/2-cx*scale;
+  transform.y=vpH/2-cy*scale;
   applyTransform();
   setTimeout(()=>CVS.style.transition='',460);
 }

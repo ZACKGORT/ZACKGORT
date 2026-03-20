@@ -1589,6 +1589,57 @@ body.light-theme #cmd-scrim.open{background:rgba(26,24,22,0.18);}
 #toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg-4);border:1px solid var(--border-2);border-radius:5px;font-family:var(--mono);font-size:8px;letter-spacing:0.1em;color:var(--ink-2);padding:6px 14px;z-index:9000;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+/* PRESENT NUDGE */
+#present-nudge{
+  position:fixed;bottom:72px;left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:var(--bg-4);
+  border:1px solid var(--accent);
+  border-radius:6px;
+  font-family:var(--mono);
+  font-size:8.5px;
+  letter-spacing:0.08em;
+  color:var(--ink);
+  padding:0;
+  z-index:9001;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.35s cubic-bezier(0.16,1,0.3,1), transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  box-shadow:0 4px 24px rgba(200,112,74,0.18), 0 1px 6px rgba(0,0,0,0.3);
+  display:flex;align-items:center;gap:0;overflow:hidden;
+  white-space:nowrap;
+}
+#present-nudge.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+#present-nudge-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 16px 9px 14px;
+  cursor:pointer;
+  background:none;border:none;
+  color:var(--ink);font-family:var(--mono);font-size:8.5px;letter-spacing:0.08em;
+  transition:background 0.15s;
+}
+#present-nudge-btn:hover{background:var(--accent-l);}
+#present-nudge-icon{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  font-size:7px;color:#fff;
+  padding-left:1px;
+}
+#present-nudge-dismiss{
+  padding:9px 10px 9px 4px;
+  cursor:pointer;background:none;border:none;
+  color:var(--ink-3);font-family:var(--mono);font-size:9px;
+  transition:color 0.15s;line-height:1;
+}
+#present-nudge-dismiss:hover{color:var(--ink);}
+
+body.light-theme #present-nudge{
+  background:var(--bg-2);
+  box-shadow:0 4px 24px rgba(184,92,50,0.14), 0 1px 8px rgba(26,24,22,0.1);
+}
+
 /* ══════════════════════════════════════════════════════
    MOBILE — portrait + landscape, iOS + Android
 ══════════════════════════════════════════════════════ */
@@ -2322,6 +2373,13 @@ body.is-mobile #cs-title,body.is-mobile #cs-body,body.is-mobile #cs-pq,body.is-m
 
 
 <div id="toast"></div>
+<div id="present-nudge" role="status" aria-live="polite">
+  <button id="present-nudge-btn" onclick="togglePresent();dismissPresentNudge()" title="Enter present mode">
+    <span id="present-nudge-icon">&#9654;</span>
+    <span>see the story &rarr; present mode</span>
+  </button>
+  <button id="present-nudge-dismiss" onclick="dismissPresentNudge()" title="Dismiss" aria-label="Dismiss">&#x2715;</button>
+</div>
 
 <script>
 // ══════════════════════════════════════════════════
@@ -3351,6 +3409,7 @@ function togglePresent(){
   document.getElementById('btn-present').textContent=presentMode?'✕ Exit':'▶ Present';
   document.getElementById('btn-present').classList.toggle('active',presentMode);
   if(presentMode){
+    dismissPresentNudge();
     if(!activeSlideId&&nodes.length)setSlide(nodes[0].id);
     const n=nodes.find(nd=>nd.id===activeSlideId);if(n)_renderPS(n,true);
   } else {
@@ -4142,6 +4201,17 @@ document.addEventListener('keydown',e=>{
 // ══════════════════════════════════════════════════
 let _tt=null;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2200);}
+
+// Present nudge — shown once per session on load
+let _nudgeDismissed=false;
+function showPresentNudge(){
+  if(_nudgeDismissed||presentMode)return;
+  document.getElementById('present-nudge').classList.add('show');
+}
+function dismissPresentNudge(){
+  _nudgeDismissed=true;
+  document.getElementById('present-nudge').classList.remove('show');
+}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ══════════════════════════════════════════════════
@@ -4555,6 +4625,12 @@ function init(){
     if(start){
       navHistory=[start.id];navIndex=0;activeSlideId=start.id;
       _rebuildChain();_updHUDs();mN();_sched();
+      // Pan to first card so it's the focal point on load
+      setTimeout(()=>{
+        panTo(start.id);
+        // Nudge visitor toward Present mode after canvas settles
+        setTimeout(()=>showPresentNudge(), 1400);
+      }, 120);
     }
     mobInit();
     if(EDIT_MODE){

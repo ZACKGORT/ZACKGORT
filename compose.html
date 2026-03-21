@@ -1,0 +1,2754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>◇ wolfie.love / shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,700;0,900;1,700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════════════════════════════════════
+   wolfie.love / shop
+   The sentence is the interface.
+   Rooms are layout presets. Stories are the product.
+   Daisy-chain any sequence of rooms into a bespoke store.
+═══════════════════════════════════════════════════════════════════════ */
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;overscroll-behavior:none;scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--mono);font-size:12px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;cursor:none;
+  min-height:100vh;overscroll-behavior:none;
+}
+@media(max-width:768px){body{cursor:auto}}
+
+/* ── STORE TOKENS — set per store, override for palette shifts ── */
+:root{
+  --bg:        #080709;
+  --bg-2:      #0e0c10;
+  --bg-3:      #151318;
+  --bg-4:      #1c1a20;
+  --ink:       #f0ece6;
+  --ink-2:     #7a7470;
+  --ink-3:     #302c34;
+  --accent:    #c87a50;
+  --accent-l:  rgba(200,122,80,0.10);
+  --border:    rgba(240,236,230,0.06);
+  --border-2:  rgba(240,236,230,0.11);
+  --mono:      'DM Mono', monospace;
+  --disp:      'DM Serif Display', serif;
+  --cond:      'Barlow Condensed', sans-serif;
+  --serif:     'Playfair Display', serif;
+  --grain-opacity: 0.045;
+}
+
+/* grain */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  opacity:var(--grain-opacity);
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px;
+}
+
+/* custom cursor */
+#cursor{
+  position:fixed;width:7px;height:7px;border-radius:50%;
+  background:var(--accent);pointer-events:none;z-index:10000;
+  transform:translate(-50%,-50%);
+  transition:width .12s,height .12s,background .2s,opacity .2s;
+  opacity:0;
+}
+#cursor.big{width:18px;height:18px;opacity:.22}
+#cursor.vis{opacity:1}
+
+/* progress bar */
+#progress{
+  position:fixed;top:0;left:0;height:1px;width:0%;
+  background:linear-gradient(to right,transparent,var(--accent));
+  z-index:8000;pointer-events:none;transition:width .2s ease;
+}
+
+/* ════════════════════════════════
+   TOPBAR
+════════════════════════════════ */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:5000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;
+  background:rgba(8,7,9,0.92);
+  backdrop-filter:blur(20px) saturate(1.4);
+  border-bottom:1px solid var(--border);
+}
+.tb-brand{
+  font-family:var(--mono);font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-2);
+  display:flex;align-items:center;gap:10px;
+}
+.tb-brand .diamond{color:var(--accent);font-size:11px}
+.tb-brand .store-name{
+  font-family:var(--disp);font-size:14px;letter-spacing:-.01em;
+  text-transform:none;color:var(--ink);
+}
+.tb-center{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:7px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-3);
+  display:flex;align-items:center;gap:8px;
+}
+.tb-crumb-sep{opacity:.4}
+.tb-crumb-node{transition:color .12s}
+.tb-crumb-node:hover{color:var(--accent);cursor:pointer}
+.tb-actions{display:flex;align-items:center;gap:6px}
+.tb-btn{
+  background:none;border:1px solid var(--border-2);border-radius:3px;
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-2);padding:5px 9px;
+  cursor:pointer;white-space:nowrap;
+  transition:border-color .12s,color .12s,background .12s;
+}
+.tb-btn:hover{border-color:var(--border-2);color:var(--ink);background:var(--accent-l)}
+.tb-btn.accent{border-color:var(--accent);color:var(--accent)}
+.tb-btn.accent:hover{background:var(--accent);color:var(--bg)}
+.tb-cart-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--accent);color:var(--bg);
+  font-size:7px;font-weight:700;margin-left:4px;
+  opacity:0;transform:scale(0);
+  transition:opacity .2s,transform .2s;
+}
+.tb-cart-count.show{opacity:1;transform:scale(1)}
+
+/* ════════════════════════════════
+   LAYOUT COMPOSE ENGINE
+   The core: rooms are presets,
+   daisy-chainable into any store.
+════════════════════════════════ */
+
+/* Each .room is a full viewport section, a "storefront depth" */
+.room{
+  position:relative;min-height:100dvh;
+  display:flex;flex-direction:column;
+  padding-top:44px;
+  overflow:hidden;
+}
+
+/* ── Room image layer (ambient) ── */
+.room-bg{
+  position:absolute;inset:0;z-index:0;
+  pointer-events:none;overflow:hidden;
+}
+.room-bg img,.room-bg video{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center 30%;
+  opacity:0;transform:scale(1.03);
+  transition:opacity 1.6s ease,transform 18s linear;
+}
+.room-bg img.on,.room-bg video.on{opacity:1;transform:scale(1)}
+.room-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,
+    var(--bg) 0%,
+    rgba(8,7,9,.88) 30%,
+    rgba(8,7,9,.44) 60%,
+    rgba(8,7,9,.06) 100%
+  ),linear-gradient(to bottom,
+    rgba(8,7,9,.7) 0%,
+    transparent 18%,
+    transparent 78%,
+    var(--bg) 100%
+  );
+}
+
+/* ════════════════════════════════
+   ROOM LAYOUT PRESETS
+   Each preset composes the reading
+   experience differently.
+════════════════════════════════ */
+
+/* ── [1] MANIFESTO — full-bleed cinematic opener ── */
+.room[data-layout="manifesto"]{
+  justify-content:center;align-items:flex-start;
+  min-height:100dvh;
+}
+.room[data-layout="manifesto"] .room-inner{
+  position:relative;z-index:2;
+  padding:clamp(60px,10vh,120px) clamp(28px,6vw,90px);
+  max-width:660px;
+}
+.room[data-layout="manifesto"] .room-bg::after{
+  background:linear-gradient(105deg,
+    var(--bg) 0%,
+    rgba(8,7,9,.92) 36%,
+    rgba(8,7,9,.55) 65%,
+    transparent 100%
+  ),linear-gradient(to bottom,
+    rgba(8,7,9,.6) 0%,
+    transparent 30%,
+    transparent 70%,
+    var(--bg) 100%
+  );
+}
+
+/* ── [2] EDITORIAL — two column, image right ── */
+.room[data-layout="editorial"]{
+  justify-content:center;align-items:stretch;
+}
+.room[data-layout="editorial"] .room-inner{
+  position:relative;z-index:2;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;min-height:calc(100dvh - 44px);
+}
+.room[data-layout="editorial"] .col-text{
+  padding:clamp(40px,8vh,80px) clamp(28px,5vw,70px);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.room[data-layout="editorial"] .col-media{
+  position:relative;overflow:hidden;background:var(--bg-2);
+}
+.room[data-layout="editorial"] .col-media img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;opacity:.7;transition:transform 14s linear;
+}
+.room[data-layout="editorial"] .col-media::before{
+  content:'';position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to right,var(--bg) 0%,transparent 20%);
+}
+
+/* ── [3] GRID — product mosaic ── */
+.room[data-layout="grid"]{
+  justify-content:flex-start;
+  background:var(--bg-2);
+}
+.room[data-layout="grid"] .room-inner{
+  position:relative;z-index:2;
+  padding:clamp(32px,5vh,64px) clamp(20px,4vw,60px);
+  width:100%;
+}
+.room[data-layout="grid"] .grid-header{
+  margin-bottom:clamp(24px,4vh,48px);
+}
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(var(--grid-cols,3),1fr);
+  gap:clamp(12px,2vw,24px);
+}
+
+/* ── [4] FEATURE — single product, full presence ── */
+.room[data-layout="feature"]{
+  justify-content:center;align-items:center;
+}
+.room[data-layout="feature"] .room-inner{
+  position:relative;z-index:2;
+  display:grid;
+  grid-template-columns:1fr 480px;
+  gap:clamp(40px,6vw,100px);
+  padding:clamp(40px,8vh,80px) clamp(28px,5vw,72px);
+  max-width:1200px;
+  margin:0 auto;width:100%;
+  align-items:center;
+}
+.room[data-layout="feature"] .feature-media{
+  position:relative;border-radius:3px;overflow:hidden;
+  background:var(--bg-2);
+  aspect-ratio:3/4;
+}
+.room[data-layout="feature"] .feature-media img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 8s ease;
+}
+.room[data-layout="feature"] .feature-media:hover img{transform:scale(1.03)}
+
+/* ── [5] LOOKBOOK — immersive scroll with anchored text ── */
+.room[data-layout="lookbook"]{
+  min-height:auto;
+}
+.room[data-layout="lookbook"] .room-inner{
+  position:relative;z-index:2;
+  width:100%;
+}
+.lookbook-scene{
+  position:sticky;top:44px;height:calc(100dvh - 44px);
+  display:flex;align-items:center;
+  overflow:hidden;
+}
+.lookbook-scroll-content{
+  padding-bottom:calc(100dvh - 44px);
+}
+.lookbook-item{
+  min-height:100dvh;
+  display:flex;align-items:center;
+  padding:clamp(40px,8vh,80px) clamp(28px,5vw,72px);
+}
+.lookbook-text{
+  max-width:440px;
+  position:relative;z-index:2;
+}
+
+/* ── [6] COUNTER — specs / compare / tech detail ── */
+.room[data-layout="counter"]{
+  justify-content:center;background:var(--bg-3);
+}
+.room[data-layout="counter"] .room-inner{
+  position:relative;z-index:2;
+  padding:clamp(40px,8vh,80px) clamp(28px,5vw,72px);
+  max-width:900px;margin:0 auto;width:100%;
+}
+
+/* ── [7] NARRATIVE — long-read editorial depth ── */
+.room[data-layout="narrative"]{
+  justify-content:center;align-items:flex-start;
+}
+.room[data-layout="narrative"] .room-inner{
+  position:relative;z-index:2;
+  padding:clamp(48px,8vh,96px) clamp(28px,6vw,90px);
+  max-width:680px;margin-left:clamp(40px,10vw,180px);
+}
+
+/* ── [8] CLOSING — CTA, final scene ── */
+.room[data-layout="closing"]{
+  justify-content:center;align-items:center;text-align:center;
+  min-height:100dvh;
+}
+.room[data-layout="closing"] .room-inner{
+  position:relative;z-index:2;
+  padding:clamp(60px,10vh,120px) clamp(28px,6vw,90px);
+  max-width:600px;
+}
+.room[data-layout="closing"] .room-bg::after{
+  background:radial-gradient(ellipse 70% 70% at 50% 50%,
+    transparent 0%,var(--bg) 72%
+  );
+}
+
+/* responsive room overrides */
+@media(max-width:900px){
+  .room[data-layout="editorial"] .room-inner{grid-template-columns:1fr}
+  .room[data-layout="editorial"] .col-media{display:none}
+  .room[data-layout="feature"] .room-inner{grid-template-columns:1fr;max-width:520px}
+  .room[data-layout="feature"] .feature-media{aspect-ratio:4/3}
+  .product-grid{--grid-cols:2}
+  .room[data-layout="narrative"] .room-inner{margin-left:0}
+}
+@media(max-width:540px){
+  .product-grid{--grid-cols:1}
+}
+
+/* ════════════════════════════════
+   SENTENCE TYPES
+   The reading experience layer —
+   inherited from wolfie.love
+════════════════════════════════ */
+
+/* all sentence base */
+.s{
+  display:block;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1);
+  margin-bottom:0;
+}
+.s.revealed,.s.active{opacity:1;transform:none}
+.s.active{opacity:1}
+
+/* [label] — section label, small caps */
+.s.label{
+  font-family:var(--mono);font-size:7px;
+  letter-spacing:.24em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.s.label::before{
+  content:'';width:20px;height:1px;
+  background:currentColor;opacity:.6;flex-shrink:0;
+}
+
+/* [poster] — hero declaration */
+.s.poster{
+  font-family:var(--cond);font-weight:900;
+  font-size:clamp(52px,8vw,110px);
+  line-height:.88;letter-spacing:-.02em;
+  text-transform:uppercase;color:var(--ink);
+  margin-bottom:clamp(20px,3vh,40px);
+}
+.s.poster .ac{color:var(--accent)}
+.s.poster .dim{opacity:.28;-webkit-text-stroke:1px rgba(240,236,230,.18);color:transparent}
+
+/* [body] — narrative prose */
+.s.body{
+  font-family:var(--mono);font-size:12px;line-height:1.8;
+  color:var(--ink-2);margin-bottom:18px;max-width:520px;
+}
+.s.body .em{font-style:italic;color:var(--ink)}
+.s.body .ac{color:var(--accent)}
+
+/* [pull] — editorial pull quote */
+.s.pull{
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(16px,2.2vw,22px);line-height:1.5;
+  color:var(--ink);border-left:2px solid var(--accent);
+  padding:8px 0 8px 22px;margin:clamp(16px,3vh,32px) 0;
+  max-width:520px;
+}
+
+/* [spec] — key :: value */
+.s.spec{
+  display:flex;align-items:baseline;gap:0;
+  font-family:var(--mono);font-size:10px;
+  border-bottom:1px solid var(--border);
+  padding:10px 0;
+  transition:background .12s;
+}
+.s.spec:hover{background:var(--accent-l)}
+.s.spec .spec-k{
+  font-size:7px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);min-width:120px;flex-shrink:0;
+  transition:color .12s;
+}
+.s.spec:hover .spec-k{color:var(--accent)}
+.s.spec .spec-sep{color:var(--ink-3);margin:0 8px;opacity:.4}
+.s.spec .spec-v{color:var(--ink-2)}
+
+/* [break] — section divider */
+.s.break{
+  display:flex;align-items:center;gap:16px;
+  padding:clamp(24px,4vh,48px) 0;
+  opacity:0;
+}
+.s.break::before,.s.break::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(to right,transparent,var(--border),transparent);
+}
+.s.break::before{background:linear-gradient(to right,transparent,var(--border))}
+.s.break::after{background:linear-gradient(to right,var(--border),transparent)}
+.s.break .break-diamond{color:var(--ink-3);font-size:8px}
+
+/* [chapter] — chapter header */
+.ch-header{
+  opacity:0;transition:opacity .6s ease;
+  padding:clamp(40px,6vh,72px) 0 clamp(20px,3vh,36px);
+  pointer-events:none;
+}
+.ch-header.revealed{opacity:1}
+.ch-header-rule{
+  width:28px;height:1px;
+  background:linear-gradient(to right,transparent,var(--accent),transparent);
+  margin-bottom:18px;
+}
+.ch-num{
+  font-family:var(--cond);font-weight:900;
+  font-size:clamp(52px,7vw,88px);line-height:.85;
+  letter-spacing:-.04em;color:transparent;
+  -webkit-text-stroke:1px rgba(240,236,230,.05);
+  user-select:none;
+}
+.ch-title{
+  font-family:var(--cond);font-weight:900;
+  font-size:clamp(18px,2.6vw,30px);
+  letter-spacing:-.02em;text-transform:uppercase;
+  color:var(--ink);line-height:1;margin-top:6px;
+}
+.ch-sub{
+  font-family:var(--mono);font-size:7px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:8px;
+}
+
+/* ════════════════════════════════
+   PRODUCT CARDS
+   Three densities: editorial,
+   standard, compact
+════════════════════════════════ */
+
+.product-card{
+  background:var(--bg-3);border:1px solid var(--border);
+  border-radius:2px;overflow:hidden;cursor:pointer;
+  transition:border-color .2s,transform .2s,box-shadow .2s;
+  position:relative;
+}
+.product-card:hover{
+  border-color:var(--border-2);transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+.product-card:hover .pc-img img{transform:scale(1.04)}
+.pc-img{
+  position:relative;overflow:hidden;
+  background:var(--bg-4);
+}
+.pc-img img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 8s ease,filter .3s;
+  filter:brightness(.88);display:block;
+}
+.product-card:hover .pc-img img{filter:brightness(.95)}
+.pc-badge{
+  position:absolute;top:10px;left:10px;
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;background:var(--accent);color:var(--bg);
+  padding:3px 7px;border-radius:1px;z-index:2;
+}
+.pc-body{padding:14px 16px 18px}
+.pc-meta{
+  font-family:var(--mono);font-size:7px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:7px;
+}
+.pc-name{
+  font-family:var(--serif);font-weight:700;font-size:clamp(13px,1.4vw,16px);
+  letter-spacing:-.02em;color:var(--ink);line-height:1.2;margin-bottom:8px;
+}
+.pc-desc{
+  font-family:var(--mono);font-size:10px;line-height:1.6;
+  color:var(--ink-2);margin-bottom:12px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.pc-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+}
+.pc-price{
+  font-family:var(--cond);font-weight:700;font-size:18px;
+  letter-spacing:-.01em;color:var(--ink);
+}
+.pc-price .price-sub{
+  font-family:var(--mono);font-size:8px;
+  color:var(--ink-3);font-weight:400;
+  text-decoration:line-through;margin-left:5px;
+}
+.pc-add{
+  background:none;border:1px solid var(--border-2);
+  border-radius:2px;font-family:var(--mono);
+  font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);padding:7px 12px;cursor:pointer;
+  transition:border-color .12s,color .12s,background .12s;
+}
+.pc-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+.pc-add:active{background:var(--accent);color:var(--bg)}
+
+/* card density variants */
+.product-card[data-density="editorial"] .pc-img{aspect-ratio:2/3}
+.product-card[data-density="standard"]  .pc-img{aspect-ratio:3/4}
+.product-card[data-density="compact"]   .pc-img{aspect-ratio:1/1}
+.product-card[data-density="compact"]   .pc-desc{display:none}
+
+/* ════════════════════════════════
+   CHAPTER / NAV WIDGET
+════════════════════════════════ */
+#chapter-widget{
+  position:fixed;bottom:28px;left:28px;z-index:4000;
+}
+.cw-trigger{
+  background:var(--bg-2);border:1px solid var(--border-2);
+  border-radius:3px;font-family:var(--mono);font-size:8px;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-2);padding:7px 12px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  transition:border-color .12s,color .12s;
+  backdrop-filter:blur(12px);
+}
+.cw-trigger:hover{border-color:var(--border-2);color:var(--ink)}
+.cw-current{color:var(--accent)}
+.cw-arrow{opacity:.5;font-size:7px}
+.cw-dropdown{
+  position:absolute;bottom:calc(100% + 8px);left:0;
+  background:var(--bg-2);border:1px solid var(--border-2);
+  border-radius:3px;padding:4px;min-width:180px;
+  backdrop-filter:blur(20px);
+  opacity:0;pointer-events:none;transform:translateY(6px);
+  transition:opacity .18s,transform .18s;
+}
+.cw-dropdown.open{opacity:1;pointer-events:all;transform:none}
+.cw-item{
+  display:flex;align-items:center;gap:10px;
+  width:100%;background:none;border:none;cursor:pointer;
+  font-family:var(--mono);font-size:8px;letter-spacing:.08em;
+  color:var(--ink-2);padding:7px 10px;border-radius:2px;
+  text-align:left;text-transform:uppercase;
+  transition:background .1s,color .1s;
+}
+.cw-item:hover{background:var(--accent-l);color:var(--ink)}
+.cw-item.active{color:var(--accent)}
+.cw-item-num{color:var(--ink-3);width:18px;flex-shrink:0}
+.cw-item.active .cw-item-num{color:var(--accent);opacity:.6}
+
+/* ════════════════════════════════
+   NAV WIDGET (prev/next)
+════════════════════════════════ */
+#nav-widget{
+  position:fixed;right:24px;bottom:28px;z-index:4000;
+}
+.nw-shell{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  background:var(--bg-2);border:1px solid var(--border-2);
+  border-radius:3px;padding:8px 7px;
+  backdrop-filter:blur(12px);
+}
+.nw-btn{
+  background:none;border:none;color:var(--ink-3);
+  font-family:var(--mono);font-size:11px;cursor:pointer;
+  padding:4px 8px;border-radius:2px;
+  transition:color .12s,background .12s;line-height:1;
+}
+.nw-btn:hover{color:var(--ink);background:var(--accent-l)}
+.nw-pip{
+  width:1px;height:32px;background:var(--border-2);
+  position:relative;border-radius:1px;overflow:hidden;
+}
+.nw-pip-fill{
+  position:absolute;bottom:0;left:0;right:0;
+  background:var(--accent);border-radius:1px;
+  transition:height .3s ease;height:0%;
+}
+.nw-counter{
+  font-family:var(--mono);font-size:7px;
+  letter-spacing:.06em;color:var(--ink-3);
+}
+
+/* ════════════════════════════════
+   COMPOSE ENGINE PANEL
+════════════════════════════════ */
+#compose-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(8,7,9,.88);backdrop-filter:blur(8px);
+  opacity:0;pointer-events:none;
+  transition:opacity .24s;
+}
+#compose-overlay.open{opacity:1;pointer-events:all}
+#compose-studio{
+  position:absolute;inset:44px 0 0;
+  background:var(--bg-2);border-left:1px solid var(--border-2);
+  display:grid;grid-template-columns:280px 1fr;
+  grid-template-rows:44px 1fr;
+  overflow:hidden;
+}
+#cs-bar{
+  grid-column:1/-1;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;border-bottom:1px solid var(--border-2);
+  background:var(--bg-3);
+}
+#cs-bar-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+#cs-bar-title strong{color:var(--accent)}
+.cs-bar-actions{display:flex;align-items:center;gap:6px}
+.cs-btn{
+  background:none;border:1px solid var(--border-2);border-radius:3px;
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-2);padding:5px 10px;cursor:pointer;
+  transition:border-color .12s,color .12s,background .12s;
+}
+.cs-btn:hover{color:var(--ink);background:var(--accent-l)}
+.cs-btn.accent{border-color:var(--accent);color:var(--accent)}
+.cs-btn.accent:hover{background:var(--accent);color:var(--bg)}
+#cs-left{
+  border-right:1px solid var(--border-2);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#cs-right{
+  overflow-y:auto;scrollbar-width:thin;
+  scrollbar-color:var(--border-2) transparent;
+  padding:20px;
+}
+
+/* Room palette (left rail) */
+.cs-section{padding:16px 14px;border-bottom:1px solid var(--border)}
+.cs-section-title{
+  font-family:var(--mono);font-size:7px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;
+}
+.layout-rack{display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1;padding:12px 14px}
+.layout-rack::-webkit-scrollbar{width:1px}
+.layout-rack::-webkit-scrollbar-thumb{background:var(--border-2)}
+
+.layout-pill{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border:1px solid var(--border);
+  background:none;border-radius:2px;cursor:grab;
+  transition:border-color .12s,background .12s;
+  text-align:left;width:100%;
+}
+.layout-pill:hover{border-color:var(--border-2);background:var(--accent-l)}
+.layout-pill.dragging{opacity:.3;cursor:grabbing}
+.lp-icon{
+  width:36px;height:24px;border:1px solid var(--border-2);
+  border-radius:1px;flex-shrink:0;position:relative;
+  overflow:hidden;background:var(--bg-3);
+}
+/* tiny layout previews */
+.lp-icon[data-preview="manifesto"]::after{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:60%;
+  background:linear-gradient(to right,var(--accent-l),transparent);
+}
+.lp-icon[data-preview="editorial"]::before{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:50%;
+  background:var(--bg-4);
+}
+.lp-icon[data-preview="grid"]::after{
+  content:'';position:absolute;inset:3px;
+  background:repeating-linear-gradient(
+    90deg,var(--border-2) 0,var(--border-2) 1px,transparent 1px,transparent 33%
+  );
+  background-size:33% 100%;
+}
+.lp-icon[data-preview="feature"]::before{
+  content:'';position:absolute;right:4px;top:3px;bottom:3px;width:38%;
+  background:var(--bg-4);border-radius:1px;
+}
+.lp-icon[data-preview="lookbook"]::after{
+  content:'';position:absolute;left:4px;top:3px;bottom:3px;width:5px;
+  background:var(--accent);opacity:.4;border-radius:1px;
+}
+.lp-icon[data-preview="counter"]::after{
+  content:'';position:absolute;inset:4px;
+  border-top:1px solid var(--border-2);
+  border-bottom:1px solid var(--border-2);
+}
+.lp-icon[data-preview="narrative"]::after{
+  content:'';position:absolute;left:5px;top:4px;right:30%;bottom:4px;
+  border-left:1px solid var(--accent);opacity:.5;
+}
+.lp-icon[data-preview="closing"]::after{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:12px;height:12px;border-radius:50%;
+  background:var(--accent-l);border:1px solid var(--accent);opacity:.5;
+}
+.lp-info{flex:1;min-width:0}
+.lp-name{
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-2);display:block;margin-bottom:2px;
+}
+.lp-desc{font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.4}
+.lp-handle{color:var(--ink-3);font-size:9px;flex-shrink:0}
+
+/* Chain builder (right panel) */
+#cs-chain{display:flex;flex-direction:column;gap:8px}
+.cs-chain-empty{
+  font-family:var(--mono);font-size:8px;letter-spacing:.08em;
+  color:var(--ink-3);text-align:center;padding:40px 20px;
+  border:1px dashed var(--border-2);border-radius:2px;
+}
+.chain-node{
+  background:var(--bg-3);border:1px solid var(--border-2);
+  border-radius:2px;overflow:hidden;
+  transition:border-color .12s;
+}
+.chain-node.active-node{border-color:var(--accent)}
+.chain-node-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;cursor:pointer;
+}
+.chain-node-bar:hover .cn-label{color:var(--ink)}
+.cn-num{
+  font-family:var(--mono);font-size:7px;letter-spacing:.12em;
+  color:var(--ink-3);width:18px;flex-shrink:0;
+}
+.cn-label{
+  font-family:var(--mono);font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-2);flex:1;
+  transition:color .1s;
+}
+.cn-layout-badge{
+  font-family:var(--mono);font-size:7px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent);
+  background:var(--accent-l);border:1px solid rgba(200,122,80,.2);
+  padding:2px 7px;border-radius:20px;
+}
+.cn-remove{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-3);font-size:13px;padding:0 2px;
+  transition:color .1s;line-height:1;
+}
+.cn-remove:hover{color:var(--accent)}
+.chain-node-detail{
+  padding:0 12px 12px;display:none;
+  border-top:1px solid var(--border);
+}
+.chain-node-detail.open{display:block}
+.cn-detail-row{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 0;border-bottom:1px solid var(--border);
+}
+.cn-detail-row:last-child{border-bottom:none}
+.cn-detail-label{
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);width:80px;flex-shrink:0;
+}
+.cn-detail-val{flex:1}
+.cn-input{
+  background:none;border:none;outline:none;
+  font-family:var(--mono);font-size:9px;color:var(--ink-2);
+  width:100%;caret-color:var(--accent);
+}
+.cn-input:focus{color:var(--ink)}
+.cn-select{
+  background:var(--bg-4);border:1px solid var(--border-2);
+  color:var(--ink-2);font-family:var(--mono);font-size:8px;
+  padding:3px 7px;border-radius:2px;cursor:pointer;outline:none;
+  transition:border-color .12s;
+}
+.cn-select:focus{border-color:var(--accent)}
+
+/* chain arrows */
+.chain-arrow{
+  display:flex;justify-content:center;align-items:center;
+  color:var(--ink-3);font-size:10px;padding:2px 0;
+  opacity:.5;
+}
+
+/* ════════════════════════════════
+   LIVE PREVIEW WIDGET
+   Floating · draggable · collapsible
+   Renders a live schematic of the
+   daisy-chain as you compose it.
+════════════════════════════════ */
+#preview-widget{
+  position:fixed;
+  z-index:9500;
+  width:var(--pw-w, 280px);
+  min-width:200px;
+  max-width:480px;
+  background:var(--bg);
+  border:1px solid var(--border-2);
+  border-radius:4px;
+  box-shadow:0 20px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(200,122,80,.08);
+  overflow:hidden;
+  /* default position — bottom-right of compose area, above close btn */
+  bottom:28px;
+  right:28px;
+  transition:box-shadow .2s, border-color .2s, height .22s cubic-bezier(.22,1,.36,1), opacity .18s;
+  display:none; /* shown only when compose is open */
+  user-select:none;
+}
+#preview-widget.pw-dragging{
+  transition:box-shadow .1s;
+  box-shadow:0 32px 80px rgba(0,0,0,.9), 0 0 0 1px rgba(200,122,80,.22);
+  border-color:rgba(200,122,80,.3);
+}
+#preview-widget.pw-collapsed{
+  height:38px!important;
+  overflow:hidden;
+}
+
+/* header / drag handle */
+#pw-header{
+  display:flex;align-items:center;gap:0;
+  padding:0 10px;height:38px;
+  background:var(--bg-3);
+  border-bottom:1px solid var(--border-2);
+  cursor:grab;
+  flex-shrink:0;
+}
+#pw-header:active{cursor:grabbing}
+#pw-drag-dots{
+  color:var(--ink-3);font-size:9px;letter-spacing:2px;
+  margin-right:8px;flex-shrink:0;line-height:1;
+  pointer-events:none;
+}
+#pw-title{
+  font-family:var(--mono);font-size:7px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);
+  flex:1;pointer-events:none;
+  display:flex;align-items:center;gap:7px;
+}
+#pw-title .pw-live-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);flex-shrink:0;
+  animation:pwpulse 2.2s ease-in-out infinite;
+}
+@keyframes pwpulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.3;transform:scale(.6)}
+}
+#pw-chain-count{
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  color:var(--accent);background:var(--accent-l);
+  border:1px solid rgba(200,122,80,.2);
+  padding:1px 6px;border-radius:20px;
+}
+.pw-ctrl-btn{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-3);font-size:11px;padding:4px 5px;
+  line-height:1;border-radius:2px;
+  transition:color .1s,background .1s;flex-shrink:0;
+}
+.pw-ctrl-btn:hover{color:var(--ink);background:var(--accent-l)}
+
+/* resize handle — bottom edge */
+#pw-resize{
+  position:absolute;bottom:0;left:0;right:0;height:5px;
+  cursor:ns-resize;z-index:2;
+}
+#pw-resize::after{
+  content:'';position:absolute;
+  bottom:2px;left:50%;transform:translateX(-50%);
+  width:28px;height:2px;border-radius:1px;
+  background:var(--border-2);transition:background .14s;
+}
+#pw-resize:hover::after{background:var(--accent)}
+
+/* resize handle — right edge */
+#pw-resize-r{
+  position:absolute;top:38px;right:0;bottom:5px;width:5px;
+  cursor:ew-resize;z-index:2;
+}
+
+/* body */
+#pw-body{
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;
+  padding:12px 10px 16px;
+  max-height:420px;
+  transition:max-height .22s cubic-bezier(.22,1,.36,1);
+}
+#pw-body::-webkit-scrollbar{width:1px}
+#pw-body::-webkit-scrollbar-thumb{background:var(--border-2)}
+
+/* empty state */
+#pw-empty{
+  padding:24px 12px;text-align:center;
+  font-family:var(--mono);font-size:8px;letter-spacing:.08em;
+  color:var(--ink-3);text-transform:uppercase;line-height:1.8;
+}
+
+/* viewport indicator at top of preview */
+#pw-viewport-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px 10px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:10px;
+}
+.pw-vp-label{
+  font-family:var(--mono);font-size:7px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pw-vp-btns{display:flex;gap:3px;margin-left:auto}
+.pw-vp-btn{
+  background:none;border:1px solid var(--border-2);border-radius:2px;
+  font-family:var(--mono);font-size:6px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+  padding:3px 6px;cursor:pointer;
+  transition:border-color .1s,color .1s,background .1s;
+}
+.pw-vp-btn:hover{border-color:var(--border-2);color:var(--ink);background:var(--accent-l)}
+.pw-vp-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+
+/* the schematic — visual chain render */
+#pw-schematic{display:flex;flex-direction:column;gap:4px}
+
+.pw-room{
+  position:relative;border-radius:2px;overflow:hidden;
+  border:1px solid var(--border-2);
+  background:var(--bg-2);
+  cursor:pointer;
+  transition:border-color .14s,transform .14s;
+  animation:pwRoomIn .22s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes pwRoomIn{
+  from{opacity:0;transform:translateY(-4px)}
+  to{opacity:1;transform:none}
+}
+.pw-room:hover{border-color:rgba(200,122,80,.4);transform:translateX(2px)}
+.pw-room.pw-active-room{border-color:var(--accent)}
+
+/* palette swatch bar on left */
+.pw-room-pal{
+  position:absolute;left:0;top:0;bottom:0;width:3px;
+}
+
+/* layout-specific diagram fills */
+.pw-room-diagram{
+  display:flex;align-items:stretch;
+  padding:6px 8px 6px 14px;gap:6px;
+  min-height:40px;
+}
+
+/* text column in diagram */
+.pw-diag-text{
+  display:flex;flex-direction:column;gap:3px;
+  justify-content:center;flex:1;
+}
+.pw-diag-line{
+  height:2px;border-radius:1px;
+  background:var(--border-2);
+}
+.pw-diag-line.tall{height:6px}
+.pw-diag-line.accent{background:rgba(200,122,80,.4)}
+.pw-diag-line.w-60{width:60%}
+.pw-diag-line.w-80{width:80%}
+.pw-diag-line.w-40{width:40%}
+.pw-diag-line.w-90{width:90%}
+.pw-diag-line.w-70{width:70%}
+.pw-diag-line.w-50{width:50%}
+.pw-diag-line.w-30{width:30%}
+
+/* image block in diagram */
+.pw-diag-img{
+  border-radius:1px;background:var(--bg-4);flex-shrink:0;
+}
+
+/* grid cells */
+.pw-diag-grid{
+  display:grid;gap:3px;flex:1;
+}
+.pw-diag-cell{
+  background:var(--bg-4);border-radius:1px;
+}
+
+/* room meta row */
+.pw-room-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:4px 8px 5px 14px;
+  border-top:1px solid var(--border);
+  background:var(--bg-3);
+}
+.pw-room-name{
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.pw-room-layout{
+  font-family:var(--mono);font-size:6.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent);opacity:.7;
+}
+.pw-room-palette-tag{
+  font-family:var(--mono);font-size:6px;letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:1px 5px;border-radius:10px;
+  border:1px solid var(--border-2);
+  color:var(--ink-3);
+}
+
+/* connector between rooms */
+.pw-connector{
+  display:flex;align-items:center;justify-content:center;
+  gap:6px;padding:1px 0;
+}
+.pw-conn-line{
+  flex:1;height:1px;
+  background:linear-gradient(to right,transparent,var(--border-2),transparent);
+}
+.pw-conn-arrow{
+  color:var(--ink-3);font-size:8px;opacity:.4;
+  font-family:var(--mono);
+}
+
+/* footer bar — store summary */
+#pw-footer{
+  border-top:1px solid var(--border);
+  padding:8px 10px;
+  background:var(--bg-3);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+}
+#pw-footer-summary{
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+  flex:1;
+}
+#pw-footer-summary strong{color:var(--accent)}
+.pw-apply-btn{
+  background:var(--accent);border:none;border-radius:2px;
+  font-family:var(--mono);font-size:7px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--bg);
+  padding:5px 10px;cursor:pointer;flex-shrink:0;
+  transition:opacity .12s,transform .1s;
+}
+.pw-apply-btn:hover{opacity:.85}
+.pw-apply-btn:active{transform:scale(.96)}
+
+/* ════════════════════════════════
+   PALETTE SHIFT SYSTEM
+   Each chapter can declare its
+   own atmosphere token set
+════════════════════════════════ */
+
+/* warm amber — golden */
+.room[data-palette="amber"]{
+  --bg:#0c0800;--bg-2:#120e00;--bg-3:#1a1600;--bg-4:#231e00;
+  --ink:#f8f0d8;--ink-2:#b09060;--ink-3:#4a3818;
+  --accent:#e8a830;--accent-l:rgba(232,168,48,0.09);
+  --border:rgba(248,240,216,0.06);--border-2:rgba(248,240,216,0.11);
+}
+/* slate green — forest */
+.room[data-palette="forest"]{
+  --bg:#060a08;--bg-2:#0a100c;--bg-3:#111710;--bg-4:#181f16;
+  --ink:#e0ece4;--ink-2:#607860;--ink-3:#182418;
+  --accent:#88b878;--accent-l:rgba(136,184,120,0.09);
+  --border:rgba(224,236,228,0.06);--border-2:rgba(224,236,228,0.11);
+}
+/* deep red — editorial */
+.room[data-palette="editorial-red"]{
+  --bg:#0d0203;--bg-2:#130406;--bg-3:#1a0608;--bg-4:#22090b;
+  --ink:#f5d8d8;--ink-2:#a04040;--ink-3:#2a0808;
+  --accent:#e03030;--accent-l:rgba(224,48,48,0.09);
+  --border:rgba(245,216,216,0.06);--border-2:rgba(245,216,216,0.11);
+}
+/* warm linen — light day mode */
+.room[data-palette="linen"]{
+  --bg:#f4f1eb;--bg-2:#ece8e0;--bg-3:#e2ddd4;--bg-4:#d8d2c8;
+  --ink:#1a1816;--ink-2:#52504a;--ink-3:#9a9488;
+  --accent:#b85c32;--accent-l:rgba(184,92,50,0.09);
+  --border:rgba(26,24,22,0.07);--border-2:rgba(26,24,22,0.13);
+}
+.room[data-palette="linen"] .room-bg::after{
+  background:linear-gradient(to right,
+    #f4f1eb 0%,rgba(244,241,235,.88) 30%,rgba(244,241,235,.44) 60%,rgba(244,241,235,.06) 100%
+  ),linear-gradient(to bottom,
+    rgba(244,241,235,.7) 0%,transparent 18%,transparent 78%,#f4f1eb 100%
+  );
+}
+/* midnight blue */
+.room[data-palette="midnight"]{
+  --bg:#030612;--bg-2:#060c1e;--bg-3:#0a1228;--bg-4:#0e1832;
+  --ink:#d8e4f8;--ink-2:#5878b8;--ink-3:#0e1832;
+  --accent:#6a9bcc;--accent-l:rgba(106,155,204,0.09);
+  --border:rgba(216,228,248,0.06);--border-2:rgba(216,228,248,0.11);
+}
+
+/* ════════════════════════════════
+   SIDE PANEL (product detail)
+════════════════════════════════ */
+#panel{
+  position:fixed;top:44px;right:0;bottom:0;width:360px;
+  background:var(--bg-2);border-left:1px solid var(--border-2);
+  display:flex;flex-direction:column;overflow:hidden;z-index:3000;
+  transform:translateX(100%);
+  transition:transform .36s cubic-bezier(.22,1,.36,1);
+}
+#panel.open{transform:none}
+#panel-backdrop{
+  position:fixed;inset:0;z-index:2999;
+  background:rgba(8,7,9,.55);opacity:0;pointer-events:none;
+  transition:opacity .24s;
+}
+#panel-backdrop.show{opacity:1;pointer-events:all}
+.panel-close{
+  position:absolute;top:12px;right:12px;
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-3);font-size:16px;line-height:1;
+  transition:color .1s;z-index:1;padding:4px;
+}
+.panel-close:hover{color:var(--ink)}
+.panel-img{
+  width:100%;aspect-ratio:3/4;background:var(--bg-3);
+  overflow:hidden;position:relative;flex-shrink:0;
+}
+.panel-img img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 8s ease;
+}
+.panel-body{
+  flex:1;overflow-y:auto;padding:20px 18px 28px;
+  scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;
+}
+.panel-meta{
+  font-family:var(--mono);font-size:7px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:8px;
+}
+.panel-name{
+  font-family:var(--disp);font-size:clamp(20px,2.6vw,28px);
+  letter-spacing:-.02em;color:var(--ink);line-height:1.1;
+  margin-bottom:12px;
+}
+.panel-desc{
+  font-family:var(--mono);font-size:10px;line-height:1.8;
+  color:var(--ink-2);margin-bottom:20px;
+}
+.panel-specs{border-top:1px solid var(--border);margin-bottom:20px}
+.panel-spec-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-size:9px;
+}
+.ps-key{color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;font-size:7.5px}
+.ps-val{color:var(--ink-2)}
+.panel-price-row{
+  display:flex;align-items:baseline;gap:10px;margin-bottom:16px;
+}
+.panel-price{
+  font-family:var(--cond);font-weight:700;font-size:32px;
+  letter-spacing:-.02em;color:var(--ink);
+}
+.panel-price-orig{
+  font-family:var(--mono);font-size:11px;
+  text-decoration:line-through;color:var(--ink-3);
+}
+.panel-swatches{display:flex;gap:6px;margin-bottom:18px}
+.swatch{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid transparent;cursor:pointer;
+  transition:border-color .12s,transform .12s;
+}
+.swatch.active{border-color:var(--ink);transform:scale(1.15)}
+.panel-sizes{
+  display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px;
+}
+.size-btn{
+  background:none;border:1px solid var(--border-2);
+  font-family:var(--mono);font-size:8px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-2);
+  padding:6px 10px;cursor:pointer;border-radius:1px;
+  transition:border-color .12s,color .12s,background .12s;
+}
+.size-btn:hover{border-color:var(--border-2);color:var(--ink);background:var(--accent-l)}
+.size-btn.active{border-color:var(--accent);color:var(--ink);background:var(--accent-l)}
+.size-btn.sold-out{opacity:.28;pointer-events:none;text-decoration:line-through}
+.btn-atc{
+  display:block;width:100%;
+  background:var(--accent);border:none;border-radius:2px;
+  font-family:var(--cond);font-weight:700;font-size:14px;
+  letter-spacing:.04em;text-transform:uppercase;
+  color:var(--bg);padding:14px 20px;cursor:pointer;
+  transition:background .15s,transform .1s;margin-bottom:8px;
+}
+.btn-atc:hover{background:color-mix(in srgb,var(--accent) 85%,#fff)}
+.btn-atc:active{transform:scale(.98)}
+.btn-wishlist{
+  display:block;width:100%;
+  background:none;border:1px solid var(--border-2);border-radius:2px;
+  font-family:var(--mono);font-size:8px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-2);
+  padding:10px;cursor:pointer;
+  transition:border-color .12s,color .12s,background .12s;
+}
+.btn-wishlist:hover{border-color:var(--border-2);color:var(--ink);background:var(--accent-l)}
+
+/* ════════════════════════════════
+   CART DRAWER
+════════════════════════════════ */
+#cart{
+  position:fixed;top:44px;right:0;bottom:0;width:340px;
+  background:var(--bg-2);border-left:1px solid var(--border-2);
+  display:flex;flex-direction:column;z-index:6000;
+  transform:translateX(100%);
+  transition:transform .32s cubic-bezier(.22,1,.36,1);
+}
+#cart.open{transform:none}
+#cart-backdrop{
+  position:fixed;inset:0;z-index:5999;
+  background:rgba(8,7,9,.55);opacity:0;pointer-events:none;
+  transition:opacity .24s;
+}
+#cart-backdrop.show{opacity:1;pointer-events:all}
+.cart-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border-2);
+  flex-shrink:0;
+}
+.cart-title{
+  font-family:var(--mono);font-size:8px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+  display:flex;align-items:center;gap:8px;
+}
+.cart-count-badge{
+  background:var(--accent);color:var(--bg);
+  font-size:7px;font-weight:700;
+  width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.cart-close{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-3);font-size:16px;
+  transition:color .1s;padding:2px;
+}
+.cart-close:hover{color:var(--ink)}
+.cart-items{
+  flex:1;overflow-y:auto;padding:14px 18px;
+  scrollbar-width:thin;scrollbar-color:var(--border-2) transparent;
+}
+.cart-item{
+  display:flex;gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--border);
+}
+.ci-img{
+  width:64px;height:80px;border-radius:1px;overflow:hidden;
+  background:var(--bg-3);flex-shrink:0;
+}
+.ci-img img{width:100%;height:100%;object-fit:cover}
+.ci-body{flex:1;min-width:0}
+.ci-name{
+  font-family:var(--serif);font-weight:700;font-size:12px;
+  letter-spacing:-.01em;color:var(--ink);line-height:1.2;
+  margin-bottom:5px;
+}
+.ci-meta{
+  font-family:var(--mono);font-size:8px;
+  color:var(--ink-3);margin-bottom:8px;
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.ci-price{
+  font-family:var(--cond);font-weight:700;font-size:16px;
+  color:var(--ink-2);
+}
+.ci-remove{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-3);font-size:11px;
+  align-self:flex-start;margin-top:4px;
+  transition:color .1s;padding:2px;
+}
+.ci-remove:hover{color:var(--accent)}
+.cart-foot{
+  padding:16px 18px;border-top:1px solid var(--border-2);
+  flex-shrink:0;
+}
+.cart-total-row{
+  display:flex;justify-content:space-between;
+  align-items:baseline;margin-bottom:14px;
+}
+.cart-total-label{
+  font-family:var(--mono);font-size:8px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.cart-total-price{
+  font-family:var(--cond);font-weight:700;font-size:24px;
+  letter-spacing:-.02em;color:var(--ink);
+}
+.btn-checkout{
+  display:block;width:100%;
+  background:var(--accent);border:none;border-radius:2px;
+  font-family:var(--cond);font-weight:700;font-size:14px;
+  letter-spacing:.04em;text-transform:uppercase;
+  color:var(--bg);padding:14px 20px;cursor:pointer;
+  transition:background .15s,transform .1s;
+}
+.btn-checkout:hover{background:color-mix(in srgb,var(--accent) 85%,#fff)}
+.btn-checkout:active{transform:scale(.98)}
+.cart-empty{
+  padding:60px 20px;text-align:center;
+  font-family:var(--mono);font-size:9px;
+  letter-spacing:.1em;color:var(--ink-3);
+  text-transform:uppercase;
+}
+
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:var(--bg-3);border:1px solid var(--border-2);
+  color:var(--ink);font-family:var(--mono);font-size:8px;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:11px 18px;border-radius:2px;z-index:9998;
+  opacity:0;pointer-events:none;white-space:nowrap;
+  transition:opacity .2s,transform .2s;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  display:flex;align-items:center;gap:10px;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast-accent{color:var(--accent)}
+
+/* ════════════════════════════════
+   WOLFIE CREDIT
+════════════════════════════════ */
+#wolfie-credit{
+  position:fixed;bottom:12px;right:24px;
+  font-family:var(--mono);font-size:7px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);opacity:.5;
+  z-index:3999;
+  transition:opacity .2s;
+}
+#wolfie-credit:hover{opacity:1}
+#wolfie-credit a{color:inherit;text-decoration:none}
+#wolfie-credit a:hover{color:var(--accent)}
+
+/* ════════════════════════════════
+   UTILITIES
+════════════════════════════════ */
+.visually-hidden{position:absolute;width:1px;height:1px;clip:rect(0 0 0 0);overflow:hidden}
+.scrollbar-thin{scrollbar-width:thin;scrollbar-color:var(--border-2) transparent}
+.scrollbar-thin::-webkit-scrollbar{width:1px;height:1px}
+.scrollbar-thin::-webkit-scrollbar-thumb{background:var(--border-2)}
+
+/* no-transition on load */
+body.no-transitions *{transition:none!important}
+
+/* ════════════════════════════════
+   DEMO STORE: wolfie.love/shoes
+   "Sable & Thread" — a fine
+   footwear boutique
+   Rooms daisy-chained:
+   manifesto → editorial → grid
+   → feature → narrative
+   → counter → closing
+════════════════════════════════ */
+
+</style>
+</head>
+
+<body class="no-transitions">
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor"></div>
+<!-- PROGRESS -->
+<div id="progress"></div>
+
+<!-- TOPBAR -->
+<header id="topbar">
+  <div class="tb-brand">
+    <span class="diamond">◇</span>
+    <span class="tb-brand-path">wolfie.love /</span>
+    <span class="store-name">Sable &amp; Thread</span>
+  </div>
+  <div class="tb-center">
+    <span class="tb-crumb-node" onclick="scrollToRoom(0)">House</span>
+    <span class="tb-crumb-sep">/</span>
+    <span class="tb-crumb-node" onclick="scrollToRoom(2)">Collection</span>
+    <span class="tb-crumb-sep">/</span>
+    <span class="tb-crumb-node" onclick="scrollToRoom(4)">The Work</span>
+    <span class="tb-crumb-sep">/</span>
+    <span class="tb-crumb-node" onclick="scrollToRoom(6)">Visit</span>
+  </div>
+  <div class="tb-actions">
+    <button class="tb-btn" onclick="openCompose()" title="Layout Compose Engine">⊡ Compose</button>
+    <button class="tb-btn accent" onclick="openCart()">
+      Bag
+      <span class="tb-cart-count" id="tb-cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- PANEL BACKDROP -->
+<div id="panel-backdrop" onclick="closePanel()"></div>
+<!-- CART BACKDROP -->
+<div id="cart-backdrop" onclick="closeCart()"></div>
+
+<!-- ══════════════════════════════════════════
+     ROOM 0 · MANIFESTO
+     The storefront. Come as you are.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="manifesto" data-room="0" data-ch="1" id="room-0">
+  <div class="room-bg">
+    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1800&q=80" alt="Sable & Thread" class="on">
+  </div>
+  <div class="room-inner">
+
+    <span class="s label" data-idx="0" data-ch="1">◇ wolfie.love / shoes</span>
+    <div class="s poster" data-idx="1" data-ch="1">
+      Shoes<br>that<br><span class="ac">last.</span>
+    </div>
+    <p class="s body" data-idx="2" data-ch="1">
+      We make footwear the way it used to be made — by hand, in small runs, from materials that develop character with age. <span class="em">Nothing here is designed to be replaced next season.</span>
+    </p>
+    <p class="s pull" data-idx="3" data-ch="1">
+      "The best shoe you'll ever own is the one you're still wearing in ten years."
+    </p>
+    <div class="s break" data-idx="4"><span class="break-diamond">◇</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ROOM 1 · EDITORIAL
+     The brand story. Two-column depth.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="editorial" data-room="1" data-ch="1" id="room-1">
+  <div class="room-inner">
+    <div class="col-text">
+      <div class="ch-header" data-ch="1">
+        <div class="ch-header-rule"></div>
+        <div class="ch-num">01</div>
+        <div class="ch-title">The Making</div>
+        <div class="ch-sub">Hand-lasted · welt-constructed · built to resoleable</div>
+      </div>
+      <span class="s label" data-idx="5" data-ch="1">The Atelier</span>
+      <p class="s body" data-idx="6" data-ch="1">
+        Every pair begins as a pattern drawn by hand in our workshop in León, Mexico — a city that has been making shoes since the sixteenth century. <span class="em">We work with the same families who taught us.</span>
+      </p>
+      <p class="s body" data-idx="7" data-ch="1">
+        The leather comes from four tanneries, each chosen for a specific quality: the Horween Chromexcel for its pull-up depth, the Wickett &amp; Craig harness for structure, a French calf for dress work, and a Brazilian suede that ages like nothing else.
+      </p>
+      <p class="s pull" data-idx="8" data-ch="1">
+        "We don't do seasons. We do iterations. Each new run is a refinement of what came before."
+      </p>
+      <div class="s break" data-idx="9"><span class="break-diamond">◇</span></div>
+    </div>
+    <div class="col-media">
+      <img src="https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?w=1200&q=80" alt="The workshop">
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ROOM 2 · GRID
+     The collection. Three across.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="grid" data-room="2" data-ch="2" id="room-2">
+  <div class="room-inner">
+    <div class="grid-header">
+      <div class="ch-header revealed" data-ch="2">
+        <div class="ch-header-rule"></div>
+        <div class="ch-num">02</div>
+        <div class="ch-title">The Collection</div>
+        <div class="ch-sub">Autumn run · 24 pairs per model · no restocks this season</div>
+      </div>
+      <span class="s label revealed" data-idx="10" data-ch="2">Current Season</span>
+    </div>
+
+    <div class="product-grid" style="--grid-cols:3">
+
+      <div class="product-card" data-density="editorial"
+           onclick="openPanel('derby','The Furnace Derby','Full-grain vegetable tan · Goodyear welted · Cedar last','$485','https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&q=80','Brown Leather','8 · 8.5 · 9 · 9.5 · 10 · 10.5 · 11')">
+        <div class="pc-img">
+          <img src="https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&q=80" alt="The Furnace Derby" loading="lazy">
+          <span class="pc-badge">New</span>
+        </div>
+        <div class="pc-body">
+          <span class="pc-meta">Derby · Brown Leather</span>
+          <div class="pc-name">The Furnace Derby</div>
+          <p class="pc-desc">Full-grain veg tan, open-lacing, Goodyear welted to an asymmetric cedar last.</p>
+          <div class="pc-foot">
+            <span class="pc-price">$485</span>
+            <button class="pc-add" onclick="event.stopPropagation();addToCart('The Furnace Derby','$485')">+ Bag</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" data-density="editorial"
+           onclick="openPanel('chelsea','The Moor Chelsea','Suede · elastic gusset · leather sole · resoleable','$520','https://images.unsplash.com/photo-1561861422-a549073e547a?w=800&q=80','Tan Suede','7 · 7.5 · 8 · 8.5 · 9 · 9.5 · 10')">
+        <div class="pc-img">
+          <img src="https://images.unsplash.com/photo-1561861422-a549073e547a?w=800&q=80" alt="The Moor Chelsea" loading="lazy">
+        </div>
+        <div class="pc-body">
+          <span class="pc-meta">Chelsea · Tan Suede</span>
+          <div class="pc-name">The Moor Chelsea</div>
+          <p class="pc-desc">Hand-stitched elastic gusset, single leather sole. Made to be resoled, repeatedly.</p>
+          <div class="pc-foot">
+            <span class="pc-price">$520</span>
+            <button class="pc-add" onclick="event.stopPropagation();addToCart('The Moor Chelsea','$520')">+ Bag</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" data-density="editorial"
+           onclick="openPanel('oxford','The Sable Oxford','Black calf · closed-lacing · single leather sole','$545','https://images.unsplash.com/photo-1543508282-6319a3e2621f?w=800&q=80','Black Calf','7 · 7.5 · 8 · 8.5 · 9 · 9.5 · 10 · 10.5')">
+        <div class="pc-img">
+          <img src="https://images.unsplash.com/photo-1543508282-6319a3e2621f?w=800&q=80" alt="The Sable Oxford" loading="lazy">
+        </div>
+        <div class="pc-body">
+          <span class="pc-meta">Oxford · Black Calf</span>
+          <div class="pc-name">The Sable Oxford</div>
+          <p class="pc-desc">Closed-lacing over a slim last. French calf, mirror-polished toe cap, triple-stitched welt.</p>
+          <div class="pc-foot">
+            <span class="pc-price">$545</span>
+            <button class="pc-add" onclick="event.stopPropagation();addToCart('The Sable Oxford','$545')">+ Bag</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" data-density="standard"
+           onclick="openPanel('boot','The Foundry Boot','Harness leather · commando sole · Goodyear welted','$620','https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80','Tan Harness','8 · 8.5 · 9 · 9.5 · 10 · 10.5 · 11 · 11.5')">
+        <div class="pc-img">
+          <img src="https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80" alt="The Foundry Boot" loading="lazy">
+        </div>
+        <div class="pc-body">
+          <span class="pc-meta">Boot · Tan Harness</span>
+          <div class="pc-name">The Foundry Boot</div>
+          <p class="pc-desc">Wickett &amp; Craig harness, commando sole, 7-inch shaft. The one people keep for decades.</p>
+          <div class="pc-foot">
+            <span class="pc-price">$620</span>
+            <button class="pc-add" onclick="event.stopPropagation();addToCart('The Foundry Boot','$620')">+ Bag</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" data-density="standard"
+           onclick="openPanel('loafer','The Thread Loafer','Horween Chromexcel · hand-stitched apron · leather sole','$465','https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&q=80','Dark Brown','7 · 7.5 · 8 · 8.5 · 9 · 9.5 · 10')">
+        <div class="pc-img">
+          <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&q=80" alt="The Thread Loafer" loading="lazy">
+        </div>
+        <div class="pc-body">
+          <span class="pc-meta">Loafer · Dark Brown</span>
+          <div class="pc-name">The Thread Loafer</div>
+          <p class="pc-desc">Apron-stitched in Horween Chromexcel — the pull-up leather that deepens with every wear.</p>
+          <div class="pc-foot">
+            <span class="pc-price">$465</span>
+            <button class="pc-add" onclick="event.stopPropagation();addToCart('The Thread Loafer','$465')">+ Bag</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-card" data-density="standard"
+           onclick="openPanel('monk','The Morro Monk','Double-monk · dark cognac · burnished toe','$510','https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80','Dark Cognac','7.5 · 8 · 8.5 · 9 · 9.5 · 10')">
+        <div class="pc-img">
+          <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?w=800&q=80" alt="The Morro Monk" loading="lazy">
+        </div>
+        <div class="pc-body">
+          <span class="pc-meta">Monk Strap · Dark Cognac</span>
+          <div class="pc-name">The Morro Monk</div>
+          <p class="pc-desc">Double monk buckles in solid brass, burnished by hand at the toe and heel. A statement that doesn't shout.</p>
+          <div class="pc-foot">
+            <span class="pc-price">$510</span>
+            <button class="pc-add" onclick="event.stopPropagation();addToCart('The Morro Monk','$510')">+ Bag</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /product-grid -->
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ROOM 3 · FEATURE
+     The hero product. Full presence.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="feature" data-room="3" data-ch="3" data-palette="amber" id="room-3">
+  <div class="room-inner">
+    <div class="feature-media">
+      <img src="https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=1200&q=80" alt="The Foundry Boot">
+    </div>
+    <div class="feature-text">
+      <div class="ch-header revealed" data-ch="3">
+        <div class="ch-header-rule"></div>
+        <div class="ch-num">03</div>
+        <div class="ch-title">The Foundry Boot</div>
+        <div class="ch-sub">The flagship · 24 in this run · built for thirty years</div>
+      </div>
+      <span class="s label revealed" data-idx="11" data-ch="3">Editor's Pick</span>
+      <div class="s poster" data-idx="12" data-ch="3" style="font-size:clamp(40px,5vw,72px)">
+        Built<br>for the<br><span class="ac">long walk.</span>
+      </div>
+      <p class="s body" data-idx="13" data-ch="3">
+        Wickett &amp; Craig harness leather — the same tannery that's been running since 1867. Hand-lasted on a wide round toe. Commando sole for grip. The shaft is seven inches, single-piece, no seam at the back.
+      </p>
+      <p class="s body" data-idx="14" data-ch="3">
+        It will look better in five years than it does today. <span class="em">That's what vegetable tanning does to leather when you care for it.</span> We include a care kit, and we resole them for life.
+      </p>
+      <div class="s spec" data-idx="15" data-ch="3">
+        <span class="spec-k">Construction</span>
+        <span class="spec-sep">::</span>
+        <span class="spec-v">Goodyear Welt · hand-lasted · resoleable</span>
+      </div>
+      <div class="s spec" data-idx="16" data-ch="3">
+        <span class="spec-k">Upper</span>
+        <span class="spec-sep">::</span>
+        <span class="spec-v">Wickett &amp; Craig harness · natural tan · 3mm</span>
+      </div>
+      <div class="s spec" data-idx="17" data-ch="3">
+        <span class="spec-k">Sole</span>
+        <span class="spec-sep">::</span>
+        <span class="spec-v">Vibram 132 commando · lugged · oil-resistant</span>
+      </div>
+      <div class="s spec" data-idx="18" data-ch="3">
+        <span class="spec-k">Run</span>
+        <span class="spec-sep">::</span>
+        <span class="spec-v">24 pairs · sizes 8–11.5 · <span style="color:var(--accent)">11 remaining</span></span>
+      </div>
+      <div class="s break" data-idx="19"><span class="break-diamond">◇</span></div>
+      <button class="btn-atc s" data-idx="20" style="margin-top:8px" onclick="openPanel('boot','The Foundry Boot','Harness leather · commando sole · Goodyear welted','$620','https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80','Tan Harness','8 · 8.5 · 9 · 9.5 · 10 · 10.5 · 11 · 11.5')">
+        Choose Your Size →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ROOM 4 · NARRATIVE
+     The brand essay. Long-read depth.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="narrative" data-room="4" data-ch="4" id="room-4">
+  <div class="room-bg">
+    <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=1800&q=80" alt="The workshop" class="on" style="object-position:center 60%">
+  </div>
+  <div class="room-inner">
+    <div class="ch-header revealed" data-ch="4">
+      <div class="ch-header-rule"></div>
+      <div class="ch-num">04</div>
+      <div class="ch-title">Why We Make Them</div>
+      <div class="ch-sub">The long version · worth reading · about eight minutes</div>
+    </div>
+    <span class="s label" data-idx="21" data-ch="4">The Essay</span>
+    <p class="s body" data-idx="22" data-ch="4">
+      There's a specific kind of grief that happens when a well-made thing is thrown away. We felt it enough times that we decided to do something about it.
+    </p>
+    <p class="s body" data-idx="23" data-ch="4">
+      Fast fashion's invasion of footwear happened slowly, then all at once. The same disruption that hit clothing — speed, cheapness, disposability — hit shoes harder, because shoes require more craft to make well. When the price points collapsed, the craft had to go first.
+    </p>
+    <p class="s pull" data-idx="24" data-ch="4">
+      "A shoe resoled is a shoe that didn't end up in a landfill. Over a lifetime, that's a dozen pairs that didn't get made."
+    </p>
+    <p class="s body" data-idx="25" data-ch="4">
+      The Goodyear welt construction we use was developed in 1869. It hasn't been improved because it doesn't need to be. A strip of leather — the welt — connects the upper to the insole and the outsole. When the sole wears out, you remove the stitching, replace the sole, and restitch it. <span class="em">The upper is untouched. The break-in is already done.</span>
+    </p>
+    <p class="s body" data-idx="26" data-ch="4">
+      We offer lifetime resoling. Not as a marketing promise. As a business model. When you resole, we see you again. We remember what you ordered. We ask how the leather is coming in. We talk about the walk.
+    </p>
+    <div class="s break" data-idx="27"><span class="break-diamond">◇</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ROOM 5 · COUNTER
+     The spec sheet. Detailed, structural.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="counter" data-room="5" data-ch="5" id="room-5">
+  <div class="room-inner">
+    <div class="ch-header revealed" data-ch="5">
+      <div class="ch-header-rule"></div>
+      <div class="ch-num">05</div>
+      <div class="ch-title">The Materials</div>
+      <div class="ch-sub">Every component named · every source named · no shortcuts</div>
+    </div>
+    <span class="s label revealed" data-idx="28" data-ch="5">Materials Spec</span>
+
+    <div class="s spec" data-idx="29" data-ch="5">
+      <span class="spec-k">Horween Chromexcel</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Chicago, IL · chrome-tan with hot-stuffed wax finish · pull-up character</span>
+    </div>
+    <div class="s spec" data-idx="30" data-ch="5">
+      <span class="spec-k">Wickett &amp; Craig Harness</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Curwensville, PA · vegetable tan · 3mm · 1867-running tannery</span>
+    </div>
+    <div class="s spec" data-idx="31" data-ch="5">
+      <span class="spec-k">French Box Calf</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Tanneries du Puy, France · drum-dyed · mirror-finish capable</span>
+    </div>
+    <div class="s spec" data-idx="32" data-ch="5">
+      <span class="spec-k">Brazilian Split Suede</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Franca, Brazil · buffed reverse grain · ages to rich nap</span>
+    </div>
+    <div class="s spec" data-idx="33" data-ch="5">
+      <span class="spec-k">Thread</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Coats Nylbond · braided polyester · 138 weight · UV-resistant</span>
+    </div>
+    <div class="s spec" data-idx="34" data-ch="5">
+      <span class="spec-k">Last</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">CNC-milled beech wood · hand-finished · stored with every order</span>
+    </div>
+    <div class="s spec" data-idx="35" data-ch="5">
+      <span class="spec-k">Sole Options</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Leather single/double · Vibram 132 commando · Dainite studded</span>
+    </div>
+    <div class="s spec" data-idx="36" data-ch="5">
+      <span class="spec-k">Welt</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Storm welt standard · closed channel stitching · 8 stitches/inch</span>
+    </div>
+    <div class="s spec" data-idx="37" data-ch="5">
+      <span class="spec-k">Resoling</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Free · lifetime · ship to León · returned in 14 days</span>
+    </div>
+    <div class="s break" data-idx="38"><span class="break-diamond">◇</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     ROOM 6 · CLOSING
+     Come in. The final scene.
+══════════════════════════════════════════ -->
+<section class="room" data-layout="closing" data-room="6" data-ch="6" id="room-6">
+  <div class="room-bg">
+    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1800&q=80" alt="Sable & Thread" class="on" style="opacity:.4">
+  </div>
+  <div class="room-inner">
+    <span class="s label" data-idx="39" data-ch="6">◇ Sable &amp; Thread</span>
+    <div class="s poster" data-idx="40" data-ch="6" style="font-size:clamp(52px,7vw,96px)">
+      The pair<br>you keep<br><span class="ac">forever.</span>
+    </div>
+    <p class="s body" data-idx="41" data-ch="6" style="margin:0 auto 28px;max-width:440px">
+      We make 24 pairs of each model per run. No restocks. When they're gone, we study what worked and refine. The next run is better.
+    </p>
+    <div class="s" data-idx="42" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-atc" style="max-width:200px" onclick="scrollToRoom(2)">Shop the Collection →</button>
+      <button class="btn-wishlist" style="max-width:200px">Join the List</button>
+    </div>
+    <div class="s spec" data-idx="43" style="max-width:440px;margin:28px auto 0;text-align:left" data-ch="6">
+      <span class="spec-k">Address</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">212 Thread Street · León, GTO</span>
+    </div>
+    <div class="s spec" data-idx="44" style="max-width:440px;margin:0 auto" data-ch="6">
+      <span class="spec-k">Hours</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Mon – Sat, 10am – 7pm</span>
+    </div>
+    <div class="s spec" data-idx="45" style="max-width:440px;margin:0 auto 0" data-ch="6">
+      <span class="spec-k">Platform</span>
+      <span class="spec-sep">::</span>
+      <span class="spec-v">Built on <a href="https://wolfie.love" target="_blank" style="color:var(--accent);text-decoration:none">wolfie.love</a> · the sentence is the interface</span>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER WIDGET -->
+<div id="chapter-widget">
+  <button class="cw-trigger" onclick="toggleChapterMenu()">
+    <span style="font-size:8px;color:var(--ink-3)">Room</span>
+    <span style="width:1px;height:10px;background:var(--border-2)"></span>
+    <span class="cw-current" id="cw-current">The House</span>
+    <span class="cw-arrow">▾</span>
+  </button>
+  <div class="cw-dropdown" id="cw-dropdown">
+    <button class="cw-item active" onclick="scrollToRoom(0);toggleChapterMenu()"><span class="cw-item-num">00</span>The House</button>
+    <button class="cw-item" onclick="scrollToRoom(1);toggleChapterMenu()"><span class="cw-item-num">01</span>The Making</button>
+    <button class="cw-item" onclick="scrollToRoom(2);toggleChapterMenu()"><span class="cw-item-num">02</span>The Collection</button>
+    <button class="cw-item" onclick="scrollToRoom(3);toggleChapterMenu()"><span class="cw-item-num">03</span>The Foundry Boot</button>
+    <button class="cw-item" onclick="scrollToRoom(4);toggleChapterMenu()"><span class="cw-item-num">04</span>Why We Make Them</button>
+    <button class="cw-item" onclick="scrollToRoom(5);toggleChapterMenu()"><span class="cw-item-num">05</span>The Materials</button>
+    <button class="cw-item" onclick="scrollToRoom(6);toggleChapterMenu()"><span class="cw-item-num">06</span>Come In</button>
+  </div>
+</div>
+
+<!-- NAV WIDGET -->
+<div id="nav-widget">
+  <div class="nw-shell">
+    <button class="nw-btn" id="nw-prev" onclick="navPrev()">↑</button>
+    <div class="nw-pip"><div class="nw-pip-fill" id="nw-pip"></div></div>
+    <span class="nw-counter" id="nw-counter">01/38</span>
+    <button class="nw-btn" id="nw-next" onclick="navNext()">↓</button>
+  </div>
+</div>
+
+<!-- SIDE PANEL (product detail) -->
+<div id="panel">
+  <button class="panel-close" onclick="closePanel()">✕</button>
+  <div class="panel-img">
+    <img id="panel-img" src="" alt="">
+  </div>
+  <div class="panel-body">
+    <div class="panel-meta" id="panel-meta"></div>
+    <div class="panel-name" id="panel-name"></div>
+    <div class="panel-desc" id="panel-desc"></div>
+    <div class="panel-price-row">
+      <span class="panel-price" id="panel-price"></span>
+    </div>
+    <div class="panel-swatches" id="panel-swatches"></div>
+    <div class="panel-sizes" id="panel-sizes"></div>
+    <button class="btn-atc" onclick="panelAddToCart()">Add to Bag</button>
+    <button class="btn-wishlist">Save for Later</button>
+    <div class="panel-specs" style="margin-top:20px">
+      <div class="panel-spec-row"><span class="ps-key">Construction</span><span class="ps-val">Goodyear Welt · resoleable</span></div>
+      <div class="panel-spec-row"><span class="ps-key">Care</span><span class="ps-val">Leather conditioner · cedar trees</span></div>
+      <div class="panel-spec-row"><span class="ps-key">Shipping</span><span class="ps-val">Free · 7–10 days</span></div>
+      <div class="panel-spec-row"><span class="ps-key">Returns</span><span class="ps-val">30 days · unworn</span></div>
+      <div class="panel-spec-row"><span class="ps-key">Resoling</span><span class="ps-val">Free · lifetime</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div id="cart">
+  <div class="cart-header">
+    <div class="cart-title">
+      Your Bag
+      <span class="cart-count-badge" id="cart-badge">0</span>
+    </div>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">Your bag is empty.<br>Nothing stays empty for long.</div>
+  </div>
+  <div class="cart-foot" id="cart-foot" style="display:none">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-price" id="cart-total">$0</span>
+    </div>
+    <button class="btn-checkout">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <span class="toast-accent">◇</span>
+  <span id="toast-msg">Added to bag</span>
+  <button style="background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:12px;padding:0 2px;margin-left:8px" onclick="hideToast()">✕</button>
+</div>
+
+<!-- ════════════════════════════════
+     COMPOSE ENGINE OVERLAY
+════════════════════════════════ -->
+<div id="compose-overlay">
+  <div id="compose-studio">
+    <div id="cs-bar">
+      <div id="cs-bar-title">⊡ wolfie.love / <strong>Layout Compose Engine</strong> · Daisy-chain rooms into a bespoke store</div>
+      <div class="cs-bar-actions">
+        <button class="cs-btn" onclick="closeCompose()">✕ Close</button>
+        <button class="cs-btn accent" onclick="applyChain()">▶ Apply Chain</button>
+      </div>
+    </div>
+    <div id="cs-left">
+      <div class="cs-section">
+        <div class="cs-section-title">Room Presets · click to chain →</div>
+      </div>
+      <div class="layout-rack">
+
+        <button class="layout-pill" data-layout="manifesto" onclick="addToChain('manifesto','Opening scene · cinematic · full-bleed')">
+          <div class="lp-icon" data-preview="manifesto"></div>
+          <div class="lp-info"><span class="lp-name">Manifesto</span><span class="lp-desc">Opening scene · poster text · full-bleed image · the hook</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="editorial" onclick="addToChain('editorial','Brand story · two-column · image right')">
+          <div class="lp-icon" data-preview="editorial"></div>
+          <div class="lp-info"><span class="lp-name">Editorial</span><span class="lp-desc">Two-column · brand story left · image depth right</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="grid" onclick="addToChain('grid','Product mosaic · configurable columns')">
+          <div class="lp-icon" data-preview="grid"></div>
+          <div class="lp-info"><span class="lp-name">Grid</span><span class="lp-desc">Product mosaic · 1–3 col · card density options · the browse room</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="feature" onclick="addToChain('feature','Hero product · full presence')">
+          <div class="lp-icon" data-preview="feature"></div>
+          <div class="lp-info"><span class="lp-name">Feature</span><span class="lp-desc">Hero product · large image · spec detail · the showcase</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="lookbook" onclick="addToChain('lookbook','Immersive scroll · sticky image · walking depth')">
+          <div class="lp-icon" data-preview="lookbook"></div>
+          <div class="lp-info"><span class="lp-name">Lookbook</span><span class="lp-desc">Immersive scroll · sticky atmosphere · walking depth · the mood room</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="narrative" onclick="addToChain('narrative','Long-read · essay · brand depth')">
+          <div class="lp-icon" data-preview="narrative"></div>
+          <div class="lp-info"><span class="lp-name">Narrative</span><span class="lp-desc">Long-read essay · brand philosophy · the depth room</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="counter" onclick="addToChain('counter','Specs · compare · the technical room')">
+          <div class="lp-icon" data-preview="counter"></div>
+          <div class="lp-info"><span class="lp-name">Counter</span><span class="lp-desc">Spec sheet · materials · compare · the technical room</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+        <button class="layout-pill" data-layout="closing" onclick="addToChain('closing','CTA · final scene · the door')">
+          <div class="lp-icon" data-preview="closing"></div>
+          <div class="lp-info"><span class="lp-name">Closing</span><span class="lp-desc">CTA · contact · final scene · the door out</span></div>
+          <span class="lp-handle">⋮</span>
+        </button>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+          <div class="cs-section-title" style="padding:0 0 10px">Atmosphere Palettes</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <button class="layout-pill" onclick="showPaletteNote('default')">
+              <div class="lp-icon" style="background:var(--bg-3)"></div>
+              <div class="lp-info"><span class="lp-name">Default · Night</span><span class="lp-desc">Warm dark ground · terracotta accent</span></div>
+            </button>
+            <button class="layout-pill" onclick="showPaletteNote('amber')">
+              <div class="lp-icon" style="background:#120e00;border-color:rgba(232,168,48,.3)"></div>
+              <div class="lp-info"><span class="lp-name">Amber · Golden</span><span class="lp-desc">Deep amber ground · golden accent</span></div>
+            </button>
+            <button class="layout-pill" onclick="showPaletteNote('forest')">
+              <div class="lp-icon" style="background:#0a100c;border-color:rgba(136,184,120,.3)"></div>
+              <div class="lp-info"><span class="lp-name">Forest · Slate</span><span class="lp-desc">Hunting green · sage accent</span></div>
+            </button>
+            <button class="layout-pill" onclick="showPaletteNote('midnight')">
+              <div class="lp-icon" style="background:#060c1e;border-color:rgba(106,155,204,.3)"></div>
+              <div class="lp-info"><span class="lp-name">Midnight · Blue</span><span class="lp-desc">Deep blue · steel accent</span></div>
+            </button>
+            <button class="layout-pill" onclick="showPaletteNote('linen')">
+              <div class="lp-icon" style="background:#f4f1eb;border-color:rgba(184,92,50,.3)"></div>
+              <div class="lp-info"><span class="lp-name">Linen · Day</span><span class="lp-desc">Warm off-white · brick accent</span></div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="cs-right">
+      <div style="margin-bottom:16px">
+        <div style="font-family:var(--mono);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px">
+          Current Chain · <span id="cs-chain-count">0</span> rooms
+        </div>
+        <div id="cs-chain">
+          <div class="cs-chain-empty">
+            Click any room preset on the left to begin your chain.<br><br>
+            Each room is a section with a proven layout, optimised for its depth of field. Daisy-chain them in any order. The live preview widget shows your chain in real time.
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border-2);padding-top:16px;margin-top:8px">
+        <div style="font-family:var(--mono);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px">
+          Reading Experience · Sentence Type Reference
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:2px">
+            <span style="font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid rgba(200,122,80,.2);padding:2px 6px;border-radius:20px;flex-shrink:0;min-width:52px;text-align:center">[poster]</span>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.5">Bold hero declaration · cinematic upper · the first thing they read</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:2px">
+            <span style="font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid rgba(200,122,80,.2);padding:2px 6px;border-radius:20px;flex-shrink:0;min-width:52px;text-align:center">[body]</span>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.5">Narrative prose · where the brand voice lives · the medium layer</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:2px">
+            <span style="font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid rgba(200,122,80,.2);padding:2px 6px;border-radius:20px;flex-shrink:0;min-width:52px;text-align:center">[pull]</span>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.5">Inset quote · editorial weight · the sentence that earns a rest</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:2px">
+            <span style="font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid rgba(200,122,80,.2);padding:2px 6px;border-radius:20px;flex-shrink:0;min-width:52px;text-align:center">[spec]</span>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.5">Key :: Value · structured data with narrative context · the proof layer</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);border-radius:2px">
+            <span style="font-family:var(--mono);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid rgba(200,122,80,.2);padding:2px 6px;border-radius:20px;flex-shrink:0;min-width:52px;text-align:center">[label]</span>
+            <span style="font-family:var(--mono);font-size:8px;color:var(--ink-3);line-height:1.5">Section label · small caps accent · the wayfinder</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WOLFIE CREDIT -->
+<div id="wolfie-credit">
+  <a href="https://wolfie.love" target="_blank">◇ wolfie.love</a>
+</div>
+
+<!-- ════════════════════════════════
+     LIVE PREVIEW WIDGET
+     Floats over compose studio.
+     Draggable · collapsible · resizable.
+════════════════════════════════ -->
+<div id="preview-widget" role="complementary" aria-label="Live chain preview">
+  <div id="pw-header">
+    <span id="pw-drag-dots">· · ·</span>
+    <div id="pw-title">
+      <span class="pw-live-dot"></span>
+      Live Preview
+      <span id="pw-chain-count" style="display:none">0</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:2px;margin-left:auto">
+      <button class="pw-ctrl-btn" id="pw-viewport-toggle" title="Toggle viewport" onclick="cycleViewport()" style="font-size:9px;letter-spacing:.04em">□</button>
+      <button class="pw-ctrl-btn" id="pw-collapse-btn" title="Collapse / expand" onclick="togglePreviewCollapse()">−</button>
+      <button class="pw-ctrl-btn" title="Close preview" onclick="closePreviewWidget()" style="font-size:10px">✕</button>
+    </div>
+  </div>
+
+  <div id="pw-body">
+    <div id="pw-viewport-bar" style="display:none">
+      <span class="pw-vp-label">Viewport</span>
+      <div class="pw-vp-btns">
+        <button class="pw-vp-btn active" data-vp="desktop" onclick="setViewport('desktop',this)">Desktop</button>
+        <button class="pw-vp-btn" data-vp="tablet" onclick="setViewport('tablet',this)">Tablet</button>
+        <button class="pw-vp-btn" data-vp="mobile" onclick="setViewport('mobile',this)">Mobile</button>
+      </div>
+    </div>
+
+    <div id="pw-empty">
+      Add rooms to your chain<br>to see a live preview here.
+    </div>
+
+    <div id="pw-schematic"></div>
+  </div>
+
+  <div id="pw-footer" style="display:none">
+    <div id="pw-footer-summary">–</div>
+    <button class="pw-apply-btn" onclick="applyChain()">Apply →</button>
+  </div>
+
+  <!-- resize handles -->
+  <div id="pw-resize"></div>
+  <div id="pw-resize-r"></div>
+</div>
+
+<script>
+/* ════════════════════════════════
+   ENGINE CORE
+════════════════════════════════ */
+
+// Remove no-transitions on load
+setTimeout(()=>document.body.classList.remove('no-transitions'),60);
+
+// CURSOR
+const CUR = document.getElementById('cursor');
+let curVis=false;
+document.addEventListener('mousemove',e=>{
+  CUR.style.left=e.clientX+'px';CUR.style.top=e.clientY+'px';
+  if(!curVis){CUR.classList.add('vis');curVis=true;}
+});
+document.addEventListener('touchstart',()=>{CUR.classList.remove('vis');curVis=false;},{passive:true});
+document.querySelectorAll('a,button,.product-card,.layout-pill,.cw-item,.chain-node-bar,.size-btn,.swatch,.pc-add,.btn-atc,.btn-wishlist').forEach(el=>{
+  el.addEventListener('mouseenter',()=>CUR.classList.add('big'));
+  el.addEventListener('mouseleave',()=>CUR.classList.remove('big'));
+});
+
+/* ────────────────────────
+   SENTENCE REVEAL ENGINE
+   The heart of wolfie.love:
+   sentences reveal on scroll.
+──────────────────────── */
+const sentences = Array.from(document.querySelectorAll('.s'));
+let currentSentence = 0;
+
+const sentenceObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('revealed');
+    }
+  });
+},{rootMargin:'-10% 0px -10% 0px',threshold:0.1});
+
+sentences.forEach(s=>sentenceObserver.observe(s));
+
+// Progress + nav counter
+window.addEventListener('scroll',()=>{
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = Math.round((window.scrollY/total)*100);
+  document.getElementById('progress').style.width=pct+'%';
+  document.getElementById('nw-pip').style.height=pct+'%';
+  updateCurrentRoom();
+},{ passive:true });
+
+/* ────────────────────────
+   ROOM NAVIGATION
+──────────────────────── */
+const rooms = Array.from(document.querySelectorAll('.room'));
+const roomNames = ['The House','The Making','The Collection','The Foundry Boot','Why We Make Them','The Materials','Come In'];
+let currentRoom = 0;
+
+function updateCurrentRoom(){
+  const mid = window.scrollY + window.innerHeight/2;
+  rooms.forEach((r,i)=>{
+    const top = r.offsetTop;
+    const bot = top + r.offsetHeight;
+    if(mid >= top && mid < bot){
+      if(currentRoom!==i){
+        currentRoom=i;
+        document.getElementById('cw-current').textContent=roomNames[i]||'';
+        document.querySelectorAll('.cw-item').forEach((el,j)=>{
+          el.classList.toggle('active',j===i);
+        });
+      }
+    }
+  });
+  const revealed = sentences.filter(s=>s.classList.contains('revealed')).length;
+  document.getElementById('nw-counter').textContent=
+    String(Math.min(revealed,sentences.length)).padStart(2,'0')+'/'+
+    String(sentences.length).padStart(2,'0');
+}
+
+function scrollToRoom(n){
+  const r=document.getElementById('room-'+n);
+  if(r) r.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function navPrev(){scrollToRoom(Math.max(0,currentRoom-1))}
+function navNext(){scrollToRoom(Math.min(rooms.length-1,currentRoom+1))}
+
+/* ────────────────────────
+   CHAPTER MENU
+──────────────────────── */
+function toggleChapterMenu(){
+  document.getElementById('cw-dropdown').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  const w=document.getElementById('chapter-widget');
+  if(!w.contains(e.target)) document.getElementById('cw-dropdown').classList.remove('open');
+});
+
+/* ────────────────────────
+   PRODUCT PANEL
+──────────────────────── */
+let panelProduct = {};
+
+function openPanel(id, name, desc, price, img, color, sizes){
+  panelProduct = {id,name,desc,price,img,color,sizes};
+  document.getElementById('panel-img').src = img;
+  document.getElementById('panel-meta').textContent = color;
+  document.getElementById('panel-name').textContent = name;
+  document.getElementById('panel-desc').textContent = desc;
+  document.getElementById('panel-price').textContent = price;
+
+  // sizes
+  const sizeEl = document.getElementById('panel-sizes');
+  sizeEl.innerHTML = sizes.split(' · ').map(s=>
+    `<button class="size-btn" onclick="this.parentElement.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${s}</button>`
+  ).join('');
+
+  // swatches (demo)
+  const swEl = document.getElementById('panel-swatches');
+  swEl.innerHTML = `
+    <span class="swatch active" style="background:#8b6044" title="Tan"></span>
+    <span class="swatch" style="background:#2a1a0e" title="Dark Brown" onclick="this.parentElement.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));this.classList.add('active')"></span>
+    <span class="swatch" style="background:#1a1a1a" title="Black" onclick="this.parentElement.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));this.classList.add('active')"></span>
+  `;
+
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('panel-backdrop').classList.add('show');
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('panel-backdrop').classList.remove('show');
+}
+
+function panelAddToCart(){
+  const sel = document.querySelector('#panel-sizes .size-btn.active');
+  const size = sel ? sel.textContent : '';
+  addToCart(panelProduct.name + (size?' · '+size:''), panelProduct.price, panelProduct.img);
+  closePanel();
+}
+
+/* ────────────────────────
+   CART
+──────────────────────── */
+let cartItems = [];
+let cartOpen = false;
+
+function addToCart(name, price, img=''){
+  cartItems.push({name, price, img, id: Date.now()});
+  renderCart();
+  showToast('◇ '+name+' · added to bag');
+}
+
+function removeFromCart(id){
+  cartItems = cartItems.filter(i=>i.id!==id);
+  renderCart();
+}
+
+function renderCart(){
+  const count = cartItems.length;
+  // topbar badge
+  const badge = document.getElementById('tb-cart-count');
+  badge.textContent = count;
+  badge.classList.toggle('show', count>0);
+  // cart badge
+  document.getElementById('cart-badge').textContent = count;
+  // items
+  const el = document.getElementById('cart-items');
+  if(count===0){
+    el.innerHTML='<div class="cart-empty">Your bag is empty.<br>Nothing stays empty for long.</div>';
+    document.getElementById('cart-foot').style.display='none';
+  } else {
+    el.innerHTML = cartItems.map(item=>`
+      <div class="cart-item">
+        ${item.img?`<div class="ci-img"><img src="${item.img.replace('w=800','w=200')}" alt="${item.name}"></div>`:'<div class="ci-img" style="background:var(--bg-3)"></div>'}
+        <div class="ci-body">
+          <div class="ci-name">${item.name}</div>
+          <div class="ci-price">${item.price}</div>
+        </div>
+        <button class="ci-remove" onclick="removeFromCart(${item.id})">✕</button>
+      </div>
+    `).join('');
+    // total
+    const total = cartItems.reduce((sum,i)=>{
+      return sum + parseInt(i.price.replace(/\D/g,''));
+    },0);
+    document.getElementById('cart-total').textContent='$'+total.toLocaleString();
+    document.getElementById('cart-foot').style.display='block';
+  }
+}
+
+function openCart(){
+  // close panel if open
+  closePanel();
+  document.getElementById('cart').classList.add('open');
+  document.getElementById('cart-backdrop').classList.add('show');
+}
+function closeCart(){
+  document.getElementById('cart').classList.remove('open');
+  document.getElementById('cart-backdrop').classList.remove('show');
+}
+
+/* ────────────────────────
+   TOAST
+──────────────────────── */
+let toastTimer;
+function showToast(msg){
+  document.getElementById('toast-msg').textContent = msg || 'Added to bag';
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 3200);
+}
+function hideToast(){document.getElementById('toast').classList.remove('show')}
+
+/* ════════════════════════════════
+   COMPOSE ENGINE
+════════════════════════════════ */
+let chain = [];
+
+function openCompose(){
+  document.getElementById('compose-overlay').classList.add('open');
+  showPreviewWidget();
+}
+function closeCompose(){
+  document.getElementById('compose-overlay').classList.remove('open');
+  hidePreviewWidget();
+}
+
+function addToChain(layout, desc){
+  chain.push({layout, desc, palette:'', gridCols:'3', id:Date.now()});
+  renderChain();
+  renderPreview();
+}
+function removeFromChain(id){
+  chain = chain.filter(c=>c.id!==id);
+  renderChain();
+  renderPreview();
+}
+function updateChainNode(id, key, val){
+  const node = chain.find(c=>c.id===id);
+  if(node){ node[key]=val; renderPreview(); }
+}
+function toggleChainNode(id){
+  const el = document.getElementById('cnd-'+id);
+  if(el) el.classList.toggle('open');
+  chain.forEach(c=>c._active = c.id===id && el && el.classList.contains('open'));
+  renderPreview();
+  renderChain();
+}
+function applyChain(){
+  showToast('◇ Chain applied · '+chain.length+' rooms configured');
+  closeCompose();
+}
+function showPaletteNote(palette){
+  showToast('◇ Palette: '+palette+' · assign to any room in the chain');
+}
+
+function renderChain(){
+  document.getElementById('cs-chain-count').textContent = chain.length;
+  const el = document.getElementById('cs-chain');
+  if(chain.length===0){
+    el.innerHTML='<div class="cs-chain-empty">Click any room preset on the left to begin your chain.<br><br>Each room is a section with a proven layout, optimised for its depth of field. Daisy-chain them in any order. The live preview widget reflects your chain in real time — built from this store\'s actual content.</div>';
+    return;
+  }
+  el.innerHTML = chain.map((c,i)=>`
+    <div class="chain-node${c._active?' active-node':''}" id="cn-${c.id}">
+      <div class="chain-node-bar" onclick="toggleChainNode(${c.id})">
+        <span class="cn-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="cn-label">${c.desc||c.layout}</span>
+        <span class="cn-layout-badge">${c.layout}</span>
+        <button class="cn-remove" onclick="event.stopPropagation();removeFromChain(${c.id})">✕</button>
+      </div>
+      <div class="chain-node-detail" id="cnd-${c.id}">
+        <div class="cn-detail-row">
+          <span class="cn-detail-label">Room Name</span>
+          <div class="cn-detail-val"><input class="cn-input" placeholder="e.g. The Collection"
+            value="${c.desc||''}"
+            oninput="updateChainNode(${c.id},'desc',this.value)"></div>
+        </div>
+        <div class="cn-detail-row">
+          <span class="cn-detail-label">Palette</span>
+          <div class="cn-detail-val">
+            <select class="cn-select" onchange="updateChainNode(${c.id},'palette',this.value)">
+              <option value=""${!c.palette?' selected':''}>Default · Night</option>
+              <option value="amber"${c.palette==='amber'?' selected':''}>Amber · Golden</option>
+              <option value="forest"${c.palette==='forest'?' selected':''}>Forest · Slate</option>
+              <option value="midnight"${c.palette==='midnight'?' selected':''}>Midnight · Blue</option>
+              <option value="linen"${c.palette==='linen'?' selected':''}>Linen · Day</option>
+              <option value="editorial-red"${c.palette==='editorial-red'?' selected':''}>Editorial · Red</option>
+            </select>
+          </div>
+        </div>
+        <div class="cn-detail-row">
+          <span class="cn-detail-label">Grid Cols</span>
+          <div class="cn-detail-val">
+            <select class="cn-select" onchange="updateChainNode(${c.id},'gridCols',this.value)">
+              <option value="3"${c.gridCols==='3'?' selected':''}>3 col</option>
+              <option value="2"${c.gridCols==='2'?' selected':''}>2 col</option>
+              <option value="4"${c.gridCols==='4'?' selected':''}>4 col</option>
+              <option value="1"${c.gridCols==='1'?' selected':''}>1 col</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${i < chain.length-1 ? '<div class="chain-arrow">↓</div>' : ''}
+  `).join('');
+}
+
+/* ════════════════════════════════
+   LIVE PREVIEW WIDGET
+   Floating · draggable · collapsible
+   Renders real content from the DOM —
+   poster text, product names, spec rows,
+   pull quotes — pulled from each room.
+════════════════════════════════ */
+
+const PW = {
+  collapsed: false,
+  pos: { x: null, y: null },
+  size: { w: 280 },
+  dragging: false,
+  resizingY: false,
+  resizingX: false,
+};
+
+const PALETTE_COLORS = {
+  '':              '#c87a50',
+  'amber':         '#e8a830',
+  'forest':        '#88b878',
+  'midnight':      '#6a9bcc',
+  'linen':         '#b85c32',
+  'editorial-red': '#e03030',
+};
+
+/* Read real content from the live DOM room matching this layout */
+function getRoomContent(layout, chainNode){
+  // find the matching room on the page
+  const roomEl = document.querySelector(`.room[data-layout="${layout}"]`);
+  if(!roomEl) return null;
+
+  const poster  = roomEl.querySelector('.s.poster')?.innerText.trim().replace(/\s+/g,' ') || '';
+  const label   = roomEl.querySelector('.s.label')?.innerText.trim() || '';
+  const body    = roomEl.querySelector('.s.body')?.innerText.trim().slice(0,100) || '';
+  const pull    = roomEl.querySelector('.s.pull')?.innerText.trim().slice(0,80) || '';
+  const chTitle = roomEl.querySelector('.ch-title')?.innerText.trim() || '';
+  const specRows = Array.from(roomEl.querySelectorAll('.s.spec')).slice(0,4).map(s=>({
+    k: s.querySelector('.spec-k')?.innerText.trim() || '',
+    v: s.querySelector('.spec-v')?.innerText.trim().slice(0,36) || '',
+  }));
+  const productCards = Array.from(roomEl.querySelectorAll('.product-card')).slice(0,6).map(card=>({
+    name:  card.querySelector('.pc-name')?.innerText.trim() || '',
+    price: card.querySelector('.pc-price')?.innerText.trim() || '',
+    img:   card.querySelector('.pc-img img')?.src || '',
+    meta:  card.querySelector('.pc-meta')?.innerText.trim() || '',
+  }));
+  const featureImg = roomEl.querySelector('.feature-media img')?.src || '';
+  const bgImg      = (roomEl.querySelector('.room-bg img.on') || roomEl.querySelector('.room-bg img'))?.src || '';
+  const colMediaImg= roomEl.querySelector('.col-media img')?.src || '';
+
+  return { poster, label, body, pull, chTitle, specRows, productCards, featureImg, bgImg, colMediaImg };
+}
+
+function renderPreview(){
+  const pw = document.getElementById('preview-widget');
+  if(!pw || pw.style.display==='none') return;
+
+  const countEl = document.getElementById('pw-chain-count');
+  const emptyEl = document.getElementById('pw-empty');
+  const schEl   = document.getElementById('pw-schematic');
+  const footEl  = document.getElementById('pw-footer');
+  const footSum = document.getElementById('pw-footer-summary');
+
+  countEl.textContent = chain.length;
+  countEl.style.display = chain.length ? 'inline' : 'none';
+
+  if(chain.length===0){
+    emptyEl.style.display='block';
+    schEl.innerHTML='';
+    footEl.style.display='none';
+    return;
+  }
+  emptyEl.style.display='none';
+  footEl.style.display='flex';
+
+  schEl.innerHTML = chain.map((c,i)=>{
+    const pal     = c.palette || '';
+    const accent  = PALETTE_COLORS[pal] || PALETTE_COLORS[''];
+    const isActive = c._active;
+    const content  = getRoomContent(c.layout, c);
+    const roomName = c.desc || c.layout;
+    const palLabel = pal || 'night';
+
+    return `
+      <div class="pw-room${isActive?' pw-active-room':''}"
+           onclick="highlightChainNode(${c.id})"
+           title="${c.layout} · ${roomName}">
+        <div class="pw-room-pal" style="background:${accent}"></div>
+        <div class="pw-room-diagram">
+          ${buildRoomDiagram(c.layout, content, accent, c.gridCols)}
+        </div>
+        <div class="pw-room-meta">
+          <span class="pw-room-name">${roomName}</span>
+          <span class="pw-room-palette-tag" style="border-color:${accent}44;color:${accent}">${palLabel}</span>
+          <span class="pw-room-layout">${c.layout}</span>
+        </div>
+      </div>
+      ${i < chain.length-1 ? '<div class="pw-connector"><div class="pw-conn-line"></div><span class="pw-conn-arrow">↓</span><div class="pw-conn-line"></div></div>' : ''}
+    `;
+  }).join('');
+
+  const palettes = [...new Set(chain.map(c=>c.palette||'night'))];
+  footSum.innerHTML = `<strong>${chain.length}</strong> room${chain.length!==1?'s':''} · ${palettes.length} palette${palettes.length!==1?'s':''}`;
+}
+
+/* Build a diagram cell using real content from the DOM */
+function buildRoomDiagram(layout, d, accent, gridCols){
+  if(!d) return buildAbstractDiagram(layout, accent);
+
+  const txt = (s, style='') =>
+    `<div style="height:2px;border-radius:1px;background:rgba(240,236,230,.18);margin-bottom:3px;${style}">${s?`<span style="display:none">${s}</span>`:''}</div>`;
+
+  const accentLine = (w='60%') =>
+    `<div style="height:2px;border-radius:1px;background:${accent};opacity:.5;width:${w};margin-bottom:4px"></div>`;
+
+  const labelLine = d.label
+    ? `<div style="font-family:'DM Mono',monospace;font-size:5.5px;letter-spacing:.2em;text-transform:uppercase;color:${accent};opacity:.8;margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${d.label}</div>`
+    : accentLine('40%');
+
+  const posterBlock = d.poster
+    ? `<div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:9px;text-transform:uppercase;color:rgba(240,236,230,.9);line-height:1;letter-spacing:-.01em;margin-bottom:4px;overflow:hidden;max-height:22px">${d.poster.slice(0,20)}</div>`
+    : `<div style="height:9px;border-radius:1px;background:rgba(240,236,230,.22);width:75%;margin-bottom:4px"></div>`;
+
+  const bodyBlock = d.body
+    ? `<div style="font-family:'DM Mono',monospace;font-size:5px;line-height:1.5;color:rgba(240,236,230,.4);overflow:hidden;max-height:18px;margin-bottom:3px">${d.body.slice(0,60)}</div>`
+    : `${txt('',`width:90%`)}${txt('',`width:70%`)}`;
+
+  const pullBlock = d.pull
+    ? `<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:5.5px;color:rgba(240,236,230,.55);border-left:1.5px solid ${accent};padding-left:5px;overflow:hidden;max-height:14px;margin-top:3px">${d.pull.slice(0,50)}</div>`
+    : '';
+
+  const bgImg = d.bgImg && !d.bgImg.endsWith('/')
+    ? `style="background:url('${d.bgImg}') center/cover no-repeat;opacity:.18;position:absolute;inset:0;"`
+    : '';
+
+  if(layout==='manifesto'||layout==='closing'){
+    return `
+      ${bgImg?`<div ${bgImg}></div>`:''}
+      <div style="position:relative;z-index:1;flex:1;padding-right:4px">
+        ${labelLine}${posterBlock}${bodyBlock}${pullBlock}
+      </div>
+      ${bgImg?`<div style="width:30%;background:rgba(0,0,0,.3);border-radius:1px;opacity:.4"></div>`:''}
+    `;
+  }
+
+  if(layout==='editorial'){
+    const colImg = d.colMediaImg && !d.colMediaImg.endsWith('/')
+      ? `<div style="width:38%;background:url('${d.colMediaImg}') center/cover;border-radius:1px;opacity:.55;flex-shrink:0"></div>`
+      : `<div style="width:38%;background:rgba(255,255,255,.06);border-radius:1px;flex-shrink:0"></div>`;
+    return `
+      <div style="flex:1;padding-right:5px">
+        ${labelLine}${bodyBlock}${pullBlock}
+      </div>
+      ${colImg}
+    `;
+  }
+
+  if(layout==='grid'){
+    const cols = parseInt(gridCols)||3;
+    const cards = d.productCards.slice(0,cols*2);
+    const cardW = Math.floor(100/cols)-2;
+    const cardHTML = cards.map(card=>{
+      const imgStyle = card.img && !card.img.endsWith('/')
+        ? `background:url('${card.img}') center/cover no-repeat`
+        : 'background:rgba(255,255,255,.07)';
+      return `<div style="width:${cardW}%;flex-shrink:0;border-radius:1px;overflow:hidden;border:1px solid rgba(255,255,255,.07)">
+        <div style="${imgStyle};height:${cardW*0.9}%;min-height:12px;opacity:.7"></div>
+        <div style="padding:2px 3px">
+          ${card.name?`<div style="font-size:4.5px;color:rgba(240,236,230,.7);overflow:hidden;white-space:nowrap;font-family:'DM Mono',monospace">${card.name.slice(0,14)}</div>`:''}
+          ${card.price?`<div style="font-size:5.5px;font-weight:700;color:rgba(240,236,230,.85);font-family:'Barlow Condensed',sans-serif">${card.price}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    return `
+      <div style="flex:1;overflow:hidden">
+        ${labelLine}
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:2px">${cardHTML}</div>
+      </div>
+    `;
+  }
+
+  if(layout==='feature'){
+    const fImg = d.featureImg && !d.featureImg.endsWith('/')
+      ? `<div style="width:36%;background:url('${d.featureImg}') center/cover;border-radius:1px;opacity:.7;flex-shrink:0;aspect-ratio:3/4;align-self:stretch"></div>`
+      : `<div style="width:36%;background:rgba(255,255,255,.07);border-radius:1px;flex-shrink:0"></div>`;
+    const specHTML = d.specRows.slice(0,3).map(r=>
+      `<div style="display:flex;gap:3px;border-bottom:1px solid rgba(255,255,255,.05);padding:1.5px 0">
+        <span style="font-size:4px;text-transform:uppercase;letter-spacing:.06em;color:rgba(240,236,230,.25);font-family:'DM Mono',monospace;min-width:28px;flex-shrink:0">${r.k.slice(0,8)}</span>
+        <span style="font-size:4px;color:rgba(240,236,230,.45);font-family:'DM Mono',monospace;overflow:hidden;white-space:nowrap">${r.v.slice(0,22)}</span>
+      </div>`
+    ).join('');
+    return `
+      ${fImg}
+      <div style="flex:1;padding-left:5px;overflow:hidden">
+        ${labelLine}${posterBlock}
+        <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:3px">${specHTML}</div>
+      </div>
+    `;
+  }
+
+  if(layout==='narrative'||layout==='lookbook'){
+    return `
+      <div style="display:flex;gap:4px;flex:1">
+        <div style="width:2px;background:${accent};opacity:.35;border-radius:1px;flex-shrink:0;margin-top:2px"></div>
+        <div style="flex:1;overflow:hidden">
+          ${labelLine}${bodyBlock}${pullBlock}
+        </div>
+      </div>
+    `;
+  }
+
+  if(layout==='counter'){
+    const specHTML = d.specRows.map(r=>
+      `<div style="display:flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.05);padding:2px 0">
+        <span style="font-size:4.5px;text-transform:uppercase;letter-spacing:.06em;color:rgba(240,236,230,.3);font-family:'DM Mono',monospace;min-width:34px;flex-shrink:0">${r.k.slice(0,10)}</span>
+        <span style="font-size:4.5px;color:rgba(240,236,230,.5);font-family:'DM Mono',monospace;overflow:hidden;white-space:nowrap">${r.v.slice(0,28)}</span>
+      </div>`
+    ).join('');
+    return `
+      <div style="flex:1;overflow:hidden">
+        ${labelLine}
+        <div style="border-top:1px solid rgba(255,255,255,.06);margin-top:2px">${specHTML}</div>
+      </div>
+    `;
+  }
+
+  return buildAbstractDiagram(layout, accent);
+}
+
+/* Fallback for layouts with no matching room yet */
+function buildAbstractDiagram(layout, accent){
+  return `
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:3px">
+      <div style="height:2px;border-radius:1px;background:${accent};opacity:.4;width:40%"></div>
+      <div style="height:2px;border-radius:1px;background:rgba(240,236,230,.15);width:80%"></div>
+      <div style="height:2px;border-radius:1px;background:rgba(240,236,230,.10);width:60%"></div>
+      <div style="height:2px;border-radius:1px;background:rgba(240,236,230,.07);width:75%"></div>
+    </div>
+  `;
+}
+
+function highlightChainNode(id){
+  const wasActive = chain.find(c=>c.id===id)?._active;
+  chain.forEach(c=>c._active=false);
+  if(!wasActive){
+    const node = chain.find(c=>c.id===id);
+    if(node) node._active=true;
+    const detail = document.getElementById('cnd-'+id);
+    if(detail) detail.classList.add('open');
+  } else {
+    const detail = document.getElementById('cnd-'+id);
+    if(detail) detail.classList.remove('open');
+  }
+  renderChain();
+  renderPreview();
+}
+
+/* ── Show / hide ── */
+function showPreviewWidget(){
+  const pw = document.getElementById('preview-widget');
+  const vw = window.innerWidth, vh = window.innerHeight;
+  pw.style.display='block';
+  pw.style.width = PW.size.w+'px';
+  if(PW.pos.x===null){
+    PW.pos.x = vw - PW.size.w - 32;
+    PW.pos.y = vh - 460 - 52;
+  }
+  applyPWPos();
+  renderPreview();
+}
+function hidePreviewWidget(){
+  document.getElementById('preview-widget').style.display='none';
+}
+function closePreviewWidget(){ hidePreviewWidget(); }
+
+function applyPWPos(){
+  const pw = document.getElementById('preview-widget');
+  const vw = window.innerWidth, vh = window.innerHeight;
+  PW.pos.x = Math.max(8, Math.min(vw - PW.size.w - 8, PW.pos.x));
+  PW.pos.y = Math.max(52, Math.min(vh - 50, PW.pos.y));
+  pw.style.left   = PW.pos.x+'px';
+  pw.style.top    = PW.pos.y+'px';
+  pw.style.right  = 'auto';
+  pw.style.bottom = 'auto';
+  pw.style.width  = PW.size.w+'px';
+}
+
+function togglePreviewCollapse(){
+  const pw  = document.getElementById('preview-widget');
+  const btn = document.getElementById('pw-collapse-btn');
+  PW.collapsed = !PW.collapsed;
+  pw.classList.toggle('pw-collapsed', PW.collapsed);
+  btn.textContent = PW.collapsed ? '+' : '−';
+  btn.title = PW.collapsed ? 'Expand' : 'Collapse';
+}
+
+function cycleViewport(){
+  const modes = ['desktop','tablet','mobile'];
+  const widths = {desktop:280, tablet:240, mobile:180};
+  const i = modes.indexOf(document.getElementById('preview-widget').dataset.vp||'desktop');
+  const next = modes[(i+1)%3];
+  document.getElementById('preview-widget').dataset.vp = next;
+  PW.size.w = widths[next];
+  document.getElementById('preview-widget').style.width = PW.size.w+'px';
+  document.getElementById('pw-viewport-toggle').textContent =
+    next==='desktop' ? '□' : next==='tablet' ? '▭' : '▯';
+  applyPWPos();
+  // show bar
+  const bar = document.getElementById('pw-viewport-bar');
+  bar.style.display='flex';
+  bar.querySelectorAll('.pw-vp-btn').forEach(b=>b.classList.toggle('active',b.dataset.vp===next));
+}
+function setViewport(vp, btn){
+  const widths = {desktop:280, tablet:240, mobile:180};
+  PW.size.w = widths[vp]||280;
+  document.getElementById('preview-widget').dataset.vp = vp;
+  document.getElementById('preview-widget').style.width = PW.size.w+'px';
+  applyPWPos();
+  btn.closest('.pw-vp-btns').querySelectorAll('.pw-vp-btn').forEach(b=>b.classList.toggle('active',b===btn));
+}
+
+/* ── Drag ── */
+(()=>{
+  let ox,oy,sx,sy;
+  function down(e){
+    if(e.target.closest('.pw-ctrl-btn,.pw-vp-btn')) return;
+    PW.dragging=true;
+    const pw=document.getElementById('preview-widget');
+    pw.classList.add('pw-dragging');
+    const r=pw.getBoundingClientRect();
+    ox=r.left; oy=r.top; sx=e.clientX; sy=e.clientY;
+    e.preventDefault();
+  }
+  function move(e){
+    if(!PW.dragging) return;
+    PW.pos.x=ox+(e.clientX-sx); PW.pos.y=oy+(e.clientY-sy);
+    applyPWPos();
+  }
+  function up(){
+    if(PW.dragging){ PW.dragging=false; document.getElementById('preview-widget').classList.remove('pw-dragging'); }
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const hdr=document.getElementById('pw-header');
+    if(!hdr) return;
+    hdr.addEventListener('mousedown',down);
+    hdr.addEventListener('touchstart',e=>{const t=e.touches[0];down({clientX:t.clientX,clientY:t.clientY,target:e.target,preventDefault:()=>e.preventDefault()});},{passive:false});
+    window.addEventListener('mousemove',move);
+    window.addEventListener('touchmove',e=>{if(!PW.dragging)return;const t=e.touches[0];move({clientX:t.clientX,clientY:t.clientY});},{passive:true});
+    window.addEventListener('mouseup',up);
+    window.addEventListener('touchend',up);
+  });
+})();
+
+/* ── Resize bottom ── */
+(()=>{
+  let sy,sh;
+  function down(e){ PW.resizingY=true; sy=e.clientY; sh=document.getElementById('pw-body').offsetHeight; e.preventDefault(); }
+  function move(e){ if(!PW.resizingY)return; const h=Math.max(100,Math.min(window.innerHeight-100,sh+(e.clientY-sy))); document.getElementById('pw-body').style.maxHeight=h+'px'; }
+  function up(){ PW.resizingY=false; }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const r=document.getElementById('pw-resize');
+    if(!r) return;
+    r.addEventListener('mousedown',down);
+    window.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',up);
+  });
+})();
+
+/* ── Resize right ── */
+(()=>{
+  let sx,sw;
+  function down(e){ PW.resizingX=true; sx=e.clientX; sw=document.getElementById('preview-widget').offsetWidth; e.preventDefault(); }
+  function move(e){ if(!PW.resizingX)return; const w=Math.max(200,Math.min(480,sw+(e.clientX-sx))); PW.size.w=w; document.getElementById('preview-widget').style.width=w+'px'; applyPWPos(); }
+  function up(){ PW.resizingX=false; }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const r=document.getElementById('pw-resize-r');
+    if(!r) return;
+    r.addEventListener('mousedown',down);
+    window.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',up);
+  });
+})();
+
+/* ────────────────────────
+   INIT
+──────────────────────── */
+updateCurrentRoom();
+
+requestAnimationFrame(()=>{
+  const first = document.querySelectorAll('#room-0 .s');
+  first.forEach((el,i)=>{ setTimeout(()=>el.classList.add('revealed'), 200 + i*120); });
+});
+</script>
+</body>
+</html>

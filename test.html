@@ -249,11 +249,12 @@ body{font-family:var(--mono);background:var(--au-bg);color:var(--au-ink);cursor:
 .cat-fl{font-family:var(--mono);font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--au-ink3);width:56px;flex-shrink:0}
 .cat-in{background:none;border:none;outline:none;font-family:var(--mono);font-size:7.5px;color:var(--au-ink2);flex:1;caret-color:var(--au-acc)}.cat-in:focus{color:var(--au-ink)}
 
-/* ─── PREVIEW WIDGET ─────────────────────────────────────────── */
+/* ─── PREVIEW WIDGET (schema — original) ────────────────────── */
 #pw{position:fixed;z-index:9500;width:248px;background:#fff;border:1px solid var(--au-bdr2);border-radius:4px;box-shadow:0 8px 32px rgba(0,0,0,.12);overflow:hidden;bottom:24px;right:24px;display:none;user-select:none}
 #pw.pwdrag{box-shadow:0 16px 48px rgba(0,0,0,.18);border-color:rgba(184,104,64,.4)}
 #pw.pwcol #pw-body,#pw.pwcol #pw-foot{display:none}
 #pw-hd{display:flex;align-items:center;padding:0 7px 0 9px;height:32px;background:var(--au-bg3);border-bottom:1px solid var(--au-bdr2);cursor:grab}
+#pw-hd:active{cursor:grabbing}
 #pw-dd{color:var(--au-ink3);font-size:8px;letter-spacing:3px;margin-right:6px;pointer-events:none;line-height:1}
 #pw-lb{font-family:var(--mono);font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--au-ink3);flex:1;pointer-events:none;display:flex;align-items:center;gap:5px}
 #pw-pulse{width:4px;height:4px;border-radius:50%;background:var(--au-acc);flex-shrink:0;animation:pwp 2.4s ease-in-out infinite}
@@ -261,6 +262,7 @@ body{font-family:var(--mono);background:var(--au-bg);color:var(--au-ink);cursor:
 #pw-cnt{font-family:var(--mono);font-size:7px;color:var(--au-acc);background:var(--au-accl);border:1px solid rgba(184,104,64,.25);padding:1px 5px;border-radius:20px;display:none}
 .pwc{background:none;border:none;cursor:pointer;color:var(--au-ink3);font-size:10px;padding:2px 4px;line-height:1;border-radius:2px;transition:all .1s}.pwc:hover{color:var(--au-ink);background:var(--au-accl)}
 #pw-body{overflow-y:auto;padding:7px 7px 9px;max-height:320px;scrollbar-width:thin;scrollbar-color:var(--au-bdr2) transparent}
+#pw-body::-webkit-scrollbar{width:2px}
 #pw-mt{padding:14px 10px;text-align:center;font-family:var(--mono);font-size:8px;color:var(--au-ink3);text-transform:uppercase;line-height:2}
 #pw-sch{display:flex;flex-direction:column;gap:2px}
 .pw-rm{position:relative;border-radius:2px;overflow:hidden;border:1px solid var(--au-bdr2);background:var(--au-bg);cursor:pointer;transition:all .14s}
@@ -280,6 +282,83 @@ body{font-family:var(--mono);background:var(--au-bg);color:var(--au-ink);cursor:
 .pw-apl{background:var(--au-acc);border:none;border-radius:2px;font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:4px 9px;cursor:pointer}.pw-apl:hover{opacity:.85}
 #pw-rzr{position:absolute;top:32px;right:0;bottom:0;width:5px;cursor:ew-resize;z-index:2}
 #pw-rzb{position:absolute;bottom:0;left:0;right:0;height:5px;cursor:ns-resize;z-index:2}
+
+/* ─── LIVE PREVIEW WIDGET (sovereign) ───────────────────────────
+   A separate, independent floating window. Displays a scaled
+   iframe of the actual rendered page. Opened via the compose
+   bar. Stays open independently of the schema widget.
+   Draggable, resizable, device-width toggle.
+────────────────────────────────────────────────────────────── */
+#lp{
+  position:fixed;z-index:9400;
+  width:480px;height:600px;
+  background:var(--au-bg3);
+  border:1px solid var(--au-bdr2);
+  border-radius:5px;
+  box-shadow:0 16px 56px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.06);
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  user-select:none;
+  top:60px;left:50%;
+  transform:translateX(-50%);
+}
+#lp.lpdrag{box-shadow:0 24px 72px rgba(0,0,0,.22)}
+/* header bar */
+#lp-hd{
+  display:flex;align-items:center;
+  height:36px;flex-shrink:0;
+  background:var(--au-bg3);
+  border-bottom:1px solid var(--au-bdr2);
+  cursor:grab;padding:0 8px 0 11px;gap:8px;
+}
+#lp-hd:active{cursor:grabbing}
+#lp-pulse{width:4px;height:4px;border-radius:50%;background:var(--au-acc);flex-shrink:0;animation:pwp 2.4s ease-in-out infinite}
+#lp-title{font-family:var(--mono);font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:var(--au-ink3);flex:1;pointer-events:none}
+/* device toggles */
+#lp-devs{display:flex;align-items:center;gap:2px}
+.lp-dev{
+  background:none;border:1px solid var(--au-bdr2);border-radius:2px;
+  font-family:var(--mono);font-size:6px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--au-ink3);padding:2px 6px;cursor:pointer;transition:all .1s;
+}
+.lp-dev:hover{border-color:var(--au-bdr3);color:var(--au-ink)}
+.lp-dev.on{border-color:var(--au-acc);color:var(--au-acc);background:var(--au-accl)}
+#lp-close{background:none;border:none;cursor:pointer;color:var(--au-ink3);font-size:13px;padding:2px 4px;line-height:1;border-radius:2px;transition:color .1s;flex-shrink:0}
+#lp-close:hover{color:var(--au-ink)}
+/* viewport — clips scaled iframe */
+#lp-vp{
+  flex:1;position:relative;overflow:hidden;
+  background:#080709;min-height:0;
+}
+#lp-frame{
+  position:absolute;top:0;left:0;
+  border:none;transform-origin:top left;
+  background:#080709;
+}
+/* rebuild shimmer */
+#lp-loading{
+  position:absolute;inset:0;z-index:2;
+  background:rgba(228,225,221,.88);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:7px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--au-ink3);
+  opacity:0;pointer-events:none;transition:opacity .18s;
+}
+#lp-loading.show{opacity:1}
+/* status bar */
+#lp-foot{
+  display:flex;align-items:center;justify-content:space-between;
+  height:26px;flex-shrink:0;
+  background:var(--au-bg2);
+  border-top:1px solid var(--au-bdr);
+  padding:0 10px;
+}
+#lp-dim{font-family:var(--mono);font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--au-ink3)}
+#lp-pgname{font-family:var(--mono);font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--au-ink2)}
+/* resize handle — right edge */
+#lp-rzr{position:absolute;top:36px;right:0;bottom:26px;width:5px;cursor:ew-resize;z-index:3}
+#lp-rzb{position:absolute;bottom:26px;left:0;right:0;height:5px;cursor:ns-resize;z-index:3}
 
 /* ─── RENDER (dark brand layer) ──────────────────────────────── */
 #rndr{position:fixed;inset:0;z-index:8000;background:#080709;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(240,236,230,.08) transparent;opacity:0;pointer-events:none;transition:opacity .32s cubic-bezier(.22,1,.36,1)}
@@ -737,7 +816,6 @@ body{font-family:var(--mono);background:var(--au-bg);color:var(--au-ink);cursor:
     <button class="tbtn" id="btn-add">+ Page</button>
     <div class="tb-vsep"></div>
     <button class="tbtn a" id="btn-prev">Preview ↗</button>
-    <button class="tbtn" id="btn-bag">Bag <span class="cn" id="tb-cn">0</span></button>
   </div>
 </div>
 
@@ -761,6 +839,7 @@ body{font-family:var(--mono);background:var(--au-bg);color:var(--au-ink);cursor:
     <div id="cs-bar">
       <div id="cs-ttl">⊡ <strong id="cs-plbl">Page</strong> · Compose</div>
       <div class="cs-acts">
+        <button class="csbtn" id="btn-lp">⊙ Live</button>
         <button class="csbtn" id="btn-cclose">← Field</button>
         <button class="csbtn ac" id="btn-apply">▶ Apply</button>
       </div>
@@ -828,6 +907,30 @@ body{font-family:var(--mono);background:var(--au-bg);color:var(--au-ink);cursor:
     </div>
     <div id="pw-rzr"></div>
     <div id="pw-rzb"></div>
+  </div>
+
+  <!-- LIVE PREVIEW — sovereign floating window -->
+  <div id="lp">
+    <div id="lp-hd">
+      <span id="lp-pulse"></span>
+      <span id="lp-title">Live Preview</span>
+      <div id="lp-devs">
+        <button class="lp-dev on" data-lp-dev="full">Full</button>
+        <button class="lp-dev" data-lp-dev="tablet">Tablet</button>
+        <button class="lp-dev" data-lp-dev="mobile">Mobile</button>
+      </div>
+      <button id="lp-close">×</button>
+    </div>
+    <div id="lp-vp">
+      <div id="lp-loading">Rendering…</div>
+      <iframe id="lp-frame" scrolling="yes" title="Live preview"></iframe>
+    </div>
+    <div id="lp-foot">
+      <span id="lp-pgname">—</span>
+      <span id="lp-dim">1440px</span>
+    </div>
+    <div id="lp-rzr"></div>
+    <div id="lp-rzb"></div>
   </div>
 </div>
 
@@ -1006,11 +1109,11 @@ function gid(){return 'i'+(idn++);}
 
 /* ── PERSIST ────────────────────────────────────────────────── */
 function save(){
-  try{localStorage.setItem('arc11',JSON.stringify({pages:pages,sfT:sfT,idn:idn,proj:g('tb-proj').value}));}catch(e){}
+  try{localStorage.setItem('arc15',JSON.stringify({pages:pages,sfT:sfT,idn:idn,proj:g('tb-proj').value}));}catch(e){}
 }
 function load(){
   try{
-    var d=JSON.parse(localStorage.getItem('arc11')||'null');
+    var d=JSON.parse(localStorage.getItem('arc15')||'null');
     if(!d)return false;
     pages=d.pages||[];sfT=d.sfT||{x:0,y:0,s:1};idn=d.idn||1;
     if(d.proj)g('tb-proj').value=d.proj;
@@ -1691,11 +1794,12 @@ g('btn-cat-add').addEventListener('click',function(){
   pg.catalog.push(prod);catExpanded[prod.id]=true;renderCatalog(pg);save();
 });
 
-/* ── PREVIEW WIDGET ─────────────────────────────────────────── */
-var PWS={col:false,pos:{x:null,y:null},w:248,drag:false,rx:false,ry:false};
+/* ── PREVIEW WIDGET (schematic) ─────────────────────────────── */
+var PWS={pos:{x:null,y:null},w:248,drag:false,rx:false,ry:false};
+
 function showPW(){
   g('pw').style.display='block';
-  if(PWS.pos.x===null){PWS.pos.x=window.innerWidth-PWS.w-24;PWS.pos.y=window.innerHeight-420;}
+  if(PWS.pos.x===null){PWS.pos.x=window.innerWidth-PWS.w-24;PWS.pos.y=window.innerHeight-440;}
   applyPWPos();
 }
 function hidePW(){g('pw').style.display='none';}
@@ -1706,15 +1810,24 @@ function applyPWPos(){
   pw.style.left=PWS.pos.x+'px';pw.style.top=PWS.pos.y+'px';
   pw.style.right='auto';pw.style.bottom='auto';pw.style.width=PWS.w+'px';
 }
-function togglePWCol(){PWS.col=!PWS.col;g('pw').classList.toggle('pwcol',PWS.col);g('pw-col').textContent=PWS.col?'+':'−';}
+function togglePWCol(){
+  var col=!g('pw').classList.toggle('pwcol');
+  g('pw-col').textContent=col?'+':'−';
+}
+
 function renderPW(){
   var pg=cpg(),sch=g('pw-sch'),mt2=g('pw-mt'),ft=g('pw-foot'),cnt=g('pw-cnt');
-  if(!pg||!pg.rooms.length){mt2.style.display='block';sch.innerHTML='';ft.style.display='none';cnt.style.display='none';return;}
-  mt2.style.display='none';ft.style.display='flex';cnt.textContent=pg.rooms.length;cnt.style.display='inline';
+  if(!pg||!pg.rooms.length){
+    mt2.style.display='block';sch.innerHTML='';
+    ft.style.display='none';cnt.style.display='none';
+    scheduleLPRebuild();return;
+  }
+  mt2.style.display='none';ft.style.display='flex';
+  cnt.textContent=pg.rooms.length;cnt.style.display='inline';
   sch.innerHTML='';
   pg.rooms.forEach(function(rm,i){
     var ly=LAYOUTS.filter(function(l){return l.id===rm.layout;})[0]||LAYOUTS[0];
-    var ct=getCtype(rm);var col=rmColor(rm),isA=editRm===rm.id;
+    var col=rmColor(rm),isA=editRm===rm.id;
     var rmel=ce('div');rmel.className='pw-rm'+(isA?' pwa':'');rmel.dataset.opencerm=rm.id;
     var pal=ce('div');pal.className='pw-pal';pal.style.background=col;
     var dg=ce('div');dg.className='pw-dg';buildDiagInto(dg,rm,col);
@@ -1733,19 +1846,175 @@ function renderPW(){
     }
   });
   g('pw-sum').innerHTML='<strong>'+pg.rooms.length+'</strong> room'+(pg.rooms.length!==1?'s':'');
+  scheduleLPRebuild();
 }
 g('pw-sch').addEventListener('click',function(e){var rm=e.target.closest('[data-opencerm]');if(rm)openCEById(rm.dataset.opencerm);});
+
 (function(){
   var ox,oy,sx,sy;
   g('pw-hd').addEventListener('mousedown',function(e){
-    if(e.target.closest('.pwc'))return;PWS.drag=true;g('pw').classList.add('pwdrag');
+    if(e.target.closest('.pwc'))return;
+    PWS.drag=true;g('pw').classList.add('pwdrag');
     var r=g('pw').getBoundingClientRect();ox=r.left;oy=r.top;sx=e.clientX;sy=e.clientY;e.preventDefault();
   });
   window.addEventListener('mousemove',function(e){if(!PWS.drag)return;PWS.pos.x=ox+(e.clientX-sx);PWS.pos.y=oy+(e.clientY-sy);applyPWPos();});
   window.addEventListener('mouseup',function(){if(PWS.drag){PWS.drag=false;g('pw').classList.remove('pwdrag');}});
 })();
-(function(){var sx,sw;g('pw-rzr').addEventListener('mousedown',function(e){PWS.rx=true;sx=e.clientX;sw=g('pw').offsetWidth;e.preventDefault();});window.addEventListener('mousemove',function(e){if(!PWS.rx)return;PWS.w=Math.max(200,Math.min(400,sw-(e.clientX-sx)));g('pw').style.width=PWS.w+'px';applyPWPos();});window.addEventListener('mouseup',function(){PWS.rx=false;});})();
-(function(){var sy,sh;g('pw-rzb').addEventListener('mousedown',function(e){PWS.ry=true;sy=e.clientY;sh=g('pw-body').offsetHeight;e.preventDefault();});window.addEventListener('mousemove',function(e){if(!PWS.ry)return;g('pw-body').style.maxHeight=Math.max(80,Math.min(window.innerHeight-120,sh+(e.clientY-sy)))+'px';});window.addEventListener('mouseup',function(){PWS.ry=false;});})();
+(function(){
+  var sx,sw;
+  g('pw-rzr').addEventListener('mousedown',function(e){PWS.rx=true;sx=e.clientX;sw=g('pw').offsetWidth;e.preventDefault();});
+  window.addEventListener('mousemove',function(e){if(!PWS.rx)return;PWS.w=Math.max(200,Math.min(400,sw+(e.clientX-sx)));g('pw').style.width=PWS.w+'px';applyPWPos();});
+  window.addEventListener('mouseup',function(){PWS.rx=false;});
+})();
+(function(){
+  var sy,sh;
+  g('pw-rzb').addEventListener('mousedown',function(e){PWS.ry=true;sy=e.clientY;sh=g('pw-body').offsetHeight;e.preventDefault();});
+  window.addEventListener('mousemove',function(e){if(!PWS.ry)return;g('pw-body').style.maxHeight=Math.max(80,Math.min(window.innerHeight-120,sh+(e.clientY-sy)))+'px';});
+  window.addEventListener('mouseup',function(){PWS.ry=false;});
+})();
+
+/* ── LIVE PREVIEW — sovereign floating window ───────────────── */
+var LPS={
+  open:false,
+  dev:'full',
+  devW:{full:1440,tablet:768,mobile:390},
+  devLabel:{full:'1440px',tablet:'768px',mobile:'390px'},
+  w:480,h:600,
+  pos:{x:null,y:null},
+  drag:false,rx:false,ry:false,
+  rebuildTimer:null
+};
+
+function showLP(){
+  LPS.open=true;
+  var lp=g('lp');lp.style.display='flex';
+  if(LPS.pos.x===null){
+    /* centre on screen */
+    LPS.pos.x=Math.max(8,(window.innerWidth-LPS.w)/2);
+    LPS.pos.y=Math.max(50,(window.innerHeight-LPS.h)/2);
+  }
+  applyLPPos();
+  scheduleLPRebuild();
+}
+function hideLP(){
+  LPS.open=false;
+  g('lp').style.display='none';
+}
+function applyLPPos(){
+  var lp=g('lp');
+  LPS.pos.x=Math.max(8,Math.min(window.innerWidth-LPS.w-8,LPS.pos.x));
+  LPS.pos.y=Math.max(42,Math.min(window.innerHeight-60,LPS.pos.y));
+  lp.style.left=LPS.pos.x+'px';lp.style.top=LPS.pos.y+'px';
+  lp.style.width=LPS.w+'px';lp.style.height=LPS.h+'px';
+  lp.style.transform='none'; /* override the CSS centring once positioned */
+}
+
+/* Device toggle */
+document.querySelectorAll('[data-lp-dev]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    LPS.dev=btn.dataset.lpDev;
+    document.querySelectorAll('[data-lp-dev]').forEach(function(b){
+      b.classList.toggle('on',b.dataset.lpDev===LPS.dev);
+    });
+    g('lp-dim').textContent=LPS.devLabel[LPS.dev]||'';
+    scaleLPFrame();
+  });
+});
+
+/* Debounce rebuild — triggers 600ms after any authoring change */
+function scheduleLPRebuild(){
+  clearTimeout(LPS.rebuildTimer);
+  LPS.rebuildTimer=setTimeout(function(){
+    if(LPS.open)buildLP();
+  },600);
+}
+
+function buildLP(){
+  var pg=cpg();if(!pg)return;
+  g('lp-pgname').textContent=pg.title;
+  g('lp-loading').classList.add('show');
+  var frame=g('lp-frame');
+  frame.onload=function(){
+    g('lp-loading').classList.remove('show');
+    scaleLPFrame();
+  };
+  frame.srcdoc=buildPreviewHTML(pg);
+}
+
+/* Shared HTML builder — renders the page into a self-contained srcdoc */
+function getPageStyles(){
+  var css='';
+  document.querySelectorAll('style').forEach(function(s){css+=s.textContent;});
+  return css;
+}
+function buildPreviewHTML(pg){
+  var tmp=document.createElement('div');
+  pg.rooms.forEach(function(rm,i){
+    var sec=buildRoom(rm,i,pg);
+    sec.querySelectorAll('.s').forEach(function(el){el.classList.add('rev');});
+    tmp.appendChild(sec);
+  });
+  var fonts='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">';
+  var reset='<style>*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}html,body{background:#080709;color:#f0ece6;font-family:"DM Mono",monospace}.s{opacity:1!important;transform:none!important;transition:none!important}.room{cursor:default}.btn-atc,.btn-wl,.pc-add,.cat-item-add{cursor:default}</style>';
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+fonts+'<style>'+getPageStyles()+'</style>'+reset+'</head><body class="render-scope">'+tmp.innerHTML+'</body></html>';
+}
+
+/* Scale iframe to fit the lp-vp at the chosen device width */
+function scaleLPFrame(){
+  requestAnimationFrame(function(){
+    var vp=g('lp-vp');var frame=g('lp-frame');
+    if(!vp||!frame)return;
+    var vpW=vp.offsetWidth;var vpH=vp.offsetHeight;
+    if(!vpW||!vpH)return;
+    var devW=LPS.devW[LPS.dev]||1440;
+    var scale=vpW/devW;
+    frame.style.width=devW+'px';
+    frame.style.height=(vpH/scale)+'px';
+    frame.style.transform='scale('+scale+')';
+  });
+}
+window.addEventListener('resize',function(){if(LPS.open)scaleLPFrame();});
+
+/* Drag */
+(function(){
+  var ox,oy,sx,sy;
+  g('lp-hd').addEventListener('mousedown',function(e){
+    if(e.target.closest('.lp-dev,#lp-close'))return;
+    LPS.drag=true;g('lp').classList.add('lpdrag');
+    var r=g('lp').getBoundingClientRect();ox=r.left;oy=r.top;sx=e.clientX;sy=e.clientY;
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove',function(e){
+    if(!LPS.drag)return;
+    LPS.pos.x=ox+(e.clientX-sx);LPS.pos.y=oy+(e.clientY-sy);applyLPPos();
+  });
+  window.addEventListener('mouseup',function(){if(LPS.drag){LPS.drag=false;g('lp').classList.remove('lpdrag');}});
+})();
+/* Resize — right edge */
+(function(){
+  var sx,sw;
+  g('lp-rzr').addEventListener('mousedown',function(e){LPS.rx=true;sx=e.clientX;sw=LPS.w;e.preventDefault();});
+  window.addEventListener('mousemove',function(e){
+    if(!LPS.rx)return;
+    LPS.w=Math.max(320,Math.min(window.innerWidth-40,sw+(e.clientX-sx)));
+    applyLPPos();scaleLPFrame();
+  });
+  window.addEventListener('mouseup',function(){LPS.rx=false;});
+})();
+/* Resize — bottom edge */
+(function(){
+  var sy,sh;
+  g('lp-rzb').addEventListener('mousedown',function(e){LPS.ry=true;sy=e.clientY;sh=LPS.h;e.preventDefault();});
+  window.addEventListener('mousemove',function(e){
+    if(!LPS.ry)return;
+    LPS.h=Math.max(280,Math.min(window.innerHeight-80,sh+(e.clientY-sy)));
+    applyLPPos();scaleLPFrame();
+  });
+  window.addEventListener('mouseup',function(){LPS.ry=false;});
+})();
+
+g('lp-close').addEventListener('click',hideLP);
+g('btn-lp').addEventListener('click',function(){if(LPS.open)hideLP();else showLP();});
 
 /* ── RENDER ─────────────────────────────────────────────────── */
 function previewFirst(){
@@ -2128,7 +2397,6 @@ function closeCart(){g('crt').classList.remove('open');g('crt-bd').classList.rem
 /* ── BUTTON WIRING ──────────────────────────────────────────── */
 g('btn-add').addEventListener('click',addPage);
 g('btn-prev').addEventListener('click',previewFirst);
-g('btn-bag').addEventListener('click',openCart);
 g('btn-cclose').addEventListener('click',closeCompose);
 g('btn-apply').addEventListener('click',applyClose);
 g('btn-ce-save').addEventListener('click',saveCE);

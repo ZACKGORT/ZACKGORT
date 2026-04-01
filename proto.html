@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Wolfgang & Co. · Career Spiral</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#05030a;transition:background 0.6s;}
+body.light{background:#f5f1ea;}
+canvas{display:block;width:100vw;height:100vh;position:relative;z-index:1;}
+#bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+#brand{position:fixed;top:24px;left:28px;z-index:100;pointer-events:none;font-family:'DM Mono',monospace;}
+#brand-name{font-size:10px;letter-spacing:0.26em;text-transform:uppercase;color:rgba(218,165,32,0.70);transition:color 0.5s;}
+#brand-sub{font-size:7.5px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(218,165,32,0.28);margin-top:5px;transition:color 0.5s;}
+body.light #brand-name{color:rgba(100,60,0,0.85);}
+body.light #brand-sub{color:rgba(100,60,0,0.45);}
+
+#era-label{position:fixed;top:24px;right:28px;z-index:100;font-family:'DM Mono',monospace;text-align:right;pointer-events:none;}
+#era-year{font-size:28px;letter-spacing:-0.02em;color:rgba(218,165,32,0.18);transition:color 0.5s,opacity 0.4s;font-family:'Crimson Text',serif;font-style:italic;}
+#era-name{font-size:7px;letter-spacing:0.20em;text-transform:uppercase;color:rgba(218,165,32,0.22);margin-top:4px;}
+body.light #era-year{color:rgba(100,60,0,0.22);}
+body.light #era-name{color:rgba(100,60,0,0.30);}
+
+#hud{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:1px;
+  background:rgba(218,165,32,0.04);
+  border:1px solid rgba(218,165,32,0.12);
+  border-radius:4px;overflow:hidden;z-index:100;
+  transition:background 0.5s,border-color 0.5s;
+}
+.hud-btn{
+  background:none;border:none;cursor:pointer;
+  color:rgba(218,165,32,0.35);
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.18em;
+  text-transform:uppercase;padding:9px 18px;
+  border-right:1px solid rgba(218,165,32,0.10);
+  transition:color 0.2s,background 0.2s;
+}
+.hud-btn:last-child{border-right:none;}
+.hud-btn:hover{color:rgba(218,165,32,0.85);background:rgba(218,165,32,0.06);}
+.hud-btn.active{color:#daa520;background:rgba(218,165,32,0.10);}
+.hud-sep{width:1px;background:rgba(218,165,32,0.15);align-self:stretch;flex-shrink:0;margin:6px 0;}
+.hud-zoom{padding:9px 14px;font-size:13px;letter-spacing:0;color:rgba(218,165,32,0.30);}
+.hud-zoom:hover{color:rgba(218,165,32,0.85);}
+body.light #hud{background:rgba(100,60,0,0.03);border-color:rgba(100,60,0,0.16);}
+body.light .hud-btn{color:rgba(100,60,0,0.50);border-right-color:rgba(100,60,0,0.10);}
+body.light .hud-btn:hover{color:rgba(100,60,0,0.90);}
+body.light .hud-btn.active{color:rgba(100,60,0,0.95);}
+
+/* ── TIMELINE NAV STRIP ── */
+#timeline-nav{
+  position:fixed;bottom:70px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:0;
+  z-index:100;
+  font-family:'DM Mono',monospace;
+  background:rgba(5,3,10,0.85);
+  border:1px solid rgba(218,165,32,0.14);
+  border-radius:4px;
+  backdrop-filter:blur(16px);
+  overflow:hidden;
+  transition:opacity 0.4s;
+}
+body.light #timeline-nav{background:rgba(255,252,240,0.92);border-color:rgba(100,60,0,0.18);}
+#tl-prev,#tl-next{
+  background:none;border:none;cursor:pointer;
+  color:rgba(218,165,32,0.55);
+  padding:7px 13px;font-size:13px;
+  transition:color 0.2s,background 0.2s;
+  border-right:1px solid rgba(218,165,32,0.08);
+}
+#tl-next{border-left:1px solid rgba(218,165,32,0.08);border-right:none;}
+#tl-prev:hover,#tl-next:hover{color:#daa520;background:rgba(218,165,32,0.08);}
+#tl-prev:disabled,#tl-next:disabled{color:rgba(218,165,32,0.12);cursor:default;}
+body.light #tl-prev,body.light #tl-next{color:rgba(100,60,0,0.50);}
+body.light #tl-prev:hover,body.light #tl-next:hover{color:rgba(100,60,0,0.9);}
+
+#tl-track{
+  display:flex;align-items:center;
+  gap:2px;
+  padding:7px 10px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  max-width:min(640px, 65vw);
+}
+#tl-track::-webkit-scrollbar{display:none;}
+.tl-pip{
+  width:22px;height:22px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  position:relative;
+  border-radius:2px;
+  transition:background 0.15s;
+}
+.tl-pip:hover{background:rgba(218,165,32,0.08);}
+.tl-pip-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(218,165,32,0.20);
+  transition:all 0.25s;
+  flex-shrink:0;
+}
+.tl-pip.active .tl-pip-dot{
+  background:#daa520;
+  width:8px;height:8px;
+  box-shadow:0 0 6px rgba(218,165,32,0.6);
+}
+.tl-pip:hover .tl-pip-dot{background:rgba(218,165,32,0.60);}
+.tl-pip-year{
+  position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);
+  font-size:6px;letter-spacing:0.12em;color:rgba(218,165,32,0.35);
+  white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity 0.15s;
+}
+.tl-pip:hover .tl-pip-year,.tl-pip.active .tl-pip-year{opacity:1;color:rgba(218,165,32,0.70);}
+body.light .tl-pip-dot{background:rgba(100,60,0,0.22);}
+body.light .tl-pip.active .tl-pip-dot{background:rgba(100,60,0,0.80);}
+
+#tl-label{
+  padding:5px 10px 5px 2px;
+  font-size:7px;letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(218,165,32,0.35);
+  white-space:nowrap;border-left:1px solid rgba(218,165,32,0.08);
+  min-width:90px;
+  transition:color 0.2s;
+}
+body.light #tl-label{color:rgba(100,60,0,0.50);}
+
+#hint{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(218,165,32,0.16);z-index:100;pointer-events:none;white-space:nowrap;transition:opacity 1.2s;}
+body.light #hint{color:rgba(100,60,0,0.38);}
+
+#theme-toggle{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:100;background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.32);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.20em;text-transform:uppercase;padding:6px 14px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
+#theme-toggle:hover{color:rgba(218,165,32,0.75);border-color:rgba(218,165,32,0.45);}
+body.light #theme-toggle{border-color:rgba(100,60,0,0.22);color:rgba(100,60,0,0.55);}
+
+#tooltip{position:fixed;top:0;left:0;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:200;}
+#tooltip.vis{opacity:1;}
+#tt-inner{background:rgba(5,3,10,0.97);border:1px solid rgba(218,165,32,0.16);border-radius:4px;padding:12px 16px;backdrop-filter:blur(12px);max-width:260px;}
+.tt-era{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(218,165,32,0.40);margin-bottom:5px;}
+.tt-title{font-family:'Crimson Text',serif;font-size:16px;color:#f5ecd5;line-height:1.2;margin-bottom:5px;letter-spacing:-0.01em;}
+.tt-role{font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(218,165,32,0.35);}
+.tt-sub{font-family:'DM Mono',monospace;font-size:6px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(218,165,32,0.25);margin-top:4px;font-style:italic;}
+body.light #tt-inner{background:rgba(255,252,244,0.99);border-color:rgba(100,60,0,0.16);}
+body.light .tt-era{color:rgba(100,60,0,0.55);}
+body.light .tt-title{color:rgba(30,15,0,0.92);}
+body.light .tt-role{color:rgba(100,60,0,0.55);}
+
+/* DETAIL PANEL */
+#ghost{position:fixed;z-index:700;width:360px;pointer-events:none;opacity:0;right:28px;top:50%;transform:translateY(-50%) translateX(18px) scale(0.97);transition:opacity 0.30s,transform 0.30s;}
+#ghost.on{opacity:1;transform:translateY(-50%) translateX(0) scale(1);pointer-events:all;}
+.gc{background:rgba(5,3,10,0.98);border:1px solid rgba(218,165,32,0.12);border-radius:6px;box-shadow:0 18px 62px rgba(0,0,0,0.9);backdrop-filter:blur(26px);overflow:hidden;}
+.gcscroll{max-height:82vh;overflow-y:auto;scrollbar-width:none;}
+.gcscroll::-webkit-scrollbar{display:none;}
+.gcbar{height:2px;width:100%;background:rgba(218,165,32,0.55);}
+.gchead{padding:16px 16px 12px;border-bottom:1px solid rgba(218,165,32,0.08);}
+.gcera{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(218,165,32,0.40);margin-bottom:6px;}
+.gctitle{font-family:'Crimson Text',serif;font-size:19px;letter-spacing:-0.02em;color:#f5ecd5;line-height:1.2;margin-bottom:5px;}
+.gcrole{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(218,165,32,0.32);}
+
+/* IMAGE STRIP in ghost panel */
+.gc-images{
+  display:flex;gap:4px;padding:10px 16px 2px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.gc-images::-webkit-scrollbar{display:none;}
+.gc-img-frame{
+  width:80px;height:60px;flex-shrink:0;
+  border-radius:3px;overflow:hidden;
+  background:rgba(218,165,32,0.06);
+  border:1px solid rgba(218,165,32,0.10);
+  position:relative;
+}
+.gc-img-frame img{
+  width:100%;height:100%;object-fit:cover;
+  opacity:0.80;transition:opacity 0.2s;
+  display:block;
+}
+.gc-img-frame img:hover{opacity:1;}
+.gc-img-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;
+  font-size:7px;letter-spacing:0.14em;
+  color:rgba(218,165,32,0.20);
+  text-align:center;
+  padding:6px;
+}
+
+/* SUBNODE pills in ghost panel */
+.gc-moons{
+  padding:8px 16px 10px;
+  border-bottom:1px solid rgba(218,165,32,0.06);
+}
+.gc-moons-label{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(218,165,32,0.25);margin-bottom:7px;}
+.gc-moon-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.gc-moon-pill{
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.12em;
+  text-transform:uppercase;
+  padding:3px 8px;border-radius:10px;
+  border:1px solid rgba(218,165,32,0.25);
+  color:rgba(218,165,32,0.50);
+  cursor:pointer;transition:all 0.15s;
+}
+.gc-moon-pill:hover{background:rgba(218,165,32,0.10);color:rgba(218,165,32,0.85);border-color:rgba(218,165,32,0.50);}
+.gc-moon-pill.active{background:rgba(218,165,32,0.12);color:#daa520;border-color:rgba(218,165,32,0.60);}
+
+.gcbody{padding:14px 16px 14px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.72;color:rgba(245,236,213,0.65);border-bottom:1px solid rgba(218,165,32,0.06);}
+body.light .gcbody{color:rgba(30,15,0,0.72);}
+.gc-sentences{padding:10px 16px 14px;border-bottom:1px solid rgba(218,165,32,0.06);}
+.gc-sent-label{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(218,165,32,0.25);margin-bottom:8px;}
+.gc-sent{font-family:'Crimson Text',serif;font-size:13.5px;line-height:1.62;color:rgba(245,236,213,0.45);cursor:pointer;padding:4px 6px;border-radius:2px;transition:all 0.15s;margin-bottom:3px;display:block;}
+.gc-sent:hover{color:rgba(245,236,213,0.88);background:rgba(218,165,32,0.06);}
+.gc-sent.active{color:#f5ecd5;background:rgba(218,165,32,0.10);border-left:2px solid rgba(218,165,32,0.55);padding-left:10px;}
+.gcft{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 12px;}
+.gctag{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.16em;text-transform:uppercase;padding:3px 9px;border-radius:9px;border:1px solid rgba(218,165,32,0.35);color:rgba(218,165,32,0.55);}
+
+/* nav arrows in panel footer */
+.gc-nav{display:flex;gap:4px;align-items:center;}
+.gcnav-btn{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:26px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:all;}
+.gcnav-btn:hover:not(:disabled){color:#f5ecd5;border-color:rgba(218,165,32,0.55);}
+.gcnav-btn:disabled{opacity:0.2;cursor:default;}
+.gcclose{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:all;}
+.gcclose:hover{color:#f5ecd5;border-color:rgba(218,165,32,0.55);}
+
+body.light .gc{background:rgba(255,252,244,0.99);border-color:rgba(100,60,0,0.14);}
+body.light .gchead,.gcbody,.gc-sentences,.gcft{border-color:rgba(100,60,0,0.10);}
+body.light .gcera{color:rgba(100,60,0,0.55);}
+body.light .gctitle{color:rgba(30,15,0,0.92);}
+body.light .gcrole{color:rgba(100,60,0,0.55);}
+body.light .gc-sent{color:rgba(30,15,0,0.50);}
+body.light .gc-sent:hover{color:rgba(30,15,0,0.90);background:rgba(100,60,0,0.05);}
+body.light .gc-sent.active{color:rgba(30,15,0,0.95);background:rgba(100,60,0,0.07);border-left-color:rgba(100,60,0,0.50);}
+body.light .gc-sent-label{color:rgba(100,60,0,0.40);}
+body.light .gcclose{border-color:rgba(100,60,0,0.22);color:rgba(100,60,0,0.55);}
+body.light .gcclose:hover{color:rgba(30,15,0,0.90);}
+body.light .gctag{color:rgba(100,60,0,0.55);border-color:rgba(100,60,0,0.35);}
+body.light .gc-images{background:none;}
+body.light .gc-img-frame{background:rgba(100,60,0,0.05);border-color:rgba(100,60,0,0.12);}
+body.light .gc-moons-label{color:rgba(100,60,0,0.40);}
+body.light .gc-moon-pill{color:rgba(100,60,0,0.50);border-color:rgba(100,60,0,0.25);}
+body.light .gc-moon-pill:hover{background:rgba(100,60,0,0.06);color:rgba(100,60,0,0.85);}
+
+/* MOBILE SHEET */
+#msheet{display:none;position:fixed;bottom:0;left:0;right:0;z-index:700;background:rgba(5,3,10,0.98);border-top:1px solid rgba(218,165,32,0.10);border-radius:14px 14px 0 0;max-height:72vh;overflow-y:auto;scrollbar-width:none;transform:translateY(100%);transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);backdrop-filter:blur(28px);}
+#msheet::-webkit-scrollbar{display:none;}
+#msheet.on{transform:translateY(0);}
+.mshandle{width:36px;height:4px;background:rgba(218,165,32,0.20);border-radius:2px;margin:12px auto 6px;}
+.mshead{padding:16px 20px 12px;border-bottom:1px solid rgba(218,165,32,0.08);}
+.msera{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(218,165,32,0.40);margin-bottom:6px;}
+.mstitle{font-family:'Crimson Text',serif;font-size:22px;letter-spacing:-0.02em;color:#f5ecd5;line-height:1.15;margin-bottom:4px;}
+.ms-images{display:flex;gap:4px;padding:10px 20px;overflow-x:auto;scrollbar-width:none;}
+.ms-images::-webkit-scrollbar{display:none;}
+.ms-img-frame{width:80px;height:60px;flex-shrink:0;border-radius:3px;overflow:hidden;background:rgba(218,165,32,0.06);border:1px solid rgba(218,165,32,0.10);}
+.ms-img-frame img{width:100%;height:100%;object-fit:cover;opacity:0.80;}
+.msbody{padding:13px 20px 14px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.72;color:rgba(245,236,213,0.60);}
+.msft{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 14px;}
+.ms-nav{display:flex;gap:4px;}
+.ms-navbtn{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:26px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+.ms-navbtn:hover:not(:disabled){color:#f5ecd5;border-color:rgba(218,165,32,0.55);}
+.ms-navbtn:disabled{opacity:0.2;}
+.msclose{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+@media(max-width:768px){#ghost{display:none;}#msheet{display:block;}}
+
+/* TIMELINE SPINE INDICATOR */
+#spine-indicator{display:none;}
+
+/* moon ghost hidden — disabled */
+#moon-ghost{display:none;}
+
+/* ── TABLE OF CONTENTS OVERLAY ── */
+#toc{
+  position:fixed;inset:0;z-index:900;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.25s;
+  background:rgba(5,3,10,0.82);
+  backdrop-filter:blur(22px);
+}
+#toc.vis{opacity:1;pointer-events:all;}
+body.light #toc{background:rgba(245,241,234,0.88);}
+#toc-inner{
+  width:min(560px,90vw);
+  max-height:88vh;
+  overflow-y:auto;
+  scrollbar-width:none;
+  background:rgba(10,6,20,0.96);
+  border:1px solid rgba(218,165,32,0.16);
+  border-radius:8px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.9);
+}
+#toc-inner::-webkit-scrollbar{display:none;}
+body.light #toc-inner{background:rgba(255,252,244,0.99);border-color:rgba(100,60,0,0.16);}
+#toc-header{
+  padding:20px 24px 16px;
+  border-bottom:1px solid rgba(218,165,32,0.10);
+  display:flex;align-items:center;justify-content:space-between;
+}
+#toc-title{
+  font-family:'Crimson Text',serif;font-size:18px;letter-spacing:-0.01em;
+  color:rgba(245,236,213,0.85);font-style:italic;
+}
+body.light #toc-title{color:rgba(30,15,0,0.85);}
+#toc-sub{
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.20em;
+  text-transform:uppercase;color:rgba(218,165,32,0.35);margin-top:4px;
+}
+#toc-close{
+  background:none;border:1px solid rgba(218,165,32,0.18);
+  color:rgba(218,165,32,0.40);width:26px;height:26px;
+  border-radius:2px;cursor:pointer;font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;transition:all 0.2s;
+}
+#toc-close:hover{color:#f5ecd5;border-color:rgba(218,165,32,0.60);}
+body.light #toc-close{color:rgba(100,60,0,0.55);border-color:rgba(100,60,0,0.22);}
+#toc-list{padding:10px 0 16px;}
+.toc-row{
+  display:flex;align-items:baseline;gap:16px;
+  padding:9px 24px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all 0.15s;
+}
+.toc-row:hover{
+  background:rgba(218,165,32,0.05);
+  border-left-color:rgba(218,165,32,0.40);
+}
+body.light .toc-row:hover{background:rgba(100,60,0,0.04);border-left-color:rgba(100,60,0,0.35);}
+.toc-year{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;
+  color:rgba(218,165,32,0.35);flex-shrink:0;width:34px;
+  transition:color 0.15s;
+}
+.toc-row:hover .toc-year{color:rgba(218,165,32,0.75);}
+body.light .toc-year{color:rgba(100,60,0,0.45);}
+.toc-name{
+  font-family:'Crimson Text',serif;font-size:16px;letter-spacing:-0.01em;
+  color:rgba(245,236,213,0.65);line-height:1.2;
+  transition:color 0.15s;
+}
+.toc-row:hover .toc-name{color:rgba(245,236,213,0.95);}
+body.light .toc-name{color:rgba(30,15,0,0.60);}
+body.light .toc-row:hover .toc-name{color:rgba(30,15,0,0.92);}
+.toc-domain{
+  font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.14em;
+  text-transform:uppercase;color:rgba(218,165,32,0.22);margin-left:auto;flex-shrink:0;
+  transition:color 0.15s;
+}
+.toc-row:hover .toc-domain{color:rgba(218,165,32,0.55);}
+body.light .toc-domain{color:rgba(100,60,0,0.30);}
+#toc-hint{
+  text-align:center;padding:0 24px 16px;
+  font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.16em;
+  text-transform:uppercase;color:rgba(218,165,32,0.16);
+}
+body.light #toc-hint{color:rgba(100,60,0,0.30);}
+</style>
+</head>
+<body>
+<canvas id="bg-mesh"></canvas>
+<canvas id="canvas"></canvas>
+
+<div id="brand">
+  <div id="brand-name">Wolfgang &amp; Co.</div>
+  <div id="brand-sub">Career Spiral · 2005 — 2026</div>
+</div>
+<button id="theme-toggle">Light</button>
+
+<div id="era-label">
+  <div id="era-year">2026</div>
+  <div id="era-name">Present</div>
+</div>
+
+<div id="spine-indicator"></div>
+
+<div id="hud">
+  <button class="hud-btn active" data-view="spiral">SPIRAL</button>
+  <button class="hud-btn" data-view="arc">TIMELINE</button>
+  <div class="hud-sep"></div>
+  <button class="hud-btn hud-zoom" id="hud-zoom-out">−</button>
+  <button class="hud-btn hud-zoom" id="hud-zoom-in">+</button>
+</div>
+
+<!-- TIMELINE NAV STRIP -->
+<div id="timeline-nav">
+  <button id="tl-prev" title="Previous era">&#8592;</button>
+  <div id="tl-track"></div>
+  <div id="tl-label">——</div>
+  <button id="tl-next" title="Next era">&#8594;</button>
+</div>
+
+<div id="hint">drag to orbit · scroll to zoom · click any node · ← → navigate · space pauses</div>
+
+<div id="tooltip"><div id="tt-inner">
+  <div class="tt-era" id="tt-era"></div>
+  <div class="tt-title" id="tt-title"></div>
+  <div class="tt-role" id="tt-role"></div>
+  <div class="tt-sub" id="tt-sub"></div>
+</div></div>
+
+<div id="ghost"><div class="gc">
+  <div class="gcbar"></div>
+  <div class="gcscroll">
+    <div class="gchead">
+      <div class="gcera" id="gc-era"></div>
+      <div class="gctitle" id="gc-title"></div>
+      <div class="gcrole" id="gc-role"></div>
+    </div>
+    <!-- image strip -->
+    <div class="gc-images" id="gc-images"></div>
+    <!-- moon pills -->
+    <div class="gc-moons" id="gc-moons" style="display:none;">
+      <div class="gc-moons-label">Satellites</div>
+      <div class="gc-moon-pills" id="gc-moon-pills"></div>
+    </div>
+    <div class="gcbody" id="gc-body"></div>
+    <div class="gc-sentences" id="gc-sentences">
+      <div class="gc-sent-label">From the narrative</div>
+      <div id="gc-sent-list"></div>
+    </div>
+    <div class="gcft">
+      <span class="gctag" id="gc-tag"></span>
+      <div class="gc-nav">
+        <button class="gcnav-btn" id="gc-prev" title="Previous era">&#8592;</button>
+        <button class="gcnav-btn" id="gc-next" title="Next era">&#8594;</button>
+        <button class="gcclose" onclick="closePanel()">✕</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div id="msheet">
+  <div class="mshandle"></div>
+  <div class="mshead">
+    <div class="msera" id="ms-era"></div>
+    <div class="mstitle" id="ms-title"></div>
+  </div>
+  <div class="ms-images" id="ms-images"></div>
+  <div class="msbody" id="ms-body"></div>
+  <div class="msft">
+    <div class="ms-nav">
+      <button class="ms-navbtn" id="ms-prev">&#8592;</button>
+      <button class="ms-navbtn" id="ms-next">&#8594;</button>
+    </div>
+    <button class="msclose" onclick="closePanel()">✕</button>
+  </div>
+</div>
+
+<!-- moon ghost disabled -->
+<div id="moon-ghost"></div>
+
+<!-- TABLE OF CONTENTS -->
+<div id="toc">
+  <div id="toc-inner">
+    <div id="toc-header">
+      <div>
+        <div id="toc-title">Career Spiral · 2005 — 2026</div>
+        <div id="toc-sub">Wolfgang &amp; Co. · Table of Contents</div>
+      </div>
+      <button id="toc-close" onclick="closeTOC()">✕</button>
+    </div>
+    <div id="toc-list"></div>
+    <div id="toc-hint">right-click or long-press anywhere to return here</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────
+// CAREER DATA
+// ─────────────────────────────────────────────────────────
+const ERAS = [
+  {
+    id: 'origin',
+    year: '2005',
+    title: 'The Autodidact Origin',
+    role: 'Self-taught · Suburban Philadelphia',
+    era: '2005 — 2008',
+    domain: 'roots',
+    body: 'Built my first computer circa 2005. Installed pirated copies of Photoshop and Illustrator. Didn\'t graduate from university — stopped out, not dropped out. Studied what I saw. Observed, amalgamated, and carried my craft through conviction.',
+    sentences: [
+      'I built my first computer circa 2005.',
+      'I immediately installed pirated copies of Adobe Photoshop and Illustrator.',
+      'I studied what I saw — read books, flipped through magazines, took on client work.',
+      'I created faux website concepts to understand designing for the medium.',
+      'All this culminated in responding to a Craigslist post that changed everything.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1593640408182-31c228bc6ddb?w=240&h=180&fit=crop', caption: 'First build' },
+      { src: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=240&h=180&fit=crop', caption: 'Design study' },
+    ],
+    moons: [
+      { label: 'Photoshop', desc: 'Pirated — but the learning was real.' },
+      { label: 'Illustrator', desc: 'Vector logic from day one.' },
+      { label: 'Craigslist gig', desc: 'First paid design work.' },
+    ],
+    color: 0xb87333, hex: '#b87333'
+  },
+  {
+    id: 'turn5',
+    year: '2008',
+    title: 'Turn5 Inc.',
+    role: 'Designer · Product Photographer · Suburbia',
+    era: '2008 — 2011',
+    domain: 'product',
+    body: 'A garage startup in the suburbs of Philadelphia that became my formal education. The kind of place where you wear the hat you want. Charged with designing for web properties, product packaging, printed catalogues, emails and ads across multiple brand systems.',
+    sentences: [
+      'A turning point at Turn5 Inc.',
+      'The kind of place where you wear the hat you want.',
+      'I was handed a brand new PC and a Canon Rebel DSLR.',
+      'Charged with designing for our web properties, product packaging, printed catalogues, emails and ads.',
+      'Add product photography and retouching, specializing in color match and OEM quality.',
+      'We built a lifestyle brand that grew from ten to forty million per year during my time at Turn5.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?w=240&h=180&fit=crop', caption: 'Studio work' },
+      { src: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=240&h=180&fit=crop', caption: 'Product photography' },
+      { src: 'https://images.unsplash.com/photo-1545665277-5937489579f2?w=240&h=180&fit=crop', caption: 'Catalogue design' },
+    ],
+    moons: [
+      { label: 'Photography', desc: 'Canon Rebel DSLR, product studio.' },
+      { label: 'Web Design', desc: 'HTML/CSS e-commerce properties.' },
+      { label: 'Print', desc: 'Catalogues, packaging, ads.' },
+      { label: 'Email', desc: 'Multi-brand campaign systems.' },
+    ],
+    color: 0xdaa520, hex: '#daa520'
+  },
+  {
+    id: 'leadnomics',
+    year: '2011',
+    title: 'Leadnomics',
+    role: 'Conversion Designer · Philadelphia',
+    era: '2011 — 2013',
+    domain: 'conversion',
+    body: 'Paradigm shifty. Lead generation across multiple verticals — cash cow was payday loans. My job was to make it easy for users to make catastrophic financial decisions. Achieved a 95.8% conversion rate using responsive design and rigorous testing.',
+    sentences: [
+      'Leadnomics was shifty — paradigm shifty.',
+      'We focused on lead generation across multiple verticals.',
+      'Said bluntly, my job was to make it easy for our users to make catastrophic financial decisions.',
+      'I achieved a 95.8% conversion rate using responsive design and rigorous testing.',
+      'Business bides by imperative, not by idealism.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=240&h=180&fit=crop', caption: 'Conversion data' },
+    ],
+    moons: [
+      { label: '95.8% CVR', desc: 'Highest conversion rate in vertical.' },
+      { label: 'Responsive', desc: 'Mobile-first before it was standard.' },
+      { label: 'A/B Testing', desc: 'Data-driven iteration.' },
+    ],
+    color: 0x8b6914, hex: '#8b6914'
+  },
+  {
+    id: '160over90',
+    year: '2013',
+    title: 'One Sixty Over Ninety',
+    role: 'Interaction Designer · Center City Philadelphia',
+    era: '2013 — 2015',
+    domain: 'agency',
+    body: 'One Sixty Over Ninety — my heartrate when offered a job as an Interaction Designer. I took a pay cut to join their new Interactive Department. Clients included Comcast, Kent State, and the Philadelphia Eagles. The culture demanded we dare.',
+    sentences: [
+      'One Sixty Over Ninety — my heartrate when offered a job as an Interaction Designer.',
+      'I took a pay cut to join their new Interactive Department, but I was there to learn.',
+      'Clients included Comcast, Kent State, and the Philadelphia Eagles.',
+      'We worked long days, longer nights, and short weekends.',
+      'The work wasn\'t scientific. It was expressive. It was novel. It was considered.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=240&h=180&fit=crop', caption: 'Agency life' },
+      { src: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=240&h=180&fit=crop', caption: 'Interactive work' },
+    ],
+    moons: [
+      { label: 'Comcast', desc: 'Cable + digital ecosystem.' },
+      { label: 'Philly Eagles', desc: 'Sports brand interaction design.' },
+      { label: 'Kent State', desc: 'Higher-ed digital presence.' },
+    ],
+    color: 0xdaa520, hex: '#daa520'
+  },
+  {
+    id: 'o3world',
+    year: '2015',
+    title: 'O3 World',
+    role: 'UX Designer · Fishtown Philadelphia',
+    era: '2015 — 2016',
+    domain: 'product',
+    body: 'A digital product shop in the heart of Fishtown, Philly. Agile in nature and scrum led. We held daily stand-ups to manage projects for clients like La Colombe, Vertex, and SEIC. We practiced true Lean UX methodologies.',
+    sentences: [
+      'O3 World was an elevating experience.',
+      'A digital product shop in the heart of Fishtown, Philly.',
+      'We were Agile in nature and scrum led.',
+      'We practiced true Lean UX methodologies.',
+      'We workshopped with whiteboards. We wireframed with Balsamiq. We shipped.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=240&h=180&fit=crop', caption: 'UX workshop' },
+    ],
+    moons: [
+      { label: 'La Colombe', desc: 'Coffee brand digital experience.' },
+      { label: 'Lean UX', desc: 'Hypothesis-driven design process.' },
+      { label: 'Scrum', desc: 'Daily standups, sprint cycles.' },
+    ],
+    color: 0xc49a2e, hex: '#c49a2e'
+  },
+  {
+    id: 'workarea',
+    year: '2016',
+    title: 'Workarea',
+    role: 'Product Designer · Downtown Philadelphia',
+    era: '2016 — 2017',
+    domain: 'saas',
+    body: 'A proprietary SaaS platform. We skipped high-fidelity mockups for napkin sketches and direct collaboration with developers. We were a dev-shop through and through. We built things better, faster, smarter.',
+    sentences: [
+      'Downtown from Fishtown was Workarea, where I worked on a proprietary SaaS platform.',
+      'We skipped high-fidelity mockups for napkin sketches and direct collaboration with developers.',
+      'We were a dev-shop through and through.',
+      'We built things better, faster, smarter.',
+      'The company sold, requiring I reframe my approach.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=240&h=180&fit=crop', caption: 'SaaS product' },
+    ],
+    moons: [
+      { label: 'e-Commerce SaaS', desc: 'Platform for enterprise retail.' },
+      { label: 'Dev Pairing', desc: 'Napkin to PR, no mockup wall.' },
+    ],
+    color: 0x9a7820, hex: '#9a7820'
+  },
+  {
+    id: 'flightpath',
+    year: '2017',
+    title: 'FlightPath',
+    role: 'Interactive Designer · Midtown Manhattan',
+    era: '2017 — 2018',
+    domain: 'pharma',
+    body: 'Hello, New York City. Emerging from bankruptcy, the agency served the pharmaceutical sector. This was my foot-in-the-door to the NYC scene. Commuting from Philly to Manhattan every business day for a full year.',
+    sentences: [
+      'Enter FlightPath. Hello, New York City.',
+      'Emerging from bankruptcy, the agency served the pharmaceutical sector.',
+      'They needed my help, and this was my foot-in-the-door to the NYC scene.',
+      'Commuting from Philly to Manhattan — and back — every business day for a full year.',
+      'Up and out by five o\'clock; home by ten o\'clock — maybe.',
+      'Saw both Sunrise and Sunset every day away from home. Two skylines, three hours apart.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=240&h=180&fit=crop', caption: 'NYC commute' },
+      { src: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=240&h=180&fit=crop', caption: 'Two skylines' },
+    ],
+    moons: [
+      { label: 'Pharma UX', desc: 'HCP & patient portals.' },
+      { label: 'NYC entry', desc: 'Midtown Manhattan studio.' },
+      { label: 'Commuter life', desc: 'Amtrak, both ways, daily.' },
+    ],
+    color: 0xdaa520, hex: '#daa520'
+  },
+  {
+    id: 'livearea',
+    year: '2018',
+    title: 'LiveArea',
+    role: 'UX Manager · Remote',
+    era: '2018 — 2020',
+    domain: 'ecomm',
+    body: 'From Workarea to LiveArea. From IC to Manager. I owned the UX process for a gamut of B2B & B2C e-commerce brands via the Salesforce Commerce Cloud platform. It was the most ownership I had held to date.',
+    sentences: [
+      'From Workarea to LiveArea. From IC to Manager.',
+      'I owned the UX process for a gamut of B2B & B2C e-commerce brands.',
+      'It was the most ownership I had held to date.',
+      'I ran discovery. I directed and delegated. I socialized my solutions.',
+      'I crafted "Cards Against Bad UX" to help clients empathize with users.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1556742393-d75f468bfcb0?w=240&h=180&fit=crop', caption: 'E-commerce UX' },
+    ],
+    moons: [
+      { label: 'Mgmt', desc: 'First IC-to-manager transition.' },
+      { label: 'SFCC', desc: 'Salesforce Commerce Cloud.' },
+      { label: 'Cards vs UX', desc: 'Custom empathy card game.' },
+      { label: 'B2B & B2C', desc: 'Multi-sector portfolio.' },
+    ],
+    color: 0xc49a2e, hex: '#c49a2e'
+  },
+  {
+    id: 'covid',
+    year: '2020',
+    title: 'Remote, Not Removed',
+    role: 'WFH · The Pandemic Years',
+    era: '2020 — 2022',
+    domain: 'remote',
+    body: 'Something shifted as the world worked through the COVID pandemic. Once familiar faces faded behind canceled cameras. Less time commuting, more time computing. Camera on. Game-face on.',
+    sentences: [
+      'Something shifted as the world worked through the COVID pandemic.',
+      'Once familiar faces faded behind canceled cameras — now shadows, muffled, or on mute.',
+      'Less time commuting, more time computing.',
+      'Camera on. Game-face on.',
+      'The logos get bigger from here — literally.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=240&h=180&fit=crop', caption: 'Home office' },
+    ],
+    moons: [
+      { label: 'Zoom culture', desc: 'Cameras on. Always on.' },
+      { label: 'Async tools', desc: 'Figma, Notion, Loom.' },
+    ],
+    color: 0x8b6914, hex: '#8b6914'
+  },
+  {
+    id: 'biglogos',
+    year: '2022',
+    title: 'Huge · Code and Theory · Publicis Sapient',
+    role: 'Senior / Principal Designer · NYC',
+    era: '2022 — 2024',
+    domain: 'enterprise',
+    body: 'Huge (Sentral). Code and Theory — from sixty-two floors up in One World Trade, working on TikTok For Business. Publicis Sapient — a year embedded in Digital Transformation for BNY Mellon, where I became the de facto lead because someone had to be.',
+    sentences: [
+      'The logos get bigger from here — literally.',
+      'Huge (Sentral). Code and Theory — from sixty-two floors up in One World Trade.',
+      'Working on TikTok For Business.',
+      'Publicis Sapient — a year embedded in Digital Transformation for BNY Mellon.',
+      'Where I became the de facto lead because someone had to be. I was not hired as one. I became one.',
+      'Each engagement taught me something. Some taught me what I wanted. Some taught me what I didn\'t.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=240&h=180&fit=crop', caption: 'Enterprise design' },
+      { src: 'https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?w=240&h=180&fit=crop', caption: 'One WTC view' },
+    ],
+    moons: [
+      { label: 'Huge / Sentral', desc: 'Hospitality tech platform.' },
+      { label: 'TikTok Biz', desc: 'Ad platform UX @ One WTC.' },
+      { label: 'BNY Mellon', desc: 'Became de facto design lead.' },
+      { label: 'Publicis', desc: 'Digital transformation at scale.' },
+    ],
+    color: 0xdaa520, hex: '#daa520'
+  },
+  {
+    id: 'pivot',
+    year: '2024',
+    title: 'The Low Voltage Pivot',
+    role: 'Network Technician · The Humility Semester',
+    era: '2024',
+    domain: 'pivot',
+    body: 'When I said rock & roll, I did not mean oldies. I thought I paid my dues. And so, I pivoted to low voltage contracting. I learned to terminate an RJ45 in 30–45 seconds. Different parts of my brain — the same brain that once wireframed enterprise banking platforms.',
+    sentences: [
+      'Come on baby, let\'s do the twist.',
+      'I pivoted to low voltage contracting.',
+      'I learned to terminate an RJ45 in 30–45 seconds.',
+      'I run cables, install security systems, and manage cable management in commercial and residential settings.',
+      'I\'m using different parts of my brain — the same brain that once wireframed enterprise banking platforms.',
+      'Humility is a hell of a teacher.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=240&h=180&fit=crop', caption: 'Low voltage work' },
+    ],
+    moons: [
+      { label: 'RJ45', desc: 'Terminated in under 45 seconds.' },
+      { label: 'Security sys', desc: 'Camera + access install.' },
+      { label: 'Humility', desc: 'A hell of a teacher.' },
+    ],
+    color: 0x8b6914, hex: '#8b6914'
+  },
+  {
+    id: 'now',
+    year: '2026',
+    title: 'Seek & Employ',
+    role: 'Thinker & Maker · Present',
+    era: '2025 — 2026',
+    domain: 'now',
+    body: 'Currently seeking the next full-time role. I want work that matters with people who care. I am not looking for a title. I am looking for a team. I offer systems thinking and hands-on prototyping — I bridge design and development because I have lived on both sides of the handoff.',
+    sentences: [
+      'Currently I\'m seeking my next full-time role.',
+      'I want work that matters with people who care.',
+      'I am not looking for a title. I am looking for a team.',
+      'I offer systems thinking and hands-on prototyping.',
+      'I bridge design and development because I have lived on both sides of the handoff.',
+      'I think. I make. I ship.',
+    ],
+    images: [
+      { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=240&h=180&fit=crop', caption: 'Thinker & Maker' },
+    ],
+    moons: [
+      { label: 'Systems', desc: 'Thinking at scale.' },
+      { label: 'Prototyping', desc: 'Hands-on, always.' },
+      { label: 'Open to work', desc: 'Full-time, in-person or remote.' },
+    ],
+    color: 0xdaa520, hex: '#daa520'
+  },
+];
+
+// ─────────────────────────────────────────────────────────
+// SPIRAL GEOMETRY
+// ─────────────────────────────────────────────────────────
+function spiralPos(t, view) {
+  if (view === 'arc') {
+    const angle = (t - 0.5) * Math.PI * 1.2;
+    const radius = 28;
+    return new THREE.Vector3(
+      Math.cos(angle) * radius,
+      (t - 0.5) * 8,
+      Math.sin(angle) * radius * 0.3
+    );
+  }
+  const turns = 1.65;
+  const angle = t * Math.PI * 2 * turns - Math.PI * 0.5;
+  const minR = 4, maxR = 28;
+  const radius = minR + (maxR - minR) * Math.pow(t, 0.7);
+  return new THREE.Vector3(Math.cos(angle) * radius, (t - 0.5) * 22, Math.sin(angle) * radius);
+}
+
+ERAS.forEach((era, i) => {
+  const t = i / (ERAS.length - 1);
+  era._t = t;
+  era._spiralPos = spiralPos(t, 'spiral');
+  era._arcPos = spiralPos(t, 'arc');
+  era._pos = era._spiralPos.clone();
+});
+
+const ERA_BY_ID = {};
+ERAS.forEach(e => { ERA_BY_ID[e.id] = e; });
+
+// ─────────────────────────────────────────────────────────
+// THREE.JS SETUP
+// ─────────────────────────────────────────────────────────
+let isLight = false;
+const cvs = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x000000, 0.008);
+const cam = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.1, 2000);
+
+let camState = { phi: Math.PI * 0.28, theta: Math.PI * 0.1, radius: 68 };
+let camTarget = { ...camState };
+const scenePivot = new THREE.Vector3();
+const scenePivotTgt = new THREE.Vector3();
+
+function applyCam() {
+  const { phi, theta, radius } = camState, c = scenePivot;
+  cam.position.set(
+    c.x + radius * Math.sin(phi) * Math.sin(theta),
+    c.y + radius * Math.cos(phi),
+    c.z + radius * Math.sin(phi) * Math.cos(theta)
+  );
+  cam.lookAt(c);
+}
+applyCam();
+
+const ambLight = new THREE.AmbientLight(0xffffff, 0.12); scene.add(ambLight);
+const dLight = new THREE.DirectionalLight(0xffd070, 0.4); dLight.position.set(10, 30, 10); scene.add(dLight);
+const gold1 = new THREE.PointLight(0xdaa520, 5, 120); gold1.position.set(-15, 8, -15); scene.add(gold1);
+const gold2 = new THREE.PointLight(0xb87333, 4, 100); gold2.position.set(15, 8, 15); scene.add(gold2);
+const warmTop = new THREE.PointLight(0xffc060, 3, 80); warmTop.position.set(0, 20, 0); scene.add(warmTop);
+
+// Particles
+const PC = 800;
+const pPos = new Float32Array(PC * 3), pPh = new Float32Array(PC), pSp = new Float32Array(PC);
+for (let i = 0; i < PC; i++) {
+  const r = 8 + Math.pow(Math.random(), 0.6) * 40, a = Math.random() * Math.PI * 2, h = (Math.random() - 0.5) * 30;
+  pPos[i*3] = Math.cos(a)*r; pPos[i*3+1] = h; pPos[i*3+2] = Math.sin(a)*r;
+  pPh[i] = Math.random() * Math.PI * 2; pSp[i] = 0.15 + Math.random() * 0.25;
+}
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos.slice(), 3));
+const pOrig = pPos.slice();
+const pMat = new THREE.PointsMaterial({ color: 0xdaa520, size: 0.05, transparent: true, opacity: 0.12, sizeAttenuation: true, depthWrite: false });
+scene.add(new THREE.Points(pGeo, pMat));
+
+// ─────────────────────────────────────────────────────────
+// SCENE BUILDING
+// ─────────────────────────────────────────────────────────
+const nodeObjects = [], allLines = [], allLabels = [], glowSprites = [];
+const moonSystems = [];
+const raycaster = new THREE.Raycaster();
+
+function makeGlowSprite(color, radius) {
+  const sz = 128, c = document.createElement('canvas'); c.width = sz; c.height = sz;
+  const ctx = c.getContext('2d'), cx = sz/2, cy = sz/2;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, sz/2);
+  const r = (color>>16)&255, g = (color>>8)&255, b = color&255;
+  grad.addColorStop(0, `rgba(${r},${g},${b},0.60)`);
+  grad.addColorStop(0.4, `rgba(${r},${g},${b},0.18)`);
+  grad.addColorStop(0.8, `rgba(${r},${g},${b},0.04)`);
+  grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  spr.scale.set(radius * 6, radius * 6, 1);
+  return spr;
+}
+
+function makeLabelCanvas(text, color, fs) {
+  const c = document.createElement('canvas'); c.width = 640; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.font = `400 ${fs * 2.2}px "DM Mono", monospace`;
+  ctx.fillText(text.toUpperCase(), 10, 42);
+  return c;
+}
+
+function addLabel(text, pos, dkColor, fs) {
+  const c = makeLabelCanvas(text, dkColor, fs);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  spr.position.copy(pos).add(new THREE.Vector3(0.6, 0.5, 0));
+  spr.scale.set(11, 1.1, 1);
+  scene.add(spr);
+  allLabels.push({ spr, text, darkColor: dkColor, fs });
+  return spr;
+}
+
+function redrawLabels() {
+  allLabels.forEach(({ spr, text, darkColor, fs }) => {
+    const color = isLight ? 'rgba(60,30,0,0.65)' : darkColor;
+    const c = makeLabelCanvas(text, color, fs);
+    spr.material.map.dispose();
+    spr.material.map = new THREE.CanvasTexture(c);
+    spr.material.needsUpdate = true;
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// MOON LABEL — galaxy style: plain text, no pill, no fill
+// ─────────────────────────────────────────────────────────
+function makeMoonLabelCanvas(text, hexColor) {
+  const c = document.createElement('canvas'); c.width = 320; c.height = 40;
+  const ctx = c.getContext('2d');
+  // Pure text on transparent canvas — no pill, no background, no stroke
+  ctx.fillStyle = isLight ? 'rgba(60,30,0,0.75)' : hexColor + 'cc';
+  ctx.font = '400 13px "DM Mono", monospace';
+  ctx.fillText(text.toUpperCase(), 6, 26);
+  return { canvas: c, w: 320, h: 40 };
+}
+
+function buildMoons(era, parentPos, parentSize) {
+  if (!era.moons || era.moons.length === 0) return null;
+  const system = { moons: [], parentEra: era };
+
+  const orbit1 = era.moons.slice(0, Math.min(3, era.moons.length));
+  const orbit2 = era.moons.length > 3 ? era.moons.slice(3) : [];
+
+  [orbit1, orbit2].forEach((group, orbitIdx) => {
+    if (!group.length) return;
+    const orbitR = parentSize * 8 + orbitIdx * parentSize * 5.5;
+    const tiltY  = orbitIdx === 0 ? 0.22 : 0.38;
+
+    // Faint orbit ring
+    const ringPts = [];
+    for (let k = 0; k <= 64; k++) {
+      const a = (k / 64) * Math.PI * 2;
+      ringPts.push(new THREE.Vector3(
+        Math.cos(a) * orbitR,
+        Math.sin(a) * orbitR * tiltY,
+        Math.sin(a) * orbitR * 0.28
+      ));
+    }
+    const ring = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(ringPts),
+      new THREE.LineBasicMaterial({ color: era.color, transparent: true, opacity: 0.055, depthWrite: false })
+    );
+    scene.add(ring);
+    allLines.push({ line: ring, darkOp: 0.055, lightOp: 0.14, darkColor: era.color, lightColor: 0x5a3000 });
+
+    group.forEach((moon, mi) => {
+      const baseAngle = (mi / group.length) * Math.PI * 2;
+      const speed = 0.16 + orbitIdx * 0.09 + mi * 0.025;
+      const { canvas } = makeMoonLabelCanvas(moon.label, era.hex);
+
+      // Small sphere dot (galaxy style)
+      const dotGeo = new THREE.SphereGeometry(parentSize * 0.35, 8, 8);
+      const dotMat = new THREE.MeshPhysicalMaterial({
+        color: era.color, emissive: era.color,
+        emissiveIntensity: 1.2,
+        metalness: 0, roughness: 0.1,
+        transparent: true, opacity: 0, depthWrite: false
+      });
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      scene.add(dot);
+
+      // Glow on dot
+      const dotGlow = makeGlowSprite(era.color, parentSize * 0.35);
+      dotGlow.material.opacity = 0;
+      scene.add(dotGlow);
+
+      // Text label sprite — fixed aspect ratio, no stretch
+      const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: new THREE.CanvasTexture(canvas),
+        transparent: true, depthWrite: false
+      }));
+      // 320:40 = 8:1 ratio. Scale so height ≈ 0.45 world units → width = 3.6
+      spr.scale.set(3.6, 0.45, 1);
+      spr.userData = { isMoonLabel: true, moon, era };
+      scene.add(spr);
+
+      system.moons.push({ dot, dotGlow, spr, moon, baseAngle, orbitR, tiltY, orbitIdx, speed, ring, era });
+    });
+  });
+
+  moonSystems.push(system);
+  return system;
+}
+
+function tickMoons(elapsed) {
+  moonSystems.forEach(sys => {
+    const pos = sys.parentEra._pos;
+    sys.moons.forEach(m => {
+      const angle = m.baseAngle + elapsed * m.speed;
+      const ox = pos.x + Math.cos(angle) * m.orbitR;
+      const oy = pos.y + Math.sin(angle) * m.orbitR * m.tiltY;
+      const oz = pos.z + Math.sin(angle) * m.orbitR * 0.28;
+
+      m.dot.position.set(ox, oy, oz);
+      m.dotGlow.position.set(ox, oy, oz);
+      // Label sits just ahead of the dot
+      m.spr.position.set(ox + 0.18, oy + 0.16, oz);
+      m.ring.position.copy(pos);
+
+      // Fade in when focused on parent
+      const targetOp = isFocused && focusedEra && focusedEra.id === m.era.id ? 1.0 : 0.0;
+      m.dot.material.opacity += (targetOp * 0.85 - m.dot.material.opacity) * 0.08;
+      m.dotGlow.material.opacity += (targetOp * 0.55 - m.dotGlow.material.opacity) * 0.08;
+      m.spr.material.opacity += (targetOp * 0.72 - m.spr.material.opacity) * 0.08;
+    });
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// SCENE BUILD
+// ─────────────────────────────────────────────────────────
+function buildSpiralTube() {
+  const pts = ERAS.map(e => e._spiralPos.clone());
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const tubePts = curve.getPoints(200);
+  const tubeMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0.08 });
+  const tube = new THREE.Line(new THREE.BufferGeometry().setFromPoints(tubePts), tubeMat);
+  scene.add(tube);
+  allLines.push({ line: tube, darkOp: 0.08, lightOp: 0.20, darkColor: 0xdaa520, lightColor: 0x5a3000 });
+
+  const innerMat = new THREE.LineBasicMaterial({ color: 0xb87333, transparent: true, opacity: 0.04 });
+  const inner = new THREE.Line(new THREE.BufferGeometry().setFromPoints(tubePts), innerMat);
+  scene.add(inner);
+  allLines.push({ line: inner, darkOp: 0.04, lightOp: 0.12, darkColor: 0xb87333, lightColor: 0x5a3000 });
+}
+
+function buildScene() {
+  buildSpiralTube();
+
+  const spinePts = [new THREE.Vector3(0, -14, 0), new THREE.Vector3(0, 14, 0)];
+  const spineMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0.04 });
+  const spine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(spinePts), spineMat);
+  scene.add(spine);
+  allLines.push({ line: spine, darkOp: 0.04, lightOp: 0.10, darkColor: 0xdaa520, lightColor: 0x5a3000 });
+
+  ERAS.forEach((era, i) => {
+    const pos = era._spiralPos;
+    const nodeSize = era.id === 'now' ? 0.30 : 0.16 + era._t * 0.08;
+
+    // Spoke
+    const spokeY = new THREE.Vector3(0, pos.y, 0);
+    const spokeMat = new THREE.LineBasicMaterial({ color: era.color, transparent: true, opacity: 0.06 });
+    const spoke = new THREE.Line(new THREE.BufferGeometry().setFromPoints([spokeY, pos.clone()]), spokeMat);
+    scene.add(spoke);
+    allLines.push({ line: spoke, darkOp: 0.06, lightOp: 0.18, darkColor: era.color, lightColor: 0x5a3000 });
+
+    // Planet node
+    const geo = new THREE.SphereGeometry(nodeSize, 16, 16);
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: era.color, emissive: era.color,
+      emissiveIntensity: era.id === 'now' ? 2.4 : 1.3,
+      metalness: 0.3, roughness: 0.08, clearcoat: 1.0,
+      transparent: true, opacity: 0.92
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(pos);
+    mesh.userData = { era, origColor: era.color, origEI: era.id === 'now' ? 2.4 : 1.3, isMoon: false };
+    scene.add(mesh);
+    nodeObjects.push({ mesh, era });
+
+    // Glow sprite on planet
+    const gs = makeGlowSprite(era.color, nodeSize);
+    gs.position.copy(pos);
+    gs.material.opacity = 0.65;
+    scene.add(gs);
+    glowSprites.push(gs);
+
+    // Label
+    const shortTitle = era.title.length > 28 ? era.title.slice(0, 26) + '…' : era.title;
+    addLabel(shortTitle, pos, era.hex + 'bb', 6.5);
+    addLabel(era.year, new THREE.Vector3(-0.8, pos.y, 0), 'rgba(218,165,32,0.35)', 5.5);
+
+    // Build orbiting moons
+    buildMoons(era, pos, nodeSize);
+  });
+
+  // Connection lines between eras
+  for (let i = 0; i < ERAS.length - 1; i++) {
+    const a = ERAS[i], b = ERAS[i+1];
+    const mid = a._spiralPos.clone().add(b._spiralPos).multiplyScalar(0.5); mid.y += 0.5;
+    const pts = new THREE.QuadraticBezierCurve3(a._spiralPos, mid, b._spiralPos).getPoints(24);
+    const connMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0.22 });
+    const conn = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), connMat);
+    scene.add(conn);
+    allLines.push({ line: conn, darkOp: 0.22, lightOp: 0.40, darkColor: 0xdaa520, lightColor: 0x5a3000 });
+  }
+}
+buildScene();
+
+// ─────────────────────────────────────────────────────────
+// TIMELINE NAV STRIP
+// ─────────────────────────────────────────────────────────
+function buildTimelineNav() {
+  const track = document.getElementById('tl-track');
+  ERAS.forEach((era, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'tl-pip';
+    pip.dataset.idx = i;
+    pip.title = era.title;
+    pip.innerHTML = `<div class="tl-pip-year">${era.year}</div><div class="tl-pip-dot"></div>`;
+    pip.addEventListener('click', () => focusEra(era));
+    track.appendChild(pip);
+  });
+}
+buildTimelineNav();
+
+function updateTimelineNav(activeEra) {
+  document.querySelectorAll('.tl-pip').forEach((pip, i) => {
+    pip.classList.toggle('active', activeEra && ERAS[i].id === activeEra.id);
+  });
+  if (activeEra) {
+    const activePip = document.querySelector('.tl-pip.active');
+    if (activePip) activePip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+    const idx = ERAS.findIndex(e => e.id === activeEra.id);
+    document.getElementById('tl-label').textContent = `${idx + 1} / ${ERAS.length}`;
+    document.getElementById('tl-prev').disabled = idx === 0;
+    document.getElementById('tl-next').disabled = idx === ERAS.length - 1;
+  } else {
+    document.getElementById('tl-label').textContent = '——';
+    document.getElementById('tl-prev').disabled = false;
+    document.getElementById('tl-next').disabled = false;
+  }
+}
+
+document.getElementById('tl-prev').addEventListener('click', () => {
+  const idx = focusedEra ? ERAS.findIndex(e => e.id === focusedEra.id) : 1;
+  if (idx > 0) focusEra(ERAS[idx - 1]);
+});
+document.getElementById('tl-next').addEventListener('click', () => {
+  const idx = focusedEra ? ERAS.findIndex(e => e.id === focusedEra.id) : -1;
+  if (idx < ERAS.length - 1) focusEra(ERAS[idx + 1]);
+});
+
+document.getElementById('gc-prev').addEventListener('click', () => {
+  if (!focusedEra) return;
+  const idx = ERAS.findIndex(e => e.id === focusedEra.id);
+  if (idx > 0) focusEra(ERAS[idx - 1]);
+});
+document.getElementById('gc-next').addEventListener('click', () => {
+  if (!focusedEra) return;
+  const idx = ERAS.findIndex(e => e.id === focusedEra.id);
+  if (idx < ERAS.length - 1) focusEra(ERAS[idx + 1]);
+});
+document.getElementById('ms-prev').addEventListener('click', () => {
+  if (!focusedEra) return;
+  const idx = ERAS.findIndex(e => e.id === focusedEra.id);
+  if (idx > 0) focusEra(ERAS[idx - 1]);
+});
+document.getElementById('ms-next').addEventListener('click', () => {
+  if (!focusedEra) return;
+  const idx = ERAS.findIndex(e => e.id === focusedEra.id);
+  if (idx < ERAS.length - 1) focusEra(ERAS[idx + 1]);
+});
+
+// ─────────────────────────────────────────────────────────
+// VIEW SWITCHING
+// ─────────────────────────────────────────────────────────
+let currentView = 'spiral';
+let morphing = false, morphT = 0;
+
+function switchView(view) {
+  if (view === currentView) return;
+  currentView = view;
+  morphing = true; morphT = 0;
+  document.querySelectorAll('.hud-btn[data-view]').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-view="${view}"]`).classList.add('active');
+  if (view === 'arc') { camTarget.phi = Math.PI * 0.08; camTarget.theta = 0; camTarget.radius = 55; }
+  else { camTarget.phi = Math.PI * 0.28; camTarget.radius = 68; }
+}
+
+document.querySelectorAll('.hud-btn[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+document.getElementById('hud-zoom-in').addEventListener('click', () => { camTarget.radius = Math.max(12, camTarget.radius - 12); });
+document.getElementById('hud-zoom-out').addEventListener('click', () => { camTarget.radius = Math.min(130, camTarget.radius + 12); });
+
+// ─────────────────────────────────────────────────────────
+// PANEL
+// ─────────────────────────────────────────────────────────
+let focusedEra = null;
+
+function buildImageStrip(era, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  if (!era.images || era.images.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'flex';
+  era.images.forEach(img => {
+    const frame = document.createElement('div');
+    frame.className = containerId.includes('ms') ? 'ms-img-frame' : 'gc-img-frame';
+    const el = document.createElement('img');
+    el.src = img.src;
+    el.alt = img.caption || '';
+    el.loading = 'lazy';
+    el.onerror = () => {
+      frame.innerHTML = `<div class="gc-img-placeholder">${img.caption || 'IMG'}</div>`;
+    };
+    frame.appendChild(el);
+    container.appendChild(frame);
+  });
+}
+
+function buildMoonPills(era) {
+  const section = document.getElementById('gc-moons');
+  const pillsContainer = document.getElementById('gc-moon-pills');
+  pillsContainer.innerHTML = '';
+  if (!era.moons || era.moons.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  era.moons.forEach(moon => {
+    const pill = document.createElement('span');
+    pill.className = 'gc-moon-pill';
+    pill.textContent = moon.label;
+    pill.title = moon.desc || '';
+    pill.addEventListener('click', () => {
+      pillsContainer.querySelectorAll('.gc-moon-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+    pillsContainer.appendChild(pill);
+  });
+}
+
+function openPanel(era) {
+  const idx = ERAS.findIndex(e => e.id === era.id);
+  document.getElementById('gc-era').textContent = era.era;
+  document.getElementById('gc-title').textContent = era.title;
+  document.getElementById('gc-role').textContent = era.role;
+  document.getElementById('gc-body').textContent = era.body;
+  document.getElementById('gc-tag').textContent = era.domain;
+
+  document.getElementById('gc-prev').disabled = idx === 0;
+  document.getElementById('gc-next').disabled = idx === ERAS.length - 1;
+
+  buildImageStrip(era, 'gc-images');
+  buildImageStrip(era, 'ms-images');
+  buildMoonPills(era);
+
+  const list = document.getElementById('gc-sent-list');
+  list.innerHTML = '';
+  era.sentences.forEach((s, i) => {
+    const el = document.createElement('span');
+    el.className = 'gc-sent' + (i === 0 ? ' active' : '');
+    el.textContent = s;
+    el.addEventListener('click', () => {
+      list.querySelectorAll('.gc-sent').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+    });
+    list.appendChild(el);
+  });
+
+  document.getElementById('ghost').classList.add('on');
+
+  document.getElementById('ms-era').textContent = era.era;
+  document.getElementById('ms-title').textContent = era.title;
+  document.getElementById('ms-body').textContent = era.body;
+  document.getElementById('ms-prev').disabled = idx === 0;
+  document.getElementById('ms-next').disabled = idx === ERAS.length - 1;
+  document.getElementById('msheet').classList.add('on');
+
+  document.getElementById('era-year').textContent = era.year;
+  document.getElementById('era-name').textContent = era.era;
+
+  updateTimelineNav(era);
+}
+
+window.closePanel = function () {
+  focusedEra = null; isFocused = false;
+  document.getElementById('ghost').classList.remove('on');
+  document.getElementById('msheet').classList.remove('on');
+  updateTimelineNav(null);
+  scenePivotTgt.set(0, 0, 0);
+  camTarget.radius = 68; camTarget.phi = Math.PI * 0.28;
+  resetHighlights();
+};
+
+// ─────────────────────────────────────────────────────────
+// FOCUS
+// ─────────────────────────────────────────────────────────
+let isFocused = false;
+
+function focusEra(era) {
+  isFocused = true; focusedEra = era;
+  scenePivotTgt.copy(era._pos);
+  camTarget.radius = 20; camTarget.phi = Math.PI * 0.22;
+  openPanel(era);
+  highlightConnections(era);
+}
+
+function highlightConnections(era) {
+  const idx = ERAS.findIndex(e => e.id === era.id);
+  nodeObjects.forEach(({ mesh }, i) => {
+    const near = Math.abs(i - idx) <= 2;
+    mesh.material.opacity = near ? 0.96 : 0.18;
+    mesh.material.emissiveIntensity = near ? (mesh.userData.origEI * 1.5) : 0.1;
+  });
+  allLines.forEach(({ line, darkOp }) => { line.material.opacity = darkOp * 0.3; });
+}
+
+function resetHighlights() {
+  nodeObjects.forEach(({ mesh }) => {
+    mesh.material.opacity = 0.92; mesh.material.emissiveIntensity = mesh.userData.origEI;
+  });
+  allLines.forEach(({ line, darkOp, lightOp }) => { line.material.opacity = isLight ? lightOp : darkOp; });
+}
+
+// Moon image ghost — disabled
+function showMoonGhost() { /* no-op */ }
+function hideMoonGhost() { /* no-op */ }
+
+// ─────────────────────────────────────────────────────────
+// INTERACTION
+// ─────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+let hoveredMesh = null, mouse = new THREE.Vector2();
+let drag = false, lastDragX = 0, lastDragY = 0, isDragging = false;
+let hintFaded = false, orbitPaused = false;
+let hoveredNodeMesh = null;
+
+function getAllHittable() {
+  return nodeObjects.map(o => o.mesh);
+}
+
+function checkHover(clientX, clientY) {
+  raycaster.setFromCamera(mouse, cam);
+  const hits = raycaster.intersectObjects(getAllHittable());
+
+  if (hoveredNodeMesh && (!hits.length || hits[0].object !== hoveredNodeMesh)) {
+    hoveredNodeMesh.scale.setScalar(hoveredNodeMesh.userData._baseScale || 1);
+    hoveredNodeMesh = null;
+  }
+
+  if (hits.length) {
+    const hit = hits[0].object;
+    const nodeObj = nodeObjects.find(o => o.mesh === hit);
+    const e = nodeObj ? nodeObj.era : null;
+
+    if (e && hoveredMesh !== hit) {
+      hoveredMesh = hit;
+      document.getElementById('tt-era').textContent = e.era;
+      document.getElementById('tt-title').textContent = e.title;
+      document.getElementById('tt-title').style.color = isLight ? '#2a1000' : '#f5ecd5';
+      document.getElementById('tt-role').textContent = e.role;
+      document.getElementById('tt-sub').textContent = '';
+      tooltip.classList.add('vis');
+    }
+
+    if (nodeObj && nodeObj.mesh !== hoveredNodeMesh) {
+      if (hoveredNodeMesh) hoveredNodeMesh.scale.setScalar(hoveredNodeMesh.userData._baseScale || 1);
+      hoveredNodeMesh = nodeObj.mesh;
+      if (!hoveredNodeMesh.userData._baseScale) hoveredNodeMesh.userData._baseScale = 1;
+      hoveredNodeMesh.scale.setScalar(1.55);
+    }
+
+    document.body.style.cursor = 'pointer';
+  } else {
+    if (hoveredMesh) { hoveredMesh = null; tooltip.classList.remove('vis'); }
+    document.body.style.cursor = 'default';
+  }
+}
+
+function posTooltip(cx, cy) {
+  tooltip.style.transform = `translate(${cx + 18}px,${cy - 10}px)`;
+}
+
+cvs.addEventListener('pointerdown', e => {
+  if (e.button === 2) return;
+  isDragging = false; drag = false;
+  lastDragX = e.clientX; lastDragY = e.clientY;
+  cvs.setPointerCapture(e.pointerId);
+});
+
+cvs.addEventListener('pointermove', e => {
+  const rect = cvs.getBoundingClientRect();
+  mouse.x = (e.clientX - rect.left) / rect.width * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  posTooltip(e.clientX, e.clientY);
+  if (e.buttons && e.button !== 2) {
+    isDragging = true; drag = true;
+    camTarget.theta -= (e.clientX - lastDragX) * 0.005;
+    camTarget.phi = Math.max(0.04, Math.min(Math.PI * 0.48, camTarget.phi + (e.clientY - lastDragY) * 0.005));
+    lastDragX = e.clientX; lastDragY = e.clientY;
+  } else {
+    checkHover(e.clientX, e.clientY);
+  }
+});
+
+cvs.addEventListener('pointerup', e => {
+  if (e.button === 2) return;
+  if (!drag) {
+    raycaster.setFromCamera(mouse, cam);
+    const hits = raycaster.intersectObjects(getAllHittable());
+    if (hits.length) {
+      const hit = hits[0].object;
+      const nodeObj = nodeObjects.find(o => o.mesh === hit);
+      if (nodeObj) focusEra(nodeObj.era);
+    } else if (isFocused) {
+      closePanel();
+    }
+  }
+  if (!hintFaded) { document.getElementById('hint').style.opacity = '0.05'; hintFaded = true; }
+});
+
+cvs.addEventListener('wheel', e => { camTarget.radius = Math.max(10, Math.min(130, camTarget.radius + e.deltaY * 0.06)); }, { passive: true });
+cvs.addEventListener('contextmenu', e => { e.preventDefault(); openTOC(); });
+
+let longPressTimer = null;
+cvs.addEventListener('touchstart', e => {
+  longPressTimer = setTimeout(() => { openTOC(); }, 600);
+}, { passive: true });
+cvs.addEventListener('touchend', () => { clearTimeout(longPressTimer); });
+cvs.addEventListener('touchmove', () => { clearTimeout(longPressTimer); });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (tocVisible) { closeTOC(); } else { closePanel(); } }
+  if (e.code === 'Space') { e.preventDefault(); orbitPaused = !orbitPaused; }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    const idx = focusedEra ? ERAS.findIndex(er => er.id === focusedEra.id) : -1;
+    if (idx < ERAS.length - 1) focusEra(ERAS[idx + 1]);
+  }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (focusedEra) {
+      const idx = ERAS.findIndex(er => er.id === focusedEra.id);
+      if (idx > 0) focusEra(ERAS[idx - 1]);
+    }
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// TABLE OF CONTENTS
+// ─────────────────────────────────────────────────────────
+let tocVisible = false;
+
+function buildTOC() {
+  const list = document.getElementById('toc-list');
+  ERAS.forEach((era, i) => {
+    const row = document.createElement('div');
+    row.className = 'toc-row';
+    row.innerHTML = `
+      <span class="toc-year">${era.year}</span>
+      <span class="toc-name">${era.title}</span>
+      <span class="toc-domain">${era.domain}</span>`;
+    row.addEventListener('click', () => { closeTOC(); focusEra(era); });
+    list.appendChild(row);
+  });
+}
+buildTOC();
+
+function openTOC() {
+  document.getElementById('toc').classList.add('vis');
+  tocVisible = true;
+}
+window.closeTOC = function () {
+  document.getElementById('toc').classList.remove('vis');
+  tocVisible = false;
+};
+document.getElementById('toc').addEventListener('click', e => {
+  if (e.target === document.getElementById('toc')) closeTOC();
+});
+
+// ─────────────────────────────────────────────────────────
+// THEME
+// ─────────────────────────────────────────────────────────
+function applyTheme() {
+  document.body.classList.toggle('light', isLight);
+  document.getElementById('theme-toggle').textContent = isLight ? 'Dark' : 'Light';
+  allLines.forEach(({ line, darkColor, lightColor, darkOp, lightOp }) => {
+    line.material.color.setHex(isLight ? (lightColor || 0x5a3000) : darkColor);
+    line.material.opacity = isLight ? lightOp : darkOp;
+  });
+  nodeObjects.forEach(({ mesh }) => {
+    if (isLight) {
+      mesh.material.color.setHex(0x3a1a00);
+      mesh.material.emissive.setHex(0x000000);
+      mesh.material.emissiveIntensity = 0;
+      mesh.material.metalness = 0.1; mesh.material.roughness = 0.6;
+    } else {
+      const ud = mesh.userData;
+      mesh.material.color.setHex(ud.origColor);
+      mesh.material.emissive.setHex(ud.origColor);
+      mesh.material.emissiveIntensity = ud.origEI;
+      mesh.material.metalness = 0.3; mesh.material.roughness = 0.08;
+    }
+  });
+  glowSprites.forEach(gs => { gs.visible = !isLight; });
+  gold1.intensity = isLight ? 0 : 5;
+  gold2.intensity = isLight ? 0 : 4;
+  warmTop.intensity = isLight ? 0 : 3;
+  ambLight.intensity = isLight ? 1.1 : 0.12;
+  pMat.opacity = isLight ? 0 : 0.12;
+  scene.fog.color.setHex(isLight ? 0xf5f1ea : 0x000000);
+  renderer.setClearColor(isLight ? 0xf5f1ea : 0x000000, 0);
+  redrawLabels();
+  drawMesh();
+}
+document.getElementById('theme-toggle').addEventListener('click', () => { isLight = !isLight; applyTheme(); });
+
+// ─────────────────────────────────────────────────────────
+// BACKGROUND MESH
+// ─────────────────────────────────────────────────────────
+const bgCanvas = document.getElementById('bg-mesh'), bgCtx = bgCanvas.getContext('2d');
+function resizeBg() { bgCanvas.width = innerWidth; bgCanvas.height = innerHeight; } resizeBg();
+const BD = [
+  { x:0.12,y:0.22,vx:0.00007,vy:0.00005,r:0.65,col:[60,30,5] },
+  { x:0.78,y:0.70,vx:-0.00005,vy:0.00007,r:0.55,col:[50,20,2] },
+  { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.45,col:[80,45,8] },
+  { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.50,col:[40,15,2] },
+];
+const BL = [
+  { x:0.12,y:0.22,vx:0.00007,vy:0.00005,r:0.65,col:[220,200,170] },
+  { x:0.78,y:0.70,vx:-0.00005,vy:0.00007,r:0.55,col:[210,185,150] },
+  { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.45,col:[230,215,185] },
+  { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.50,col:[215,195,165] },
+];
+function drawMesh() {
+  const w = bgCanvas.width, h = bgCanvas.height;
+  bgCtx.clearRect(0, 0, w, h);
+  const blobs = isLight ? BL : BD;
+  bgCtx.fillStyle = isLight ? '#f5f1ea' : '#05030a';
+  bgCtx.fillRect(0, 0, w, h);
+  blobs.forEach(b => {
+    const cx = b.x*w, cy = b.y*h, rad = Math.max(w,h)*b.r;
+    const grd = bgCtx.createRadialGradient(cx,cy,0,cx,cy,rad);
+    const [r,g,bl] = b.col;
+    grd.addColorStop(0, `rgba(${r},${g},${bl},${isLight?0.40:0.55})`);
+    grd.addColorStop(0.5, `rgba(${r},${g},${bl},${isLight?0.12:0.14})`);
+    grd.addColorStop(1, `rgba(${r},${g},${bl},0)`);
+    bgCtx.fillStyle = grd; bgCtx.fillRect(0, 0, w, h);
+  });
+  const vig = bgCtx.createRadialGradient(w/2,h/2,h*0.3,w/2,h/2,h*0.9);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(1,isLight?'rgba(30,10,0,0.07)':'rgba(0,0,0,0.72)');
+  bgCtx.fillStyle = vig; bgCtx.fillRect(0, 0, w, h);
+}
+let meshT = 0;
+function tickMesh() {
+  meshT++;
+  [...BD,...BL].forEach(b => {
+    b.x += b.vx; b.y += b.vy;
+    if (b.x<0||b.x>1) b.vx*=-1;
+    if (b.y<0||b.y>1) b.vy*=-1;
+  });
+  if (meshT % 3 === 0) drawMesh();
+  requestAnimationFrame(tickMesh);
+}
+drawMesh(); tickMesh();
+
+// ─────────────────────────────────────────────────────────
+// NODE MORPH (spiral ↔ arc)
+// ─────────────────────────────────────────────────────────
+function tickMorph() {
+  if (!morphing) return;
+  morphT = Math.min(morphT + 0.04, 1);
+  const ease = morphT < 0.5 ? 2*morphT*morphT : 1 - Math.pow(-2*morphT+2,2)/2;
+  nodeObjects.forEach(({ mesh, era }, i) => {
+    const from = currentView === 'arc' ? era._spiralPos : era._arcPos;
+    const to   = currentView === 'arc' ? era._arcPos   : era._spiralPos;
+    mesh.position.lerpVectors(from, to, ease);
+    era._pos.copy(mesh.position);
+    if (glowSprites[i]) glowSprites[i].position.copy(mesh.position);
+    if (allLabels[i*2]) allLabels[i*2].spr.position.set(mesh.position.x+0.6, mesh.position.y+0.5, mesh.position.z);
+  });
+  if (morphT >= 1) morphing = false;
+}
+
+// ─────────────────────────────────────────────────────────
+// ANIMATE
+// ─────────────────────────────────────────────────────────
+let lastTime = 0, elapsed = 0;
+
+function animate(ts) {
+  requestAnimationFrame(animate);
+  const dt = Math.min((ts - lastTime) / 1000, 0.05);
+  lastTime = ts; elapsed += dt;
+
+  camState.phi   += (camTarget.phi   - camState.phi)   * 0.08;
+  camState.theta += (camTarget.theta - camState.theta) * 0.08;
+  camState.radius+= (camTarget.radius- camState.radius)* 0.08;
+  scenePivot.lerp(scenePivotTgt, 0.08);
+
+  if (!isFocused && !isDragging && !orbitPaused) camTarget.theta += dt * 0.015;
+
+  if (!isFocused) {
+    nodeObjects.forEach(({ mesh, era }) => {
+      const pulse = 1 + Math.sin(elapsed * 0.7 + era._t * Math.PI * 2) * 0.025;
+      mesh.scale.setScalar(pulse);
+    });
+  }
+
+  const pa = pGeo.attributes.position.array;
+  for (let i = 0; i < PC; i++) pa[i*3+1] = pOrig[i*3+1] + Math.sin(elapsed*pSp[i]+pPh[i])*0.35;
+  pGeo.attributes.position.needsUpdate = true;
+
+  tickMorph();
+  tickMoons(elapsed);
+
+  gold1.intensity = (isLight ? 0 : 5) + Math.sin(elapsed * 0.8) * 0.5;
+  gold2.intensity = (isLight ? 0 : 4) + Math.sin(elapsed * 0.6 + 1.2) * 0.4;
+
+  applyCam();
+  renderer.render(scene, cam);
+  isDragging = false;
+}
+requestAnimationFrame(animate);
+
+window.addEventListener('resize', () => {
+  cam.aspect = innerWidth / innerHeight;
+  cam.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  resizeBg(); drawMesh();
+});
+</script>
+</body>
+</html>

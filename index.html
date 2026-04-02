@@ -3,138 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Wolfgang & Co. · Career Spiral</title>
+<title>Zack Gort · Senior UX/UI Designer & Strategist · Wolfgang & Co.</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><text y='28' font-size='24' font-family='monospace' font-weight='300' fill='%23daa520'>&lt;/</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#05030a;transition:background 0.6s;}
-body.light{background:#f5f1ea;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:#05030a;transition:background 0.6s;user-select:none;-webkit-user-select:none;}
+body.light{background:#ffffff;}
 canvas{display:block;width:100vw;height:100vh;position:relative;z-index:1;}
 #bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;}
 
-#brand{position:fixed;top:24px;left:28px;z-index:100;pointer-events:none;font-family:'DM Mono',monospace;}
+#brand{position:fixed;top:20px;left:24px;z-index:100;font-family:'DM Mono',monospace;cursor:pointer;}
+#brand-logo{display:flex;align-items:center;gap:10px;position:relative;}
+#brand-saturn{flex-shrink:0;opacity:0.75;transition:opacity 0.3s;}
+#brand:hover #brand-saturn{opacity:1;}
+#brand-text{display:flex;flex-direction:column;gap:3px;}
 #brand-name{font-size:10px;letter-spacing:0.26em;text-transform:uppercase;color:rgba(218,165,32,0.70);transition:color 0.5s;}
-#brand-sub{font-size:7.5px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(218,165,32,0.28);margin-top:5px;transition:color 0.5s;}
-body.light #brand-name{color:rgba(100,60,0,0.85);}
-body.light #brand-sub{color:rgba(100,60,0,0.45);}
+#brand-sub{font-size:7.5px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(218,165,32,0.28);transition:color 0.5s;}
+/* Ghost acronym tooltip */
+#brand-dab{
+  position:absolute;top:calc(100% + 8px);left:0;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.18em;
+  text-transform:uppercase;color:rgba(218,165,32,0.70);
+  background:rgba(5,3,10,0.92);border:1px solid rgba(218,165,32,0.14);
+  border-radius:2px;padding:5px 10px;white-space:nowrap;
+  opacity:0;transform:translateY(-4px);
+  transition:opacity 0.2s, transform 0.2s;
+  pointer-events:none;z-index:200;
+}
+#brand:hover #brand-dab{opacity:1;transform:translateY(0);}
+body.light #brand-name{color:rgba(0,0,0,0.90);}
+body.light #brand-sub{color:rgba(0,0,0,0.50);}
+body.light #brand-saturn circle,body.light #brand-saturn ellipse,body.light #brand-saturn line{stroke:rgba(0,0,0,0.45)!important;}
+body.light #brand-saturn circle.node{fill:rgba(0,0,0,0.60)!important;stroke:none!important;}
+body.light #brand-dab{background:#fff;border-color:rgba(0,0,0,0.12);color:rgba(0,0,0,0.75);}
 
 #era-label{position:fixed;top:24px;right:28px;z-index:100;font-family:'DM Mono',monospace;text-align:right;pointer-events:none;}
 #era-year{font-size:28px;letter-spacing:-0.02em;color:rgba(218,165,32,0.18);transition:color 0.5s,opacity 0.4s;font-family:'Crimson Text',serif;font-style:italic;}
 #era-name{font-size:7px;letter-spacing:0.20em;text-transform:uppercase;color:rgba(218,165,32,0.22);margin-top:4px;}
-body.light #era-year{color:rgba(100,60,0,0.22);}
-body.light #era-name{color:rgba(100,60,0,0.30);}
+body.light #era-year{color:rgba(0,0,0,0.22);}
+body.light #era-name{color:rgba(0,0,0,0.55);}
 
+/* ── TOP HUD ── */
 #hud{
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  position:fixed;top:20px;right:24px;
   display:flex;align-items:center;gap:1px;
   background:rgba(218,165,32,0.04);
   border:1px solid rgba(218,165,32,0.12);
   border-radius:4px;overflow:hidden;z-index:100;
   transition:background 0.5s,border-color 0.5s;
 }
+@media(max-width:768px){
+  #hud{display:none;}  /* Mobile: nav handled by #mobile-nav-bar */
+}
 .hud-btn{
   background:none;border:none;cursor:pointer;
   color:rgba(218,165,32,0.35);
   font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.18em;
-  text-transform:uppercase;padding:9px 18px;
+  text-transform:uppercase;padding:8px 16px;
   border-right:1px solid rgba(218,165,32,0.10);
   transition:color 0.2s,background 0.2s;
 }
 .hud-btn:last-child{border-right:none;}
 .hud-btn:hover{color:rgba(218,165,32,0.85);background:rgba(218,165,32,0.06);}
 .hud-btn.active{color:#daa520;background:rgba(218,165,32,0.10);}
-.hud-sep{width:1px;background:rgba(218,165,32,0.15);align-self:stretch;flex-shrink:0;margin:6px 0;}
-.hud-zoom{padding:9px 14px;font-size:13px;letter-spacing:0;color:rgba(218,165,32,0.30);}
-.hud-zoom:hover{color:rgba(218,165,32,0.85);}
-body.light #hud{background:rgba(100,60,0,0.03);border-color:rgba(100,60,0,0.16);}
-body.light .hud-btn{color:rgba(100,60,0,0.50);border-right-color:rgba(100,60,0,0.10);}
-body.light .hud-btn:hover{color:rgba(100,60,0,0.90);}
-body.light .hud-btn.active{color:rgba(100,60,0,0.95);}
+.hud-sep{width:1px;background:rgba(218,165,32,0.15);align-self:stretch;flex-shrink:0;margin:5px 0;}
+body.light #hud{background:rgba(255,255,255,0.96);border-color:rgba(0,0,0,0.12);}
+body.light .hud-btn{color:rgba(0,0,0,0.55);border-right-color:rgba(0,0,0,0.08);}
+body.light .hud-btn:hover{color:#000;}
+body.light .hud-btn.active{color:#000;background:rgba(0,0,0,0.08);}
 
-/* ── TIMELINE NAV STRIP ── */
-#timeline-nav{
-  position:fixed;bottom:70px;left:50%;transform:translateX(-50%);
-  display:flex;align-items:center;gap:0;
-  z-index:100;
-  font-family:'DM Mono',monospace;
-  background:rgba(5,3,10,0.85);
-  border:1px solid rgba(218,165,32,0.14);
-  border-radius:4px;
-  backdrop-filter:blur(16px);
-  overflow:hidden;
+/* ── SENTENCE GHOST IMAGE ── */
+#sent-ghost{
+  position:fixed;left:0;top:0;
+  width:220px;height:165px;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity 0.35s, transform 0.35s;
+  z-index:690;
+  transform:translateX(-12px);
+}
+#sent-ghost.vis{opacity:1;transform:translateX(0);}
+#sent-ghost-img{
+  width:100%;height:100%;object-fit:cover;
+  border-radius:3px;
+  filter:saturate(0.7) brightness(0.75);
+  display:block;
+}
+#sent-ghost-cap{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:6px 10px;
+  font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.14em;
+  text-transform:uppercase;color:rgba(245,236,213,0.55);
+  background:linear-gradient(transparent,rgba(0,0,0,0.6));
+  border-radius:0 0 3px 3px;
+}
+body.light #sent-ghost-img{filter:saturate(0) brightness(1.0);}
+body.light #sent-ghost-cap{color:rgba(0,0,0,0.55);}
+@media(max-width:768px){#sent-ghost{display:none;}}
+
+/* ── GRID VIEW ── */
+#grid-overlay{
+  position:fixed;inset:0;z-index:500;
+  display:none;
+  align-items:flex-start;justify-content:center;
+  pointer-events:none;
+  opacity:0;
   transition:opacity 0.4s;
+  overflow-y:auto;
 }
-body.light #timeline-nav{background:rgba(255,252,240,0.92);border-color:rgba(100,60,0,0.18);}
-#tl-prev,#tl-next{
-  background:none;border:none;cursor:pointer;
-  color:rgba(218,165,32,0.55);
-  padding:7px 13px;font-size:13px;
-  transition:color 0.2s,background 0.2s;
-  border-right:1px solid rgba(218,165,32,0.08);
+#grid-overlay.vis{opacity:1;pointer-events:all;}
+#grid-inner{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  padding:24px 16px 80px;
+  width:min(960px,100%);
+  min-height:100%;
 }
-#tl-next{border-left:1px solid rgba(218,165,32,0.08);border-right:none;}
-#tl-prev:hover,#tl-next:hover{color:#daa520;background:rgba(218,165,32,0.08);}
-#tl-prev:disabled,#tl-next:disabled{color:rgba(218,165,32,0.12);cursor:default;}
-body.light #tl-prev,body.light #tl-next{color:rgba(100,60,0,0.50);}
-body.light #tl-prev:hover,body.light #tl-next:hover{color:rgba(100,60,0,0.9);}
+#grid-inner::-webkit-scrollbar{display:none;}
+@media(max-width:600px){
+  #grid-inner{
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:16px 14px 88px;
+  }
+}
+@media(min-width:601px) and (max-width:860px){#grid-inner{grid-template-columns:repeat(2,1fr);}}
+.grid-card{
+  background:rgba(5,3,10,0.94);
+  border:1px solid rgba(218,165,32,0.12);
+  border-radius:5px;padding:16px 14px 14px;
+  cursor:pointer;transition:all 0.20s;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(8px) scale(0.97);
+  animation:cardIn 0.35s forwards;
+}
+@keyframes cardIn{to{opacity:1;transform:none;}}
+.grid-card:hover{border-color:rgba(218,165,32,0.40);background:rgba(10,6,20,0.97);}
+@media(max-width:600px){
+  .grid-card{
+    display:flex;align-items:baseline;gap:14px;
+    padding:14px 14px 14px;
+  }
+  .gc-bar-top{display:none;}
+  .grid-card-year{flex-shrink:0;margin:0;font-size:7.5px;letter-spacing:0.18em;width:auto;}
+  .grid-card-role,.grid-card-body{display:none;}
+  .grid-card-title{font-size:17px;margin:0;}
+}
+.gc-bar-top{height:2px;width:100%;position:absolute;top:0;left:0;border-radius:5px 5px 0 0;}
+.grid-card-year{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.20em;text-transform:uppercase;color:rgba(218,165,32,0.38);margin-bottom:8px;margin-top:4px;}
+.grid-card-title{font-family:'Crimson Text',serif;font-size:16px;letter-spacing:-0.01em;color:#f5ecd5;line-height:1.25;margin-bottom:5px;}
+.grid-card-role{font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(218,165,32,0.28);line-height:1.5;}
+.grid-card-body{font-family:'Crimson Text',serif;font-size:12px;line-height:1.58;color:rgba(245,236,213,0.38);margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+body.light .grid-card{background:#fff;border-color:rgba(0,0,0,0.10);}
+body.light .grid-card:hover{border-color:rgba(0,0,0,0.40);}
+body.light .grid-card-year{color:rgba(0,0,0,0.40);}
+body.light .grid-card-title{color:#000;}
+body.light .grid-card-role{color:rgba(0,0,0,0.45);}
+body.light .grid-card-body{color:rgba(0,0,0,0.60);}
 
-#tl-track{
-  display:flex;align-items:center;
-  gap:2px;
-  padding:7px 10px;
-  overflow-x:auto;
-  scrollbar-width:none;
-  max-width:min(640px, 65vw);
-}
-#tl-track::-webkit-scrollbar{display:none;}
-.tl-pip{
-  width:22px;height:22px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  position:relative;
-  border-radius:2px;
-  transition:background 0.15s;
-}
-.tl-pip:hover{background:rgba(218,165,32,0.08);}
-.tl-pip-dot{
-  width:5px;height:5px;border-radius:50%;
-  background:rgba(218,165,32,0.20);
-  transition:all 0.25s;
-  flex-shrink:0;
-}
-.tl-pip.active .tl-pip-dot{
-  background:#daa520;
-  width:8px;height:8px;
-  box-shadow:0 0 6px rgba(218,165,32,0.6);
-}
-.tl-pip:hover .tl-pip-dot{background:rgba(218,165,32,0.60);}
-.tl-pip-year{
-  position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);
-  font-size:6px;letter-spacing:0.12em;color:rgba(218,165,32,0.35);
-  white-space:nowrap;pointer-events:none;
-  opacity:0;transition:opacity 0.15s;
-}
-.tl-pip:hover .tl-pip-year,.tl-pip.active .tl-pip-year{opacity:1;color:rgba(218,165,32,0.70);}
-body.light .tl-pip-dot{background:rgba(100,60,0,0.22);}
-body.light .tl-pip.active .tl-pip-dot{background:rgba(100,60,0,0.80);}
+#tl-label{display:none;}
 
-#tl-label{
-  padding:5px 10px 5px 2px;
-  font-size:7px;letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(218,165,32,0.35);
-  white-space:nowrap;border-left:1px solid rgba(218,165,32,0.08);
-  min-width:90px;
-  transition:color 0.2s;
-}
-body.light #tl-label{color:rgba(100,60,0,0.50);}
+#hint{display:none;}
 
-#hint{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(218,165,32,0.16);z-index:100;pointer-events:none;white-space:nowrap;transition:opacity 1.2s;}
-body.light #hint{color:rgba(100,60,0,0.38);}
-
-#theme-toggle{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:100;background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.32);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.20em;text-transform:uppercase;padding:6px 14px;border-radius:2px;cursor:pointer;transition:all 0.2s;}
-#theme-toggle:hover{color:rgba(218,165,32,0.75);border-color:rgba(218,165,32,0.45);}
-body.light #theme-toggle{border-color:rgba(100,60,0,0.22);color:rgba(100,60,0,0.55);}
+#theme-toggle{display:none;}
 
 #tooltip{position:fixed;top:0;left:0;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:200;}
 #tooltip.vis{opacity:1;}
@@ -143,10 +177,10 @@ body.light #theme-toggle{border-color:rgba(100,60,0,0.22);color:rgba(100,60,0,0.
 .tt-title{font-family:'Crimson Text',serif;font-size:16px;color:#f5ecd5;line-height:1.2;margin-bottom:5px;letter-spacing:-0.01em;}
 .tt-role{font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(218,165,32,0.35);}
 .tt-sub{font-family:'DM Mono',monospace;font-size:6px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(218,165,32,0.25);margin-top:4px;font-style:italic;}
-body.light #tt-inner{background:rgba(255,252,244,0.99);border-color:rgba(100,60,0,0.16);}
-body.light .tt-era{color:rgba(100,60,0,0.55);}
-body.light .tt-title{color:rgba(30,15,0,0.92);}
-body.light .tt-role{color:rgba(100,60,0,0.55);}
+body.light #tt-inner{background:#fff;border-color:rgba(0,0,0,0.12);}
+body.light .tt-era{color:rgba(0,0,0,0.45);}
+body.light .tt-title{color:#000;}
+body.light .tt-role{color:rgba(0,0,0,0.55);}
 
 /* DETAIL PANEL */
 #ghost{position:fixed;z-index:700;width:360px;pointer-events:none;opacity:0;right:28px;top:50%;transform:translateY(-50%) translateX(18px) scale(0.97);transition:opacity 0.30s,transform 0.30s;}
@@ -155,39 +189,54 @@ body.light .tt-role{color:rgba(100,60,0,0.55);}
 .gcscroll{max-height:82vh;overflow-y:auto;scrollbar-width:none;}
 .gcscroll::-webkit-scrollbar{display:none;}
 .gcbar{height:2px;width:100%;background:rgba(218,165,32,0.55);}
-.gchead{padding:16px 16px 12px;border-bottom:1px solid rgba(218,165,32,0.08);}
+.gchead{
+  padding:12px 14px 12px;
+  border-bottom:1px solid rgba(218,165,32,0.08);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.gchead-text{flex:1;min-width:0;}
 .gcera{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(218,165,32,0.40);margin-bottom:6px;}
 .gctitle{font-family:'Crimson Text',serif;font-size:19px;letter-spacing:-0.02em;color:#f5ecd5;line-height:1.2;margin-bottom:5px;}
 .gcrole{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(218,165,32,0.32);}
+.gchead-nav{display:flex;gap:4px;align-items:center;flex-shrink:0;padding-top:2px;}
 
-/* IMAGE STRIP in ghost panel */
-.gc-images{
-  display:flex;gap:4px;padding:10px 16px 2px;
-  overflow-x:auto;scrollbar-width:none;
+/* IFRAME HERO */
+.gc-iframe-wrap{
+  position:relative;width:100%;height:200px;
+  background:rgba(218,165,32,0.04);
+  border-bottom:1px solid rgba(218,165,32,0.08);
+  overflow:hidden;
 }
-.gc-images::-webkit-scrollbar{display:none;}
-.gc-img-frame{
-  width:80px;height:60px;flex-shrink:0;
-  border-radius:3px;overflow:hidden;
-  background:rgba(218,165,32,0.06);
-  border:1px solid rgba(218,165,32,0.10);
-  position:relative;
+.gc-iframe-wrap iframe{
+  width:160%;height:160%;
+  transform:scale(0.625);transform-origin:top left;
+  border:none;pointer-events:none;
+  position:absolute;top:0;left:0;
+  opacity:0.88;
 }
-.gc-img-frame img{
-  width:100%;height:100%;object-fit:cover;
-  opacity:0.80;transition:opacity 0.2s;
-  display:block;
+.gc-iframe-cover{
+  position:absolute;inset:0;z-index:2;
+  background:linear-gradient(to bottom, transparent 55%, rgba(5,3,10,0.80) 100%);
+  cursor:pointer;
 }
-.gc-img-frame img:hover{opacity:1;}
-.gc-img-placeholder{
-  width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'DM Mono',monospace;
-  font-size:7px;letter-spacing:0.14em;
-  color:rgba(218,165,32,0.20);
-  text-align:center;
-  padding:6px;
+.gc-iframe-badge{
+  position:absolute;bottom:10px;right:12px;z-index:3;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.18em;
+  text-transform:uppercase;color:rgba(218,165,32,0.60);
+  background:rgba(5,3,10,0.75);border:1px solid rgba(218,165,32,0.20);
+  border-radius:2px;padding:3px 8px;
+  transition:all 0.2s;pointer-events:all;
 }
+.gc-iframe-badge:hover{color:#daa520;border-color:rgba(218,165,32,0.55);}
+.gc-iframe-none{
+  display:flex;align-items:center;justify-content:center;height:100%;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.16em;
+  text-transform:uppercase;color:rgba(218,165,32,0.15);
+}
+body.light .gc-iframe-wrap{background:#f2f2f2;border-color:rgba(0,0,0,0.08);}
+body.light .gc-iframe-cover{background:linear-gradient(to bottom, transparent 55%, rgba(255,255,255,0.85) 100%);}
+body.light .gc-iframe-badge{background:rgba(255,255,255,0.92);color:rgba(0,0,0,0.55);border-color:rgba(0,0,0,0.14);}
+body.light .gc-iframe-none{color:rgba(0,0,0,0.22);}
 
 /* SUBNODE pills in ghost panel */
 .gc-moons{
@@ -207,44 +256,52 @@ body.light .tt-role{color:rgba(100,60,0,0.55);}
 .gc-moon-pill:hover{background:rgba(218,165,32,0.10);color:rgba(218,165,32,0.85);border-color:rgba(218,165,32,0.50);}
 .gc-moon-pill.active{background:rgba(218,165,32,0.12);color:#daa520;border-color:rgba(218,165,32,0.60);}
 
-.gcbody{padding:14px 16px 14px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.72;color:rgba(245,236,213,0.65);border-bottom:1px solid rgba(218,165,32,0.06);}
-body.light .gcbody{color:rgba(30,15,0,0.72);}
-.gc-sentences{padding:10px 16px 14px;border-bottom:1px solid rgba(218,165,32,0.06);}
-.gc-sent-label{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(218,165,32,0.25);margin-bottom:8px;}
-.gc-sent{font-family:'Crimson Text',serif;font-size:13.5px;line-height:1.62;color:rgba(245,236,213,0.45);cursor:pointer;padding:4px 6px;border-radius:2px;transition:all 0.15s;margin-bottom:3px;display:block;}
-.gc-sent:hover{color:rgba(245,236,213,0.88);background:rgba(218,165,32,0.06);}
-.gc-sent.active{color:#f5ecd5;background:rgba(218,165,32,0.10);border-left:2px solid rgba(218,165,32,0.55);padding-left:10px;}
-.gcft{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 12px;}
-.gctag{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.16em;text-transform:uppercase;padding:3px 9px;border-radius:9px;border:1px solid rgba(218,165,32,0.35);color:rgba(218,165,32,0.55);}
+.gcbody{padding:14px 16px 16px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.76;color:rgba(245,236,213,0.70);}
+body.light .gcbody{color:rgba(0,0,0,0.80);}
+.gcft{display:flex;align-items:center;padding:10px 16px 12px;border-top:1px solid rgba(218,165,32,0.06);}
+.gctag{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.16em;text-transform:uppercase;padding:3px 9px;border-radius:9px;border:1px solid rgba(218,165,32,0.30);color:rgba(218,165,32,0.50);}
 
-/* nav arrows in panel footer */
-.gc-nav{display:flex;gap:4px;align-items:center;}
-.gcnav-btn{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:26px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:all;}
+/* nav arrows — now in header */
+.gcnav-btn{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.38);width:24px;height:22px;border-radius:2px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:all;}
 .gcnav-btn:hover:not(:disabled){color:#f5ecd5;border-color:rgba(218,165,32,0.55);}
-.gcnav-btn:disabled{opacity:0.2;cursor:default;}
-.gcclose{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:all;}
+.gcnav-btn:disabled{opacity:0.18;cursor:default;}
+.gcclose{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.38);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;transition:all 0.2s;pointer-events:all;}
 .gcclose:hover{color:#f5ecd5;border-color:rgba(218,165,32,0.55);}
 
-body.light .gc{background:rgba(255,252,244,0.99);border-color:rgba(100,60,0,0.14);}
-body.light .gchead,.gcbody,.gc-sentences,.gcft{border-color:rgba(100,60,0,0.10);}
-body.light .gcera{color:rgba(100,60,0,0.55);}
-body.light .gctitle{color:rgba(30,15,0,0.92);}
-body.light .gcrole{color:rgba(100,60,0,0.55);}
-body.light .gc-sent{color:rgba(30,15,0,0.50);}
-body.light .gc-sent:hover{color:rgba(30,15,0,0.90);background:rgba(100,60,0,0.05);}
-body.light .gc-sent.active{color:rgba(30,15,0,0.95);background:rgba(100,60,0,0.07);border-left-color:rgba(100,60,0,0.50);}
-body.light .gc-sent-label{color:rgba(100,60,0,0.40);}
-body.light .gcclose{border-color:rgba(100,60,0,0.22);color:rgba(100,60,0,0.55);}
-body.light .gcclose:hover{color:rgba(30,15,0,0.90);}
-body.light .gctag{color:rgba(100,60,0,0.55);border-color:rgba(100,60,0,0.35);}
-body.light .gc-images{background:none;}
-body.light .gc-img-frame{background:rgba(100,60,0,0.05);border-color:rgba(100,60,0,0.12);}
-body.light .gc-moons-label{color:rgba(100,60,0,0.40);}
-body.light .gc-moon-pill{color:rgba(100,60,0,0.50);border-color:rgba(100,60,0,0.25);}
-body.light .gc-moon-pill:hover{background:rgba(100,60,0,0.06);color:rgba(100,60,0,0.85);}
+body.light .gc{background:#fff;border-color:rgba(0,0,0,0.10);}
+body.light .gchead,body.light .gcbody,body.light .gcft{border-color:rgba(0,0,0,0.08);}
+body.light .gcera{color:rgba(0,0,0,0.42);}
+body.light .gctitle{color:#000;}
+body.light .gcrole{color:rgba(0,0,0,0.50);}
+body.light .gc-sent{color:rgba(0,0,0,0.65);}
+body.light .gc-sent:hover{color:#000;background:rgba(0,0,0,0.05);}
+body.light .gc-sent.active{color:#000;background:rgba(0,0,0,0.06);border-left-color:rgba(0,0,0,0.40);}
+body.light .gc-sent-label{color:rgba(0,0,0,0.38);}
+body.light .gcclose{border-color:rgba(0,0,0,0.14);color:rgba(0,0,0,0.45);}
+body.light .gcclose:hover{color:#000;}
+body.light .gctag{color:rgba(0,0,0,0.50);border-color:rgba(0,0,0,0.20);}
+
+body.light .gc-img-frame{background:#eee;border-color:rgba(0,0,0,0.10);}
+body.light .gc-moons-label{color:rgba(0,0,0,0.38);}
+body.light .gc-moon-pill{color:rgba(0,0,0,0.50);border-color:rgba(0,0,0,0.18);}
+body.light .gc-moon-pill:hover{background:rgba(0,0,0,0.05);color:#000;}
 
 /* MOBILE SHEET */
-#msheet{display:none;position:fixed;bottom:0;left:0;right:0;z-index:700;background:rgba(5,3,10,0.98);border-top:1px solid rgba(218,165,32,0.10);border-radius:14px 14px 0 0;max-height:72vh;overflow-y:auto;scrollbar-width:none;transform:translateY(100%);transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);backdrop-filter:blur(28px);}
+/* Mobile sheet — slides up behind the fixed nav bar */
+#msheet{
+  display:none;position:fixed;
+  bottom:48px;  /* sits above the fixed mobile nav bar */
+  left:0;right:0;
+  z-index:700;
+  background:rgba(5,3,10,0.98);
+  border-top:1px solid rgba(218,165,32,0.10);
+  border-radius:14px 14px 0 0;
+  max-height:calc(72vh - 48px);
+  overflow-y:auto;scrollbar-width:none;
+  transform:translateY(calc(100% + 48px));
+  transition:transform 0.38s cubic-bezier(0.22,1,0.36,1);
+  backdrop-filter:blur(28px);
+}
 #msheet::-webkit-scrollbar{display:none;}
 #msheet.on{transform:translateY(0);}
 .mshandle{width:36px;height:4px;background:rgba(218,165,32,0.20);border-radius:2px;margin:12px auto 6px;}
@@ -255,13 +312,75 @@ body.light .gc-moon-pill:hover{background:rgba(100,60,0,0.06);color:rgba(100,60,
 .ms-images::-webkit-scrollbar{display:none;}
 .ms-img-frame{width:80px;height:60px;flex-shrink:0;border-radius:3px;overflow:hidden;background:rgba(218,165,32,0.06);border:1px solid rgba(218,165,32,0.10);}
 .ms-img-frame img{width:100%;height:100%;object-fit:cover;opacity:0.80;}
-.msbody{padding:13px 20px 14px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.72;color:rgba(245,236,213,0.60);}
-.msft{display:flex;align-items:center;justify-content:space-between;padding:10px 20px 14px;}
-.ms-nav{display:flex;gap:4px;}
-.ms-navbtn{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:26px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
-.ms-navbtn:hover:not(:disabled){color:#f5ecd5;border-color:rgba(218,165,32,0.55);}
-.ms-navbtn:disabled{opacity:0.2;}
-.msclose{background:none;border:1px solid rgba(218,165,32,0.16);color:rgba(218,165,32,0.35);width:22px;height:22px;border-radius:2px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;}
+.msbody{padding:13px 20px 20px;font-family:'Crimson Text',serif;font-size:15px;line-height:1.72;color:rgba(245,236,213,0.60);}
+
+/* Fixed mobile nav bar — always at bottom:0, z above sheet */
+#mobile-nav-bar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:48px;
+  z-index:800;
+  background:rgba(5,3,10,0.97);
+  border-top:1px solid rgba(218,165,32,0.12);
+  backdrop-filter:blur(20px);
+  align-items:stretch;
+  padding:0;
+}
+@media(max-width:768px){
+  #mobile-nav-bar{display:flex;}
+}
+.ms-navbtn{
+  flex:1;
+  background:none;border:none;
+  color:rgba(218,165,32,0.45);
+  font-family:'DM Mono',monospace;font-size:8px;
+  letter-spacing:0.18em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  transition:color 0.15s,background 0.15s;
+  border-right:1px solid rgba(218,165,32,0.08);
+}
+.ms-navbtn:last-child{border-right:none;}
+.ms-navbtn:hover{color:rgba(218,165,32,0.85);background:rgba(218,165,32,0.05);}
+.ms-navbtn:active{color:#daa520;background:rgba(218,165,32,0.10);}
+.ms-navbtn:disabled{opacity:0.18;pointer-events:none;}
+.msclose{
+  flex:0 0 48px;
+  background:none;border:none;
+  border-left:1px solid rgba(218,165,32,0.08);
+  border-right:1px solid rgba(218,165,32,0.08);
+  color:rgba(218,165,32,0.35);
+  font-family:'DM Mono',monospace;font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  /* Hidden by default — fades in when panel is open */
+  opacity:0;
+  transform:scale(0.7);
+  pointer-events:none;
+  transition:color 0.15s, background 0.15s, opacity 0.20s, transform 0.20s;
+}
+body.panel-open .msclose{opacity:1;transform:scale(1);pointer-events:all;}
+.msclose:hover{color:rgba(218,165,32,0.80);background:rgba(218,165,32,0.05);}
+.msclose:active{color:#daa520;}
+/* hide the old msft footer inside the sheet */
+.msft{display:none;}
+.ms-nav{display:none;}
+
+/* Light theme mobile nav bar */
+body.light #mobile-nav-bar{background:rgba(255,255,255,0.97);border-top-color:rgba(0,0,0,0.09);}
+body.light .ms-navbtn{color:rgba(0,0,0,0.45);border-right-color:rgba(0,0,0,0.07);}
+body.light .ms-navbtn:hover{color:#000;background:rgba(0,0,0,0.04);}
+body.light .msclose{color:rgba(0,0,0,0.35);border-color:rgba(0,0,0,0.07);}
+body.light.panel-open .msclose{opacity:1;transform:scale(1);pointer-events:all;}
+body.light .msclose:hover{color:#000;background:rgba(0,0,0,0.04);}
+body.light #msheet{background:rgba(255,255,255,0.99);border-top-color:rgba(0,0,0,0.08);}
+body.light .msera{color:rgba(0,0,0,0.42);}
+body.light .mstitle{color:#000;}
+body.light .msbody{color:rgba(0,0,0,0.75);}
+
 @media(max-width:768px){#ghost{display:none;}#msheet{display:block;}}
 
 /* TIMELINE SPINE INDICATOR */
@@ -280,7 +399,7 @@ body.light .gc-moon-pill:hover{background:rgba(100,60,0,0.06);color:rgba(100,60,
   backdrop-filter:blur(22px);
 }
 #toc.vis{opacity:1;pointer-events:all;}
-body.light #toc{background:rgba(245,241,234,0.88);}
+body.light #toc{background:rgba(255,255,255,0.94);}
 #toc-inner{
   width:min(560px,90vw);
   max-height:88vh;
@@ -292,7 +411,7 @@ body.light #toc{background:rgba(245,241,234,0.88);}
   box-shadow:0 24px 80px rgba(0,0,0,0.9);
 }
 #toc-inner::-webkit-scrollbar{display:none;}
-body.light #toc-inner{background:rgba(255,252,244,0.99);border-color:rgba(100,60,0,0.16);}
+body.light #toc-inner{background:#fff;border-color:rgba(0,0,0,0.10);}
 #toc-header{
   padding:20px 24px 16px;
   border-bottom:1px solid rgba(218,165,32,0.10);
@@ -302,7 +421,7 @@ body.light #toc-inner{background:rgba(255,252,244,0.99);border-color:rgba(100,60
   font-family:'Crimson Text',serif;font-size:18px;letter-spacing:-0.01em;
   color:rgba(245,236,213,0.85);font-style:italic;
 }
-body.light #toc-title{color:rgba(30,15,0,0.85);}
+body.light #toc-title{color:#000;}
 #toc-sub{
   font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.20em;
   text-transform:uppercase;color:rgba(218,165,32,0.35);margin-top:4px;
@@ -315,7 +434,7 @@ body.light #toc-title{color:rgba(30,15,0,0.85);}
   font-family:'DM Mono',monospace;transition:all 0.2s;
 }
 #toc-close:hover{color:#f5ecd5;border-color:rgba(218,165,32,0.60);}
-body.light #toc-close{color:rgba(100,60,0,0.55);border-color:rgba(100,60,0,0.22);}
+body.light #toc-close{color:rgba(0,0,0,0.45);border-color:rgba(0,0,0,0.14);}
 #toc-list{padding:10px 0 16px;}
 .toc-row{
   display:flex;align-items:baseline;gap:16px;
@@ -327,35 +446,252 @@ body.light #toc-close{color:rgba(100,60,0,0.55);border-color:rgba(100,60,0,0.22)
   background:rgba(218,165,32,0.05);
   border-left-color:rgba(218,165,32,0.40);
 }
-body.light .toc-row:hover{background:rgba(100,60,0,0.04);border-left-color:rgba(100,60,0,0.35);}
+body.light .toc-row:hover{background:rgba(0,0,0,0.04);border-left-color:rgba(0,0,0,0.30);}
 .toc-year{
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;
   color:rgba(218,165,32,0.35);flex-shrink:0;width:34px;
   transition:color 0.15s;
 }
 .toc-row:hover .toc-year{color:rgba(218,165,32,0.75);}
-body.light .toc-year{color:rgba(100,60,0,0.45);}
+body.light .toc-year{color:rgba(0,0,0,0.35);}
 .toc-name{
   font-family:'Crimson Text',serif;font-size:16px;letter-spacing:-0.01em;
   color:rgba(245,236,213,0.65);line-height:1.2;
   transition:color 0.15s;
 }
 .toc-row:hover .toc-name{color:rgba(245,236,213,0.95);}
-body.light .toc-name{color:rgba(30,15,0,0.60);}
-body.light .toc-row:hover .toc-name{color:rgba(30,15,0,0.92);}
+body.light .toc-name{color:rgba(0,0,0,0.68);}
+body.light .toc-row:hover .toc-name{color:#000;}
 .toc-domain{
   font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.14em;
   text-transform:uppercase;color:rgba(218,165,32,0.22);margin-left:auto;flex-shrink:0;
   transition:color 0.15s;
 }
 .toc-row:hover .toc-domain{color:rgba(218,165,32,0.55);}
-body.light .toc-domain{color:rgba(100,60,0,0.30);}
+body.light .toc-domain{color:rgba(0,0,0,0.28);}
 #toc-hint{
   text-align:center;padding:0 24px 16px;
   font-family:'DM Mono',monospace;font-size:6.5px;letter-spacing:0.16em;
   text-transform:uppercase;color:rgba(218,165,32,0.16);
 }
-body.light #toc-hint{color:rgba(100,60,0,0.30);}
+body.light #toc-hint{color:rgba(0,0,0,0.28);}
+
+
+/* ── LIGHT THEME: B&W ACCESSIBLE ── */
+body.light{background:#fff;color:#000;}
+body.light #brand-name{color:rgba(0,0,0,0.90)!important;}
+body.light #brand-sub{color:rgba(0,0,0,0.50)!important;}
+body.light #era-year{color:rgba(0,0,0,0.25)!important;}
+body.light #era-name{color:rgba(0,0,0,0.55)!important;}
+body.light #hud{background:rgba(255,255,255,0.94)!important;border-color:rgba(0,0,0,0.14)!important;box-shadow:0 1px 8px rgba(0,0,0,0.08);}
+body.light .hud-btn{color:rgba(0,0,0,0.55)!important;border-right-color:rgba(0,0,0,0.08)!important;}
+body.light .hud-btn:hover{color:#000!important;background:rgba(0,0,0,0.05)!important;}
+body.light .hud-btn.active{color:#000!important;background:rgba(0,0,0,0.08)!important;}
+body.light #tt-inner{background:#fff!important;border-color:rgba(0,0,0,0.14)!important;}
+body.light .tt-era{color:rgba(0,0,0,0.50)!important;}
+body.light .tt-title{color:#000!important;}
+body.light .tt-role{color:rgba(0,0,0,0.60)!important;}
+body.light .gc{background:#fff!important;border-color:rgba(0,0,0,0.12)!important;box-shadow:0 8px 32px rgba(0,0,0,0.12)!important;}
+body.light .gchead,body.light .gcbody,body.light .gcft{border-color:rgba(0,0,0,0.08)!important;}
+body.light .gcera{color:rgba(0,0,0,0.45)!important;}
+body.light .gctitle{color:#000!important;}
+body.light .gcrole{color:rgba(0,0,0,0.50)!important;}
+body.light .gcbody{color:rgba(0,0,0,0.80)!important;}
+body.light .gcclose{border-color:rgba(0,0,0,0.16)!important;color:rgba(0,0,0,0.45)!important;}
+body.light .gcnav-btn{border-color:rgba(0,0,0,0.14)!important;color:rgba(0,0,0,0.45)!important;}
+body.light .gctag{color:rgba(0,0,0,0.55)!important;border-color:rgba(0,0,0,0.22)!important;}
+body.light .gc-moon-pill{color:rgba(0,0,0,0.55)!important;border-color:rgba(0,0,0,0.22)!important;}
+body.light .gc-moon-pill:hover{background:rgba(0,0,0,0.06)!important;color:#000!important;}
+body.light .gc-iframe-wrap{background:#f4f4f4!important;border-color:rgba(0,0,0,0.08)!important;}
+body.light .gc-iframe-badge{background:rgba(255,255,255,0.90)!important;color:rgba(0,0,0,0.60)!important;border-color:rgba(0,0,0,0.16)!important;}
+body.light .grid-card{background:#fff!important;border-color:rgba(0,0,0,0.10)!important;}
+body.light .grid-card:hover{border-color:rgba(0,0,0,0.40)!important;}
+body.light .grid-card-year{color:rgba(0,0,0,0.45)!important;}
+body.light .grid-card-title{color:#000!important;}
+body.light .grid-card-role{color:rgba(0,0,0,0.50)!important;}
+body.light .grid-card-body{color:rgba(0,0,0,0.65)!important;}
+body.light .toc-name{color:rgba(0,0,0,0.72)!important;}
+body.light .toc-row:hover .toc-name{color:#000!important;}
+body.light .toc-year{color:rgba(0,0,0,0.40)!important;}
+body.light #toc{background:rgba(255,255,255,0.92)!important;}
+body.light #toc-inner{background:#fff!important;border-color:rgba(0,0,0,0.12)!important;}
+body.light #toc-title{color:#000!important;}
+body.light #toc-close{border-color:rgba(0,0,0,0.16)!important;color:rgba(0,0,0,0.50)!important;}
+body.light .toc-row:hover{background:rgba(0,0,0,0.04)!important;border-left-color:rgba(0,0,0,0.35)!important;}
+body.light #brand-dab{background:#fff!important;border-color:rgba(0,0,0,0.14)!important;color:rgba(0,0,0,0.75)!important;}
+body.light #brand-saturn circle,body.light #brand-saturn ellipse{stroke:rgba(0,0,0,0.50)!important;}
+body.light #brand-saturn circle.node{fill:rgba(0,0,0,0.65)!important;stroke:none!important;}
+
+
+/* ── CASE STUDY PANEL ───────────────────────────────────── */
+#cs-panel {
+  position: fixed; inset: 0; z-index: 800;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(3,2,8,0.88);
+  backdrop-filter: blur(28px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.28s;
+}
+#cs-panel.on { opacity: 1; pointer-events: all; }
+
+#cs-inner {
+  width: min(860px, 94vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(6,4,14,0.98);
+  border: 1px solid rgba(218,165,32,0.14);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.95);
+  overflow: hidden;
+}
+
+#cs-accent-bar { height: 2px; width: 100%; flex-shrink: 0; transition: background 0.3s; }
+
+#cs-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 16px 20px 12px; border-bottom: 1px solid rgba(218,165,32,0.08);
+  flex-shrink: 0;
+}
+.cs-meta { flex: 1; }
+#cs-type {
+  font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: rgba(218,165,32,0.45); margin-bottom: 4px;
+}
+#cs-era {
+  font-family: 'DM Mono', monospace; font-size: 6.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: rgba(218,165,32,0.28);
+}
+.cs-close {
+  background: none; border: 1px solid rgba(218,165,32,0.18);
+  color: rgba(218,165,32,0.40); width: 26px; height: 26px;
+  border-radius: 2px; cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; transition: all 0.18s;
+  flex-shrink: 0;
+}
+.cs-close:hover { color: #f5ecd5; border-color: rgba(218,165,32,0.60); }
+
+#cs-body-wrap {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+#cs-body-wrap::-webkit-scrollbar { display: none; }
+
+#cs-left {
+  padding: 20px 22px 20px;
+  border-right: 1px solid rgba(218,165,32,0.06);
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+#cs-title {
+  font-family: 'Crimson Text', serif; font-size: 22px;
+  letter-spacing: -0.02em; line-height: 1.2;
+  color: #f5ecd5;
+}
+#cs-body {
+  font-family: 'Crimson Text', serif; font-size: 15px;
+  line-height: 1.76; color: rgba(245,236,213,0.70);
+}
+#cs-pull {
+  font-family: 'Crimson Text', serif; font-style: italic;
+  font-size: 13.5px; line-height: 1.6;
+  padding: 8px 0 8px 12px;
+  border-left: 2px solid;
+  opacity: 0.85;
+}
+#cs-stats {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  padding-top: 4px;
+}
+.cs-stat { display: flex; flex-direction: column; gap: 2px; }
+.cs-stat-num {
+  font-family: 'Crimson Text', serif; font-size: 22px;
+  font-weight: 600; letter-spacing: -0.02em; line-height: 1;
+}
+.cs-stat-label {
+  font-family: 'DM Mono', monospace; font-size: 6.5px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(218,165,32,0.38);
+}
+
+#cs-right {
+  padding: 0;
+  position: relative; overflow: hidden;
+  min-height: 260px;
+}
+#cs-img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center top;
+  display: block; opacity: 0.75;
+  transition: opacity 0.3s;
+}
+#cs-img-fade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right, rgba(6,4,14,0.55) 0%, transparent 40%),
+              linear-gradient(to top, rgba(6,4,14,0.80) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+#cs-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px 12px; border-top: 1px solid rgba(218,165,32,0.08);
+  flex-shrink: 0; gap: 12px;
+}
+#cs-pips { display: flex; gap: 5px; align-items: center; flex: 1; }
+.cs-pip {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(218,165,32,0.18); cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.cs-pip.active { width: 8px; height: 8px; }
+.cs-pip:hover { background: rgba(218,165,32,0.50); }
+#cs-counter {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.16em; color: rgba(218,165,32,0.30);
+}
+.cs-nav { display: flex; gap: 4px; }
+.cs-nav-btn {
+  background: none; border: 1px solid rgba(218,165,32,0.16);
+  color: rgba(218,165,32,0.40); width: 28px; height: 24px;
+  border-radius: 2px; cursor: pointer; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; transition: all 0.18s;
+}
+.cs-nav-btn:hover:not(:disabled) { color: #f5ecd5; border-color: rgba(218,165,32,0.60); }
+.cs-nav-btn:disabled { opacity: 0.18; cursor: default; }
+
+/* Light mode */
+body.light #cs-panel { background: rgba(240,236,226,0.88); }
+body.light #cs-inner {
+  background: rgba(255,252,244,0.99);
+  border-color: rgba(0,0,0,0.10);
+}
+body.light #cs-type { color: rgba(0,0,0,0.42); }
+body.light #cs-era  { color: rgba(0,0,0,0.32); }
+body.light #cs-title { color: #0a0a0a; }
+body.light #cs-body  { color: rgba(0,0,0,0.75); }
+body.light .cs-stat-label { color: rgba(0,0,0,0.40); }
+body.light .cs-nav-btn { color: rgba(0,0,0,0.40); border-color: rgba(0,0,0,0.14); }
+body.light .cs-nav-btn:hover:not(:disabled) { color: #000; }
+body.light .cs-close { color: rgba(0,0,0,0.45); border-color: rgba(0,0,0,0.16); }
+body.light .cs-close:hover { color: #000; border-color: rgba(0,0,0,0.55); }
+body.light .cs-pip { background: rgba(0,0,0,0.14); }
+body.light #cs-counter { color: rgba(0,0,0,0.35); }
+body.light #cs-img-fade {
+  background: linear-gradient(to right, rgba(255,252,244,0.55) 0%, transparent 40%),
+              linear-gradient(to top, rgba(255,252,244,0.80) 0%, transparent 50%);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  #cs-body-wrap { grid-template-columns: 1fr; }
+  #cs-right { display: none; }
+  #cs-left { padding: 16px 16px; }
+  #cs-title { font-size: 19px; }
+}
+
 </style>
 </head>
 <body>
@@ -363,35 +699,52 @@ body.light #toc-hint{color:rgba(100,60,0,0.30);}
 <canvas id="canvas"></canvas>
 
 <div id="brand">
-  <div id="brand-name">Wolfgang &amp; Co.</div>
-  <div id="brand-sub">Career Spiral · 2005 — Present</div>
+  <div id="brand-logo">
+    <svg id="brand-saturn" width="36" height="36" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <text x="2" y="26" 
+        font-family="DM Mono, monospace" 
+        font-size="22" 
+        font-weight="300"
+        fill="rgba(218,165,32,0.70)"
+        letter-spacing="-1">
+        &lt;/
+      </text>
+    </svg>
+    <div id="brand-text">
+      <div id="brand-name">Wolfgang &amp; Co.</div>
+      <div id="brand-sub">Zack Gort · Senior UX/UI Designer</div>
+    </div>
+  </div>
+  <!-- Hover ghost: full dab.cx acronym -->
+  <div id="brand-dab">Thinker &amp; Maker · 20 years · zack@reasonably.cc</div>
 </div>
-<button id="theme-toggle">Light</button>
 
 <div id="era-label">
-  <div id="era-year">2026</div>
-  <div id="era-name">Present</div>
+  <div id="era-year">2003</div>
+  <div id="era-name">Origin</div>
 </div>
 
 <div id="spine-indicator"></div>
 
+<!-- TOP-RIGHT HUD: views + theme -->
 <div id="hud">
-  <button class="hud-btn active" data-view="spiral">SPIRAL</button>
+  <button class="hud-btn active" data-view="spiral">ORBIT</button>
   <button class="hud-btn" data-view="arc">TIMELINE</button>
+  <button class="hud-btn" data-view="grid">GRID</button>
+  <button class="hud-btn" data-view="galaxy">GALAXY</button>
   <div class="hud-sep"></div>
-  <button class="hud-btn hud-zoom" id="hud-zoom-out">−</button>
-  <button class="hud-btn hud-zoom" id="hud-zoom-in">+</button>
+  <button class="hud-btn" id="theme-toggle-hud">DARK</button>
 </div>
 
-<!-- TIMELINE NAV STRIP -->
-<div id="timeline-nav">
-  <button id="tl-prev" title="Previous era">&#8592;</button>
+<!-- hidden stubs so JS refs don't break -->
+<button id="theme-toggle" style="display:none">Light</button>
+<div id="timeline-nav" style="display:none">
+  <button id="tl-prev"></button>
   <div id="tl-track"></div>
-  <div id="tl-label">——</div>
-  <button id="tl-next" title="Next era">&#8594;</button>
+  <div id="tl-label"></div>
+  <button id="tl-next"></button>
 </div>
-
-<div id="hint">drag to orbit · scroll to zoom · click any node · ← → navigate · space pauses</div>
+<div id="hint" style="display:none"></div>
 
 <div id="tooltip"><div id="tt-inner">
   <div class="tt-era" id="tt-era"></div>
@@ -403,30 +756,31 @@ body.light #toc-hint{color:rgba(100,60,0,0.30);}
 <div id="ghost"><div class="gc">
   <div class="gcbar"></div>
   <div class="gcscroll">
+    <!-- TOP BAR: title + nav + close -->
     <div class="gchead">
-      <div class="gcera" id="gc-era"></div>
-      <div class="gctitle" id="gc-title"></div>
-      <div class="gcrole" id="gc-role"></div>
+      <div class="gchead-text">
+        <div class="gcera" id="gc-era"></div>
+        <div class="gctitle" id="gc-title"></div>
+        <div class="gcrole" id="gc-role"></div>
+      </div>
+      <div class="gchead-nav">
+        <button class="gcnav-btn" id="gc-prev" title="Previous">&#8592;</button>
+        <button class="gcnav-btn" id="gc-next" title="Next">&#8594;</button>
+        <button class="gcclose" onclick="closePanel()">✕</button>
+      </div>
     </div>
-    <!-- image strip -->
-    <div class="gc-images" id="gc-images"></div>
+    <!-- IFRAME HERO -->
+    <div class="gc-iframe-wrap" id="gc-iframe-wrap">
+      <div class="gc-iframe-none" id="gc-iframe-none">no url</div>
+    </div>
     <!-- moon pills -->
     <div class="gc-moons" id="gc-moons" style="display:none;">
       <div class="gc-moons-label">Satellites</div>
       <div class="gc-moon-pills" id="gc-moon-pills"></div>
     </div>
     <div class="gcbody" id="gc-body"></div>
-    <div class="gc-sentences" id="gc-sentences">
-      <div class="gc-sent-label">From the narrative</div>
-      <div id="gc-sent-list"></div>
-    </div>
     <div class="gcft">
       <span class="gctag" id="gc-tag"></span>
-      <div class="gc-nav">
-        <button class="gcnav-btn" id="gc-prev" title="Previous era">&#8592;</button>
-        <button class="gcnav-btn" id="gc-next" title="Next era">&#8594;</button>
-        <button class="gcclose" onclick="closePanel()">✕</button>
-      </div>
     </div>
   </div>
 </div></div>
@@ -439,24 +793,35 @@ body.light #toc-hint{color:rgba(100,60,0,0.30);}
   </div>
   <div class="ms-images" id="ms-images"></div>
   <div class="msbody" id="ms-body"></div>
-  <div class="msft">
-    <div class="ms-nav">
-      <button class="ms-navbtn" id="ms-prev">&#8592;</button>
-      <button class="ms-navbtn" id="ms-next">&#8594;</button>
-    </div>
-    <button class="msclose" onclick="closePanel()">✕</button>
-  </div>
+</div>
+
+<!-- Fixed mobile nav bar: PREV | ✕ | NEXT full-width -->
+<div id="mobile-nav-bar">
+  <button class="ms-navbtn" id="ms-prev" onclick="navPrev()">&#8592; Prev</button>
+  <button class="msclose" id="mobile-close-btn" onclick="closePanel()">✕</button>
+  <button class="ms-navbtn" id="ms-next" onclick="navNext()">Next &#8594;</button>
 </div>
 
 <!-- moon ghost disabled -->
 <div id="moon-ghost"></div>
+
+<!-- SENTENCE GHOST IMAGE -->
+<div id="sent-ghost">
+  <img id="sent-ghost-img" src="" alt="">
+  <div id="sent-ghost-cap"></div>
+</div>
+
+<!-- GRID VIEW OVERLAY -->
+<div id="grid-overlay">
+  <div id="grid-inner"></div>
+</div>
 
 <!-- TABLE OF CONTENTS -->
 <div id="toc">
   <div id="toc-inner">
     <div id="toc-header">
       <div>
-        <div id="toc-title">Career Spiral · 2005 — Present</div>
+        <div id="toc-title">D.A.B.CX · A Roadmap</div>
         <div id="toc-sub">Wolfgang &amp; Co. · Table of Contents</div>
       </div>
       <button id="toc-close" onclick="closeTOC()">✕</button>
@@ -469,477 +834,408 @@ body.light #toc-hint{color:rgba(100,60,0,0.30);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ─────────────────────────────────────────────────────────
-// CAREER DATA
+// ROADMAP NODES — narrative-as-nodes
+// The sentence as primitive: wolfie.love → ecosystem
 // ─────────────────────────────────────────────────────────
 const ERAS = [
+  // ── ERA 0: ORIGIN ──────────────────────────────────────────
   {
     id: 'origin',
-    year: '2005',
-    title: 'The Autodidact Origin',
-    role: 'Self-taught · Suburban Philadelphia',
-    era: '2005 — 2008',
+    year: '2003',
+    title: 'Miller Designworks',
+    role: 'Junior Designer · Suburban Philadelphia',
+    era: '2003 — 2004',
     domain: 'roots',
-    body: 'Built my first computer circa 2005. Installed pirated copies of Photoshop and Illustrator. Didn\'t graduate from university — stopped out, not dropped out. I studied what I saw. Read books, flipped through magazines, took on early client work. Observed, amalgamated, and carried my craft through conviction — not credentials.',
+    url: null,
+    body: 'The first studio. Miller Designworks put a professional context around instincts I had been developing informally — print, identity, production. Before Craigslist, before startups, before New York. The beginning of the thread.',
     sentences: [
-      'I built my first computer circa 2005.',
-      'I immediately installed pirated copies of Adobe Photoshop and Illustrator — the learning was real, even if the license wasn\'t.',
-      'I didn\'t graduate from university. I stopped out — that\'s different from dropping out.',
-      'I studied what I saw: books, magazines, client work, anything with a grid and a purpose.',
-      'I created faux website concepts just to understand designing for the medium — nobody asked me to.',
-      'All this culminated in responding to a Craigslist post that changed everything.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1593640408182-31c228bc6ddb?w=240&h=180&fit=crop', caption: 'First build' },
-      { src: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=240&h=180&fit=crop', caption: 'Design study' },
+      'Miller Designworks was the first studio.',
+      'Print, identity, production — professional context for instincts I had been developing informally.',
+      'Before Craigslist, before startups, before New York.',
+      'The beginning of the thread.',
     ],
     moons: [
-      { label: 'Photoshop', desc: 'Pirated — but the learning was real.' },
-      { label: 'Illustrator', desc: 'Vector logic from day one.' },
-      { label: 'Craigslist gig', desc: 'First paid design work.' },
-      { label: 'Stopped out', desc: 'Not dropped out — a meaningful distinction.' },
+      { label: 'Print design', desc: 'Identity and production in a traditional studio context.' },
+      { label: 'First professional role', desc: 'Where craft became work.' },
     ],
-    color: 0xb87333, hex: '#b87333'
+    color: 0xa08030, hex: '#a08030'
   },
+
+  // ── ERA 1: TURN5 ────────────────────────────────────────────
   {
     id: 'turn5',
-    year: '2008',
+    year: '2007',
     title: 'Turn5 Inc.',
-    role: 'Designer · Product Photographer · Suburbia',
-    era: '2008 — 2011',
-    domain: 'product',
-    body: 'A garage startup in the suburbs of Philadelphia that became my formal education. The kind of place where you wear the hat you want — and then wear three more. Charged with designing web properties, product packaging, printed catalogues, emails, and ads across multiple brand systems. Also handed a Canon Rebel DSLR and told to build a photo studio. We grew from ten to forty million in revenue during my time there.',
+    role: 'Designer · Product Photographer · E-commerce Startup',
+    era: '2007 — 2011',
+    domain: 'startup',
+    url: null,
+    body: 'A garage startup in the suburbs of Philadelphia that became my real education. I wore every hat — web, print, packaging, email, ads, and then they handed me a Canon Rebel DSLR and told me to build a photo studio from nothing. We grew from ten to forty million in revenue during my time there.',
     sentences: [
-      'A turning point at Turn5 Inc. — a garage startup that became my university.',
-      'The kind of place where you wear the hat you want — and then wear three more.',
-      'I was handed a brand new PC and a Canon Rebel DSLR and told to figure it out.',
-      'Charged with designing web properties, product packaging, printed catalogues, emails, and ads.',
-      'I built a product photography studio from scratch — OEM color-match accuracy, zero prior experience.',
-      'We built a lifestyle brand that grew from ten to forty million dollars per year during my time at Turn5.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?w=240&h=180&fit=crop', caption: 'Studio work' },
-      { src: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=240&h=180&fit=crop', caption: 'Product photography' },
-      { src: 'https://images.unsplash.com/photo-1545665277-5937489579f2?w=240&h=180&fit=crop', caption: 'Catalogue design' },
+      'A garage startup that became my real education.',
+      'Web properties, product packaging, printed catalogues, emails, ads — all mine.',
+      'They handed me a Canon Rebel DSLR and told me to build a photo studio from nothing.',
+      'We grew from ten to forty million in revenue during my tenure.',
+      'No title, no credential — just the work and what it proved.',
     ],
     moons: [
-      { label: 'Photography', desc: 'Canon Rebel DSLR, built studio from scratch.' },
-      { label: 'Web Design', desc: 'HTML/CSS e-commerce properties.' },
-      { label: 'Print', desc: 'Catalogues, packaging, ads — full print cycle.' },
-      { label: 'Email', desc: 'Multi-brand campaign systems at scale.' },
-      { label: '$10M → $40M', desc: 'Revenue growth during tenure.' },
+      { label: 'Product Photography', desc: 'Built a studio from scratch. Canon Rebel.' },
+      { label: 'Multi-brand systems', desc: 'Web, print, packaging — simultaneously.' },
+      { label: '$10M → $40M', desc: 'Revenue growth during my tenure.' },
+      { label: 'E-commerce', desc: 'Early hands-on web commerce design.' },
     ],
-    color: 0xdaa520, hex: '#daa520'
+    color: 0xc89030, hex: '#c89030'
   },
+
+  // ── ERA 2: PHILLY STARTUP & AGENCY ──────────────────────────
   {
     id: 'leadnomics',
     year: '2011',
     title: 'Leadnomics',
-    role: 'Conversion Designer · Philadelphia',
-    era: '2011 — 2013',
-    domain: 'conversion',
-    body: 'Paradigm shifty. Lead generation across multiple verticals — the cash cow was payday loans. My job was to make it easy for users to make catastrophic financial decisions. I achieved a 95.8% conversion rate using responsive design and rigorous A/B testing — mobile-first before it was a mandate. Business bides by imperative, not by idealism. I learned both sides of that equation here.',
+    role: 'Conversion Designer · Lead Generation Startup',
+    era: '2011 — 2014',
+    domain: 'startup',
+    url: null,
+    body: 'Lead generation across multiple verticals — the cash cow was payday loans. My job was to make it easy for users to make catastrophic financial decisions. I achieved a 95.8% conversion rate using responsive design and rigorous A/B testing — mobile-first before it was a mandate. Business bides by imperative, not by idealism. I learned both sides of that equation here.',
     sentences: [
-      'Leadnomics was shifty — paradigm shifty.',
-      'We focused on lead generation across multiple verticals. The cash cow was payday loans.',
-      'Said bluntly: my job was to make it easy for our users to make catastrophic financial decisions.',
-      'I achieved a 95.8% conversion rate using responsive design and rigorous A/B testing.',
-      'Mobile-first before it was a mandate — I saw what was coming and built for it.',
-      'Business bides by imperative, not by idealism. I learned both sides of that equation here.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=240&h=180&fit=crop', caption: 'Conversion data' },
-      { src: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=240&h=180&fit=crop', caption: 'A/B results' },
+      'Lead generation across multiple verticals — the cash cow was payday loans.',
+      'My job: make it easy for users to make catastrophic financial decisions.',
+      'I achieved a 95.8% conversion rate using responsive design and A/B testing.',
+      'Mobile-first before it was a mandate.',
+      'Business bides by imperative, not by idealism.',
+      'I learned both sides of that equation here.',
     ],
     moons: [
-      { label: '95.8% CVR', desc: 'Highest conversion rate in vertical.' },
-      { label: 'Responsive', desc: 'Mobile-first before it was standard.' },
-      { label: 'A/B Testing', desc: 'Rigorous, data-driven iteration.' },
-      { label: 'FinLead UX', desc: 'High-stakes persuasive interface design.' },
+      { label: '95.8% CVR', desc: 'Conversion rate via responsive design & A/B testing.' },
+      { label: 'Mobile-first', desc: 'Before it was mandated — it was just right.' },
+      { label: 'Multi-vertical', desc: 'Finance, insurance, consumer lead gen.' },
     ],
-    color: 0x8b6914, hex: '#8b6914'
+    color: 0xd4a020, hex: '#d4a020'
   },
+
   {
     id: '160over90',
-    year: '2013',
+    year: '2014',
     title: 'One Sixty Over Ninety',
-    role: 'Interaction Designer · Center City Philadelphia',
-    era: '2013 — 2016',
+    role: 'Interaction Designer · Full-Service Agency',
+    era: '2014 — 2016',
     domain: 'agency',
-    body: 'One Sixty Over Ninety — my heartrate when offered the job. I took a pay cut to join their new Interactive Department because the culture demanded we dare. Full-service interaction design for .EDU clients: Comcast, Kent State, the Philadelphia Eagles. Information architecture, prototyping, ADA compliance, client-facing creative lead. Long days, longer nights. This is where I learned what design culture could be.',
+    url: null,
+    body: 'One Sixty Over Ninety — my heartrate when offered the job. I took a pay cut to join their new Interactive Department because the culture demanded we dare. Full-service interaction design for .EDU and enterprise clients: Comcast, Kent State, the Philadelphia Eagles. Information architecture, prototyping, ADA compliance, client-facing creative lead.',
     sentences: [
-      'One Sixty Over Ninety — my heartrate when offered a job as an Interaction Designer.',
-      'I took a pay cut to join their new Interactive Department. I was there to learn, not to earn.',
-      'Full-service interaction design for .EDU clients — Comcast, Kent State, the Philadelphia Eagles.',
-      'I owned information architecture, prototyping, ADA compliance, and client-facing creative lead.',
-      'Long days, longer nights. Short weekends.',
-      'The work wasn\'t scientific. It was expressive. It was novel. It was considered.',
-      'This is where I learned what design culture could — and should — be.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=240&h=180&fit=crop', caption: 'Agency life' },
-      { src: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=240&h=180&fit=crop', caption: 'Interactive work' },
+      'I took a pay cut to join their new Interactive Department.',
+      'The culture demanded we dare — that was enough.',
+      '.EDU and enterprise clients: Comcast, Kent State, the Philadelphia Eagles.',
+      'Information architecture, prototyping, ADA compliance, client-facing creative lead.',
+      'Long days, longer nights. This is where I learned what design culture could be.',
     ],
     moons: [
-      { label: 'Comcast', desc: 'Cable + digital ecosystem design.' },
-      { label: 'Philly Eagles', desc: 'Sports brand interaction design.' },
-      { label: 'Kent State', desc: 'Higher-ed digital presence.' },
-      { label: 'ADA Compliance', desc: 'Accessibility as a design standard.' },
-      { label: 'IA', desc: 'Information architecture at agency scale.' },
+      { label: '.EDU', desc: 'Higher education UX — a distinct discipline.' },
+      { label: 'ADA Compliance', desc: 'Accessibility as design constraint, not afterthought.' },
+      { label: 'Comcast', desc: 'Enterprise interaction design at scale.' },
+      { label: 'Philly Eagles', desc: 'Sports & entertainment digital presence.' },
+      { label: 'Interactive Dept.', desc: 'Founding member of a new practice area.' },
     ],
     color: 0xdaa520, hex: '#daa520'
   },
+
   {
     id: 'o3world',
     year: '2016',
     title: 'O3 World',
-    role: 'UX Designer · Fishtown Philadelphia',
+    role: 'UX Designer · Digital Product',
     era: '2016 — 2017',
     domain: 'product',
-    body: 'A digital product shop in the heart of Fishtown, Philly. Certified Scrum Master. Agile in nature and sprint-led. Daily standups, whiteboards, wireframes — real Lean UX, not the powerpoint version. Clients included La Colombe, Vertex, and SEIC. This was where process and practice converged.',
+    url: null,
+    body: 'A digital product shop in the heart of Fishtown, Philly. Certified Scrum Master. Agile in practice and sprint-led. Daily standups, whiteboards, wireframes — real Lean UX, not the PowerPoint version. Clients included La Colombe, Vertex, and SEIC.',
     sentences: [
-      'O3 World was a digital product shop in the heart of Fishtown — a neighborhood that takes itself seriously.',
-      'Certified Scrum Master. Agile in nature and sprint-led.',
-      'Daily standups. Whiteboards. Wireframes. We practiced true Lean UX methodologies.',
-      'Not the PowerPoint version of Lean UX — the whiteboard version.',
-      'Clients included La Colombe, Vertex, and SEIC.',
-      'This was where process and practice finally converged for me.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=240&h=180&fit=crop', caption: 'UX workshop' },
+      'A digital product shop in the heart of Fishtown.',
+      'Certified Scrum Master. Agile in practice, not in posture.',
+      'Daily standups, whiteboards, wireframes — real Lean UX.',
+      'Clients: La Colombe, Vertex, SEIC.',
     ],
     moons: [
-      { label: 'La Colombe', desc: 'Coffee brand digital experience.' },
-      { label: 'Lean UX', desc: 'Hypothesis-driven design in practice.' },
-      { label: 'Scrum', desc: 'Certified Scrum Master — daily standups, sprint cycles.' },
-      { label: 'Vertex', desc: 'Enterprise SaaS product design.' },
+      { label: 'Scrum Master', desc: 'Certified. Agile as practice, not theater.' },
+      { label: 'La Colombe', desc: 'Consumer product & brand digital.' },
+      { label: 'Lean UX', desc: 'Real sprints. Real standups. Real wireframes.' },
     ],
-    color: 0xc49a2e, hex: '#c49a2e'
+    color: 0xe8b030, hex: '#e8b030'
   },
+
   {
     id: 'workarea',
     year: '2017',
     title: 'Workarea',
-    role: 'Senior UX Designer · Downtown Philadelphia',
+    role: 'Senior UX Designer · SaaS E-commerce',
     era: '2017 — 2018',
-    domain: 'saas',
+    domain: 'product',
+    url: null,
     body: 'A proprietary SaaS e-commerce platform shaped through direct client relationships and data-informed iteration. No mockup theater — napkin sketches and real conversations with engineers until the thing was right. We skipped high-fidelity for high-velocity. I shaped the platform through direct client feedback loops until the company sold.',
     sentences: [
-      'Downtown from Fishtown was Workarea — a proprietary SaaS e-commerce platform.',
-      'We skipped high-fidelity mockups for napkin sketches and direct collaboration with developers.',
-      'No mockup theater. Real conversations with engineers until the thing was right.',
-      'I shaped the platform through direct client relationships and data-informed iteration.',
-      'We built things better, faster, smarter — because we had to.',
-      'The company sold. That required me to reframe my approach — and I did.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=240&h=180&fit=crop', caption: 'SaaS product' },
+      'A proprietary SaaS e-commerce platform.',
+      'Napkin sketches and real conversations with engineers — no mockup theater.',
+      'We skipped high-fidelity for high-velocity.',
+      'I shaped the platform through direct client feedback loops.',
+      'Until the company sold.',
     ],
     moons: [
-      { label: 'e-Commerce SaaS', desc: 'Proprietary platform for enterprise retail.' },
-      { label: 'Dev Pairing', desc: 'Napkin to PR — no mockup wall.' },
-      { label: 'Client loops', desc: 'Direct feedback-to-iteration cycles.' },
+      { label: 'SaaS', desc: 'Proprietary e-commerce — end-to-end UX ownership.' },
+      { label: 'High-velocity', desc: 'Speed was the feature. Sketches > comps.' },
+      { label: 'Acquisition', desc: 'Shaped the product until exit.' },
     ],
-    color: 0x9a7820, hex: '#9a7820'
+    color: 0xc8a020, hex: '#c8a020'
   },
+
+  // ── ERA 3: NEW YORK ──────────────────────────────────────────
   {
     id: 'flightpath',
     year: '2018',
     title: 'FlightPath',
-    role: 'Senior UX Designer · Midtown Manhattan',
-    era: '2018 — 2020',
-    domain: 'pharma',
-    body: 'Hello, New York City. Emerging from bankruptcy, the agency served the pharmaceutical sector — Merck, Goya, Charter. This was my foot-in-the-door to the NYC scene. Commuting from Philly to Manhattan and back, every business day, for a full year. Up and out by five. Home by ten — maybe. Two skylines, three hours apart.',
+    role: 'Senior UX Designer · Digital Design Agency',
+    era: '2018 — 2019',
+    domain: 'agency',
+    url: null,
+    body: 'Hello, New York City. The agency was emerging from bankruptcy — I was not deterred. Pharmaceutical sector: Merck, Charter, Goya. My foot-in-the-door to the NYC scene. Commuting from Philly to Manhattan and back, every business day, for a full year. Up and out by five. Home by ten — maybe.',
     sentences: [
-      'Enter FlightPath. Hello, New York City.',
-      'The agency was emerging from bankruptcy — but they needed my help, and this was my entry to the NYC scene.',
-      'Clients included Merck, Goya, and Charter — Pharmaceutical, E-commerce, and Media.',
-      'I ran UX strategy and design across the full project lifecycle.',
-      'Commuting from Philly to Manhattan — and back — every business day for a full year.',
-      'Up and out by five o\'clock; home by ten o\'clock — maybe.',
-      'I saw both Sunrise and Sunset every day away from home. Two skylines, three hours apart.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?w=240&h=180&fit=crop', caption: 'NYC commute' },
-      { src: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=240&h=180&fit=crop', caption: 'Two skylines' },
+      'Hello, New York City.',
+      'The agency was emerging from bankruptcy — I was not deterred.',
+      'Clients: Merck, Charter, Goya.',
+      'I commuted from Philly to Manhattan and back, every business day, for a full year.',
+      'Up and out by five. Home by ten — maybe. Two skylines, three hours apart.',
     ],
     moons: [
-      { label: 'Merck', desc: 'Pharma HCP & patient portal UX.' },
-      { label: 'Goya', desc: 'E-commerce design for iconic brand.' },
-      { label: 'Charter', desc: 'Media & telecom digital experience.' },
-      { label: 'NYC entry', desc: 'Foot-in-the-door to the Manhattan scene.' },
-      { label: 'Commuter life', desc: 'Amtrak, both ways, every business day.' },
+      { label: 'NYC debut', desc: 'Foot-in-door to the New York design scene.' },
+      { label: 'Merck', desc: 'Pharmaceutical UX — regulated, precise, high-stakes.' },
+      { label: 'Commuter life', desc: 'PHL → MAN, daily. One full year.' },
     ],
-    color: 0xdaa520, hex: '#daa520'
+    color: 0xf0b830, hex: '#f0b830'
   },
+
   {
     id: 'livearea',
-    year: '2020',
-    title: 'PFSWeb LiveArea',
-    role: 'Manager, UX · Remote',
-    era: '2020 — 2021',
-    domain: 'ecomm',
-    body: 'From IC to Manager. I owned the full UX strategy and design function for Salesforce Commerce Cloud builds across B2C and B2B clients throughout the project lifecycle. Conversion, post-sale re-engagement, design systems at platform scale. I ran discovery, directed and delegated, socialized solutions — and invented "Cards Against Bad UX" to help clients empathize with their own users.',
+    year: '2019',
+    title: 'Livearea (PFSWeb)',
+    role: 'Manager, UX · Salesforce Commerce Cloud',
+    era: '2019 — 2021',
+    domain: 'ecommerce',
+    url: null,
+    body: 'From IC to Manager. I owned the full UX strategy and design function for Salesforce Commerce Cloud builds across B2C and B2B clients: Aquasana, West Marine, Yeti, and others. Conversion, post-sale re-engagement, design systems at platform scale. I invented "Cards Against Bad UX" to help clients empathize with their own users.',
     sentences: [
-      'From FlightPath to LiveArea. From individual contributor to Manager.',
-      'I owned the full UX strategy and design function throughout project lifecycles.',
-      'Full-spectrum Salesforce Commerce Cloud builds across B2C and B2B clients.',
-      'Conversion optimization, post-sale re-engagement, design systems at platform scale.',
-      'I ran discovery. I directed and delegated. I socialized solutions upward and across.',
-      'I invented "Cards Against Bad UX" — a custom card game to help clients empathize with their own users.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1556742393-d75f468bfcb0?w=240&h=180&fit=crop', caption: 'E-commerce UX' },
+      'From IC to Manager — first time owning the function, not just doing the work.',
+      'Salesforce Commerce Cloud across B2C and B2B: Aquasana, West Marine, Yeti.',
+      'Conversion, post-sale re-engagement, design systems at platform scale.',
+      'I invented "Cards Against Bad UX" — an empathy tool for client workshops.',
+      'Discovery, delegation, socialization. The full management loop.',
     ],
     moons: [
-      { label: 'IC → Manager', desc: 'First formal management transition.' },
-      { label: 'SFCC', desc: 'Salesforce Commerce Cloud platform.' },
-      { label: 'Cards vs UX', desc: 'Custom empathy card game — invented here.' },
-      { label: 'B2B & B2C', desc: 'Multi-sector e-commerce portfolio.' },
-      { label: 'Design Systems', desc: 'Platform-scale component architecture.' },
+      { label: 'SFCC', desc: 'Salesforce Commerce Cloud — B2C and B2B.' },
+      { label: 'IC → Manager', desc: 'First time owning the full UX function.' },
+      { label: 'Cards Against Bad UX', desc: 'Invented empathy workshop tool for clients.' },
+      { label: 'Aquasana · West Marine · Yeti', desc: 'Major e-commerce clients.' },
     ],
-    color: 0xc49a2e, hex: '#c49a2e'
+    color: 0xddb030, hex: '#ddb030'
   },
+
   {
-    id: 'huge',
-    year: '2021',
+    id: 'huge2021',
+    year: '2021a',
     title: 'HUGE Inc.',
-    role: 'Senior UX Designer · Remote',
+    role: 'Senior UX Designer · Lifestyle E-commerce',
     era: '03/2021 — 04/2021',
-    domain: 'enterprise',
-    body: 'A short but sharp engagement at HUGE Inc. I defined end-to-end UX and the booking flow for Sentral Lifestyle Apartments — a hospitality-tech platform reimagining urban living. Brand activation strategy, competitive analysis, and critical user flows delivered under constrained conditions. Fast, precise, shipped.',
+    domain: 'agency',
+    url: null,
+    body: 'Short but sharp. End-to-end UX and booking flow for Sentral Lifestyle Apartments — a hospitality-tech platform reimagining urban living. Brand activation strategy, competitive analysis, critical user flows delivered under constrained conditions. Fast. Precise. Shipped.',
     sentences: [
-      'A short engagement at HUGE Inc. — brief by contract, not by output.',
-      'I defined end-to-end UX and the complete booking flow for Sentral Lifestyle Apartments.',
-      'Sentral was a hospitality-tech platform reimagining what urban apartment living could feel like.',
-      'Brand activation strategy, competitive analysis, critical flows — all delivered under constrained conditions.',
-      'Fast. Precise. Shipped.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=240&h=180&fit=crop', caption: 'Lifestyle platform' },
-      { src: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=240&h=180&fit=crop', caption: 'Urban living UX' },
+      'Short but sharp.',
+      'End-to-end UX and booking flow for Sentral Lifestyle Apartments.',
+      'Hospitality-tech reimagining urban living.',
+      'Brand activation strategy, competitive analysis, critical user flows.',
+      'Constrained conditions. Fast. Precise. Shipped.',
     ],
     moons: [
-      { label: 'Sentral', desc: 'Hospitality-tech lifestyle apartment platform.' },
-      { label: 'Booking flow', desc: 'End-to-end UX for reservation system.' },
-      { label: 'Brand activation', desc: 'Strategy for a new category of living.' },
-      { label: 'Competitive audit', desc: 'Market positioning analysis.' },
+      { label: 'Sentral', desc: 'Hospitality-tech · Urban living · Booking UX.' },
+      { label: 'Constrained delivery', desc: 'Short engagement — full deliverables.' },
     ],
-    color: 0xb87333, hex: '#b87333'
+    color: 0xe8c040, hex: '#e8c040'
   },
+
   {
     id: 'elva',
-    year: '2021',
+    year: '2021b',
     title: 'Elva Design Group',
-    role: 'Senior UX Designer · Remote',
+    role: 'Senior UX Designer · Shopify E-commerce (GNC)',
     era: '04/2021 — 08/2021',
-    domain: 'ecomm',
-    body: 'Owned discovery through delivery for GNC\'s Shopify redesign — mobile-first, component-based, shipped in 12 weeks. Strategy and execution in the same hands. From research to component library to live storefront, this was about what it looks like when one person holds the entire thread without dropping it.',
+    domain: 'ecommerce',
+    url: 'https://intoview.pro/cv',
+    body: 'Owned discovery through delivery for GNC\'s Shopify redesign — mobile-first, component-based, shipped in 12 weeks. Strategy and execution in the same hands. From research to component library to live storefront, one thread held without dropping. The outcome helped GNC reclaim ~$500M in annual revenue following bankruptcy.',
     sentences: [
-      'Elva Design Group — where I owned discovery through delivery for GNC\'s Shopify redesign.',
-      'Mobile-first. Component-based. Shipped in 12 weeks.',
-      'Strategy and execution in the same hands — no handoff lag, no translation loss.',
-      'From research to component library to live storefront, I held the entire thread.',
-      'GNC is a global brand. The redesign had to meet that weight and move at startup speed.',
-      'It did.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b6?w=240&h=180&fit=crop', caption: 'Shopify design' },
-      { src: 'https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=240&h=180&fit=crop', caption: 'Component system' },
+      'GNC asked us to shake things up — ground-up Shopify redesign, post-bankruptcy.',
+      'Mobile-first. Component-based. Atomic design system.',
+      'Discovery through delivery in 12 weeks.',
+      'Strategy and execution in the same hands.',
+      'One thread held from research to live storefront.',
+      'The result helped GNC reclaim ~$500M in annual revenue.',
     ],
     moons: [
-      { label: 'GNC', desc: 'Global health & nutrition brand redesign.' },
-      { label: 'Shopify', desc: 'Mobile-first component-based storefront.' },
-      { label: '12 weeks', desc: 'Discovery to delivery — shipped on time.' },
-      { label: 'Component lib', desc: 'Modular design system for e-commerce.' },
+      { label: 'GNC', desc: 'Global health & nutrition — total e-commerce overhaul.' },
+      { label: 'Shopify', desc: 'Headless, mobile-first, atomic component system.' },
+      { label: '12 weeks', desc: 'Discovery to delivery. No dropped threads.' },
+      { label: '~$500M recovery', desc: 'Revenue reclaimed post-bankruptcy.' },
     ],
-    color: 0xc49a2e, hex: '#c49a2e'
+    color: 0xffd040, hex: '#ffd040',
+    caseStudy: 'gnc'
   },
+
   {
     id: 'codeandtheory',
-    year: '2021',
+    year: '2021c',
     title: 'Code & Theory',
-    role: 'Senior Interaction Designer · Manhattan',
+    role: 'Senior Interaction Designer → DRI · TikTok For Business',
     era: '08/2021 — 04/2022',
-    domain: 'enterprise',
+    domain: 'agency',
+    url: null,
     body: 'Led UX and interaction design for TikTok For Business from 62 floors above Manhattan. Ran information architecture and headless CMS workshops. Moved from Senior Designer to Associate Creative Director to Directly Responsible Individual on one of the fastest-growing advertising platforms in the world — a trajectory earned, not assigned.',
     sentences: [
-      'Code & Theory — from sixty-two floors above Manhattan, looking down at the city I\'d earned.',
-      'I led UX and interaction design for TikTok For Business.',
-      'One of the fastest-growing advertising platforms in the world. The pressure was consistent and high.',
-      'I ran IA and headless CMS workshops — translating content architecture for product and marketing simultaneously.',
-      'I moved from Senior Designer to ACD to Directly Responsible Individual.',
-      'That trajectory was earned, not assigned.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1499159058454-75067059248a?w=240&h=180&fit=crop', caption: 'Manhattan view' },
-      { src: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=240&h=180&fit=crop', caption: 'TikTok platform' },
+      'TikTok For Business. 62 floors above Manhattan.',
+      'UX and interaction design for one of the fastest-growing ad platforms in the world.',
+      'Information architecture workshops. Headless CMS strategy.',
+      'Senior Designer → Associate Creative Director → Directly Responsible Individual.',
+      'A trajectory earned, not assigned.',
     ],
     moons: [
-      { label: 'TikTok For Biz', desc: 'Ad platform UX at global scale.' },
-      { label: 'ACD', desc: 'Associate Creative Director — organically elevated.' },
-      { label: 'Headless CMS', desc: 'IA workshops for content architecture.' },
-      { label: 'DRI', desc: 'Directly Responsible Individual designation.' },
-      { label: '62 floors', desc: 'One World Trade Center, Manhattan.' },
+      { label: 'TikTok For Business', desc: 'Global advertising platform UX at enterprise scale.' },
+      { label: 'DRI', desc: 'Directly Responsible Individual — earned, not assigned.' },
+      { label: 'Headless CMS', desc: 'Architecture workshops for enterprise content.' },
+      { label: 'SD → ACD → DRI', desc: 'Three roles, one engagement.' },
     ],
-    color: 0xdaa520, hex: '#daa520'
+    color: 0xf5c030, hex: '#f5c030'
   },
+
   {
     id: 'publicis',
     year: '2022',
     title: 'Publicis Sapient',
-    role: 'Senior UX Designer · Interim Product Owner · NYC',
+    role: 'Senior UX Designer · Interim Product Owner · BNY Mellon',
     era: '04/2022 — 03/2023',
-    domain: 'enterprise',
+    domain: 'fintech',
+    url: 'https://intoview.pro/cv',
     body: 'Embedded in BNY Mellon\'s digital transformation as interim Product Owner and primary client liaison — a role I wasn\'t hired for and became anyway. Architected user data models and flows across three Agile tracks. Centralized a sprawling product ecosystem into a modular, scalable design system. Named operational silos nobody else had mapped.',
     sentences: [
-      'Publicis Sapient — embedded inside BNY Mellon\'s digital transformation for a full year.',
-      'I wasn\'t hired as Product Owner or primary client liaison. I became them.',
-      'I architected user data models and flows across three simultaneous Agile tracks.',
-      'I centralized a sprawling product ecosystem into a modular, scalable design system.',
-      'I named operational silos nobody else had mapped — which is how you fix things nobody else has fixed.',
-      '"Zack has a deep connection to emotions, imagination, and sensitivity — the quintessential idealist." — Christopher Bayle, ACD UX, Publicis Sapient',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=240&h=180&fit=crop', caption: 'BNY Mellon' },
-      { src: 'https://images.unsplash.com/photo-1535320903710-d993d3d77d29?w=240&h=180&fit=crop', caption: 'Design system' },
+      'Embedded in BNY Mellon\'s digital transformation at Publicis Sapient.',
+      'Interim Product Owner and primary client liaison — a role I wasn\'t hired for and became anyway.',
+      'Architected user data models and flows across three Agile tracks.',
+      'Centralized a sprawling product ecosystem into a modular, scalable design system.',
+      'Named operational silos nobody else had mapped.',
+      'Human blood, sweat, and copious caffeine. Zero AI. This was 2022.',
     ],
     moons: [
-      { label: 'BNY Mellon', desc: 'Year-long digital transformation embed.' },
-      { label: 'Interim PO', desc: 'Product Owner role — earned, not assigned.' },
-      { label: 'Data models', desc: 'User data architecture across 3 Agile tracks.' },
-      { label: 'Design system', desc: 'Modular, scalable component architecture.' },
-      { label: 'Silo mapping', desc: 'Named operational gaps nobody else had identified.' },
+      { label: 'BNY Mellon / Wove', desc: 'Industry-first unified advisor financial dashboard.' },
+      { label: 'Interim PO', desc: 'Product Owner — assumed, not assigned.' },
+      { label: 'Three Agile tracks', desc: 'Data models and flows across parallel workstreams.' },
+      { label: 'Design system', desc: 'Modular, scalable — centralized a sprawling ecosystem.' },
+      { label: 'Silo mapping', desc: 'Named what nobody else had charted.' },
     ],
-    color: 0xdaa520, hex: '#daa520'
+    color: 0xdaa520, hex: '#daa520',
+    caseStudy: 'bny'
   },
+
+  // ── ERA 4: CONTRACT & PIVOT ──────────────────────────────────
   {
-    id: 'pivot',
-    year: '2024',
-    title: 'The Low Voltage Pivot',
-    role: 'Network Technician · The Humility Semester',
-    era: '2024',
-    domain: 'pivot',
-    body: 'When I said rock & roll, I did not mean oldies. I thought I had paid my dues. And so, I pivoted — to low voltage contracting. I learned to terminate an RJ45 in 30–45 seconds. I ran cables, installed security systems, managed cable infrastructure in commercial and residential settings. Different parts of my brain — the same brain that once wireframed enterprise banking platforms. Humility is a hell of a teacher.',
+    id: 'ic2023',
+    year: '2023',
+    title: 'Independent Contractor',
+    role: 'SR UX · Development · Remote',
+    era: '2023 — 2025',
+    domain: 'contract',
+    url: null,
+    body: 'Two years of contract work spanning three distinct threads. Brave People with Geico Asset Management. Phenom — proprietary AI platform UX. And a full year of low voltage contracting, running cable, installing security systems, and terminating an RJ45 in under 45 seconds. Humility is a hell of a teacher.',
     sentences: [
-      'Come on baby, let\'s do the twist.',
-      'I pivoted to low voltage contracting — because the design market contracted and I adapted.',
-      'I learned to terminate an RJ45 connector in 30–45 seconds. Clean termination. Every time.',
-      'I ran cables, installed security systems, and managed cable infrastructure in commercial and residential buildings.',
-      'Different parts of my brain — but the same brain that once wireframed enterprise banking platforms.',
-      'Humility is a hell of a teacher. I took the class willingly.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=240&h=180&fit=crop', caption: 'Low voltage work' },
+      'Two years. Three distinct threads.',
+      '2024–25: HUGE + UX and Development for Merck.',
+      '2024: Phenom — proprietary AI platform, UX strategy end-to-end.',
+      '2023–24: Brave People + Geico Asset Management.',
+      '2024: Low voltage contracting. RJ45 in 30–45 seconds. Different parts of the same brain.',
+      'Humility is a hell of a teacher.',
     ],
     moons: [
-      { label: 'RJ45', desc: 'Terminated in under 45 seconds — clean, every time.' },
-      { label: 'Security sys', desc: 'Camera + access control installation.' },
-      { label: 'Cable mgmt', desc: 'Commercial and residential infrastructure.' },
-      { label: 'Humility', desc: 'A hell of a teacher.' },
+      { label: 'Phenom', desc: 'Proprietary AI platform — UX strategy, content infra, events.' },
+      { label: 'Merck (HUGE)', desc: 'UX and Development for pharma enterprise.' },
+      { label: 'Geico Asset Mgmt', desc: 'Brave People engagement — fintech UX.' },
+      { label: 'Low voltage pivot', desc: 'Cabling. Security systems. Humility.' },
+      { label: 'RJ45', desc: 'Terminated in 30–45 seconds. Every time.' },
     ],
-    color: 0x8b6914, hex: '#8b6914'
+    color: 0x9a8040, hex: '#9a8040'
   },
+
+  // ── ERA 5: WOLFGANG & CO. ────────────────────────────────────
   {
-    id: 'phenom',
-    year: '2025',
-    title: 'Phenom',
-    role: 'User Experience Strategist · Remote',
-    era: '02/2025 — 05/2025',
-    domain: 'saas',
-    body: 'Owned the corporate web presence end-to-end — content strategy, product roadmap, third-party integrations, and live event infrastructure. Operated across Marketing, Sales, and Product simultaneously. Named operational silos nobody else had mapped — again. Tools: Contentful, Jira, digital content systems. I did not ask for the scope. The scope found me.',
-    sentences: [
-      'Phenom — a talent experience platform with a global footprint and a web presence that needed ownership.',
-      'I owned it end-to-end: content strategy, product roadmap, third-party integrations, live event infrastructure.',
-      'I operated across Marketing, Sales, and Product simultaneously — crossing every lane by necessity.',
-      'I named operational silos nobody else had mapped. That sentence keeps repeating in my career because the problem keeps repeating in organizations.',
-      'Tools: Contentful, Jira, digital content systems.',
-      'I did not ask for the scope. The scope found me.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=240&h=180&fit=crop', caption: 'Web strategy' },
-      { src: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=240&h=180&fit=crop', caption: 'Cross-functional' },
-    ],
-    moons: [
-      { label: 'Contentful', desc: 'Headless CMS content architecture.' },
-      { label: 'Web presence', desc: 'Corporate site owned end-to-end.' },
-      { label: 'Live events', desc: 'Digital event infrastructure.' },
-      { label: 'Cross-org', desc: 'Marketing + Sales + Product alignment.' },
-      { label: 'Roadmap', desc: 'Product strategy for web platform.' },
-    ],
-    color: 0xc49a2e, hex: '#c49a2e'
-  },
-  {
-    id: 'wolfgang',
-    year: '2025',
+    id: 'wolfco',
+    year: 'W&Co',
     title: 'Wolfgang & Co.',
-    role: 'Founder · Thinker & Maker · Present',
+    role: 'Founder · Thinker & Maker',
     era: '2025 — Now',
     domain: 'studio',
-    body: 'A concept studio focused on craft, language, and human intent — as realized through a bespoke narrative-as-nodes engine. As a self-taught designer, developer, and autodidactic learner, I have been thinking about human solutions to computer problems, namely: how we communicate. My answer is The Sentence. ifimaybefrank, reasonably, intoview, wolfie.life — each is an expression of this conviction.',
+    url: 'https://wolfie.love',
+    body: 'A concept studio focused on craft, language, and human intent — as realized through a bespoke narrative-as-nodes engine. Named for my late blind rescue poodle Wolfgang. The sentence is the irreducible unit of thought. Every platform in the ecosystem — ifimaybefrank, reasonably, intoview, wolfie.life — is an expression of this single conviction.',
     sentences: [
-      'Wolfgang & Co. — a concept studio focused on craft, language, and human intent.',
-      'The engine underneath everything I\'m building is a narrative-as-nodes system I designed myself.',
-      'As a self-taught designer, developer, and autodidactic learner — I\'ve been thinking about how we communicate.',
-      'My answer is The Sentence. Not the interface. Not the flow. The sentence.',
-      'ifimaybefrank.com (a writing model) · reasonably.cc (a thinking model) · intoview.pro (my model) · wolfie.life (a new category).',
-      'Each made with wolfie.love — and each an expression of the same conviction, expressed differently.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=240&h=180&fit=crop', caption: 'Wolfgang studio' },
-      { src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=240&h=180&fit=crop', caption: 'Narrative engine' },
+      'Wolfgang & Co. — named for my late blind rescue poodle.',
+      'A studio focused on craft, language, and human intent.',
+      'The sentence is the irreducible unit of thought.',
+      'wolfie.love: the origin. Built from nothing. Memorial for Wolfgang.',
+      'ifimaybefrank.com. reasonably.cc. intoview.pro. wolfie.life.',
+      'Each platform is an expression of a single conviction.',
     ],
     moons: [
-      { label: 'ifimaybefrank', desc: 'A writing model — ifimaybefrank.com' },
-      { label: 'reasonably', desc: 'A thinking model — reasonably.cc' },
-      { label: 'intoview', desc: 'My professional model — intoview.pro' },
-      { label: 'wolfie.life', desc: 'A new category — wolfie.life' },
-      { label: 'The Sentence', desc: 'Core thesis: narrative as interface.' },
+      { label: 'wolfie.love', desc: 'The origin. Memorial for Wolfgang. Built from scratch.' },
+      { label: 'ifimaybefrank.com', desc: 'Writing engine. Sentence-as-primitive manifesto.' },
+      { label: 'reasonably.cc', desc: 'Thinking tool. Bracket annotation. Direct-stack.' },
+      { label: 'intoview.pro', desc: 'Professional presence. Case study engine.' },
+      { label: 'dab.cx', desc: 'Design [for] agentic architecture, bridging [the human] client experience.' },
     ],
-    color: 0xdaa520, hex: '#daa520'
+    color: 0xffd700, hex: '#ffd700'
   },
+
+  // ── ERA 6: NOW ───────────────────────────────────────────────
   {
-    id: 'now',
+    id: 'seek',
     year: '2026',
-    title: 'Seek & Employ',
-    role: 'Thinker & Maker · Open to Work',
+    title: 'Open to Work',
+    role: 'Senior / Principal UX · Remote · Full-time',
     era: '2026 — Present',
     domain: 'now',
-    body: 'Currently seeking the next full-time role. I want work that matters with people who care. I am not looking for a title — I am looking for a team. I offer systems thinking, hands-on prototyping, and the rare ability to bridge design and development because I have lived on both sides of the handoff. I think deeply about human-to-human interaction and how to make meaningful interfaces at scale.',
+    url: 'https://intoview.pro/cv',
+    body: 'Twenty years. No degree. Every credential earned in the work itself. I am not looking for a title — I am looking for a team. I offer systems thinking, code-native prototyping, and the rare ability to bridge design and development because I have lived on both sides of the handoff.',
     sentences: [
-      'Currently seeking my next full-time role. This is not a passive search.',
-      'I want work that matters with people who care — that sentence is the full criteria.',
-      'I am not looking for a title. I am looking for a team.',
-      'I offer systems thinking and hands-on prototyping — I can think it and build it.',
-      'I bridge design and development because I have lived on both sides of the handoff.',
-      'I think deeply about human-to-human interaction and how to make meaningful interfaces at scale.',
-      'I think. I make. I ship.',
-    ],
-    images: [
-      { src: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=240&h=180&fit=crop', caption: 'Thinker & Maker' },
+      'Twenty years. No degree. Every credential earned in the work itself.',
+      'I am not looking for a title — I am looking for a team.',
+      'Systems thinking. Code-native prototyping. 0-to-1 product development.',
+      'I have lived on both sides of the design/dev handoff.',
+      'I think deeply about human-to-human interaction at scale.',
+      'zack@reasonably.cc · linkedin.com/in/zackgort',
     ],
     moons: [
-      { label: 'Systems thinking', desc: 'Design at the level of architecture.' },
-      { label: 'Prototyping', desc: 'Hands-on — napkin to shipped product.' },
-      { label: 'Open to work', desc: 'Full-time, principal level, in-person or remote.' },
-      { label: 'zackgort.com', desc: 'Portfolio and presence.' },
-      { label: 'intoview.pro', desc: 'My model — designed for exactly this moment.' },
+      { label: 'UX / Product Design', desc: 'Senior / Principal. 20 years. No fluff.' },
+      { label: 'Code-native', desc: 'Vanilla HTML/CSS/JS. Single-file as constraint & argument.' },
+      { label: 'Systems thinker', desc: 'IA, flows, design systems, 0-to-1.' },
+      { label: 'intoview.pro/cv', desc: 'Full case studies: BNY Mellon & GNC.' },
+      { label: 'Contact', desc: 'zack@reasonably.cc' },
     ],
-    color: 0xdaa520, hex: '#daa520'
+    color: 0xffe566, hex: '#ffe566'
   },
-];
+]
 
 // ─────────────────────────────────────────────────────────
 // SPIRAL GEOMETRY
 // ─────────────────────────────────────────────────────────
 function spiralPos(t, view) {
   if (view === 'arc') {
-    const angle = (t - 0.5) * Math.PI * 1.2;
-    const radius = 28;
-    return new THREE.Vector3(
-      Math.cos(angle) * radius,
-      (t - 0.5) * 8,
-      Math.sin(angle) * radius * 0.3
-    );
+    // Vertical arc: evenly spaced nodes along a clean arc scaled to node count
+    const N = ERAS.length;
+    const totalSpan = 24;  // world units, vertical
+    const yOff = (t - 0.5) * totalSpan;
+    const arcBow = 14;     // how much the arc bows outward
+    const bow = arcBow * (1 - Math.pow(t * 2 - 1, 2)); // parabola, 0 at ends, max at center
+    return new THREE.Vector3(bow, yOff, 0);
   }
   const turns = 1.65;
   const angle = t * Math.PI * 2 * turns - Math.PI * 0.5;
@@ -960,6 +1256,129 @@ const ERA_BY_ID = {};
 ERAS.forEach(e => { ERA_BY_ID[e.id] = e; });
 
 // ─────────────────────────────────────────────────────────
+// CASE STUDY DATA
+// ─────────────────────────────────────────────────────────
+const GNC_SLIDES = [
+  {
+    id: 'gnc-1', type: 'Case Study', era: '2021',
+    title: 'GNC: The Whey Back',
+    body: 'GNC was emerging from bankruptcy. They needed a complete Shopify rebuild — platform overhaul, design system, and mobile-first navigation — built from scratch in twelve weeks. No runway. No room for precious.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/pBMMxY1Z/11.webp'
+  },
+  {
+    id: 'gnc-2', type: 'The Problem', era: '2021',
+    title: 'A Brand in Freefall',
+    body: 'GNC had 5,200 retail stores, 1.2M monthly site visitors, and a digital presence that couldn\'t convert either. Legacy platform — slow, desktop-centric, architecturally broken. Bankruptcy wasn\'t the end. It was the forcing function.',
+    pull: 'The site didn\'t just need a redesign. It needed a reason to exist.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/pBMMxY1Z/11.webp'
+  },
+  {
+    id: 'gnc-3', type: 'My Role', era: '2021',
+    title: 'Senior UX Designer — Elva Design Group',
+    body: 'My mandate: lead UX strategy, define the information architecture, build a modular component system, and deliver production-ready wireframes across every critical user flow — from homepage to checkout.',
+    pull: 'Twelve weeks. Zero ambiguity about what success looked like.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/7N2rDqrN/8.webp'
+  },
+  {
+    id: 'gnc-4', type: 'Approach', era: '2021',
+    title: 'Taxonomy First',
+    body: 'Before any wireframe, I restructured the entire product taxonomy — a prerequisite for navigation that could scale. Category logic, faceted filtering, cross-sell paths, and loyalty tier integration all had to cohere from the ground up.',
+    pull: 'You cannot design navigation for a catalog you haven\'t understood.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/pBMMxY1Z/11.webp'
+  },
+  {
+    id: 'gnc-5', type: 'Design System', era: '2021',
+    title: 'Modular. Scalable. Shipped.',
+    stats: [['12', 'Weeks to Launch'], ['40+', 'Components'], ['5.2K', 'Retail Stores']],
+    body: 'Atomic design principles, mobile-first breakpoints, and a navigation system that handled both digital commerce and in-store retail parity. Every component designed to be reused — not reimagined — at every touchpoint.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/7N2rDqrN/8.webp'
+  },
+  {
+    id: 'gnc-6', type: 'Mobile-First', era: '2021',
+    title: 'The Navigation Problem',
+    body: 'GNC\'s previous nav was a desktop-era mega-menu retrofitted onto mobile. I redesigned it from scratch: thumb-zone logic, progressive disclosure, persistent cart state, category hierarchy that surfaced the right product in the fewest taps.',
+    pull: 'Navigation is the product. If you can\'t find it, it doesn\'t exist.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/pBMMxY1Z/11.webp'
+  },
+  {
+    id: 'gnc-7', type: 'Outcome', era: '2021',
+    title: '~$500M Revenue Recovery',
+    stats: [['1.2M', 'Monthly Users'], ['100%', 'Mobile-First'], ['12', 'Weeks']],
+    body: 'The rebuilt platform launched on time and became the digital foundation of GNC\'s post-bankruptcy recovery. The Shopify migration, redesigned navigation, and modular design system gave the brand a platform to grow from — at a moment when getting it wrong wasn\'t an option.',
+    pull: 'If the bar ain\'t bending, you\'re just pretending.',
+    accent: '#c8704a',
+    img: 'https://i.ibb.co/7N2rDqrN/8.webp'
+  }
+];
+
+const BNY_SLIDES = [
+  {
+    id: 'bny-1', type: 'Case Study', era: '2022–2023',
+    title: 'BNY Mellon Pershing X: Wove',
+    body: 'Wove is an industry-first platform that gives financial advisors their client\'s complete picture in one place — built at Publicis Sapient for BNY Mellon Pershing X. I was not hired as the lead. I became one.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/XkM2hn8n/bny1.png'
+  },
+  {
+    id: 'bny-2', type: 'The Problem', era: '2022–2023',
+    title: 'Disconnected by Design',
+    body: 'Financial advisors were managing client relationships across four or more disconnected platforms. Every morning: log into one system for holdings, another for performance, another for risk, another for communication history. Context evaporated. Mistakes compounded.',
+    pull: 'The platform wasn\'t failing advisors. The architecture was.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/XkM2hn8n/bny1.png'
+  },
+  {
+    id: 'bny-3', type: 'My Role', era: '2022–2023',
+    title: 'Sr. UX Designer → Product Design Lead',
+    body: 'I joined as Senior UX Designer. Within the first quarter, I was running design across three parallel Agile tracks — not because it was assigned, but because the work required it. I became Product Design Lead through delivery, not title.',
+    pull: 'I was not hired as a lead. I became one.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/vvMZmq94/bny2.png'
+  },
+  {
+    id: 'bny-4', type: 'IA Strategy', era: '2022–2023',
+    title: 'One Surface. Every Signal.',
+    body: 'How do you present a client\'s full financial picture — holdings, risk, performance, planning scenarios, advisor notes, document history — without overwhelming the person whose job is to act on it? A unified client profile model with progressive disclosure and workflow-aware navigation.',
+    pull: 'The advisor shouldn\'t have to think about where they are. They should only think about the client.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/XkM2hn8n/bny1.png'
+  },
+  {
+    id: 'bny-5', type: 'Design System', era: '2022–2023',
+    title: 'The Canonical Component System',
+    stats: [['3', 'Agile Tracks'], ['1', 'Unified System'], ['WCAG 2.1', 'AA Compliant']],
+    body: 'I built and maintained the Wove design system in Figma — a canonical component library serving all three development tracks simultaneously. React and Tailwind constraints informed every decision. Tokens, variants, documentation: dev-handoff-ready from day one.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/vvMZmq94/bny2.png'
+  },
+  {
+    id: 'bny-6', type: 'Cross-Workflow Navigation', era: '2022–2023',
+    title: 'The Hard Part',
+    body: 'The Wove platform had to support radically different advisor workflows — daily check-ins, deep planning sessions, compliance reviews. I designed navigation that was contextually aware: the same surface reconfigured itself depending on what the advisor was trying to do, without losing state.',
+    pull: 'Context is the product. Lose it and you\'ve lost the advisor.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/xS49C07B/bny3.png'
+  },
+  {
+    id: 'bny-7', type: 'Outcome', era: '2022–2023',
+    title: 'Launched. Extended. Trusted.',
+    stats: [['$2T+', 'AUM Platform'], ['240+', 'Advisor Firms'], ['0', 'AI. All Human.']],
+    body: 'Wove launched at BNY Mellon scale and security standards — a platform managing trillions in assets under management. My contract was extended. The design system I built became the single source of truth for all subsequent Pershing X product development.',
+    pull: 'No Artificial Intelligence here — every decision was human due diligence.',
+    accent: '#6ab09a',
+    img: 'https://i.ibb.co/xS49C07B/bny3.png'
+  }
+];
+
+const CASE_STUDY_DATA = { gnc: { slides: GNC_SLIDES, color: 0xc8704a, hex: '#c8704a', label: 'GNC' }, bny: { slides: BNY_SLIDES, color: 0x6ab09a, hex: '#6ab09a', label: 'BNY Mellon' } };
+
+// ─────────────────────────────────────────────────────────
 // THREE.JS SETUP
 // ─────────────────────────────────────────────────────────
 let isLight = false;
@@ -977,6 +1396,83 @@ let camTarget = { ...camState };
 const scenePivot = new THREE.Vector3();
 const scenePivotTgt = new THREE.Vector3();
 
+// ── SWOOP ANIMATOR ──────────────────────────────────────
+// Single continuous arc: gentle outward bow, theta sweep, arriving
+// low (phi near horizon) looking slightly upward toward the node.
+const swoop = {
+  active: false,
+  t: 0,
+  totalDur: 1.40,   // seconds — unhurried, cinematic
+  startPhi: 0, startTheta: 0, startRadius: 0,
+  startPivot: new THREE.Vector3(),
+  endPhi: 0, endTheta: 0, endRadius: 0,
+  endPivot: new THREE.Vector3(),
+};
+
+function swoopTo(endPhi, endTheta, endRadius, endPivotVec) {
+  swoop.startPhi    = camState.phi;
+  swoop.startTheta  = camState.theta;
+  swoop.startRadius = camState.radius;
+  swoop.startPivot.copy(scenePivot);
+  swoop.endPhi      = endPhi;
+  swoop.endTheta    = endTheta;
+  swoop.endRadius   = endRadius;
+  swoop.endPivot.copy(endPivotVec);
+  swoop.t           = 0;
+  swoop.active      = true;
+}
+
+// Ease: smooth-start, ease into landing
+function easeFigure8(t) {
+  // Quintic ease-out — fast start, very smooth arrival
+  return 1 - Math.pow(1 - t, 4);
+}
+
+// Bow curve: rises to peak at t≈0.35 then returns — mild outward arc
+function bowCurve(t) {
+  return Math.sin(t * Math.PI) * 0.22;  // max +22% radius bow at midpoint
+}
+
+function tickSwoop(dt) {
+  if (!swoop.active) return;
+  swoop.t = Math.min(swoop.t + dt / swoop.totalDur, 1);
+  const t = swoop.t;
+  const e = easeFigure8(t);
+
+  // Radius: smoothly close in, with a gentle outward bow early in the move
+  const bow = bowCurve(t);
+  const baseRadius = swoop.startRadius + (swoop.endRadius - swoop.startRadius) * e;
+  camState.radius = baseRadius * (1 + bow);
+
+  // Theta: sweep the short way around
+  let dTheta = swoop.endTheta - swoop.startTheta;
+  while (dTheta >  Math.PI) dTheta -= Math.PI * 2;
+  while (dTheta < -Math.PI) dTheta += Math.PI * 2;
+  camState.theta = swoop.startTheta + dTheta * e;
+
+  // Phi: arrive lower than start — ease from current elevation down to endPhi
+  // The "looking up" feel comes from endPhi being closer to π/2 (horizon),
+  // with a slight overshoot past endPhi that recovers, making camera dip below
+  // and float back up to final angle
+  const phiOvershoot = swoop.endPhi * 0.08 * Math.sin(t * Math.PI);
+  camState.phi = swoop.startPhi + (swoop.endPhi - swoop.startPhi) * e + phiOvershoot;
+
+  // Pivot: track smoothly to target
+  scenePivot.lerpVectors(swoop.startPivot, swoop.endPivot, e);
+
+  if (swoop.t >= 1) {
+    swoop.active = false;
+    camState.phi    = swoop.endPhi;
+    camState.theta  = swoop.endTheta;
+    camState.radius = swoop.endRadius;
+    camTarget.phi    = swoop.endPhi;
+    camTarget.theta  = swoop.endTheta;
+    camTarget.radius = swoop.endRadius;
+    scenePivot.copy(swoop.endPivot);
+    scenePivotTgt.copy(swoop.endPivot);
+  }
+}
+
 function applyCam() {
   const { phi, theta, radius } = camState, c = scenePivot;
   cam.position.set(
@@ -993,6 +1489,10 @@ const dLight = new THREE.DirectionalLight(0xffd070, 0.4); dLight.position.set(10
 const gold1 = new THREE.PointLight(0xdaa520, 5, 120); gold1.position.set(-15, 8, -15); scene.add(gold1);
 const gold2 = new THREE.PointLight(0xb87333, 4, 100); gold2.position.set(15, 8, 15); scene.add(gold2);
 const warmTop = new THREE.PointLight(0xffc060, 3, 80); warmTop.position.set(0, 20, 0); scene.add(warmTop);
+// Extra lights for galaxy view — placed near cluster positions
+const galaxyLight1 = new THREE.PointLight(0x6080ff, 6, 150); galaxyLight1.position.set(-40, 10, -15); scene.add(galaxyLight1);
+const galaxyLight2 = new THREE.PointLight(0xd070ff, 5, 130); galaxyLight2.position.set(45, 5, 10); scene.add(galaxyLight2);
+const galaxyLight3 = new THREE.PointLight(0x40c0a0, 4, 120); galaxyLight3.position.set(0, 8, 50); scene.add(galaxyLight3);
 
 // Particles
 const PC = 800;
@@ -1009,10 +1509,136 @@ const pMat = new THREE.PointsMaterial({ color: 0xdaa520, size: 0.05, transparent
 scene.add(new THREE.Points(pGeo, pMat));
 
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
 // SCENE BUILDING
 // ─────────────────────────────────────────────────────────
 const nodeObjects = [], allLines = [], allLabels = [], glowSprites = [];
 const moonSystems = [];
+const caseStudyMoons = []; // ringed Saturn moons for case studies
+
+// ── BUILD RINGED CASE-STUDY MOON ─────────────────────────
+function buildCaseStudyMoon(era, parentPos, parentSize) {
+  const cs = CASE_STUDY_DATA[era.caseStudy];
+  if (!cs) return;
+
+  const orbitR   = parentSize * 14;    // further out than regular moons
+  const moonR    = parentSize * 0.72;  // noticeably bigger than regular moon dots
+  const baseAngle = era.caseStudy === 'gnc' ? Math.PI * 0.6 : Math.PI * 1.4;
+  const speed    = 0.07;               // slow, stately orbit
+  const tiltY    = 0.30;
+  const tiltZ    = 0.18;
+  const color    = cs.color;
+
+  // Orbit path ring (always faintly visible)
+  const orbitPts = [];
+  for (let k = 0; k <= 80; k++) {
+    const a = (k / 80) * Math.PI * 2;
+    orbitPts.push(new THREE.Vector3(
+      Math.cos(a) * orbitR,
+      Math.sin(a) * orbitR * tiltY,
+      Math.sin(a) * orbitR * tiltZ
+    ));
+  }
+  const orbitLine = new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints(orbitPts),
+    new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.18, depthWrite: false })
+  );
+  scene.add(orbitLine);
+  allLines.push({ line: orbitLine, darkOp: 0.18, lightOp: 0.35, darkColor: color, lightColor: 0x333333 });
+
+  // Moon sphere
+  const moonGeo = new THREE.SphereGeometry(moonR, 20, 20);
+  const moonMat = new THREE.MeshPhysicalMaterial({
+    color, emissive: color, emissiveIntensity: 1.6,
+    metalness: 0.1, roughness: 0.05, clearcoat: 1.0,
+    transparent: true, opacity: 0.92
+  });
+  const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+  moonMesh.userData = { isCaseStudy: true, caseStudy: era.caseStudy, era };
+  scene.add(moonMesh);
+
+  // Hit proxy (larger, invisible)
+  const hitGeo = new THREE.SphereGeometry(moonR * 3.5, 8, 8);
+  const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+  const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+  hitMesh.userData = { isCaseStudy: true, caseStudy: era.caseStudy, era };
+  scene.add(hitMesh);
+
+  // Saturn ring (RingGeometry, tilted)
+  const ringInner = moonR * 1.45;
+  const ringOuter = moonR * 2.55;
+  const ringGeo = new THREE.RingGeometry(ringInner, ringOuter, 48);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color, side: THREE.DoubleSide,
+    transparent: true, opacity: 0.55, depthWrite: false
+  });
+  const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+  // Tilt ring ~25° from horizontal so it looks Saturnian
+  ringMesh.rotation.x = Math.PI * 0.42;
+  ringMesh.rotation.y = Math.PI * 0.15;
+  scene.add(ringMesh);
+
+  // Second faint outer ring halo
+  const ring2Geo = new THREE.RingGeometry(ringOuter * 1.05, ringOuter * 1.38, 48);
+  const ring2Mat = new THREE.MeshBasicMaterial({
+    color, side: THREE.DoubleSide,
+    transparent: true, opacity: 0.18, depthWrite: false
+  });
+  const ring2Mesh = new THREE.Mesh(ring2Geo, ring2Mat);
+  ring2Mesh.rotation.x = ringMesh.rotation.x;
+  ring2Mesh.rotation.y = ringMesh.rotation.y;
+  scene.add(ring2Mesh);
+
+  // Glow sprite
+  const glow = makeGlowSprite(color, moonR);
+  glow.scale.setScalar(moonR * 10);
+  glow.material.opacity = 0.5;
+  scene.add(glow);
+
+  // Label canvas
+  const lc = document.createElement('canvas'); lc.width = 384; lc.height = 56;
+  const lctx = lc.getContext('2d');
+  lctx.fillStyle = cs.hex + 'cc';
+  lctx.font = '300 13px "DM Mono", monospace';
+  lctx.letterSpacing = '0.14em';
+  lctx.fillText('CASE STUDY  ·  ' + cs.label.toUpperCase(), 8, 34);
+  const labelSpr = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(lc),
+    transparent: true, depthWrite: false
+  }));
+  labelSpr.scale.set(5.2, 0.76, 1);
+  labelSpr.material.opacity = 0.85;
+  scene.add(labelSpr);
+
+  caseStudyMoons.push({
+    era, parentPos, orbitR, tiltY, tiltZ, baseAngle, speed,
+    moonMesh, hitMesh, ringMesh, ring2Mesh, glow, labelSpr, orbitLine,
+    cs
+  });
+}
+
+function tickCaseStudyMoons(elapsed) {
+  caseStudyMoons.forEach(m => {
+    const p = m.era._pos;
+    const angle = m.baseAngle + elapsed * m.speed;
+    const ox = p.x + Math.cos(angle) * m.orbitR;
+    const oy = p.y + Math.sin(angle) * m.orbitR * m.tiltY;
+    const oz = p.z + Math.sin(angle) * m.orbitR * m.tiltZ;
+
+    m.moonMesh.position.set(ox, oy, oz);
+    m.hitMesh.position.set(ox, oy, oz);
+    m.ringMesh.position.set(ox, oy, oz);
+    m.ring2Mesh.position.set(ox, oy, oz);
+    m.glow.position.set(ox, oy, oz);
+    m.labelSpr.position.set(ox + 0.2, oy + m.cs === 'gnc' ? 0.55 : 0.55, oz);
+    m.orbitLine.position.copy(p);
+
+    // Pulse ring opacity gently
+    const pulse = 0.45 + Math.sin(elapsed * 0.8 + m.baseAngle) * 0.10;
+    m.ringMesh.material.opacity = pulse;
+  });
+}
+
 const raycaster = new THREE.Raycaster();
 
 function makeGlowSprite(color, radius) {
@@ -1033,8 +1659,9 @@ function makeLabelCanvas(text, color, fs) {
   const c = document.createElement('canvas'); c.width = 640; c.height = 64;
   const ctx = c.getContext('2d');
   ctx.fillStyle = color;
-  ctx.font = `400 ${fs * 2.2}px "DM Mono", monospace`;
-  ctx.fillText(text.toUpperCase(), 10, 42);
+  // Use Crimson Text for all floating labels — matches panel typography
+  ctx.font = `italic 600 ${fs * 2.6}px "Crimson Text", serif`;
+  ctx.fillText(text, 10, 44);
   return c;
 }
 
@@ -1050,7 +1677,7 @@ function addLabel(text, pos, dkColor, fs) {
 
 function redrawLabels() {
   allLabels.forEach(({ spr, text, darkColor, fs }) => {
-    const color = isLight ? 'rgba(60,30,0,0.65)' : darkColor;
+    const color = isLight ? 'rgba(0,0,0,0.85)' : darkColor;
     const c = makeLabelCanvas(text, color, fs);
     spr.material.map.dispose();
     spr.material.map = new THREE.CanvasTexture(c);
@@ -1064,10 +1691,9 @@ function redrawLabels() {
 function makeMoonLabelCanvas(text, hexColor) {
   const c = document.createElement('canvas'); c.width = 320; c.height = 40;
   const ctx = c.getContext('2d');
-  // Pure text on transparent canvas — no pill, no background, no stroke
-  ctx.fillStyle = isLight ? 'rgba(60,30,0,0.75)' : hexColor + 'cc';
-  ctx.font = '400 13px "DM Mono", monospace';
-  ctx.fillText(text.toUpperCase(), 6, 26);
+  ctx.fillStyle = isLight ? 'rgba(0,0,0,0.80)' : hexColor + 'cc';
+  ctx.font = 'italic 600 15px "Crimson Text", serif';
+  ctx.fillText(text, 6, 28);
   return { canvas: c, w: 320, h: 40 };
 }
 
@@ -1098,7 +1724,7 @@ function buildMoons(era, parentPos, parentSize) {
       new THREE.LineBasicMaterial({ color: era.color, transparent: true, opacity: 0.055, depthWrite: false })
     );
     scene.add(ring);
-    allLines.push({ line: ring, darkOp: 0.055, lightOp: 0.14, darkColor: era.color, lightColor: 0x5a3000 });
+    allLines.push({ line: ring, darkOp: 0.055, lightOp: 0.25, darkColor: era.color, lightColor: 0x000000 });
 
     group.forEach((moon, mi) => {
       const baseAngle = (mi / group.length) * Math.PI * 2;
@@ -1173,12 +1799,12 @@ function buildSpiralTube() {
   const tubeMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0.08 });
   const tube = new THREE.Line(new THREE.BufferGeometry().setFromPoints(tubePts), tubeMat);
   scene.add(tube);
-  allLines.push({ line: tube, darkOp: 0.08, lightOp: 0.20, darkColor: 0xdaa520, lightColor: 0x5a3000 });
+  allLines.push({ line: tube, darkOp: 0.08, lightOp: 0.22, darkColor: 0xdaa520, lightColor: 0x000000 });
 
   const innerMat = new THREE.LineBasicMaterial({ color: 0xb87333, transparent: true, opacity: 0.04 });
   const inner = new THREE.Line(new THREE.BufferGeometry().setFromPoints(tubePts), innerMat);
   scene.add(inner);
-  allLines.push({ line: inner, darkOp: 0.04, lightOp: 0.12, darkColor: 0xb87333, lightColor: 0x5a3000 });
+  allLines.push({ line: inner, darkOp: 0.04, lightOp: 0.10, darkColor: 0xb87333, lightColor: 0x000000 });
 }
 
 function buildScene() {
@@ -1188,7 +1814,7 @@ function buildScene() {
   const spineMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0.04 });
   const spine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(spinePts), spineMat);
   scene.add(spine);
-  allLines.push({ line: spine, darkOp: 0.04, lightOp: 0.10, darkColor: 0xdaa520, lightColor: 0x5a3000 });
+  allLines.push({ line: spine, darkOp: 0.04, lightOp: 0.08, darkColor: 0xdaa520, lightColor: 0x000000 });
 
   ERAS.forEach((era, i) => {
     const pos = era._spiralPos;
@@ -1199,7 +1825,7 @@ function buildScene() {
     const spokeMat = new THREE.LineBasicMaterial({ color: era.color, transparent: true, opacity: 0.06 });
     const spoke = new THREE.Line(new THREE.BufferGeometry().setFromPoints([spokeY, pos.clone()]), spokeMat);
     scene.add(spoke);
-    allLines.push({ line: spoke, darkOp: 0.06, lightOp: 0.18, darkColor: era.color, lightColor: 0x5a3000 });
+    allLines.push({ line: spoke, darkOp: 0.06, lightOp: 0.15, darkColor: era.color, lightColor: 0x000000 });
 
     // Planet node
     const geo = new THREE.SphereGeometry(nodeSize, 16, 16);
@@ -1213,7 +1839,14 @@ function buildScene() {
     mesh.position.copy(pos);
     mesh.userData = { era, origColor: era.color, origEI: era.id === 'now' ? 2.4 : 1.3, isMoon: false };
     scene.add(mesh);
-    nodeObjects.push({ mesh, era });
+    // Invisible large hit proxy for touch accuracy
+    const hitGeo = new THREE.SphereGeometry(nodeSize * 3.5, 8, 8);
+    const hitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
+    const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+    hitMesh.position.copy(pos);
+    hitMesh.userData = { era, isHitProxy: true };
+    scene.add(hitMesh);
+    nodeObjects.push({ mesh, hitMesh, era });
 
     // Glow sprite on planet
     const gs = makeGlowSprite(era.color, nodeSize);
@@ -1229,6 +1862,7 @@ function buildScene() {
 
     // Build orbiting moons
     buildMoons(era, pos, nodeSize);
+    if (era.caseStudy) buildCaseStudyMoon(era, pos, nodeSize);
   });
 
   // Connection lines between eras
@@ -1239,47 +1873,365 @@ function buildScene() {
     const connMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0.22 });
     const conn = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), connMat);
     scene.add(conn);
-    allLines.push({ line: conn, darkOp: 0.22, lightOp: 0.40, darkColor: 0xdaa520, lightColor: 0x5a3000 });
+    allLines.push({ line: conn, darkOp: 0.22, lightOp: 0.35, darkColor: 0xdaa520, lightColor: 0x000000 });
   }
 }
 buildScene();
 
 // ─────────────────────────────────────────────────────────
-// TIMELINE NAV STRIP
+// GALAXY LAYER — zoom-out view, thematic clusters
 // ─────────────────────────────────────────────────────────
-function buildTimelineNav() {
-  const track = document.getElementById('tl-track');
-  ERAS.forEach((era, i) => {
-    const pip = document.createElement('div');
-    pip.className = 'tl-pip';
-    pip.dataset.idx = i;
-    pip.title = era.title;
-    pip.innerHTML = `<div class="tl-pip-year">${era.year}</div><div class="tl-pip-dot"></div>`;
-    pip.addEventListener('click', () => focusEra(era));
-    track.appendChild(pip);
-  });
-}
-buildTimelineNav();
+const LAYER_ORRERY = 'orrery';
+const LAYER_GALAXY = 'galaxy';
+let currentLayer = LAYER_ORRERY;
 
-function updateTimelineNav(activeEra) {
-  document.querySelectorAll('.tl-pip').forEach((pip, i) => {
-    pip.classList.toggle('active', activeEra && ERAS[i].id === activeEra.id);
-  });
-  if (activeEra) {
-    const activePip = document.querySelector('.tl-pip.active');
-    if (activePip) activePip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+const GALAXY_VIEW      = { phi: Math.PI * 0.12, theta: -Math.PI * 0.06, radius: 145 };
+const GALAXY_RADIUS_DEFAULT = 145;
+const GALAXY_RADIUS_MIN     = 90;
+const GALAXY_RADIUS_MAX     = 180;
+const ORRERY_RADIUS_MIN     = 2;
+const ORRERY_RADIUS_MAX     = 130;
+const ZOOM_STEP_GALAXY      = 22;
+const ZOOM_STEP_ORRERY      = 12;
 
-    const idx = ERAS.findIndex(e => e.id === activeEra.id);
-    document.getElementById('tl-label').textContent = `${idx + 1} / ${ERAS.length}`;
-    document.getElementById('tl-prev').disabled = idx === 0;
-    document.getElementById('tl-next').disabled = idx === ERAS.length - 1;
+function switchLayer(layer) {
+  currentLayer = layer;
+  if (layer === LAYER_GALAXY) {
+    // Dismiss everything before entering galaxy
+    if (focusedEra) {
+      focusedEra = null; isFocused = false;
+      document.getElementById('ghost').classList.remove('on');
+      document.getElementById('msheet').classList.remove('on');
+      hideSentGhost();
+      resetHighlights();
+    }
+    tooltip.classList.remove('vis');
+    hoveredMesh = null;
+    closeGridView();
+    scenePivotTgt.set(0, 0, 0);
+    camTarget = { ...GALAXY_VIEW };
+    document.querySelectorAll('.hud-btn[data-view]').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-view="galaxy"]').classList.add('active');
   } else {
-    document.getElementById('tl-label').textContent = '——';
-    document.getElementById('tl-prev').disabled = false;
-    document.getElementById('tl-next').disabled = false;
+    camTarget = { phi: Math.PI * 0.28, theta: Math.PI * 0.1, radius: 68 };
+    document.querySelectorAll('.hud-btn[data-view]').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-view="spiral"]').classList.add('active');
+    clearGalaxyFocus();
   }
 }
 
+// Cluster definitions — thematic groupings of the roadmap nodes
+
+const CLUSTERS = [];
+
+const CLUSTER_CONNECTIONS = [
+  { from: 'genesis',   to: 'platforms',  label: 'Conviction → commerce' },
+  { from: 'genesis',   to: 'editorial',  label: 'Soul → voice' },
+  { from: 'platforms', to: 'argument',   label: 'Platform → argument' },
+  { from: 'editorial', to: 'argument',   label: 'Writing → conviction' },
+  { from: 'argument',  to: 'method',     label: 'Conviction → practice' },
+  { from: 'genesis',   to: 'method',     label: 'Origin → method' },
+];
+
+const galaxyObjects = [], galaxyLines = [], galaxyGroup = new THREE.Group();
+// scene.add deferred until after scene is initialized
+
+function makeClusterCanvas(cluster, forLight) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+  const ctx = c.getContext('2d');
+  const r = (cluster.color >> 16) & 255, g = (cluster.color >> 8) & 255, b = cluster.color & 255;
+  const nameColor  = forLight ? 'rgba(10,14,30,0.88)'  : `rgba(${r},${g},${b},0.95)`;
+  const subColor   = forLight ? 'rgba(10,14,30,0.44)'  : `rgba(${r},${g},${b},0.50)`;
+  const countColor = forLight ? 'rgba(10,14,30,0.28)'  : `rgba(${r},${g},${b},0.30)`;
+  ctx.fillStyle = nameColor;
+  ctx.font = '900 38px "Crimson Text", serif';
+  const lines = cluster.name.split('\n');
+  lines.forEach((ln, i) => ctx.fillText(ln, 12, 60 + i * 48));
+  ctx.fillStyle = subColor;
+  ctx.font = '300 18px "DM Mono", monospace';
+  ctx.fillText(cluster.sub, 12, 60 + lines.length * 48 + 24);
+  ctx.fillStyle = countColor;
+  ctx.font = '300 15px "DM Mono", monospace';
+  ctx.fillText(cluster.nodeIds.length + ' nodes', 12, 60 + lines.length * 48 + 48);
+  return c;
+}
+
+function getClusterDotPositions(cl) {
+  const R = cl.size * 5.5, DS = cl.size * 0.28;
+  return cl.nodeIds.map((_, i) => {
+    const a = (i / Math.max(cl.nodeIds.length, 1)) * Math.PI * 2;
+    return { x: Math.cos(a) * R * 0.75, y: 0, z: Math.sin(a) * R * 0.75, size: DS };
+  });
+}
+
+function buildGalaxyLayer() {
+  CLUSTERS.forEach(cl => {
+    const geo = new THREE.SphereGeometry(cl.size, 32, 32);
+    const mat = new THREE.MeshPhysicalMaterial({
+      color: cl.color, emissive: cl.color, emissiveIntensity: 1.8,
+      metalness: 0.05, roughness: 0.35, clearcoat: 0.6,
+      transparent: true, opacity: 0
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(cl.pos);
+    mesh.userData = { cluster: cl };
+    galaxyGroup.add(mesh);
+
+    const atmGeo = new THREE.SphereGeometry(cl.size * 1.55, 24, 24);
+    const atmMat = new THREE.MeshBasicMaterial({ color: cl.color, transparent: true, opacity: 0, side: THREE.BackSide, depthWrite: false });
+    const atm = new THREE.Mesh(atmGeo, atmMat);
+    atm.position.copy(cl.pos);
+    galaxyGroup.add(atm);
+
+    const glowSpr = makeGlowSprite(cl.color, cl.size);
+    glowSpr.scale.setScalar(cl.size * 9);
+    glowSpr.position.copy(cl.pos);
+    glowSpr.material.opacity = 0;
+    galaxyGroup.add(glowSpr);
+
+    const lc = makeClusterCanvas(cl, false);
+    const lSpr = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(lc), transparent: true, depthWrite: false }));
+    lSpr.scale.set(28, 14, 1);
+    lSpr.position.set(cl.pos.x - cl.size * 6.5, cl.pos.y + cl.size * 3.5, cl.pos.z);
+    lSpr.material.opacity = 0;
+    galaxyGroup.add(lSpr);
+
+    const ringPts = [];
+    for (let i = 0; i <= 80; i++) {
+      const a = i / 80 * Math.PI * 2;
+      ringPts.push(new THREE.Vector3(cl.pos.x + Math.cos(a) * cl.size * 1.35, cl.pos.y, cl.pos.z + Math.sin(a) * cl.size * 1.35));
+    }
+    const ringMat = new THREE.LineBasicMaterial({ color: cl.color, transparent: true, opacity: 0 });
+    const ringLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts), ringMat);
+    galaxyGroup.add(ringLine);
+    galaxyLines.push({ line: ringLine, baseOp: 0.35 });
+
+    const dotPositions = getClusterDotPositions(cl);
+    cl.nodeIds.forEach((nid, ni) => {
+      const node = ERA_BY_ID[nid]; if (!node) return;
+      const offset = dotPositions[ni] || dotPositions[0];
+      const dotPos = new THREE.Vector3(cl.pos.x + offset.x, cl.pos.y + offset.y, cl.pos.z + offset.z);
+      const dotSize = offset.size || 0.22;
+      const dotGeo = new THREE.SphereGeometry(dotSize, 16, 16);
+      const dotMat = new THREE.MeshPhysicalMaterial({
+        color: cl.color, emissive: cl.color, emissiveIntensity: 1.6,
+        metalness: 0.05, roughness: 0.15, clearcoat: 0.8,
+        transparent: true, opacity: 0
+      });
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.copy(dotPos);
+      dot.userData = { clusterDot: true, nodeId: nid, cluster: cl };
+      galaxyGroup.add(dot);
+
+      const dotGlow = makeGlowSprite(cl.color, dotSize);
+      dotGlow.scale.setScalar(dotSize * 9);
+      dotGlow.position.copy(dotPos);
+      dotGlow.material.opacity = 0;
+      galaxyGroup.add(dotGlow);
+      galaxyObjects.push({ type: 'dot', mesh: dot, glow: dotGlow, cluster: cl, nodeId: nid });
+
+      const threadMat = new THREE.LineBasicMaterial({ color: cl.color, transparent: true, opacity: 0 });
+      const threadLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([dotPos, cl.pos.clone()]), threadMat);
+      galaxyGroup.add(threadLine);
+      threadLine.userData = { cluster: cl };
+      galaxyLines.push({ line: threadLine, baseOp: 0.12, clusterId: cl.id });
+    });
+
+    galaxyObjects.push({ type: 'cluster', mesh, atm, glow: glowSpr, label: lSpr, ring: ringLine, cluster: cl });
+  });
+
+  CLUSTER_CONNECTIONS.forEach(cc => {
+    const fromCl = CLUSTERS.find(c => c.id === cc.from), toCl = CLUSTERS.find(c => c.id === cc.to);
+    if (!fromCl || !toCl) return;
+    const p1 = fromCl.pos.clone(), p2 = toCl.pos.clone(), mid = p1.clone().add(p2).multiplyScalar(0.5);
+    mid.y += 18 + Math.random() * 12;
+    const pts = new THREE.QuadraticBezierCurve3(p1, mid, p2).getPoints(40);
+    const arcMat = new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0, depthWrite: false });
+    const arcLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), arcMat);
+    galaxyGroup.add(arcLine);
+    arcLine.userData = { clFrom: cc.from, clTo: cc.to };
+    galaxyLines.push({ line: arcLine, baseOp: 0.28, isArc: true, label: cc.label, clFrom: cc.from, clTo: cc.to });
+  });
+}
+buildGalaxyLayer();
+
+// Galaxy hub — "Full System / Orrery View"
+const galaxyHubGroup = new THREE.Group();
+// scene.add deferred
+galaxyHubGroup.visible = false;
+(function buildGalaxyHub() {
+  const hubMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(3.8, 32, 32),
+    new THREE.MeshPhysicalMaterial({ color: 0xdaa520, emissive: 0xdaa520, emissiveIntensity: 2.2, metalness: 0.05, roughness: 0.3, clearcoat: 0.8, transparent: true, opacity: 0 })
+  );
+  hubMesh.userData = { isGalaxyHub: true };
+  galaxyHubGroup.add(hubMesh);
+  const hubAtm = new THREE.Mesh(new THREE.SphereGeometry(3.8 * 1.6, 24, 24), new THREE.MeshBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0, side: THREE.BackSide, depthWrite: false }));
+  galaxyHubGroup.add(hubAtm);
+  const hubGlow = makeGlowSprite(0xdaa520, 3.8);
+  hubGlow.scale.setScalar(3.8 * 10); hubGlow.material.opacity = 0;
+  galaxyHubGroup.add(hubGlow);
+  const hubCanvas = document.createElement('canvas'); hubCanvas.width = 512; hubCanvas.height = 128;
+  const hCtx = hubCanvas.getContext('2d');
+  hCtx.fillStyle = 'rgba(218,165,32,0.90)'; hCtx.font = '900 32px "Crimson Text",serif'; hCtx.fillText('Full System', 12, 52);
+  hCtx.fillStyle = 'rgba(218,165,32,0.45)'; hCtx.font = '300 16px "DM Mono",monospace'; hCtx.fillText('ALL NODES · ORRERY VIEW', 12, 84);
+  const hubLabel = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(hubCanvas), transparent: true, depthWrite: false }));
+  hubLabel.scale.set(24, 6, 1); hubLabel.position.set(-3.8 * 5, 3.8 * 3.5, 0); hubLabel.material.opacity = 0;
+  galaxyHubGroup.add(hubLabel);
+  const hubRingPts = [];
+  for (let i = 0; i <= 80; i++) { const a = i / 80 * Math.PI * 2; hubRingPts.push(new THREE.Vector3(Math.cos(a) * 3.8 * 1.4, 0, Math.sin(a) * 3.8 * 1.4)); }
+  const hubRing = new THREE.Line(new THREE.BufferGeometry().setFromPoints(hubRingPts), new THREE.LineBasicMaterial({ color: 0xdaa520, transparent: true, opacity: 0 }));
+  galaxyHubGroup.add(hubRing);
+  galaxyHubGroup.userData = { mesh: hubMesh, atm: hubAtm, glow: hubGlow, label: hubLabel, ring: hubRing };
+})();
+
+const hubMeshList = [galaxyHubGroup.userData.mesh];
+scene.add(galaxyGroup); galaxyGroup.visible = false;
+scene.add(galaxyHubGroup); galaxyHubGroup.visible = false;
+let galaxyAlpha = 0, isGalaxyView = false;
+const GALAXY_ENTER_THRESHOLD = 80, GALAXY_FADE_SPEED = 0.065;
+const DARK_FOG_COLOR = 0x000000, LIGHT_FOG_COLOR = 0xf5f1ea;
+let activeGalaxyCluster = null, hoveredCluster = null, hoveredDotMesh = null;
+
+function updateGalaxyAlpha() {
+  const r = camState.radius;
+  let target = 0;
+  if (r > GALAXY_ENTER_THRESHOLD) target = Math.min((r - GALAXY_ENTER_THRESHOLD) / (GALAXY_RADIUS_DEFAULT - GALAXY_ENTER_THRESHOLD), 1);
+  galaxyAlpha += (target - galaxyAlpha) * GALAXY_FADE_SPEED;
+  if (galaxyAlpha < 0.001) galaxyAlpha = 0;
+  if (galaxyAlpha > 0.999) galaxyAlpha = 1;
+  isGalaxyView = galaxyAlpha > 0.01;
+  galaxyGroup.visible = isGalaxyView;
+  galaxyHubGroup.visible = isGalaxyView;
+
+  const oa = 1 - galaxyAlpha;
+  nodeObjects.forEach(({ mesh }) => { mesh.material.opacity = isLight ? oa * 0.88 : oa * 0.95; });
+  glowSprites.forEach(gs => { gs.material.opacity = isLight ? 0 : oa * 0.72; });
+  allLabels.forEach(({ spr }) => { spr.material.opacity = oa; });
+  allLines.forEach(({ line, darkOp, lightOp }) => {
+    line.material.opacity = Math.max(0, (isLight ? lightOp : darkOp) * oa);
+  });
+
+  const ga = galaxyAlpha, focCl = activeGalaxyCluster;
+  galaxyObjects.forEach(obj => {
+    const isFoc = focCl && obj.cluster === focCl, dim = (focCl && !isFoc) ? 0.18 : 1.0;
+    if (obj.type === 'cluster') {
+      const boost = isFoc ? 1.25 : 1.0;
+      obj.mesh.material.opacity = ga * 1.0 * dim * boost;
+      obj.atm.material.opacity = ga * (isFoc ? 0.45 : 0.20) * dim;
+      obj.glow.material.opacity = isLight ? 0 : ga * (isFoc ? 1.4 : 0.80) * dim;
+      obj.label.material.opacity = ga * dim;
+      obj.ring.material.opacity = ga * (isFoc ? 0.90 : 0.55) * dim;
+    } else if (obj.type === 'dot') {
+      const isHov = obj.mesh === hoveredDotMesh, inFoc = focCl && obj.cluster === focCl, noFoc = !focCl;
+      let tOp, tEI, tGlow;
+      if (isHov) { tOp = ga * 1.0; tEI = 2.4; tGlow = isLight ? 0 : ga * 0.90; }
+      else if (inFoc || noFoc) { tOp = ga * 0.88; tEI = 1.6; tGlow = isLight ? 0 : ga * 0.45; }
+      else { tOp = ga * 0.15; tEI = 0.3; tGlow = 0; }
+      const lk = 0.10;
+      obj.mesh.material.opacity += (tOp - obj.mesh.material.opacity) * lk;
+      obj.mesh.material.emissiveIntensity += (tEI - obj.mesh.material.emissiveIntensity) * lk;
+      if (obj.glow) obj.glow.material.opacity += (tGlow - obj.glow.material.opacity) * lk;
+    }
+  });
+
+  galaxyLines.forEach(({ line, baseOp, isArc, clFrom, clTo, clusterId }) => {
+    let op = baseOp * 1.8, dim = 1.0;  // base boost for all lines
+    if (focCl) {
+      if (isArc) { const inv = clFrom === focCl.id || clTo === focCl.id; dim = inv ? 1.0 : 0.12; if (inv) op = Math.min(op * 2.0, 0.95); }
+      else { dim = (!clusterId || clusterId === focCl.id) ? 1.0 : 0.12; }
+    }
+    line.material.opacity = Math.min(ga * op * dim, 0.95);
+  });
+
+  if (isGalaxyView && galaxyHubGroup.userData.mesh) {
+    const hub = galaxyHubGroup.userData, hDim = focCl ? 0.30 : 1.0, lk = 0.10;
+    hub.mesh.material.opacity += (ga * 1.0 * hDim - hub.mesh.material.opacity) * lk;
+    hub.atm.material.opacity  += (ga * 0.28 * hDim - hub.atm.material.opacity)  * lk;
+    hub.glow.material.opacity += ((isLight ? 0 : ga * 0.95 * hDim) - hub.glow.material.opacity) * lk;
+    hub.label.material.opacity+= (ga * hDim - hub.label.material.opacity) * lk;
+    hub.ring.material.opacity += (ga * 0.65 * hDim - hub.ring.material.opacity) * lk;
+  }
+  // redraw bg nebula with galaxy color blend every 3 frames
+  if (typeof _galaxyNebulaTick === 'undefined') window._galaxyNebulaTick = 0;
+  _galaxyNebulaTick++;
+  if (_galaxyNebulaTick % 3 === 0) drawMesh();
+}
+
+const clusterMeshes = galaxyObjects.filter(o => o.type === 'cluster').map(o => o.mesh);
+const dotMeshes = galaxyObjects.filter(o => o.type === 'dot').map(o => o.mesh);
+
+function setGalaxyFocus(cl) { activeGalaxyCluster = cl; }
+function clearGalaxyFocus() { activeGalaxyCluster = null; }
+
+function checkGalaxyHover(mouseVec) {
+  if (!isGalaxyView || galaxyAlpha < 0.3) return false;
+  raycaster.setFromCamera(mouseVec, cam);
+  const hubHits = raycaster.intersectObjects(hubMeshList);
+  if (hubHits.length) {
+    document.getElementById('tt-era').textContent = 'Gateway';
+    document.getElementById('tt-title').textContent = 'Full System';
+    document.getElementById('tt-title').style.color = '#daa520';
+    document.getElementById('tt-role').textContent = 'All nodes · Orrery view';
+    tooltip.classList.add('vis'); hoveredDotMesh = null; document.body.style.cursor = 'pointer';
+    return true;
+  }
+  const cHits = raycaster.intersectObjects(clusterMeshes);
+  if (cHits.length) {
+    const cl = cHits[0].object.userData.cluster;
+    if (cl !== hoveredCluster) {
+      hoveredCluster = cl;
+      document.getElementById('tt-era').textContent = cl.nodeIds.length + ' nodes';
+      document.getElementById('tt-title').textContent = cl.name.replace('\n', ' ');
+      document.getElementById('tt-title').style.color = cl.hex;
+      document.getElementById('tt-role').textContent = cl.sub;
+      tooltip.classList.add('vis');
+    }
+    hoveredDotMesh = null; setGalaxyFocus(cl); document.body.style.cursor = 'pointer';
+    return true;
+  }
+  const dHits = raycaster.intersectObjects(dotMeshes);
+  if (dHits.length) {
+    const dot = dHits[0].object, node = ERA_BY_ID[dot.userData.nodeId], cl = dot.userData.cluster;
+    if (node) {
+      document.getElementById('tt-era').textContent = cl.name.replace('\n', ' ');
+      document.getElementById('tt-title').textContent = node.title;
+      document.getElementById('tt-title').style.color = cl.hex;
+      document.getElementById('tt-role').textContent = node.role;
+      tooltip.classList.add('vis');
+    }
+    hoveredDotMesh = dot; setGalaxyFocus(cl); document.body.style.cursor = 'pointer';
+    return true;
+  }
+  hoveredDotMesh = null;
+  if (hoveredCluster) { hoveredCluster = null; tooltip.classList.remove('vis'); }
+  clearGalaxyFocus();
+  return false;
+}
+
+function handleGalaxyClick(mouseVec) {
+  if (!isGalaxyView || galaxyAlpha < 0.3) return false;
+  raycaster.setFromCamera(mouseVec, cam);
+  const hubHits = raycaster.intersectObjects(hubMeshList);
+  if (hubHits.length) { switchLayer(LAYER_ORRERY); clearGalaxyFocus(); return true; }
+  const cHits = raycaster.intersectObjects(clusterMeshes);
+  if (cHits.length) { switchLayer(LAYER_ORRERY); clearGalaxyFocus(); return true; }
+  const dHits = raycaster.intersectObjects(dotMeshes);
+  if (dHits.length) {
+    const node = ERA_BY_ID[dHits[0].object.userData.nodeId];
+    if (node) { switchLayer(LAYER_ORRERY); setTimeout(() => focusEra(node), 600); }
+    return true;
+  }
+  return false;
+}
+
+
+// ─────────────────────────────────────────────────────────
+// TIMELINE NAV STRIP
+// ─────────────────────────────────────────────────────────
+// Navigation handled by HUD prev/next buttons and direct node tap
+
+// Stubs for old tl-prev/tl-next (hidden but referenced)
 document.getElementById('tl-prev').addEventListener('click', () => {
   const idx = focusedEra ? ERAS.findIndex(e => e.id === focusedEra.id) : 1;
   if (idx > 0) focusEra(ERAS[idx - 1]);
@@ -1313,22 +2265,169 @@ document.getElementById('ms-next').addEventListener('click', () => {
 // ─────────────────────────────────────────────────────────
 // VIEW SWITCHING
 // ─────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────
+// GRID VIEW
+// ─────────────────────────────────────────────────────────
+let gridVisible = false;
+
+function buildGridView() {
+  const inner = document.getElementById('grid-inner');
+  inner.innerHTML = '';
+  ERAS.forEach((era, i) => {
+    const card = document.createElement('div');
+    card.className = 'grid-card';
+    card.style.animationDelay = (i * 0.04) + 's';
+    const bar = document.createElement('div');
+    bar.className = 'gc-bar-top';
+    bar.style.background = era.hex;
+    card.appendChild(bar);
+    card.innerHTML += `
+      <div class="grid-card-year">${era.year} &nbsp;·&nbsp; ${era.era}</div>
+      <div class="grid-card-title">${era.title}</div>
+      <div class="grid-card-role">${era.role}</div>
+      <div class="grid-card-body">${era.body}</div>`;
+    card.prepend(bar);
+    card.addEventListener('click', () => { closeGridView(); setTimeout(() => focusEra(era), 250); });
+    inner.appendChild(card);
+  });
+}
+
+function openGridView() {
+  gridVisible = true;
+  buildGridView();
+  const el = document.getElementById('grid-overlay');
+  el.style.display = 'flex';
+  requestAnimationFrame(() => el.classList.add('vis'));
+  document.querySelectorAll('.hud-btn[data-view]').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-view="grid"]').classList.add('active');
+  // Tap/click outside any card closes grid
+  el.addEventListener('pointerdown', function handler(ev) {
+    if (!ev.target.closest('.grid-card')) {
+      closeGridView();
+      switchView('spiral');
+      el.removeEventListener('pointerdown', handler);
+    }
+  });
+}
+
+function closeGridView() {
+  if (!gridVisible) return;
+  gridVisible = false;
+  const el = document.getElementById('grid-overlay');
+  el.classList.remove('vis');
+  setTimeout(() => { el.style.display = 'none'; }, 420);
+}
+
+// ─────────────────────────────────────────────────────────
+// SENTENCE GHOST IMAGE
+// ─────────────────────────────────────────────────────────
+let sentGhostTimer = null;
+const sentGhostEl = document.getElementById('sent-ghost');
+const sentGhostImg = document.getElementById('sent-ghost-img');
+const sentGhostCap = document.getElementById('sent-ghost-cap');
+
+// Sentence image pool — map sentence index → unsplash image
+// Each node's images cycle across sentences
+function getSentenceImage(era, sentIndex) {
+  if (!era.images || era.images.length === 0) return null;
+  return era.images[sentIndex % era.images.length];
+}
+
+function showSentGhost(era, sentIndex, anchorEl) {
+  const img = getSentenceImage(era, sentIndex);
+  if (!img) { hideSentGhost(); return; }
+  sentGhostImg.src = img.src;
+  sentGhostCap.textContent = img.caption || '';
+  // Position: vertically centered on sentence, to the left of the ghost panel
+  const anchorRect = anchorEl ? anchorEl.getBoundingClientRect() : { top: window.innerHeight/2, height: 40 };
+  const midY = anchorRect.top + anchorRect.height / 2;
+  const y = Math.max(20, Math.min(window.innerHeight - 190, midY - 82));
+  const panelLeft = window.innerWidth - 28 - 360;  // ghost panel: right:28px width:360px
+  sentGhostEl.style.top = y + 'px';
+  sentGhostEl.style.left = Math.max(8, panelLeft - 244) + 'px';
+  sentGhostEl.classList.add('vis');
+}
+
+function hideSentGhost() {
+  sentGhostEl.classList.remove('vis');
+}
+
 let currentView = 'spiral';
 let morphing = false, morphT = 0;
 
 function switchView(view) {
+  if (view === 'galaxy') { closeGridView(); switchLayer(LAYER_GALAXY); return; }
+  if (currentLayer === LAYER_GALAXY) switchLayer(LAYER_ORRERY);
+  if (view === 'grid') { openGridView(); return; }
+  closeGridView();
   if (view === currentView) return;
   currentView = view;
   morphing = true; morphT = 0;
   document.querySelectorAll('.hud-btn[data-view]').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-view="${view}"]`).classList.add('active');
-  if (view === 'arc') { camTarget.phi = Math.PI * 0.08; camTarget.theta = 0; camTarget.radius = 55; }
+  if (view === 'arc') { camTarget.phi = Math.PI * 0.06; camTarget.theta = 0; camTarget.radius = 48; }
   else { camTarget.phi = Math.PI * 0.28; camTarget.radius = 68; }
 }
 
 document.querySelectorAll('.hud-btn[data-view]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
-document.getElementById('hud-zoom-in').addEventListener('click', () => { camTarget.radius = Math.max(12, camTarget.radius - 12); });
-document.getElementById('hud-zoom-out').addEventListener('click', () => { camTarget.radius = Math.min(130, camTarget.radius + 12); });
+// ─── NAVIGATION ─────────────────────────────────────────
+function navPrev() {
+  const idx = focusedEra ? ERAS.findIndex(e => e.id === focusedEra.id) : 1;
+  focusEra(idx > 0 ? ERAS[idx - 1] : ERAS[ERAS.length - 1]);
+}
+function navNext() {
+  const idx = focusedEra ? ERAS.findIndex(e => e.id === focusedEra.id) : -1;
+  focusEra(idx < ERAS.length - 1 ? ERAS[idx + 1] : ERAS[0]);
+}
+
+// prev/next handled by mobile-nav-bar onclick
+
+// Theme toggle in HUD
+// Theme toggle: brand logo or HUD button
+function toggleTheme() {
+  isLight = !isLight;
+  applyTheme();
+  document.getElementById('theme-toggle').textContent = isLight ? 'Dark' : 'Light';
+  const _thb = document.getElementById('theme-toggle-hud');
+  if (_thb) _thb.textContent = isLight ? 'DARK' : 'LIGHT';
+  const thb = document.getElementById('theme-toggle-hud');
+  if (thb) thb.textContent = isLight ? 'DARK' : 'LIGHT';
+}
+// Brand: tap = overview, long-press = theme toggle (mobile)
+let brandLongPressTimer = null;
+const brandEl = document.getElementById('brand');
+brandEl.addEventListener('pointerdown', () => {
+  brandLongPressTimer = setTimeout(() => {
+    brandLongPressTimer = null;
+    toggleTheme();
+    // Brief visual flash on the brand to confirm
+    brandEl.style.opacity = '0.4';
+    setTimeout(() => brandEl.style.opacity = '', 180);
+  }, 500);
+});
+brandEl.addEventListener('pointerup',    () => clearTimeout(brandLongPressTimer));
+brandEl.addEventListener('pointerleave', () => clearTimeout(brandLongPressTimer));
+brandEl.addEventListener('click', () => {
+  if (!brandLongPressTimer && brandLongPressTimer !== null) return; // was a long-press, skip click
+  clearTimeout(brandLongPressTimer);
+  brandLongPressTimer = null;
+  // Close any open panel and zoom out to a side view of the full spiral
+  closePanel();
+  if (currentLayer === LAYER_GALAXY) switchLayer(LAYER_ORRERY);
+  isFocused = false; focusedEra = null;
+  swoop.active = false;
+  activeNodeNebulaIdx = -1;
+  resetHighlights();
+  scenePivotTgt.set(0, 0, 0);
+  // Side view: theta=0 looks along -Z, slight tilt to see Y spread of spiral
+  // radius=58 fits all 9 nodes comfortably within FOV 52°
+  swoopTo(Math.PI * 0.22, Math.PI * 0.08, 58, new THREE.Vector3(0, 0, 0));
+  camTarget.phi    = Math.PI * 0.22;
+  camTarget.theta  = Math.PI * 0.08;
+  camTarget.radius = 58;
+});
+document.getElementById('theme-toggle-hud').addEventListener('click', toggleTheme);
 
 // ─────────────────────────────────────────────────────────
 // PANEL
@@ -1377,6 +2476,39 @@ function buildMoonPills(era) {
   });
 }
 
+function buildIframeHero(era) {
+  const wrap = document.getElementById('gc-iframe-wrap');
+  const none = document.getElementById('gc-iframe-none');
+  // Remove old iframe if present
+  const old = wrap.querySelector('iframe');
+  if (old) old.remove();
+  const oldBadge = wrap.querySelector('.gc-iframe-badge');
+  if (oldBadge) oldBadge.remove();
+  const oldCover = wrap.querySelector('.gc-iframe-cover');
+  if (oldCover) oldCover.remove();
+  if (!era.url) {
+    none.style.display = 'flex';
+    return;
+  }
+  none.style.display = 'none';
+  const iframe = document.createElement('iframe');
+  iframe.src = era.url;
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+  iframe.setAttribute('loading', 'lazy');
+  iframe.setAttribute('title', era.title + ' preview');
+  wrap.appendChild(iframe);
+  const cover = document.createElement('div');
+  cover.className = 'gc-iframe-cover';
+  wrap.appendChild(cover);
+  const badge = document.createElement('a');
+  badge.className = 'gc-iframe-badge';
+  badge.textContent = era.url.replace('https://', '');
+  badge.href = era.url;
+  badge.target = '_blank';
+  badge.rel = 'noopener';
+  wrap.appendChild(badge);
+}
+
 function openPanel(era) {
   const idx = ERAS.findIndex(e => e.id === era.id);
   document.getElementById('gc-era').textContent = era.era;
@@ -1388,22 +2520,9 @@ function openPanel(era) {
   document.getElementById('gc-prev').disabled = idx === 0;
   document.getElementById('gc-next').disabled = idx === ERAS.length - 1;
 
-  buildImageStrip(era, 'gc-images');
+  buildIframeHero(era);
   buildImageStrip(era, 'ms-images');
   buildMoonPills(era);
-
-  const list = document.getElementById('gc-sent-list');
-  list.innerHTML = '';
-  era.sentences.forEach((s, i) => {
-    const el = document.createElement('span');
-    el.className = 'gc-sent' + (i === 0 ? ' active' : '');
-    el.textContent = s;
-    el.addEventListener('click', () => {
-      list.querySelectorAll('.gc-sent').forEach(x => x.classList.remove('active'));
-      el.classList.add('active');
-    });
-    list.appendChild(el);
-  });
 
   document.getElementById('ghost').classList.add('on');
 
@@ -1413,32 +2532,184 @@ function openPanel(era) {
   document.getElementById('ms-prev').disabled = idx === 0;
   document.getElementById('ms-next').disabled = idx === ERAS.length - 1;
   document.getElementById('msheet').classList.add('on');
+  document.body.classList.add('panel-open');
 
   document.getElementById('era-year').textContent = era.year;
   document.getElementById('era-name').textContent = era.era;
 
-  updateTimelineNav(era);
 }
 
 window.closePanel = function () {
-  focusedEra = null; isFocused = false;
   document.getElementById('ghost').classList.remove('on');
   document.getElementById('msheet').classList.remove('on');
-  updateTimelineNav(null);
-  scenePivotTgt.set(0, 0, 0);
-  camTarget.radius = 68; camTarget.phi = Math.PI * 0.28;
-  resetHighlights();
+  document.body.classList.remove('panel-open');
+  hideSentGhost();
 };
+
+// ── CASE STUDY PANEL ─────────────────────────────────────
+let csState = { deck: null, idx: 0 };
+
+function openCaseStudy(key) {
+  const cs = CASE_STUDY_DATA[key];
+  if (!cs) return;
+  csState.deck = cs.slides;
+  csState.idx  = 0;
+  renderCSSlide();
+  const panel = document.getElementById('cs-panel');
+  panel.classList.add('on');
+  document.body.classList.add('cs-open');
+}
+
+window.closeCaseStudy = function() {
+  document.getElementById('cs-panel').classList.remove('on');
+  document.body.classList.remove('cs-open');
+};
+
+window.csNext = function() {
+  if (!csState.deck) return;
+  csState.idx = Math.min(csState.idx + 1, csState.deck.length - 1);
+  renderCSSlide();
+};
+
+window.csPrev = function() {
+  if (!csState.deck) return;
+  csState.idx = Math.max(csState.idx - 1, 0);
+  renderCSSlide();
+};
+
+function renderCSSlide() {
+  const slide = csState.deck[csState.idx];
+  const total = csState.deck.length;
+  const idx   = csState.idx;
+  const acc   = slide.accent || '#daa520';
+
+  document.getElementById('cs-accent-bar').style.background = acc;
+  document.getElementById('cs-type').textContent  = slide.type;
+  document.getElementById('cs-era').textContent   = slide.era;
+  document.getElementById('cs-title').textContent = slide.title;
+  document.getElementById('cs-title').style.color = '#f5ecd5';
+
+  // Body
+  document.getElementById('cs-body').textContent = slide.body;
+
+  // Pull quote
+  const pullEl = document.getElementById('cs-pull');
+  if (slide.pull) {
+    pullEl.textContent = slide.pull;
+    pullEl.style.display = 'block';
+    pullEl.style.borderLeftColor = acc;
+    pullEl.style.color = acc;
+  } else {
+    pullEl.style.display = 'none';
+  }
+
+  // Stats row
+  const statsEl = document.getElementById('cs-stats');
+  if (slide.stats && slide.stats.length) {
+    statsEl.style.display = 'flex';
+    statsEl.innerHTML = slide.stats.map(([num, label]) =>
+      `<div class="cs-stat"><div class="cs-stat-num" style="color:${acc}">${num}</div><div class="cs-stat-label">${label}</div></div>`
+    ).join('');
+  } else {
+    statsEl.style.display = 'none';
+  }
+
+  // Image
+  const imgEl = document.getElementById('cs-img');
+  if (slide.img) {
+    imgEl.src = slide.img;
+    imgEl.style.display = 'block';
+  } else {
+    imgEl.style.display = 'none';
+  }
+
+  // Progress pips
+  const pips = document.getElementById('cs-pips');
+  pips.innerHTML = csState.deck.map((_, i) =>
+    `<div class="cs-pip${i === idx ? ' active' : ''}" style="${i === idx ? `background:${acc}` : ''}" onclick="csState.idx=${i};renderCSSlide()"></div>`
+  ).join('');
+
+  // Counter
+  document.getElementById('cs-counter').textContent = `${idx + 1} / ${total}`;
+
+  // Nav button states
+  document.getElementById('cs-prev-btn').disabled = idx === 0;
+  document.getElementById('cs-next-btn').disabled = idx === total - 1;
+
+  // Accent color on nav buttons
+  document.getElementById('cs-next-btn').style.borderColor = idx < total - 1 ? acc + '66' : '';
+  document.getElementById('cs-prev-btn').style.borderColor = idx > 0 ? acc + '66' : '';
+}
+
+// Keyboard nav for case study panel
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('cs-panel').classList.contains('on')) return;
+  if (e.key === 'Escape')      { window.closeCaseStudy(); }
+  else if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { window.csNext(); }
+  else if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    { window.csPrev(); }
+});
+
 
 // ─────────────────────────────────────────────────────────
 // FOCUS
 // ─────────────────────────────────────────────────────────
 let isFocused = false;
 
+// Compute the preset camera for a given era (pure, no side effects)
+function eraPreset(era) {
+  const pos = era._pos;
+  const isMobile = window.innerWidth <= 768;
+
+  // ── Derived theta: approach from the outside of the spiral.
+  // The node's XZ position tells us which direction it faces outward.
+  // Camera should sit on the far side — opposite the origin — so we're
+  // looking inward toward the spiral center, with the node between us and it.
+  const nodeAngle = Math.atan2(pos.z, pos.x); // world angle of node from center
+  const theta = nodeAngle + Math.PI * 0.55;    // offset: approach from ~100° off the node's bearing
+
+  // ── Derived radius: proportional to node's distance from center.
+  // Nodes further out on the spiral get slightly more distance so context is visible.
+  const nodeR = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+  const baseRadius = 12 + nodeR * 0.55;
+  const radius = isMobile
+    ? Math.max(10, baseRadius * 0.85)   // tighter on mobile
+    : Math.max(14, baseRadius);
+
+  // ── Derived phi: camera elevation.
+  // Desktop: moderate elevation — node in upper-center, panel on right is clear.
+  // Mobile: lower elevation (camera higher, looks more downward at node),
+  //         placing node in top ~40% of canvas above the bottom sheet.
+  const phi = isMobile
+    ? Math.PI * 0.25   // ~45° above horizontal — camera well above, looks down
+    : Math.PI * 0.34;  // ~29° — desktop, slight upward look
+
+  // ── Panel shift: on desktop push pivot left so node clears the right panel.
+  // Derived from theta so it always shifts in true screen-right direction.
+  const panelShift = isMobile ? 0 : 3.5;
+  const screenRight = new THREE.Vector3(Math.cos(theta), 0, -Math.sin(theta));
+  const pivot = pos.clone().addScaledVector(screenRight, panelShift);
+
+  return { theta, phi, radius, pivot };
+}
+
 function focusEra(era) {
+  closeGridView();
+  if (currentLayer === LAYER_GALAXY) switchLayer(LAYER_ORRERY);
   isFocused = true; focusedEra = era;
-  scenePivotTgt.copy(era._pos);
-  camTarget.radius = 20; camTarget.phi = Math.PI * 0.22;
+
+  const preset = eraPreset(era);
+  const targetPivot = preset.pivot;
+  scenePivotTgt.copy(targetPivot);
+
+  swoopTo(preset.phi, preset.theta, preset.radius, targetPivot);
+
+  camTarget.phi    = preset.phi;
+  camTarget.theta  = preset.theta;
+  camTarget.radius = preset.radius;
+
+  // Set per-node nebula
+  activeNodeNebulaIdx = ERAS.findIndex(e => e.id === era.id);
+
   openPanel(era);
   highlightConnections(era);
 }
@@ -1474,10 +2745,15 @@ let hintFaded = false, orbitPaused = false;
 let hoveredNodeMesh = null;
 
 function getAllHittable() {
-  return nodeObjects.map(o => o.mesh);
+  // Include both visual mesh and large hit proxies for touch accuracy
+  const meshes = [];
+  nodeObjects.forEach(o => { meshes.push(o.mesh); if (o.hitMesh) meshes.push(o.hitMesh); });
+  caseStudyMoons.forEach(m => { meshes.push(m.moonMesh); meshes.push(m.hitMesh); });
+  return meshes;
 }
 
 function checkHover(clientX, clientY) {
+  if (checkGalaxyHover(mouse)) return;
   raycaster.setFromCamera(mouse, cam);
   const hits = raycaster.intersectObjects(getAllHittable());
 
@@ -1488,7 +2764,22 @@ function checkHover(clientX, clientY) {
 
   if (hits.length) {
     const hit = hits[0].object;
-    const nodeObj = nodeObjects.find(o => o.mesh === hit);
+
+    // Case study moon?
+    const csHit = hit.userData.isCaseStudy ? caseStudyMoons.find(m => m.moonMesh === hit || m.hitMesh === hit) : null;
+    if (csHit && hoveredMesh !== hit) {
+      hoveredMesh = hit;
+      document.getElementById('tt-era').textContent = csHit.cs.label + '  ·  Case Study';
+      document.getElementById('tt-title').textContent = csHit.era.title;
+      document.getElementById('tt-title').style.color = csHit.cs.hex;
+      document.getElementById('tt-role').textContent = 'Click to open case study';
+      document.getElementById('tt-sub').textContent = '';
+      tooltip.classList.add('vis');
+      document.body.style.cursor = 'pointer';
+      return;
+    }
+
+    const nodeObj = nodeObjects.find(o => o.mesh === hit || o.hitMesh === hit);
     const e = nodeObj ? nodeObj.era : null;
 
     if (e && hoveredMesh !== hit) {
@@ -1502,10 +2793,15 @@ function checkHover(clientX, clientY) {
     }
 
     if (nodeObj && nodeObj.mesh !== hoveredNodeMesh) {
-      if (hoveredNodeMesh) hoveredNodeMesh.scale.setScalar(hoveredNodeMesh.userData._baseScale || 1);
+      if (hoveredNodeMesh) {
+        hoveredNodeMesh.scale.setScalar(hoveredNodeMesh.userData._baseScale || 1);
+        const prevObj = nodeObjects.find(o => o.mesh === hoveredNodeMesh);
+        if (prevObj && prevObj.hitMesh) prevObj.hitMesh.scale.setScalar(1);
+      }
       hoveredNodeMesh = nodeObj.mesh;
       if (!hoveredNodeMesh.userData._baseScale) hoveredNodeMesh.userData._baseScale = 1;
       hoveredNodeMesh.scale.setScalar(1.55);
+      if (nodeObj.hitMesh) nodeObj.hitMesh.scale.setScalar(1.55);
     }
 
     document.body.style.cursor = 'pointer';
@@ -1516,12 +2812,34 @@ function checkHover(clientX, clientY) {
 }
 
 function posTooltip(cx, cy) {
-  tooltip.style.transform = `translate(${cx + 18}px,${cy - 10}px)`;
+  // Clamp so tooltip never overflows viewport edge
+  // On mobile (touch): appear above and to the left of the finger
+  const isMobile = window.innerWidth <= 768;
+  const ttEl = document.getElementById('tt-inner');
+  const ttW = ttEl ? ttEl.offsetWidth || 220 : 220;
+  const ttH = ttEl ? ttEl.offsetHeight || 80 : 80;
+  let x, y;
+  if (isMobile) {
+    // Left of and above the touch point
+    x = cx - ttW - 12;
+    y = cy - ttH - 12;
+  } else {
+    x = cx + 18;
+    y = cy - 10;
+  }
+  // Clamp within viewport
+  x = Math.max(8, Math.min(window.innerWidth  - ttW - 8, x));
+  y = Math.max(8, Math.min(window.innerHeight - ttH - 8, y));
+  tooltip.style.transform = `translate(${x}px,${y}px)`;
 }
+
+let pointerDownX = 0, pointerDownY = 0;
+const isMobileDevice = () => window.innerWidth <= 768;
 
 cvs.addEventListener('pointerdown', e => {
   if (e.button === 2) return;
   isDragging = false; drag = false;
+  pointerDownX = e.clientX; pointerDownY = e.clientY;
   lastDragX = e.clientX; lastDragY = e.clientY;
   cvs.setPointerCapture(e.pointerId);
 });
@@ -1531,44 +2849,162 @@ cvs.addEventListener('pointermove', e => {
   mouse.x = (e.clientX - rect.left) / rect.width * 2 - 1;
   mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
   posTooltip(e.clientX, e.clientY);
+
   if (e.buttons && e.button !== 2) {
-    isDragging = true; drag = true;
-    camTarget.theta -= (e.clientX - lastDragX) * 0.005;
-    camTarget.phi = Math.max(0.04, Math.min(Math.PI * 0.48, camTarget.phi + (e.clientY - lastDragY) * 0.005));
+    const dx = e.clientX - pointerDownX, dy = e.clientY - pointerDownY;
+    const dragThreshold = isMobileDevice() ? 12 : 4; // slightly more resistant on mobile
+    if (!drag && Math.sqrt(dx*dx + dy*dy) > dragThreshold) {
+      drag = true;
+      if (swoop.active) {
+        swoop.active = false;
+        camTarget.phi    = camState.phi;
+        camTarget.theta  = camState.theta;
+        camTarget.radius = camState.radius;
+      }
+    }
+    if (drag) {
+      isDragging = true;
+      const sensitivity = isMobileDevice() ? 0.004 : 0.005;
+      camTarget.theta -= (e.clientX - lastDragX) * sensitivity;
+      camTarget.phi = Math.max(0.04, Math.min(Math.PI * 0.48, camTarget.phi + (e.clientY - lastDragY) * sensitivity));
+    }
     lastDragX = e.clientX; lastDragY = e.clientY;
   } else {
-    checkHover(e.clientX, e.clientY);
+    if (e.pointerType === 'mouse') checkHover(e.clientX, e.clientY);
   }
 });
 
 cvs.addEventListener('pointerup', e => {
   if (e.button === 2) return;
+
+  const dx = e.clientX - pointerDownX;
+  const dy = e.clientY - pointerDownY;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (isMobileDevice()) {
+    // ── MOBILE: swipe-to-navigate tour ──
+    const SWIPE_THRESHOLD = 48;   // px — minimum horizontal swipe distance
+    const AXIS_RATIO = 1.4;       // horizontal must dominate vertical by this factor
+
+    if (dist > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy) * AXIS_RATIO) {
+      // Horizontal swipe detected
+      if (dx < 0) {
+        // Swipe LEFT → next node
+        navNext();
+      } else {
+        // Swipe RIGHT → prev node
+        navPrev();
+      }
+      return;
+    }
+
+    // Short tap: open panel for current focused node, or jump to tapped node
+    if (dist < 16) {
+      if (handleGalaxyClick(mouse)) return;
+      raycaster.setFromCamera(mouse, cam);
+      const hits = raycaster.intersectObjects(getAllHittable());
+      if (hits.length) {
+        const hit = hits[0].object;
+        // Case study moon tap?
+        if (hit.userData.isCaseStudy) { openCaseStudy(hit.userData.caseStudy); return; }
+        const nodeObj = nodeObjects.find(o => o.mesh === hit || o.hitMesh === hit);
+        if (nodeObj) {
+          if (focusedEra && nodeObj.era.id === focusedEra.id) {
+            openPanel(focusedEra);
+          } else {
+            focusEra(nodeObj.era);
+          }
+        }
+      } else if (focusedEra) {
+        const sheet = document.getElementById('msheet');
+        if (sheet.classList.contains('on')) {
+          document.getElementById('msheet').classList.remove('on');
+        } else {
+          openPanel(focusedEra);
+        }
+      }
+    }
+    return;
+  }
+
+  // ── DESKTOP: existing behavior ──
   if (!drag) {
+    if (handleGalaxyClick(mouse)) { if (!hintFaded) { document.getElementById('hint').style.opacity = '0.05'; hintFaded = true; } return; }
     raycaster.setFromCamera(mouse, cam);
     const hits = raycaster.intersectObjects(getAllHittable());
     if (hits.length) {
       const hit = hits[0].object;
-      const nodeObj = nodeObjects.find(o => o.mesh === hit);
+      // Case study moon click?
+      if (hit.userData.isCaseStudy) { openCaseStudy(hit.userData.caseStudy); return; }
+      const nodeObj = nodeObjects.find(o => o.mesh === hit || o.hitMesh === hit);
       if (nodeObj) focusEra(nodeObj.era);
     } else if (isFocused) {
-      closePanel();
+      document.getElementById('ghost').classList.remove('on');
+      document.getElementById('msheet').classList.remove('on');
+      hideSentGhost();
+      focusedEra = null; isFocused = false;
+      swoop.active = false;
+      activeNodeNebulaIdx = -1;
+      scenePivotTgt.set(0, 0, 0);
+      camTarget.radius = 68; camTarget.phi = Math.PI * 0.28; camTarget.theta = Math.PI * 0.1;
+      resetHighlights();
     }
   }
   if (!hintFaded) { document.getElementById('hint').style.opacity = '0.05'; hintFaded = true; }
 });
 
-cvs.addEventListener('wheel', e => { camTarget.radius = Math.max(10, Math.min(130, camTarget.radius + e.deltaY * 0.06)); }, { passive: true });
+// Re-lock orbit pivot to the focused node so zoom never drifts off-center
+function lockPivotToFocus() {
+  if (!focusedEra || !isFocused) return;
+  const preset = eraPreset(focusedEra);
+  scenePivotTgt.copy(preset.pivot);
+  scenePivot.copy(preset.pivot);
+}
+
+cvs.addEventListener('wheel', e => {
+  if (swoop.active) { swoop.active = false; camTarget.phi = camState.phi; camTarget.theta = camState.theta; camTarget.radius = camState.radius; }
+  lockPivotToFocus();
+  const mx = currentLayer === LAYER_GALAXY ? GALAXY_RADIUS_MAX : ORRERY_RADIUS_MAX;
+  const mn = currentLayer === LAYER_GALAXY ? GALAXY_RADIUS_MIN : ORRERY_RADIUS_MIN;
+  const sensitivity = Math.max(0.012, camTarget.radius * 0.0018);
+  camTarget.radius = Math.max(mn, Math.min(mx, camTarget.radius + e.deltaY * sensitivity));
+}, { passive: true });
 cvs.addEventListener('contextmenu', e => { e.preventDefault(); openTOC(); });
 
 let longPressTimer = null;
+let pinchDist = 0;
+
 cvs.addEventListener('touchstart', e => {
+  if (e.touches.length === 2) {
+    clearTimeout(longPressTimer);
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    pinchDist = Math.sqrt(dx*dx + dy*dy);
+    return;
+  }
   longPressTimer = setTimeout(() => { openTOC(); }, 600);
 }, { passive: true });
+
+cvs.addEventListener('touchmove', e => {
+  clearTimeout(longPressTimer);
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const delta = pinchDist - dist;
+    const mn = currentLayer === LAYER_GALAXY ? GALAXY_RADIUS_MIN : ORRERY_RADIUS_MIN;
+    const mx = currentLayer === LAYER_GALAXY ? GALAXY_RADIUS_MAX : ORRERY_RADIUS_MAX;
+    const pinchSens = Math.max(0.03, camTarget.radius * 0.004);
+    camTarget.radius = Math.max(mn, Math.min(mx, camTarget.radius + delta * pinchSens));
+    lockPivotToFocus();
+    pinchDist = dist;
+  }
+}, { passive: true });
+
 cvs.addEventListener('touchend', () => { clearTimeout(longPressTimer); });
-cvs.addEventListener('touchmove', () => { clearTimeout(longPressTimer); });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { if (tocVisible) { closeTOC(); } else { closePanel(); } }
+  if (e.key === 'Escape') { if (tocVisible) { closeTOC(); } else if (gridVisible) { closeGridView(); switchView('spiral'); } else { closePanel(); } }
   if (e.code === 'Space') { e.preventDefault(); orbitPaused = !orbitPaused; }
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
     e.preventDefault();
@@ -1622,16 +3058,18 @@ document.getElementById('toc').addEventListener('click', e => {
 function applyTheme() {
   document.body.classList.toggle('light', isLight);
   document.getElementById('theme-toggle').textContent = isLight ? 'Dark' : 'Light';
+  const _thb = document.getElementById('theme-toggle-hud');
+  if (_thb) _thb.textContent = isLight ? 'DARK' : 'LIGHT';
   allLines.forEach(({ line, darkColor, lightColor, darkOp, lightOp }) => {
     line.material.color.setHex(isLight ? (lightColor || 0x5a3000) : darkColor);
     line.material.opacity = isLight ? lightOp : darkOp;
   });
   nodeObjects.forEach(({ mesh }) => {
     if (isLight) {
-      mesh.material.color.setHex(0x3a1a00);
+      mesh.material.color.setHex(0x111111);
       mesh.material.emissive.setHex(0x000000);
       mesh.material.emissiveIntensity = 0;
-      mesh.material.metalness = 0.1; mesh.material.roughness = 0.6;
+      mesh.material.metalness = 0; mesh.material.roughness = 0.9;
     } else {
       const ud = mesh.userData;
       mesh.material.color.setHex(ud.origColor);
@@ -1641,13 +3079,52 @@ function applyTheme() {
     }
   });
   glowSprites.forEach(gs => { gs.visible = !isLight; });
+  // Moon dots: black in light mode
+  moonSystems.forEach(sys => {
+    sys.moons.forEach(m => {
+      if (isLight) {
+        m.dot.material.color.setHex(0x000000);
+        m.dot.material.emissive.setHex(0x000000);
+        m.dot.material.emissiveIntensity = 0;
+      } else {
+        m.dot.material.color.setHex(m.era.color);
+        m.dot.material.emissive.setHex(m.era.color);
+        m.dot.material.emissiveIntensity = 1.2;
+      }
+    });
+  });
+  // Redraw moon labels with correct color
+  moonSystems.forEach(sys => {
+    sys.moons.forEach(m => {
+      const { canvas } = makeMoonLabelCanvas(m.moon.label, m.era.hex);
+      m.spr.material.map.dispose();
+      m.spr.material.map = new THREE.CanvasTexture(canvas);
+      m.spr.material.needsUpdate = true;
+    });
+  });
   gold1.intensity = isLight ? 0 : 5;
   gold2.intensity = isLight ? 0 : 4;
   warmTop.intensity = isLight ? 0 : 3;
   ambLight.intensity = isLight ? 1.1 : 0.12;
   pMat.opacity = isLight ? 0 : 0.12;
-  scene.fog.color.setHex(isLight ? 0xf5f1ea : 0x000000);
-  renderer.setClearColor(isLight ? 0xf5f1ea : 0x000000, 0);
+  scene.fog.color.setHex(isLight ? 0xffffff : 0x000000);
+  renderer.setClearColor(isLight ? 0xffffff : 0x000000, 0);
+  // Galaxy cluster theme update
+  galaxyObjects.forEach(obj => {
+    if (obj.type === 'cluster') {
+      obj.glow.visible = !isLight;
+      const newLc = makeClusterCanvas(obj.cluster, isLight);
+      obj.label.material.map.dispose();
+      obj.label.material.map = new THREE.CanvasTexture(newLc);
+      obj.label.material.needsUpdate = true;
+      if (isLight) { obj.mesh.material.color.setHex(0x1a1a20); obj.atm.material.opacity = 0.06; }
+      else { obj.mesh.material.color.setHex(obj.cluster.color); }
+    }
+    if (obj.type === 'dot') {
+      if (isLight) obj.mesh.material.color.setHex(0x3a1a00);
+      else obj.mesh.material.color.setHex(obj.cluster.color);
+    }
+  });
   redrawLabels();
   drawMesh();
 }
@@ -1664,24 +3141,86 @@ const BD = [
   { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.45,col:[80,45,8] },
   { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.50,col:[40,15,2] },
 ];
-const BL = [
-  { x:0.12,y:0.22,vx:0.00007,vy:0.00005,r:0.65,col:[220,200,170] },
-  { x:0.78,y:0.70,vx:-0.00005,vy:0.00007,r:0.55,col:[210,185,150] },
-  { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.45,col:[230,215,185] },
-  { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.50,col:[215,195,165] },
+// Galaxy nebula — deep blue-violet
+const BG = [
+  { x:0.12,y:0.22,vx:0.00007,vy:0.00005,r:0.68,col:[8,18,80] },
+  { x:0.78,y:0.70,vx:-0.00005,vy:0.00007,r:0.58,col:[40,12,90] },
+  { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.48,col:[6,50,65] },
+  { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.52,col:[20,8,72] },
 ];
+const BGL = [
+  { x:0.12,y:0.22,vx:0.00007,vy:0.00005,r:0.68,col:[190,195,240] },
+  { x:0.78,y:0.70,vx:-0.00005,vy:0.00007,r:0.58,col:[215,195,240] },
+  { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.48,col:[185,225,235] },
+  { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.52,col:[200,190,240] },
+];
+const BL = [
+  { x:0.12,y:0.22,vx:0.00007,vy:0.00005,r:0.65,col:[220,220,220] },
+  { x:0.78,y:0.70,vx:-0.00005,vy:0.00007,r:0.55,col:[200,200,200] },
+  { x:0.85,y:0.15,vx:-0.00006,vy:-0.00006,r:0.45,col:[235,235,235] },
+  { x:0.20,y:0.82,vx:0.00006,vy:-0.00005,r:0.50,col:[210,210,210] },
+];
+
+// Per-node nebula palettes — indexed by ERAS order
+// Each is [r,g,b] for the dominant nebula blob, dark theme
+const NODE_NEBULA_DARK = [
+  [[90,75,0],[70,60,0],[100,85,5],[60,50,0]],       // origin: electric gold
+  [[95,85,0],[80,70,0],[100,95,10],[70,60,0]],       // wolfie.love: solar yellow
+  [[0,85,78],[0,65,60],[5,95,88],[0,50,45]],         // wolfie.life: cyan-teal
+  [[0,60,100],[0,45,80],[5,70,100],[0,35,70]],       // intoview: electric blue
+  [[55,20,100],[42,12,85],[65,28,100],[35,8,75]],    // emdash: violet
+  [[20,40,100],[12,28,85],[25,52,100],[8,20,80]],    // rsp: indigo-blue
+  [[30,100,15],[20,80,8],[38,100,20],[15,70,5]],     // reasonandresolution: lime
+  [[100,20,75],[85,10,60],[100,30,85],[70,8,55]],    // ifimaybefrank: fuchsia
+  [[100,82,0],[85,68,0],[100,90,5],[70,55,0]],       // dab: bright gold
+];
+let activeNodeNebulaIdx = -1;  // -1 = default
+function lerpBlobSets(setA, setB, t) {
+  return setA.map((a, i) => {
+    const b = setB[i];
+    return { ...a, col: [
+      Math.round(a.col[0] + (b.col[0] - a.col[0]) * t),
+      Math.round(a.col[1] + (b.col[1] - a.col[1]) * t),
+      Math.round(a.col[2] + (b.col[2] - a.col[2]) * t),
+    ]};
+  });
+}
 function drawMesh() {
   const w = bgCanvas.width, h = bgCanvas.height;
   bgCtx.clearRect(0, 0, w, h);
-  const blobs = isLight ? BL : BD;
-  bgCtx.fillStyle = isLight ? '#f5f1ea' : '#05030a';
+  const ga = typeof galaxyAlpha !== 'undefined' ? galaxyAlpha : 0;
+  let baseSet = isLight ? BL : BD;
+  // Blend toward active node nebula when focused (dark mode only)
+  if (!isLight && activeNodeNebulaIdx >= 0 && ga < 0.1) {
+    const nc = NODE_NEBULA_DARK[activeNodeNebulaIdx];
+    if (nc) {
+      const nodeSet = BD.map((b, i) => ({ ...b, col: nc[i] || b.col }));
+      baseSet = lerpBlobSets(BD, nodeSet, 0.65);
+    }
+  }
+  const galaxySet = isLight ? BGL : BG;
+  const blobs = ga > 0.01 ? lerpBlobSets(baseSet, galaxySet, ga) : baseSet;
+  const bgBase = isLight ? '#f5f1ea' : '#05030a';
+  const bgGal  = isLight ? '#e8eaf5' : '#01020f';
+  if (ga > 0.01) {
+    const t = ga;
+    const baseRgb = isLight ? [245,241,234] : [5,3,10];
+    const galRgb  = isLight ? [232,234,245] : [1,2,15];
+    const r = Math.round(baseRgb[0] + (galRgb[0]-baseRgb[0])*t);
+    const g = Math.round(baseRgb[1] + (galRgb[1]-baseRgb[1])*t);
+    const b = Math.round(baseRgb[2] + (galRgb[2]-baseRgb[2])*t);
+    bgCtx.fillStyle = `rgb(${r},${g},${b})`;
+  } else {
+    bgCtx.fillStyle = bgBase;
+  }
   bgCtx.fillRect(0, 0, w, h);
   blobs.forEach(b => {
     const cx = b.x*w, cy = b.y*h, rad = Math.max(w,h)*b.r;
     const grd = bgCtx.createRadialGradient(cx,cy,0,cx,cy,rad);
     const [r,g,bl] = b.col;
-    grd.addColorStop(0, `rgba(${r},${g},${bl},${isLight?0.40:0.55})`);
-    grd.addColorStop(0.5, `rgba(${r},${g},${bl},${isLight?0.12:0.14})`);
+    const intensity = isLight ? (ga > 0.01 ? 0.50 : 0.40) : (ga > 0.01 ? 0.65 : 0.55);
+    grd.addColorStop(0, `rgba(${r},${g},${bl},${intensity})`);
+    grd.addColorStop(0.5, `rgba(${r},${g},${bl},${intensity*0.28})`);
     grd.addColorStop(1, `rgba(${r},${g},${bl},0)`);
     bgCtx.fillStyle = grd; bgCtx.fillRect(0, 0, w, h);
   });
@@ -1693,7 +3232,7 @@ function drawMesh() {
 let meshT = 0;
 function tickMesh() {
   meshT++;
-  [...BD,...BL].forEach(b => {
+  [...BD,...BL,...BG,...BGL].forEach(b => {
     b.x += b.vx; b.y += b.vy;
     if (b.x<0||b.x>1) b.vx*=-1;
     if (b.y<0||b.y>1) b.vy*=-1;
@@ -1702,6 +3241,27 @@ function tickMesh() {
   requestAnimationFrame(tickMesh);
 }
 drawMesh(); tickMesh();
+applyTheme(); // init with default theme (light)
+
+// Mobile: position camera at first node preset without opening the panel
+// This gives a "pseudo-focused" state — node is framed, panel is closed
+if (window.innerWidth <= 768) {
+  requestAnimationFrame(() => {
+    const era = ERAS[0];
+    const preset = eraPreset(era);
+    isFocused = true;
+    focusedEra = era;
+    activeNodeNebulaIdx = 0;
+    scenePivotTgt.copy(preset.pivot);
+    swoopTo(preset.phi, preset.theta, preset.radius, preset.pivot);
+    camTarget.phi    = preset.phi;
+    camTarget.theta  = preset.theta;
+    camTarget.radius = preset.radius;
+    highlightConnections(era);
+    document.getElementById('era-year').textContent = era.year;
+    document.getElementById('era-name').textContent = era.era;
+  });
+}
 
 // ─────────────────────────────────────────────────────────
 // NODE MORPH (spiral ↔ arc)
@@ -1710,11 +3270,12 @@ function tickMorph() {
   if (!morphing) return;
   morphT = Math.min(morphT + 0.04, 1);
   const ease = morphT < 0.5 ? 2*morphT*morphT : 1 - Math.pow(-2*morphT+2,2)/2;
-  nodeObjects.forEach(({ mesh, era }, i) => {
+  nodeObjects.forEach(({ mesh, hitMesh, era }, i) => {
     const from = currentView === 'arc' ? era._spiralPos : era._arcPos;
     const to   = currentView === 'arc' ? era._arcPos   : era._spiralPos;
     mesh.position.lerpVectors(from, to, ease);
     era._pos.copy(mesh.position);
+    if (hitMesh) hitMesh.position.copy(mesh.position);
     if (glowSprites[i]) glowSprites[i].position.copy(mesh.position);
     if (allLabels[i*2]) allLabels[i*2].spr.position.set(mesh.position.x+0.6, mesh.position.y+0.5, mesh.position.z);
   });
@@ -1731,12 +3292,17 @@ function animate(ts) {
   const dt = Math.min((ts - lastTime) / 1000, 0.05);
   lastTime = ts; elapsed += dt;
 
-  camState.phi   += (camTarget.phi   - camState.phi)   * 0.08;
-  camState.theta += (camTarget.theta - camState.theta) * 0.08;
-  camState.radius+= (camTarget.radius- camState.radius)* 0.08;
-  scenePivot.lerp(scenePivotTgt, 0.08);
-
-  if (!isFocused && !isDragging && !orbitPaused) camTarget.theta += dt * 0.015;
+  if (swoop.active) {
+    tickSwoop(dt);
+    // Suppress auto-orbit and user drag during swoop
+  } else {
+    camState.phi   += (camTarget.phi   - camState.phi)   * 0.08;
+    camState.theta += (camTarget.theta - camState.theta) * 0.08;
+    camState.radius+= (camTarget.radius- camState.radius)* 0.08;
+    const pivotLerpSpeed = isFocused ? 0.22 : 0.08;
+    scenePivot.lerp(scenePivotTgt, pivotLerpSpeed);
+    if (!isFocused && !isDragging && !orbitPaused) camTarget.theta += dt * 0.015;
+  }
 
   if (!isFocused) {
     nodeObjects.forEach(({ mesh, era }) => {
@@ -1751,9 +3317,28 @@ function animate(ts) {
 
   tickMorph();
   tickMoons(elapsed);
+  tickCaseStudyMoons(elapsed);
+  updateGalaxyAlpha();
 
-  gold1.intensity = (isLight ? 0 : 5) + Math.sin(elapsed * 0.8) * 0.5;
-  gold2.intensity = (isLight ? 0 : 4) + Math.sin(elapsed * 0.6 + 1.2) * 0.4;
+  // Blend point lights toward focused node color
+  const _ni = activeNodeNebulaIdx;
+  const _nc = (!isLight && _ni >= 0 && NODE_NEBULA_DARK[_ni]) ? NODE_NEBULA_DARK[_ni][0] : null;
+  if (_nc) {
+    const _hex = (_nc[0]<<16)|(_nc[1]<<8)|_nc[2];
+    gold1.color.setHex(_hex); gold2.color.setHex(_hex);
+    gold1.intensity = 5 + Math.sin(elapsed * 0.8) * 0.5;
+    gold2.intensity = 4 + Math.sin(elapsed * 0.6 + 1.2) * 0.4;
+  } else {
+    gold1.color.setHex(0xdaa520); gold2.color.setHex(0xb87333);
+    gold1.intensity = (isLight ? 0 : 5) + Math.sin(elapsed * 0.8) * 0.5;
+    gold2.intensity = (isLight ? 0 : 4) + Math.sin(elapsed * 0.6 + 1.2) * 0.4;
+  }
+  if (typeof galaxyAlpha !== 'undefined') {
+    const ga = galaxyAlpha;
+    galaxyLight1.intensity = isLight ? 0 : ga * (6 + Math.sin(elapsed * 0.4) * 1.0);
+    galaxyLight2.intensity = isLight ? 0 : ga * (5 + Math.sin(elapsed * 0.5 + 1) * 0.8);
+    galaxyLight3.intensity = isLight ? 0 : ga * (4 + Math.sin(elapsed * 0.3 + 2) * 0.6);
+  }
 
   applyCam();
   renderer.render(scene, cam);
@@ -1768,5 +3353,42 @@ window.addEventListener('resize', () => {
   resizeBg(); drawMesh();
 });
 </script>
+<!-- ═══ CASE STUDY PANEL ═══ -->
+<div id="cs-panel">
+  <div id="cs-inner">
+    <div id="cs-accent-bar"></div>
+
+    <div id="cs-header">
+      <div class="cs-meta">
+        <div id="cs-type"></div>
+        <div id="cs-era"></div>
+      </div>
+      <button class="cs-close" onclick="closeCaseStudy()">✕</button>
+    </div>
+
+    <div id="cs-body-wrap">
+      <div id="cs-left">
+        <div id="cs-title"></div>
+        <div id="cs-stats"></div>
+        <div id="cs-body"></div>
+        <div id="cs-pull"></div>
+      </div>
+      <div id="cs-right">
+        <img id="cs-img" src="" alt="">
+        <div id="cs-img-fade"></div>
+      </div>
+    </div>
+
+    <div id="cs-footer">
+      <div id="cs-pips"></div>
+      <div id="cs-counter"></div>
+      <div class="cs-nav">
+        <button class="cs-nav-btn" id="cs-prev-btn" onclick="csPrev()">&#8592;</button>
+        <button class="cs-nav-btn" id="cs-next-btn" onclick="csNext()">&#8594;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

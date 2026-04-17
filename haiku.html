@@ -77,10 +77,22 @@
     .lw.open .bdg{opacity:1;transform:scale(1)}
 
     .sep-h{height:14px}
-    .dots{display:flex;justify-content:center;gap:11px;margin-top:18px}
-    .dot{width:11px;height:11px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:transparent;transition:border-color .25s,background .25s;cursor:pointer}
-    .dot.on{border-color:var(--red);background:rgba(229,73,58,.18)}
 
+    .controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:18px}
+    .dots{display:flex;justify-content:center;gap:11px}
+    .dot{width:11px;height:11px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:transparent;transition:border-color .25s,background .25s;cursor:pointer}
+    .dot:hover{border-color:rgba(255,255,255,.45)}
+    .dot.on{border-color:var(--red);background:rgba(229,73,58,.18)}
+    .navbtns{display:flex;gap:28px}
+    .nbtn{
+      font-size:18px;color:rgba(255,255,255,.28);cursor:pointer;
+      transition:color .15s,transform .1s;
+      user-select:none;line-height:1;padding:4px 8px;
+    }
+    .nbtn:hover{color:rgba(255,255,255,.7);transform:scale(1.2)}
+    .nbtn:active{transform:scale(.95)}
+
+    .lw[data-href]{cursor:pointer}
     a{color:var(--red);text-decoration:none}
   </style>
 </head>
@@ -142,9 +154,9 @@ function bkHtml(syls,r){
 }
 
 function linel(line,r,link){
-  const inner=link?`<a href="${line.href}">${line.raw}</a>`:line.raw;
-  return `<div class="lw">
-    <p class="raw${r?' it':''}">${inner}</p>
+  const attr=link?` data-href="${line.href}" style="cursor:pointer"`:'';
+  return `<div class="lw"${attr}>
+    <p class="raw${r?' it':''}">${line.raw}</p>
     <div class="bk">${bkHtml(line.syls,r)}</div>
   </div>`;
 }
@@ -162,8 +174,11 @@ stage.innerHTML=P.map((pg,pi)=>{
     pg.variants.forEach((v,vi)=>{
       h+=`<div id="v${pi}_${vi}"${vi?' style="display:none"':''}>${linel(v,true,false)}</div>`;
     });
-    h+=`</div><div class="dots" id="d${pi}">`;
-    pg.variants.forEach((_,vi)=>{ h+=`<div class="dot${vi?'':' on'}" id="dt${pi}_${vi}"></div>`; });
+    h+=`</div><div class="controls">`;
+    h+=`<div class="dots" id="d${pi}">`;
+    pg.variants.forEach((_,vi)=>{ h+=`<div class="dot${vi?'':' on'}" id="dt${pi}_${vi}" data-pi="${pi}" data-vi="${vi}"></div>`; });
+    h+=`</div>`;
+    h+=`<div class="navbtns"><span class="nbtn" id="nb-p${pi}">&#8592;</span><span class="nbtn" id="nb-n${pi}">&#8594;</span></div>`;
     h+=`</div>`;
   }
   return `<div class="page${pi?'':' active'}" id="pg${pi}">${h}</div>`;
@@ -172,8 +187,17 @@ stage.innerHTML=P.map((pg,pi)=>{
 stage.querySelectorAll('.lw').forEach(lw=>{
   lw.addEventListener('mouseenter',()=>lw.classList.add('open'));
   lw.addEventListener('mouseleave',()=>lw.classList.remove('open'));
-  lw.addEventListener('click',e=>e.stopPropagation());
-  lw.addEventListener('touchend',e=>{e.stopPropagation();lw.classList.toggle('open');});
+  lw.addEventListener('click',e=>{
+    e.stopPropagation();
+    const href=lw.dataset.href;
+    if(href) window.open(href,'_blank');
+  });
+  lw.addEventListener('touchend',e=>{
+    e.stopPropagation();
+    const href=lw.dataset.href;
+    if(href){window.open(href,'_blank');return;}
+    lw.classList.toggle('open');
+  });
 });
 
 function setV(pi,vi){
@@ -202,17 +226,32 @@ function swap(np,nv){
   },680);
 }
 
-function goNext(){if(busy)return;const pg=P[cp];if(pg.variants&&cv<pg.variants.length-1){cv++;setV(cp,cv);}else if(cp<P.length-1)swap(cp+1,0);}
-function goPrev(){if(busy)return;if(cv>0){cv--;setV(cp,cv);}else if(cp>0){const p=cp-1;swap(p,P[p].variants?P[p].variants.length-1:0);}}
+function goNext(){const pg=P[cp];if(pg.variants&&cv<pg.variants.length-1){cv++;setV(cp,cv);}else if(cp<P.length-1)swap(cp+1,0);}
+function goPrev(){if(cv>0){cv--;setV(cp,cv);}else if(cp>0){const p=cp-1;swap(p,P[p].variants?P[p].variants.length-1:0);}}
 
-// scroll navigation
+// wire dots and nav buttons
+P.forEach((_,pi)=>{
+  // dots
+  document.querySelectorAll(`[data-pi="${pi}"]`).forEach(dot=>{
+    dot.addEventListener('click',e=>{e.stopPropagation();const vi=+dot.dataset.vi;if(pi===cp){cv=vi;setV(cp,cv);}});
+  });
+  // prev/next buttons
+  const btnP=document.getElementById(`nb-p${pi}`);
+  const btnN=document.getElementById(`nb-n${pi}`);
+  if(btnP){
+    btnP.addEventListener('click',e=>{e.stopPropagation();goPrev();});
+    btnN.addEventListener('click',e=>{e.stopPropagation();goNext();});
+  }
+});
+
+// scroll navigation — short cooldown for fast cycling
 let scrollCooldown=false;
 window.addEventListener('wheel',e=>{
   e.preventDefault();
   if(scrollCooldown)return;
   scrollCooldown=true;
   e.deltaY>0?goNext():goPrev();
-  setTimeout(()=>{scrollCooldown=false;},600);
+  setTimeout(()=>{scrollCooldown=false;},320);
 },{passive:false});
 
 // touch swipe

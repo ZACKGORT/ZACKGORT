@@ -2,287 +2,191 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-  <title>Zack Gort — Designer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <title>Zack Gort</title>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--red:rgb(229,73,58);--red3:rgba(229,73,58,.35);--w3:rgba(255,255,255,.18)}
 
-    :root {
-      --red: rgba(229, 73, 58, 1);
-      --red-dim: rgba(229, 73, 58, 0.18);
-    }
+    html,body{width:100%;height:100%;overflow:hidden;background:#000;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+    body{display:flex;align-items:center;justify-content:center;font-family:'Source Sans 3','Source Sans Pro',sans-serif}
 
-    html, body {
-      width: 100%; height: 100%;
-      overflow: hidden;
-      background: #000;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
+    /* nav zones */
+    #nzl,#nzr{position:fixed;top:0;bottom:0;width:50%;z-index:5}
+    #nzl{left:0;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='22'%3E%3Ctext y='16' font-family='sans-serif' font-size='12' fill='white' opacity='0.5'%3E%E2%86%90 prev%3C/text%3E%3C/svg%3E") 0 11,w-resize}
+    #nzr{right:0;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='22'%3E%3Ctext y='16' font-family='sans-serif' font-size='12' fill='white' opacity='0.5'%3Enext %E2%86%92%3C/text%3E%3C/svg%3E") 0 11,e-resize}
 
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
-    }
+    .stage{position:relative;width:100%;max-width:600px;padding:0 24px;z-index:10}
 
-    /* ── click zones ── */
-    .zone {
-      position: fixed;
-      top: 0; bottom: 0;
-      width: 50%;
-      z-index: 20;
-    }
-    #zl { left: 0; }
-    #zr { right: 0; }
+    .page{position:absolute;top:50%;left:0;right:0;padding:0 24px;transform:translateY(-50%);opacity:0;transition:opacity .7s ease}
+    .page.active{opacity:1;position:relative;top:auto;transform:none;padding:0}
 
-    /* desktop cursors */
-    @media (hover: hover) {
-      #zl:not(.off) { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='22'%3E%3Ctext y='16' font-family='sans-serif' font-size='12' fill='white' opacity='0.6'%3E%E2%86%90 prev%3C/text%3E%3C/svg%3E") 0 11, w-resize; }
-      #zr:not(.off) { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='22'%3E%3Ctext y='16' font-family='sans-serif' font-size='12' fill='white' opacity='0.6'%3Enext %E2%86%92%3C/text%3E%3C/svg%3E") 0 11, e-resize; }
-      .zone.off { cursor: default; }
-    }
+    /* line: grid stack raw + breakdown */
+    .lw{display:grid;align-items:center;justify-items:center;padding:2px 0;position:relative;z-index:15}
+    .lw .raw,.lw .bk{grid-column:1;grid-row:1;width:100%}
 
-    /* ── stage ── */
-    .stage {
-      position: relative;
-      width: 100%;
-      max-width: 560px;
-      padding: 0 32px;
-      pointer-events: none;
-    }
+    .raw{text-align:center;font-family:'Source Sans 3','Source Sans Pro',sans-serif;text-transform:uppercase;font-size:clamp(13px,5vw,24px);font-weight:300;line-height:2.4em;letter-spacing:.13em;color:#fff;text-shadow:1px 2px 4px rgba(100,100,100,.18);transition:opacity .3s,filter .3s;white-space:nowrap}
+    .raw.it{font-style:italic;color:var(--red)}
+    .lw.open .raw{opacity:0;filter:blur(5px);pointer-events:none}
 
-    /* ── pages ── */
-    .page {
-      position: absolute;
-      top: 50%; left: 0; right: 0;
-      transform: translateY(-50%);
-      opacity: 0;
-      transition: opacity 0.7s ease;
-      padding: 0 32px;
-    }
-    .page.active {
-      opacity: 1;
-      position: relative;
-      top: auto; left: auto; right: auto;
-      transform: none;
-      padding: 0;
-    }
+    .bk{display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;row-gap:8px;opacity:0;pointer-events:none;transition:opacity .15s;padding:10px 0}
+    .lw.open .bk{opacity:1;pointer-events:auto}
 
-    /* ── typography ── */
-    p {
-      text-align: center;
-      font-family: 'Source Sans 3', 'Source Sans Pro', sans-serif;
-      text-transform: uppercase;
-      font-size: clamp(15px, 5.5vw, 28px);
-      font-weight: 300;
-      line-height: 2.5em;
-      letter-spacing: .13em;
-      color: #fff;
-      text-shadow: 1px 2px 4px rgba(120,120,120,.3);
-    }
-    span {
-      font-style: italic;
-      color: var(--red);
-    }
-    a {
-      color: var(--red);
-      text-decoration: none;
-      pointer-events: auto;
-    }
+    .conn{width:clamp(5px,1.5vw,18px);height:1px;background:var(--w3);flex-shrink:0;margin-bottom:12px}
+    .conn.r{background:var(--red3)}
 
-    /* ── variant line ── */
-    .vwrap {
-      position: relative;
-      height: 2.6em;
-      margin-bottom: 1.2em;
-    }
-    .vwrap > div {
-      position: absolute;
-      left: 0; right: 0;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-    .vwrap > div.on { opacity: 1; }
+    .chip{display:flex;flex-direction:column;align-items:center;gap:3px;transform:perspective(140px) rotateY(90deg);opacity:0;transition:transform .26s cubic-bezier(.4,0,.2,1),opacity .2s}
+    .lw.open .chip{transform:perspective(140px) rotateY(0deg);opacity:1}
 
-    /* ── dots ── */
-    .dots {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 6px;
-    }
-    .dot {
-      width: 13px; height: 13px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.28);
-      background: transparent;
-      transition: border-color 0.25s, background 0.25s;
-    }
-    .dot.on {
-      border-color: var(--red);
-      background: var(--red-dim);
-    }
+    .cs{border:1px solid rgba(255,255,255,.28);border-radius:3px;padding:3px 8px;font-size:clamp(9px,2.1vw,12px);font-weight:300;letter-spacing:.05em;color:rgba(255,255,255,.85);line-height:1.6;white-space:nowrap}
+    .cs.r{border-color:var(--red3);color:var(--red);font-style:italic}
+    .cn{font-size:8px;color:rgba(255,255,255,.28);letter-spacing:.1em;line-height:1}
+    .cn.r{color:var(--red3)}
 
-    /* ── mobile arrow hints ── */
-    .arrows {
-      position: fixed;
-      bottom: max(28px, env(safe-area-inset-bottom, 28px));
-      left: 0; right: 0;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 28px;
-      pointer-events: none;
-      z-index: 30;
-    }
-    .arrow {
-      font-family: 'Source Sans 3', sans-serif;
-      font-size: 11px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
-      transition: color 0.3s, opacity 0.3s;
-    }
-    .arrow.hide { opacity: 0; }
+    .bdg{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:300;color:rgba(255,255,255,.45);margin-left:10px;margin-bottom:12px;flex-shrink:0;transform:perspective(140px) rotateY(90deg);opacity:0;transition:transform .26s cubic-bezier(.4,0,.2,1),opacity .2s}
+    .bdg.r{border-color:var(--red3);color:var(--red)}
+    .lw.open .bdg{transform:perspective(140px) rotateY(0deg);opacity:1}
+
+    .sep{height:clamp(8px,2.5vw,20px)}
+    .dots{display:flex;justify-content:center;gap:11px;margin-top:16px;position:relative;z-index:15}
+    .dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:transparent;transition:border-color .25s,background .25s}
+    .dot.on{border-color:var(--red);background:rgba(229,73,58,.18)}
+
+    a{color:var(--red);text-decoration:none;pointer-events:auto}
+
+    @media(hover:none){#nzl,#nzr{cursor:auto}}
   </style>
 </head>
 <body>
-
-  <div class="zone" id="zl"></div>
-  <div class="zone" id="zr"></div>
-
+  <div id="nzl"></div>
+  <div id="nzr"></div>
   <div class="stage" id="stage"></div>
-
-  <div class="arrows">
-    <span class="arrow hide" id="al">← prev</span>
-    <span class="arrow" id="ar">next →</span>
-  </div>
-
 <script>
-const pages = [
-  { lines: ["Hi! Got a minute?", "I'm Zack Gort & I design"],
-    variants: ["experiences.", "web interfaces.", "for any device."] },
-  { lines: ["Everything from", "creative ideation"],
-    variants: ["to big red buttons.", "— responsive websites", "— intuitive forms"] },
-  { lines: ["People I work with", "say I have a good mind for"],
-    variants: ["functional design.", "clean typography.", "usability."] },
-  { lines: ["Ideas aren't pulled", "from thin air, but founded in"],
-    variants: ["whiteboard discussions.", "AB split-testing.", "trial and error."] },
-  { lines: [
-      "You can <a href='mailto:zack.gort@gmail.com'>Email Me</a>",
-      "Get connected on <a href='https://www.linkedin.com/in/zackgort/'>LinkedIn</a>",
-      "Or check out <a href='https://www.zackgort.com'>My Site</a>"
-    ], variants: null }
+const P=[
+  {fixed:[
+    {raw:"Hi! Got a minute?",syls:["Hi!","Got","a","min","ute"]},
+    {raw:"I'm Zack Gort & I design",syls:["I'm","Zack","Gort","&","I","des","ign"]},
+  ],variants:[
+    {raw:"experiences.",syls:["ex","per","i","ence","es"]},
+    {raw:"web interfaces.",syls:["web","int","er","face","es"]},
+    {raw:"for any device.",syls:["for","a","ny","de","vice"]},
+  ]},
+  {fixed:[
+    {raw:"Everything from",syls:["Ev","er","y","thing","from"]},
+    {raw:"creative ideation",syls:["cre","at","ive","I","de","a","tion"]},
+  ],variants:[
+    {raw:"to big red buttons.",syls:["to","big","red","but","tons"]},
+    {raw:"— responsive websites",syls:["res","pon","sive","web","sites"]},
+    {raw:"— intuitive forms",syls:["in","tu","i","tive","forms"]},
+  ]},
+  {fixed:[
+    {raw:"People I work with",syls:["Peop","le","I","work","with"]},
+    {raw:"say I have a good mind for",syls:["Say","I","have","a","good","mind","for"]},
+  ],variants:[
+    {raw:"functional design.",syls:["func","tion","a","de","sign"]},
+    {raw:"clean typography.",syls:["clean","ty","po","gra","phy"]},
+    {raw:"usability.",syls:["us","a","bi","li","t","y"]},
+  ]},
+  {fixed:[
+    {raw:"Ideas aren't pulled",syls:["I","de","as","aren't","pulled"]},
+    {raw:"from thin air, but founded in:",syls:["from","thin","air,","but","found","ed","in"]},
+  ],variants:[
+    {raw:"whiteboard discussions.",syls:["white","board","dis","cus","sions"]},
+    {raw:"AB split-testing.",syls:["A","B","split\u2013","test","ing"]},
+    {raw:"trial and error.",syls:["tri","al","and","er","ror"]},
+  ]},
+  {contact:true,lines:[
+    {raw:"You can email me",syls:["You","can","em","ail","me"],href:"mailto:zack@reasonably.cc"},
+    {raw:"get connected on LinkedIn",syls:["get","con","nect","ed","on","Linked","In"],href:"https://www.linkedin.com/in/zackgort/"},
+    {raw:"or float through my site",syls:["or","float","through","my","site"],href:"https://zack.cx"},
+  ]},
 ];
 
-let cp = 0, cv = 0, busy = false;
-
-const stage  = document.getElementById('stage');
-const zl     = document.getElementById('zl');
-const zr     = document.getElementById('zr');
-const al     = document.getElementById('al');
-const ar     = document.getElementById('ar');
-
-// Build DOM
-stage.innerHTML = pages.map((pg, pi) => `
-  <div class="page${pi===0?' active':''}" id="pg${pi}">
-    <div class="tset">
-      ${pg.lines.map(l=>`<p>${l}</p>`).join('')}
-    </div>
-    ${pg.variants ? `
-    <div class="vwrap" id="vw${pi}">
-      ${pg.variants.map((v,vi)=>`
-        <div id="v${pi}_${vi}" class="${vi===0?'on':''}"><p><span>${v}</span></p></div>
-      `).join('')}
-    </div>
-    <div class="dots" id="dots${pi}">
-      ${pg.variants.map((_,vi)=>`<div class="dot${vi===0?' on':''}" id="d${pi}_${vi}"></div>`).join('')}
-    </div>` : ''}
-  </div>`).join('');
-
-function totalSteps() {
-  return pages.reduce((s,p) => s + (p.variants ? p.variants.length : 1), 0);
-}
-function globalStep() {
-  let s = 0;
-  for (let i=0;i<cp;i++) s += pages[i].variants ? pages[i].variants.length : 1;
-  return s + cv;
-}
-function syncUI() {
-  const g = globalStep(), t = totalSteps()-1;
-  const atStart = g === 0, atEnd = g === t;
-  zl.classList.toggle('off', atStart);
-  zr.classList.toggle('off', atEnd);
-  al.classList.toggle('hide', atStart);
-  ar.classList.toggle('hide', atEnd);
+function chips(syls,r){
+  const rc=r?' r':'';
+  return syls.map((s,i)=>
+    (i?`<div class="conn${rc}"></div>`:'')+
+    `<div class="chip" style="transition-delay:${i*58}ms"><div class="cs${rc}">${s}</div><div class="cn${rc}">${i+1}</div></div>`
+  ).join('')+`<div class="bdg${rc}" style="transition-delay:${syls.length*58+60}ms">${syls.length}</div>`;
 }
 
-function setVariant(pi, vi) {
-  const pg = pages[pi];
-  if (!pg.variants) return;
-  pg.variants.forEach((_,i) => {
-    document.getElementById(`v${pi}_${i}`).classList.toggle('on', i===vi);
-    document.getElementById(`d${pi}_${i}`).classList.toggle('on', i===vi);
+function linel(line,r,link){
+  const inner=link?`<a href="${line.href}">${line.raw}</a>`:line.raw;
+  return `<div class="lw"><p class="raw${r?' it':''}">${inner}</p><div class="bk">${chips(line.syls,r)}</div></div>`;
+}
+
+let cp=0,cv=0,busy=false;
+const stage=document.getElementById('stage');
+
+stage.innerHTML=P.map((pg,pi)=>{
+  let h='';
+  if(pg.contact){
+    h=pg.lines.map(l=>linel(l,false,true)).join('<div class="sep"></div>');
+  } else {
+    h=pg.fixed.map(f=>linel(f,false,false)).join('');
+    h+=`<div class="sep"></div><div id="vw${pi}">`;
+    pg.variants.forEach((v,vi)=>{
+      h+=`<div id="v${pi}_${vi}"${vi?' style="display:none"':''}>${linel(v,true,false)}</div>`;
+    });
+    h+=`</div><div class="dots" id="d${pi}">`;
+    pg.variants.forEach((_,vi)=>{ h+=`<div class="dot${vi?'':' on'}" id="dt${pi}_${vi}"></div>`; });
+    h+=`</div>`;
+  }
+  return `<div class="page${pi?'':' active'}" id="pg${pi}">${h}</div>`;
+}).join('');
+
+stage.querySelectorAll('.lw').forEach(lw=>{
+  lw.addEventListener('mouseenter',()=>lw.classList.add('open'));
+  lw.addEventListener('mouseleave',()=>lw.classList.remove('open'));
+  lw.addEventListener('click',e=>e.stopPropagation());
+  lw.addEventListener('touchend',e=>{e.stopPropagation();lw.classList.toggle('open');});
+});
+
+function setV(pi,vi){
+  if(!P[pi].variants)return;
+  P[pi].variants.forEach((_,i)=>{
+    const el=document.getElementById(`v${pi}_${i}`);
+    el.style.display=i===vi?'':'none';
+    if(i!==vi)el.querySelectorAll('.lw').forEach(l=>l.classList.remove('open'));
+    document.getElementById(`dt${pi}_${i}`).classList.toggle('on',i===vi);
   });
 }
 
-function swapPage(newPg, newV) {
-  if (busy) return; busy = true;
-  const out = document.getElementById(`pg${cp}`);
-  const inn = document.getElementById(`pg${newPg}`);
-  out.style.opacity = '0';
-  setTimeout(() => {
-    out.classList.remove('active'); out.style.opacity = '';
-    cp = newPg; cv = newV;
-    setVariant(cp, cv);
-    inn.style.cssText = 'opacity:0';
-    inn.classList.add('active');
+function swap(np,nv){
+  if(busy)return;busy=true;
+  const out=document.getElementById(`pg${cp}`),inn=document.getElementById(`pg${np}`);
+  out.querySelectorAll('.lw.open').forEach(l=>l.classList.remove('open'));
+  out.style.opacity='0';
+  setTimeout(()=>{
+    out.classList.remove('active');out.style.opacity='';
+    cp=np;cv=nv;setV(cp,cv);
+    inn.classList.add('active');inn.style.opacity='0';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      inn.style.cssText = 'opacity:1;transition:opacity 0.7s ease';
-      setTimeout(()=>{ inn.style.cssText = ''; busy = false; syncUI(); }, 720);
+      inn.style.transition='opacity .7s ease';inn.style.opacity='1';
+      setTimeout(()=>{inn.style.transition='';inn.style.opacity='';busy=false;},720);
     }));
-  }, 680);
+  },680);
 }
 
-function goNext() {
-  if (busy) return;
-  const pg = pages[cp];
-  if (pg.variants && cv < pg.variants.length-1) {
-    cv++; setVariant(cp, cv); syncUI();
-  } else if (cp < pages.length-1) {
-    swapPage(cp+1, 0);
-  }
-}
-function goPrev() {
-  if (busy) return;
-  if (cv > 0) {
-    cv--; setVariant(cp, cv); syncUI();
-  } else if (cp > 0) {
-    const prev = cp-1;
-    swapPage(prev, pages[prev].variants ? pages[prev].variants.length-1 : 0);
-  }
-}
+function goNext(){if(busy)return;const pg=P[cp];if(pg.variants&&cv<pg.variants.length-1){cv++;setV(cp,cv);}else if(cp<P.length-1)swap(cp+1,0);}
+function goPrev(){if(busy)return;if(cv>0){cv--;setV(cp,cv);}else if(cp>0){const p=cp-1;swap(p,P[p].variants?P[p].variants.length-1:0);}}
 
-zr.addEventListener('click', goNext);
-zl.addEventListener('click', goPrev);
+document.getElementById('nzl').addEventListener('click',goPrev);
+document.getElementById('nzr').addEventListener('click',goNext);
 
-// swipe support
-let tx = 0;
-document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
-document.addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - tx;
-  if (Math.abs(dx) > 40) dx < 0 ? goNext() : goPrev();
-}, {passive:true});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(e.target.closest('.lw'))return;
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>40)dx<0?goNext():goPrev();
+},{passive:true});
 
-// keyboard
-document.addEventListener('keydown', e => {
-  if (e.key==='ArrowRight'||e.key===' ') goNext();
-  if (e.key==='ArrowLeft') goPrev();
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')goNext();
+  if(e.key==='ArrowLeft')goPrev();
 });
-
-syncUI();
 </script>
 </body>
 </html>

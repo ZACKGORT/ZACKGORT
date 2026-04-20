@@ -216,7 +216,15 @@ stage.querySelectorAll('.lw').forEach(lw=>{
     const href=lw.dataset.href;
     if(href) window.open(href,'_blank');
   });
+  let lwTouchStartX=0,lwTouchStartY=0;
+  lw.addEventListener('touchstart',e=>{
+    lwTouchStartX=e.touches[0].clientX;
+    lwTouchStartY=e.touches[0].clientY;
+  },{passive:true});
   lw.addEventListener('touchend',e=>{
+    const dx=Math.abs(e.changedTouches[0].clientX-lwTouchStartX);
+    const dy=Math.abs(e.changedTouches[0].clientY-lwTouchStartY);
+    if(dx>10||dy>10)return; // was a swipe, not a tap
     e.stopPropagation();
     const href=lw.dataset.href;
     if(href){window.open(href,'_blank');return;}

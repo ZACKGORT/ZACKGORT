@@ -214,10 +214,14 @@ window.addEventListener('wheel',e=>{
   e.deltaY>0?goNext():goPrev();
   setTimeout(()=>{scrollCooldown=false;},320);
 },{passive:false});
-let tx=0,ty=0;
-document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+let tx=0,ty=0,tOnLink=false;
+document.addEventListener('touchstart',e=>{
+  tx=e.touches[0].clientX;
+  ty=e.touches[0].clientY;
+  tOnLink=!!e.target.closest('.lw');
+},{passive:true});
 document.addEventListener('touchend',e=>{
-  if(e.target.closest('[data-href]'))return;
+  if(tOnLink)return;
   if(e.target.closest('.lw'))return;
   const dx=e.changedTouches[0].clientX-tx;
   const dy=e.changedTouches[0].clientY-ty;

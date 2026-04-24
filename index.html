@@ -267,6 +267,60 @@ html, body {
   object-fit: contain;
   object-position: center center;
 }
+#about-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.96);
+  z-index: 1000;
+  cursor: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#about-overlay.open {
+  display: flex;
+}
+#about-cursor {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1001;
+  font-size: 22px;
+  color: rgba(0,0,0,0.5);
+  font-family: monospace;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+#about-overlay.open ~ #about-cursor {
+  display: block;
+}
+#about-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  max-width: 560px;
+  width: 90%;
+  pointer-events: none;
+}
+#about-inner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+#about-caption {
+  font-family: monospace;
+  font-size: 12px;
+  color: rgba(0,0,0,0.5);
+  text-align: center;
+  line-height: 1.8;
+  margin: 0;
+}
+#about-caption em {
+  font-style: italic;
+  color: rgba(0,0,0,0.75);
+}
 </style>
 </head>
 <body>
@@ -275,8 +329,20 @@ html, body {
 
   <div class="topbar">
     <div class="wordmark">zackgort.com</div>
-    <a class="ext-link" href="https://zack.cx" target="_blank" rel="noopener">zack.cx</a>
+    <div style="display:flex;gap:24px;align-items:baseline;">
+      <button class="ext-link about-btn" onclick="openAbout()" style="background:none;border:none;padding:0;cursor:pointer;">about</button>
+      <a class="ext-link" href="https://zack.cx" target="_blank" rel="noopener">zack.cx</a>
+    </div>
   </div>
+
+  <!-- ABOUT OVERLAY -->
+  <div id="about-overlay" onclick="closeAbout()">
+    <div id="about-inner">
+      <img src="https://i.ibb.co/G3Mng7N7/dc01b4b0-bf34-486a-9320-98e63ec85a76.png" alt="Mental Model">
+      <p id="about-caption">My Mental Model:<br><br><em>&#8220;the ollie &#8212; a system of inputs that unlocks unlimited output.&#8221;</em> &#8212; zack</p>
+    </div>
+  </div>
+  <div id="about-cursor">×</div>
 
   <p class="usp">I specialize in thoughtful timeless information &amp; user experience systems. I design. I write. I think. I make.</p>
 
@@ -351,11 +417,14 @@ B2B &amp; B2C Builds</div>
     <div class="thesis-cols">
       <div class="thesis-col">
         <a href="https://www.wolfie.love" target="_blank" rel="noopener">wolfie.love</a>
+        <a href="https://www.wolfie.love/food" target="_blank" rel="noopener">wolfie.love/food</a>
+        <a href="https://www.wolfie.love/real" target="_blank" rel="noopener">wolfie.love/real</a>
+        <a href="https://www.wolfie.love/shop" target="_blank" rel="noopener">wolfie.love/shop</a>
         <a href="https://www.wolfie.love/cine" target="_blank" rel="noopener">wolfie.love/cine</a>
-        <a href="https://reasonandresolution.com" target="_blank" rel="noopener">reasonandresolution.com</a>
-        <a href="https://intoview.pro" target="_blank" rel="noopener">intoview.pro</a>
         <a href="https://reasonably.cc" target="_blank" rel="noopener">reasonably.cc</a>
         <a href="https://ifimaybefrank.com" target="_blank" rel="noopener">ifimaybefrank.com</a>
+        <a href="https://reasonandresolution.com" target="_blank" rel="noopener">reasonandresolution.com</a>
+        <a href="https://intoview.pro" target="_blank" rel="noopener">intoview.pro</a>
         <a href="https://www.wolfie.life" target="_blank" rel="noopener">wolfie.life</a>
         <a href="https://www.wolfie.life/wiki" target="_blank" rel="noopener">wolfie.life/wiki</a>
         <a href="https://neverever.land" target="_blank" rel="noopener">neverever.land</a>
@@ -364,8 +433,6 @@ B2B &amp; B2C Builds</div>
         <a href="https://zackgort.com" target="_blank" rel="noopener">zackgort.com</a>
         <a href="https://zackgort.com/haiku" target="_blank" rel="noopener">zackgort.com/haiku</a>
         <a href="https://zackgort.com/classic" target="_blank" rel="noopener">zackgort.com/classic</a>
-        <a href="https://zackgort.com/vitae" target="_blank" rel="noopener">zackgort.com/vitae</a>
-        <a href="https://zackgort.com/study" target="_blank" rel="noopener">zackgort.com/study</a>
         <a href="https://zack.cx" target="_blank" rel="noopener">zack.cx</a>
       </div>
     </div>
@@ -435,6 +502,25 @@ const MOON_FRAMES = ["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAD1CAYA
 const FMS = 80;
 const W = 52, H = 73;
 const GROUND_Y = 60;
+
+  function openAbout() {
+    document.getElementById('about-overlay').classList.add('open');
+    document.getElementById('about-cursor').style.display = 'block';
+    document.addEventListener('keydown', escAbout);
+    document.addEventListener('mousemove', trackAboutCursor);
+  }
+  function closeAbout() {
+    document.getElementById('about-overlay').classList.remove('open');
+    document.getElementById('about-cursor').style.display = 'none';
+    document.removeEventListener('keydown', escAbout);
+    document.removeEventListener('mousemove', trackAboutCursor);
+  }
+  function escAbout(e) { if (e.key === 'Escape') closeAbout(); }
+  function trackAboutCursor(e) {
+    const c = document.getElementById('about-cursor');
+    c.style.left = e.clientX + 'px';
+    c.style.top  = e.clientY + 'px';
+  }
 
 function toggleWide(btn) {
   const c = btn.closest('.case');

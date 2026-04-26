@@ -85,7 +85,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     height: var(--s);
     position: relative;
     transform-style: preserve-3d;
-    transform: rotateX(90deg) rotateY(0deg);
+    transform: rotateX(0deg) rotateY(0deg);
     will-change: transform;
   }
   .face {
@@ -941,7 +941,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
 <div id="scene">
   <div id="cube">
     <div class="face" data-face="top" data-i="0">
-      <img src="https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg" alt="Chapter 1">
+      <img src="https://i.ibb.co/LXR70BTD/wolfieboop.webp" alt="Chapter 5">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
         <h3 class="fc-title"></h3>
@@ -951,7 +951,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
       </div>
     </div>
     <div class="face" data-face="front" data-i="1">
-      <img src="https://i.ibb.co/09K8Z99/image-624.png" alt="Chapter 2">
+      <img src="https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg" alt="Chapter 1">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
         <h3 class="fc-title"></h3>
@@ -961,7 +961,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
       </div>
     </div>
     <div class="face" data-face="right" data-i="2">
-      <img src="https://i.ibb.co/1fMNf4nW/7.webp" alt="Chapter 3">
+      <img src="https://i.ibb.co/09K8Z99/image-624.png" alt="Chapter 2">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
         <h3 class="fc-title"></h3>
@@ -971,7 +971,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
       </div>
     </div>
     <div class="face" data-face="back" data-i="3">
-      <img src="https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp" alt="Chapter 4">
+      <img src="https://i.ibb.co/1fMNf4nW/7.webp" alt="Chapter 3">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
         <h3 class="fc-title"></h3>
@@ -981,7 +981,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
       </div>
     </div>
     <div class="face" data-face="left" data-i="4">
-      <img src="https://i.ibb.co/LXR70BTD/wolfieboop.webp" alt="Chapter 5">
+      <img src="https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp" alt="Chapter 4">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
         <h3 class="fc-title"></h3>
@@ -1270,11 +1270,11 @@ const BNY_SLIDES = [
 const N = 6;
 const FACE_NAMES = ["CHAPTER 1","CHAPTER 2","CHAPTER 3","CHAPTER 4","CHAPTER 5","CHAPTER 6"];
 const CHAPTER_STOPS = [
-  { rx: 90,  ry:   0 },
   { rx:  0,  ry:   0 },
   { rx:  0,  ry: -90 },
   { rx:  0,  ry:-180 },
   { rx:  0,  ry:-270 },
+  { rx:  0,  ry:-360 },
   { rx:-90,  ry:-360 },
 ];
 
@@ -1423,11 +1423,11 @@ function exitCaseMode() {
 
   // Restore original face images
   const origImgs = [
+    "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
     "https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg",
     "https://i.ibb.co/09K8Z99/image-624.png",
     "https://i.ibb.co/1fMNf4nW/7.webp",
     "https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp",
-    "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
     "https://i.ibb.co/0jHKxpPZ/vermont-91.jpg",
   ];
   dom.faces.forEach((face, i) => {
@@ -1601,9 +1601,9 @@ const frame = now => {
     dom.faces.forEach((face, i) => {
       var o;
       if (i === 0 || i === 5) {
-        // Top/bottom: full when active chapter, dimmed otherwise
+        // Top face is ch4, bottom face is ch5
         var activeChapter = Math.round(smooth * (N - 1));
-        if ((i === 0 && activeChapter === 0) || (i === 5 && activeChapter === 5)) {
+        if ((i === 0 && activeChapter === 4) || (i === 5 && activeChapter === 5)) {
           o = 1.0;
         } else {
           o = 0.35;

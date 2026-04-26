@@ -1442,6 +1442,12 @@ function preloadCaseSlides(slides) {
 }
 
 function enterCaseMode(key) {
+  // If already in case mode, exit first then re-enter
+  if (caseMode) {
+    exitCaseMode();
+    setTimeout(function() { enterCaseMode(key); }, 450);
+    return;
+  }
   const scene = document.getElementById("scene");
 
   // Fade out cube to mask snap + content load
@@ -1530,7 +1536,10 @@ function exitCaseMode() {
     updateSectionNavDots(Math.round(smooth * (N - 1)));
   }
 
-    if (scene) { scene.style.opacity = ""; setTimeout(function() { scene.style.transition = ""; }, 250); }
+    if (scene) {
+      scene.style.opacity = "1";
+      setTimeout(function() { scene.style.transition = ""; scene.style.opacity = ""; }, 300);
+    }
   }, 180);
 }
 

@@ -1057,6 +1057,39 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
 #ne-ink-overlay{ z-index: 9001; }
 #ne-world-fg   { z-index: 9002; }
 
+#ne-ctx-menu {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  background: rgba(10,7,24,0.92);
+  border: 1px solid rgba(0,229,255,0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.35rem 0;
+  min-width: 160px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+#ne-ctx-menu.open { display: flex; }
+#ne-ctx-menu a {
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  color: rgba(0,229,255,0.75);
+  text-decoration: none;
+  padding: 0.45rem 1rem;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer !important;
+}
+#ne-ctx-menu a:hover {
+  background: rgba(0,229,255,0.1);
+  color: rgba(0,229,255,1);
+}
+#ne-ctx-menu a + a {
+  border-top: 1px solid rgba(0,229,255,0.08);
+}
+
 </style>
 </head>
 <body>
@@ -2430,6 +2463,7 @@ function openGallery(key) {
   window.addEventListener('mouseup',   onMouseUp);
   canvas.addEventListener('wheel',     onWheel, { passive: false });
 
+
   // Expose drag controls for touch
   window._galleryDrag = { get targetPos() { return targetPos; }, set targetPos(v) { targetPos = v; }, get targetDist() { return targetDist; }, set targetDist(v) { targetDist = v; }, get isScrolling() { return isScrolling; }, set isScrolling(v) { isScrolling = v; }, get autoScroll() { return autoScroll; }, set autoScroll(v) { autoScroll = v; } };
 
@@ -3163,6 +3197,60 @@ window.addEventListener('load',function(){
   ne_loop();
 });
 
+})();
+</script>
+
+
+<!-- ── NeverEver context menu ── -->
+<div id="ne-ctx-menu">
+  <a href="#" id="ne-ctx-top">↑ back to top</a>
+  <a href="#" id="ne-ctx-copy">⎘ copy link</a>
+  <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin</a>
+  <a href="https://wolfie.love" target="_blank">wolfie.love</a>
+  <a href="https://zack.cx" target="_blank">zack.cx</a>
+</div>
+
+<script>
+// ── NeverEver context menu ────────────────────────────────────────────────
+(function() {
+  var menu = document.getElementById('ne-ctx-menu');
+  if (!menu) return;
+
+  function showMenu(x, y) {
+    menu.classList.add('open');
+    // Keep within viewport
+    var mw = 170, mh = 170;
+    var left = Math.min(x, window.innerWidth  - mw - 8);
+    var top  = Math.min(y, window.innerHeight - mh - 8);
+    menu.style.left = left + 'px';
+    menu.style.top  = top  + 'px';
+  }
+  function hideMenu() { menu.classList.remove('open'); }
+
+  // Right click anywhere triggers context menu
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    showMenu(e.clientX, e.clientY);
+  });
+
+  // Click outside to dismiss
+  document.addEventListener('pointerdown', function(e) {
+    if (!menu.contains(e.target)) hideMenu();
+  });
+
+  // Back to top
+  document.getElementById('ne-ctx-top').addEventListener('click', function(e) {
+    e.preventDefault();
+    hideMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Copy link
+  document.getElementById('ne-ctx-copy').addEventListener('click', function(e) {
+    e.preventDefault();
+    hideMenu();
+    navigator.clipboard.writeText(window.location.href).catch(function() {});
+  });
 })();
 </script>
 

@@ -432,8 +432,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   pointer-events: none;
 }
 
-.face[data-face="right"],
-body.case-mode .face-content { display: flex; }
+body.case-mode .face-content { display: none; } /* panel handles content, overlay off */
 
 .fc-meta {
   display: flex;
@@ -510,7 +509,7 @@ body.case-mode .face-content { display: flex; }
 }
 
 /* Case mode — dim scroll content */
-body.case-mode #scroll_container { opacity: 0.04; pointer-events: none; transition: opacity 0.5s; }
+body.case-mode #scroll_container { opacity: 0; pointer-events: none; transition: opacity 0.5s; }
 body.case-mode #cube-tap { display: none; }
 body:not(.case-mode) #scroll_container { opacity: 1; transition: opacity 0.5s; }
 
@@ -838,28 +837,51 @@ body.has-gallery #cube-tap { cursor: pointer; }
   body.case-mode #mobile-nav { display: none !important; }
   body.case-mode .face-content { display: none; }
 
-  /* Case panel below cube */
-  #case-panel {
-    top: auto; right: 0; left: 0;
-    bottom: 3.5rem;
-    transform: none;
-    width: 100%; max-height: 42vh;
-    padding: 0 1.25rem;
-    background: rgba(0,0,0,0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255,255,255,0.08);
-    overflow-y: auto;
+  /* Case mode: panel fills bottom, cube fills top */
+  body.case-mode #case-panel {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 3.5rem !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-height: 44vh !important;
+    padding: 0 1.25rem !important;
+    background: rgba(0,0,0,0.88) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+    overflow-y: auto !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+    z-index: 30 !important;
   }
-  #case-panel-inner { padding: 0.75rem 0; }
-  #cp-title { font-size: clamp(1.4rem, 7vw, 2.2rem) !important; }
+  body.case-mode #case-panel #case-panel-inner { padding: 0.75rem 0; }
+  #cp-title { font-size: clamp(1.3rem, 6.5vw, 2rem) !important; }
+  #cp-body  { font-size: 0.66rem !important; line-height: 1.6 !important; }
 
-  /* Case HUD top right on mobile */
+  /* Case HUD: compact top-right row */
   body.case-mode #case-hud {
-    top: 0.75rem; right: 0.75rem;
-    bottom: auto; left: auto;
-    flex-direction: row; background: none; padding: 0;
+    position: fixed !important;
+    top: 0.75rem !important;
+    right: 0.75rem !important;
+    bottom: auto !important;
+    left: auto !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    background: rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(8px) !important;
+    padding: 0.3rem 0.6rem !important;
+    border-radius: 2px !important;
   }
+  body.case-mode #case-hud #case-hud-counter { font-size: 0.52rem; }
+  body.case-mode .case-exit-btn { font-size: 0.52rem !important; padding: 0.3rem 0.6rem !important; }
+
+  /* Mobile nav bar hidden in case mode */
+  body.case-mode #mobile-nav { display: none !important; }
+  body.case-mode #scroll_container { display: none !important; }
 }
 
 /* Desktop: shift cube left in case mode for panel */
@@ -973,16 +995,6 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
 <div id="scene">
   <div id="cube">
     <div class="face" data-face="top" data-i="0">
-      <img src="https://i.ibb.co/LXR70BTD/wolfieboop.webp" alt="Chapter 5">
-      <div class="face-content">
-        <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
-        <h3 class="fc-title"></h3>
-        <div class="fc-stats"></div>
-        <p class="fc-body"></p>
-        <p class="fc-pull"></p>
-      </div>
-    </div>
-    <div class="face" data-face="front" data-i="1">
       <img src="https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg" alt="Chapter 1">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
@@ -992,7 +1004,7 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
         <p class="fc-pull"></p>
       </div>
     </div>
-    <div class="face" data-face="right" data-i="2">
+    <div class="face" data-face="front" data-i="1">
       <img src="https://i.ibb.co/09K8Z99/image-624.png" alt="Chapter 2">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
@@ -1002,7 +1014,7 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
         <p class="fc-pull"></p>
       </div>
     </div>
-    <div class="face" data-face="back" data-i="3">
+    <div class="face" data-face="right" data-i="2">
       <img src="https://i.ibb.co/1fMNf4nW/7.webp" alt="Chapter 3">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
@@ -1012,8 +1024,18 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
         <p class="fc-pull"></p>
       </div>
     </div>
-    <div class="face" data-face="left" data-i="4">
+    <div class="face" data-face="back" data-i="3">
       <img src="https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp" alt="Chapter 4">
+      <div class="face-content">
+        <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
+        <h3 class="fc-title"></h3>
+        <div class="fc-stats"></div>
+        <p class="fc-body"></p>
+        <p class="fc-pull"></p>
+      </div>
+    </div>
+    <div class="face" data-face="left" data-i="4">
+      <img src="https://i.ibb.co/LXR70BTD/wolfieboop.webp" alt="Chapter 5">
       <div class="face-content">
         <div class="fc-meta"><span class="fc-type"></span><span class="fc-era"></span></div>
         <h3 class="fc-title"></h3>
@@ -1470,11 +1492,11 @@ function exitCaseMode() {
 
   // Restore original face images
   const origImgs = [
-    "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
     "https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg",
     "https://i.ibb.co/09K8Z99/image-624.png",
     "https://i.ibb.co/1fMNf4nW/7.webp",
     "https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp",
+    "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
     "https://i.ibb.co/0jHKxpPZ/vermont-91.jpg",
   ];
   dom.faces.forEach((face, i) => {
@@ -2277,6 +2299,9 @@ function openGallery(key) {
   window.addEventListener('mouseup',   onMouseUp);
   canvas.addEventListener('wheel',     onWheel, { passive: false });
 
+  // Expose drag controls for touch
+  window._galleryDrag = { get targetPos() { return targetPos; }, set targetPos(v) { targetPos = v; }, get targetDist() { return targetDist; }, set targetDist(v) { targetDist = v; }, get isScrolling() { return isScrolling; }, set isScrolling(v) { isScrolling = v; }, get autoScroll() { return autoScroll; }, set autoScroll(v) { autoScroll = v; } };
+
   // Cleanup stored for closeGallery
   galleryThree = {
     renderer: renderer,
@@ -2288,6 +2313,7 @@ function openGallery(key) {
       slides.forEach(function(s) { scene.remove(s); s.geometry.dispose(); s.material.dispose(); });
       renderer.dispose();
       galleryThree = null;
+      window._galleryDrag = null;
     }
   };
 }
@@ -2328,6 +2354,7 @@ document.addEventListener('keydown', function(e) {
 
 <script>
 // ── Mobile navigation ────────────────────────────────────────────────────
+window.mobileNav = function() {}; // stub — overridden by mobile IIFE
 (function() {
   if (!window.matchMedia('(max-width: 900px)').matches) return;
 
@@ -2359,7 +2386,7 @@ document.addEventListener('keydown', function(e) {
     }, 50);
   }
 
-  window.mobileNav = function(dir) { goTo(cur + dir); };
+  window.mobileNav = function(dir) { goTo(cur + dir); }; // exposed globally
 
   // ── Touch: vertical = chapter (at edge), horizontal = chapter bypass ──
   var tx0 = 0, ty0 = 0, dir = null, dragging = false;

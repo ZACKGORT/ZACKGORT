@@ -1122,9 +1122,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
 <div id="top-progress"><div id="top-progress-fill"></div></div>
 
 <div id="hud">
-  <div id="hud_pct">000%</div>
-  <div class="progress-bar"><div class="progress-fill" id="prog_fill"></div></div>
-  <div class="scene-label" id="scene_name">ROLLING</div>
+  <div class="scene-label" id="scene_name">CHAPTER 1</div>
 </div>
 
 <button id="theme_toggle" aria-label="Toggle theme">
@@ -1434,6 +1432,7 @@ const dom = {
   strip:       document.getElementById("scene_strip"),
   hudPct:      null,
   progFill:    null,
+  topFill:     document.getElementById('top-progress-fill'),
   sceneName:   document.getElementById("scene_name"),
   captionNum:  document.getElementById("face_caption_num"),
   captionName: document.getElementById("face_caption_name"),
@@ -1545,46 +1544,65 @@ function exitCaseMode() {
   if (scene) { scene.style.transition = "opacity 0.2s ease"; scene.style.opacity = "0"; }
 
   setTimeout(function() {
-    caseMode   = null;
-    caseSlides = [];
-    STOPS      = CHAPTER_STOPS.slice();
+    caseMode     = null;
+    caseSlides   = [];
+    STOPS        = CHAPTER_STOPS.slice();
     caseProgress = 0;
-    tgt = clamp(window.scrollY / maxScroll, 0, 1);
-    smooth = tgt;
+    velocity     = 0;
 
     applyTheme(prevTheme);
     document.body.classList.remove("case-mode");
     unlockScroll();
 
-  // Restore original face images
-  const origImgs = [
-    "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
-    "https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg",
-    "https://i.ibb.co/09K8Z99/image-624.png",
-    "https://i.ibb.co/1fMNf4nW/7.webp",
-    "https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp",
-    "https://i.ibb.co/0jHKxpPZ/vermont-91.jpg",
-  ];
-  dom.faces.forEach((face, i) => {
-    const fc = face.querySelector(".face-content");
-    if (fc) { fc.querySelectorAll("[class^=fc-]").forEach(el => { el.textContent=""; el.style.display=""; }); }
-    face.style.removeProperty("--case-accent");
-    if (origImgs[i]) {
-      let img = face.querySelector("img");
-      if (img) img.src = origImgs[i];
-    } else {
+    // Restore original face images
+    const origImgs = [
+      "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
+      "https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg",
+      "https://i.ibb.co/09K8Z99/image-624.png",
+      "https://i.ibb.co/1fMNf4nW/7.webp",
+      "https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp",
+      "https://i.ibb.co/0jHKxpPZ/vermont-91.jpg",
+    ];
+    dom.faces.forEach((face, i) => {
+      const fc = face.querySelector(".face-content");
+      if (fc) { fc.querySelectorAll("[class^=fc-]").forEach(el => { el.textContent=""; el.style.display=""; }); }
+      face.style.removeProperty("--case-accent");
       const img = face.querySelector("img");
-      if (img && !["right","back","left"].includes(face.dataset.face)) img.remove();
+      if (img && origImgs[i]) img.src = origImgs[i];
+    });
+
+    // Restore scroll state
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      // Mobile: restore to the chapter that triggered the case study
+      const ch = Math.round(smooth * (N - 1));
+      tgt    = ch / Math.max(1, N - 1);
+      smooth = tgt;
+      _rawTgt = tgt;
+      if (window.mobileNav) {
+        // Sync mob-strip position without animation
+        const strip = document.getElementById("mob-strip");
+        if (strip) {
+          strip.style.transition = "none";
+          strip.style.transform = "translateX(" + (-ch * 100) + "vw)";
+        }
+        const mobChapter = document.getElementById("mob-chapter");
+        const NAMES = ["CHAPTER 1","CHAPTER 2","CHAPTER 3","CHAPTER 4","CHAPTER 5","CHAPTER 6"];
+        if (mobChapter) mobChapter.textContent = NAMES[ch] || "";
+        updateSectionNavDots(ch);
+      }
+    } else {
+      // Desktop: restore from scroll position
+      resize();
+      tgt    = clamp(window.scrollY / Math.max(1, maxScroll), 0, 1);
+      smooth = tgt;
+      _rawTgt = tgt;
+      updateSectionNavDots(Math.round(smooth * (N - 1)));
     }
-  });
 
-  // Reset to chapter scroll
-  targetX = 0; currentX = 0; velocity = 0;
-  tgt = 0; smooth = 0;
-  maxScroll = (N - 1) * panelWidth;
-  updateSectionNavDots(0);
-
-    if (scene) { scene.style.opacity = ""; setTimeout(function() { scene.style.transition = ""; }, 250); }
+    if (scene) {
+      scene.style.opacity = "";
+      setTimeout(function() { scene.style.transition = ""; }, 250);
+    }
   }, 180);
 }
 

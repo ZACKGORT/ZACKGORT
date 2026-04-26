@@ -598,8 +598,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   pointer-events: none;
 }
 
-.face[data-face="right"],
-body.case-mode .face-content { display: flex; }
+body.case-mode .face-content { display: none; } /* panel handles content */
 
 .fc-meta {
   display: flex;
@@ -683,24 +682,19 @@ body:not(.case-mode) #scroll_container { opacity: 1; transition: opacity 0.5s; }
 /* Case HUD — slides counter */
 #case-hud {
   position: fixed;
-  bottom: var(--ui-inset);
+  top: var(--ui-inset);
   right: var(--ui-inset);
-  z-index: var(--z-ui);
+  z-index: 100;
   display: none;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
 }
 body.case-mode #case-hud { display: flex; }
 body.case-mode #face_caption { display: none; }
+body.case-mode #hud { display: none; }
 
-#case-hud-title {
-  font-family: var(--font-display);
-  font-size: clamp(0.9rem, 2vw, 1.4rem);
-  letter-spacing: 0.04em;
-  color: var(--fg);
-  line-height: 1;
-}
+#case-hud-title { display: none; } /* title shown in panel */
 #case-hud-counter {
   font-family: var(--font-mono);
   font-size: 0.58rem;
@@ -996,19 +990,15 @@ body.has-gallery #cube-tap { cursor: pointer; }
     letter-spacing: 0.15em;
   }
 
-  /* Case HUD — bottom centered on mobile */
+  /* Case HUD — stays top right on mobile too */
   body.case-mode #case-hud {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    align-items: center;
+    top: 0.75rem;
+    right: 0.75rem;
+    bottom: auto;
+    left: auto;
     flex-direction: row;
-    justify-content: space-between;
-    padding: 0.75rem 1.25rem;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255,255,255,0.08);
-    z-index: 100;
+    background: none;
+    padding: 0;
   }
 
   #case-hud-title {
@@ -1045,6 +1035,127 @@ body.has-gallery #cube-tap { cursor: pointer; }
   20%  { opacity: 1; }
   80%  { opacity: 1; }
   100% { opacity: 0; }
+}
+
+/* ── Case study content panel ── */
+#case-panel {
+  position: fixed;
+  top: 50%;
+  right: var(--ui-inset);
+  transform: translateY(-50%);
+  width: min(340px, 30vw);
+  max-height: 70vh;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease 0.2s;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+#case-panel::-webkit-scrollbar { display: none; }
+body.case-mode #case-panel {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#case-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.5rem 0;
+}
+
+#cp-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+#cp-type {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--case-accent-panel, var(--accent));
+}
+#cp-era {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+#cp-era::before { content: "/ "; }
+
+#cp-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.8vw, 2.8rem);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  color: var(--fg);
+  margin: 0;
+}
+
+#cp-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.cp-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cp-stat-n {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  line-height: 1;
+  color: var(--case-accent-panel, var(--accent));
+  letter-spacing: -0.02em;
+}
+.cp-stat-l {
+  font-family: var(--font-mono);
+  font-size: 0.46rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+#cp-body {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--fg) 65%, transparent);
+  margin: 0;
+}
+
+#cp-pull {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--case-accent-panel, var(--accent));
+  border-left: 2px solid var(--case-accent-panel, var(--accent));
+  padding-left: 0.75rem;
+  margin: 0;
+}
+
+/* Mobile: panel sits below cube */
+@media (max-width: 900px) {
+  #case-panel {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 3.5rem;
+    transform: none;
+    width: 100%;
+    max-height: 42vh;
+    padding: 0 1.25rem;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  #case-panel-inner { padding: 0.75rem 0; }
+  #cp-title { font-size: clamp(1.4rem, 7vw, 2.2rem); }
+  #cp-body  { font-size: 0.68rem; }
 }
 
 </style>
@@ -1350,6 +1461,17 @@ body.has-gallery #cube-tap { cursor: pointer; }
   <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35)">swipe to explore</span>
 </div>
 
+<!-- ── Case study content panel ── -->
+<div id="case-panel">
+  <div id="case-panel-inner">
+    <div id="cp-meta"><span id="cp-type"></span><span id="cp-era"></span></div>
+    <h2 id="cp-title"></h2>
+    <div id="cp-stats"></div>
+    <p id="cp-body"></p>
+    <p id="cp-pull"></p>
+  </div>
+</div>
+
 <!-- ── Case study HUD ── -->
 <div id="case-hud">
   <div id="case-hud-title"></div>
@@ -1612,7 +1734,35 @@ function updateCaseHUD(stopIdx) {
   var _cht = document.getElementById("case-hud-title");
   var _chc = document.getElementById("case-hud-counter");
   if (_cht) _cht.textContent = slide.title;
-  if (_chc) _chc.textContent = `${(stopIdx+1).toString().padStart(2,"0")} / ${caseSlides.length.toString().padStart(2,"0")}`;
+  if (_chc) _chc.textContent = (stopIdx+1).toString().padStart(2,"0") + " / " + caseSlides.length.toString().padStart(2,"0");
+
+  // Update content panel
+  document.documentElement.style.setProperty("--case-accent-panel", slide.accent || "var(--accent)");
+  const set = (id, val) => { var el = document.getElementById(id); if (el) el.textContent = val || ""; };
+  set("cp-type",  slide.type);
+  set("cp-era",   slide.era);
+  set("cp-title", slide.title);
+  set("cp-body",  slide.body);
+
+  var pullEl = document.getElementById("cp-pull");
+  if (pullEl) { pullEl.textContent = slide.pull || ""; pullEl.style.display = slide.pull ? "" : "none"; }
+
+  var statsEl = document.getElementById("cp-stats");
+  if (statsEl) {
+    if (slide.stats && slide.stats.length) {
+      statsEl.innerHTML = slide.stats.map(function(s) {
+        return "<div class=\"cp-stat\"><span class=\"cp-stat-n\">" + s[0] + "</span><span class=\"cp-stat-l\">" + s[1] + "</span></div>";
+      }).join("");
+      statsEl.style.display = "flex";
+    } else {
+      statsEl.innerHTML = "";
+      statsEl.style.display = "none";
+    }
+  }
+
+  // Scroll panel back to top on slide change
+  var panel = document.getElementById("case-panel");
+  if (panel) panel.scrollTop = 0;
 }
 
 function updateSectionNavDots(idx) {
@@ -1745,6 +1895,10 @@ const frame = now => {
 
   smooth += (tgt - smooth) * (1 - Math.exp(-dt * 8));
   smooth = clamp(smooth, 0, 1);
+  // Keep _rawTgt in sync every frame
+  if (!caseMode && !isMobileLayout()) {
+    _rawTgt = maxScroll > 0 ? clamp(window.scrollY / maxScroll, 0, 1) : 0;
+  }
 
   updateHUD(smooth);
   setCube(smooth);

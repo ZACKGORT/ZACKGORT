@@ -716,22 +716,49 @@ body.has-gallery #cube-tap { cursor: pointer; }
   outline: none;
 }
 
-/* ── Top progress bar ── */
+/* ── Cursor-line progress indicator ── */
 #top-progress {
   position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  z-index: 9999;
-  background: rgba(0,0,0,0.08);
+  top: var(--ui-inset);
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(120px, 18vw, 220px);
+  height: 1px;
+  z-index: var(--z-ui);
   pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+#top-progress::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--muted) 25%, transparent);
 }
 #top-progress-fill {
-  height: 100%;
+  height: 1px;
   width: 0%;
-  background: var(--ink);
-  transition: background 0.4s ease;
+  background: var(--accent);
+  position: relative;
+  transition: width 0.12s linear, background 0.4s ease;
 }
-:root[data-theme="dark"] #top-progress-fill { background: #ff2c2c; }
+#top-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -3px;
+  width: 1px;
+  height: 7px;
+  background: var(--accent);
+  animation: cursor-blink 1.1s step-end infinite;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+:root[data-theme="dark"]  #top-progress-fill        { background: var(--accent-dark); }
+:root[data-theme="dark"]  #top-progress-fill::after { background: var(--accent-dark); }
+body.case-mode #top-progress { opacity: 0; pointer-events: none; }
 
 /* HUD — just chapter label, top right */
 #hud {
@@ -754,10 +781,13 @@ body.has-gallery #cube-tap { cursor: pointer; }
 ═══════════════════════════════════════════════ */
 @media (max-width: 900px) {
 
+  /* Progress indicator: stays centered, vertically aligned with top UI */
+  #top-progress { top: 0.9rem; width: clamp(80px, 28vw, 160px); }
+
   /* Hide desktop navigation chrome */
   #scene_strip, #face_caption { display: none; }
   #hud { top: 0.75rem; right: 0.75rem; }
-  #theme_toggle { bottom: 5rem; left: 0.75rem; translate: 0 0; }
+  #theme_toggle { bottom: 1.5rem; left: 0.75rem; translate: 0 0; }
 
   /* Cube: fixed top zone */
   #scene {
@@ -776,7 +806,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
   #scroll_container {
     position: fixed;
     top: 43vh; left: 0; right: 0;
-    height: calc(57vh - 3.5rem);
+    height: 57vh;
     overflow: hidden;
     display: block;
     z-index: 2;
@@ -828,8 +858,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
   .links-list { margin-block-start: 0.4rem; }
   .links-list a { font-size: 0.58rem; }
 
-  /* Mobile nav bar */
-  #mobile-nav { display: flex !important; }
+  /* Mobile nav bar — removed */
 
   /* Case mode: cube fills upper portion, panel takes bottom */
   body.case-mode #scene    { height: 55vh; }
@@ -903,7 +932,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
 
 /* ── Mobile nav bar ── */
 #mobile-nav {
-  display: none;
+  display: none !important;
   position: fixed;
   bottom: 0; left: 0; right: 0;
   height: 3.5rem; z-index: 50;
@@ -1010,36 +1039,12 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
   z-index: calc(var(--z-ui) + 1) !important;
 }
 
-/* ── Custom thin scrollbars (replace all system scrollbars) ── */
+/* ── Suppress all system scrollbars globally ── */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--muted) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-*::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
-}
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-*::-webkit-scrollbar-thumb {
-  background: var(--muted);
-  border-radius: 0;
-  opacity: 0.5;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-}
-/* Mobile sections — show slim rail, hide until scroll */
-@media (max-width: 900px) {
-  section::-webkit-scrollbar { width: 2px; }
-  section::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--muted) 40%, transparent); }
-}
-/* Case panel scrollbar */
-#case-panel {
-  scrollbar-width: thin;
-  scrollbar-color: var(--muted) transparent;
-}
+*::-webkit-scrollbar { display: none; }
 
 /* ── neverever persistent overlay ── */
 #ne-world, #ne-world-fg, #ne-ink-overlay {
@@ -1160,11 +1165,12 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <h1>DESIGN.<br>WRITE.<br>THINK.<br>MAKE.</h1>
       <p class="body-text">
         I specialize in thoughtful timeless information &amp;
-        experience systems. 
+        experience systems. The sentence is the most meaningfully
+        precise artifact of human &amp; machine intelligence.
       </p>
       <div class="cta-row">
         <a class="cta" href="#s1">
-          Things I Think About
+          Enter
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M1 6h10M6 1l5 5-5 5"/>
           </svg>
@@ -1192,14 +1198,14 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s0">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-         Prev
+          Back
         </a>
         <button class="cta" onclick="event.stopPropagation();enterCaseMode('gnc')">
           Expand
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h4M11 1V5M11 1L6 6M11 11H7M1 11V7M1 11l5-5"/></svg>
         </button>
         <a class="cta" href="#s2">
-          Next
+          Turn
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1226,14 +1232,14 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s1">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Prev
+          Back
         </a>
         <button class="cta" onclick="event.stopPropagation();enterCaseMode('bny')">
           Expand
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h4M11 1V5M11 1L6 6M11 11H7M1 11V7M1 11l5-5"/></svg>
         </button>
         <a class="cta" href="#s3">
-          Next
+          Turn
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1258,10 +1264,10 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s2">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Prev
+          Back
         </a>
         <a class="cta" href="#s4">
-          Next
+          Turn
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1273,7 +1279,7 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
     <div class="text-card">
       <div class="h-line"></div>
       <div class="tag">04 — Thesis explorations</div>
-      <h2>Hueristics<br>for <em>intent</em></h2>
+      <h2>THE<br>SENTENCE.</h2>
       <p class="body-text">
         "The sentence is the most meaningfully precise artifact
         of human &amp; machine intelligence." — zack.cx
@@ -1281,6 +1287,18 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="links-cols">
         <div class="links-list">
           <a href="https://wolfie.love" target="_blank">wolfie.love</a>
+          <a href="https://wolfie.love/cine" target="_blank">wolfie.love/cine</a>
+          <a href="https://wolfie.life" target="_blank">wolfie.life</a>
+          <a href="https://reasonably.cc" target="_blank">reasonably.cc</a>
+          <a href="https://intoview.pro" target="_blank">intoview.pro</a>
+          <a href="https://ifimaybefrank.com" target="_blank">ifimaybefrank.com</a>
+          <a href="https://reasonandresolution.com" target="_blank">reasonandresolution.com</a>
+        </div>
+        <div class="links-list">
+          <a href="https://zackgort.com" target="_blank">zackgort.com</a>
+          <a href="https://zackgort.com/haiku" target="_blank">zackgort.com/haiku</a>
+          <a href="https://zackgort.com/classic" target="_blank">zackgort.com/classic</a>
+          <a href="https://zackgort.com/vitae" target="_blank">zackgort.com/vitae</a>
           <a href="https://neverever.land" target="_blank">neverever.land</a>
           <a href="https://zack.cx" target="_blank">zack.cx</a>
         </div>
@@ -1288,10 +1306,10 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s3">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Prev
+          Back
         </a>
         <a class="cta" href="#s5">
-          Next
+          Turn
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1304,18 +1322,18 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="h-line"></div>
       <div class="tag">05 — Contact</div>
       <h2>Thanks for stopping by.<br></h2>
-      <div class="links-list">
-        <a href="https://www.linkedin.com/in/zackgort/" target="_blank">/in/zackgort</a>
-      </div>
-        <br>Work to eat. Eat to live. Live to skate. Skate after work.
+      <p class="body-text">
+        zack@reasonably.cc
+        <br>linkedin.com/in/zackgort<br><br>
+        *all em-dashes sourced from emdash.click
       </p>
       <div class="cta-row">
         <a class="cta-back" href="#s4">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Prev
+          Back
         </a>
         <a class="cta" href="#s0">
-          Refresh
+          Roll again
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>

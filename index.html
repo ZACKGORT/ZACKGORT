@@ -429,16 +429,23 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
       height: min(70vw, 38vh, 340px);
     }
 
-    /* ── Scroll container: lower half, single section visible ── */
+    /* ── Scroll container: lower half ── */
     #scroll_container {
       position: fixed;
       top: 55vh; left: 0; right: 0;
       height: calc(45vh - 3.5rem);
       overflow: hidden;
+      display: block;
     }
 
-    /* ── Sections: horizontal strip ── */
-    #scroll_container { display: flex; will-change: transform; }
+    /* ── Inner strip: horizontal, transforms slide it ── */
+    #mob-strip {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      will-change: transform;
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
     section {
       flex-shrink: 0;
       min-height: unset;
@@ -1032,6 +1039,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
 
 <!-- ── Scroll content ── -->
 <div id="scroll_container">
+  <div id="mob-strip">
 
   <!-- 0 · Rolling -->
   <section id="s0">
@@ -1215,6 +1223,8 @@ body.has-gallery #cube-tap { cursor: pointer; }
     </div>
   </section>
 
+
+  </div>
 </div><!-- /scroll_container -->
 
 
@@ -2279,6 +2289,7 @@ document.addEventListener('keydown', function(e) {
   if (!window.matchMedia('(max-width: 900px)').matches) return;
 
   var container  = document.getElementById('scroll_container');
+  var strip = document.getElementById('mob-strip') || container;
   var mobChapter = document.getElementById('mob-chapter');
   var N_ch = 6;
   var currentCh = 0;
@@ -2287,8 +2298,7 @@ document.addEventListener('keydown', function(e) {
   function goTo(idx) {
     idx = Math.max(0, Math.min(N_ch - 1, idx));
     currentCh = idx;
-    container.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
-    container.style.transform  = 'translateX(' + (-idx * 100) + 'vw)';
+    strip.style.transform  = 'translateX(' + (-idx * 100) + 'vw)';
     // Drive cube — set both tgt and smooth so it snaps cleanly
     tgt    = idx / (N_ch - 1);
     smooth = tgt;
@@ -2307,11 +2317,12 @@ document.addEventListener('keydown', function(e) {
 
   // Touch swipe on card area
   var tx0 = 0;
-  if (container) {
-    container.addEventListener('touchstart', function(e) {
+  var touchTarget = document.getElementById('mob-strip') || container;
+  if (touchTarget) {
+    touchTarget.addEventListener('touchstart', function(e) {
       tx0 = e.touches[0].clientX;
     }, { passive: true });
-    container.addEventListener('touchend', function(e) {
+    touchTarget.addEventListener('touchend', function(e) {
       var dx = e.changedTouches[0].clientX - tx0;
       if (Math.abs(dx) > 40) goTo(currentCh + (dx < 0 ? 1 : -1));
     }, { passive: true });

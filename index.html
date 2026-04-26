@@ -752,7 +752,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
 /* ═══════════════════════════════════════════════
    MOBILE LAYOUT  ≤ 900px
 ═══════════════════════════════════════════════ */
-@media (max-width: 900px) {
+@media (max-width: 900px) and (orientation: portrait) {
 
   /* Hide desktop navigation chrome */
   #scene_strip, #face_caption { display: none; }
@@ -1611,7 +1611,7 @@ let panelWidth = window.innerWidth;
 
 const lerp  = (a, b, f) => a + (b - a) * f;
 const clamp = (n, lo, hi) => Math.min(Math.max(n, lo), hi);
-const isMobileLayout = () => window.matchMedia("(max-width: 900px)").matches;
+const isMobileLayout = () => window.matchMedia("(max-width: 900px) and (orientation: portrait)").matches;
 
 const buildTops = () => {
   sectionTops = sections.map(s => s.getBoundingClientRect().top + window.scrollY);
@@ -2274,6 +2274,35 @@ function openGallery(key) {
   canvas.addEventListener('mousedown', function(e) {
     isDragging = true; dragStartX = e.clientX; dragLastX = e.clientX;
   });
+
+  // Touch support
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    isDragging = true;
+    dragStartX = e.touches[0].clientX;
+    dragLastX  = e.touches[0].clientX;
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (!isDragging) return;
+    var dx = e.touches[0].clientX - dragLastX;
+    dragLastX = e.touches[0].clientX;
+    targetDist = Math.min(1, targetDist + Math.abs(dx) * 0.02);
+    targetPos -= dx * S.touchSens;
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    var vel2 = (dragLastX - dragStartX) * 0.005;
+    if (Math.abs(vel2) > 0.3) {
+      autoScroll  = -vel2 * S.momentumMult * 0.05;
+      targetDist  = Math.min(1, Math.abs(vel2) * 3 * S.distortionSens);
+      isScrolling = true;
+      setTimeout(function() { isScrolling = false; }, 800);
+    }
+  }, { passive: true });
   function onMouseMove(e) {
     pointLight.position.x = (e.clientX / W) * 2 - 1;
     pointLight.position.y = -(e.clientY / H) * 2 + 1;

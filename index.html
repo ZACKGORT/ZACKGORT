@@ -983,7 +983,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
     <div class="text-card">
       <div class="h-line"></div>
       <div class="tag">04 — Thesis explorations</div>
-      <h2>THE<br>SENTENCE.</h2>
+      <h2>Meaning<br>& Intent.</h2>
       <p class="body-text">
         "The sentence is the most meaningfully precise artifact
         of human &amp; machine intelligence." — zack.cx
@@ -991,21 +991,10 @@ body.has-gallery #cube-tap { cursor: pointer; }
       <div class="links-cols">
         <div class="links-list">
           <a href="https://wolfie.love" target="_blank">wolfie.love</a>
-          <a href="https://wolfie.love/cine" target="_blank">wolfie.love/cine</a>
-          <a href="https://wolfie.life" target="_blank">wolfie.life</a>
-          <a href="https://reasonably.cc" target="_blank">reasonably.cc</a>
-          <a href="https://intoview.pro" target="_blank">intoview.pro</a>
-          <a href="https://ifimaybefrank.com" target="_blank">ifimaybefrank.com</a>
-          <a href="https://reasonandresolution.com" target="_blank">reasonandresolution.com</a>
-        </div>
-        <div class="links-list">
-          <a href="https://zackgort.com" target="_blank">zackgort.com</a>
-          <a href="https://zackgort.com/haiku" target="_blank">zackgort.com/haiku</a>
-          <a href="https://zackgort.com/classic" target="_blank">zackgort.com/classic</a>
-          <a href="https://zackgort.com/vitae" target="_blank">zackgort.com/vitae</a>
           <a href="https://neverever.land" target="_blank">neverever.land</a>
           <a href="https://zack.cx" target="_blank">zack.cx</a>
         </div>
+
       </div>
       <div class="cta-row">
         <a class="cta-back" href="#s3">
@@ -1063,7 +1052,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
 // CASE STUDY DATA
 // ─────────────────────────────────────────────────────────
 const GNC_SLIDES = [
-  { id:"gnc-1", type:"Case Study", era:"2021", title:"GNC: The Whey Back", body:"GNC was emerging from bankruptcy. They needed a complete Shopify rebuild built from scratch in twelve weeks. No runway. No room for precious.", accent:"#c8704a", img:"https://i.ibb.co/pBMMxY1Z/11.webp" },
+  { id:"gnc-1", type:"Case Study", era:"2021", title:"This is the Whey", body:"GNC was emerging from bankruptcy. They needed a complete Shopify rebuild built from scratch in twelve weeks. No runway. No room for precious.", accent:"#c8704a", img:"https://i.ibb.co/pBMMxY1Z/11.webp" },
   { id:"gnc-2", type:"The Problem", era:"2021", title:"A Brand in Freefall", body:"GNC had 5,200 retail stores, 1.2M monthly site visitors, and a digital presence that could not convert either. Legacy platform — slow, desktop-centric, architecturally broken.", pull:"The site did not just need a redesign. It needed a reason to exist.", accent:"#c8704a", img:"https://i.ibb.co/spHgPH6N/1.webp" },
   { id:"gnc-3", type:"My Role", era:"2021", title:"Senior UX Designer, Elva Design Group", body:"Lead UX strategy, define the information architecture, build a modular component system, and deliver production-ready wireframes across every critical user flow.", pull:"Twelve weeks. Zero ambiguity about what success looked like.", accent:"#c8704a", img:"https://i.ibb.co/cXg5Phdc/3.webp" },
   { id:"gnc-4", type:"Approach", era:"2021", title:"Taxonomy First", body:"Before any wireframe, I restructured the entire product taxonomy. Category logic, faceted filtering, cross-sell paths, and loyalty tier integration all had to cohere from the ground up.", pull:"You cannot design navigation for a catalog you have not understood.", accent:"#c8704a", img:"https://i.ibb.co/gZ58PKyk/4.webp" },
@@ -1127,7 +1116,7 @@ const dom = {
   faces:       [...document.querySelectorAll(".face")],
   scrollEl:    document.getElementById("scroll_container"),
   strip:       document.getElementById("scene_strip"),
-  hudPct:      null,
+  hudPct:      document.getElementById("hud_pct"),
   progFill:    null,
   sceneName:   document.getElementById("scene_name"),
   captionNum:  document.getElementById("face_caption_num"),
@@ -2106,7 +2095,7 @@ var ne_targetRotSpeed = 1.0, ne_currentRotSpeed = 1.0;
 document.addEventListener('wheel', function(e) {
   var delta = e.deltaY * 0.002;
   ne_reverseLerp = Math.max(NE_REVERSE_LIMIT, Math.min(1.2, ne_reverseLerp + delta));
-}, { passive: true });
+}, { passive: true, capture: true });
 
 var NE_ATMOSPHERE_Y = 55;
 var ne_scene, ne_camera, ne_renderer, ne_fgRenderer;

@@ -510,7 +510,7 @@ body.case-mode .face-content { display: flex; }
 }
 
 /* Case mode — dim scroll content */
-body.case-mode #scroll_container { opacity: 0.04; pointer-events: none; transition: opacity 0.5s; }
+body.case-mode #scroll_container { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.5s, visibility 0.5s; }
 body.case-mode #cube-tap { display: none; }
 body:not(.case-mode) #scroll_container { opacity: 1; transition: opacity 0.5s; }
 
@@ -2010,17 +2010,22 @@ const GALLERY_DATA = {
       'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
       'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
       'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
-      'https://i.ibb.co/KcLtFPg3/IMG-20170310-150927-864.jpg',
+      'https://i.ibb.co/60GV48WK/fishtown.webp',
+      'https://i.ibb.co/MkjJjpR/FB-IMG-1508452344350-1.jpg',
       'https://i.ibb.co/PswtrTff/IMG-20170104-184947-650.jpg',
       'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
       'https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg',
       'https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp',
-      'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*tYdDX2QlVLwXI7gm3evMLw.png',
-      'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*a9toSr99x6NtE5YC7bGnzw.png',
-      'https://miro.medium.com/v2/resize:fit:1400/format:webp/1*3gnCq0a4KbY8MGJyVKyP-A.png',
-      'https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg',
       'https://i.ibb.co/nz4HvC4/image-417-min.png',
-      'https://i.ibb.co/TLKRCBk/image-1-Copy-Copy.png',
+      'https://i.ibb.co/5gMSK3gg/IMG-20171231-190053.webp',
+      'https://i.ibb.co/PG1MrDLt/1-DUp-Jk-Ot-Zacr-Xz-Febgk5rt-Q.webp',
+      'https://i.ibb.co/fd8Ycjyv/1-pch6xh-Ep-Fo-Xxli-AGb-Nnr7-Q.webp',
+      'https://i.ibb.co/v6fqJ9b9/1-I-n-HQKs7-BIXo-Y0onf-Nxn-Og.webp',
+      'https://i.ibb.co/rR74bLkf/1-o-XV3b-GDEf-TKoh-Ue-ICCjc1-A.webp',
+      'https://i.ibb.co/sJkpkV9Q/1-l4jg-O1-4g-Ey-Wy-IBEQZho0g.webp',
+      'https://i.ibb.co/DVW4Wx9/DFm-UDg-RW0-AERCDG.jpg',
+      'https://i.ibb.co/pKXbVfQ/63bc56ca95a0da22326a23ee-workarea-pup-01.jpg',
+
     ],
   },
   setup: {
@@ -2052,16 +2057,51 @@ const GALLERY_DATA = {
     ],
   },
   slide: {
-    tag: '03 · LiveArea · Salesforce', title: 'solutioning [sic]',
+    tag: '03 · LiveArea · Salesforce', title: 'a point of view',
     images: [
-      'https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp',
-      'https://i.ibb.co/h1K4ngF/image-409-min.png',
-      'https://i.ibb.co/m5yN57gn/IMG-20160526-164803987-01.jpg',
-      'https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg',
-      'https://i.ibb.co/VYS1xRzh/work2.webp',
-      'https://i.ibb.co/MrFyzRt/work3.webp',
-      'https://i.ibb.co/rmYrSsk/wisc-mobile.jpg',
-      'https://i.ibb.co/TDk7M7zh/1-KE8g-FA6w4wud1u-DAr-A4-Yv-Q.webp',
+    'https://i.ibb.co/MDw7nWfZ/greenpoint.webp',
+'https://i.ibb.co/MkTGC2NX/6feetapart.webp',
+'https://i.ibb.co/gbn5tBf5/ZAX01304.jpg',
+'https://i.ibb.co/j9vwMpg1/IMG-20200515-231729-042.jpg',
+'https://i.ibb.co/fYr89sG0/DSC08182.jpg',
+
+'https://i.ibb.co/rRdNxC5g/DSC08300.webp',
+'https://i.ibb.co/ym1z1pyb/DSC05994.webp',
+'https://i.ibb.co/h1yDszfq/2863797725928703996-5144774570.webp',
+'https://i.ibb.co/WvW71PR3/2288089293770285108-5144774570.webp',
+'https://i.ibb.co/1YyFqBj3/2278120764300123596-5144774570.webp',
+'https://i.ibb.co/ccSZT30x/603985613b870e6cd6c49a29-IMG-3457.webp',
+'https://i.ibb.co/k2svMNFv/603d10120fba838e599b6b5e-IMG-1563.webp',
+'https://i.ibb.co/1Y2gsgBy/603d6207dcd0225713fe1549-IMG-4484.webp',
+'https://i.ibb.co/WNtnFQqP/603d1185cafcb2591f42b1ad-IMG-3932.webp',
+'https://i.ibb.co/DPyhP1T7/603d100d889053cc334ee5fc-IMG-2083.webp',
+'https://i.ibb.co/zWkXCBb9/603d61b96ca6f0c336165b6e-DSC09310.webp',
+'https://i.ibb.co/Fbr1sSb6/603d8d7a3a6df470a4a661a1-DSC00726.webp',
+'https://i.ibb.co/5gddKNw3/603d0bb2331da47ee88db089-DSC02085.webp',
+'https://i.ibb.co/8njbYh3K/603d0b5635e8053bc120bec7-DSC09034.webp',
+'https://i.ibb.co/VYQs1pyb/603d0b8abf1990616037cc35-ZAX03810.webp',
+'https://i.ibb.co/JX320Vw/603b3890dcd3ab104d67d405-ZAX01233-2.webp',
+'https://i.ibb.co/m5sNTvYX/603a967916b10d5bef5a6dd8-ZAX02712-1.webp',
+'https://i.ibb.co/0yjJ4j8L/603a967a5dc3e982f571b744-ZAX00968.webp',
+'https://i.ibb.co/bjCjbfbT/603a93efdfd184c21ef2d238-IMG-3352.webp',
+'https://i.ibb.co/RG7ymtn5/603a93eedce047078935438a-IMG-5686.webp',
+'https://i.ibb.co/9HzBPc7Y/603a93eea83b1aab7a98c35b-DSC08228.webp',
+'https://i.ibb.co/zsxNHK7/2448148266170177557-5144774570.jpg',
+'https://i.ibb.co/0ZWH7cT/2321673929708515123-5144774570.jpg',
+'https://i.ibb.co/mSR1GDc/2309287483437628607-5144774570.jpg',
+'https://i.ibb.co/dr55NKK/2288089293770285108-5144774570.jpg',
+'https://i.ibb.co/WP03r4g/2285335292767225477-5144774570.jpg',
+'https://i.ibb.co/gMfzKq7/2285334039064568314-5144774570.jpg',
+'https://i.ibb.co/87JMSwc/2269419019461331921-5144774570.jpg',
+'https://i.ibb.co/RymyPtP/image-443-min.png',
+'https://i.ibb.co/Ct9DZd9/image-442-min.png',
+'https://i.ibb.co/jJD2YPJ/image-438-min.png',
+'https://i.ibb.co/gTrCrJd/6463e0a86edfa1bd8ed7ed78-IMG-20220625-231733-173.webp',
+'https://i.ibb.co/xHcVc0k/63bc73fb6521f9025bdacc8c-IMG-20220719-182310-414.webp',
+'https://i.ibb.co/HVt8q9Q/63bc58fdd5af3c7496ddc47b-Embedded-Image-18.jpg',
+'https://i.ibb.co/2KG97tH/63bc73fb17c4cf8bb0731b4f-IMG-20220717-004144-444.webp',
+'https://i.ibb.co/52Cm4Cf/63bc58fccaee2352e1c9b36d-Embedded-Image-3.jpg',
+
     ],
   },
   tuck: {
@@ -2089,6 +2129,7 @@ const GALLERY_DATA = {
     ],
   },
 };
+
 
 var CHAPTER_GALLERIES = ['rolling', 'setup', 'pop', 'slide', 'tuck', 'landing'];
 

@@ -950,6 +950,103 @@ body.has-gallery #cube-tap { cursor: pointer; }
   color: var(--muted);
 }
 
+/* ── Mobile case study overrides ── */
+@media (max-width: 900px) {
+
+  /* Cube takes full screen in case mode */
+  body.case-mode #scene {
+    height: 100vh;
+    z-index: 20;
+  }
+
+  /* Face content overlay — bigger text, more padding */
+  body.case-mode .face-content {
+    padding: 1.25rem;
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.96) 0%,
+      rgba(0,0,0,0.6) 55%,
+      rgba(0,0,0,0.05) 100%
+    );
+  }
+
+  .fc-title {
+    font-size: clamp(1.4rem, 6vw, 2.2rem) !important;
+    margin: 0 0 0.6rem;
+  }
+  .fc-body {
+    font-size: clamp(0.68rem, 2.8vw, 0.8rem) !important;
+    line-height: 1.7;
+  }
+  .fc-pull {
+    font-size: clamp(0.62rem, 2.5vw, 0.75rem) !important;
+  }
+  .fc-stat-n {
+    font-size: clamp(1.4rem, 5vw, 2rem) !important;
+  }
+  .fc-stat-l {
+    font-size: clamp(0.5rem, 1.8vw, 0.6rem) !important;
+  }
+  .fc-stats {
+    gap: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .fc-type, .fc-era {
+    font-size: clamp(0.55rem, 2vw, 0.65rem) !important;
+    letter-spacing: 0.15em;
+  }
+
+  /* Case HUD — bottom centered on mobile */
+  body.case-mode #case-hud {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 100;
+  }
+
+  #case-hud-title {
+    font-size: clamp(0.75rem, 3.5vw, 1rem) !important;
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 0.5rem;
+  }
+
+  #case-hud-counter {
+    font-size: 0.58rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-right: 0.75rem;
+  }
+
+  .case-exit-btn {
+    flex-shrink: 0;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.56rem;
+  }
+
+  /* Swipe hint on case mode */
+  body.case-mode #mob-case-hint {
+    display: flex;
+  }
+}
+
+@keyframes fadeHint {
+  0%   { opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 </style>
 </head>
 <body>
@@ -1249,6 +1346,12 @@ body.has-gallery #cube-tap { cursor: pointer; }
   </button>
 </div>
 
+<!-- ── Mobile case swipe hint ── -->
+<div id="mob-case-hint" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:200; pointer-events:none; flex-direction:column; align-items:center; gap:0.4rem; animation: fadeHint 2.5s ease forwards;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M8 6l4-4 4 4M12 2v16M16 18l-4 4-4-4"/></svg>
+  <span style="font-family:var(--font-mono);font-size:0.5rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.35)">swipe to explore</span>
+</div>
+
 <!-- ── Case study HUD ── -->
 <div id="case-hud">
   <div id="case-hud-title"></div>
@@ -1416,6 +1519,18 @@ function enterCaseMode(key) {
     lockScroll();
     updateCaseHUD(0);
     updateSectionNavDots(0);
+
+    // Mobile: show swipe hint briefly
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      const hint = document.getElementById('mob-case-hint');
+      if (hint) {
+        hint.style.display = 'flex';
+        hint.style.animation = 'none';
+        void hint.offsetWidth;
+        hint.style.animation = 'fadeHint 2.5s ease forwards';
+        setTimeout(() => { hint.style.display = 'none'; }, 2600);
+      }
+    }
 
     // Fade back in
     if (scene) scene.style.opacity = "";
@@ -2444,6 +2559,64 @@ document.addEventListener('keydown', function(e) {
 
   // Init
   goTo(0, false);
+})();
+</script>
+
+
+<script>
+// ── Mobile case study swipe ───────────────────────────────────────────────
+(function() {
+  if (!window.matchMedia('(max-width: 900px)').matches) return;
+
+  var ty0 = 0, tx0 = 0;
+  var THRESH = 50;
+
+  document.addEventListener('touchstart', function(e) {
+    if (!caseMode) return;
+    ty0 = e.touches[0].clientY;
+    tx0 = e.touches[0].clientX;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    if (!caseMode) return;
+    var dy = e.changedTouches[0].clientY - ty0;
+    var dx = e.changedTouches[0].clientX - tx0;
+    if (Math.abs(dy) < THRESH && Math.abs(dx) < THRESH) return;
+
+    var slides = caseSlides.length;
+    var cur    = Math.round(caseProgress);
+
+    if (Math.abs(dy) >= Math.abs(dx)) {
+      // Vertical: up = next slide, down = prev
+      if (dy < -THRESH && cur < slides - 1) {
+        caseProgress = cur + 1;
+        tgt = caseProgress / Math.max(1, slides - 1);
+      } else if (dy > THRESH && cur > 0) {
+        caseProgress = cur - 1;
+        tgt = caseProgress / Math.max(1, slides - 1);
+      }
+    } else {
+      // Horizontal: left = next, right = prev
+      if (dx < -THRESH && cur < slides - 1) {
+        caseProgress = cur + 1;
+        tgt = caseProgress / Math.max(1, slides - 1);
+      } else if (dx > THRESH && cur > 0) {
+        caseProgress = cur - 1;
+        tgt = caseProgress / Math.max(1, slides - 1);
+      }
+    }
+  }, { passive: true });
+
+  // Live drag preview on case slides
+  document.addEventListener('touchmove', function(e) {
+    if (!caseMode) return;
+    var dy = e.touches[0].clientY - ty0;
+    var slides = caseSlides.length;
+    var pull = -dy / (window.innerHeight * 0.5);
+    var preview = Math.round(caseProgress) + pull;
+    preview = Math.max(0, Math.min(slides - 1, preview));
+    tgt = preview / Math.max(1, slides - 1);
+  }, { passive: true });
 })();
 </script>
 

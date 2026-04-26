@@ -401,16 +401,165 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 }
 
 @layer responsive {
-  @media (width <= 56.25em) {
-    #hud { top: 1rem; right: 1rem; }
+  @media (max-width: 900px) {
+    /* ── Hide desktop-only UI ── */
     #scene_strip { display: none; }
-    #theme_toggle { bottom: 1rem; left: 1.25rem; translate: 0 0; }
-    #face_caption { bottom: 1rem; }
-    section { min-height: 150vh; align-items: flex-end; padding: 0 1.5rem 3.5rem; }
-    #s0 { min-height: 100vh; align-items: center; padding: 4rem 1.5rem; }
-    :is(.text-card, .text-card.right) { max-width: 100%; padding: 1.5rem 1.25rem; }
-    .body-text { line-height: 1.6; }
+    #face_caption { display: none; }
+
+    /* ── HUD ── */
+    #hud { top: 0.75rem; right: 0.75rem; }
+
+    /* ── Theme toggle ── */
+    #theme_toggle { bottom: 5rem; left: 0.75rem; translate: 0 0; }
+
+    /* ── Cube: fixed, upper half ── */
+    #scene {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 55vh;
+      bottom: auto;
+    }
+    #cube { --s: min(70vw, 38vh, 340px); }
+
+    /* ── Cube tap zone ── */
+    #cube-tap {
+      top: 27.5vh;
+      left: 50%;
+      width: min(70vw, 38vh, 340px);
+      height: min(70vw, 38vh, 340px);
+    }
+
+    /* ── Scroll container: lower half, single section visible ── */
+    #scroll_container {
+      position: fixed;
+      top: 55vh; left: 0; right: 0;
+      height: calc(45vh - 3.5rem);
+      overflow: hidden;
+    }
+
+    /* ── Sections: horizontal strip ── */
+    #scroll_container { display: flex; will-change: transform; }
+    section {
+      flex-shrink: 0;
+      min-height: unset;
+      width: 100vw;
+      height: calc(45vh - 3.5rem);
+      padding: 1rem 1.25rem 0.5rem;
+      align-items: flex-start;
+      overflow-y: auto;
+    }
+
+    :is(.text-card, .text-card.right) {
+      max-width: 100%;
+      width: 100%;
+      padding: 1rem;
+      margin-inline-start: 0;
+      border-left: var(--hairline) solid var(--card-border);
+      border-right: none;
+      text-align: left;
+    }
+    .text-card.right .cta-row { justify-content: flex-start; }
+    .text-card.right .h-line { transform-origin: left; margin-inline-start: 0; }
+    .stat-row { justify-content: flex-start !important; }
+
+    h1 { font-size: clamp(2rem, 11vw, 3rem); }
+    h2 { font-size: clamp(1.6rem, 8vw, 2.4rem); }
+    .body-text { font-size: 0.66rem; line-height: 1.5; margin-block-start: 0.6rem; }
+    .stat-row { margin-block-start: 0.75rem; gap: 1rem; }
+    .stat-num { font-size: 1.4rem; }
+    .cta-row { margin-block-start: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
+    .links-cols { flex-direction: column; gap: 0.15rem; }
+    .links-list { margin-block-start: 0.4rem; }
+    .links-list a { font-size: 0.58rem; }
+
+    /* ── Mobile prev/next HUD ── */
+    #mobile-nav {
+      display: flex !important;
+    }
+
+    /* ── Case mode ── */
+    body.case-mode #scroll_container { display: none; }
+    body.case-mode #mobile-nav { display: none !important; }
+  }
+}
+    #face_caption { display: none; }
+
+    /* HUD top right */
+    #hud { top: 0.75rem; right: 0.75rem; }
+
+    /* Theme toggle */
+    #theme_toggle { bottom: 0.75rem; left: 0.75rem; translate: 0 0; width: 1.75rem; height: 1.75rem; }
+
+    /* Cube: fixed, top 40% of screen */
+    #scene {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 52vh;
+      align-items: center;
+      justify-content: center;
+    }
+    #cube { --s: min(72vw, 36vh, 360px); }
+
+    /* Scroll container: no vertical scrolling on mobile */
+    #scroll_container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 44vh;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    /* Sections: horizontal strip, each full width */
+    #scroll_container { display: flex; }
+    section {
+      min-height: unset;
+      height: 44vh;
+      min-width: 100vw;
+      width: 100vw;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 1.25rem;
+      overflow: hidden;
+    }
+
+    :is(.text-card, .text-card.right) {
+      max-width: 100%;
+      width: 100%;
+      padding: 1.25rem 1rem;
+      margin-inline-start: 0;
+      border-left: var(--hairline) solid var(--card-border);
+      border-right: none;
+      text-align: left;
+    }
+    .text-card.right .cta-row { justify-content: flex-start; }
+    .text-card.right .h-line { transform-origin: left; margin-inline-start: 0; }
+
+    h1 { font-size: clamp(2.2rem, 12vw, 3.5rem); }
+    h2 { font-size: clamp(1.8rem, 9vw, 2.8rem); }
+    .body-text { font-size: 0.68rem; line-height: 1.55; margin-block-start: 0.75rem; }
+    .stat-row { margin-block-start: 1rem; gap: 1.2rem; }
+    .stat-num { font-size: 1.5rem; }
+    .cta-row { margin-block-start: 1rem; flex-wrap: wrap; }
     .links-cols { flex-direction: column; gap: 0.25rem; }
+    .links-list { margin-block-start: 0.5rem; }
+    .links-list a { font-size: 0.6rem; }
+
+    /* cube-tap: full top zone */
+    #cube-tap {
+      top: 26vh;
+      left: 50%;
+      width: min(72vw, 36vh, 360px);
+      height: min(72vw, 36vh, 360px);
+    }
+
+    /* Case mode adjustments */
+    body.case-mode #scroll_container { display: none; }
   }
 }
 
@@ -750,6 +899,40 @@ body.has-gallery #cube-tap { cursor: pointer; }
   color: var(--muted);
 }
 
+/* ── Mobile nav HUD ── */
+#mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 3.5rem;
+  z-index: 50;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  background: var(--card-bg);
+  border-top: var(--hairline) solid var(--card-border);
+  backdrop-filter: blur(8px);
+}
+#mob-prev, #mob-next {
+  background: none;
+  border: var(--hairline) solid var(--card-border);
+  color: var(--muted);
+  width: 2.2rem; height: 2.2rem;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+#mob-prev:hover, #mob-next:hover { color: var(--fg); border-color: var(--muted); }
+#mob-prev svg, #mob-next svg { width: 0.7rem; height: 0.7rem; }
+#mob-chapter {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 </style>
 </head>
 <body>
@@ -1035,6 +1218,17 @@ body.has-gallery #cube-tap { cursor: pointer; }
 </div><!-- /scroll_container -->
 
 
+<!-- ── Mobile prev/next nav ── -->
+<div id="mobile-nav" style="display:none">
+  <button id="mob-prev" onclick="mobileNav(-1)">
+    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1L3 6l5 5"/></svg>
+  </button>
+  <div id="mob-chapter"></div>
+  <button id="mob-next" onclick="mobileNav(1)">
+    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1l5 5-5 5"/></svg>
+  </button>
+</div>
+
 <!-- ── Case study HUD ── -->
 <div id="case-hud">
   <div id="case-hud-title"></div>
@@ -1229,12 +1423,12 @@ function exitCaseMode() {
 
   // Restore original face images
   const origImgs = [
-    "https://i.ibb.co/BLk2ftF/image-451-min.png",
-    "https://i.ibb.co/BLk2ftF/image-451-min.png",
-    "https://i.ibb.co/cSQCgNQY/work1.webp",
+    "https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg",
+    "https://i.ibb.co/09K8Z99/image-624.png",
     "https://i.ibb.co/1fMNf4nW/7.webp",
     "https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp",
-    "https://i.ibb.co/HmmCNyS/603d61b96ca6f0c336165b6e-DSC09310.webp",
+    "https://i.ibb.co/LXR70BTD/wolfieboop.webp",
+    "https://i.ibb.co/0jHKxpPZ/vermont-91.jpg",
   ];
   dom.faces.forEach((face, i) => {
     const fc = face.querySelector(".face-content");
@@ -1302,6 +1496,7 @@ dom.themeToggle.addEventListener("click", () => {
 // SCROLL STATE
 // ─────────────────────────────────────────────────────────
 let maxScroll = 1, tgt = 0, smooth = 0, velocity = 0, _rawTgt = 0;
+const isMobileLayout = () => window.matchMedia('(max-width: 900px)').matches;
 let sectionTops = [];
 let lastFaceIdx = -1;
 let panelWidth = window.innerWidth;
@@ -1427,10 +1622,10 @@ requestAnimationFrame(frame);
 
 window.addEventListener("scroll", () => {
   if (caseMode) return;
+  if (isMobileLayout()) return; // Mobile uses mobileNav, not scroll
   // Map to section index so cube face aligns with each chapter
   const si = sectionFromScroll(window.scrollY);
   const raw = window.scrollY / maxScroll;
-  // Blend: section index drives cube, raw scroll drives HUD %
   tgt = si / Math.max(1, N - 1);
   _rawTgt = raw;
 }, { passive: true });
@@ -1444,7 +1639,7 @@ window.addEventListener("wheel", e => {
   if (caseMode) {
     caseProgress = clamp(caseProgress + delta / (innerHeight * 0.8), 0, caseSlides.length - 1);
     tgt = caseProgress / Math.max(1, caseSlides.length - 1);
-  } else {
+  } else if (!isMobileLayout()) {
     velocity += delta;
     velocity = clamp(velocity, -600, 600);
   }
@@ -2000,6 +2195,32 @@ function openGallery(key) {
   window.addEventListener('mouseup',   onMouseUp);
   canvas.addEventListener('wheel',     onWheel, { passive: false });
 
+  // Touch support for gallery
+  var touchX0 = 0, touchDragStart = 0;
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    touchX0 = e.touches[0].clientX;
+    touchDragStart = targetPos;
+    isDragging = true; dragStartX = touchX0; dragLastX = touchX0;
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    var tx = e.touches[0].clientX;
+    var dx = tx - dragLastX;
+    dragLastX = tx;
+    targetDist = Math.min(1, targetDist + Math.abs(dx)*0.02);
+    targetPos -= dx * S.touchSens;
+  }, { passive: false });
+  canvas.addEventListener('touchend', function(e) {
+    isDragging = false;
+    var vel2 = (dragLastX - dragStartX) * 0.005;
+    if (Math.abs(vel2) > 0.3) {
+      autoScroll = -vel2 * S.momentumMult * 0.05;
+      isScrolling = true;
+      setTimeout(function() { isScrolling = false; }, 800);
+    }
+  }, { passive: true });
+
   // Cleanup stored for closeGallery
   galleryThree = {
     renderer: renderer,
@@ -2046,6 +2267,68 @@ function closeGallery() {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && galleryOpen) closeGallery();
 });
+</script>
+
+
+
+
+
+<script>
+// ── Mobile navigation ────────────────────────────────────────────────────
+(function() {
+  if (!window.matchMedia('(max-width: 900px)').matches) return;
+
+  var container  = document.getElementById('scroll_container');
+  var mobChapter = document.getElementById('mob-chapter');
+  var N_ch = 6;
+  var currentCh = 0;
+  var NAMES = ["CHAPTER 1","CHAPTER 2","CHAPTER 3","CHAPTER 4","CHAPTER 5","CHAPTER 6"];
+
+  function goTo(idx) {
+    idx = Math.max(0, Math.min(N_ch - 1, idx));
+    currentCh = idx;
+    container.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+    container.style.transform  = 'translateX(' + (-idx * 100) + 'vw)';
+    // Drive cube — set both tgt and smooth so it snaps cleanly
+    tgt    = idx / (N_ch - 1);
+    smooth = tgt;
+    _rawTgt = tgt;
+    // Update top progress bar
+    var fill = document.getElementById('top-progress-fill');
+    if (fill) fill.style.width = (tgt * 100) + '%';
+    // Update chapter name in HUD
+    var sn = document.getElementById('scene_name');
+    if (sn) sn.textContent = NAMES[idx] || '';
+    if (mobChapter) mobChapter.textContent = NAMES[idx] || '';
+    updateSectionNavDots(idx);
+  }
+
+  window.mobileNav = function(dir) { goTo(currentCh + dir); };
+
+  // Touch swipe on card area
+  var tx0 = 0;
+  if (container) {
+    container.addEventListener('touchstart', function(e) {
+      tx0 = e.touches[0].clientX;
+    }, { passive: true });
+    container.addEventListener('touchend', function(e) {
+      var dx = e.changedTouches[0].clientX - tx0;
+      if (Math.abs(dx) > 40) goTo(currentCh + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+  }
+
+  // Intercept anchor #sN clicks
+  document.addEventListener('click', function(e) {
+    if (!window.matchMedia('(max-width: 900px)').matches) return;
+    var a = e.target.closest('a[href^="#s"]');
+    if (!a) return;
+    var m = a.getAttribute('href').match(/#s(\d)/);
+    if (m) { e.preventDefault(); goTo(parseInt(m[1])); }
+  });
+
+  // Init
+  goTo(0);
+})();
 </script>
 
 </body>

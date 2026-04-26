@@ -2294,47 +2294,142 @@ document.addEventListener('keydown', function(e) {
 
 
 <script>
-// ── Mobile navigation ────────────────────────────────────────────────────
+// ── Mobile navigation & touch controls ─────────────────────────────────
 (function() {
   if (!window.matchMedia('(max-width: 900px)').matches) return;
 
+  var strip      = document.getElementById('mob-strip');
   var container  = document.getElementById('scroll_container');
-  var strip = document.getElementById('mob-strip') || container;
   var mobChapter = document.getElementById('mob-chapter');
-  var N_ch = 6;
-  var currentCh = 0;
-  var NAMES = ["CHAPTER 1","CHAPTER 2","CHAPTER 3","CHAPTER 4","CHAPTER 5","CHAPTER 6"];
+  var N_ch       = 6;
+  var currentCh  = 0;
+  var NAMES      = ["CHAPTER 1","CHAPTER 2","CHAPTER 3","CHAPTER 4","CHAPTER 5","CHAPTER 6"];
 
-  function goTo(idx) {
+  // ── Chapter navigation ─────────────────────────────────────────────
+  function goTo(idx, animate) {
     idx = Math.max(0, Math.min(N_ch - 1, idx));
     currentCh = idx;
-    strip.style.transform  = 'translateX(' + (-idx * 100) + 'vw)';
-    // Drive cube — set both tgt and smooth so it snaps cleanly
-    tgt    = idx / (N_ch - 1);
-    smooth = tgt;
+
+    if (strip) {
+      strip.style.transition = animate !== false
+        ? 'transform 0.45s cubic-bezier(0.4,0,0.2,1)'
+        : 'none';
+      strip.style.transform = 'translateX(' + (-idx * 100) + 'vw)';
+    }
+
+    // Cube lerps to target
+    tgt     = idx / (N_ch - 1);
     _rawTgt = tgt;
-    // Update top progress bar
+
     var fill = document.getElementById('top-progress-fill');
     if (fill) fill.style.width = (tgt * 100) + '%';
-    // Update chapter name in HUD
     var sn = document.getElementById('scene_name');
     if (sn) sn.textContent = NAMES[idx] || '';
     if (mobChapter) mobChapter.textContent = NAMES[idx] || '';
     updateSectionNavDots(idx);
+
+    // Reset section scroll position
+    setTimeout(function() {
+      var sections = document.querySelectorAll('#mob-strip section');
+      if (sections[idx]) sections[idx].scrollTop = 0;
+    }, 50);
   }
 
   window.mobileNav = function(dir) { goTo(currentCh + dir); };
 
-  // Touch swipe on card area
-  var tx0 = 0;
-  var touchTarget = document.getElementById('mob-strip') || container;
-  if (touchTarget) {
-    touchTarget.addEventListener('touchstart', function(e) {
-      tx0 = e.touches[0].clientX;
+  // ── Touch state ────────────────────────────────────────────────────
+  var tx0 = 0, ty0 = 0;
+  var txLast = 0, tyLast = 0;
+  var direction = null; // 'h' or 'v'
+  var dragging  = false;
+  var THRESHOLD = 60;   // px to commit chapter change
+  var MAG_RANGE = 120;  // px of magnetic drag range
+
+  function getActiveSection() {
+    var sections = document.querySelectorAll('#mob-strip section');
+    return sections[currentCh] || null;
+  }
+
+  function atScrollTop()    { var s = getActiveSection(); return !s || s.scrollTop <= 2; }
+  function atScrollBottom() { var s = getActiveSection(); return !s || s.scrollTop + s.clientHeight >= s.scrollHeight - 2; }
+
+  if (container) {
+    container.addEventListener('touchstart', function(e) {
+      tx0 = txLast = e.touches[0].clientX;
+      ty0 = tyLast = e.touches[0].clientY;
+      direction = null;
+      dragging  = true;
     }, { passive: true });
-    touchTarget.addEventListener('touchend', function(e) {
+
+    container.addEventListener('touchmove', function(e) {
+      if (!dragging) return;
+      var tx = e.touches[0].clientX;
+      var ty = e.touches[0].clientY;
+      var dx = tx - tx0;
+      var dy = ty - ty0;
+
+      // Determine dominant direction once
+      if (!direction && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        direction = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      }
+
+      if (direction === 'h') {
+        // Horizontal — prevent default, let cube drag preview
+        e.preventDefault();
+        var progress = dx / window.innerWidth;
+        var previewCh = currentCh - progress;
+        previewCh = Math.max(0, Math.min(N_ch - 1, previewCh));
+        tgt = previewCh / (N_ch - 1);
+        if (strip) {
+          strip.style.transition = 'none';
+          strip.style.transform = 'translateX(calc(' + (-currentCh * 100) + 'vw + ' + dx + 'px))';
+        }
+      } else if (direction === 'v') {
+        // Vertical — check if we should scroll content or change chapter
+        var sec = getActiveSection();
+        var canScrollUp   = sec && sec.scrollTop > 2;
+        var canScrollDown = sec && sec.scrollTop + sec.clientHeight < sec.scrollHeight - 2;
+
+        if ((dy < 0 && canScrollDown) || (dy > 0 && canScrollUp)) {
+          // Let native scroll handle it
+          return;
+        }
+
+        // At edge — magnetic chapter drag
+        e.preventDefault();
+        var pull = -dy; // positive = pulling up (next)
+        var magnetProgress = Math.min(1, Math.abs(pull) / MAG_RANGE);
+        // Ease the magnetic feel
+        var eased = magnetProgress * magnetProgress;
+        var targetChOffset = pull > 0 ? currentCh + eased : currentCh - eased;
+        targetChOffset = Math.max(0, Math.min(N_ch - 1, targetChOffset));
+        tgt = targetChOffset / (N_ch - 1);
+      }
+
+      txLast = tx; tyLast = ty;
+    }, { passive: false });
+
+    container.addEventListener('touchend', function(e) {
+      if (!dragging) return;
+      dragging = false;
+
       var dx = e.changedTouches[0].clientX - tx0;
-      if (Math.abs(dx) > 40) goTo(currentCh + (dx < 0 ? 1 : -1));
+      var dy = e.changedTouches[0].clientY - ty0;
+
+      if (direction === 'h') {
+        if (dx < -THRESHOLD)      goTo(currentCh + 1);
+        else if (dx > THRESHOLD)  goTo(currentCh - 1);
+        else                       goTo(currentCh); // snap back
+      } else if (direction === 'v') {
+        var pull = -dy;
+        if (pull > THRESHOLD && currentCh < N_ch - 1) {
+          goTo(currentCh + 1);
+        } else if (pull < -THRESHOLD && currentCh > 0) {
+          goTo(currentCh - 1);
+        } else {
+          goTo(currentCh); // snap back
+        }
+      }
     }, { passive: true });
   }
 
@@ -2348,7 +2443,7 @@ document.addEventListener('keydown', function(e) {
   });
 
   // Init
-  goTo(0);
+  goTo(0, false);
 })();
 </script>
 

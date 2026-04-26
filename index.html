@@ -863,21 +863,22 @@ body.has-gallery #cube-tap { cursor: pointer; }
 
   /* Case HUD: compact top-right row */
   body.case-mode #case-hud {
-    position: fixed !important;
-    top: 0.75rem !important;
-    right: 0.75rem !important;
-    bottom: auto !important;
-    left: auto !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    left: 0 !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 0.5rem !important;
-    background: rgba(0,0,0,0.5) !important;
-    backdrop-filter: blur(8px) !important;
-    padding: 0.3rem 0.6rem !important;
-    border-radius: 2px !important;
+    justify-content: space-between !important;
+    padding: 0.6rem 1.25rem !important;
+    background: rgba(0,0,0,0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    border-top: 1px solid rgba(255,255,255,0.08) !important;
+    width: 100% !important;
+    gap: 0 !important;
   }
-  body.case-mode #case-hud #case-hud-counter { font-size: 0.52rem; }
-  body.case-mode .case-exit-btn { font-size: 0.52rem !important; padding: 0.3rem 0.6rem !important; }
+  body.case-mode #case-hud #case-hud-counter { font-size: 0.56rem; }
+  body.case-mode .case-exit-btn { font-size: 0.56rem !important; padding: 0.4rem 0.8rem !important; }
 
   /* Mobile nav bar hidden in case mode */
   body.case-mode #mobile-nav { display: none !important; }
@@ -975,17 +976,88 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
   padding-left: 0.75rem; margin: 0;
 }
 
-/* ── Case HUD: top right, row layout ── */
+/* ── Case HUD: bottom right ── */
 #case-hud {
-  position: fixed !important;
-  top: var(--ui-inset) !important;
-  right: var(--ui-inset) !important;
-  bottom: auto !important;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.75rem;
+  position: fixed;
+  bottom: var(--ui-inset);
+  right: var(--ui-inset);
+  top: auto;
+  z-index: var(--z-ui);
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
+body.case-mode #case-hud { display: flex; }
 #case-hud-title { display: none; }
+
+/* ── NeverEver overlay ── */
+#neverever-layer {
+  position: fixed; inset: 0;
+  z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.5s ease;
+  background: #020111;
+  overflow: hidden;
+}
+#neverever-layer.open { opacity: 1; pointer-events: all; }
+
+#neverever-layer #ne-world {
+  position: absolute; width: 100%; height: 100%;
+  background: transparent; overflow: hidden;
+  touch-action: none; z-index: 2;
+}
+#neverever-layer #ne-world-fg {
+  position: absolute; inset: 0; pointer-events: none; z-index: 70;
+}
+#neverever-layer #ne-ink-overlay {
+  position: absolute; inset: 0; pointer-events: none; z-index: 19;
+}
+#neverever-layer #ne-hit-flash {
+  position: absolute; inset: 0; background: #f25346; opacity: 0;
+  pointer-events: none; z-index: 30; mix-blend-mode: multiply;
+}
+#neverever-layer #ne-cursor {
+  position: fixed;
+  width: 32px; height: 20px;
+  border: 1.5px solid rgba(0,229,255,0.35);
+  border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width 0.2s, height 0.2s, border-color 0.3s;
+}
+#neverever-layer #ne-cursor.active { width: 44px; height: 28px; border-color: rgba(242,83,70,0.7); }
+
+/* Toggle button */
+#ne-toggle {
+  position: fixed;
+  bottom: var(--ui-inset);
+  right: var(--ui-inset);
+  z-index: 250;
+  background: none;
+  border: var(--hairline) solid var(--card-border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+#ne-toggle:hover { color: var(--fg); border-color: var(--muted); }
+#ne-toggle.ne-active {
+  color: rgba(0,229,255,0.85);
+  border-color: rgba(0,229,255,0.4);
+  background: rgba(0,229,255,0.06);
+}
+.ne-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor; transition: background 0.3s;
+}
+body.case-mode #ne-toggle,
+#gallery.open ~ #ne-toggle { display: none; }
 
 </style>
 </head>
@@ -1062,9 +1134,7 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
 <div id="top-progress"><div id="top-progress-fill"></div></div>
 
 <div id="hud">
-  <div id="hud_pct">000%</div>
-  <div class="progress-bar"><div class="progress-fill" id="prog_fill"></div></div>
-  <div class="scene-label" id="scene_name">ROLLING</div>
+  <div class="scene-label" id="scene_name">CHAPTER 1</div>
 </div>
 
 <button id="theme_toggle" aria-label="Toggle theme">
@@ -1701,8 +1771,13 @@ const frame = now => {
 
   smooth += (tgt - smooth) * (1 - Math.exp(-dt * 8));
   smooth = clamp(smooth, 0, 1);
-  if (!caseMode && !isMobileLayout()) {
-    _rawTgt = maxScroll > 0 ? clamp(window.scrollY / maxScroll, 0, 1) : 0;
+  // Sync top progress bar every frame
+  if (!dom.topFill) dom.topFill = document.getElementById("top-progress-fill");
+  if (dom.topFill) {
+    var _pct = caseMode
+      ? Math.round(smooth * 100)
+      : Math.round(clamp(isMobileLayout() ? _rawTgt : (maxScroll > 0 ? window.scrollY / maxScroll : 0), 0, 1) * 100);
+    dom.topFill.style.width = _pct + "%";
   }
 
   updateHUD(smooth);
@@ -2570,6 +2645,1213 @@ window.mobileNav = function() {}; // stub — overridden by mobile IIFE
   document.getElementById('gallery').addEventListener('transitionend', function() {
     if (this.classList.contains('open')) addGalleryTouch();
   });
+})();
+</script>
+
+
+<!-- ── NeverEver overlay ── -->
+<div id="neverever-layer" aria-hidden="true">
+  <canvas id="ne-ink-overlay"></canvas>
+  <div id="ne-cursor"></div>
+  <div id="ne-world"></div>
+  <div id="ne-world-fg"></div>
+  <div id="ne-hit-flash"></div>
+</div>
+<button id="ne-toggle" aria-label="Open neverever">
+  <span class="ne-dot"></span>
+  neverever
+</button>
+
+
+
+<script>
+// ── NeverEver overlay ────────────────────────────────────────────────────
+(function() {
+"use strict";
+
+var NE_OPEN   = false;
+var NE_INITED = false;
+var _neLayer  = document.getElementById('neverever-layer');
+var _neToggle = document.getElementById('ne-toggle');
+
+_neToggle.addEventListener('click', function() {
+  NE_OPEN ? neClose() : neOpen();
+});
+
+function neOpen() {
+  if (NE_OPEN) return;
+  NE_OPEN = true;
+  _neLayer.classList.add('open');
+  _neLayer.removeAttribute('aria-hidden');
+  _neToggle.classList.add('ne-active');
+  document.documentElement.setAttribute('data-ne-open','1');
+  if (!NE_INITED) {
+    NE_INITED = true;
+    neInit();
+    neInkStart();
+  } else if (STATUS === 'paused') {
+    STATUS = 'playing';
+    loop();
+  }
+}
+
+function neClose() {
+  if (!NE_OPEN) return;
+  NE_OPEN = false;
+  _neLayer.classList.remove('open');
+  _neLayer.setAttribute('aria-hidden','true');
+  _neToggle.classList.remove('ne-active');
+  document.documentElement.removeAttribute('data-ne-open');
+  STATUS = 'paused';
+}
+
+// Block cube2 wheel while NE is open
+window.addEventListener('wheel', function(e) {
+  if (document.documentElement.getAttribute('data-ne-open')) e.stopImmediatePropagation();
+}, { passive: false, capture: true });
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && NE_OPEN) neClose();
+});
+
+// ── NeverEver scene code ─────────────────────────────────────────────────
+
+"use strict";
+
+
+var WIDTH = window.innerWidth, HEIGHT = window.innerHeight;
+var frame = 0;
+var STATUS = 'playing';
+
+// ─── Mouse / touch tracking ────────────────────────────────────────────────
+var mouse = { x: 0, y: 0 };
+var butterfly = { vx: 0, vy: 0 };
+
+function norm(v, a, b, c, d) { return c + (d - c) * ((v - a) / (b - a)); }
+
+_neLayer.addEventListener('mousemove', function(e) {
+  mouse.x = -1 + (e.clientX / WIDTH) * 2;
+  mouse.y =  1 - (e.clientY / HEIGHT) * 2;
+});
+
+var touchState = { active: false, id: null, hasMoved: false };
+_neLayer.addEventListener('touchstart', function(e) {
+  var t = e.touches[0];
+  touchState.active = true; touchState.id = t.identifier; touchState.hasMoved = false;
+  mouse.x = -1 + (t.clientX / WIDTH) * 2;
+  mouse.y =  1 - (t.clientY / HEIGHT) * 2;
+}, { passive: true });
+_neLayer.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+  for (var i = 0; i < e.touches.length; i++) {
+    if (e.touches[i].identifier === touchState.id) {
+      touchState.hasMoved = true;
+      mouse.x = -1 + (e.touches[i].clientX / WIDTH) * 2;
+      mouse.y =  1 - (e.touches[i].clientY / HEIGHT) * 2;
+      break;
+    }
+  }
+}, { passive: false });
+_neLayer.addEventListener('touchend', function(e) { touchState.active = false; }, { passive: true });
+
+// ─── Scroll / direction ─────────────────────────────────────────────────────
+var reverseLerp = 0;
+var MAGNETIC_FORWARD = 1.0;
+var MAGNETIC_STRENGTH = 0.04;
+var REVERSE_LIMIT = -1.6;
+var targetRotSpeed = 1.0, currentRotSpeed = 1.0;
+var sceneSpeed = 1.0;
+
+_neLayer.addEventListener('wheel', function(e) {
+  var delta = e.deltaY * 0.002;
+  reverseLerp = Math.max(REVERSE_LIMIT, Math.min(1.2, reverseLerp + delta));
+}, { passive: true });
+
+// ─── Atmosphere zone ────────────────────────────────────────────────────────
+var ATMOSPHERE_Y = 55;
+var wasInAtmosphere = false;
+var _inWolfieZone = false;
+var heatFactor = 0;
+
+// ─── Scene ─────────────────────────────────────────────────────────────────
+var scene, camera, renderer, fgRenderer;
+var humanoid = null;
+var companionPoodle = null;
+var nextFlipFrame = 0;
+var frameFrozen = false;
+
+function createScene() {
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x1a1025, 100, 950);
+  camera = new THREE.PerspectiveCamera(60, WIDTH / HEIGHT, 1, 10000);
+  camera.position.set(0, 100, 200);
+
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(WIDTH, HEIGHT);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.getElementById('ne-world').appendChild(renderer.domElement);
+
+  fgRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  fgRenderer.setSize(WIDTH, HEIGHT);
+  fgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  document.getElementById('ne-world-fg').appendChild(fgRenderer.domElement);
+
+  window.addEventListener('resize', function() {
+    WIDTH = window.innerWidth; HEIGHT = window.innerHeight;
+    camera.aspect = WIDTH / HEIGHT;
+    camera.updateProjectionMatrix();
+    renderer.setSize(WIDTH, HEIGHT);
+    fgRenderer.setSize(WIDTH, HEIGHT);
+  });
+}
+
+function createLights() {
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x000000, 0.5));
+  scene.add(new THREE.AmbientLight(0x404040, 0.7));
+  var sun = new THREE.DirectionalLight(0xffffff, 0.9);
+  sun.position.set(150, 350, 350);
+  sun.castShadow = true;
+  sun.shadow.camera.left = -500; sun.shadow.camera.right = 500;
+  sun.shadow.camera.top = 500; sun.shadow.camera.bottom = -500;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 1000;
+  sun.shadow.mapSize.width = 2048; sun.shadow.mapSize.height = 2048;
+  scene.add(sun);
+}
+
+function makeBox(w, h, d, mat) {
+  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+}
+
+// ─── RAGDOLL ASTRONAUT ─────────────────────────────────────────────────────
+function RagdollHuman() {
+  this.mesh = new THREE.Object3D();
+  this.mesh.rotation.y = Math.PI * 0.25;
+  this.baseRotX = -0.55;
+  this.baseRotZ = 0;
+  this.flipX = 0;
+  this.flipZ = 0;
+  this.mesh.rotation.x = -0.55;
+  this.singularity = false;
+  this.slingVx = 0; this.slingVy = 0; this.slingFrames = 0;
+  this.reachFade = 1.0;
+
+  var _toonGrad = (function() {
+    var d = new Uint8Array([80,80,80, 160,160,160, 255,255,255]);
+    var t = new THREE.DataTexture(d, 3, 1, THREE.RGBFormat);
+    t.minFilter = t.magFilter = THREE.NearestFilter;
+    t.needsUpdate = true;
+    return t;
+  })();
+
+  this.suitMat    = new THREE.MeshToonMaterial({ color: 0xffffff, gradientMap: _toonGrad });
+  var jointMat    = new THREE.MeshToonMaterial({ color: 0x666666, gradientMap: _toonGrad });
+  var visorMat    = new THREE.MeshToonMaterial({ color: 0x111115, gradientMap: _toonGrad });
+  var packMat     = new THREE.MeshToonMaterial({ color: 0xdddddd, gradientMap: _toonGrad });
+  var thrusterMat = new THREE.MeshToonMaterial({ color: 0x444444, gradientMap: _toonGrad });
+  this.flameMat   = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+
+  var head = makeBox(18, 18, 18, this.suitMat);
+  head.position.set(0, 34, 0); head.castShadow = true;
+  this.mesh.add(head); this.head = head;
+
+  var visor = makeBox(14, 10, 4, visorMat);
+  visor.position.set(0, 2, 8);
+  head.add(visor);
+
+  var neck = makeBox(12, 4, 12, jointMat);
+  neck.position.set(0, 24, 0);
+  this.mesh.add(neck);
+
+  var torsoU = makeBox(24, 16, 16, this.suitMat);
+  torsoU.position.set(0, 15, 0); torsoU.castShadow = true;
+  this.mesh.add(torsoU);
+
+  var pack = makeBox(26, 30, 14, packMat);
+  pack.position.set(0, 0, -14); pack.castShadow = true;
+  torsoU.add(pack);
+
+  var packRidge = makeBox(28, 4, 16, thrusterMat);
+  packRidge.position.set(0, 4, 0);
+  pack.add(packRidge);
+
+  var fuelMat = new THREE.MeshToonMaterial({ color: 0x888888, gradientMap: _toonGrad });
+  var fuelL = makeBox(3, 18, 3, fuelMat);
+  fuelL.position.set(-10, -4, 6); pack.add(fuelL);
+  var fuelR = makeBox(3, 18, 3, fuelMat);
+  fuelR.position.set(10, -4, 6); pack.add(fuelR);
+
+  var lThruster = new THREE.Mesh(new THREE.CylinderGeometry(4, 5.5, 12, 10), thrusterMat);
+  lThruster.position.set(-9, -17, 0); pack.add(lThruster);
+  var rThruster = new THREE.Mesh(new THREE.CylinderGeometry(4, 5.5, 12, 10), thrusterMat);
+  rThruster.position.set(9, -17, 0); pack.add(rThruster);
+
+  var rimMat = new THREE.MeshToonMaterial({ color: 0xaaaaaa, gradientMap: _toonGrad });
+  var lRim = new THREE.Mesh(new THREE.CylinderGeometry(5.8, 5.8, 2, 10), rimMat);
+  lRim.position.set(0, -7, 0); lThruster.add(lRim);
+  var rRim = new THREE.Mesh(new THREE.CylinderGeometry(5.8, 5.8, 2, 10), rimMat);
+  rRim.position.set(0, -7, 0); rThruster.add(rRim);
+
+  this.lThruster = lThruster;
+  this.rThruster = rThruster;
+
+  this.lFlame = new THREE.Mesh(new THREE.ConeGeometry(4, 16, 10), this.flameMat);
+  this.lFlame.position.set(0, -12, 0); this.lFlame.rotation.x = Math.PI;
+  lThruster.add(this.lFlame);
+  this.rFlame = new THREE.Mesh(new THREE.ConeGeometry(4, 16, 10), this.flameMat);
+  this.rFlame.position.set(0, -12, 0); this.rFlame.rotation.x = Math.PI;
+  rThruster.add(this.rFlame);
+
+  var torsoL = makeBox(22, 12, 14, this.suitMat);
+  torsoL.position.set(0, 3, 0); torsoL.castShadow = true;
+  this.mesh.add(torsoL);
+
+  var pelvis = makeBox(20, 8, 12, jointMat);
+  pelvis.position.set(0, -5, 0);
+  this.mesh.add(pelvis);
+
+  this.rShoulderPivot = new THREE.Object3D();
+  this.rShoulderPivot.position.set(-15, 16, 0);
+  this.rShoulderPivot.rotation.x =  0.65;
+  this.rShoulderPivot.rotation.z = -0.55;
+  this.rShoulderPivot.userData = { velX: 0, velZ: 0 };
+  var rUpperArm = makeBox(8, 18, 8, this.suitMat);
+  rUpperArm.position.set(0, -9, 0);
+  this.rShoulderPivot.add(rUpperArm);
+  this.rElbowPivot = new THREE.Object3D();
+  this.rElbowPivot.position.set(0, -18, 0);
+  this.rElbowPivot.rotation.x =  0.10;
+  this.rElbowPivot.rotation.z = -0.20;
+  this.rElbowPivot.userData = { velX: 0, velZ: 0 };
+  var rForearm = makeBox(7, 14, 7, this.suitMat);
+  rForearm.position.set(0, -7, 0);
+  this.rElbowPivot.add(rForearm);
+  this.rShoulderPivot.add(this.rElbowPivot);
+  this.mesh.add(this.rShoulderPivot);
+
+  this.lShoulderPivot = new THREE.Object3D();
+  this.lShoulderPivot.position.set(15, 16, 0);
+  this.lShoulderPivot.rotation.x =  0.65;
+  this.lShoulderPivot.rotation.z =  0.55;
+  this.lShoulderPivot.userData = { velX: 0, velZ: 0 };
+  var lUpperArm = makeBox(8, 18, 8, this.suitMat);
+  lUpperArm.position.set(0, -9, 0);
+  this.lShoulderPivot.add(lUpperArm);
+  this.lElbowPivot = new THREE.Object3D();
+  this.lElbowPivot.position.set(0, -18, 0);
+  this.lElbowPivot.rotation.x =  0.10;
+  this.lElbowPivot.rotation.z =  0.20;
+  this.lElbowPivot.userData = { velX: 0, velZ: 0 };
+  var lForearm = makeBox(7, 14, 7, this.suitMat);
+  lForearm.position.set(0, -7, 0);
+  this.lElbowPivot.add(lForearm);
+  this.lShoulderPivot.add(this.lElbowPivot);
+  this.mesh.add(this.lShoulderPivot);
+
+  this.rHipPivot = new THREE.Object3D();
+  this.rHipPivot.position.set(-8, -9, 0);
+  this.rHipPivot.userData = { velX: 0, velZ: 0 };
+  var rThigh = makeBox(10, 18, 10, this.suitMat);
+  rThigh.position.set(0, -9, 0);
+  this.rHipPivot.add(rThigh);
+  this.rKneePivot = new THREE.Object3D();
+  this.rKneePivot.position.set(0, -18, 0);
+  this.rKneePivot.userData = { velX: 0, velZ: 0 };
+  var rShin = makeBox(9, 16, 9, this.suitMat);
+  rShin.position.set(0, -8, 0);
+  this.rKneePivot.add(rShin);
+  this.rHipPivot.add(this.rKneePivot);
+  this.mesh.add(this.rHipPivot);
+
+  this.lHipPivot = new THREE.Object3D();
+  this.lHipPivot.position.set(8, -9, 0);
+  this.lHipPivot.userData = { velX: 0, velZ: 0 };
+  var lThigh = makeBox(10, 18, 10, this.suitMat);
+  lThigh.position.set(0, -9, 0);
+  this.lHipPivot.add(lThigh);
+  this.lKneePivot = new THREE.Object3D();
+  this.lKneePivot.position.set(0, -18, 0);
+  this.lKneePivot.userData = { velX: 0, velZ: 0 };
+  var lShin = makeBox(9, 16, 9, this.suitMat);
+  lShin.position.set(0, -8, 0);
+  this.lKneePivot.add(lShin);
+  this.lHipPivot.add(this.lKneePivot);
+  this.mesh.add(this.lHipPivot);
+
+  this.joints = [
+    { pivot: this.rShoulderPivot, stiffX: 0.06, stiffZ: 0.06, dampX: 0.90, dampZ: 0.90, limX: 1.0, limZ: 1.0 },
+    { pivot: this.lShoulderPivot, stiffX: 0.06, stiffZ: 0.06, dampX: 0.90, dampZ: 0.90, limX: 1.0, limZ: 1.0 },
+    { pivot: this.rElbowPivot,    stiffX: 0.05, stiffZ: 0.04, dampX: 0.93, dampZ: 0.93, limX: 1.6, limZ: 1.0 },
+    { pivot: this.lElbowPivot,    stiffX: 0.05, stiffZ: 0.04, dampX: 0.93, dampZ: 0.93, limX: 1.6, limZ: 1.0 },
+    { pivot: this.rHipPivot,      stiffX: 0.18, stiffZ: 0.14, dampX: 0.68, dampZ: 0.68, limX: 1.4, limZ: 0.28 },
+    { pivot: this.rKneePivot,     stiffX: 0.15, stiffZ: 0.11, dampX: 0.68, dampZ: 0.68, limX: 1.5, limZ: 0.14 },
+    { pivot: this.lHipPivot,      stiffX: 0.18, stiffZ: 0.14, dampX: 0.68, dampZ: 0.68, limX: 1.4, limZ: 0.28 },
+    { pivot: this.lKneePivot,     stiffX: 0.15, stiffZ: 0.11, dampX: 0.68, dampZ: 0.68, limX: 1.5, limZ: 0.14 },
+  ];
+
+  this.armDrift = [
+    { phaseX: Math.random()*Math.PI*2, phaseZ: Math.random()*Math.PI*2, speedX: 0.009+Math.random()*0.006, speedZ: 0.007+Math.random()*0.005, ampX: 0.16, ampZ: 0.20 },
+    { phaseX: Math.random()*Math.PI*2, phaseZ: Math.random()*Math.PI*2, speedX: 0.009+Math.random()*0.006, speedZ: 0.007+Math.random()*0.005, ampX: 0.16, ampZ: 0.20 },
+    { phaseX: Math.random()*Math.PI*2, phaseZ: Math.random()*Math.PI*2, speedX: 0.011+Math.random()*0.007, speedZ: 0.009+Math.random()*0.006, ampX: 0.10, ampZ: 0.12 },
+    { phaseX: Math.random()*Math.PI*2, phaseZ: Math.random()*Math.PI*2, speedX: 0.011+Math.random()*0.007, speedZ: 0.009+Math.random()*0.006, ampX: 0.10, ampZ: 0.12 },
+  ];
+  this.animTime = 0;
+  this.butterflyDx = 0; this.butterflyDy = 0; this.butterflyDist = 0;
+}
+
+RagdollHuman.prototype.update = function(accelX, accelY, speed, dx, dy) {
+  dx = dx || 0; dy = dy || 0;
+  this.animTime += 0.08;
+
+  var reverseForce = Math.max(0, -reverseLerp) / 2.2;
+  var forwardForce = Math.max(0,  reverseLerp) / 1.2;
+  var inertiaPitch = forwardForce * 0.40 - reverseForce * 0.35;
+  var armTrail     = forwardForce * 0.75 - reverseForce * 0.65;
+  var sideDrift    = forwardForce * 0.50 - reverseForce * 0.50;
+  var scrollIntensity = Math.min(1, Math.max(forwardForce, reverseForce) * 1.6);
+
+  var altFactor = Math.max(0, Math.min(1, (this.mesh.position.y - 25) / 150));
+  var poseLow  = Math.max(0, 1 - altFactor / 0.38);
+  var poseHigh = Math.max(0, (altFactor - 0.62) / 0.38);
+
+  var targetBodyX = (-1.05 + altFactor * 0.80) + inertiaPitch;
+  var leanZ = -accelX * 0.8;
+
+  this.baseRotZ += (leanZ       - this.baseRotZ) * 0.10;
+  this.baseRotX += (targetBodyX - this.baseRotX) * 0.06;
+
+  this.mesh.rotation.z = this.baseRotZ + this.flipZ;
+  this.mesh.rotation.x = this.baseRotX + this.flipX;
+
+  var facingBias = Math.max(-1, Math.min(1, dx / 120));
+  var bfAngle = Math.PI * 0.75 - facingBias * Math.PI * 0.55;
+  this.mesh.rotation.y += (bfAngle - this.mesh.rotation.y) * 0.06;
+
+  var baseScale   = 0.6 + Math.random() * 0.4;
+  var thrustBoost = Math.max(0, accelY * 2.5);
+  this.lFlame.scale.set(1, baseScale + thrustBoost, 0.5);
+  this.rFlame.scale.set(1, baseScale + thrustBoost, 0.5);
+
+  for (var ad = 0; ad < this.armDrift.length; ad++) {
+    this.armDrift[ad].phaseX += this.armDrift[ad].speedX;
+    this.armDrift[ad].phaseZ += this.armDrift[ad].speedZ;
+  }
+  var dRS = this.armDrift[0], dLS = this.armDrift[1],
+      dRE = this.armDrift[2], dLE = this.armDrift[3];
+
+  var distFromCenter  = Math.sqrt(mouse.x * mouse.x + mouse.y * mouse.y);
+  var centerProximity = Math.max(0, 1 - distFromCenter / Math.SQRT2);
+
+  var bfDist  = this.butterflyDist || 0;
+  var bfDx    = this.butterflyDx   || 0;
+  var bfDy    = this.butterflyDy   || 0;
+  var bfLen   = Math.max(1, bfDist);
+  var bfNx    = bfDx / bfLen;
+  var bfNy    = bfDy / bfLen;
+  var reachUrgency = Math.min(1, bfDist / 80);
+
+  var bodySpeed = Math.sqrt(accelX*accelX + accelY*accelY);
+  var momentumLimiter = Math.max(0.25, 1.0 - bodySpeed * 18);
+
+  this.reachFade = Math.min(1.0, this.reachFade + 0.018);
+  var reach = this.reachFade;
+
+  var armReach = 0.65 - centerProximity * 2.2;
+  var supermanPull = poseLow * 0.75;
+
+  var butterflyReachX = -bfNy * reachUrgency * 1.2 * momentumLimiter * reach;
+  var butterflyReachZ = -bfNx * reachUrgency * 0.6 * momentumLimiter * reach;
+
+  var shoulderZ = 0.55 + poseLow * (-0.43) + poseHigh * 0.30;
+  var elbowZ    = 0.20 + poseLow * (-0.10) + poseHigh * 0.50;
+
+  this.joints[0].restX = armReach - supermanPull + butterflyReachX + Math.sin(dRS.phaseX) * dRS.ampX + armTrail;
+  this.joints[0].restZ = (-shoulderZ + butterflyReachZ) + Math.sin(dRS.phaseZ) * dRS.ampZ - sideDrift;
+  this.joints[1].restX = armReach - supermanPull + butterflyReachX + Math.sin(dLS.phaseX) * dLS.ampX + armTrail;
+  this.joints[1].restZ = ( shoulderZ - butterflyReachZ) + Math.sin(dLS.phaseZ) * dLS.ampZ + sideDrift;
+  this.joints[2].restX = 0.10 + centerProximity * -0.8 + butterflyReachX * 0.65 + Math.sin(dRE.phaseX) * dRE.ampX + armTrail * 0.6;
+  this.joints[2].restZ = (-elbowZ + butterflyReachZ * 0.5) + Math.sin(dRE.phaseZ) * dRE.ampZ - sideDrift * 0.75;
+  this.joints[3].restX = 0.10 + centerProximity * -0.8 + butterflyReachX * 0.65 + Math.sin(dLE.phaseX) * dLE.ampX + armTrail * 0.6;
+  this.joints[3].restZ = ( elbowZ - butterflyReachZ * 0.5) + Math.sin(dLE.phaseZ) * dLE.ampZ + sideDrift * 0.75;
+
+  if (scrollIntensity > 0) {
+    this.joints[2].restX = 0.10;
+    this.joints[3].restX = 0.10;
+  }
+
+  var legZ    = 0.10 + poseLow * (-0.04) + poseHigh * 0.16;
+  var legBack = poseLow * 0.28;
+
+  for (var i = 0; i < this.joints.length; i++) {
+    var j = this.joints[i], p = j.pivot, ud = p.userData;
+
+    if (i >= 4) {
+      var legTrail = forwardForce * 0.55 - reverseForce * 0.55;
+      var isHip    = (i === 4 || i === 6);
+      var hipFold  = reverseForce * 1.05;
+      var kneeLock = Math.min(1, reverseForce * 1.2);
+      var idleAnim = Math.sin(this.animTime * 0.9 + i) * 0.12 * (1 - kneeLock);
+      if (isHip) {
+        j.restX = (0.08 - legBack - hipFold) + idleAnim + legTrail;
+      } else {
+        j.restX = (0.08 - legBack + idleAnim + legTrail) * (1 - kneeLock);
+      }
+      j.restZ = (i === 4 ? -legZ : i === 6 ? legZ : i === 5 ? -legZ : legZ)
+        + Math.sin(this.animTime * 0.7 + i) * 0.08 * (1 - kneeLock * 0.6)
+        + (i === 4 || i === 5 ? -sideDrift : sideDrift) * 0.25;
+    }
+
+    var errX = j.restX - p.rotation.x;
+    var errZ = j.restZ - p.rotation.z;
+    ud.velX = ud.velX * j.dampX + errX * j.stiffX;
+    ud.velZ = ud.velZ * j.dampZ + errZ * j.stiffZ;
+    var minX = (i === 2 || i === 3) ? 0 : -j.limX;
+    p.rotation.x = Math.max(minX, Math.min(j.limX, p.rotation.x + ud.velX));
+    var minZ = -j.limZ, maxZ = j.limZ;
+    if (i === 0) maxZ =  0.15;
+    if (i === 1) minZ = -0.15;
+    p.rotation.z = Math.max(minZ, Math.min(maxZ, p.rotation.z + ud.velZ));
+  }
+
+  var headLookZ = -leanZ * 0.5 + Math.sin(this.animTime * 0.8) * 0.05
+    - bfNx * reachUrgency * 0.3 * momentumLimiter * reach;
+  var headLookX = (-forwardForce * 0.30 + reverseForce * 0.35)
+    - bfNy * reachUrgency * 0.25 * momentumLimiter * reach;
+  this.head.rotation.z += (headLookZ - this.head.rotation.z) * 0.12;
+  this.head.rotation.x += (headLookX - this.head.rotation.x) * 0.10;
+};
+
+RagdollHuman.prototype.hitReaction = function() {
+  this.reachFade = 0;
+  for (var i = 0; i < this.joints.length; i++) {
+    this.joints[i].pivot.userData.velX += (Math.random() - 0.5) * 3.5;
+    this.joints[i].pivot.userData.velZ += (Math.random() - 0.5) * (i >= 4 ? 1.0 : 3.5);
+  }
+  gsap.to(this, { flipX: this.flipX + (Math.random()-0.5)*Math.PI*2, duration: 0.8, ease: "power2.out" });
+  gsap.to(this.mesh.rotation, { y: this.mesh.rotation.y + (Math.random()-0.5)*Math.PI*3, duration: 0.8, ease: "power2.out" });
+  gsap.to(this, { flipZ: this.flipZ + (Math.random()-0.5)*Math.PI*2, duration: 0.8, ease: "power2.out" });
+};
+
+// ─── COMPANION DOG (Wolfgang) ───────────────────────────────────────────────
+function CompanionPoodle() {
+  this.animT = 0;
+  this.px = 40; this.py = 100;
+  this.vx = 0; this.vy = 0;
+  this.behaviorTimer = Math.floor(Math.random() * 120) + 60;
+  this.behavior = 'orbit';
+  this.orbitAngle = 0.8;
+  this.orbitRadius = 38;
+  this.orbitDir = 1;
+  this.zoomTargetX = 0; this.zoomTargetY = 100;
+  this.bodyYaw = 0;
+  this._pvx = 0; this._pvy = 0;
+  this._jv = {
+    neck:  { vx:0, vz:0 },
+    tail1: { vx:0, vz:0 }, tail2: { vx:0, vz:0 }, tail3: { vx:0, vz:0 },
+    earL:  { vx:0, vz:0 }, earR:  { vx:0, vz:0 },
+    flUp:  { vx:0, vz:0 }, flKn: { vx:0, vz:0 },
+    frUp:  { vx:0, vz:0 }, frKn: { vx:0, vz:0 },
+    blUp:  { vx:0, vz:0 }, blKn: { vx:0, vz:0 }, blHk: { vx:0 },
+    brUp:  { vx:0, vz:0 }, brKn: { vx:0, vz:0 }, brHk: { vx:0 },
+  };
+
+  var fur  = new THREE.MeshPhongMaterial({ color: 0xf4f0e8, flatShading: true });
+  var furS = new THREE.MeshPhongMaterial({ color: 0xdedad0, flatShading: true });
+  var blk  = new THREE.MeshPhongMaterial({ color: 0x111111, flatShading: true });
+  var nose = new THREE.MeshPhongMaterial({ color: 0x1a0a0a, flatShading: true });
+
+  this.mesh = new THREE.Object3D();
+  this.mesh.name = 'wolfgang';
+  this.mesh.scale.setScalar(0.20);
+
+  this.body = new THREE.Object3D();
+  this.mesh.add(this.body);
+
+  var torsoGeom = new THREE.BoxGeometry(16, 11, 24);
+  this.torso = new THREE.Mesh(torsoGeom, fur);
+  this.torso.castShadow = true;
+  this.body.add(this.torso);
+
+  this.tail1Pivot = new THREE.Object3D();
+  this.tail1Pivot.position.set(0, 3, -13);
+  this.tail1Pivot.rotation.x = -0.9;
+  this.torso.add(this.tail1Pivot);
+  var t1m = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 10), fur);
+  t1m.position.z = 5; this.tail1Pivot.add(t1m);
+
+  this.tail2Pivot = new THREE.Object3D();
+  this.tail2Pivot.position.z = 10;
+  this.tail1Pivot.add(this.tail2Pivot);
+  var t2m = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 9), furS);
+  t2m.position.z = 4.5; this.tail2Pivot.add(t2m);
+
+  this.tail3Pivot = new THREE.Object3D();
+  this.tail3Pivot.position.z = 9;
+  this.tail2Pivot.add(this.tail3Pivot);
+  var t3m = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 7), fur);
+  t3m.position.z = 3.5; this.tail3Pivot.add(t3m);
+
+  this.neckPivot = new THREE.Object3D();
+  this.neckPivot.position.set(0, 4, 12);
+  this.neckPivot.rotation.x = 0.5;
+  this.torso.add(this.neckPivot);
+  var nkM = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 10), fur);
+  nkM.position.z = 5; this.neckPivot.add(nkM);
+
+  this.headNode = new THREE.Object3D();
+  this.headNode.position.z = 10;
+  this.neckPivot.add(this.headNode);
+
+  this.head = new THREE.Mesh(new THREE.BoxGeometry(14, 12, 14), fur);
+  this.head.castShadow = true;
+  this.headNode.add(this.head);
+
+  var muzzle = new THREE.Mesh(new THREE.BoxGeometry(10, 7, 10), furS);
+  muzzle.position.set(0, -2, 11); this.head.add(muzzle);
+  var nsM = new THREE.Mesh(new THREE.BoxGeometry(5, 3.5, 2.5), nose);
+  nsM.position.set(0, 1.5, 5); muzzle.add(nsM);
+
+  var eyG = new THREE.BoxGeometry(2.5, 4, 4);
+  this.eyeL = new THREE.Mesh(eyG, new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true }));
+  this.eyeL.position.set(6, 2, 6); this.head.add(this.eyeL);
+  var irL = new THREE.Mesh(new THREE.BoxGeometry(1, 2.5, 2.5), blk);
+  irL.position.set(1.5, 0.3, 1.5); this.eyeL.add(irL);
+  this.eyeR = this.eyeL.clone();
+  this.eyeR.position.x = -6;
+  this.eyeR.children[0].position.x = -1.5;
+  this.head.add(this.eyeR);
+
+  this.earLPivot = new THREE.Object3D();
+  this.earLPivot.position.set(7, 5, 1);
+  this.earLPivot.rotation.z = 0.15;
+  this.head.add(this.earLPivot);
+  var erL = new THREE.Mesh(new THREE.BoxGeometry(7, 10, 4), furS);
+  erL.position.set(0, -5, 0); this.earLPivot.add(erL);
+
+  this.earRPivot = new THREE.Object3D();
+  this.earRPivot.position.set(-7, 5, 1);
+  this.earRPivot.rotation.z = -0.15;
+  this.head.add(this.earRPivot);
+  this.earRPivot.add(erL.clone());
+
+  // Bubble helmet
+  var helmetMat = new THREE.MeshPhongMaterial({ color: 0xaaddff, transparent: true, opacity: 0.18, shininess: 120, specular: 0xffffff, side: THREE.FrontSide, depthWrite: false });
+  var helmetSphere = new THREE.Mesh(new THREE.SphereGeometry(15.5, 16, 12), helmetMat);
+  helmetSphere.position.set(0, -1, 2); this.headNode.add(helmetSphere);
+
+  var helmetInnerMat = new THREE.MeshPhongMaterial({ color: 0xcceeff, transparent: true, opacity: 0.07, shininess: 60, specular: 0xffffff, side: THREE.BackSide, depthWrite: false });
+  var helmetInner = new THREE.Mesh(new THREE.SphereGeometry(14.5, 16, 12), helmetInnerMat);
+  helmetInner.position.set(0, -1, 2); this.headNode.add(helmetInner);
+
+  var glint = new THREE.Mesh(new THREE.SphereGeometry(2.2, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55, depthWrite: false }));
+  glint.position.set(5, 9, 9); this.headNode.add(glint);
+
+  var _t = this;
+  function makeFrontLeg(bx, splayZ) {
+    var upPivot = new THREE.Object3D();
+    upPivot.position.set(bx, -5, 11);
+    upPivot.rotation.z = splayZ;
+    _t.body.add(upPivot);
+    var upMesh = new THREE.Mesh(new THREE.BoxGeometry(5, 9, 5), fur);
+    upMesh.position.y = -4.5; upPivot.add(upMesh);
+    var knPivot = new THREE.Object3D();
+    knPivot.position.y = -9; knPivot.rotation.x = 0.25;
+    upPivot.add(knPivot);
+    var loMesh = new THREE.Mesh(new THREE.BoxGeometry(4, 8, 4), furS);
+    loMesh.position.y = -4; knPivot.add(loMesh);
+    var pawMesh = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 7), fur);
+    pawMesh.position.set(0, -8, 1.5); knPivot.add(pawMesh);
+    return { up: upPivot, kn: knPivot };
+  }
+
+  function makeRearLeg(bx, splayZ) {
+    var upPivot = new THREE.Object3D();
+    upPivot.position.set(bx, -4, -11);
+    upPivot.rotation.z = splayZ; upPivot.rotation.x = 0.35;
+    _t.body.add(upPivot);
+    var upMesh = new THREE.Mesh(new THREE.BoxGeometry(5, 10, 5), fur);
+    upMesh.position.y = -5; upPivot.add(upMesh);
+    var knPivot = new THREE.Object3D();
+    knPivot.position.y = -10; knPivot.rotation.x = 0.55;
+    upPivot.add(knPivot);
+    var loMesh = new THREE.Mesh(new THREE.BoxGeometry(4, 8, 4), furS);
+    loMesh.position.y = -4; knPivot.add(loMesh);
+    var hockPivot = new THREE.Object3D();
+    hockPivot.position.y = -8; hockPivot.rotation.x = -0.60;
+    knPivot.add(hockPivot);
+    var metaMesh = new THREE.Mesh(new THREE.BoxGeometry(4, 6, 4), furS);
+    metaMesh.position.y = -3; hockPivot.add(metaMesh);
+    var pawMesh = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 7), fur);
+    pawMesh.position.set(0, -6, -1.5); hockPivot.add(pawMesh);
+    return { up: upPivot, kn: knPivot, hock: hockPivot };
+  }
+
+  this.legFL = makeFrontLeg(-7, -0.38);
+  this.legFR = makeFrontLeg( 7,  0.38);
+  this.legBL = makeRearLeg(-7, -0.38);
+  this.legBR = makeRearLeg( 7,  0.38);
+
+  this.mesh.traverse(function(o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+}
+
+CompanionPoodle.prototype.update = function(hx, hy) {
+  this.animT += 0.08;
+  var t = this.animT;
+
+  this.behaviorTimer--;
+  if (this.behaviorTimer <= 0) {
+    var roll = Math.random();
+    if (roll < 0.45)      { this.behavior = 'orbit';  this.orbitDir = Math.random() < 0.5 ? 1 : -1; this.behaviorTimer = 180 + Math.floor(Math.random() * 240); }
+    else if (roll < 0.65) { this.behavior = 'zoom';   this.behaviorTimer = 60  + Math.floor(Math.random() * 80); this.zoomTargetX = hx + (Math.random() - 0.5) * 80; this.zoomTargetY = hy + (Math.random() - 0.5) * 60; }
+    else if (roll < 0.82) { this.behavior = 'stare';  this.behaviorTimer = 90  + Math.floor(Math.random() * 120); }
+    else                  { this.behavior = 'circle'; this.orbitDir = Math.random() < 0.5 ? 1 : -1; this.behaviorTimer = 100 + Math.floor(Math.random() * 140); }
+  }
+
+  var targetX, targetY, pull;
+  if (this.behavior === 'orbit') {
+    this.orbitAngle += 0.018 * this.orbitDir;
+    targetX = hx + Math.cos(this.orbitAngle) * this.orbitRadius;
+    targetY = hy + Math.sin(this.orbitAngle) * this.orbitRadius * 0.55;
+    pull = 0.055;
+  } else if (this.behavior === 'zoom') {
+    targetX = this.zoomTargetX; targetY = this.zoomTargetY; pull = 0.12;
+  } else if (this.behavior === 'stare') {
+    targetX = hx + 32 + Math.sin(t * 0.3) * 8;
+    targetY = hy - 10 + Math.cos(t * 0.25) * 6;
+    pull = 0.03;
+  } else {
+    this.orbitAngle += 0.038 * this.orbitDir;
+    targetX = hx + Math.cos(this.orbitAngle) * 22;
+    targetY = hy + Math.sin(this.orbitAngle) * 14;
+    pull = 0.09;
+  }
+
+  this.vx += (targetX - this.px) * pull * 0.15;
+  this.vy += (targetY - this.py) * pull * 0.15;
+  this.vx *= 0.86; this.vy *= 0.86;
+  var spd = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
+  var maxSpd = this.behavior === 'zoom' ? 12 : this.behavior === 'circle' ? 8 : 5;
+  if (spd > maxSpd) { this.vx *= maxSpd/spd; this.vy *= maxSpd/spd; }
+
+  this.px += this.vx; this.py += this.vy;
+  if (this.px < -115) this.vx += (-115 - this.px) * 0.08;
+  if (this.px >  115) this.vx += ( 115 - this.px) * 0.08;
+  if (this.py <  18)  this.vy += (  18 - this.py) * 0.10;
+  if (this.py >  175) this.vy += ( 175 - this.py) * 0.10;
+
+  this.mesh.position.set(this.px, this.py, 16);
+
+  var desiredYaw = Math.atan2(this.vx, 0.5) + Math.PI * 0.55;
+  if (spd < 0.5) desiredYaw = Math.atan2(hx - this.px, 1) + Math.PI * 0.5;
+  this.bodyYaw += (desiredYaw - this.bodyYaw) * 0.10;
+  this.mesh.rotation.y = this.bodyYaw;
+  this.mesh.rotation.x = this.vy * -0.018;
+  this.mesh.rotation.z = this.vx * -0.022;
+
+  var runSpd = Math.min(1, spd / 8);
+  var runT   = t * (1.5 + runSpd * 2.5);
+  this.body.position.y = Math.sin(runT * 2) * 2 * runSpd;
+
+  var blink = (Math.sin(t * 0.11) > 0.96) ? 0.05 : 1;
+  this.eyeL.scale.y = blink; this.eyeR.scale.y = blink;
+
+  var accelX = this.vx - this._pvx;
+  var accelY = this.vy - this._pvy;
+  this._pvx = this.vx; this._pvy = this.vy;
+
+  var jv = this._jv;
+  var D = 0.75, S = 0.12;
+  var floatAmt = Math.max(0, 1 - spd / 1.5);
+  var paddleT  = t * 1.8;
+
+  // Neck
+  jv.neck.vx = (jv.neck.vx + accelY * 1.8) * D - (this.neckPivot.rotation.x - 0.5) * S;
+  var stareTilt = this.behavior === 'stare' ? Math.sin(t * 0.4) * 0.35 : 0;
+  jv.neck.vz = (jv.neck.vz - accelX * 1.2) * D - this.neckPivot.rotation.z * (S * 0.7);
+  jv.neck.vz += stareTilt * 0.04;
+  this.neckPivot.rotation.x = Math.max(-0.2, Math.min(1.3, this.neckPivot.rotation.x + jv.neck.vx));
+  this.neckPivot.rotation.z = Math.max(-0.6, Math.min(0.6, this.neckPivot.rotation.z + jv.neck.vz));
+
+  // Ears
+  var earDriveZ = accelX * 2.2, earDriveX = -runSpd * 0.8 + accelY * 0.6;
+  jv.earL.vz = (jv.earL.vz + earDriveZ) * 0.68 - this.earLPivot.rotation.z * 0.20;
+  jv.earR.vz = (jv.earR.vz - earDriveZ) * 0.68 - this.earRPivot.rotation.z * 0.20;
+  jv.earL.vx = (jv.earL.vx + earDriveX) * 0.70 - this.earLPivot.rotation.x * 0.18;
+  jv.earR.vx = (jv.earR.vx + earDriveX) * 0.70 - this.earRPivot.rotation.x * 0.18;
+  this.earLPivot.rotation.z = Math.max(-0.8, Math.min(0.8, this.earLPivot.rotation.z + jv.earL.vz));
+  this.earRPivot.rotation.z = Math.max(-0.8, Math.min(0.8, this.earRPivot.rotation.z + jv.earR.vz));
+  this.earLPivot.rotation.x = Math.max(-0.7, Math.min(0.5, this.earLPivot.rotation.x + jv.earL.vx));
+  this.earRPivot.rotation.x = Math.max(-0.7, Math.min(0.5, this.earRPivot.rotation.x + jv.earR.vx));
+
+  // Tail
+  var wagFreq = this.behavior === 'stare' ? 6.0 : this.behavior === 'circle' ? 11 : 8.5;
+  var wagAmp  = this.behavior === 'stare' ? 2.0 : 1.6;
+  var wagPhase = Math.sin(t * wagFreq) * wagAmp;
+  jv.tail1.vx = (jv.tail1.vx + accelX * 2.5) * 0.78 - (this.tail1Pivot.rotation.x - (-0.8)) * 0.08;
+  jv.tail1.vz = (jv.tail1.vz + wagPhase * 0.10 + accelY * 1.5) * 0.75 - this.tail1Pivot.rotation.z * 0.09;
+  this.tail1Pivot.rotation.x = Math.max(-1.6, Math.min(0.3, this.tail1Pivot.rotation.x + jv.tail1.vx));
+  this.tail1Pivot.rotation.z = Math.max(-1.8, Math.min(1.8, this.tail1Pivot.rotation.z + jv.tail1.vz));
+  jv.tail2.vx = (jv.tail2.vx + accelX * 1.8) * 0.70 - this.tail2Pivot.rotation.x * 0.07;
+  jv.tail2.vz = (jv.tail2.vz + wagPhase * 0.16) * 0.68 - this.tail2Pivot.rotation.z * 0.08;
+  this.tail2Pivot.rotation.x = Math.max(-0.8, Math.min(0.8, this.tail2Pivot.rotation.x + jv.tail2.vx));
+  this.tail2Pivot.rotation.z = Math.max(-1.6, Math.min(1.6, this.tail2Pivot.rotation.z + jv.tail2.vz));
+  jv.tail3.vz = (jv.tail3.vz + wagPhase * 0.22) * 0.63 - this.tail3Pivot.rotation.z * 0.07;
+  jv.tail3.vx = (jv.tail3.vx + accelX * 1.2) * 0.65 - this.tail3Pivot.rotation.x * 0.07;
+  this.tail3Pivot.rotation.z = Math.max(-1.4, Math.min(1.4, this.tail3Pivot.rotation.z + jv.tail3.vz));
+  this.tail3Pivot.rotation.x = Math.max(-0.8, Math.min(0.8, this.tail3Pivot.rotation.x + jv.tail3.vx));
+
+  // Legs
+  var _rl = reverseLerp;
+  var scrollFwd = Math.max(0, _rl), scrollRev = Math.max(0, -_rl);
+  var scrollDrive = scrollRev * 0.9 - scrollFwd * 0.7;
+  var strideSign = (_rl < -0.05) ? -1 : 1;
+  var strF =  Math.sin(runT) * runSpd * 0.9 * strideSign;
+  var strB = -Math.sin(runT) * runSpd * 0.9 * strideSign;
+  var paddleL =  Math.sin(paddleT) * 0.55 * floatAmt;
+  var paddleR =  Math.sin(paddleT + Math.PI) * 0.55 * floatAmt;
+  var latKick = accelX * 0.6 * strideSign;
+
+  jv.flUp.vx = (jv.flUp.vx + strF * 0.05 - accelY * 0.8 - scrollDrive * 0.55 + paddleL * 0.12) * D - this.legFL.up.rotation.x * S;
+  jv.frUp.vx = (jv.frUp.vx - strF * 0.05 - accelY * 0.8 - scrollDrive * 0.55 + paddleR * 0.12) * D - this.legFR.up.rotation.x * S;
+  jv.flUp.vz = (jv.flUp.vz + latKick) * D - this.legFL.up.rotation.z * S;
+  jv.frUp.vz = (jv.frUp.vz + latKick) * D - this.legFR.up.rotation.z * S;
+  this.legFL.up.rotation.x = Math.max(-0.9, Math.min(1.0, this.legFL.up.rotation.x + jv.flUp.vx));
+  this.legFR.up.rotation.x = Math.max(-0.9, Math.min(1.0, this.legFR.up.rotation.x + jv.frUp.vx));
+  this.legFL.up.rotation.z = Math.max(-0.85, Math.min(0.20, this.legFL.up.rotation.z + jv.flUp.vz));
+  this.legFR.up.rotation.z = Math.max(-0.20, Math.min(0.85, this.legFR.up.rotation.z + jv.frUp.vz));
+
+  var knFrontRest = 0.25 + scrollDrive * 0.35 * strideSign;
+  var paddleCurlL = Math.max(0, Math.sin(paddleT) * 0.5 * floatAmt);
+  var paddleCurlR = Math.max(0, Math.sin(paddleT + Math.PI) * 0.5 * floatAmt);
+  jv.flKn.vx = (jv.flKn.vx + jv.flUp.vx * 0.55 + paddleCurlL * 0.10) * 0.72 - (this.legFL.kn.rotation.x - knFrontRest) * 0.14;
+  jv.frKn.vx = (jv.frKn.vx + jv.frUp.vx * 0.55 + paddleCurlR * 0.10) * 0.72 - (this.legFR.kn.rotation.x - knFrontRest) * 0.14;
+  this.legFL.kn.rotation.x = Math.max(0.05, Math.min(1.2, this.legFL.kn.rotation.x + jv.flKn.vx));
+  this.legFR.kn.rotation.x = Math.max(0.05, Math.min(1.2, this.legFR.kn.rotation.x + jv.frKn.vx));
+
+  jv.blUp.vx = (jv.blUp.vx + strB * 0.05 - accelY * 0.7 - scrollDrive * 0.45) * D - (this.legBL.up.rotation.x - 0.35) * S;
+  jv.brUp.vx = (jv.brUp.vx - strB * 0.05 - accelY * 0.7 - scrollDrive * 0.45) * D - (this.legBR.up.rotation.x - 0.35) * S;
+  jv.blUp.vz = (jv.blUp.vz + latKick * 0.8) * D - this.legBL.up.rotation.z * S;
+  jv.brUp.vz = (jv.brUp.vz + latKick * 0.8) * D - this.legBR.up.rotation.z * S;
+  this.legBL.up.rotation.x = Math.max(-0.3, Math.min(1.1, this.legBL.up.rotation.x + jv.blUp.vx));
+  this.legBR.up.rotation.x = Math.max(-0.3, Math.min(1.1, this.legBR.up.rotation.x + jv.brUp.vx));
+  this.legBL.up.rotation.z = Math.max(-0.85, Math.min(0.20, this.legBL.up.rotation.z + jv.blUp.vz));
+  this.legBR.up.rotation.z = Math.max(-0.20, Math.min(0.85, this.legBR.up.rotation.z + jv.brUp.vz));
+
+  jv.blKn.vx = (jv.blKn.vx + jv.blUp.vx * 0.6) * 0.70 - (this.legBL.kn.rotation.x - 0.55) * 0.16;
+  jv.brKn.vx = (jv.brKn.vx + jv.brUp.vx * 0.6) * 0.70 - (this.legBR.kn.rotation.x - 0.55) * 0.16;
+  this.legBL.kn.rotation.x = Math.max(0.10, Math.min(1.2, this.legBL.kn.rotation.x + jv.blKn.vx));
+  this.legBR.kn.rotation.x = Math.max(0.10, Math.min(1.2, this.legBR.kn.rotation.x + jv.brKn.vx));
+
+  var hockRestL = -0.60 - (this.legBL.kn.rotation.x - 0.55) * 0.5;
+  var hockRestR = -0.60 - (this.legBR.kn.rotation.x - 0.55) * 0.5;
+  jv.blHk.vx = (jv.blHk.vx - jv.blKn.vx * 0.5) * 0.72 - (this.legBL.hock.rotation.x - hockRestL) * 0.18;
+  jv.brHk.vx = (jv.brHk.vx - jv.brKn.vx * 0.5) * 0.72 - (this.legBR.hock.rotation.x - hockRestR) * 0.18;
+  this.legBL.hock.rotation.x = Math.max(-1.1, Math.min(-0.10, this.legBL.hock.rotation.x + jv.blHk.vx));
+  this.legBR.hock.rotation.x = Math.max(-1.1, Math.min(-0.10, this.legBR.hock.rotation.x + jv.brHk.vx));
+};
+
+// ─── PARTICLES ─────────────────────────────────────────────────────────────
+var DUST_COLORS = [0x68c3c0, 0x4a3b69, 0x2b596b, 0x444455, 0x556677];
+
+// Moondust trail
+var smokeParticles = [], smokePool = [];
+function SmokeParticle() {
+  var g = new THREE.IcosahedronGeometry(1, 0);
+  g.applyMatrix4(new THREE.Matrix4().makeScale(1, 0.55 + Math.random()*0.3, 0.4 + Math.random()*0.3));
+  var m = new THREE.MeshPhongMaterial({ color: DUST_COLORS[Math.floor(Math.random()*DUST_COLORS.length)], flatShading: true, transparent: true, opacity: 0.0 });
+  this.mesh = new THREE.Mesh(g, m);
+  scene.add(this.mesh);
+}
+function spawnSmoke(x, y, z, velX, velY) {
+  var p = smokePool.length ? smokePool.pop() : new SmokeParticle();
+  p.mesh.position.set(x+(Math.random()-0.5)*4, y+(Math.random()-0.5)*4, z+(Math.random()-0.5)*4);
+  var baseSize = 0.8 + Math.random()*1.5;
+  p.mesh.scale.setScalar(baseSize);
+  p.mesh.rotation.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
+  p.mesh.material.opacity = 0.15 + Math.random()*0.15;
+  p.mesh.material.color.setHex(DUST_COLORS[Math.floor(Math.random()*DUST_COLORS.length)]);
+  p.mesh.visible = true;
+  p.vx = velX*0.18+(Math.random()-0.5)*0.8; p.vy = velY*0.10+(Math.random()-0.5)*0.6+0.15; p.vz = (Math.random()-0.5)*0.6;
+  p.vr = (Math.random()-0.5)*0.08; p.life = 1.0; p.decay = 0.03+Math.random()*0.02;
+  p.growRate = 0.02+Math.random()*0.03; p.baseSize = baseSize;
+  smokeParticles.push(p);
+}
+function updateSmoke() {
+  for (var i = smokeParticles.length-1; i >= 0; i--) {
+    var p = smokeParticles[i]; p.life -= p.decay;
+    if (p.life <= 0) { p.mesh.visible = false; smokePool.push(p); smokeParticles.splice(i,1); continue; }
+    p.mesh.position.x += p.vx; p.mesh.position.y += p.vy; p.mesh.position.z += p.vz;
+    p.vx *= 0.95; p.vy *= 0.95;
+    p.mesh.rotation.x += p.vr; p.mesh.rotation.z += p.vr*0.7;
+    var s = p.baseSize*(1+(1-p.life)*p.growRate*20); p.mesh.scale.setScalar(s);
+    p.mesh.material.opacity = p.life*0.25;
+  }
+}
+
+// Air puffs
+var airPuffs = [], airPuffPool = [];
+function AirPuff() {
+  var m = new THREE.MeshBasicMaterial({ color: 0x88ddff, transparent: true, opacity: 0, depthWrite: false });
+  this.mesh = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.25, 5, 12), m);
+  this.mesh.visible = false; scene.add(this.mesh);
+}
+function spawnAirPuffs(vx, vy, bfDx, bfDy) {
+  if (!humanoid) return;
+  var cursorPull = Math.sqrt(bfDx*bfDx + bfDy*bfDy);
+  if (Math.random() > 0.04 + Math.min(0.06, cursorPull*0.0005)) return;
+  var wp = new THREE.Vector3();
+  (Math.random() < 0.5 ? humanoid.lThruster : humanoid.rThruster).getWorldPosition(wp);
+  var bfLen = Math.max(1, cursorPull);
+  var ejVx = -(bfDx/bfLen)*(0.4+Math.random()*0.5);
+  var ejVy = -(bfDy/bfLen)*(0.4+Math.random()*0.5)-0.6;
+  var p = airPuffPool.length ? airPuffPool.pop() : new AirPuff();
+  p.mesh.position.set(wp.x+(Math.random()-0.5)*4, wp.y-5+(Math.random()-0.5)*4, wp.z+(Math.random()-0.5)*4);
+  p.mesh.rotation.set(Math.PI*0.5+(Math.random()-0.5)*0.6, (Math.random()-0.5)*0.5, (Math.random()-0.5)*0.5);
+  p.mesh.scale.setScalar(0.06+Math.random()*0.04);
+  p.mesh.material.opacity = 0; p.mesh.material.color.setHex(Math.random() < 0.25 ? 0xffffff : 0x88ddff);
+  p.mesh.visible = true;
+  p.vx = ejVx; p.vy = ejVy; p.vz = (Math.random()-0.5)*0.5;
+  p.life = 1.0; p.decay = 0.025+Math.random()*0.018;
+  p.peakOpacity = 0.30+Math.random()*0.15; p.growRate = 0.015+Math.random()*0.010;
+  airPuffs.push(p);
+}
+function updateAirPuffs() {
+  for (var i = airPuffs.length-1; i >= 0; i--) {
+    var p = airPuffs[i]; p.life -= p.decay;
+    if (p.life <= 0) { p.mesh.visible = false; airPuffPool.push(p); airPuffs.splice(i,1); continue; }
+    p.mesh.position.x += p.vx; p.mesh.position.y += p.vy; p.mesh.position.z += p.vz;
+    p.vx *= 0.92; p.vy *= 0.94;
+    p.mesh.scale.setScalar(0.04+(1-p.life)*p.growRate*8);
+    p.mesh.material.opacity = p.life > 0.7 ? p.peakOpacity*((1-p.life)/0.3) : p.peakOpacity*(p.life/0.7);
+    p.mesh.rotation.z += 0.015;
+  }
+}
+
+// Snow spray (movement particles)
+var snowParticles = [], snowPool = [];
+function SnowFlake() {
+  var m = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+  var g = new THREE.OctahedronGeometry(1.2, 0);
+  g.applyMatrix4(new THREE.Matrix4().makeScale(1, 0.35, 1));
+  this.mesh = new THREE.Mesh(g, m);
+  this.mesh.visible = false; scene.add(this.mesh);
+}
+function spawnSnowSpray(x, y, z, velX, velY, speed) {
+  var count = Math.floor(1+speed*6);
+  var wDust = DUST_COLORS;
+  for (var i = 0; i < count; i++) {
+    var p = snowPool.length ? snowPool.pop() : new SnowFlake();
+    p.mesh.material.color.setHex(wDust[Math.floor(Math.random()*wDust.length)]);
+    var sideDir = Math.random() > 0.5 ? 1 : -1;
+    p.mesh.position.set(x+(Math.random()-0.5)*6, y-18+(Math.random()-0.5)*4, z+(Math.random()-0.5)*8);
+    p.mesh.rotation.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
+    var spd = 0.6+Math.random()*1.4;
+    p.vx = velX*-0.12+sideDir*(0.8+Math.random()*1.6)*spd;
+    p.vy = Math.abs(velY)*0.08+(0.3+Math.random()*0.8)*spd;
+    p.vz = (Math.random()-0.5)*1.2*spd;
+    p.vr = (Math.random()-0.5)*0.12; p.life = 1.0; p.decay = 0.022+Math.random()*0.028;
+    p.baseScale = 0.4+Math.random()*0.9; p.mesh.scale.setScalar(p.baseScale);
+    p.mesh.material.opacity = 0.0; p.peakOpacity = 0.55+Math.random()*0.35;
+    p.mesh.visible = true; snowParticles.push(p);
+  }
+}
+function updateSnowSpray() {
+  for (var i = snowParticles.length-1; i >= 0; i--) {
+    var p = snowParticles[i]; p.life -= p.decay;
+    if (p.life <= 0) { p.mesh.visible = false; snowPool.push(p); snowParticles.splice(i,1); continue; }
+    p.mesh.position.x += p.vx; p.mesh.position.y += p.vy; p.mesh.position.z += p.vz;
+    p.vx *= 0.91; p.vy *= 0.88;
+    p.mesh.rotation.x += p.vr; p.mesh.rotation.z += p.vr*0.6;
+    p.mesh.scale.setScalar(p.baseScale*(1+(1-p.life)*1.4));
+    p.mesh.material.opacity = p.life > 0.75 ? p.peakOpacity*((1-p.life)/0.25) : p.peakOpacity*(p.life/0.75);
+  }
+}
+
+// ─── Build world ────────────────────────────────────────────────────────────
+function buildWorld() {
+  humanoid = new RagdollHuman();
+  humanoid.mesh.scale.setScalar(0.25);
+  humanoid.mesh.position.set(0, 100, 0);
+  scene.add(humanoid.mesh);
+
+  companionPoodle = new CompanionPoodle();
+  scene.add(companionPoodle.mesh);
+}
+
+// ─── MAIN LOOP ──────────────────────────────────────────────────────────────
+var bfDx = 0, bfDy = 0;
+
+function loop() {
+  requestAnimationFrame(loop);
+  frame++;
+
+  reverseLerp += (0 - reverseLerp) * MAGNETIC_STRENGTH;
+  targetRotSpeed = MAGNETIC_FORWARD + reverseLerp;
+  currentRotSpeed += (targetRotSpeed - currentRotSpeed) * 0.05;
+  sceneSpeed = currentRotSpeed;
+
+  // Butterfly physics
+  var bfTx = norm(mouse.x, -1, 1, -100, 100);
+  var bfTy = norm(mouse.y, -1, 1, 25, 175);
+
+  var headOffsetY = 8.5 * Math.cos(humanoid.baseRotX);
+  var headOffsetX = 8.5 * Math.sin(humanoid.baseRotX) * -Math.sin(humanoid.mesh.rotation.y);
+  var anchorX = humanoid.mesh.position.x + headOffsetX;
+  var anchorY = humanoid.mesh.position.y + headOffsetY;
+
+  bfDx = bfTx - anchorX;
+  bfDy = bfTy - anchorY;
+  var bfDist = Math.sqrt(bfDx*bfDx + bfDy*bfDy);
+
+  var speed2d = Math.sqrt(butterfly.vx*butterfly.vx + butterfly.vy*butterfly.vy);
+  var momentumResistance = Math.min(1.0, speed2d / 18);
+  var effectiveArm = 0.018 * (1.0 - momentumResistance * 0.72);
+
+  if (bfDist > 0.5) {
+    butterfly.vx += (bfDx/bfDist) * Math.min(bfDist*0.12, 6.0) * effectiveArm * 9;
+    butterfly.vy += (bfDy/bfDist) * Math.min(bfDist*0.12, 6.0) * effectiveArm * 9;
+  }
+
+  var drag = 0.88 - Math.min(0.12, speed2d * 0.004);
+  butterfly.vx *= drag; butterfly.vy *= drag;
+  var MAX_SPEED = 9.5;
+  if (speed2d > MAX_SPEED) { butterfly.vx *= MAX_SPEED/speed2d; butterfly.vy *= MAX_SPEED/speed2d; }
+
+  // Air turbulence rotation
+  if (speed2d > 1.5) {
+    var _airNudge = speed2d * 0.00018;
+    humanoid.flipX += butterfly.vy * _airNudge;
+    humanoid.flipZ -= butterfly.vx * _airNudge;
+  }
+
+  humanoid.mesh.position.x += butterfly.vx;
+  humanoid.mesh.position.y += butterfly.vy;
+
+  // Soft walls
+  if (humanoid.mesh.position.x < -110) butterfly.vx += (-110 - humanoid.mesh.position.x) * 0.08;
+  if (humanoid.mesh.position.x >  110) butterfly.vx += ( 110 - humanoid.mesh.position.x) * 0.08;
+  if (humanoid.mesh.position.y <  20)  butterfly.vy += (  20 - humanoid.mesh.position.y) * 0.10;
+  if (humanoid.mesh.position.y >  178) butterfly.vy += ( 178 - humanoid.mesh.position.y) * 0.10;
+
+  humanoid.update(butterfly.vx*0.003, butterfly.vy*0.003, 2.0, bfDx, bfDy);
+  humanoid.butterflyDx = bfDx;
+  humanoid.butterflyDy = bfDy;
+  humanoid.butterflyDist = bfDist;
+
+  // Ambient acrobatics
+  if (frame >= nextFlipFrame) {
+    var flipNx = Math.max(-1, Math.min(1, bfDx / 100));
+    var flipNy = Math.max(-1, Math.min(1, bfDy / 100));
+    var flipDeltaX, flipDeltaZ, flipDur, fjx, fjz;
+    if (Math.abs(flipNy) >= Math.abs(flipNx) * 1.4 || Math.abs(flipNx) < 0.35) {
+      flipDeltaX = Math.PI * 2 * (flipNy >= 0 ? 1 : -1);
+      flipDeltaZ = flipNx * 0.18;
+      flipDur    = 0.60 + Math.random() * 0.25;
+      fjx = flipDeltaX > 0 ? 3.2 : -3.2;
+      fjz = flipNx * 0.8;
+    } else {
+      flipDeltaX = Math.PI * 2 * (flipNy >= 0 ? 1 : -1);
+      flipDeltaZ = Math.PI * (flipNx >= 0 ? 1 : -1);
+      flipDur    = 0.80 + Math.random() * 0.2;
+      fjx = flipDeltaX > 0 ? 2.8 : -2.8;
+      fjz = flipDeltaZ > 0 ? 2.0 : -2.0;
+    }
+    gsap.to(humanoid, { flipX: humanoid.flipX + flipDeltaX, flipZ: humanoid.flipZ + flipDeltaZ, duration: flipDur, ease: 'power2.inOut' });
+    for (var fji = 0; fji < humanoid.joints.length; fji++) {
+      humanoid.joints[fji].pivot.userData.velX += fjx * (0.7 + Math.random() * 0.4);
+      humanoid.joints[fji].pivot.userData.velZ += fjz * (0.7 + Math.random() * 0.4);
+    }
+    var flipGap = 260 + Math.floor(Math.random() * 420) - Math.floor(bfDist * 1.2);
+    nextFlipFrame = frame + Math.max(140, flipGap);
+  }
+
+  // Wolfie lower-zone
+  var inAtmos = humanoid.mesh.position.y < ATMOSPHERE_Y;
+  if (inAtmos && companionPoodle) {
+    humanoid.mesh.position.x += (companionPoodle.px - humanoid.mesh.position.x) * 0.04;
+    humanoid.mesh.position.y += (companionPoodle.py - humanoid.mesh.position.y) * 0.04;
+  }
+
+  companionPoodle.update(humanoid.mesh.position.x, humanoid.mesh.position.y);
+
+  // Particles
+  spawnAirPuffs(butterfly.vx, butterfly.vy, bfDx, bfDy);
+  var snowSpeed = speed2d;
+  if (snowSpeed > 0.4 && frame % 2 === 0) {
+    spawnSnowSpray(humanoid.mesh.position.x, humanoid.mesh.position.y, humanoid.mesh.position.z, butterfly.vx, butterfly.vy, snowSpeed/9.5);
+  }
+  if (smokeParticles.length) updateSmoke();
+  if (airPuffs.length) updateAirPuffs();
+  if (snowParticles.length) updateSnowSpray();
+
+  renderer.render(scene, camera);
+}
+
+// ─── Cursor ────────────────────────────────────────────────────────────────
+var cursorEl = document.getElementById('ne-cursor');
+_neLayer.addEventListener('mousemove', function(e) {
+  cursorEl.style.left = e.clientX + 'px';
+  cursorEl.style.top  = e.clientY + 'px';
+});
+document.addEventListener('mousedown', function() { cursorEl.classList.add('active'); });
+document.addEventListener('mouseup',   function() { cursorEl.classList.remove('active'); });
+
+// ─── Spin presets (sequential on click/tap) ────────────────────────────────
+var spinPresetIdx = 0;
+var PI = Math.PI;
+var SPIN_PRESETS = [
+  { x:  PI*2,    z:  0,        dur: 0.70, ease: "power2.inOut", jx:  3.5, jz:  0.5 },
+  { x: -PI*2,    z:  0,        dur: 0.70, ease: "power2.inOut", jx: -3.5, jz:  0.5 },
+  { x:  0,       z:  PI*2,     dur: 0.75, ease: "power2.inOut", jx:  0.5, jz:  3.5 },
+  { x:  0,       z: -PI*2,     dur: 0.75, ease: "power2.inOut", jx:  0.5, jz: -3.5 },
+  { x:  PI*1.5,  z:  PI*1.0,   dur: 0.90, ease: "power1.inOut", jx:  2.5, jz:  2.0 },
+  { x: -PI*1.5,  z: -PI*1.0,   dur: 0.90, ease: "power1.inOut", jx: -2.5, jz: -2.0 },
+  { x:  PI*3,    z:  0,        dur: 1.10, ease: "power2.inOut", jx:  4.0, jz:  0.5 },
+  { x:  PI*2.5,  z:  PI*1.5,   dur: 1.00, ease: "power1.inOut", jx:  3.0, jz:  2.5 },
+];
+
+function doSpin() {
+  if (!humanoid) return;
+  var sp = SPIN_PRESETS[spinPresetIdx % SPIN_PRESETS.length];
+  spinPresetIdx++;
+  gsap.to(humanoid, { flipX: humanoid.flipX + sp.x, flipZ: humanoid.flipZ + sp.z, duration: sp.dur, ease: sp.ease });
+  for (var i = 0; i < humanoid.joints.length; i++) {
+    humanoid.joints[i].pivot.userData.velX += sp.jx * (0.7 + Math.random() * 0.4);
+    humanoid.joints[i].pivot.userData.velZ += sp.jz * (0.7 + Math.random() * 0.4);
+  }
+  humanoid.reachFade = 0;
+}
+
+function doReset() {
+  if (!humanoid) return;
+  butterfly.vx = 0; butterfly.vy = 0;
+  gsap.killTweensOf(humanoid, 'flipX');
+  gsap.killTweensOf(humanoid, 'flipZ');
+  humanoid.flipX = 0; humanoid.flipZ = 0;
+  humanoid.baseRotX = -0.55; humanoid.baseRotZ = 0;
+  for (var i = 0; i < humanoid.joints.length; i++) {
+    humanoid.joints[i].pivot.userData.velX = 0;
+    humanoid.joints[i].pivot.userData.velZ = 0;
+  }
+}
+
+// Click → spin
+document.addEventListener('click', function(e) { doSpin(); });
+
+// Spacebar → reset orientation; R key → also reset
+document.addEventListener('keydown', function(e) {
+  if (!NE_OPEN) return;
+  if (e.code === 'Space') { e.preventDefault(); doReset(); }
+  if (e.code === 'KeyR')  { doReset(); }
+  if (e.code === 'KeyS')  { doSpin(); }
+});
+
+// Long-press on mobile → reset orientation; tap → spin
+var longPressTimer = null;
+var longPressFired = false;
+document.addEventListener('touchstart', function(e) {
+  if (e.touches.length !== 1) return;
+  longPressFired = false;
+  var _lpTouch = e.touches[0];
+  longPressTimer = setTimeout(function() {
+    longPressFired = true;
+    mouse.x = -1 + (_lpTouch.clientX / WIDTH) * 2;
+    mouse.y =  1 - (_lpTouch.clientY / HEIGHT) * 2;
+    doReset();
+  }, 600);
+}, { passive: false });
+document.addEventListener('touchend', function(e) {
+  clearTimeout(longPressTimer);
+  if (!longPressFired) doSpin();
+  longPressFired = false;
+}, { passive: true });
+document.addEventListener('touchmove', function() { clearTimeout(longPressTimer); }, { passive: true });
+
+// ─── INK OVERLAY ────────────────────────────────────────────────────────────
+(function() {
+  var _ic = document.getElementById('ne-ink-overlay');
+  var _ictx = _ic.getContext('2d');
+
+  function inkResize() { _ic.width = window.innerWidth; _ic.height = window.innerHeight; }
+  inkResize();
+  window.addEventListener('resize', inkResize);
+
+  var inkSplats = [];
+  var MAX_SPLATS = 40;
+  var inkFrame = 0;
+  var lastHumanoidX = 0, lastHumanoidY = 0;
+  var PAL = { edge: '20,10,60', splat: '100,195,220', eOp: 0.38, sOp: 0.30, grain: 0.060 };
+
+  function spawnInkSplat(wx, wy) {
+    if (inkSplats.length >= MAX_SPLATS) inkSplats.shift();
+    inkSplats.push({
+      x: norm(wx, -100, 100, 0, window.innerWidth),
+      y: norm(wy, 25, 175, window.innerHeight*0.92, window.innerHeight*0.08),
+      r: 8 + Math.random()*28, alpha: 0.12+Math.random()*0.18,
+      life: 1.0, decay: 0.003+Math.random()*0.004,
+      drips: Math.floor(Math.random()*3), dripLen: 10+Math.random()*28,
+      dripAngle: Math.PI*0.3+Math.random()*Math.PI*1.4,
+    });
+  }
+
+  function drawInkTick() {
+    inkFrame++;
+    var W = window.innerWidth, H = window.innerHeight;
+    if (_ic.width !== W || _ic.height !== H) inkResize();
+    _ictx.clearRect(0, 0, W, H);
+
+    var vg = _ictx.createRadialGradient(W/2, H/2, H*0.28, W/2, H/2, Math.max(W,H)*0.78);
+    vg.addColorStop(0,   'rgba('+PAL.edge+',0)');
+    vg.addColorStop(0.6, 'rgba('+PAL.edge+','+(PAL.eOp*0.4).toFixed(3)+')');
+    vg.addColorStop(1,   'rgba('+PAL.edge+','+PAL.eOp.toFixed(3)+')');
+    _ictx.fillStyle = vg; _ictx.fillRect(0, 0, W, H);
+
+    if (inkFrame % 2 === 0) {
+      var grainCount = Math.floor(W*H*PAL.grain*0.00008);
+      _ictx.fillStyle = 'rgba('+PAL.splat+',0.18)';
+      for (var gi = 0; gi < grainCount; gi++) _ictx.fillRect(Math.random()*W|0, Math.random()*H|0, 1, 1);
+    }
+
+    if (humanoid && humanoid.mesh) {
+      var hx = humanoid.mesh.position.x, hy = humanoid.mesh.position.y;
+      var spd2 = Math.sqrt(butterfly.vx*butterfly.vx + butterfly.vy*butterfly.vy);
+      var moved = Math.sqrt((hx-lastHumanoidX)*(hx-lastHumanoidX)+(hy-lastHumanoidY)*(hy-lastHumanoidY));
+      if (moved > 1.2 && inkFrame % 5 === 0) spawnInkSplat(hx, hy);
+      if (spd2 > 5 && inkFrame % 20 === 0) spawnInkSplat(hx+(Math.random()-0.5)*12, hy+(Math.random()-0.5)*12);
+      lastHumanoidX = hx; lastHumanoidY = hy;
+    }
+
+    for (var si = inkSplats.length-1; si >= 0; si--) {
+      var s = inkSplats[si]; s.life -= s.decay;
+      if (s.life <= 0) { inkSplats.splice(si,1); continue; }
+      var a = s.alpha * s.life * PAL.sOp / 0.22;
+      var sg = _ictx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+      sg.addColorStop(0,   'rgba('+PAL.splat+','+(a*0.9).toFixed(3)+')');
+      sg.addColorStop(0.5, 'rgba('+PAL.splat+','+(a*0.4).toFixed(3)+')');
+      sg.addColorStop(1,   'rgba('+PAL.splat+',0)');
+      _ictx.fillStyle = sg; _ictx.beginPath(); _ictx.arc(s.x, s.y, s.r, 0, Math.PI*2); _ictx.fill();
+      for (var di2 = 0; di2 < s.drips; di2++) {
+        var dang = s.dripAngle + di2*0.5 - 0.25;
+        var dlen = s.dripLen*(0.6+di2*0.3)*s.life;
+        var dx1 = s.x+Math.cos(dang)*s.r*0.6, dy1 = s.y+Math.sin(dang)*s.r*0.6;
+        var dx2 = dx1+Math.cos(dang)*dlen, dy2 = dy1+Math.sin(dang)*dlen;
+        var lg = _ictx.createLinearGradient(dx1,dy1,dx2,dy2);
+        lg.addColorStop(0, 'rgba('+PAL.splat+','+(a*0.7).toFixed(3)+')');
+        lg.addColorStop(1, 'rgba('+PAL.splat+',0)');
+        _ictx.strokeStyle = lg; _ictx.lineWidth = (2+di2)*s.life;
+        _ictx.lineCap = 'round'; _ictx.beginPath(); _ictx.moveTo(dx1,dy1); _ictx.lineTo(dx2,dy2); _ictx.stroke();
+      }
+    }
+    requestAnimationFrame(drawInkTick);
+  }
+  function neInkStart() { setTimeout(drawInkTick, 400); }
+})();
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+function neInit() { createScene(); createLights(); buildWorld(); loop(); }
+
+
 })();
 </script>
 

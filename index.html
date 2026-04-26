@@ -543,7 +543,6 @@ body.case-mode #face_caption { display: none; }
   color: var(--muted);
 }
 .case-exit-btn {
-  margin-top: 4px;
   background: none;
   border: var(--hairline) solid var(--card-border);
   color: var(--muted);
@@ -764,20 +763,20 @@ body.has-gallery #cube-tap { cursor: pointer; }
   #scene {
     position: fixed;
     top: 0; left: 0; right: 0;
-    height: 50vh; bottom: auto;
+    height: 44vh; bottom: auto;
   }
-  #cube { --s: min(66vw, 34vh, 300px); }
+  #cube { --s: min(60vw, 28vh, 260px); }
   #cube-tap {
-    top: 25vh; left: 50%;
-    width: min(66vw, 34vh, 300px);
-    height: min(66vw, 34vh, 300px);
+    top: 22vh; left: 50%;
+    width: min(60vw, 28vh, 260px);
+    height: min(60vw, 28vh, 260px);
   }
 
   /* Scroll container: fixed lower zone, clips the strip */
   #scroll_container {
     position: fixed;
-    top: 48vh; left: 0; right: 0;
-    height: calc(52vh - 3.5rem);
+    top: 43vh; left: 0; right: 0;
+    height: calc(57vh - 3.5rem);
     overflow: hidden;
     display: block;
     z-index: 2;
@@ -832,8 +831,8 @@ body.has-gallery #cube-tap { cursor: pointer; }
   /* Mobile nav bar */
   #mobile-nav { display: flex !important; }
 
-  /* Case mode: full-screen cube */
-  body.case-mode #scene    { height: 100vh; }
+  /* Case mode: cube fills upper portion, panel takes bottom */
+  body.case-mode #scene    { height: 55vh; }
   body.case-mode #scroll_container { display: none; }
   body.case-mode #mobile-nav { display: none !important; }
   body.case-mode .face-content { display: none; }
@@ -847,7 +846,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
     right: 0 !important;
     transform: none !important;
     width: 100% !important;
-    max-height: 44vh !important;
+    max-height: 40vh !important;
     padding: 0 1.25rem !important;
     background: rgba(0,0,0,0.88) !important;
     backdrop-filter: blur(16px) !important;
@@ -862,7 +861,7 @@ body.has-gallery #cube-tap { cursor: pointer; }
   #cp-title { font-size: clamp(1.3rem, 6.5vw, 2rem) !important; }
   #cp-body  { font-size: 0.66rem !important; line-height: 1.6 !important; }
 
-  /* Case HUD: compact top-right row */
+  /* Case HUD: compact top-right (counter only) */
   body.case-mode #case-hud {
     position: fixed !important;
     top: 0.75rem !important;
@@ -878,7 +877,18 @@ body.has-gallery #cube-tap { cursor: pointer; }
     border-radius: 2px !important;
   }
   body.case-mode #case-hud #case-hud-counter { font-size: 0.52rem; }
-  body.case-mode .case-exit-btn { font-size: 0.52rem !important; padding: 0.3rem 0.6rem !important; }
+
+  /* Exit button: top-center on mobile */
+  body.case-mode .case-exit-btn {
+    top: 0.75rem !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    font-size: 0.52rem !important;
+    padding: 0.3rem 0.9rem !important;
+    background: rgba(0,0,0,0.5) !important;
+    backdrop-filter: blur(8px) !important;
+    border-radius: 2px !important;
+  }
 
   /* Mobile nav bar hidden in case mode */
   body.case-mode #mobile-nav { display: none !important; }
@@ -976,17 +986,29 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
   padding-left: 0.75rem; margin: 0;
 }
 
-/* ── Case HUD: top right, row layout ── */
+/* ── Case HUD: counter stays top-right ── */
 #case-hud {
   position: fixed !important;
   top: var(--ui-inset) !important;
   right: var(--ui-inset) !important;
   bottom: auto !important;
+  left: auto !important;
   flex-direction: row !important;
   align-items: center;
   gap: 0.75rem;
 }
 #case-hud-title { display: none; }
+
+/* Exit button: top-center, away from all other UI */
+.case-exit-btn {
+  position: fixed !important;
+  top: var(--ui-inset) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  right: auto !important;
+  margin-top: 0 !important;
+  z-index: calc(var(--z-ui) + 1) !important;
+}
 
 /* ── Custom thin scrollbars (replace all system scrollbars) ── */
 * {
@@ -1138,12 +1160,11 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <h1>DESIGN.<br>WRITE.<br>THINK.<br>MAKE.</h1>
       <p class="body-text">
         I specialize in thoughtful timeless information &amp;
-        experience systems. The sentence is the most meaningfully
-        precise artifact of human &amp; machine intelligence.
+        experience systems. 
       </p>
       <div class="cta-row">
         <a class="cta" href="#s1">
-          Enter
+          Things I Think About
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M1 6h10M6 1l5 5-5 5"/>
           </svg>
@@ -1171,14 +1192,14 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s0">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Back
+         Prev
         </a>
         <button class="cta" onclick="event.stopPropagation();enterCaseMode('gnc')">
           Expand
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h4M11 1V5M11 1L6 6M11 11H7M1 11V7M1 11l5-5"/></svg>
         </button>
         <a class="cta" href="#s2">
-          Turn
+          Next
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1205,14 +1226,14 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s1">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Back
+          Prev
         </a>
         <button class="cta" onclick="event.stopPropagation();enterCaseMode('bny')">
           Expand
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1h4M11 1V5M11 1L6 6M11 11H7M1 11V7M1 11l5-5"/></svg>
         </button>
         <a class="cta" href="#s3">
-          Turn
+          Next
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1237,10 +1258,10 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s2">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Back
+          Prev
         </a>
         <a class="cta" href="#s4">
-          Turn
+          Next
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1252,7 +1273,7 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
     <div class="text-card">
       <div class="h-line"></div>
       <div class="tag">04 — Thesis explorations</div>
-      <h2>THE<br>SENTENCE.</h2>
+      <h2>Hueristics<br>for <em>intent</em></h2>
       <p class="body-text">
         "The sentence is the most meaningfully precise artifact
         of human &amp; machine intelligence." — zack.cx
@@ -1260,18 +1281,6 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="links-cols">
         <div class="links-list">
           <a href="https://wolfie.love" target="_blank">wolfie.love</a>
-          <a href="https://wolfie.love/cine" target="_blank">wolfie.love/cine</a>
-          <a href="https://wolfie.life" target="_blank">wolfie.life</a>
-          <a href="https://reasonably.cc" target="_blank">reasonably.cc</a>
-          <a href="https://intoview.pro" target="_blank">intoview.pro</a>
-          <a href="https://ifimaybefrank.com" target="_blank">ifimaybefrank.com</a>
-          <a href="https://reasonandresolution.com" target="_blank">reasonandresolution.com</a>
-        </div>
-        <div class="links-list">
-          <a href="https://zackgort.com" target="_blank">zackgort.com</a>
-          <a href="https://zackgort.com/haiku" target="_blank">zackgort.com/haiku</a>
-          <a href="https://zackgort.com/classic" target="_blank">zackgort.com/classic</a>
-          <a href="https://zackgort.com/vitae" target="_blank">zackgort.com/vitae</a>
           <a href="https://neverever.land" target="_blank">neverever.land</a>
           <a href="https://zack.cx" target="_blank">zack.cx</a>
         </div>
@@ -1279,10 +1288,10 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="cta-row">
         <a class="cta-back" href="#s3">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Back
+          Prev
         </a>
         <a class="cta" href="#s5">
-          Turn
+          Next
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1296,17 +1305,15 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <div class="tag">05 — Contact</div>
       <h2>Thanks for stopping by.<br></h2>
       <p class="body-text">
-        zack@reasonably.cc
         <br>linkedin.com/in/zackgort<br><br>
-        *all em-dashes sourced from emdash.click
       </p>
       <div class="cta-row">
         <a class="cta-back" href="#s4">
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 6H1M6 11L1 6l5-5"/></svg>
-          Back
+          wolfie.love
         </a>
         <a class="cta" href="#s0">
-          Roll again
+          Refresh
           <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6h10M6 1l5 5-5 5"/></svg>
         </a>
       </div>
@@ -1456,24 +1463,26 @@ function loadSlideToFace(faceIdx, slide) {
   const fc = face.querySelector(".face-content");
   if (!fc) return;
   face.style.setProperty("--case-accent", slide.accent || "var(--accent)");
-  fc.querySelector(".fc-type").textContent  = slide.type  || "";
-  fc.querySelector(".fc-era").textContent   = slide.era   || "";
-  fc.querySelector(".fc-title").textContent = slide.title || "";
-  fc.querySelector(".fc-body").textContent  = slide.body  || "";
+  var fcq = function(sel) { return fc.querySelector(sel); };
+  var typeEl  = fcq(".fc-type");  if (typeEl)  typeEl.textContent  = slide.type  || "";
+  var eraEl   = fcq(".fc-era");   if (eraEl)   eraEl.textContent   = slide.era   || "";
+  var titleEl = fcq(".fc-title"); if (titleEl) titleEl.textContent = slide.title || "";
+  var bodyEl  = fcq(".fc-body");  if (bodyEl)  bodyEl.textContent  = slide.body  || "";
 
-  const pullEl = fc.querySelector(".fc-pull");
-  pullEl.textContent = slide.pull || "";
-  pullEl.style.display = slide.pull ? "" : "none";
+  var pullEl = fcq(".fc-pull");
+  if (pullEl) { pullEl.textContent = slide.pull || ""; pullEl.style.display = slide.pull ? "" : "none"; }
 
-  const statsEl = fc.querySelector(".fc-stats");
-  if (slide.stats && slide.stats.length) {
-    statsEl.innerHTML = slide.stats.map(([n,l]) =>
-      `<div class="fc-stat"><span class="fc-stat-n">${n}</span><span class="fc-stat-l">${l}</span></div>`
-    ).join("");
-    statsEl.style.display = "flex";
-  } else {
-    statsEl.innerHTML = "";
-    statsEl.style.display = "none";
+  var statsEl = fcq(".fc-stats");
+  if (statsEl) {
+    if (slide.stats && slide.stats.length) {
+      statsEl.innerHTML = slide.stats.map(function(s) {
+        return '<div class="fc-stat"><span class="fc-stat-n">' + s[0] + '</span><span class="fc-stat-l">' + s[1] + '</span></div>';
+      }).join("");
+      statsEl.style.display = "flex";
+    } else {
+      statsEl.innerHTML = "";
+      statsEl.style.display = "none";
+    }
   }
 }
 
@@ -1499,6 +1508,23 @@ function enterCaseMode(key) {
 
     prevTheme = document.documentElement.getAttribute("data-theme") || "light";
     applyTheme("dark");
+
+    // Reset all face content before preloading so stale data from a previous
+    // case study never bleeds through during the next expand.
+    dom.faces.forEach(function(face) {
+      face.style.removeProperty("--case-accent");
+      var fc = face.querySelector(".face-content");
+      if (fc) {
+        var fcType  = fc.querySelector(".fc-type");  if (fcType)  fcType.textContent  = "";
+        var fcEra   = fc.querySelector(".fc-era");   if (fcEra)   fcEra.textContent   = "";
+        var fcTitle = fc.querySelector(".fc-title"); if (fcTitle) fcTitle.textContent = "";
+        var fcBody  = fc.querySelector(".fc-body");  if (fcBody)  fcBody.textContent  = "";
+        var fcPull  = fc.querySelector(".fc-pull");  if (fcPull)  { fcPull.textContent = ""; fcPull.style.display = "none"; }
+        var fcStats = fc.querySelector(".fc-stats"); if (fcStats) { fcStats.innerHTML = ""; fcStats.style.display = "none"; }
+      }
+      var img = face.querySelector("img");
+      if (img) img.src = "";
+    });
 
     preloadCaseSlides(caseSlides);
 
@@ -2551,30 +2577,50 @@ window.mobileNav = function() {}; // stub — overridden by mobile IIFE
 <script>
 // ── Gallery touch support ────────────────────────────────────────────────
 (function() {
-  function addGalleryTouch() {
-    var canvas = document.getElementById('gallery-canvas');
-    if (!canvas) return;
-    var touchX0 = 0, touchDragStart = 0;
-    canvas.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      touchX0 = e.touches[0].clientX;
-      // Access gallery internals via events — patch targetPos via custom event
-      canvas.dispatchEvent(new CustomEvent('gallery-touchstart', { detail: { x: touchX0 } }));
-    }, { passive: false });
-    canvas.addEventListener('touchmove', function(e) {
-      e.preventDefault();
-      var dx = e.touches[0].clientX - touchX0;
-      touchX0 = e.touches[0].clientX;
-      canvas.dispatchEvent(new CustomEvent('gallery-touchmove', { detail: { dx: dx } }));
-    }, { passive: false });
-    canvas.addEventListener('touchend', function(e) {
-      canvas.dispatchEvent(new CustomEvent('gallery-touchend', {}));
+  var canvas = document.getElementById('gallery-canvas');
+  if (!canvas) return;
+
+  var touchX0 = 0, touchDragStartPos = 0, isTouchDragging = false;
+
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    touchX0 = e.touches[0].clientX;
+    isTouchDragging = true;
+    if (window._galleryDrag) touchDragStartPos = window._galleryDrag.targetPos;
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    if (!isTouchDragging || !window._galleryDrag) return;
+    var dx = e.touches[0].clientX - touchX0;
+    touchX0 = e.touches[0].clientX;
+    var g = window._galleryDrag;
+    g.targetPos -= dx * (typeof S !== 'undefined' ? S.touchSens : 0.01);
+    g.targetDist = Math.min(1, g.targetDist + Math.abs(dx) * 0.02);
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(e) {
+    if (!isTouchDragging || !window._galleryDrag) { isTouchDragging = false; return; }
+    isTouchDragging = false;
+    var g = window._galleryDrag;
+    var totalDx = e.changedTouches[0].clientX - touchX0;
+    var vel = totalDx * 0.005;
+    if (Math.abs(vel) > 0.3) {
+      g.autoScroll = -vel * 2.5 * 0.05;
+      g.targetDist = Math.min(1, Math.abs(vel) * 3 * 0.22);
+      g.isScrolling = true;
+      setTimeout(function() { if (window._galleryDrag) window._galleryDrag.isScrolling = false; }, 800);
+    }
+  }, { passive: true });
+
+  // Also handle the gallery stage area (not just canvas) for better tap target
+  var galleryEl = document.getElementById('gallery');
+  if (galleryEl) {
+    galleryEl.addEventListener('touchstart', function(e) {
+      // Only handle touches directly on canvas or stage, not on bar buttons
+      if (e.target.closest('#gallery-bar')) return;
     }, { passive: true });
   }
-  // Wire up after gallery opens
-  document.getElementById('gallery').addEventListener('transitionend', function() {
-    if (this.classList.contains('open')) addGalleryTouch();
-  });
 })();
 </script>
 

@@ -1062,13 +1062,11 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
   z-index: 9999;
   display: none;
   flex-direction: column;
-  background: rgba(10,7,24,0.92);
-  border: 1px solid rgba(0,229,255,0.2);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.12);
   padding: 0.35rem 0;
   min-width: 160px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 #ne-ctx-menu.open { display: flex; }
 #ne-ctx-menu a {
@@ -1076,18 +1074,17 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: lowercase;
-  color: rgba(0,229,255,0.75);
+  color: #111;
   text-decoration: none;
   padding: 0.45rem 1rem;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.12s;
   cursor: pointer !important;
 }
 #ne-ctx-menu a:hover {
-  background: rgba(0,229,255,0.1);
-  color: rgba(0,229,255,1);
+  background: #f2f2f2;
 }
 #ne-ctx-menu a + a {
-  border-top: 1px solid rgba(0,229,255,0.08);
+  border-top: 1px solid rgba(0,0,0,0.07);
 }
 
 </style>
@@ -3249,7 +3246,7 @@ window.addEventListener('load',function(){
   document.getElementById('ne-ctx-copy').addEventListener('click', function(e) {
     e.preventDefault();
     hideMenu();
-    navigator.clipboard.writeText(window.location.href).catch(function() {});
+    navigator.clipboard.writeText('https://zackgort.com/').catch(function() {});
   });
 })();
 </script>

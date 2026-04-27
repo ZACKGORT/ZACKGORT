@@ -510,7 +510,7 @@ body.case-mode .face-content { display: flex; }
 }
 
 /* Case mode — dim scroll content */
-body.case-mode #scroll_container { opacity: 0.04; pointer-events: none; transition: opacity 0.5s; }
+body.case-mode #scroll_container { opacity: 0; pointer-events: none; transition: opacity 0.5s; }
 body.case-mode #cube-tap { display: none; }
 body:not(.case-mode) #scroll_container { opacity: 1; transition: opacity 0.5s; }
 
@@ -1458,6 +1458,7 @@ const dom = {
 let caseMode   = null;
 let caseSlides = [];
 let prevTheme  = "light";
+let _lastCaseSlideIdx = -1;
 
 function buildCaseStops(n) {
   return Array.from({length: n}, (_, i) => ({ rx: 0, ry: -i * 90 }));
@@ -1470,8 +1471,33 @@ function loadSlideToFace(faceIdx, slide) {
   // Image
   let img = face.querySelector("img");
   if (!img) { img = document.createElement("img"); face.prepend(img); }
-  img.src = slide.img;
+  const newSrc = slide.img;
   img.alt = slide.title || "";
+  if (img.src !== newSrc) {
+    img.src = newSrc;
+    // If Three.js WebGL overlay exists for this face, reload its texture
+    if (face._threeState) {
+      var ts = face._threeState;
+      ts.loaded = false;
+      ts.canvas.style.opacity = '0';
+      var reloadImg = new Image();
+      reloadImg.crossOrigin = "anonymous";
+      reloadImg.onload = function() {
+        if (img.src !== newSrc) return; // src changed again, abort
+        if (typeof THREE !== 'undefined') {
+          var tex = new THREE.Texture(reloadImg);
+          tex.needsUpdate = true;
+          ts.uniforms.u_imgAspect.value = reloadImg.naturalWidth / (reloadImg.naturalHeight || 1);
+          ts.uniforms.u_texture.value = tex;
+          ts.loaded = true;
+          img.style.opacity = '0';
+          ts.canvas.style.opacity = '1';
+        }
+      };
+      reloadImg.onerror = function() { ts.canvas.style.display = 'none'; };
+      reloadImg.src = newSrc;
+    }
+  }
 
   // Content overlay
   const fc = face.querySelector(".face-content");
@@ -1501,10 +1527,12 @@ function loadSlideToFace(faceIdx, slide) {
 }
 
 function preloadCaseSlides(slides) {
-  // Load just the first slide onto the front face, and the second onto the next face.
-  // Subsequent slides are loaded on-demand in updateHUD as the cube rotates.
-  if (slides[0]) loadSlideToFace(caseStopFaceIdx(0), slides[0]);
-  if (slides[1]) loadSlideToFace(caseStopFaceIdx(1), slides[1]);
+  // Pre-fill all 4 equatorial faces with the correct slide for their rotation position.
+  // Face slot i shows slide i (mod 4) — this stays correct as long as we always
+  // write based on slot = slideIdx % 4, never the raw slideIdx.
+  for (var fi = 0; fi < 4; fi++) {
+    if (slides[fi]) loadSlideToFace(EQ_FACES[fi], slides[fi]);
+  }
 }
 
 function enterCaseMode(key) {
@@ -1542,7 +1570,7 @@ function enterCaseMode(key) {
 
     preloadCaseSlides(caseSlides);
 
-    tgt = 0; smooth = 0; velocity = 0;
+    tgt = 0; smooth = 0; velocity = 0; _lastCaseSlideIdx = -1;
 
     document.body.classList.add("case-mode");
     lockScroll();
@@ -1728,17 +1756,20 @@ const updateHUD = s => {
     if (dom.hudPct) dom.hudPct.textContent   = String(Math.round(s * 100)).padStart(3,"0") + "%";
     if (dom.topFill) dom.topFill.style.width = `${s * 100}%`;
     updateCaseHUD(slideIdx);
-    // Always load current slide onto whichever face maps to this position (mod 4).
-    loadSlideToFace(caseStopFaceIdx(slideIdx % 4), caseSlides[slideIdx]);
-    // Preload the next slide onto the face about to rotate into view.
-    const nextIdx = slideIdx + 1;
-    if (nextIdx < caseSlides.length) {
-      loadSlideToFace(caseStopFaceIdx((slideIdx + 1) % 4), caseSlides[nextIdx]);
-    }
-    // Also keep the previous slide correct (for scrolling back).
-    const prevIdx = slideIdx - 1;
-    if (prevIdx >= 0) {
-      loadSlideToFace(caseStopFaceIdx((slideIdx + 3) % 4), caseSlides[prevIdx]);
+    // Only update face content when the slide index actually changes.
+    // This prevents overwriting a face image while it is still visible.
+    if (slideIdx !== _lastCaseSlideIdx) {
+      _lastCaseSlideIdx = slideIdx;
+      // Current slide → its face slot (cycles over 4 physical faces)
+      loadSlideToFace(EQ_FACES[slideIdx % 4], caseSlides[slideIdx]);
+      // Next slide → next face slot (loads while hidden behind cube)
+      if (caseSlides[slideIdx + 1]) {
+        loadSlideToFace(EQ_FACES[(slideIdx + 1) % 4], caseSlides[slideIdx + 1]);
+      }
+      // Previous slide → previous face slot (for backwards scrolling)
+      if (caseSlides[slideIdx - 1]) {
+        loadSlideToFace(EQ_FACES[(slideIdx + 3) % 4], caseSlides[slideIdx - 1]);
+      }
     }
     return;
   }
@@ -3306,7 +3337,23 @@ window.addEventListener('load',function(){
       img.addEventListener('load', function() { loadTex(img.src); });
     }
 
+    // Watch for src changes driven by case study slide swaps (MutationObserver on attribute)
+    (new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.attributeName === 'src' && img.src) {
+          state.loaded = false;
+          canvas.style.opacity = '0';
+          if (img.complete && img.naturalWidth) {
+            loadTex(img.src);
+          }
+          // load event listener above will fire if not yet complete
+        }
+      });
+    })).observe(img, { attributes: true, attributeFilter: ['src'] });
+
     faceStates.push(state);
+    // Attach state to DOM element for lookup by loadSlideToFace
+    face._threeState = state;
   });
 
   // Global mouse tracking in scene-space

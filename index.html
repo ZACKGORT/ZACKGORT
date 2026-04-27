@@ -1590,7 +1590,6 @@ function enterCaseMode(key) {
     lockScroll();
     updateCaseHUD(0);
     updateSectionNavDots(0);
-    if (window._syncShaderCanvasAspect) window._syncShaderCanvasAspect();
 
     // Fade back in
     if (scene) scene.style.opacity = "";
@@ -1615,7 +1614,6 @@ function exitCaseMode() {
     applyTheme(prevTheme);
     document.body.classList.remove("case-mode");
     unlockScroll();
-    if (window._syncShaderCanvasAspect) window._syncShaderCanvasAspect();
 
   // Restore original face images
   const origImgs = [
@@ -2052,18 +2050,29 @@ const GALLERY_DATA = {
   rolling: {
     tag: '00 · Identity', title: 'Intro to Zack',
     images: [
-      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
       'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
+      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
       'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
       'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
       'https://i.ibb.co/60GV48WK/fishtown.webp',
       'https://i.ibb.co/MkjJjpR/FB-IMG-1508452344350-1.jpg',
-      'https://i.ibb.co/PswtrTff/IMG-20170104-184947-650.jpg',
-      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
-      'https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg',
-      'https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp',
+
+      "https://i.ibb.co/LXmyD2hq/IMG-20170104-184947-650.webp",
+        "https://i.ibb.co/CpkzWmRn/IMG-20151206-143245434-01.webp",
+        "https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg",
+
+
+        "https://i.ibb.co/HpXh5NPN/IMG-20160407-150604368-1.jpg",
+
+        "https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp",
+
+        "https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg",
+        "https://i.ibb.co/c3vLP47/image-445-min.png",
+        "https://i.ibb.co/RymyPtP/image-443-min.png",
+        "https://i.ibb.co/Ct9DZd9/image-442-min.png",
+
       'https://i.ibb.co/nz4HvC4/image-417-min.png',
-      'https://i.ibb.co/5gMSK3gg/IMG-20171231-190053.webp',
+
       'https://i.ibb.co/PG1MrDLt/1-DUp-Jk-Ot-Zacr-Xz-Febgk5rt-Q.webp',
       'https://i.ibb.co/fd8Ycjyv/1-pch6xh-Ep-Fo-Xxli-AGb-Nnr7-Q.webp',
       'https://i.ibb.co/v6fqJ9b9/1-I-n-HQKs7-BIXo-Y0onf-Nxn-Og.webp',
@@ -2077,29 +2086,33 @@ const GALLERY_DATA = {
   setup: {
     tag: '01 · GNC via Elva Design', title: 'e-commerce',
     images: [
-      'https://i.ibb.co/cSQCgNQY/work1.webp',
-      'https://i.ibb.co/spHgPH6N/1.webp',
-      'https://i.ibb.co/ynjWYqv8/2.webp',
-      'https://i.ibb.co/cXg5Phdc/3.webp',
-      'https://i.ibb.co/gZ58PKyk/4.webp',
-      'https://i.ibb.co/Y7pGqJ69/5.webp',
-      'https://i.ibb.co/99h2bQMh/6.webp',
-      'https://i.ibb.co/yB4RwkTf/7.webp',
-      'https://i.ibb.co/7N2rDqrN/8.webp',
-      'https://i.ibb.co/rft2bf0T/9.webp',
+    'https://i.ibb.co/ynjWYqv8/2.webp',
+  'https://i.ibb.co/spHgPH6N/1.webp',
+  'https://i.ibb.co/cXg5Phdc/3.webp',
+  'https://i.ibb.co/99h2bQMh/6.webp',
+  'https://i.ibb.co/gZ58PKyk/4.webp',
+  'https://i.ibb.co/Y7pGqJ69/5.webp',
+  'https://i.ibb.co/yB4RwkTf/7.webp',
+  'https://i.ibb.co/cSQCgNQY/work1.webp',
+  'https://i.ibb.co/pBMMxY1Z/11.webp',
+  'https://i.ibb.co/7N2rDqrN/8.webp',
+  'https://i.ibb.co/vx76zjgf/10.webp',
+  'https://i.ibb.co/rft2bf0T/9.webp'
     ],
   },
   pop: {
     tag: '02 · BNY via Publicis Sapient', title: 'fintech',
     images: [
       'https://i.ibb.co/xtycG8Qd/1-Bl-Rk8m-WPs-Ivsfb-Zkdz-SI1-A.webp',
-      'https://i.ibb.co/XkM2hn8n/bny1.png',
-      'https://i.ibb.co/vvMZmq94/bny2.png',
-      'https://i.ibb.co/xS49C07B/bny3.png',
-      'https://i.ibb.co/wZY2bhKF/bny4.png',
-      'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*q-zgZhKnCs6abK8CIpE00Q.png',
-      'https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png',
-      'https://miro.medium.com/v2/resize:fit:4800/format:webp/1*-sJ-pN8tBwwsHq1XcDSLLw.png',
+      "https://i.ibb.co/wZY2bhKF/bny4.png",
+        "https://i.ibb.co/xS49C07B/bny3.png",
+        "https://i.ibb.co/vvMZmq94/bny2.png",
+        "https://i.ibb.co/XkM2hn8n/bny1.png",
+        "https://i.ibb.co/FJNG1jC/14.jpg",
+        "https://i.ibb.co/fxjgcYD/18.png",
+        "https://i.ibb.co/gtQLYJQ/17.jpg",
+        "https://i.ibb.co/Fgxcqj0/16.jpg",
+        "https://i.ibb.co/dcXH5fn/13.jpg"
     ],
   },
   slide: {
@@ -2177,13 +2190,54 @@ const GALLERY_DATA = {
   landing: {
     tag: '05 · Landing', title: 'builds well with others',
     images: [
-      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
-      'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
-      'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
-      'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
-      'https://i.ibb.co/KcLtFPg3/IMG-20170310-150927-864.jpg',
-      'https://i.ibb.co/N2yd0jJV/1-l-EJetj-Ut85-CTbb24d-BTFk-A.webp',
-      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
+
+    "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
+        "https://i.ibb.co/cX4QjFf/Screenshot-20230217-102232.png",
+        "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
+        "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
+
+
+        "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
+        "https://i.ibb.co/4Z3457T5/1-t-Yd-DX2-Ql-VLw-XI7gm3ev-MLw.webp",
+        "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
+        "https://i.ibb.co/X5NHxCV/image-414-min.png",
+        "https://i.ibb.co/0VmJ708g/work3.webp",
+
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
+        "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp",
+
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
+        "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
+        "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
+
+        "https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif",
+
+        "https://i.ibb.co/yPyHvw2/Screenshot-20230217-101719.png",
+        "https://i.ibb.co/cX4QjFf/Screenshot-20230217-102232.png",
+        "https://i.ibb.co/kzpT2Qr/tiktok3.webp",
+        "https://i.ibb.co/0DPv3vQ/Frame-4349.png",
+
+        "https://i.ibb.co/PhqGJgc/wovn-wireframes.jpg",
+        "https://i.ibb.co/4Z3457T5/1-t-Yd-DX2-Ql-VLw-XI7gm3ev-MLw.webp",
+        "https://i.ibb.co/kDXnBz5/1-p-XU6-Sp-Y7-Mx-MKiyf-VI-976g.gif",
+        "https://i.ibb.co/X5NHxCV/image-414-min.png",
+        "https://i.ibb.co/0VmJ708g/work3.webp",
+
+        "https://i.ibb.co/cSQCgNQY/work1.webp",
+        "https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp",
+        "https://i.ibb.co/jk13J77g/frame-4348-68c4866f3d9d4.webp",
+        "https://i.ibb.co/rft2bf0T/9.webp",
+        "https://i.ibb.co/vx76zjgf/10.webp",
+
+        "https://i.ibb.co/hsNwyLC/nav-1sec.gif",
+        "https://i.ibb.co/qLPtQwx3/dana-mobile-68c4866ab0d77.webp",
+        "https://i.ibb.co/5XBv9TX0/dana-mobile-mockup-68c4866c20dee.webp",
+        "https://i.ibb.co/wNWFgHj2/dana-dana-mobile-nav-68c48669d96e6.webp",
+
     ],
   },
 };
@@ -3246,15 +3300,11 @@ window.addEventListener('load',function(){
     'uniform vec2 u_prevMouse;',
     'uniform float u_aberrationIntensity;',
     'uniform float u_imgAspect;',
-    'uniform float u_canvasAspect;',
     'vec2 coverUV(vec2 uv) {',
     '  float scaleX = 1.0;',
     '  float scaleY = 1.0;',
-    '  if (u_canvasAspect > u_imgAspect) {',
-    '    scaleY = u_imgAspect / u_canvasAspect;',
-    '  } else {',
-    '    scaleX = u_canvasAspect / u_imgAspect;',
-    '  }',
+    '  if (u_imgAspect > 1.0) { scaleX = 1.0 / u_imgAspect; }',
+    '  else { scaleY = u_imgAspect; }',
     '  return (uv - 0.5) * vec2(scaleX, scaleY) + 0.5;',
     '}',
     'void main() {',
@@ -3309,8 +3359,7 @@ window.addEventListener('load',function(){
       u_mouse:              { value: new THREE.Vector2(0.5, 0.5) },
       u_prevMouse:          { value: new THREE.Vector2(0.5, 0.5) },
       u_aberrationIntensity:{ value: 0.0 },
-      u_imgAspect:          { value: 1.0 },
-      u_canvasAspect:       { value: w / h }
+      u_imgAspect:          { value: 1.0 }
     };
 
     var mesh = new THREE.Mesh(
@@ -3361,33 +3410,13 @@ window.addEventListener('load',function(){
     // Watch for src changes driven by case study slide swaps (MutationObserver on attribute)
     (new MutationObserver(function(mutations) {
       mutations.forEach(function(m) {
-        if (m.attributeName === 'src') {
-          if (!img.src) return; // src cleared to "" — wait for the next real src
+        if (m.attributeName === 'src' && img.src) {
           state.loaded = false;
           canvas.style.opacity = '0';
-          var srcAtChange = img.src;
           if (img.complete && img.naturalWidth) {
             loadTex(img.src);
-          } else {
-            // Attach a fresh one-shot listener — the original init-time listener
-            // may have already fired and won't fire again for this src change.
-            function onLoad() {
-              img.removeEventListener('load', onLoad);
-              if (img.src) loadTex(img.src);
-            }
-            img.addEventListener('load', onLoad);
-            // Fallback: for cached images the browser may not re-fire 'load'
-            // even after a src="" → src=url round-trip. Poll via rAF.
-            (function pollReady() {
-              if (img.src !== srcAtChange) return; // src changed again, abort
-              if (img.complete && img.naturalWidth) {
-                img.removeEventListener('load', onLoad);
-                loadTex(img.src);
-              } else {
-                requestAnimationFrame(pollReady);
-              }
-            })();
           }
+          // load event listener above will fire if not yet complete
         }
       });
     })).observe(img, { attributes: true, attributeFilter: ['src'] });
@@ -3437,7 +3466,7 @@ window.addEventListener('load',function(){
       s.canvas.width  = w;
       s.canvas.height = h;
       s.renderer.setSize(w, h);
-      s.uniforms.u_canvasAspect.value = w / h;
+      // OrthographicCamera (-1,1,1,-1) — no aspect update needed for square faces
     });
   });
 
@@ -3458,19 +3487,6 @@ window.addEventListener('load',function(){
     });
   }
   animate();
-
-  window._syncShaderCanvasAspect = function() {
-    requestAnimationFrame(function() {
-      faceStates.forEach(function(s) {
-        var w = s.face.offsetWidth  || 540;
-        var h = s.face.offsetHeight || 540;
-        s.canvas.width  = w;
-        s.canvas.height = h;
-        s.renderer.setSize(w, h, false);
-        s.uniforms.u_canvasAspect.value = w / h;
-      });
-    });
-  };
 
 })();
 </script>

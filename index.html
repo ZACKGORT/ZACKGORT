@@ -79,10 +79,12 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 @layer cube {
   #cube {
     --s: min(74vw, 74vh, 540px);
+    --cw: var(--s);
+    --ch: var(--s);
     pointer-events: auto;
     cursor: pointer;
-    width: var(--s);
-    height: var(--s);
+    width: var(--cw);
+    height: var(--ch);
     position: relative;
     transform-style: preserve-3d;
     transform: rotateX(90deg) rotateY(0deg);
@@ -118,12 +120,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     pointer-events: none;
     user-select: none;
   }
-  .face[data-face="front"]  { transform: translateZ(calc(var(--s) / 2)); }
-  .face[data-face="back"]   { transform: rotateY(180deg)  translateZ(calc(var(--s) / 2)); }
-  .face[data-face="right"]  { transform: rotateY(90deg)   translateZ(calc(var(--s) / 2)); }
-  .face[data-face="left"]   { transform: rotateY(-90deg)  translateZ(calc(var(--s) / 2)); }
-  .face[data-face="top"]    { transform: rotateX(-90deg)  translateZ(calc(var(--s) / 2)); }
-  .face[data-face="bottom"] { transform: rotateX(90deg)   translateZ(calc(var(--s) / 2)); }
+  /* Front/back faces: full width x height, translate along Z by half-width */
+  .face[data-face="front"]  { transform: translateZ(calc(var(--cw) / 2)); }
+  .face[data-face="back"]   { transform: rotateY(180deg) translateZ(calc(var(--cw) / 2)); }
+  /* Right/left faces: swap width↔height, translate along Z by half-width */
+  .face[data-face="right"]  {
+    width: var(--cw); height: var(--ch);
+    transform: rotateY(90deg) translateZ(calc(var(--cw) / 2));
+  }
+  .face[data-face="left"]   {
+    width: var(--cw); height: var(--ch);
+    transform: rotateY(-90deg) translateZ(calc(var(--cw) / 2));
+  }
+  /* Top/bottom: full width, depth = width, translate by half-height */
+  .face[data-face="top"]    { transform: rotateX(-90deg) translateZ(calc(var(--ch) / 2)); }
+  .face[data-face="bottom"] { transform: rotateX(90deg)  translateZ(calc(var(--ch) / 2)); }
 
 
 }
@@ -926,7 +937,11 @@ body.case-mode #top-progress { opacity: 0; pointer-events: none; }
 
 /* Desktop: shift cube left in case mode for panel */
 @media (min-width: 901px) {
-  body.case-mode #scene { right: clamp(280px, 28vw, 380px); left: 0; }
+  body.case-mode #scene { right: clamp(320px, 30vw, 420px); left: 0; }
+  body.case-mode #cube  {
+    --ch: min(58vh, 420px);
+    --cw: min(calc(var(--ch) * 16 / 10), 55vw, 680px);
+  }
   body.case-mode .face-content { display: none; }
 }
 
@@ -1488,6 +1503,9 @@ function loadSlideToFace(faceIdx, slide) {
           var tex = new THREE.Texture(reloadImg);
           tex.needsUpdate = true;
           ts.uniforms.u_imgAspect.value = reloadImg.naturalWidth / (reloadImg.naturalHeight || 1);
+          var fw = face.offsetWidth || 540;
+          var fh = face.offsetHeight || 540;
+          ts.uniforms.u_faceAspect.value = fw / Math.max(fh, 1);
           ts.uniforms.u_texture.value = tex;
           ts.loaded = true;
           img.style.opacity = '0';
@@ -3230,11 +3248,15 @@ window.addEventListener('load',function(){
     'uniform vec2 u_prevMouse;',
     'uniform float u_aberrationIntensity;',
     'uniform float u_imgAspect;',
+    'uniform float u_faceAspect;',
     'vec2 coverUV(vec2 uv) {',
+    '  float imgA = u_imgAspect;',
+    '  float faceA = u_faceAspect;',
+    '  float rel = imgA / faceA;',
     '  float scaleX = 1.0;',
     '  float scaleY = 1.0;',
-    '  if (u_imgAspect > 1.0) { scaleX = 1.0 / u_imgAspect; }',
-    '  else { scaleY = u_imgAspect; }',
+    '  if (rel > 1.0) { scaleX = 1.0 / rel; }',
+    '  else { scaleY = rel; }',
     '  return (uv - 0.5) * vec2(scaleX, scaleY) + 0.5;',
     '}',
     'void main() {',
@@ -3283,13 +3305,13 @@ window.addEventListener('load',function(){
     // Orthographic camera avoids perspective distortion on a flat plane
     var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 0.5;
-
     var uniforms = {
       u_texture:            { value: null },
       u_mouse:              { value: new THREE.Vector2(0.5, 0.5) },
       u_prevMouse:          { value: new THREE.Vector2(0.5, 0.5) },
       u_aberrationIntensity:{ value: 0.0 },
-      u_imgAspect:          { value: 1.0 }
+      u_imgAspect:          { value: 1.0 },
+      u_faceAspect:         { value: w / Math.max(h, 1) }
     };
 
     var mesh = new THREE.Mesh(
@@ -3396,7 +3418,7 @@ window.addEventListener('load',function(){
       s.canvas.width  = w;
       s.canvas.height = h;
       s.renderer.setSize(w, h);
-      // OrthographicCamera (-1,1,1,-1) — no aspect update needed for square faces
+      s.uniforms.u_faceAspect.value = w / Math.max(h, 1);
     });
   });
 

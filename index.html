@@ -1057,36 +1057,6 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
 #ne-ink-overlay{ z-index: 9001; }
 #ne-world-fg   { z-index: 9002; }
 
-#ne-ctx-menu {
-  position: fixed;
-  z-index: 9999;
-  display: none;
-  flex-direction: column;
-  background: #ffffff;
-  border: 1px solid rgba(0,0,0,0.12);
-  padding: 0.35rem 0;
-  min-width: 160px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}
-#ne-ctx-menu.open { display: flex; }
-#ne-ctx-menu a {
-  font-family: 'Courier Prime', monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: lowercase;
-  color: #111;
-  text-decoration: none;
-  padding: 0.45rem 1rem;
-  transition: background 0.12s;
-  cursor: pointer !important;
-}
-#ne-ctx-menu a:hover {
-  background: #f2f2f2;
-}
-#ne-ctx-menu a + a {
-  border-top: 1px solid rgba(0,0,0,0.07);
-}
-
 </style>
 </head>
 <body>
@@ -1425,7 +1395,7 @@ const BNY_SLIDES = [
 // CUBE NAVIGATION (chapter mode)
 // ─────────────────────────────────────────────────────────
 const N = 6;
-const FACE_NAMES = ["hi, i'm zack","e-commerce","finance","solutioning [sic]","made with wolfie.love","hireable"];
+const FACE_NAMES = ["Hi, I'm Zack","E-Commerce","Finance","Design [sic]","made with wolfie.love","inquire to acquire"];
 const CHAPTER_STOPS = [
   { rx: 90,  ry:   0 },
   { rx:  0,  ry:   0 },
@@ -2460,7 +2430,6 @@ function openGallery(key) {
   window.addEventListener('mouseup',   onMouseUp);
   canvas.addEventListener('wheel',     onWheel, { passive: false });
 
-
   // Expose drag controls for touch
   window._galleryDrag = { get targetPos() { return targetPos; }, set targetPos(v) { targetPos = v; }, get targetDist() { return targetDist; }, set targetDist(v) { targetDist = v; }, get isScrolling() { return isScrolling; }, set isScrolling(v) { isScrolling = v; }, get autoScroll() { return autoScroll; }, set autoScroll(v) { autoScroll = v; } };
 
@@ -3197,57 +3166,201 @@ window.addEventListener('load',function(){
 })();
 </script>
 
-
-<!-- ── NeverEver context menu ── -->
-<div id="ne-ctx-menu">
-  <a href="#" id="ne-ctx-top">↑ back to top</a>
-  <a href="#" id="ne-ctx-copy">⎘ copy link</a>
-  <a href="https://linkedin.com/in/zackgort" target="_blank">linkedin</a>
-  <a href="https://wolfie.love" target="_blank">wolfie.love</a>
-  <a href="https://zack.cx" target="_blank">zack.cx</a>
-</div>
-
 <script>
-// ── NeverEver context menu ────────────────────────────────────────────────
+// ── Face Image Distortion Effect ─────────────────────────────────────────────
+// Applies the mouse-follow grid-warp + chromatic aberration shader to each
+// cube face image. Only activates on non-touch devices.
 (function() {
-  var menu = document.getElementById('ne-ctx-menu');
-  if (!menu) return;
+  if (!window.THREE) return;
+  if (window.matchMedia('(hover: none)').matches) return; // skip touch devices
 
-  function showMenu(x, y) {
-    menu.classList.add('open');
-    // Keep within viewport
-    var mw = 170, mh = 170;
-    var left = Math.min(x, window.innerWidth  - mw - 8);
-    var top  = Math.min(y, window.innerHeight - mh - 8);
-    menu.style.left = left + 'px';
-    menu.style.top  = top  + 'px';
+  var VERTEX_SHADER = [
+    'varying vec2 vUv;',
+    'void main() {',
+    '  vUv = uv;',
+    '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+    '}'
+  ].join('\n');
+
+  var FRAGMENT_SHADER = [
+    'varying vec2 vUv;',
+    'uniform sampler2D u_texture;',
+    'uniform vec2 u_mouse;',
+    'uniform vec2 u_prevMouse;',
+    'uniform float u_aberrationIntensity;',
+    'uniform float u_imgAspect;',
+    'vec2 coverUV(vec2 uv) {',
+    '  float scaleX = 1.0;',
+    '  float scaleY = 1.0;',
+    '  if (u_imgAspect > 1.0) { scaleX = 1.0 / u_imgAspect; }',
+    '  else { scaleY = u_imgAspect; }',
+    '  return (uv - 0.5) * vec2(scaleX, scaleY) + 0.5;',
+    '}',
+    'void main() {',
+    '  vec2 gridUV = floor(vUv * vec2(20.0, 20.0)) / vec2(20.0, 20.0);',
+    '  vec2 centerOfPixel = gridUV + vec2(1.0/20.0, 1.0/20.0);',
+    '  vec2 mouseDirection = u_mouse - u_prevMouse;',
+    '  vec2 pixelToMouseDirection = centerOfPixel - u_mouse;',
+    '  float pixelDistanceToMouse = length(pixelToMouseDirection);',
+    '  float strength = smoothstep(0.3, 0.0, pixelDistanceToMouse);',
+    '  vec2 uvOffset = strength * -mouseDirection * 0.2;',
+    '  vec2 uv = coverUV(vUv - uvOffset);',
+    '  vec4 colorR = texture2D(u_texture, uv + vec2(strength * u_aberrationIntensity * 0.01, 0.0));',
+    '  vec4 colorG = texture2D(u_texture, uv);',
+    '  vec4 colorB = texture2D(u_texture, uv - vec2(strength * u_aberrationIntensity * 0.01, 0.0));',
+    '  gl_FragColor = vec4(colorR.r, colorG.g, colorB.b, 1.0);',
+    '}'
+  ].join('\n');
+
+  var sceneEl = document.getElementById('scene');
+  var faces = document.querySelectorAll('#cube .face');
+
+  // Per-face state
+  var faceStates = [];
+
+  faces.forEach(function(face) {
+    var img = face.querySelector('img');
+    if (!img) return;
+
+    // Create canvas overlay
+    var canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;';
+    // Insert canvas right after the img so it sits on top
+    img.parentNode.insertBefore(canvas, img.nextSibling);
+
+    // Build Three.js scene
+    var w = face.offsetWidth || 540;
+    var h = face.offsetHeight || 540;
+    canvas.width  = w;
+    canvas.height = h;
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: false });
+    renderer.setPixelRatio(1);
+    renderer.setSize(w, h, false); // false = don't override CSS size
+
+    var scene  = new THREE.Scene();
+    // Orthographic camera avoids perspective distortion on a flat plane
+    var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    camera.position.z = 0.5;
+
+    var uniforms = {
+      u_texture:            { value: null },
+      u_mouse:              { value: new THREE.Vector2(0.5, 0.5) },
+      u_prevMouse:          { value: new THREE.Vector2(0.5, 0.5) },
+      u_aberrationIntensity:{ value: 0.0 },
+      u_imgAspect:          { value: 1.0 }
+    };
+
+    var mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      new THREE.ShaderMaterial({ uniforms: uniforms, vertexShader: VERTEX_SHADER, fragmentShader: FRAGMENT_SHADER })
+    );
+    scene.add(mesh);
+
+    var state = {
+      face: face,
+      img: img,
+      canvas: canvas,
+      renderer: renderer,
+      scene: scene,
+      camera: camera,
+      uniforms: uniforms,
+      mesh: mesh,
+      mousePos:       { x: 0.5, y: 0.5 },
+      targetMousePos: { x: 0.5, y: 0.5 },
+      prevPos:        { x: 0.5, y: 0.5 },
+      easeFactor: 0.02,
+      aberration: 0.0,
+      loaded: false
+    };
+
+    function loadTex(src) {
+      new THREE.TextureLoader().load(src, function(tex) {
+        tex.needsUpdate = true;
+        // Pass image aspect ratio to shader for object-fit:cover UV correction
+        var imgW = tex.image.naturalWidth  || tex.image.width  || 1;
+        var imgH = tex.image.naturalHeight || tex.image.height || 1;
+        uniforms.u_imgAspect.value = imgW / imgH;
+        uniforms.u_texture.value = tex;
+        state.loaded = true;
+        img.style.opacity = '0';
+        canvas.style.opacity = '1';
+      }, undefined, function() {
+        canvas.style.display = 'none';
+      });
+    }
+
+    if (img.complete && img.naturalWidth) {
+      loadTex(img.src);
+    } else {
+      img.addEventListener('load', function() { loadTex(img.src); });
+    }
+
+    faceStates.push(state);
+  });
+
+  // Global mouse tracking in scene-space
+  // We compute mouse position relative to the #scene element bounding rect.
+  // Since all faces are centered there, we reuse those coords for all faces —
+  // each face is the same size as the cube so UV mapping is consistent.
+  var globalMouse = { x: 0.5, y: 0.5 };
+  var isOverScene = false;
+
+  document.addEventListener('mousemove', function(e) {
+    var rect = sceneEl ? sceneEl.getBoundingClientRect() : { left:0, top:0, width:window.innerWidth, height:window.innerHeight };
+    var nx = (e.clientX - rect.left) / rect.width;
+    var ny = (e.clientY - rect.top)  / rect.height;
+    isOverScene = nx >= 0 && nx <= 1 && ny >= 0 && ny <= 1;
+
+    if (isOverScene) {
+      faceStates.forEach(function(s) {
+        s.prevPos = { x: s.targetMousePos.x, y: s.targetMousePos.y };
+        s.targetMousePos = { x: nx, y: ny };
+        s.aberration = 1.0;
+        s.easeFactor = 0.02;
+      });
+    }
+  });
+
+  document.addEventListener('mouseleave', function() {
+    isOverScene = false;
+    faceStates.forEach(function(s) {
+      s.easeFactor = 0.05;
+      s.targetMousePos = { x: s.prevPos.x, y: s.prevPos.y };
+    });
+  });
+
+  // Resize handler
+  window.addEventListener('resize', function() {
+    faceStates.forEach(function(s) {
+      var w = s.face.offsetWidth  || 540;
+      var h = s.face.offsetHeight || 540;
+      if (s.canvas.width === w && s.canvas.height === h) return;
+      s.canvas.width  = w;
+      s.canvas.height = h;
+      s.renderer.setSize(w, h);
+      // OrthographicCamera (-1,1,1,-1) — no aspect update needed for square faces
+    });
+  });
+
+  // Shared animation loop
+  function animate() {
+    requestAnimationFrame(animate);
+    faceStates.forEach(function(s) {
+      if (!s.loaded) return;
+      // Lerp mouse
+      s.mousePos.x += (s.targetMousePos.x - s.mousePos.x) * s.easeFactor;
+      s.mousePos.y += (s.targetMousePos.y - s.mousePos.y) * s.easeFactor;
+      // Update uniforms
+      s.uniforms.u_mouse.value.set(s.mousePos.x, 1.0 - s.mousePos.y);
+      s.uniforms.u_prevMouse.value.set(s.prevPos.x, 1.0 - s.prevPos.y);
+      s.aberration = Math.max(0.0, s.aberration - 0.05);
+      s.uniforms.u_aberrationIntensity.value = s.aberration;
+      s.renderer.render(s.scene, s.camera);
+    });
   }
-  function hideMenu() { menu.classList.remove('open'); }
+  animate();
 
-  // Right click anywhere triggers context menu
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    showMenu(e.clientX, e.clientY);
-  });
-
-  // Click outside to dismiss
-  document.addEventListener('pointerdown', function(e) {
-    if (!menu.contains(e.target)) hideMenu();
-  });
-
-  // Back to top
-  document.getElementById('ne-ctx-top').addEventListener('click', function(e) {
-    e.preventDefault();
-    hideMenu();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
-  // Copy link
-  document.getElementById('ne-ctx-copy').addEventListener('click', function(e) {
-    e.preventDefault();
-    hideMenu();
-    navigator.clipboard.writeText('https://zackgort.com/').catch(function() {});
-  });
 })();
 </script>
 

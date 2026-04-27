@@ -3204,6 +3204,7 @@ function ne_buildWorld(){
   ne_humanoid.mesh.scale.setScalar(0.25);
   ne_humanoid.mesh.position.set(0,100,0);
   ne_scene.add(ne_humanoid.mesh);
+  window.ne_humanoid=ne_humanoid; // expose for orientation reset
   ne_companionPoodle=new CompanionPoodle();
   ne_scene.add(ne_companionPoodle.mesh);
 }
@@ -3488,6 +3489,129 @@ window.addEventListener('load',function(){
   }
   animate();
 
+})();
+</script>
+
+
+<!-- ── Custom context menu ────────────────────────────────────────────────────────────────────────────── -->
+<div id="ne-ctx" aria-hidden="true">
+  <button class="ne-ctx-item" id="ne-ctx-reset">↺ reset orientation</button>
+  <div class="ne-ctx-sep"></div>
+  <button class="ne-ctx-item" id="ne-ctx-refresh">⟳ refresh</button>
+  <a class="ne-ctx-item" id="ne-ctx-li" href="https://linkedin.com/in/zackgort" target="_blank" rel="noopener">↗ linkedin</a>
+  <a class="ne-ctx-item" id="ne-ctx-ne" href="https://neverever.land" target="_blank" rel="noopener">↗ neverever.land</a>
+</div>
+
+<style>
+#ne-ctx {
+  position: fixed;
+  z-index: 99999;
+  display: none;
+  flex-direction: column;
+  min-width: 11rem;
+  padding: 0.35rem 0;
+  background: rgba(14,12,11,0.93);
+  border: 1px solid rgba(200,184,154,0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: 'Courier Prime', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+}
+#ne-ctx.open { display: flex; }
+.ne-ctx-item {
+  display: block;
+  width: 100%;
+  padding: 0.52rem 1rem;
+  background: none;
+  border: none;
+  color: rgba(237,232,223,0.72);
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-decoration: none;
+  text-align: left;
+  cursor: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.ne-ctx-item:hover {
+  background: rgba(200,184,154,0.10);
+  color: #ede8df;
+}
+.ne-ctx-sep {
+  height: 1px;
+  margin: 0.3rem 0.8rem;
+  background: rgba(200,184,154,0.14);
+}
+</style>
+
+<script>
+(function () {
+  var ctx = document.getElementById('ne-ctx');
+  if (!ctx) return;
+
+  function openCtx(x, y) {
+    ctx.style.left = x + 'px';
+    ctx.style.top  = y + 'px';
+    ctx.classList.add('open');
+    var r = ctx.getBoundingClientRect();
+    if (r.right  > window.innerWidth)  ctx.style.left = (x - r.width)  + 'px';
+    if (r.bottom > window.innerHeight) ctx.style.top  = (y - r.height) + 'px';
+    ctx.setAttribute('aria-hidden', 'false');
+  }
+  function closeCtx() {
+    ctx.classList.remove('open');
+    ctx.setAttribute('aria-hidden', 'true');
+  }
+
+  function resetOrientation() {
+    var h = window.ne_humanoid;
+    if (!h) return;
+    if (typeof gsap !== 'undefined') {
+      gsap.killTweensOf(h);
+      gsap.to(h, { flipX: 0, flipZ: 0, duration: 0.9, ease: 'power3.out' });
+    } else {
+      h.flipX = 0; h.flipZ = 0;
+    }
+  }
+
+  // Left click anywhere (not on links/buttons/menu) resets orientation
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('#ne-ctx')) return;
+    if (e.target.closest('a, button, .cta, .cta-back')) return;
+    closeCtx();
+    resetOrientation();
+  });
+
+  // Right click opens custom menu
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    openCtx(e.clientX, e.clientY);
+  });
+
+  // Close on outside click or Escape
+  document.addEventListener('mousedown', function (e) {
+    if (!e.target.closest('#ne-ctx')) closeCtx();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeCtx();
+  });
+
+  // Menu item actions
+  document.getElementById('ne-ctx-reset').addEventListener('click', function () {
+    closeCtx(); resetOrientation();
+  });
+  document.getElementById('ne-ctx-refresh').addEventListener('click', function () {
+    closeCtx(); window.location.reload();
+  });
+  ['ne-ctx-li', 'ne-ctx-ne'].forEach(function (id) {
+    document.getElementById(id).addEventListener('click', closeCtx);
+  });
 })();
 </script>
 

@@ -1501,10 +1501,10 @@ function loadSlideToFace(faceIdx, slide) {
 }
 
 function preloadCaseSlides(slides) {
-  // Only load first 4 — one per equatorial face, no overwrites
-  slides.slice(0, 4).forEach((slide, i) => {
-    loadSlideToFace(caseStopFaceIdx(i), slide);
-  });
+  // Load just the first slide onto the front face, and the second onto the next face.
+  // Subsequent slides are loaded on-demand in updateHUD as the cube rotates.
+  if (slides[0]) loadSlideToFace(caseStopFaceIdx(0), slides[0]);
+  if (slides[1]) loadSlideToFace(caseStopFaceIdx(1), slides[1]);
 }
 
 function enterCaseMode(key) {
@@ -1728,12 +1728,17 @@ const updateHUD = s => {
     if (dom.hudPct) dom.hudPct.textContent   = String(Math.round(s * 100)).padStart(3,"0") + "%";
     if (dom.topFill) dom.topFill.style.width = `${s * 100}%`;
     updateCaseHUD(slideIdx);
-    // Load current slide onto its face
-    loadSlideToFace(caseStopFaceIdx(slideIdx), caseSlides[slideIdx]);
-    // Preload next slide onto its face while it's still behind the cube
+    // Always load current slide onto whichever face maps to this position (mod 4).
+    loadSlideToFace(caseStopFaceIdx(slideIdx % 4), caseSlides[slideIdx]);
+    // Preload the next slide onto the face about to rotate into view.
     const nextIdx = slideIdx + 1;
     if (nextIdx < caseSlides.length) {
-      loadSlideToFace(caseStopFaceIdx(nextIdx), caseSlides[nextIdx]);
+      loadSlideToFace(caseStopFaceIdx((slideIdx + 1) % 4), caseSlides[nextIdx]);
+    }
+    // Also keep the previous slide correct (for scrolling back).
+    const prevIdx = slideIdx - 1;
+    if (prevIdx >= 0) {
+      loadSlideToFace(caseStopFaceIdx((slideIdx + 3) % 4), caseSlides[prevIdx]);
     }
     return;
   }

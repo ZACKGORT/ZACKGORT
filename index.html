@@ -1185,8 +1185,7 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <h1>DESIGN.<br>WRITE.<br>THINK.<br>MAKE.</h1>
       <p class="body-text">
         I specialize in thoughtful timeless information &amp;
-        experience systems. The sentence is the most meaningfully
-        precise artifact of human &amp; machine intelligence.
+        experience systems.
       </p>
       <div class="cta-row">
         <a class="cta" href="#s1">
@@ -1503,9 +1502,6 @@ function loadSlideToFace(faceIdx, slide) {
           var tex = new THREE.Texture(reloadImg);
           tex.needsUpdate = true;
           ts.uniforms.u_imgAspect.value = reloadImg.naturalWidth / (reloadImg.naturalHeight || 1);
-          var fw = face.offsetWidth || 540;
-          var fh = face.offsetHeight || 540;
-          ts.uniforms.u_faceAspect.value = fw / Math.max(fh, 1);
           ts.uniforms.u_texture.value = tex;
           ts.loaded = true;
           img.style.opacity = '0';
@@ -1594,6 +1590,7 @@ function enterCaseMode(key) {
     lockScroll();
     updateCaseHUD(0);
     updateSectionNavDots(0);
+    if (window._syncShaderCanvasAspect) window._syncShaderCanvasAspect();
 
     // Fade back in
     if (scene) scene.style.opacity = "";
@@ -1618,6 +1615,7 @@ function exitCaseMode() {
     applyTheme(prevTheme);
     document.body.classList.remove("case-mode");
     unlockScroll();
+    if (window._syncShaderCanvasAspect) window._syncShaderCanvasAspect();
 
   // Restore original face images
   const origImgs = [
@@ -2054,16 +2052,18 @@ const GALLERY_DATA = {
   rolling: {
     tag: '00 · Identity', title: 'Intro to Zack',
     images: [
-      'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
       'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
+      'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
       'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
       'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
       'https://i.ibb.co/60GV48WK/fishtown.webp',
       'https://i.ibb.co/MkjJjpR/FB-IMG-1508452344350-1.jpg',
-
-
+      'https://i.ibb.co/PswtrTff/IMG-20170104-184947-650.jpg',
+      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
+      'https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg',
+      'https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp',
       'https://i.ibb.co/nz4HvC4/image-417-min.png',
-
+      'https://i.ibb.co/5gMSK3gg/IMG-20171231-190053.webp',
       'https://i.ibb.co/PG1MrDLt/1-DUp-Jk-Ot-Zacr-Xz-Febgk5rt-Q.webp',
       'https://i.ibb.co/fd8Ycjyv/1-pch6xh-Ep-Fo-Xxli-AGb-Nnr7-Q.webp',
       'https://i.ibb.co/v6fqJ9b9/1-I-n-HQKs7-BIXo-Y0onf-Nxn-Og.webp',
@@ -2177,24 +2177,16 @@ const GALLERY_DATA = {
   landing: {
     tag: '05 · Landing', title: 'builds well with others',
     images: [
-      'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
-      'https://i.ibb.co/PswtrTff/IMG-20170104-184947-650.jpg',
-      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
-      'https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg',
-      'https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp',
-
       'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
-
+      'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
       'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
-
+      'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
       'https://i.ibb.co/KcLtFPg3/IMG-20170310-150927-864.jpg',
       'https://i.ibb.co/N2yd0jJV/1-l-EJetj-Ut85-CTbb24d-BTFk-A.webp',
-
+      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
     ],
   },
 };
-
-
 
 
 var CHAPTER_GALLERIES = ['rolling', 'setup', 'pop', 'slide', 'tuck', 'landing'];
@@ -3254,15 +3246,15 @@ window.addEventListener('load',function(){
     'uniform vec2 u_prevMouse;',
     'uniform float u_aberrationIntensity;',
     'uniform float u_imgAspect;',
-    'uniform float u_faceAspect;',
+    'uniform float u_canvasAspect;',
     'vec2 coverUV(vec2 uv) {',
-    '  float imgA = u_imgAspect;',
-    '  float faceA = u_faceAspect;',
-    '  float rel = imgA / faceA;',
     '  float scaleX = 1.0;',
     '  float scaleY = 1.0;',
-    '  if (rel > 1.0) { scaleX = 1.0 / rel; }',
-    '  else { scaleY = rel; }',
+    '  if (u_canvasAspect > u_imgAspect) {',
+    '    scaleY = u_imgAspect / u_canvasAspect;',
+    '  } else {',
+    '    scaleX = u_canvasAspect / u_imgAspect;',
+    '  }',
     '  return (uv - 0.5) * vec2(scaleX, scaleY) + 0.5;',
     '}',
     'void main() {',
@@ -3311,13 +3303,14 @@ window.addEventListener('load',function(){
     // Orthographic camera avoids perspective distortion on a flat plane
     var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 0.5;
+
     var uniforms = {
       u_texture:            { value: null },
       u_mouse:              { value: new THREE.Vector2(0.5, 0.5) },
       u_prevMouse:          { value: new THREE.Vector2(0.5, 0.5) },
       u_aberrationIntensity:{ value: 0.0 },
       u_imgAspect:          { value: 1.0 },
-      u_faceAspect:         { value: w / Math.max(h, 1) }
+      u_canvasAspect:       { value: w / h }
     };
 
     var mesh = new THREE.Mesh(
@@ -3368,13 +3361,33 @@ window.addEventListener('load',function(){
     // Watch for src changes driven by case study slide swaps (MutationObserver on attribute)
     (new MutationObserver(function(mutations) {
       mutations.forEach(function(m) {
-        if (m.attributeName === 'src' && img.src) {
+        if (m.attributeName === 'src') {
+          if (!img.src) return; // src cleared to "" — wait for the next real src
           state.loaded = false;
           canvas.style.opacity = '0';
+          var srcAtChange = img.src;
           if (img.complete && img.naturalWidth) {
             loadTex(img.src);
+          } else {
+            // Attach a fresh one-shot listener — the original init-time listener
+            // may have already fired and won't fire again for this src change.
+            function onLoad() {
+              img.removeEventListener('load', onLoad);
+              if (img.src) loadTex(img.src);
+            }
+            img.addEventListener('load', onLoad);
+            // Fallback: for cached images the browser may not re-fire 'load'
+            // even after a src="" → src=url round-trip. Poll via rAF.
+            (function pollReady() {
+              if (img.src !== srcAtChange) return; // src changed again, abort
+              if (img.complete && img.naturalWidth) {
+                img.removeEventListener('load', onLoad);
+                loadTex(img.src);
+              } else {
+                requestAnimationFrame(pollReady);
+              }
+            })();
           }
-          // load event listener above will fire if not yet complete
         }
       });
     })).observe(img, { attributes: true, attributeFilter: ['src'] });
@@ -3424,7 +3437,7 @@ window.addEventListener('load',function(){
       s.canvas.width  = w;
       s.canvas.height = h;
       s.renderer.setSize(w, h);
-      s.uniforms.u_faceAspect.value = w / Math.max(h, 1);
+      s.uniforms.u_canvasAspect.value = w / h;
     });
   });
 
@@ -3445,6 +3458,19 @@ window.addEventListener('load',function(){
     });
   }
   animate();
+
+  window._syncShaderCanvasAspect = function() {
+    requestAnimationFrame(function() {
+      faceStates.forEach(function(s) {
+        var w = s.face.offsetWidth  || 540;
+        var h = s.face.offsetHeight || 540;
+        s.canvas.width  = w;
+        s.canvas.height = h;
+        s.renderer.setSize(w, h, false);
+        s.uniforms.u_canvasAspect.value = w / h;
+      });
+    });
+  };
 
 })();
 </script>

@@ -918,11 +918,11 @@ body.case-mode #top-progress { opacity: 0; pointer-events: none; }
   }
   body.case-mode #case-hud #case-hud-counter { font-size: 0.52rem; }
 
-  /* Exit button: top-center on mobile */
+  /* Exit button: center of screen on mobile */
   body.case-mode .case-exit-btn {
-    top: 0.75rem !important;
+    top: 50% !important;
     left: 50% !important;
-    transform: translateX(-50%) !important;
+    transform: translate(-50%, -50%) !important;
     font-size: 0.52rem !important;
     padding: 0.3rem 0.9rem !important;
     background: rgba(0,0,0,0.5) !important;
@@ -3495,8 +3495,6 @@ window.addEventListener('load',function(){
 
 <!-- ── Custom context menu ────────────────────────────────────────────────────────────────────────────── -->
 <div id="ne-ctx" aria-hidden="true">
-  <button class="ne-ctx-item" id="ne-ctx-reset">↺ reset orientation</button>
-  <div class="ne-ctx-sep"></div>
   <button class="ne-ctx-item" id="ne-ctx-refresh">⟳ refresh</button>
   <a class="ne-ctx-item" id="ne-ctx-li" href="https://linkedin.com/in/zackgort" target="_blank" rel="noopener">↗ linkedin</a>
   <a class="ne-ctx-item" id="ne-ctx-ne" href="https://neverever.land" target="_blank" rel="noopener">↗ neverever.land</a>
@@ -3521,6 +3519,7 @@ window.addEventListener('load',function(){
   pointer-events: auto;
   box-shadow: 0 8px 32px rgba(0,0,0,0.55);
 }
+#ne-ctx, #ne-ctx * { cursor: auto !important; }
 #ne-ctx.open { display: flex; }
 .ne-ctx-item {
   display: block;
@@ -3535,7 +3534,7 @@ window.addEventListener('load',function(){
   text-transform: inherit;
   text-decoration: none;
   text-align: left;
-  cursor: none;
+  cursor: auto;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
@@ -3603,9 +3602,6 @@ window.addEventListener('load',function(){
   });
 
   // Menu item actions
-  document.getElementById('ne-ctx-reset').addEventListener('click', function () {
-    closeCtx(); resetOrientation();
-  });
   document.getElementById('ne-ctx-refresh').addEventListener('click', function () {
     closeCtx(); window.location.reload();
   });

@@ -1185,7 +1185,8 @@ body.case-mode #case-panel { opacity: 1; pointer-events: all; }
       <h1>DESIGN.<br>WRITE.<br>THINK.<br>MAKE.</h1>
       <p class="body-text">
         I specialize in thoughtful timeless information &amp;
-        experience systems.
+        experience systems. The sentence is the most meaningfully
+        precise artifact of human &amp; machine intelligence.
       </p>
       <div class="cta-row">
         <a class="cta" href="#s1">
@@ -1502,6 +1503,9 @@ function loadSlideToFace(faceIdx, slide) {
           var tex = new THREE.Texture(reloadImg);
           tex.needsUpdate = true;
           ts.uniforms.u_imgAspect.value = reloadImg.naturalWidth / (reloadImg.naturalHeight || 1);
+          var fw = face.offsetWidth || 540;
+          var fh = face.offsetHeight || 540;
+          ts.uniforms.u_faceAspect.value = fw / Math.max(fh, 1);
           ts.uniforms.u_texture.value = tex;
           ts.loaded = true;
           img.style.opacity = '0';
@@ -2050,18 +2054,16 @@ const GALLERY_DATA = {
   rolling: {
     tag: '00 · Identity', title: 'Intro to Zack',
     images: [
-      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
       'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
+      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
       'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
       'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
       'https://i.ibb.co/60GV48WK/fishtown.webp',
       'https://i.ibb.co/MkjJjpR/FB-IMG-1508452344350-1.jpg',
-      'https://i.ibb.co/PswtrTff/IMG-20170104-184947-650.jpg',
-      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
-      'https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg',
-      'https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp',
+
+
       'https://i.ibb.co/nz4HvC4/image-417-min.png',
-      'https://i.ibb.co/5gMSK3gg/IMG-20171231-190053.webp',
+
       'https://i.ibb.co/PG1MrDLt/1-DUp-Jk-Ot-Zacr-Xz-Febgk5rt-Q.webp',
       'https://i.ibb.co/fd8Ycjyv/1-pch6xh-Ep-Fo-Xxli-AGb-Nnr7-Q.webp',
       'https://i.ibb.co/v6fqJ9b9/1-I-n-HQKs7-BIXo-Y0onf-Nxn-Og.webp',
@@ -2175,16 +2177,24 @@ const GALLERY_DATA = {
   landing: {
     tag: '05 · Landing', title: 'builds well with others',
     images: [
-      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
       'https://i.ibb.co/7xd84m10/ZAX02375.jpg',
+      'https://i.ibb.co/PswtrTff/IMG-20170104-184947-650.jpg',
+      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
+      'https://i.ibb.co/q34v0ByL/IMG-20150419-175021862.jpg',
+      'https://i.ibb.co/mCK7D4Xb/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp',
+
+      'https://i.ibb.co/bgmCG0qb/ZAX02330.jpg',
+
       'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
-      'https://i.ibb.co/NZ0y6Hn/2272303929273225747-5144774570.jpg',
+
       'https://i.ibb.co/KcLtFPg3/IMG-20170310-150927-864.jpg',
       'https://i.ibb.co/N2yd0jJV/1-l-EJetj-Ut85-CTbb24d-BTFk-A.webp',
-      'https://i.ibb.co/jkcCXSkL/IMG-20150415-134735718.jpg',
+
     ],
   },
 };
+
+
 
 
 var CHAPTER_GALLERIES = ['rolling', 'setup', 'pop', 'slide', 'tuck', 'landing'];
@@ -3244,11 +3254,15 @@ window.addEventListener('load',function(){
     'uniform vec2 u_prevMouse;',
     'uniform float u_aberrationIntensity;',
     'uniform float u_imgAspect;',
+    'uniform float u_faceAspect;',
     'vec2 coverUV(vec2 uv) {',
+    '  float imgA = u_imgAspect;',
+    '  float faceA = u_faceAspect;',
+    '  float rel = imgA / faceA;',
     '  float scaleX = 1.0;',
     '  float scaleY = 1.0;',
-    '  if (u_imgAspect > 1.0) { scaleX = 1.0 / u_imgAspect; }',
-    '  else { scaleY = u_imgAspect; }',
+    '  if (rel > 1.0) { scaleX = 1.0 / rel; }',
+    '  else { scaleY = rel; }',
     '  return (uv - 0.5) * vec2(scaleX, scaleY) + 0.5;',
     '}',
     'void main() {',
@@ -3297,13 +3311,13 @@ window.addEventListener('load',function(){
     // Orthographic camera avoids perspective distortion on a flat plane
     var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     camera.position.z = 0.5;
-
     var uniforms = {
       u_texture:            { value: null },
       u_mouse:              { value: new THREE.Vector2(0.5, 0.5) },
       u_prevMouse:          { value: new THREE.Vector2(0.5, 0.5) },
       u_aberrationIntensity:{ value: 0.0 },
-      u_imgAspect:          { value: 1.0 }
+      u_imgAspect:          { value: 1.0 },
+      u_faceAspect:         { value: w / Math.max(h, 1) }
     };
 
     var mesh = new THREE.Mesh(
@@ -3410,7 +3424,7 @@ window.addEventListener('load',function(){
       s.canvas.width  = w;
       s.canvas.height = h;
       s.renderer.setSize(w, h);
-      // OrthographicCamera (-1,1,1,-1) — no aspect update needed for square faces
+      s.uniforms.u_faceAspect.value = w / Math.max(h, 1);
     });
   });
 

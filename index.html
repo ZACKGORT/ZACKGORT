@@ -3405,20 +3405,33 @@ window.addEventListener('load',function(){
     if (img.complete && img.naturalWidth) {
       loadTex(img.src);
     } else {
-      img.addEventListener('load', function() { loadTex(img.src); });
+      img.addEventListener('load', function() {
+        var src = img.src; // snapshot at fire time — never stale
+        if (!src) return;  // ignore blank-src load events
+        loadTex(src);
+      });
     }
 
-    // Watch for src changes driven by case study slide swaps (MutationObserver on attribute)
+    // Watch for src changes driven by case study slide swaps and restores
     (new MutationObserver(function(mutations) {
       mutations.forEach(function(m) {
-        if (m.attributeName === 'src' && img.src) {
-          state.loaded = false;
+        if (m.attributeName !== 'src') return;
+        var src = img.src;
+        if (!src) {
+          // src cleared (e.g. enterCaseMode wipe) — hide canvas cleanly
           canvas.style.opacity = '0';
-          if (img.complete && img.naturalWidth) {
-            loadTex(img.src);
-          }
-          // load event listener above will fire if not yet complete
+          state.loaded = false;
+          return;
         }
+        // New real src incoming — reset display in case a previous error hid it,
+        // then fade out while the texture loads
+        canvas.style.display = '';
+        canvas.style.opacity = '0';
+        state.loaded = false;
+        if (img.complete && img.naturalWidth) {
+          loadTex(src);
+        }
+        // otherwise the 'load' listener above will fire with the snapshotted src
       });
     })).observe(img, { attributes: true, attributeFilter: ['src'] });
 

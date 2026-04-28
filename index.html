@@ -1502,6 +1502,10 @@ function loadSlideToFace(faceIdx, slide) {
           var tex = new THREE.Texture(reloadImg);
           tex.needsUpdate = true;
           ts.uniforms.u_imgAspect.value = reloadImg.naturalWidth / (reloadImg.naturalHeight || 1);
+          // Refresh plane aspect from live face dimensions (may differ from init-time size)
+          var pw = face.offsetWidth  || ts.canvas.width  || 540;
+          var ph = face.offsetHeight || ts.canvas.height || 540;
+          ts.uniforms.u_planeAspect.value = pw / (ph || 1);
           ts.uniforms.u_texture.value = tex;
           ts.loaded = true;
           img.style.opacity = '0';
@@ -3301,11 +3305,14 @@ window.addEventListener('load',function(){
     'uniform vec2 u_prevMouse;',
     'uniform float u_aberrationIntensity;',
     'uniform float u_imgAspect;',
+    'uniform float u_planeAspect;',
     'vec2 coverUV(vec2 uv) {',
+    '  float imgA   = u_imgAspect;',
+    '  float planeA = u_planeAspect;',
     '  float scaleX = 1.0;',
     '  float scaleY = 1.0;',
-    '  if (u_imgAspect > 1.0) { scaleX = 1.0 / u_imgAspect; }',
-    '  else { scaleY = u_imgAspect; }',
+    '  if (imgA > planeA) { scaleX = planeA / imgA; }',
+    '  else               { scaleY = imgA / planeA; }',
     '  return (uv - 0.5) * vec2(scaleX, scaleY) + 0.5;',
     '}',
     'void main() {',
@@ -3360,7 +3367,8 @@ window.addEventListener('load',function(){
       u_mouse:              { value: new THREE.Vector2(0.5, 0.5) },
       u_prevMouse:          { value: new THREE.Vector2(0.5, 0.5) },
       u_aberrationIntensity:{ value: 0.0 },
-      u_imgAspect:          { value: 1.0 }
+      u_imgAspect:          { value: 1.0 },
+      u_planeAspect:        { value: w / (h || 1) }
     };
 
     var mesh = new THREE.Mesh(
@@ -3389,10 +3397,13 @@ window.addEventListener('load',function(){
     function loadTex(src) {
       new THREE.TextureLoader().load(src, function(tex) {
         tex.needsUpdate = true;
-        // Pass image aspect ratio to shader for object-fit:cover UV correction
         var imgW = tex.image.naturalWidth  || tex.image.width  || 1;
         var imgH = tex.image.naturalHeight || tex.image.height || 1;
         uniforms.u_imgAspect.value = imgW / imgH;
+        // Refresh plane aspect from live face dimensions
+        var pw = face.offsetWidth  || canvas.width  || 540;
+        var ph = face.offsetHeight || canvas.height || 540;
+        uniforms.u_planeAspect.value = pw / (ph || 1);
         uniforms.u_texture.value = tex;
         state.loaded = true;
         img.style.opacity = '0';
@@ -3480,7 +3491,7 @@ window.addEventListener('load',function(){
       s.canvas.width  = w;
       s.canvas.height = h;
       s.renderer.setSize(w, h);
-      // OrthographicCamera (-1,1,1,-1) — no aspect update needed for square faces
+      s.uniforms.u_planeAspect.value = w / (h || 1);
     });
   });
 

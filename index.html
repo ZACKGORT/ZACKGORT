@@ -1489,32 +1489,6 @@ function loadSlideToFace(faceIdx, slide) {
   img.alt = slide.title || "";
   if (img.src !== newSrc) {
     img.src = newSrc;
-    // If Three.js WebGL overlay exists for this face, reload its texture
-    if (face._threeState) {
-      var ts = face._threeState;
-      ts.loaded = false;
-      ts.canvas.style.opacity = '0';
-      var reloadImg = new Image();
-      reloadImg.crossOrigin = "anonymous";
-      reloadImg.onload = function() {
-        if (img.src !== newSrc) return; // src changed again, abort
-        if (typeof THREE !== 'undefined') {
-          var tex = new THREE.Texture(reloadImg);
-          tex.needsUpdate = true;
-          ts.uniforms.u_imgAspect.value = reloadImg.naturalWidth / (reloadImg.naturalHeight || 1);
-          // Refresh plane aspect from live face dimensions (may differ from init-time size)
-          var pw = face.offsetWidth  || ts.canvas.width  || 540;
-          var ph = face.offsetHeight || ts.canvas.height || 540;
-          ts.uniforms.u_planeAspect.value = pw / (ph || 1);
-          ts.uniforms.u_texture.value = tex;
-          ts.loaded = true;
-          img.style.opacity = '0';
-          ts.canvas.style.opacity = '1';
-        }
-      };
-      reloadImg.onerror = function() { ts.canvas.style.display = 'none'; };
-      reloadImg.src = newSrc;
-    }
   }
 
   // Content overlay
@@ -3416,9 +3390,10 @@ window.addEventListener('load',function(){
     if (img.complete && img.naturalWidth) {
       loadTex(img.src);
     } else {
-      img.addEventListener('load', function() {
-        var src = img.src; // snapshot at fire time — never stale
-        if (!src) return;  // ignore blank-src load events
+      img.addEventListener('load', function onFirstLoad() {
+        img.removeEventListener('load', onFirstLoad);
+        var src = img.src;
+        if (!src) return;
         loadTex(src);
       });
     }
@@ -3429,20 +3404,25 @@ window.addEventListener('load',function(){
         if (m.attributeName !== 'src') return;
         var src = img.src;
         if (!src) {
-          // src cleared (e.g. enterCaseMode wipe) — hide canvas cleanly
           canvas.style.opacity = '0';
           state.loaded = false;
           return;
         }
-        // New real src incoming — reset display in case a previous error hid it,
-        // then fade out while the texture loads
         canvas.style.display = '';
         canvas.style.opacity = '0';
         state.loaded = false;
         if (img.complete && img.naturalWidth) {
+          // Already cached — fire immediately
           loadTex(src);
+        } else {
+          // Add a fresh one-shot listener so we never miss the load event
+          img.addEventListener('load', function onSrcLoad() {
+            img.removeEventListener('load', onSrcLoad);
+            var fireSrc = img.src;
+            if (!fireSrc) return;
+            loadTex(fireSrc);
+          });
         }
-        // otherwise the 'load' listener above will fire with the snapshotted src
       });
     })).observe(img, { attributes: true, attributeFilter: ['src'] });
 

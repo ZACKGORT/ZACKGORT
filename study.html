@@ -2,914 +2,1021 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>zackgort · study</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zack Gort — Case Studies</title>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
 <style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; overflow:hidden; overscroll-behavior:none; }
+/* ── RESET & TOKENS ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { scrollbar-width: none; overflow-x: hidden; }
 :root {
-  --bg:#f5f2ec; --bg-2:#ede9e1; --bg-3:#e6e1d8; --bg-4:#f9f7f3;
-  --ink:#1a1815; --ink-2:#6a6660; --ink-3:#9a958e;
-  --accent:#c05f38; --accent-l:rgba(192,95,56,0.08);
-  --border:rgba(26,24,21,0.08); --border-2:rgba(26,24,21,0.13); --border-3:rgba(26,24,21,0.22);
-  --disp:'DM Serif Display',serif; --text:'DM Serif Text',serif; --mono:'DM Mono',monospace;
-  --c-engine:#c05f38; --c-tool:#5a7850; --c-utility:#3a6ea0;
-  --c-writing:#7a52a8; --c-vertical:#9a7040; --c-identity:#8a6858; --c-archive:#7a6890;
+  --bg: #0f0e0e;
+  --fg: #ede8df;
+  --muted: #6b6460;
+  --muted2: #4a4540;
+  --accent: #c8b89a;
+  --gold: #d4a843;
+  --ff-display: 'Bebas Neue', sans-serif;
+  --ff-serif: 'DM Serif Display', serif;
+  --ff-mono: 'Courier Prime', monospace;
+  --easing: cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: clamp(2rem, 5vw, 5rem);
 }
-[data-theme="dark"] {
-  --bg:#0c0b09; --bg-2:#111009; --bg-3:#161410; --bg-4:#090807;
-  --ink:#ede9e0; --ink-2:#7a7870; --ink-3:#58544e;
-  --accent:#d97757; --accent-l:rgba(217,119,87,0.09);
-  --border:rgba(237,233,224,0.06); --border-2:rgba(237,233,224,0.11); --border-3:rgba(237,233,224,0.19);
-  --c-engine:#d97757; --c-tool:#7a9e7e; --c-utility:#6a9bcc;
-  --c-writing:#9b7cc0; --c-vertical:#c4a882; --c-identity:#c08060; --c-archive:#a090c8;
+body { background: var(--bg); color: var(--fg); font-family: var(--ff-mono); cursor: none; }
+img { display: block; max-width: 100%; }
+
+/* ── CURSOR ── */
+#cursor-dot, #cursor-ring {
+  position: fixed; pointer-events: none; z-index: 9999;
+  border-radius: 50%; transform: translate(-50%, -50%); mix-blend-mode: difference;
 }
-body { font-family:var(--mono); background:var(--bg); color:var(--ink); transition:background 0.4s,color 0.4s; }
-body::after { content:''; position:fixed; inset:0; z-index:9998; pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px; opacity:.015; }
-[data-theme="dark"] body::after { opacity:.03; }
-
-#topbar { position:fixed; top:0; left:0; right:0; height:44px; display:flex; align-items:center;
-  justify-content:space-between; padding:0 16px; background:var(--bg-4);
-  border-bottom:1px solid var(--border); z-index:1000; backdrop-filter:blur(8px);
-  transition:right 0.35s cubic-bezier(0.32,0.72,0,1); }
-body.panel-open #topbar { right:380px; }
-.tb-left { display:flex; align-items:center; gap:14px; }
-.tb-brand { font-family:var(--disp); font-size:14px; color:var(--ink); letter-spacing:-0.01em;
-  text-decoration:none; display:flex; align-items:center; gap:8px; }
-.tb-brand .sep { color:var(--ink-3); font-family:var(--mono); font-size:10px; }
-.tb-page { font-family:var(--mono); font-size:8px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); }
-.tb-actions { display:flex; align-items:center; gap:6px; }
-.tb-btn { background:none; border:1px solid var(--border-2); border-radius:4px; font-family:var(--mono);
-  font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-2); padding:5px 9px;
-  cursor:pointer; transition:border-color 0.15s,color 0.15s,background 0.15s; }
-.tb-btn:hover { border-color:var(--border-3); color:var(--ink); background:var(--accent-l); }
-.tb-btn.accent { border-color:var(--accent); color:var(--accent); }
-.tb-btn.accent:hover { background:var(--accent); color:var(--bg); }
-
-#spine { position:fixed; bottom:0; left:0; right:0; height:44px; background:var(--bg-4);
-  border-top:1px solid var(--border); display:flex; align-items:center;
-  justify-content:space-between; padding:0 16px; z-index:700;
-  transition:right 0.35s cubic-bezier(0.32,0.72,0,1); }
-body.panel-open #spine { right:380px; }
-.spine-legend { display:flex; align-items:center; gap:14px; }
-.legend-item { display:flex; align-items:center; gap:5px; font-family:var(--mono); font-size:7px;
-  letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-3); cursor:pointer; transition:color 0.15s; }
-.legend-item:hover { color:var(--ink-2); }
-.legend-item.active { color:var(--ink); }
-.legend-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.spine-zoom { display:flex; align-items:center; gap:0; border-left:1px solid var(--border); }
-.zoom-btn { background:none; border:none; cursor:pointer; color:var(--ink-2); font-size:13px;
-  padding:5px 10px; font-family:var(--mono); transition:color 0.15s,background 0.15s; height:44px;
-  display:flex; align-items:center; }
-.zoom-btn:hover { color:var(--ink); background:var(--border); }
-.zoom-pct { font-family:var(--mono); font-size:8px; letter-spacing:0.08em; color:var(--ink-3);
-  padding:0 10px; border-left:1px solid var(--border); border-right:1px solid var(--border); }
-
-#canvas-wrap { position:fixed; inset:0; top:44px; bottom:44px; overflow:hidden; cursor:grab; touch-action:none; }
-#canvas-wrap::before { content:''; position:absolute; inset:0;
-  background-image:radial-gradient(var(--border-2) 1px,transparent 1px);
-  background-size:32px 32px; pointer-events:none; }
-#canvas { position:absolute; top:0; left:0; width:5000px; height:3000px;
-  transform-origin:0 0; will-change:transform; }
-#connections-svg { position:absolute; top:0; left:0; width:5000px; height:3000px;
-  pointer-events:none; overflow:visible; }
-.conn-line { stroke:var(--ink-3); stroke-width:1.5; fill:none; stroke-dasharray:4 3;
-  opacity:0.4; transition:stroke 0.2s,opacity 0.2s,stroke-width 0.2s; }
-.conn-line.highlighted { stroke:var(--accent); opacity:0.85; stroke-width:2; stroke-dasharray:none; }
-.conn-line.dimmed { opacity:0.12; }
-
-.node-card { position:absolute; width:240px; background:var(--bg-4); border:1px solid var(--border-2);
-  border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06); cursor:pointer; user-select:none;
-  transition:box-shadow 0.2s,border-color 0.2s,transform 0.18s; will-change:transform; }
-.node-card:hover { box-shadow:0 6px 28px rgba(0,0,0,0.12); border-color:var(--border-3); transform:translateY(-2px); }
-.node-card.active { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-l),0 6px 28px rgba(0,0,0,0.14); }
-.node-card.is-dragging {
-  cursor:grabbing !important;
-  box-shadow:0 16px 48px rgba(0,0,0,0.18);
-  z-index:500 !important;
-  transition:box-shadow 0.1s;
-  user-select:none;
+#cursor-dot { width: 6px; height: 6px; background: var(--fg); }
+#cursor-ring {
+  width: 36px; height: 36px; border: 1.5px solid var(--fg);
+  transition: width .25s var(--easing), height .25s var(--easing), opacity .25s; opacity: .6;
 }
-[data-theme="dark"] .node-card.is-dragging { box-shadow:0 16px 48px rgba(0,0,0,0.55); }
-[data-theme="dark"] .node-card { box-shadow:0 2px 12px rgba(0,0,0,0.35); }
-[data-theme="dark"] .node-card:hover { box-shadow:0 6px 28px rgba(0,0,0,0.5); }
-.node-colorbar { height:3px; border-radius:8px 8px 0 0; }
-.node-inner { padding:12px 14px 10px; }
-.node-type-tag { font-size:7px; letter-spacing:0.14em; text-transform:uppercase; font-family:var(--mono); margin-bottom:6px; }
-.node-title { font-family:var(--disp); font-size:14px; color:var(--ink); line-height:1.25; letter-spacing:-0.01em; margin-bottom:6px; }
-.node-tagline { font-family:var(--mono); font-size:9.5px; line-height:1.6; color:var(--ink-2); }
-.node-footer { padding:7px 14px 9px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-.node-domain { font-size:7.5px; letter-spacing:0.06em; color:var(--ink-3); font-family:var(--mono); }
-.node-arrow { font-size:10px; color:var(--ink-3); transition:color 0.15s,transform 0.15s; }
-.node-card:hover .node-arrow { color:var(--accent); transform:translateX(2px); }
+body.cursor-hover #cursor-ring { width: 56px; height: 56px; opacity: 1; }
 
-#detail-panel { position:fixed; top:0; right:0; bottom:0; width:380px; background:var(--bg-4);
-  border-left:1px solid var(--border); transform:translateX(100%);
-  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); z-index:800;
-  display:flex; flex-direction:column; overflow:hidden; }
-#detail-panel.open { transform:translateX(0); }
-.dp-stripe { height:4px; flex-shrink:0; }
-.dp-topbar { height:44px; flex-shrink:0; display:flex; align-items:center;
-  justify-content:space-between; padding:0 16px; border-bottom:1px solid var(--border); }
-.dp-topbar-label { font-family:var(--mono); font-size:7.5px; letter-spacing:0.14em;
-  text-transform:uppercase; color:var(--ink-3); }
-.dp-close { background:none; border:none; cursor:pointer; color:var(--ink-3); font-size:16px;
-  padding:2px 4px; border-radius:3px; transition:color 0.15s; }
-.dp-close:hover { color:var(--ink); }
-.dp-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-.dp-scroll::-webkit-scrollbar { width:3px; }
-.dp-scroll::-webkit-scrollbar-thumb { background:var(--border-3); border-radius:2px; }
-.dp-hero { width:100%; aspect-ratio:16/9; background:var(--bg-3); overflow:hidden; position:relative; flex-shrink:0; }
-.dp-hero img { width:100%; height:100%; object-fit:cover; display:block; }
-.dp-hero-live { width:100%; height:100%; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; gap:8px; cursor:pointer; background:var(--bg-3); transition:background 0.2s; }
-.dp-hero-live:hover { background:var(--bg-2); }
-.dp-hero-live-icon { font-size:22px; color:var(--ink-3); }
-.dp-hero-live-hint { font-family:var(--mono); font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-3); }
-.dp-body { padding:20px 20px 0; }
-.dp-type-tag { font-size:7px; letter-spacing:0.14em; text-transform:uppercase; font-family:var(--mono); margin-bottom:6px; }
-.dp-title { font-family:var(--disp); font-size:22px; line-height:1.18; color:var(--ink); letter-spacing:-0.015em; margin-bottom:12px; }
-.dp-sentence { font-family:var(--mono); font-size:10.5px; line-height:1.72; color:var(--ink-2); margin-bottom:10px; }
-.dp-pullquote { font-family:var(--text); font-style:italic; font-size:14px; line-height:1.55;
-  color:var(--ink-2); border-left:2px solid var(--accent); padding-left:14px; margin:14px 0; }
-.dp-divider { border:none; border-top:1px solid var(--border); margin:14px 0; position:relative; }
-.dp-divider-label { font-family:var(--mono); font-size:7px; letter-spacing:0.14em; text-transform:uppercase;
-  color:var(--ink-3); position:absolute; top:-8px; left:0; background:var(--bg-4); padding-right:8px; }
-.dp-connections { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
-.dp-connections-label { font-family:var(--mono); font-size:7px; letter-spacing:0.14em;
-  text-transform:uppercase; color:var(--ink-3); margin-bottom:10px; }
-.dp-conn-chip { display:inline-flex; align-items:center; gap:5px; background:var(--bg-2);
-  border:1px solid var(--border-2); border-radius:20px; padding:4px 10px; margin:0 4px 6px 0;
-  font-family:var(--mono); font-size:8px; letter-spacing:0.06em; color:var(--ink-2); cursor:pointer;
-  transition:border-color 0.15s,color 0.15s,background 0.15s; }
-.dp-conn-chip:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-l); }
-.dp-conn-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.dp-footer { padding:16px 20px 24px; margin-top:16px; border-top:1px solid var(--border);
-  display:flex; gap:8px; flex-shrink:0; }
-.dp-open-btn { flex:1; background:var(--accent); color:var(--bg); border:none; border-radius:4px;
-  font-family:var(--mono); font-size:8.5px; letter-spacing:0.12em; text-transform:uppercase;
-  padding:9px; cursor:pointer; text-decoration:none; display:flex; align-items:center;
-  justify-content:center; gap:5px; transition:opacity 0.15s; }
-.dp-open-btn:hover { opacity:0.85; }
-.dp-focus-btn { background:none; border:1px solid var(--border-2); border-radius:4px;
-  font-family:var(--mono); font-size:8.5px; letter-spacing:0.1em; text-transform:uppercase;
-  color:var(--ink-2); padding:9px 14px; cursor:pointer; transition:border-color 0.15s,color 0.15s; }
-.dp-focus-btn:hover { border-color:var(--border-3); color:var(--ink); }
+/* ── PROGRESS BAR ── */
+#progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); z-index: 200; transform-origin: left; transform: scaleX(0); width: 100%; }
 
-#intro-toast { position:fixed; top:56px; left:50%; transform:translateX(-50%);
-  background:var(--bg-4); border:1px solid var(--border-2); border-radius:6px; padding:8px 16px;
-  font-family:var(--mono); font-size:8px; letter-spacing:0.1em; text-transform:uppercase;
-  color:var(--ink-3); z-index:900; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.08);
-  opacity:1; transition:opacity 0.6s; }
-#intro-toast.gone { opacity:0; }
+/* ── WEBGL CANVAS ── */
+#gl-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .3; }
 
-#minimap { position:fixed; bottom:56px; right:12px; width:110px; height:70px; background:var(--bg-4);
-  border:1px solid var(--border-2); border-radius:5px; overflow:hidden; z-index:900;
-  box-shadow:0 2px 12px rgba(0,0,0,0.08); transition:right 0.35s cubic-bezier(0.32,0.72,0,1); }
-body.panel-open #minimap { right:392px; }
-#minimap-canvas { width:100%; height:100%; }
-#minimap-vp { position:absolute; top:0; left:0; border:1px solid var(--accent);
-  background:rgba(192,95,56,0.06); pointer-events:none; border-radius:1px; }
+/* noise */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 50; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: .25; mix-blend-mode: overlay;
+}
 
-#node-count { position:fixed; top:56px; right:16px; font-family:var(--mono); font-size:7px;
-  letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-3); z-index:900;
-  transition:right 0.35s cubic-bezier(0.32,0.72,0,1); }
-body.panel-open #node-count { right:396px; }
+/* ── NAV ── */
+#site-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.5rem 2.5rem;
+  transition: backdrop-filter .4s, background .4s;
+}
+#site-nav.scrolled {
+  backdrop-filter: blur(14px); background: rgba(15,14,14,.75);
+  border-bottom: 1px solid rgba(200,184,154,.1);
+}
+.nav-logo { font-family: var(--ff-display); font-size: 1.25rem; letter-spacing: .08em; color: var(--fg); text-decoration: none; }
+.nav-logo span { color: var(--accent); }
+.nav-chapters { display: flex; gap: .2rem; list-style: none; }
+.nav-chapters li a {
+  font-family: var(--ff-mono); font-size: .58rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); text-decoration: none;
+  padding: .3rem .45rem; border: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.nav-chapters li a:hover, .nav-chapters li a.active { color: var(--accent); border-color: rgba(200,184,154,.25); }
+.nav-index-btn {
+  font-family: var(--ff-mono); font-size: .62rem; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--bg); background: var(--accent);
+  border: none; padding: .4rem 1rem; cursor: none; transition: opacity .2s;
+}
+.nav-index-btn:hover { opacity: .8; }
+
+/* ════════════════════════════════════════════════════════
+   LAYOUT PRIMITIVES
+   ════════════════════════════════════════════════════════ */
+
+/* Every chapter is a scroll section */
+.chapter-section { position: relative; z-index: 1; }
+
+/* ── SECTION INTRO HEADER (Kunzi-style: tag / big title left, label+prose right) ── */
+.section-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 5rem var(--gutter) 4rem;
+  border-bottom: 1px solid rgba(200,184,154,.08);
+  position: relative;
+}
+.section-intro .left { display: flex; flex-direction: column; justify-content: flex-end; }
+.section-intro .right {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding-left: clamp(2rem, 4vw, 5rem); border-left: 1px solid rgba(200,184,154,.08);
+}
+.si-tag {
+  font-family: var(--ff-mono); font-size: .55rem; letter-spacing: .28em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: .75rem;
+}
+.si-tag::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+.si-num {
+  font-family: var(--ff-display);
+  font-size: clamp(7rem, 16vw, 14rem);
+  line-height: .88; letter-spacing: .01em;
+  color: rgba(200,184,154,.07);
+  position: absolute; bottom: 3rem; left: calc(var(--gutter) - 1rem);
+  pointer-events: none; user-select: none;
+  z-index: 0;
+}
+.si-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: .92; letter-spacing: .02em;
+  color: var(--fg); position: relative; z-index: 1;
+}
+.si-client {
+  font-family: var(--ff-mono); font-size: .58rem; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--muted); margin-top: 1.5rem;
+}
+.si-client strong { color: var(--accent); }
+.si-label {
+  font-size: .52rem; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 1.2rem;
+}
+.si-prose {
+  font-size: .82rem; line-height: 1.85; color: var(--muted);
+}
+.si-prose p + p { margin-top: .9em; }
+.si-prose em { font-style: italic; color: rgba(200,184,154,.65); }
+.si-prose strong { color: var(--fg); font-weight: 700; }
+
+/* ── FULL-BLEED IMAGE — true full viewport height, no frame ── */
+.img-full {
+  width: 100%; height: 100vh; overflow: hidden;
+  position: relative;
+}
+.img-full img, .img-full .par-img {
+  width: 100%; height: 115%; display: block;
+  object-fit: cover; will-change: transform;
+}
+
+/* ── SPLIT: IMAGE LEFT / TEXT RIGHT (or reversed) ── */
+.split {
+  display: grid;
+  grid-template-columns: var(--split-cols, 52% 1fr);
+  align-items: stretch;
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: clamp(1rem, 2vw, 2rem);
+  background: var(--bg);
+}
+.split.reverse { grid-template-columns: var(--split-cols-rev, 1fr 52%); }
+.split .split-img { overflow: hidden; position: relative; min-height: 400px; }
+.split .split-img img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  position: absolute; inset: 0;
+}
+.split .split-img .par-img {
+  width: 100%; height: 115%; object-fit: cover; display: block;
+  position: absolute; top: -7.5%; will-change: transform;
+}
+.split .split-text {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(2.5rem, 5vw, 5rem) clamp(2rem, 4vw, 4.5rem);
+  background: var(--split-bg, var(--bg));
+}
+.split.reverse .split-text { order: -1; }
+
+/* ── TEXT BLOCK (standalone) ── */
+.text-block {
+  padding: clamp(3rem, 6vw, 6rem) var(--gutter);
+  max-width: 900px;
+}
+.text-block.center { max-width: 820px; margin: 0 auto; text-align: center; }
+.text-block.wide { max-width: none; }
+
+/* ── PULL QUOTE BAND ── */
+.pull-band {
+  padding: clamp(3rem, 6vw, 5.5rem) var(--gutter);
+  border-top: 1px solid rgba(200,184,154,.08);
+  border-bottom: 1px solid rgba(200,184,154,.08);
+}
+.pull-band blockquote {
+  font-family: var(--ff-serif); font-style: italic;
+  font-size: clamp(1.4rem, 3.5vw, 2.6rem);
+  line-height: 1.3; color: var(--fg);
+  max-width: 840px;
+}
+.pull-band blockquote + p {
+  margin-top: 1.5rem; font-size: .65rem; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+/* ── TWO-IMAGE ROW — generous dark gutters, natural aspect ratio ── */
+.img-pair {
+  display: grid; grid-template-columns: 1fr 1fr; align-items: start;
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: clamp(1rem, 2vw, 2rem);
+  background: var(--bg);
+}
+.img-pair .img-wrap { overflow: hidden; }
+.img-pair .img-wrap img { width: 100%; height: auto; display: block; }
+.img-pair.thirds { grid-template-columns: 1fr 1fr 1fr; }
+
+/* ── STAT ROW ── */
+.stat-row {
+  display: flex; gap: 0; 
+  border-top: 1px solid rgba(200,184,154,.08);
+}
+.stat-item {
+  flex: 1; padding: 2.5rem var(--gutter);
+  border-right: 1px solid rgba(200,184,154,.08);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--ff-display); font-size: clamp(2.8rem, 5vw, 5rem);
+  line-height: 1; color: var(--fg); display: block;
+}
+.stat-label { font-size: .58rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-top: .4rem; display: block; }
+
+/* ── TYPE TOKENS ── */
+.label {
+  font-size: .55rem; letter-spacing: .25em; text-transform: uppercase;
+  color: var(--muted2); display: block; margin-bottom: .75rem;
+}
+.eyebrow { font-family: var(--ff-mono); font-size: .7rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: .6rem; }
+.heading {
+  font-family: var(--ff-display); font-size: clamp(1.8rem, 3.5vw, 3.2rem);
+  line-height: 1; letter-spacing: .03em; color: var(--fg);
+}
+.prose { font-size: .82rem; line-height: 1.85; color: var(--muted); margin-top: .9rem; }
+.prose p + p { margin-top: .85em; }
+.prose em { font-style: italic; color: rgba(200,184,154,.65); }
+.prose strong { color: var(--fg); font-weight: 700; }
+.mono-list { font-size: .65rem; letter-spacing: .1em; line-height: 2; color: var(--accent); font-family: var(--ff-mono); }
+
+/* ── GIF CELL ── */
+.gif-wrap { overflow: hidden; background: #0a0a0a; }
+.gif-wrap img { width: 100%; height: auto; display: block; }
+/* gif inside img-full stays cover at full vh */
+.img-full.gif-wrap img { height: 100%; object-fit: cover; }
+
+/* ── DARK SPACER ── */
+.spacer { background: var(--bg); }
+.spacer.sm { height: 4rem; }
+.spacer.md { height: 6rem; }
+.spacer.lg { height: 10rem; }
+
+/* ── CHAPTER SEPARATOR ── */
+.chapter-sep {
+  position: relative; z-index: 1; height: 100px;
+  display: flex; align-items: center; padding: 0 var(--gutter);
+}
+.sep-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, rgba(200,184,154,.15), transparent); }
+.sep-text { font-family: var(--ff-display); font-size: .8rem; letter-spacing: .3em; color: rgba(200,184,154,.18); padding: 0 2rem; }
+
+/* ── COVER / INDEX ── */
+#chapter-index {
+  position: relative; z-index: 1; min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8rem var(--gutter) 5rem;
+}
+.index-eyebrow { font-size: .62rem; letter-spacing: .28em; text-transform: uppercase; color: var(--accent); margin-bottom: 2rem; }
+.index-title {
+  font-family: var(--ff-display); font-size: clamp(5rem, 14vw, 13rem);
+  line-height: .88; letter-spacing: .02em; margin-bottom: 3rem;
+}
+.index-title .l2 { color: var(--accent); }
+.index-sub {
+  font-family: var(--ff-serif); font-style: italic;
+  font-size: clamp(1rem, 2vw, 1.35rem); color: var(--muted);
+  max-width: 480px; line-height: 1.5; margin-bottom: 5rem;
+}
+.chapter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1px; background: rgba(200,184,154,.12); border: 1px solid rgba(200,184,154,.12); max-width: 1200px; }
+.chapter-card {
+  background: var(--bg); padding: 1.5rem 1.25rem; cursor: none;
+  transition: background .25s; position: relative; text-decoration: none; display: block;
+}
+.chapter-card:hover { background: rgba(200,184,154,.04); }
+.chapter-card:hover .card-num { color: var(--card-accent, var(--accent)); }
+.card-num { font-family: var(--ff-display); font-size: 2.8rem; color: rgba(200,184,154,.15); line-height: 1; margin-bottom: .6rem; transition: color .25s; }
+.card-label { font-size: .55rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted2); margin-bottom: .35rem; }
+.card-title { font-family: var(--ff-display); font-size: 1rem; letter-spacing: .05em; color: var(--fg); line-height: 1.1; }
+
+/* ── FOOTER ── */
+#site-footer { position: relative; z-index: 1; padding: 7rem var(--gutter) 4rem; border-top: 1px solid rgba(200,184,154,.08); text-align: center; }
+.footer-name { font-family: var(--ff-display); font-size: clamp(3rem, 9vw, 8rem); letter-spacing: .05em; color: rgba(200,184,154,.1); margin-bottom: 1.5rem; }
+.footer-cta { font-family: var(--ff-serif); font-style: italic; font-size: 1.2rem; color: var(--muted); margin-bottom: 3rem; }
+.footer-links { display: flex; justify-content: center; gap: 2.5rem; list-style: none; }
+.footer-links a { font-size: .58rem; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
+
+/* ── REVEAL ANIMATION ── */
+.reveal { opacity: 0; transform: translateY(32px); }
+.reveal.in { opacity: 1; transform: none; transition: opacity .8s var(--easing), transform .8s var(--easing); }
+.reveal-fast { opacity: 0; transform: translateY(16px); }
+.reveal-fast.in { opacity: 1; transform: none; transition: opacity .55s var(--easing), transform .55s var(--easing); }
+
+/* ── GIF override ── */
+.has-contain img { object-fit: contain !important; }
+
+/* ── DARK FRAME between image blocks ── */
+/* img-full is always edge-to-edge; framing comes from vertical padding on adjacent elements */
+.img-full + .img-full,
+.img-full + .img-pair,
+.img-pair + .img-full,
+.img-pair + .img-pair,
+.img-full + .split,
+.split + .img-full,
+.img-pair + .split,
+.split + .img-pair {
+  margin-top: clamp(1rem, 2vw, 2rem);
+}
+/* Pull bands and section intros already have their own padding — just breathe above img-full */
+.section-intro + .img-full { margin-top: 0; }
+.pull-band + .img-full,
+.pull-band + .img-pair { margin-top: 0; }
+
+@media (max-width: 768px) {
+  .nav-chapters { display: none; }
+  .section-intro { grid-template-columns: 1fr; }
+  .section-intro .right { border-left: none; padding-left: 0; padding-top: 2rem; border-top: 1px solid rgba(200,184,154,.08); }
+  .split, .split.reverse { grid-template-columns: 1fr; }
+  .split .split-img { height: 52vw; }
+  .split.reverse .split-text { order: 0; }
+  .img-pair { grid-template-columns: 1fr; }
+  .stat-row { flex-direction: column; }
+}
 </style>
 </head>
 <body>
+<canvas id="gl-canvas"></canvas>
+<div id="progress-bar"></div>
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
 
-<div id="topbar">
-  <div class="tb-left">
-    <a class="tb-brand" href="https://zackgort.com">zackgort<span class="sep">/</span></a>
-    <span class="tb-page">study</span>
-  </div>
-  <div class="tb-actions">
-    <button class="tb-btn" onclick="fitAll()">⊡ fit</button>
-    <button class="tb-btn" onclick="toggleTheme()">◐</button>
-    <a class="tb-btn accent" href="https://zackgort.com" style="text-decoration:none">← back</a>
-  </div>
-</div>
+<!-- NAV -->
+<nav id="site-nav">
+  <a href="#chapter-index" class="nav-logo">ZACK<span>GORT</span></a>
+  <ul class="nav-chapters">
+    <li><a href="#ch-why">Why</a></li>
+    <li><a href="#ch-power">Power</a></li>
+    <li><a href="#ch-am">AM</a></li>
+    <li><a href="#ch-wisc">Wisc</a></li>
+    <li><a href="#ch-dana">Dana</a></li>
+    <li><a href="#ch-kent">Kent</a></li>
+    <li><a href="#ch-wovn">WOVN</a></li>
+    <li><a href="#ch-workarea">Workarea</a></li>
+    <li><a href="#ch-pdp">PDP</a></li>
+    <li><a href="#ch-logo">Logo</a></li>
+  </ul>
+  <button class="nav-index-btn" onclick="gsap.to(window,{scrollTo:'#chapter-index',duration:.9,ease:'power3.inOut'})">Index</button>
+</nav>
 
-<div id="canvas-wrap">
-  <div id="canvas">
-    <svg id="connections-svg">
-      <defs>
-        <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L6,3 z" fill="var(--ink-3)" opacity="0.5"/>
-        </marker>
-        <marker id="arrow-accent" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L6,3 z" fill="var(--accent)" opacity="0.85"/>
-        </marker>
-      </defs>
-    </svg>
+<!-- ═══════════════════════ COVER ═══════════════════════ -->
+<section id="chapter-index">
+  <p class="index-eyebrow">Selected Works — UI + UX</p>
+  <h1 class="index-title"><span>CASE</span><br><span class="l2">STUDIES</span></h1>
+  <p class="index-sub">A cross-section of platforms, clients, and challenges — translated into pixels with intent.</p>
+  <div class="chapter-grid">
+    <a href="#ch-why"      class="chapter-card" style="--card-accent:#d4a843"><div class="card-num">01</div><div class="card-label">Origin</div><div class="card-title">Why UI+UX?</div></a>
+    <a href="#ch-power"    class="chapter-card" style="--card-accent:#4a7fbb"><div class="card-num">02</div><div class="card-label">Brand + Digital</div><div class="card-title">A Powerhouse Client</div></a>
+    <a href="#ch-am"       class="chapter-card" style="--card-accent:#c0392b"><div class="card-num">03</div><div class="card-label">E-commerce</div><div class="card-title">Full Throttle Startup</div></a>
+    <a href="#ch-wisc"     class="chapter-card" style="--card-accent:#4a9a4a"><div class="card-num">04</div><div class="card-label">.EDU Redesign</div><div class="card-title">Univ. of Wisconsin</div></a>
+    <a href="#ch-dana"     class="chapter-card" style="--card-accent:#4a80bb"><div class="card-num">05</div><div class="card-label">Non-profit Digital</div><div class="card-title">Not Rocket Science</div></a>
+    <a href="#ch-kent"     class="chapter-card" style="--card-accent:#8a4aaa"><div class="card-num">06</div><div class="card-label">IA + Navigation</div><div class="card-title">Kent State .EDU</div></a>
+    <a href="#ch-wovn"     class="chapter-card" style="--card-accent:#2a9a9a"><div class="card-num">07</div><div class="card-label">iOS / Mobile</div><div class="card-title">WOVN App</div></a>
+    <a href="#ch-workarea" class="chapter-card" style="--card-accent:#c8b89a"><div class="card-num">08</div><div class="card-label">SAP Hybris</div><div class="card-title">My Area of Expertise</div></a>
+    <a href="#ch-pdp"      class="chapter-card" style="--card-accent:#5a5acc"><div class="card-num">09</div><div class="card-label">B2B E-commerce</div><div class="card-title">PDP: Perspective…</div></a>
+    <a href="#ch-logo"     class="chapter-card" style="--card-accent:#d4a843"><div class="card-num">10</div><div class="card-label">Identity</div><div class="card-title">A Brainy Bespoke Logo</div></a>
   </div>
-</div>
+</section>
 
-<div id="spine">
-  <div class="spine-legend" id="legend">
-    <div class="legend-item active" data-type="all" onclick="filterType('all')">
-      <div class="legend-dot" style="background:var(--ink-3)"></div>all
-    </div>
-    <div class="legend-item" data-type="engine" onclick="filterType('engine')">
-      <div class="legend-dot" style="background:var(--c-engine)"></div>engine
-    </div>
-    <div class="legend-item" data-type="tool" onclick="filterType('tool')">
-      <div class="legend-dot" style="background:var(--c-tool)"></div>tool
-    </div>
-    <div class="legend-item" data-type="utility" onclick="filterType('utility')">
-      <div class="legend-dot" style="background:var(--c-utility)"></div>utility
-    </div>
-    <div class="legend-item" data-type="writing" onclick="filterType('writing')">
-      <div class="legend-dot" style="background:var(--c-writing)"></div>writing
-    </div>
-    <div class="legend-item" data-type="vertical" onclick="filterType('vertical')">
-      <div class="legend-dot" style="background:var(--c-vertical)"></div>vertical
-    </div>
-    <div class="legend-item" data-type="archive" onclick="filterType('archive')">
-      <div class="legend-dot" style="background:var(--c-archive)"></div>archive
-    </div>
-  </div>
-  <div style="display:flex;align-items:center;gap:0;">
-    <div class="spine-zoom">
-      <button class="zoom-btn" onclick="doZoom(-0.1)">−</button>
-      <span class="zoom-pct" id="zoom-pct">100%</span>
-      <button class="zoom-btn" onclick="doZoom(0.1)">+</button>
-    </div>
-  </div>
-</div>
+<!-- ═══════════════════════ CH 01: WHY ═══════════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 01</div><div class="sep-line"></div></div>
+<section id="ch-why" class="chapter-section">
 
-<div id="detail-panel">
-  <div class="dp-stripe" id="dp-stripe"></div>
-  <div class="dp-topbar">
-    <span class="dp-topbar-label" id="dp-label">node detail</span>
-    <button class="dp-close" onclick="closePanel()">✕</button>
+  <div class="section-intro reveal">
+    <div class="si-num">01</div>
+    <div class="left">
+      <span class="si-tag">Made to Make</span>
+      <h2 class="si-title">Why UI+UX?</h2>
+      <p class="si-client">Origin Story &nbsp;·&nbsp; Art → Design → UX</p>
+    </div>
+    <div class="right">
+      <span class="si-label">On Design</span>
+      <div class="si-prose">
+        <p>I draw good.</p>
+        <p>Guess I should be a designer.</p>
+        <p>But, if you break it down, it's basically an amalgamation of observational skills and mechanical intuition at play. Couple that with a keen interest in the nuances of the human psyche, add in a directive with an objective — and you're basically primed to become a 'UI+UX' designer.</p>
+      </div>
+    </div>
   </div>
-  <div class="dp-scroll" id="dp-scroll">
-    <div class="dp-hero" id="dp-hero"></div>
-    <div class="dp-body" id="dp-body"></div>
-    <div id="dp-connections-wrap" style="padding:0 20px;"></div>
-    <div class="dp-footer" id="dp-footer"></div>
+
+  <!-- hero: full bleed finger harp -->
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/jZWQDhyy/African-Finger-Harpbyzackgort-As-Bv-Y.webp" alt="African Finger Harp">
   </div>
-</div>
 
-<div id="minimap">
-  <canvas id="minimap-canvas"></canvas>
-  <div id="minimap-vp"></div>
-</div>
+  <!-- split: sunflower left / mask right -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap">
+      <img class="" src="https://i.ibb.co/qMz1CLbf/sunflouroc-TGd-LBRGUFWvp-Qmpm-Zw-NMbr.webp" alt="Sunflower">
+    </div>
+    <div class="img-wrap">
+      <img class="" src="https://i.ibb.co/gM4dRT1v/mask-Uw-Dg-Mvg-Yh-Dco-WEJTuwuk-GLQFj-SVw.webp" alt="Mask">
+    </div>
+  </div>
 
-<div id="node-count"></div>
-<div id="intro-toast">tap any node to explore</div>
+  <!-- text + Da Vinci split -->
+  <div class="split" style="--split-cols: 44% 1fr;">
+    <div class="split-img">
+      <img class="par-img" src="https://i.ibb.co/PZ3QBsGF/Meattempting-Da-Vincibyzackgort-FKF.webp" alt="Da Vinci attempt">
+    </div>
+    <div class="split-text">
+      <span class="eyebrow">Art + Design</span>
+      <h3 class="heading">Art is creating. Design is discerning &amp; dissecting.</h3>
+      <div class="prose">
+        <p>You know, there's a reason they call it a "work of art".</p>
+        <p>10,000+ hours of micro-task UX optimization later, the discipline becomes instinct — could you imagine if <em>Cy Twombly</em> designed a website?</p>
+      </div>
+      <div class="mono-list" style="margin-top:2rem;">UI · UX<br>Photography<br>Identity</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 02: POWER ═══════════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 02</div><div class="sep-line"></div></div>
+<section id="ch-power" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">02</div>
+    <div class="left">
+      <span class="si-tag">Building a Powerful Experience</span>
+      <h2 class="si-title">A Powerhouse Client</h2>
+      <p class="si-client"><strong>Power HRG</strong> &nbsp;·&nbsp; With 160over90 · Brand + Digital</p>
+    </div>
+    <div class="right">
+      <span class="si-label">The Brief</span>
+      <div class="si-prose">
+        <p>The cofounders had one very specific requirement: for it to be unlike anything or anyone else in the home remodeling space. Whereas most in their industry inventorize their services and product offerings, Power wanted to <strong>showcase the lifestyle benefits</strong> that come with achieving your dream home.</p>
+        <p>They wanted video. They wanted animation. They wanted lifestyle photography — and they had the budget and enthusiasm to see it to fruition.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- hero: full bleed -->
+  <div class="img-full reveal" style="position:relative;">
+    <img class="par-img" src="https://i.ibb.co/P79T6ft/powerhero-LTYm-Wh-GAv-Pyjom-OCDFp-EBRF.webp" alt="Power Hero">
+    <div style="position:absolute;bottom:2.5rem;left:var(--gutter);z-index:2;">
+      <p style="font-family:var(--ff-display);font-size:clamp(2rem,5vw,4rem);color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.8);">"Power is a <span style="color:var(--gold)">_____</span> company"</p>
+    </div>
+  </div>
+
+  <!-- pull quote -->
+  <div class="pull-band reveal">
+    <blockquote>"Rather than try to solve it with a single sentence, I suggested we try the opposite. The team at 160over90 liked it; the Power team loved it — so off we went."</blockquote>
+  </div>
+
+  <!-- gif pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap gif-wrap">
+      <img src="https://i.ibb.co/VcrQ8WkX/powerhomeloopoptimizedw-FIkl-UHPGV.gif" alt="Power home loop">
+    </div>
+    <div class="img-wrap gif-wrap">
+      <img src="https://i.ibb.co/7tkkDT7y/poweranimationloop-YFKh-XZGt-Pkc-UCZ.gif" alt="Power animation">
+    </div>
+  </div>
+
+  <!-- split: team photo + cross-dept prose -->
+  <div class="split reverse" style="--split-cols-rev: 1fr 48%;">
+    <div class="split-text" style="background:#0c0e14;">
+      <span class="eyebrow">Cross-department coordination</span>
+      <h3 class="heading">The Works</h3>
+      <div class="prose">
+        <p>The level of cross-department coordination was significant — nay, tremendous — with critical elements needed from everyone. I worked with the brand designers to advise design decisions that would translate into the digital space. I coordinated with photographers on on-site photo shoots. There was concept art that needed to be animated by the motion designers, and lastly — working closely with the video team to produce the video segments featured on the website.</p>
+        <p>There's a trick I learned from a copywriter at 160over90: <em>"You need to craft a 'loaded sentence'; make every word count."</em> Since I'm not really a copywriter, I just gave them a whole bunch of sentences.</p>
+        <p><em>— Shout out to the dev team. Okay, it was just Greg.</em></p>
+      </div>
+    </div>
+    <div class="split-img">
+      <img class="par-img" src="https://i.ibb.co/sdvKR9t1/happymaqv-BLVCKUYIsiv-Tgu-KJQPEPMXl.webp" alt="Team">
+    </div>
+  </div>
+
+  <!-- single gif full -->
+  <div class="img-full reveal gif-wrap">
+    <img src="https://i.ibb.co/6Rh8NkVD/powertransitionloopsec-YQr-St-Ien-Xl.gif" alt="Power transition" style="width:100%;height:100%;object-fit:cover;">
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 03: AMERICAN MUSCLE ═══════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 03</div><div class="sep-line"></div></div>
+<section id="ch-am" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">03</div>
+    <div class="left">
+      <span class="si-tag">A Fast Start</span>
+      <h2 class="si-title">Full Throttle with a Startup</h2>
+      <p class="si-client"><strong>AmericanMuscle.com</strong> &nbsp;·&nbsp; E-commerce · 2011</p>
+    </div>
+    <div class="right">
+      <span class="si-label">Ship It</span>
+      <div class="si-prose">
+        <p>It's a ton of fun to focus your efforts on a single product, especially when that product is the face of an e-commerce platform shipping <strong>millions of dollars of merchandise</strong> to a fanatical fanbase — derr, userbase.</p>
+        <p>With a need for a system that could accommodate thousands of uniquely complex online orders spanning a bevy of categories, I designed custom UI+UX solutions through iterative testing — everything from homepage through checkout, to your inbox. Or, in this case, your doorstep.</p>
+        <p><em>*The site has changed since 2011, but the fundamental building blocks are still largely intact.</em></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- hero: mustang full bleed -->
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/xyz2BHf/mustangtom-BPa-YSw-BXft-NHQCVEkp-IGb-O.webp" alt="Mustang">
+  </div>
+
+  <div class="pull-band reveal">
+    <blockquote>"Test. Sell. Optimize. Sell more. Rinse and repeat."</blockquote>
+  </div>
+
+  <!-- wireframes + product pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/5XyTHpHy/AMZProe-ILmn-CKsiv-Dl-Kba-Gg-Sn-EZXj-GNY.webp" alt="AM Z Pro"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/N27sPZv5/AMwire-GYVHbp-RSo-KUCz-KGe-FVEzj-Lzjmg.webp" alt="AM Wireframes"></div>
+  </div>
+
+  <!-- split: mustang left / holistic ownership text -->
+  <div class="split" style="--split-cols: 55% 1fr;">
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/KjFgH9Kk/mustangmm-YDg-XIj-JVi-Fvgyt-Js-Ynhvf-OX.webp" alt="Mustang MM"></div>
+    <div class="split-text">
+      <span class="eyebrow">Holistic Ownership</span>
+      <div class="prose">
+        <p>Besides the UI+UX, I functioned as the product photographer. So having a holistic hand over photography, the website, and branding, I was able to establish a <strong>cohesive design language</strong> throughout the website.</p>
+        <p>Essentially everything you see above — <em>Raxiom logo included.</em></p>
+      </div>
+      <div class="mono-list" style="margin-top:2rem;">UI · UX · Photography<br>Branding · Identity<br>Raxiom logo included.</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 04: WISCONSIN ═══════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 04</div><div class="sep-line"></div></div>
+<section id="ch-wisc" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">04</div>
+    <div class="left">
+      <span class="si-tag">"Built Without Limits"</span>
+      <h2 class="si-title">Univ. of Wisconsin–Madison</h2>
+      <p class="si-client"><strong>wisc.edu</strong> &nbsp;·&nbsp; With 160over90 · .EDU Redesign</p>
+    </div>
+    <div class="right">
+      <span class="si-label">The Situation</span>
+      <div class="si-prose">
+        <p>Okay — I realize these wireframes are basically grayscale designs. It was one of those unique situations where the university's team already had a solid IA in place and, with ambitious plans for the future — having just launched a massive rebranding effort — sought an upgrade for their .EDU.</p>
+        <p>When the client hands you their fresh brand and says <strong>"Wow us"</strong>... it's when things get exciting.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- full bleed -->
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/wFVd0CWJ/wiscfullge-Rkig-CAEDv-IJQOqn-RLTy-Yw-A.webp" alt="Wisconsin Full">
+  </div>
+
+  <!-- wireframe pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/DPCMqM15/wiscwirelofi-Hyu-LQUf-JZe-Lj-Hxhx-Nd-Xj.webp" alt="Wisc wireframe"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Q5DBrWJ/wiscstyledyh-Uw-Lz-Ci-GJb-Av-Oj-Iipa-VUF.webp" alt="Wisc styled"></div>
+  </div>
+
+  <!-- split: mobile + text -->
+  <div class="split reverse" style="--split-cols-rev: 1fr 44%;">
+    <div class="split-text" style="background:#060f06;">
+      <span class="eyebrow">How We Sold It</span>
+      <h3 class="heading">Brand elements become systematic UX cornerstones.</h3>
+      <div class="prose">
+        <p>We put together a web style guide, threw in a mixed bag of UI components, and walked the client through how key brand elements become systematic UX cornerstones in their website interface.</p>
+        <p>It really set us up for a one-to-one conversation. We talked about what they needed, what they wanted, and what they could get excited about — then asked if we could have some fun.</p>
+      </div>
+      <div class="mono-list" style="margin-top:2rem;">Wireframes · Style Guide<br>UI Components · Brand Integration<br>Desktop → Mobile 1:1</div>
+    </div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/h1KtxvB7/wiscmobiledcqqjkb-Gjo-Dg-Qi-AGk-Dt-DLi.webp" alt="Wisc mobile"></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 05: DANA ═══════════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 05</div><div class="sep-line"></div></div>
+<section id="ch-dana" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">05</div>
+    <div class="left">
+      <span class="si-tag">A 'Smart' Heads-Up Redesign</span>
+      <h2 class="si-title">It's Not Rocket Science</h2>
+      <p class="si-client"><strong>dana.org</strong> &nbsp;·&nbsp; With FlightPath · Neuroscience</p>
+    </div>
+    <div class="right">
+      <span class="si-label">No Refresh in a Decade</span>
+      <div class="si-prose">
+        <p>The Dana Foundation provides grants and funding for neuroscience research and education. The previous site hadn't seen a refresh in over a decade — making a near 1:1 desktop-to-mobile experience critical.</p>
+        <p>We delivered a <strong>full-spectrum mobile-first redesign</strong> — new brand identity, intuitive navigation, and a flexible layout for showcasing a comprehensive array of neuroscience content.</p>
+        <p>A traditional top-bar navigation was not going to work — and no way was I hiding these taxonomies behind a hamburger button. <em>(…okay, okay — burgers are acceptable for mobile.)</em></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- hero: BAW -->
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/ksTFbcm5/bawhero-Gha-St-Gjf-XDz-DZBv-URFWHFiw-Lj.webp" alt="BAW hero">
+  </div>
+
+  <!-- full-bleed gif: nav animation -->
+  <div class="img-full reveal gif-wrap">
+    <img src="https://i.ibb.co/kgKd9xPY/navsec-YRQxt-Fy-Cpymu-Zdplk-TOWUpe-ELB.gif" alt="Nav animation" style="width:100%;height:100%;object-fit:cover;">
+  </div>
+
+  <!-- split: image asset / BAW explanation -->
+  <div class="split" style="--split-cols: 40% 1fr;">
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/hFkwLZv9/imageassetw-XMKOVHr-YCxydo-Jj-BBTd-Wp.webp" alt="Dana image asset"></div>
+    <div class="split-text" style="background:#060c14;">
+      <span class="eyebrow">Oh, btw — BAW</span>
+      <h3 class="heading">Two brands. One card system.</h3>
+      <div class="prose">
+        <p>Dana Foundation has a subsidiary initiative called Brain Awareness Week — an outreach program for educating children and young adults.</p>
+        <p>My card-system interface accommodated both the business and content needs of dana.org and BAW with <strong>only modest adjustments to the CSS.</strong></p>
+        <p><em>That said, BAW was much more technically demanding on the backend — go figure.</em></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- mobile trio -->
+  <div class="img-pair thirds reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/qFR3ZBmW/danamobilemockupgtgxr-TPNy-NLPZg-PD.webp" alt="Dana mobile"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/gFbDRSzz/dana-Dana-Mobile-Navt-Mvcc-Di-YYKxz-QYj.webp" alt="Dana nav"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/GGnPBGN/bawmobilemockupg-OENk-Us-NFq-Ck-JLl-TQ.webp" alt="BAW mobile"></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 06: KENT STATE ═══════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 06</div><div class="sep-line"></div></div>
+<section id="ch-kent" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">06</div>
+    <div class="left">
+      <span class="si-tag">A Navigation &amp; Taxonomy Study</span>
+      <h2 class="si-title">Kent State .EDU</h2>
+      <p class="si-client"><strong>kent.edu</strong> &nbsp;·&nbsp; With 160over90 · IA + Nav</p>
+    </div>
+    <div class="right">
+      <span class="si-label">One Big Puzzle</span>
+      <div class="si-prose">
+        <p>Eight regional campuses, dozens of international locations, and multiple internal entities with unique priorities and initiatives. Given Kent State's breadth across the region and the world, I set out to develop IA and UI+UX solutions that accommodated their <strong>complex and atypical infrastructure.</strong></p>
+        <p>I refactored their IA, created wireframe and design prototypes showing the intended functionality, and walked through various user-flow scenarios giving the client a clear understanding of form and function.</p>
+        <p>Additionally, I engineered a separate navigation system from the ground up. While it didn't make it to fruition, it served as an invaluable thought experiment in creative and analytical problem solving. <em>— Shout-out to my developer for that insane implementation.</em></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/ZRzNg8sJ/Kj-EBo-DCXRUz-HHVRZBx-TQSEQu-Tv-Blfn-MT.webp" alt="Kent State hero">
+  </div>
+
+  <!-- nav detail full bleed -->
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/tP2RtPRT/kentnav-Qw-Utq-Np-Zzdkc-TPjlcpo-PLSJlh.webp" alt="Kent nav">
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/Nd7sYFdP/kentnav-PSz-NWCpx-DQoo-YFgrqs-WCz-Gx-ZU.webp" alt="Kent nav detail">
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 07: WOVN ═══════════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 07</div><div class="sep-line"></div></div>
+<section id="ch-wovn" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">07</div>
+    <div class="left">
+      <span class="si-tag">Hands on with iOS</span>
+      <h2 class="si-title">WOVN — an iOS App</h2>
+      <p class="si-client"><strong>O3 World</strong> &nbsp;·&nbsp; iOS · Agile · MVP</p>
+    </div>
+    <div class="right">
+      <span class="si-label">Finally, An App</span>
+      <div class="si-prose">
+        <p>Most of my UI+UX experience had been for websites — I mean, responsive websites that you can view on your phone. But the expectations are different when you're handling a native app.</p>
+        <p>You can imagine how thrilled I was when I joined O3 World and was immediately presented with the opportunity to <strong>finally get my hands on app work</strong> — operating on an efficient 2-week sprint cycle with weekly face-to-face meetings with the client.</p>
+        <p>The app was privately funded by its founder, and we met with his team on a weekly basis. In a world where most meetings occur on the cloud, it was great having <strong>face-to-face time</strong> — direct feedback, working out solutions, and getting approvals in real-time.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/cX8J5Bv3/wovntiles-Hzttul-Ze-GJCb-BEq-Qa-JYDXCI.webp" alt="WOVN tiles">
+  </div>
+
+  <div class="split" style="--split-cols:42% 1fr;">
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/BHKYR2rP/wovnapproach-Tq-Npgin-Gwu-BMl-Zq-WZv-Jt.webp" alt="WOVN approach"></div>
+    <div class="split-text" style="background:#040f0f;">
+      <span class="eyebrow">Scope</span>
+      <div class="mono-list" style="font-size:.72rem;line-height:2.2;">Account · Friends · Stories<br>Camera UX · Video<br>Auth Flows · MVP<br>2-week sprints</div>
+    </div>
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/gbS56FvY/wovnwireframeso-Ih-Xnt-Yb-Gssh-KODZAB.webp" alt="WOVN wireframes">
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 08: WORKAREA ═══════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 08</div><div class="sep-line"></div></div>
+<section id="ch-workarea" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">08</div>
+    <div class="left">
+      <span class="si-tag">{My Area} of Expertise</span>
+      <h2 class="si-title">This Is My Area</h2>
+      <p class="si-client"><strong>SAP Hybris · SFCC</strong> &nbsp;·&nbsp; LiveArea · Workarea · WebLinc</p>
+    </div>
+    <div class="right">
+      <span class="si-label">Translating Data Into Pixels</span>
+      <div class="si-prose">
+        <p>One thing I excel at: translating data points into pixels. Having worked with client teams of all types through the years, I've developed a knack for translating their hard requirements into <strong>conversation pieces that make the creative process actually creative.</strong></p>
+        <p>I may have spent as much time, if not more, in spreadsheets and word docs outlining technical specs, functional requirements, and UX specifications than I spent working on UI in Sketch.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/4nLTQS02/danaheroa-Zcf-Ia-BQr-Rdkrtxo-THSyhar-T.webp" alt="Dana hero">
+  </div>
+
+  <!-- Cards Against Bad UX pull quote -->
+  <div class="pull-band reveal">
+    <blockquote>"Rather than reading off an excel sheet and bullet points, I created a format that invited discussion and client engagement."</blockquote>
+    <p>Cards Against Bad UX — the client enjoyed it, said as much on the call, and softly approved the first pass with just two small feedback adjustments.</p>
+  </div>
+
+  <!-- three images -->
+  <div class="img-pair thirds reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/zh2Wzjs5/x-ZIHosw-LTEMUy-JIOczxZXPjv-Zds-Lfp-Nh.webp" alt="Work detail"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Dx4VJbv/RYXRiiond-RSz-Bn-PLmgh-Qn-Exr-WOgth-Qm-T.webp" alt="Work detail 2"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/d4hM7dMx/q-Vp-FTLEbs-Jdvgr-IZLfkp-Gc-Rks-SXz-Po-PA.webp" alt="Work detail 3"></div>
+  </div>
+
+  <!-- rotating nav full bleed -->
+  <div class="reveal" style="width:100%;background:#050403;overflow:hidden;">
+    <img src="https://i.ibb.co/8DFhpRmp/rotatingnavbreakdownfullcycle-Pw-Q.gif" alt="Rotating nav breakdown" style="width:100%;height:auto;display:block;object-fit:contain;">
+  </div>
+
+  <!-- from/to pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/23bv6QwS/fromthistothat-Bhnju-Ln-GDKPNb-Wawgw.webp" alt="From this to that"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/BHY9Y5sX/Chq-Zmcs-Bquyc-Ov-HYjiy-RKJqk-Ikc-SRo-Zv.webp" alt="Workarea detail"></div>
+  </div>
+
+  <!-- stories pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/cK4MYYhF/stories-AZh-EPUSk-YDf-SRVVUp-Ro-Sl-Zp-SE.webp" alt="Stories A"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/PZZ4K84X/stories-LLTzcdn-TOb-Jw-PYKdl-GSVx-YZWb.webp" alt="Stories B"></div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 09: PDP ═══════════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 09</div><div class="sep-line"></div></div>
+<section id="ch-pdp" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">09</div>
+    <div class="left">
+      <span class="si-tag">Perspective, Diligence, Payoff</span>
+      <h2 class="si-title">PDP</h2>
+      <p class="si-client"><strong>HARDINGE</strong> &nbsp;·&nbsp; B2B Ecommerce · SAP Hybris · LiveArea</p>
+    </div>
+    <div class="right">
+      <span class="si-label">Board-Level Pressure</span>
+      <div class="si-prose">
+        <p>I was approached by the SVP Creative Director who stressed this was <strong>straight from one of the Board members</strong> — so the pressure was on to deliver my best. Onus was mine to dive into the SAP Hybris platform and weigh the system's features against the client's requirements.</p>
+        <p>UX efforts ranged from iterating standard Order Lists, to designing complex data tables optimized for the layperson's mobile device, to granular documentation of micro-interactions throughout the sales funnel — add to that list navigation and taxonomy systems. My forté.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/ynyPWk7k/herohardinge-Plbu-Hi-Swg-Qd-Ruqc-Ni-Ulf.webp" alt="Hardinge hero">
+  </div>
+
+  <!-- nav iteration trio -->
+  <div class="img-pair thirds reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/SX0gLsmK/dropnavigation-Oz-Dt-Hno-Ngy-Ckoww-Dg-K.webp" alt="Drop navigation"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/bgksQwqw/dropnavigationeditshomepage-EJWur.webp" alt="Drop nav edits"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/MyffyvQg/finalizednavigationfmb-YVOjfy-CHcf.webp" alt="Finalized nav"></div>
+  </div>
+
+  <!-- override pull quote -->
+  <div class="pull-band reveal">
+    <blockquote>"I stayed up all night and made it happen."</blockquote>
+    <p>Teammate insisted their version see fruition the night before the presentation. We showed theirs first. The client seemed pleased — then asked if we had anything else. Within minutes: enthusiastic approval.</p>
+  </div>
+
+  <!-- PDP detail pairs -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Jw5N5wP2/switchtodroppdpconceptsyrf-TSes-HS.webp" alt="Drop PDP"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/VW7qMV2D/dropmyinterpretationp-SXi-Ii-YKYBGt.webp" alt="My interpretation"></div>
+  </div>
+
+  <!-- attention to detail split -->
+  <div class="split reverse" style="--split-cols-rev: 1fr 50%;">
+    <div class="split-text" style="background:#06060f;">
+      <span class="eyebrow">Attention to Detail</span>
+      <h3 class="heading">It's not magic. It's caring.</h3>
+      <div class="prose">
+        <p>There are some folks who diligently take notes on calls, and then there are others who are <em>engaged</em> in the call — gauging vocal inflections and reading between the lines of the often convoluted thoughts from the client's various contributors.</p>
+        <p>By leveraging human-centered soft skills, I consistently hit the mark within the first few passes. But it's not magic. It's maintaining full communication with the team; it's diving deep into a new platform; it's countless hours put in — <strong>not all billed</strong> — to make everything perfect. It's being patient despite egos, emotions, and exceptional deadlines. It's about caring about the work.</p>
+      </div>
+    </div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/tTDrvnhP/drop-SAinterpretationul-Cj-QNTXl-Ady.webp" alt="SA interpretation"></div>
+  </div>
+
+  <!-- closing image -->
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/4gm6DMTx/u-OAbexu-HHAVxwl-Xa-FPf-Fozvnw-Tf-HZa-ND.webp" alt="Contact / closer">
+  </div>
+
+</section>
+
+<!-- ═══════════════════════ CH 10: LOGO ═══════════════════════ -->
+<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 10</div><div class="sep-line"></div></div>
+<section id="ch-logo" class="chapter-section">
+
+  <div class="section-intro reveal">
+    <div class="si-num">10</div>
+    <div class="left">
+      <span class="si-tag">A 'Brainy' Bespoke Logo</span>
+      <h2 class="si-title">A Brainy Bespoke Logo</h2>
+      <p class="si-client"><strong>The Dana Foundation</strong> &nbsp;·&nbsp; Identity · Bespoke Typeface</p>
+    </div>
+    <div class="right">
+      <span class="si-label">Think Modularly</span>
+      <div class="si-prose">
+        <p>No cliché themes. Don't be derivative. <strong>Think modularly.</strong></p>
+        <p>I liked the idea of a dot representing a unit — an individual — and the idea of numerous circles representing many, humankind. The circle itself: a metaphor for the mind and its infinite properties.</p>
+        <p>I used general geometry relative to the proportions of a circle to create a <strong>bespoke typeface system</strong> — taking the Dana Foundation from a rasterized image logo to a modern, accommodating design and branding system. It lost out by a few votes. <em>I'm told it was close.</em></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="img-full reveal">
+    <img class="par-img" src="https://i.ibb.co/jk49XvQS/braintypeface-AKfrx-EDNtd-Bq-BMCXDDw.webp" alt="Brain typeface">
+  </div>
+
+  <!-- gif + logo pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap gif-wrap has-contain" style="background:#050400;">
+      <img src="https://i.ibb.co/nMzjH9GD/ezgifcomoptimize-MRx-Gsfs-Wjr-Ymc-Pl-Z.gif" alt="Logo animation" style="width:100%;height:100%;object-fit:contain;">
+    </div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/20Ss0wSL/danalogol-MHEu-Swyrfu-BMYu-BPDs-SSPk-X.webp" alt="Dana logo"></div>
+  </div>
+
+  <!-- dana + alliance pair -->
+  <div class="img-pair reveal" >
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/gZv0GVqm/danaintrofs-TGo-Vhrtssz-PRCde-Nok-Ged.webp" alt="Dana intro"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Hph5RbXd/alliancelogo-AQBLFEe-Xt-GVg-WOyq-XHQz.webp" alt="Alliance logo"></div>
+  </div>
+
+  <!-- closing pull quote -->
+  <div class="pull-band reveal" style="text-align:center;">
+    <blockquote style="margin:0 auto;">"I was an artist before I was a graphic designer — or UX designer. This may offer a look into how I approach design."</blockquote>
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer id="site-footer">
+  <div class="footer-name">ZACK GORT</div>
+  <p class="footer-cta">UI + UX · Navigation Systems · E-commerce · Bespoke Experiences</p>
+  <ul class="footer-links">
+    <li><a href="https://zackgort.com" target="_blank">zackgort.com</a></li>
+    <li><a href="#chapter-index">Back to Top</a></li>
+  </ul>
+</footer>
 
 <script>
-const TYPE_META = {
-  engine:  { label:'Engine',  color:'var(--c-engine)'  },
-  tool:    { label:'Tool',    color:'var(--c-tool)'    },
-  utility: { label:'Utility', color:'var(--c-utility)' },
-  writing: { label:'Writing', color:'var(--c-writing)' },
-  vertical:{ label:'Vertical',color:'var(--c-vertical)'},
-  identity:{ label:'Identity',color:'var(--c-identity)'},
-  archive: { label:'Archive', color:'var(--c-archive)' },
-};
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
-const NODES = [
-  {
-    id:'wolfie',
-    x:1400, y:600,
-    type:'engine',
-    title:'wolfie.love',
-    tagline:'The sentence engine. Origin of everything.',
-    domain:'wolfie.love',
-    url:'https://wolfie.love',
-    headerImg:'https://i.ibb.co/B5hk87fv/flower.webp',
-    content:[
-      { type:'sentence', value:'A memorial for Wolfgang — a blind mini poodle mix, rescued, irreplaceable.' },
-      { type:'sentence', value:'He died. The grief became infrastructure.' },
-      { type:'pullquote', value:'Every platform in this canvas runs on what was built here.' },
-      { type:'divider', value:'what it is' },
-      { type:'sentence', value:'Sentence-progressive narrative engine. No frameworks. No derivatives. Entirely from scratch.' },
-      { type:'sentence', value:'Compose mode. Focus mode. Grid mode. Chapter system. Image mapping. Theme engine. Music player.' },
-    ],
-    connects:['reasonably','ifimaybefrank','zackgort','reasonandresolution','wolfie-net','wolfie-food','wolfie-real','wolfie-life'],
-  },
-  {
-    id:'wolfie-life',
-    x:1060, y:1120,
-    type:'archive',
-    title:'wolfie.life',
-    tagline:'Personal photo archive. Two surfaces, one collection.',
-    domain:'wolfie.life',
-    url:'https://wolfie.life',
-    headerImg:'https://i.ibb.co/PspxySvN/warmth.webp',
-    content:[
-      { type:'sentence', value:'A personal archive of Wolfgang, street photography, Vermont, and work — 100+ moments across five chapters.' },
-      { type:'pullquote', value:'Two modes for the same content: one for managing memory, one for feeling it.' },
-      { type:'divider', value:'grid mode' },
-      { type:'sentence', value:'Infinite-scroll photo grid with pan, zoom, scatter-map navigation, and chapter filtering. Canvas-rendered at 60fps.' },
-      { type:'divider', value:'node mode' },
-      { type:'sentence', value:'Lily pad view — photos rendered inside drifting ellipses. Each pad floats on its own sine curve. Connections drawn between related moments.' },
-      { type:'divider', value:'both mode' },
-      { type:'sentence', value:'Side-by-side split: grid and node map running simultaneously. Select in one, see the context in the other.' },
-      { type:'divider', value:'detail' },
-      { type:'sentence', value:'Floating draggable widget with mood tags, connected moment thumbnails, and orientation-aware photo crop. Mood system shifts chrome color across the whole UI.' },
-      { type:'pullquote', value:'Built as a portfolio artifact for the Instagram Private Sharing role — a working prototype of the exact product space.' },
-    ],
-    connects:['wolfie'],
-  },
-  {
-    id:'reasonably',
-    x:800, y:320,
-    type:'tool',
-    title:'reasonably.cc',
-    tagline:'A thinking surface. Not a notes app.',
-    domain:'reasonably.cc',
-    url:'https://reasonably.cc',
-    content:[
-      { type:'sentence', value:'Sentence-progressive thinking tool. Single HTML file. No dependencies.' },
-      { type:'sentence', value:'Undo/redo architecture. Bracket annotation system. Canvas palette interaction model.' },
-      { type:'pullquote', value:'The tool eats its own philosophy — built with the sentence-first approach it enables.' },
-      { type:'divider', value:'node types' },
-      { type:'sentence', value:'Note · Task · Long · Media — each with Spatial, Gallery, and Compose views. Package as document.' },
-    ],
-    connects:['wolfie','ifimaybefrank'],
-  },
-  {
-    id:'ifimaybefrank',
-    x:760, y:820,
-    type:'writing',
-    title:'ifimaybefrank.com',
-    tagline:'The philosophical argument. Built from scratch.',
-    domain:'ifimaybefrank.com',
-    url:'https://ifimaybefrank.com',
-    content:[
-      { type:'sentence', value:'Built entirely in vanilla HTML, CSS, and JS. No frameworks. No derivatives.' },
-      { type:'sentence', value:'Sentence-by-sentence reading paradigm. Chapter system. Four themes. Flow mode. Bracket annotations.' },
-      { type:'sentence', value:'An imageMap system linking hundreds of phrases to contextual images.' },
-      { type:'pullquote', value:'Format shapes attention. The sentence is the interface. This was the proof.' },
-    ],
-    connects:['wolfie','reasonably'],
-  },
-  {
-    id:'zackgort',
-    x:1600, y:260,
-    type:'identity',
-    title:'zackgort.com',
-    tagline:'Narrative as nodes. The canvas biography.',
-    domain:'zackgort.com',
-    url:'https://zackgort.com',
-    content:[
-      { type:'sentence', value:'Built on the wolfie.love engine. The professional canvas — era by era, node by node.' },
-      { type:'sentence', value:'Scatter map. Sandbox mode. Minimap. Detail panel. Full node + connection topology.' },
-      { type:'pullquote', value:'The biography written in the format it argues for.' },
-    ],
-    connects:['wolfie','reasonandresolution'],
-  },
-  {
-    id:'reasonandresolution',
-    x:2200, y:560,
-    type:'engine',
-    title:'reasonandresolution.com',
-    tagline:'Anthropic RSP v3 — a governance narrative.',
-    domain:'reasonandresolution.com',
-    url:'https://reasonandresolution.com',
-    content:[
-      { type:'sentence', value:'A sentence-progressive narrative engine framed as an Anthropic RSP v3 governance interface.' },
-      { type:'sentence', value:'Six chapters. Studio mode. Compose mode. Dispatch mode. 100+ photo archive.' },
-      { type:'pullquote', value:'The platform demonstrating itself, at institutional scale.' },
-      { type:'divider', value:'also at' },
-      { type:'sentence', value:'intoview.pro/cv · narrative resume. Same engine, different content payload.' },
-    ],
-    connects:['wolfie','zackgort','intoview'],
-  },
-  {
-    id:'intoview',
-    x:2100, y:240,
-    type:'tool',
-    title:'intoview.pro',
-    tagline:'Platform for explorative experiential builds.',
-    domain:'intoview.pro',
-    url:'https://intoview.pro',
-    content:[
-      { type:'sentence', value:'A platform for exploration — not a portfolio, but a live R&D environment.' },
-      { type:'sentence', value:'Framework first, libraries optional, single-source content to support evolution.' },
-      { type:'divider', value:'active builds' },
-      { type:'sentence', value:'/note · /node · /kanban · /cv — each a distinct proof of craft.' },
-    ],
-    connects:['reasonandresolution','intoview-note','intoview-node','intoview-kanban'],
-  },
-  {
-    id:'intoview-note',
-    x:2560, y:100,
-    type:'tool',
-    title:'intoview.pro/note',
-    tagline:'Visual note-taking. React · Three.js · GSAP.',
-    domain:'intoview.pro/note',
-    url:'https://intoview.pro/note',
-    content:[
-      { type:'sentence', value:'v1.4.1 — isometric grid, 3D graphics layer, animation system.' },
-      { type:'sentence', value:'Take a photo → Make a note → Carry along.' },
-      { type:'pullquote', value:'A note-taking app built as a proof that imagination should outpace convention.' },
-    ],
-    connects:['intoview'],
-  },
-  {
-    id:'intoview-node',
-    x:2560, y:360,
-    type:'tool',
-    title:'intoview.pro/node',
-    tagline:'N.O.D.E. — provider tracking & cooldown cycles.',
-    domain:'intoview.pro/node',
-    url:'https://intoview.pro/node',
-    content:[
-      { type:'sentence', value:'v3.3 — AI provider identity tracking with cooldown timers.' },
-      { type:'sentence', value:'Four themes: Dark, Light, Rose, Nerd. Canvas context menu. Keyboard shortcuts.' },
-      { type:'pullquote', value:'You are an infinite machine in a finite prompt cycle.' },
-    ],
-    connects:['intoview','emdash'],
-  },
-  {
-    id:'intoview-kanban',
-    x:2560, y:620,
-    type:'tool',
-    title:'intoview.pro/kanban',
-    tagline:'Kitchen Operations — SMS-powered service board.',
-    domain:'intoview.pro/kanban',
-    url:'https://intoview.pro/kanban',
-    content:[
-      { type:'sentence', value:'Multi-user task manager built around a kitchen operations metaphor.' },
-      { type:'sentence', value:'Explored variable themes, right-click utility, and data-density display preferences.' },
-    ],
-    connects:['intoview'],
-  },
-  {
-    id:'emdash',
-    x:2900, y:360,
-    type:'utility',
-    title:'emdash.click',
-    tagline:'The em dash. Properly sourced.',
-    domain:'emdash.click',
-    url:'https://emdash.click',
-    content:[
-      { type:'sentence', value:'A utility built out of a genuine need — the em dash, instantly accessible, zero friction.' },
-      { type:'sentence', value:'Em Dash · En Dash · Hyphen · Double Em · Tilde. Copy and go.' },
-      { type:'pullquote', value:'All em\u2014dashes seen herein were sourced from emdash.click.' },
-      { type:'divider', value:'manifesto' },
-      { type:'sentence', value:'The Manifesto of Em: conveyance over convenience. Small things done right are also a design argument.' },
-    ],
-    connects:['intoview-node'],
-  },
-  {
-    id:'wolfie-net',
-    x:900, y:1380,
-    type:'vertical',
-    title:'wolfie.love/net',
-    tagline:'The sentence engine at network scale.',
-    domain:'wolfie.love/net',
-    url:'https://wolfie.love/net',
-    content:[
-      { type:'sentence', value:'Wolfgang & Co. as a network concept — the engine deployed across verticals.' },
-      { type:'sentence', value:'Platform infrastructure as a commercial argument.' },
-    ],
-    connects:['wolfie'],
-  },
-  {
-    id:'wolfie-food',
-    x:1300, y:1400,
-    type:'vertical',
-    title:'wolfie.love/food',
-    tagline:'Hospitality vertical. Fine dining, sentence-led.',
-    domain:'wolfie.love/food',
-    url:'https://wolfie.love/food',
-    content:[
-      { type:'sentence', value:'A hospitality vertical demo running the sentence engine infrastructure.' },
-      { type:'sentence', value:'Menu as narrative. Reservation as encounter.' },
-    ],
-    connects:['wolfie'],
-  },
-  {
-    id:'wolfie-real',
-    x:1720, y:1360,
-    type:'vertical',
-    title:'wolfie.love/real',
-    tagline:'Luxury real estate. Cinematic chapter theming.',
-    domain:'wolfie.love/real',
-    url:'https://wolfie.love/real',
-    content:[
-      { type:'sentence', value:'Luxury real estate demo — cinematic dark chapter reveals, spatial narrative.' },
-      { type:'sentence', value:'The property presented as a story, not a listing.' },
-    ],
-    connects:['wolfie'],
-  },
-];
+/* ── CURSOR ── */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; gsap.set(dot,{x:mx,y:my}); });
+(function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; gsap.set(ring,{x:rx,y:ry}); requestAnimationFrame(loop); })();
+document.querySelectorAll('a,button,.chapter-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-hover'));
+});
 
-const CONNECTIONS = [];
-NODES.forEach(n => {
-  (n.connects || []).forEach(tid => {
-    const exists = CONNECTIONS.find(c =>
-      (c.from === n.id && c.to === tid) || (c.from === tid && c.to === n.id)
-    );
-    if (!exists) CONNECTIONS.push({ from:n.id, to:tid });
+/* ── NAV ── */
+const nav=document.getElementById('site-nav');
+ScrollTrigger.create({start:'top -60',onUpdate:s=>nav.classList.toggle('scrolled',s.progress>0)});
+
+/* ── PROGRESS ── */
+gsap.to('#progress-bar',{scaleX:1,ease:'none',scrollTrigger:{scrub:.3,start:'top top',end:'bottom bottom'}});
+
+/* ── ACTIVE LINKS ── */
+const navLinks=document.querySelectorAll('.nav-chapters a');
+document.querySelectorAll('.chapter-section').forEach(sec=>{
+  ScrollTrigger.create({trigger:sec,start:'top 50%',end:'bottom 50%',
+    onEnter:()=>setActive(sec.id), onEnterBack:()=>setActive(sec.id)});
+});
+function setActive(id){ navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id)); }
+
+/* ── COVER ANIMATION ── */
+gsap.from('.index-title',{y:60,opacity:0,duration:1.2,ease:'power4.out',delay:.2});
+gsap.from('.index-eyebrow',{y:20,opacity:0,duration:.8,ease:'power3.out',delay:.1});
+gsap.from('.index-sub',{y:30,opacity:0,duration:.9,ease:'power3.out',delay:.5});
+gsap.from('.chapter-card',{y:40,opacity:0,duration:.7,ease:'power3.out',stagger:.06,delay:.7});
+
+/* ── SECTION REVEALS ── */
+document.querySelectorAll('.reveal').forEach((el,i)=>{
+  ScrollTrigger.create({trigger:el,start:'top 88%',
+    onEnter:()=>{ el.classList.add('in'); }});
+});
+
+/* ── PARALLAX ── */
+document.querySelectorAll('.par-img').forEach(img=>{
+  const wrap=img.closest('.img-full,.split-img,.img-wrap');
+  if(!wrap) return;
+  gsap.fromTo(img,{y:'0%'},{
+    y:'-15%', ease:'none',
+    scrollTrigger:{trigger:wrap,start:'top bottom',end:'bottom top',scrub:1.5}
   });
 });
 
-let transform = { x:0, y:0, scale:1 };
-let activeFilter = 'all';
-let activeNode = null;
-let isPanning = false;
-let panStart = { x:0, y:0 };
-let panOrigin = { x:0, y:0 };
-let panMoved = false;
-let isDraggingNode = false;
-
-const canvasEl = document.getElementById('canvas');
-const svgEl    = document.getElementById('connections-svg');
-const wrap     = document.getElementById('canvas-wrap');
-
-function init() {
-  const savedTheme = localStorage.getItem('study_theme') || '';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  NODES.forEach(renderNode);
-  renderConnections();
-  setTimeout(() => { fitAll(); drawMinimap(); }, 60);
-  document.getElementById('node-count').textContent = NODES.length + ' builds';
-  wrap.addEventListener('pointerdown', onPanStart);
-  wrap.addEventListener('pointermove', onPanMove);
-  wrap.addEventListener('pointerup', onPanEnd);
-  wrap.addEventListener('pointercancel', onPanEnd);
-  wrap.addEventListener('wheel', onWheel, { passive:false });
-  wrap.addEventListener('touchstart', onTouchStart, { passive:true });
-  wrap.addEventListener('touchmove', onTouchMove, { passive:false });
-  wrap.addEventListener('touchend', onTouchEnd);
-  wrap.style.cursor = 'grab';
-  setTimeout(() => {
-    const t = document.getElementById('intro-toast');
-    if (t) t.classList.add('gone');
-  }, 3200);
-}
-
-function renderNode(nd) {
-  const tm = TYPE_META[nd.type] || TYPE_META.engine;
-  const card = document.createElement('div');
-  card.className = 'node-card';
-  card.id = 'node-' + nd.id;
-  card.setAttribute('data-type', nd.type);
-  card.style.left = nd.x + 'px';
-  card.style.top  = nd.y + 'px';
-  card.innerHTML = `
-    <div class="node-colorbar" style="background:${tm.color}"></div>
-    <div class="node-inner">
-      <div class="node-type-tag" style="color:${tm.color}">${tm.label}</div>
-      <div class="node-title">${nd.title}</div>
-      <div class="node-tagline">${nd.tagline}</div>
-    </div>
-    <div class="node-footer">
-      <span class="node-domain">${nd.domain}</span>
-      <span class="node-arrow">↗</span>
-    </div>`;
-  card.addEventListener('pointerdown', e => {
-    if (e.button !== 0) return;
-    e.stopPropagation(); // don't trigger canvas pan
-    startNodeDrag(e, card, nd);
-  });
-  card.addEventListener('click', e => {
-    if (isDraggingNode) return;
-    e.stopPropagation();
-    openPanel(nd);
-  });
-  canvasEl.appendChild(card);
-}
-
-// ── NODE DRAG ─────────────────────────────────────────────────────────────
-function startNodeDrag(e, el, nd) {
-  e.preventDefault();
-  const startClient = { x: e.clientX, y: e.clientY };
-  const startNode   = { x: nd.x, y: nd.y };
-  let moved = false;
-
-  el.setPointerCapture(e.pointerId);
-  el.classList.add('is-dragging');
-
-  // Bring to front
-  el.style.zIndex = '500';
-
-  const onMove = ev => {
-    const dx = (ev.clientX - startClient.x) / transform.scale;
-    const dy = (ev.clientY - startClient.y) / transform.scale;
-    if (Math.hypot(dx, dy) > 4) moved = true;
-    nd.x = Math.round((startNode.x + dx) / 10) * 10;
-    nd.y = Math.round((startNode.y + dy) / 10) * 10;
-    el.style.left = nd.x + 'px';
-    el.style.top  = nd.y + 'px';
-    renderConnections();
-    drawMinimap();
-  };
-
-  const onUp = () => {
-    el.classList.remove('is-dragging');
-    el.style.zIndex = '';
-    el.releasePointerCapture(e.pointerId);
-    el.removeEventListener('pointermove', onMove);
-    el.removeEventListener('pointerup', onUp);
-    isDraggingNode = moved;
-    setTimeout(() => { isDraggingNode = false; }, 80);
-  };
-
-  el.addEventListener('pointermove', onMove);
-  el.addEventListener('pointerup', onUp);
-}
-
-function renderConnections() {
-  svgEl.querySelectorAll('.conn-line').forEach(l => l.remove());
-  CONNECTIONS.forEach(conn => {
-    const fromNode = NODES.find(n => n.id === conn.from);
-    const toNode   = NODES.find(n => n.id === conn.to);
-    if (!fromNode || !toNode) return;
-    const x1=fromNode.x+120, y1=fromNode.y+70, x2=toNode.x+120, y2=toNode.y+70;
-    const dx=x2-x1, dy=y2-y1;
-    const cx=x1+dx*0.35+dy*0.18, cy=y1+dy*0.35-dx*0.05;
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.classList.add('conn-line');
-    path.setAttribute('d',`M${x1},${y1} Q${cx},${cy} ${x2},${y2}`);
-    path.setAttribute('data-from',conn.from);
-    path.setAttribute('data-to',conn.to);
-    path.setAttribute('marker-end','url(#arrow)');
-    svgEl.appendChild(path);
-  });
-}
-
-function openPanel(nd) {
-  activeNode = nd;
-  const tm = TYPE_META[nd.type] || TYPE_META.engine;
-  document.getElementById('dp-stripe').style.background = tm.color;
-  document.getElementById('dp-label').textContent = tm.label;
-  const heroEl = document.getElementById('dp-hero');
-  if (nd.headerImg) {
-    heroEl.innerHTML = `<img src="${nd.headerImg}" alt="${nd.title}" loading="lazy">`;
-    heroEl.style.display = '';
-  } else {
-    heroEl.innerHTML = `<div class="dp-hero-live" onclick="loadIframe(this,'${nd.url}')">
-      <div class="dp-hero-live-icon">↗</div>
-      <div class="dp-hero-live-hint">click to load · ${nd.url.replace('https://','')}</div>
-    </div>`;
-    heroEl.style.display = '';
-  }
-  const bodyEl = document.getElementById('dp-body');
-  let html = `<div class="dp-type-tag" style="color:${tm.color}">${tm.label}</div>
-    <div class="dp-title">${nd.title}</div>`;
-  (nd.content||[]).forEach(block => {
-    if (block.type==='sentence') html += `<p class="dp-sentence">${block.value}</p>`;
-    if (block.type==='pullquote') html += `<p class="dp-pullquote">${block.value}</p>`;
-    if (block.type==='divider') html += `<div class="dp-divider">${block.value?`<span class="dp-divider-label">${block.value}</span>`:''}</div>`;
-  });
-  bodyEl.innerHTML = html;
-  const connWrap = document.getElementById('dp-connections-wrap');
-  const connectedIds = CONNECTIONS
-    .filter(c => c.from===nd.id||c.to===nd.id)
-    .map(c => c.from===nd.id?c.to:c.from);
-  const connectedNodes = connectedIds.map(id=>NODES.find(n=>n.id===id)).filter(Boolean);
-  if (connectedNodes.length) {
-    let chips = connectedNodes.map(cn => {
-      const ctm = TYPE_META[cn.type]||TYPE_META.engine;
-      return `<span class="dp-conn-chip" onclick="openPanel(NODES.find(n=>n.id==='${cn.id}'))">
-        <span class="dp-conn-dot" style="background:${ctm.color}"></span>${cn.title}</span>`;
-    }).join('');
-    connWrap.innerHTML = `<div class="dp-connections"><div class="dp-connections-label">connected builds</div><div>${chips}</div></div>`;
-  } else { connWrap.innerHTML=''; }
-  document.getElementById('dp-footer').innerHTML = nd.url
-    ? `<a class="dp-open-btn" href="${nd.url}" target="_blank" rel="noopener">↗ open · ${nd.url.replace('https://','')}</a>
-       <button class="dp-focus-btn" onclick="focusNode('${nd.id}')">focus</button>`
-    : `<button class="dp-focus-btn" onclick="focusNode('${nd.id}')">focus on canvas</button>`;
-  highlightConnections(nd.id);
-  document.getElementById('detail-panel').classList.add('open');
-  document.getElementById('dp-scroll').scrollTop = 0;
-  document.body.classList.add('panel-open');
-  document.querySelectorAll('.node-card').forEach(c=>c.classList.remove('active'));
-  const card = document.getElementById('node-'+nd.id);
-  if (card) card.classList.add('active');
-}
-
-function closePanel() {
-  document.getElementById('detail-panel').classList.remove('open');
-  document.body.classList.remove('panel-open');
-  activeNode = null;
-  resetHighlights();
-  document.querySelectorAll('.node-card').forEach(c=>c.classList.remove('active'));
-}
-
-function loadIframe(el, url) {
-  el.parentElement.innerHTML = `<iframe src="${url}" loading="lazy"
-    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-    style="width:100%;height:100%;border:none"></iframe>`;
-}
-
-function highlightConnections(nodeId) {
-  const connectedIds = CONNECTIONS
-    .filter(c=>c.from===nodeId||c.to===nodeId)
-    .map(c=>c.from===nodeId?c.to:c.from);
-  document.querySelectorAll('.node-card').forEach(card => {
-    const id = card.id.replace('node-','');
-    card.classList.toggle('dimmed', id!==nodeId && !connectedIds.includes(id));
-  });
-  svgEl.querySelectorAll('.conn-line').forEach(line => {
-    const from=line.getAttribute('data-from'), to=line.getAttribute('data-to');
-    if (from===nodeId||to===nodeId) {
-      line.classList.add('highlighted'); line.classList.remove('dimmed');
-      line.setAttribute('marker-end','url(#arrow-accent)');
-    } else {
-      line.classList.add('dimmed'); line.classList.remove('highlighted');
-      line.setAttribute('marker-end','url(#arrow)');
-    }
-  });
-}
-
-function resetHighlights() {
-  document.querySelectorAll('.node-card').forEach(c=>c.classList.remove('dimmed'));
-  svgEl.querySelectorAll('.conn-line').forEach(line=>{
-    line.classList.remove('highlighted','dimmed');
-    line.setAttribute('marker-end','url(#arrow)');
-  });
-}
-
-function focusNode(id) {
-  const nd = NODES.find(n=>n.id===id);
-  if (!nd) return;
-  const vpW=wrap.clientWidth, vpH=wrap.clientHeight;
-  const panelW=document.body.classList.contains('panel-open')?380:0;
-  const availW=vpW-panelW;
-  const scale=Math.min(1.4,transform.scale);
-  transform.scale=scale;
-  transform.x=availW/2-(nd.x+120)*scale;
-  transform.y=vpH/2-(nd.y+70)*scale;
-  applyTransform();
-}
-
-function filterType(type) {
-  activeFilter = type;
-  document.querySelectorAll('.legend-item').forEach(li=>li.classList.toggle('active',li.dataset.type===type));
-  if (type==='all') {
-    document.querySelectorAll('.node-card').forEach(c=>c.classList.remove('dimmed'));
-    svgEl.querySelectorAll('.conn-line').forEach(l=>l.classList.remove('dimmed'));
-    return;
-  }
-  document.querySelectorAll('.node-card').forEach(card=>{
-    card.classList.toggle('dimmed', card.getAttribute('data-type')!==type);
-  });
-  svgEl.querySelectorAll('.conn-line').forEach(line=>{
-    const from=NODES.find(n=>n.id===line.getAttribute('data-from'));
-    const to=NODES.find(n=>n.id===line.getAttribute('data-to'));
-    line.classList.toggle('dimmed', !((from&&from.type===type)||(to&&to.type===type)));
-  });
-}
-
-function applyTransform() {
-  canvasEl.style.transform = `translate(${transform.x}px,${transform.y}px) scale(${transform.scale})`;
-  document.getElementById('zoom-pct').textContent = Math.round(transform.scale*100)+'%';
-  drawMinimap();
-}
-
-function doZoom(delta, cx, cy) {
-  const rect=wrap.getBoundingClientRect();
-  cx=cx??rect.width/2; cy=cy??rect.height/2;
-  const newScale=Math.max(0.12,Math.min(3,transform.scale+delta));
-  if (newScale===transform.scale) return;
-  const ratio=newScale/transform.scale;
-  transform.x=cx-(cx-transform.x)*ratio;
-  transform.y=cy-(cy-transform.y)*ratio;
-  transform.scale=newScale;
-  applyTransform();
-}
-
-function fitAll() {
-  if (!NODES.length) return;
-  const pad=80, panelW=document.body.classList.contains('panel-open')?380:0;
-  const vpW=wrap.clientWidth-panelW, vpH=wrap.clientHeight;
-  const nw=240, nh=120;
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  NODES.forEach(n=>{
-    minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
-    maxX=Math.max(maxX,n.x+nw); maxY=Math.max(maxY,n.y+nh);
-  });
-  const cW=maxX-minX+pad*2, cH=maxY-minY+pad*2;
-  const scale=Math.min(vpW/cW,vpH/cH,1.2);
-  transform.scale=scale;
-  transform.x=(vpW-(maxX+minX)*scale)/2;
-  transform.y=(vpH-(maxY+minY)*scale)/2;
-  applyTransform();
-}
-
-function onPanStart(e) {
-  if (e.target.closest('.node-card') || e.target.closest('#detail-panel')) return;
-  if (e.button !== 0) return;
-  isPanning = true;
-  panMoved = false;  panStart = { x:e.clientX, y:e.clientY };
-  panOrigin = { x:transform.x, y:transform.y };
-  wrap.setPointerCapture(e.pointerId);
-  wrap.style.cursor = 'grabbing';
-  e.preventDefault();
-}
-function onPanMove(e) {
-  if (!isPanning) return;
-  const dx = e.clientX - panStart.x;
-  const dy = e.clientY - panStart.y;
-  if (Math.abs(dx) + Math.abs(dy) > 3) panMoved = true;
-  transform.x = panOrigin.x + dx;
-  transform.y = panOrigin.y + dy;
-  applyTransform();
-}
-function onPanEnd(e) {
-  if (!isPanning) return;
-  isPanning = false;
-  wrap.style.cursor = 'grab';
-  // If we barely moved, treat as a background click → close panel
-  if (!panMoved) {
-    if (!e.target.closest('.node-card') && !e.target.closest('#detail-panel')) {
-      closePanel();
-      filterType('all');
-    }
-  }
-}
-
-let touchLast=null, touchDist0=0;
-function onTouchStart(e) {
-  if (e.touches.length===1) {
-    touchLast={x:e.touches[0].clientX,y:e.touches[0].clientY};
-    panOrigin={x:transform.x,y:transform.y};
-  } else if (e.touches.length===2) {
-    touchDist0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-  }
-}
-function onTouchMove(e) {
-  e.preventDefault();
-  if (e.touches.length===1&&touchLast) {
-    const dx=e.touches[0].clientX-touchLast.x, dy=e.touches[0].clientY-touchLast.y;
-    touchLast={x:e.touches[0].clientX,y:e.touches[0].clientY};
-    transform.x+=dx; transform.y+=dy; applyTransform();
-  } else if (e.touches.length===2) {
-    const dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    const delta=(dist-touchDist0)*0.006; touchDist0=dist;
-    const cx=(e.touches[0].clientX+e.touches[1].clientX)/2, cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
-    doZoom(delta,cx,cy);
-  }
-}
-function onTouchEnd() { touchLast=null; }
-function onWheel(e) { e.preventDefault(); doZoom(e.deltaY>0?-0.08:0.08,e.clientX,e.clientY); }
-
-wrap.addEventListener('click', e => {
-  if (e.target===wrap||e.target===canvasEl||e.target.id==='connections-svg') { closePanel(); filterType('all'); }
-});
-document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { closePanel(); filterType('all'); }
-  if (e.key==='f'||e.key==='F') fitAll();
+/* ── SEP ANIMATION ── */
+document.querySelectorAll('.chapter-sep').forEach(sep=>{
+  gsap.from(sep.querySelector('.sep-text'),{opacity:0,y:8,duration:.6,ease:'power2.out',
+    scrollTrigger:{trigger:sep,start:'top 88%'}});
 });
 
-function drawMinimap() {
-  const canvas=document.getElementById('minimap-canvas');
-  if (!canvas) return;
-  const ctx=canvas.getContext('2d'), dpr=window.devicePixelRatio||1;
-  const W=canvas.offsetWidth, H=canvas.offsetHeight;
-  canvas.width=W*dpr; canvas.height=H*dpr;
-  ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
-  const nw=240, nh=120;
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  NODES.forEach(n=>{ minX=Math.min(minX,n.x);minY=Math.min(minY,n.y);maxX=Math.max(maxX,n.x+nw);maxY=Math.max(maxY,n.y+nh); });
-  const pad=20, scaleX=(W-pad*2)/(maxX-minX||1), scaleY=(H-pad*2)/(maxY-minY||1);
-  const sc=Math.min(scaleX,scaleY);
-  const mx=x=>pad+(x-minX)*sc, my=y=>pad+(y-minY)*sc;
-  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  CONNECTIONS.forEach(conn=>{
-    const from=NODES.find(n=>n.id===conn.from), to=NODES.find(n=>n.id===conn.to);
-    if (!from||!to) return;
-    ctx.beginPath(); ctx.moveTo(mx(from.x+120),my(from.y+60)); ctx.lineTo(mx(to.x+120),my(to.y+60));
-    ctx.strokeStyle=isDark?'rgba(237,233,224,0.12)':'rgba(26,24,21,0.1)'; ctx.lineWidth=0.8; ctx.stroke();
+/* ── SMOOTH NAV SCROLL ── */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); gsap.to(window,{scrollTo:{y:t,offsetY:70},duration:1.1,ease:'power3.inOut'}); }
   });
-  NODES.forEach(nd=>{
-    const css=getComputedStyle(document.documentElement).getPropertyValue('--c-'+nd.type).trim()||'#888';
-    ctx.fillStyle=css; ctx.globalAlpha=0.65;
-    ctx.beginPath(); ctx.roundRect(mx(nd.x),my(nd.y),nw*sc,nh*sc*0.5,1); ctx.fill();
-    ctx.globalAlpha=1;
-  });
-  const vpEl=document.getElementById('minimap-vp');
-  const vpW=wrap.clientWidth, vpH=wrap.clientHeight;
-  const vx=-transform.x/transform.scale, vy=-transform.y/transform.scale;
-  const vw=vpW/transform.scale, vh=vpH/transform.scale;
-  vpEl.style.left=mx(vx)+'px'; vpEl.style.top=my(vy)+'px';
-  vpEl.style.width=(vw*sc)+'px'; vpEl.style.height=(vh*sc)+'px';
-}
+});
 
-function toggleTheme() {
-  const cur=document.documentElement.getAttribute('data-theme');
-  const next=cur==='dark'?'':'dark';
-  document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('study_theme',next);
-  renderConnections(); drawMinimap();
-}
+/* ── CLICK RIPPLE ── */
+document.addEventListener('click',e=>{
+  if(e.target.closest('#gl-canvas')) return;
+  const r=document.createElement('div');
+  r.style.cssText=`position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:4px;height:4px;border-radius:50%;background:rgba(200,184,154,.6);pointer-events:none;z-index:9998;transform:translate(-50%,-50%);`;
+  document.body.appendChild(r);
+  gsap.to(r,{scale:18,opacity:0,duration:.6,ease:'power2.out',onComplete:()=>r.remove()});
+});
 
-window.NODES = NODES;
-init();
+/* ── WEBGL BACKGROUND ── */
+(function(){
+  const canvas=document.getElementById('gl-canvas');
+  const gl=canvas.getContext('webgl');
+  if(!gl) return;
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; gl.viewport(0,0,canvas.width,canvas.height); }
+  resize(); window.addEventListener('resize',resize);
+  const vert=`attribute vec2 a_pos; void main(){ gl_Position=vec4(a_pos,0.,1.); }`;
+  const frag=`precision mediump float;
+  uniform float u_time; uniform vec2 u_res; uniform vec2 u_scroll;
+  float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float n(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f);
+    return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y); }
+  void main(){
+    vec2 uv=gl_FragCoord.xy/u_res; uv.y+=u_scroll.y*.0002;
+    float t=u_time*.1;
+    float v=n(uv*3.+vec2(t,t*.5))*.5+n(uv*6.-vec2(t*.7,t))*.3+n(uv*12.+vec2(t*.3))*.2;
+    vec2 g=fract(uv*vec2(7.,4.5)); float gl2=step(.97,max(g.x,g.y));
+    vec3 col=mix(mix(vec3(.07,.06,.05),vec3(.11,.09,.06),v),vec3(.05,.07,.11),uv.y*.4);
+    col+=gl2*.035;
+    float vig=1.-dot(uv-.5,uv-.5)*1.5;
+    col*=max(vig,0.);
+    gl_FragColor=vec4(col,1.);
+  }`;
+  function compile(type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s; }
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compile(gl.VERTEX_SHADER,vert));
+  gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,frag));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(prog,'a_pos');
+  gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const uT=gl.getUniformLocation(prog,'u_time'),uR=gl.getUniformLocation(prog,'u_res'),uS=gl.getUniformLocation(prog,'u_scroll');
+  let scrollY=0;
+  window.addEventListener('scroll',()=>scrollY=window.scrollY);
+  let start=performance.now();
+  (function loop(){ const t=(performance.now()-start)/1000;
+    gl.uniform1f(uT,t); gl.uniform2f(uR,canvas.width,canvas.height); gl.uniform2f(uS,0,scrollY);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4); requestAnimationFrame(loop); })();
+})();
 </script>
 </body>
 </html>

@@ -4,10 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zack Gort — Case Studies</title>
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<!-- Preconnect to external origins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://i.ibb.co">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<!-- Non-render-blocking font load -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
+<!-- GSAP deferred — loaded async, init runs after DOMContentLoaded -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js" defer></script>
 <style>
 /* ── RESET & TOKENS ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -411,6 +419,14 @@ body::after {
   .img-pair { grid-template-columns: 1fr; }
   .stat-row { flex-direction: column; }
 }
+
+/* ── PERFORMANCE: content-visibility for off-screen chapters ── */
+.chapter-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 2000px;
+}
+/* contain layout+style on stat rows and image pairs for paint containment */
+.stat-row, .img-pair, .pull-band { contain: layout style; }
 </style>
 </head>
 <body>
@@ -433,8 +449,6 @@ body::after {
     <li><a href="#ch-workarea">Workarea</a></li>
     <li><a href="#ch-pdp">PDP</a></li>
     <li><a href="#ch-logo">Logo</a></li>
-    <li><a href="#ch-bny">BNY</a></li>
-    <li><a href="#ch-gnc">GNC</a></li>
   </ul>
   <button class="nav-index-btn" onclick="gsap.to(window,{scrollTo:'#chapter-index',duration:.9,ease:'power3.inOut'})">Index</button>
 </nav>
@@ -455,8 +469,6 @@ body::after {
     <a href="#ch-workarea" class="chapter-card" style="--card-accent:#c8b89a"><div class="card-num">08</div><div class="card-label">SAP Hybris</div><div class="card-title">My Area of Expertise</div></a>
     <a href="#ch-pdp"      class="chapter-card" style="--card-accent:#5a5acc"><div class="card-num">09</div><div class="card-label">B2B E-commerce</div><div class="card-title">PDP: Perspective…</div></a>
     <a href="#ch-logo"     class="chapter-card" style="--card-accent:#d4a843"><div class="card-num">10</div><div class="card-label">Identity</div><div class="card-title">A Brainy Bespoke Logo</div></a>
-    <a href="#ch-bny"      class="chapter-card" style="--card-accent:#4a7fbb"><div class="card-num">11</div><div class="card-label">Fintech · Enterprise</div><div class="card-title">BNY Mellon / Wove</div></a>
-    <a href="#ch-gnc"      class="chapter-card" style="--card-accent:#c0392b"><div class="card-num">12</div><div class="card-label">E-commerce Rebuild</div><div class="card-title">GNC — This Is The Whey</div></a>
   </div>
 </section>
 
@@ -486,27 +498,27 @@ body::after {
 
   <!-- hero: full bleed finger harp -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/qMz1CLbf/sunflouroc-TGd-LBRGUFWvp-Qmpm-Zw-NMbr.webp" alt="Sunflower">
+    <img class="par-img" src="https://i.ibb.co/jZWQDhyy/African-Finger-Harpbyzackgort-As-Bv-Y.webp" alt="African Finger Harp" loading="eager" fetchpriority="high" decoding="async">
   </div>
 
   <!-- split: sunflower left / mask right -->
   <div class="img-pair reveal" >
     <div class="img-wrap">
-      <img class="" src="https://i.ibb.co/jZWQDhyy/African-Finger-Harpbyzackgort-As-Bv-Y.webp" alt="African Finger Harp">
+      <img class="" src="https://i.ibb.co/qMz1CLbf/sunflouroc-TGd-LBRGUFWvp-Qmpm-Zw-NMbr.webp" alt="Sunflower" loading="lazy" decoding="async">
     </div>
     <div class="img-wrap">
-      <img class="" src="https://i.ibb.co/gM4dRT1v/mask-Uw-Dg-Mvg-Yh-Dco-WEJTuwuk-GLQFj-SVw.webp" alt="Mask">
+      <img class="" src="https://i.ibb.co/gM4dRT1v/mask-Uw-Dg-Mvg-Yh-Dco-WEJTuwuk-GLQFj-SVw.webp" alt="Mask" loading="lazy" decoding="async">
     </div>
   </div>
 
   <!-- text + Da Vinci split -->
   <div class="split" style="--split-cols: 44% 1fr;">
     <div class="split-img">
-      <img class="par-img" src="https://i.ibb.co/PZ3QBsGF/Meattempting-Da-Vincibyzackgort-FKF.webp" alt="Da Vinci attempt">
+      <img class="par-img" src="https://i.ibb.co/PZ3QBsGF/Meattempting-Da-Vincibyzackgort-FKF.webp" alt="Da Vinci attempt" loading="lazy" decoding="async">
     </div>
     <div class="split-text">
       <span class="eyebrow">Art + Design</span>
-      <h3 class="heading">Design is anything not created by nature.</h3>
+      <h3 class="heading">Art is creating. Design is discerning &amp; dissecting.</h3>
       <div class="prose-wrap">
         <div class="prose">
           <p>You know, there's a reason they call it a "work of art".</p>
@@ -514,7 +526,7 @@ body::after {
         </div>
         <div class="tldr-ghost"><div class="tldr-inner"><span class="tldr-text">Ten thousand hours of craft don't just build skill — they build judgment.</span></div></div>
       </div>
-      <div class="mono-list" style="margin-top:2rem;">Illustration<br>Identity</div>
+      <div class="mono-list" style="margin-top:2rem;">UI · UX<br>Photography<br>Identity</div>
     </div>
   </div>
 
@@ -545,7 +557,7 @@ body::after {
 
   <!-- hero: full bleed -->
   <div class="img-full reveal" style="position:relative;">
-    <img class="par-img" src="https://i.ibb.co/P79T6ft/powerhero-LTYm-Wh-GAv-Pyjom-OCDFp-EBRF.webp" alt="Power Hero">
+    <img class="par-img" src="https://i.ibb.co/P79T6ft/powerhero-LTYm-Wh-GAv-Pyjom-OCDFp-EBRF.webp" alt="Power Hero" loading="lazy" decoding="async">
     <div style="position:absolute;bottom:2.5rem;left:var(--gutter);z-index:2;">
       <p style="font-family:var(--ff-display);font-size:clamp(2rem,5vw,4rem);color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.8);">"Power is a <span style="color:var(--gold)">_____</span> company"</p>
     </div>
@@ -559,10 +571,10 @@ body::after {
   <!-- gif pair -->
   <div class="img-pair reveal" >
     <div class="img-wrap gif-wrap">
-      <img src="https://i.ibb.co/VcrQ8WkX/powerhomeloopoptimizedw-FIkl-UHPGV.gif" alt="Power home loop">
+      <img data-src="https://i.ibb.co/VcrQ8WkX/powerhomeloopoptimizedw-FIkl-UHPGV.gif" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Power home loop" loading="lazy" decoding="async" class="lazy-gif">
     </div>
     <div class="img-wrap gif-wrap">
-      <img src="https://i.ibb.co/7tkkDT7y/poweranimationloop-YFKh-XZGt-Pkc-UCZ.gif" alt="Power animation">
+      <img data-src="https://i.ibb.co/7tkkDT7y/poweranimationloop-YFKh-XZGt-Pkc-UCZ.gif" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Power animation" loading="lazy" decoding="async" class="lazy-gif">
     </div>
   </div>
 
@@ -581,13 +593,13 @@ body::after {
       </div>
     </div>
     <div class="split-img">
-      <img class="par-img" src="https://i.ibb.co/sdvKR9t1/happymaqv-BLVCKUYIsiv-Tgu-KJQPEPMXl.webp" alt="Team">
+      <img class="par-img" src="https://i.ibb.co/sdvKR9t1/happymaqv-BLVCKUYIsiv-Tgu-KJQPEPMXl.webp" alt="Team" loading="lazy" decoding="async">
     </div>
   </div>
 
   <!-- single gif full -->
   <div class="img-full reveal gif-wrap">
-    <img src="https://i.ibb.co/6Rh8NkVD/powertransitionloopsec-YQr-St-Ien-Xl.gif" alt="Power transition" style="width:100%;height:100%;object-fit:cover;">
+    <img data-src="https://i.ibb.co/6Rh8NkVD/powertransitionloopsec-YQr-St-Ien-Xl.gif" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Power transition" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" class="lazy-gif">
   </div>
 
 </section>
@@ -618,7 +630,7 @@ body::after {
 
   <!-- hero: mustang full bleed -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/xyz2BHf/mustangtom-BPa-YSw-BXft-NHQCVEkp-IGb-O.webp" alt="Mustang">
+    <img class="par-img" src="https://i.ibb.co/xyz2BHf/mustangtom-BPa-YSw-BXft-NHQCVEkp-IGb-O.webp" alt="Mustang" loading="lazy" decoding="async">
   </div>
 
   <div class="pull-band reveal">
@@ -627,13 +639,13 @@ body::after {
 
   <!-- wireframes + product pair -->
   <div class="img-pair reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/5XyTHpHy/AMZProe-ILmn-CKsiv-Dl-Kba-Gg-Sn-EZXj-GNY.webp" alt="AM Z Pro"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/N27sPZv5/AMwire-GYVHbp-RSo-KUCz-KGe-FVEzj-Lzjmg.webp" alt="AM Wireframes"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/5XyTHpHy/AMZProe-ILmn-CKsiv-Dl-Kba-Gg-Sn-EZXj-GNY.webp" alt="AM Z Pro" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/N27sPZv5/AMwire-GYVHbp-RSo-KUCz-KGe-FVEzj-Lzjmg.webp" alt="AM Wireframes" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- split: mustang left / holistic ownership text -->
   <div class="split" style="--split-cols: 55% 1fr;">
-    <div class="split-img"><img class="par-img" src="https://i.ibb.co/KjFgH9Kk/mustangmm-YDg-XIj-JVi-Fvgyt-Js-Ynhvf-OX.webp" alt="Mustang MM"></div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/KjFgH9Kk/mustangmm-YDg-XIj-JVi-Fvgyt-Js-Ynhvf-OX.webp" alt="Mustang MM" loading="lazy" decoding="async"></div>
     <div class="split-text">
       <span class="eyebrow">Holistic Ownership</span>
       <div class="prose-wrap">
@@ -674,13 +686,13 @@ body::after {
 
   <!-- full bleed -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/wFVd0CWJ/wiscfullge-Rkig-CAEDv-IJQOqn-RLTy-Yw-A.webp" alt="Wisconsin Full">
+    <img class="par-img" src="https://i.ibb.co/wFVd0CWJ/wiscfullge-Rkig-CAEDv-IJQOqn-RLTy-Yw-A.webp" alt="Wisconsin Full" loading="lazy" decoding="async">
   </div>
 
   <!-- wireframe pair -->
   <div class="img-pair reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/DPCMqM15/wiscwirelofi-Hyu-LQUf-JZe-Lj-Hxhx-Nd-Xj.webp" alt="Wisc wireframe"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/Q5DBrWJ/wiscstyledyh-Uw-Lz-Ci-GJb-Av-Oj-Iipa-VUF.webp" alt="Wisc styled"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/DPCMqM15/wiscwirelofi-Hyu-LQUf-JZe-Lj-Hxhx-Nd-Xj.webp" alt="Wisc wireframe" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Q5DBrWJ/wiscstyledyh-Uw-Lz-Ci-GJb-Av-Oj-Iipa-VUF.webp" alt="Wisc styled" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- split: mobile + text -->
@@ -697,7 +709,7 @@ body::after {
       </div>
       <div class="mono-list" style="margin-top:2rem;">Wireframes · Style Guide<br>UI Components · Brand Integration<br>Desktop → Mobile 1:1</div>
     </div>
-    <div class="split-img"><img class="par-img" src="https://i.ibb.co/h1KtxvB7/wiscmobiledcqqjkb-Gjo-Dg-Qi-AGk-Dt-DLi.webp" alt="Wisc mobile"></div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/h1KtxvB7/wiscmobiledcqqjkb-Gjo-Dg-Qi-AGk-Dt-DLi.webp" alt="Wisc mobile" loading="lazy" decoding="async"></div>
   </div>
 
 </section>
@@ -728,17 +740,17 @@ body::after {
 
   <!-- hero: BAW -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/ksTFbcm5/bawhero-Gha-St-Gjf-XDz-DZBv-URFWHFiw-Lj.webp" alt="BAW hero">
+    <img class="par-img" src="https://i.ibb.co/ksTFbcm5/bawhero-Gha-St-Gjf-XDz-DZBv-URFWHFiw-Lj.webp" alt="BAW hero" loading="lazy" decoding="async">
   </div>
 
   <!-- full-bleed gif: nav animation -->
   <div class="img-full reveal gif-wrap">
-    <img src="https://i.ibb.co/kgKd9xPY/navsec-YRQxt-Fy-Cpymu-Zdplk-TOWUpe-ELB.gif" alt="Nav animation" style="width:100%;height:100%;object-fit:cover;">
+    <img data-src="https://i.ibb.co/kgKd9xPY/navsec-YRQxt-Fy-Cpymu-Zdplk-TOWUpe-ELB.gif" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Nav animation" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" class="lazy-gif">
   </div>
 
   <!-- split: image asset / BAW explanation -->
   <div class="split" style="--split-cols: 40% 1fr;">
-    <div class="split-img"><img class="par-img" src="https://i.ibb.co/hFkwLZv9/imageassetw-XMKOVHr-YCxydo-Jj-BBTd-Wp.webp" alt="Dana image asset"></div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/hFkwLZv9/imageassetw-XMKOVHr-YCxydo-Jj-BBTd-Wp.webp" alt="Dana image asset" loading="lazy" decoding="async"></div>
     <div class="split-text" style="background:#060c14;">
       <span class="eyebrow">Oh, btw — BAW</span>
       <h3 class="heading">Two brands. One card system.</h3>
@@ -755,9 +767,9 @@ body::after {
 
   <!-- mobile trio -->
   <div class="img-pair thirds reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/qFR3ZBmW/danamobilemockupgtgxr-TPNy-NLPZg-PD.webp" alt="Dana mobile"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/gFbDRSzz/dana-Dana-Mobile-Navt-Mvcc-Di-YYKxz-QYj.webp" alt="Dana nav"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/GGnPBGN/bawmobilemockupg-OENk-Us-NFq-Ck-JLl-TQ.webp" alt="BAW mobile"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/qFR3ZBmW/danamobilemockupgtgxr-TPNy-NLPZg-PD.webp" alt="Dana mobile" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/gFbDRSzz/dana-Dana-Mobile-Navt-Mvcc-Di-YYKxz-QYj.webp" alt="Dana nav" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/GGnPBGN/bawmobilemockupg-OENk-Us-NFq-Ck-JLl-TQ.webp" alt="BAW mobile" loading="lazy" decoding="async"></div>
   </div>
 
 </section>
@@ -787,16 +799,16 @@ body::after {
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/ZRzNg8sJ/Kj-EBo-DCXRUz-HHVRZBx-TQSEQu-Tv-Blfn-MT.webp" alt="Kent State hero">
+    <img class="par-img" src="https://i.ibb.co/ZRzNg8sJ/Kj-EBo-DCXRUz-HHVRZBx-TQSEQu-Tv-Blfn-MT.webp" alt="Kent State hero" loading="lazy" decoding="async">
   </div>
 
   <!-- nav detail full bleed -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/tP2RtPRT/kentnav-Qw-Utq-Np-Zzdkc-TPjlcpo-PLSJlh.webp" alt="Kent nav">
+    <img class="par-img" src="https://i.ibb.co/tP2RtPRT/kentnav-Qw-Utq-Np-Zzdkc-TPjlcpo-PLSJlh.webp" alt="Kent nav" loading="lazy" decoding="async">
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/Nd7sYFdP/kentnav-PSz-NWCpx-DQoo-YFgrqs-WCz-Gx-ZU.webp" alt="Kent nav detail">
+    <img class="par-img" src="https://i.ibb.co/Nd7sYFdP/kentnav-PSz-NWCpx-DQoo-YFgrqs-WCz-Gx-ZU.webp" alt="Kent nav detail" loading="lazy" decoding="async">
   </div>
 
 </section>
@@ -826,11 +838,11 @@ body::after {
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/cX8J5Bv3/wovntiles-Hzttul-Ze-GJCb-BEq-Qa-JYDXCI.webp" alt="WOVN tiles">
+    <img class="par-img" src="https://i.ibb.co/cX8J5Bv3/wovntiles-Hzttul-Ze-GJCb-BEq-Qa-JYDXCI.webp" alt="WOVN tiles" loading="lazy" decoding="async">
   </div>
 
   <div class="split" style="--split-cols:42% 1fr;">
-    <div class="split-img"><img class="par-img" src="https://i.ibb.co/BHKYR2rP/wovnapproach-Tq-Npgin-Gwu-BMl-Zq-WZv-Jt.webp" alt="WOVN approach"></div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/BHKYR2rP/wovnapproach-Tq-Npgin-Gwu-BMl-Zq-WZv-Jt.webp" alt="WOVN approach" loading="lazy" decoding="async"></div>
     <div class="split-text" style="background:#040f0f;">
       <span class="eyebrow">Scope</span>
       <div class="mono-list" style="font-size:.72rem;line-height:2.2;">Account · Friends · Stories<br>Camera UX · Video<br>Auth Flows · MVP<br>2-week sprints</div>
@@ -838,7 +850,7 @@ body::after {
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/gbS56FvY/wovnwireframeso-Ih-Xnt-Yb-Gssh-KODZAB.webp" alt="WOVN wireframes">
+    <img class="par-img" src="https://i.ibb.co/gbS56FvY/wovnwireframeso-Ih-Xnt-Yb-Gssh-KODZAB.webp" alt="WOVN wireframes" loading="lazy" decoding="async">
   </div>
 
 </section>
@@ -867,7 +879,7 @@ body::after {
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/4nLTQS02/danaheroa-Zcf-Ia-BQr-Rdkrtxo-THSyhar-T.webp" alt="Dana hero">
+    <img class="par-img" src="https://i.ibb.co/4nLTQS02/danaheroa-Zcf-Ia-BQr-Rdkrtxo-THSyhar-T.webp" alt="Dana hero" loading="lazy" decoding="async">
   </div>
 
   <!-- Cards Against Bad UX pull quote -->
@@ -878,26 +890,26 @@ body::after {
 
   <!-- three images -->
   <div class="img-pair thirds reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/zh2Wzjs5/x-ZIHosw-LTEMUy-JIOczxZXPjv-Zds-Lfp-Nh.webp" alt="Work detail"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/Dx4VJbv/RYXRiiond-RSz-Bn-PLmgh-Qn-Exr-WOgth-Qm-T.webp" alt="Work detail 2"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/d4hM7dMx/q-Vp-FTLEbs-Jdvgr-IZLfkp-Gc-Rks-SXz-Po-PA.webp" alt="Work detail 3"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/zh2Wzjs5/x-ZIHosw-LTEMUy-JIOczxZXPjv-Zds-Lfp-Nh.webp" alt="Work detail" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Dx4VJbv/RYXRiiond-RSz-Bn-PLmgh-Qn-Exr-WOgth-Qm-T.webp" alt="Work detail 2" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/d4hM7dMx/q-Vp-FTLEbs-Jdvgr-IZLfkp-Gc-Rks-SXz-Po-PA.webp" alt="Work detail 3" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- rotating nav full bleed -->
   <div class="reveal" style="width:100%;background:#050403;overflow:hidden;">
-    <img src="https://i.ibb.co/8DFhpRmp/rotatingnavbreakdownfullcycle-Pw-Q.gif" alt="Rotating nav breakdown" style="width:100%;height:auto;display:block;object-fit:contain;">
+    <img data-src="https://i.ibb.co/8DFhpRmp/rotatingnavbreakdownfullcycle-Pw-Q.gif" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Rotating nav breakdown" style="width:100%;height:auto;display:block;object-fit:contain;" loading="lazy" decoding="async" class="lazy-gif">
   </div>
 
   <!-- from/to pair -->
   <div class="img-pair reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/23bv6QwS/fromthistothat-Bhnju-Ln-GDKPNb-Wawgw.webp" alt="From this to that"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/BHY9Y5sX/Chq-Zmcs-Bquyc-Ov-HYjiy-RKJqk-Ikc-SRo-Zv.webp" alt="Workarea detail"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/23bv6QwS/fromthistothat-Bhnju-Ln-GDKPNb-Wawgw.webp" alt="From this to that" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/BHY9Y5sX/Chq-Zmcs-Bquyc-Ov-HYjiy-RKJqk-Ikc-SRo-Zv.webp" alt="Workarea detail" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- stories pair -->
   <div class="img-pair reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/cK4MYYhF/stories-AZh-EPUSk-YDf-SRVVUp-Ro-Sl-Zp-SE.webp" alt="Stories A"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/PZZ4K84X/stories-LLTzcdn-TOb-Jw-PYKdl-GSVx-YZWb.webp" alt="Stories B"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/cK4MYYhF/stories-AZh-EPUSk-YDf-SRVVUp-Ro-Sl-Zp-SE.webp" alt="Stories A" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/PZZ4K84X/stories-LLTzcdn-TOb-Jw-PYKdl-GSVx-YZWb.webp" alt="Stories B" loading="lazy" decoding="async"></div>
   </div>
 
 </section>
@@ -926,14 +938,14 @@ body::after {
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/ynyPWk7k/herohardinge-Plbu-Hi-Swg-Qd-Ruqc-Ni-Ulf.webp" alt="Hardinge hero">
+    <img class="par-img" src="https://i.ibb.co/ynyPWk7k/herohardinge-Plbu-Hi-Swg-Qd-Ruqc-Ni-Ulf.webp" alt="Hardinge hero" loading="lazy" decoding="async">
   </div>
 
   <!-- nav iteration trio -->
   <div class="img-pair thirds reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/SX0gLsmK/dropnavigation-Oz-Dt-Hno-Ngy-Ckoww-Dg-K.webp" alt="Drop navigation"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/bgksQwqw/dropnavigationeditshomepage-EJWur.webp" alt="Drop nav edits"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/MyffyvQg/finalizednavigationfmb-YVOjfy-CHcf.webp" alt="Finalized nav"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/SX0gLsmK/dropnavigation-Oz-Dt-Hno-Ngy-Ckoww-Dg-K.webp" alt="Drop navigation" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/bgksQwqw/dropnavigationeditshomepage-EJWur.webp" alt="Drop nav edits" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/MyffyvQg/finalizednavigationfmb-YVOjfy-CHcf.webp" alt="Finalized nav" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- override pull quote -->
@@ -944,15 +956,15 @@ body::after {
 
   <!-- PDP detail pairs -->
   <div class="img-pair reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/Jw5N5wP2/switchtodroppdpconceptsyrf-TSes-HS.webp" alt="Drop PDP"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/VW7qMV2D/dropmyinterpretationp-SXi-Ii-YKYBGt.webp" alt="My interpretation"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Jw5N5wP2/switchtodroppdpconceptsyrf-TSes-HS.webp" alt="Drop PDP" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/VW7qMV2D/dropmyinterpretationp-SXi-Ii-YKYBGt.webp" alt="My interpretation" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- attention to detail split -->
   <div class="split reverse" style="--split-cols-rev: 1fr 50%;">
     <div class="split-text" style="background:#06060f;">
       <span class="eyebrow">Attention to Detail</span>
-      <h3 class="heading">It's not magic. It's craft.</h3>
+      <h3 class="heading">It's not magic. It's caring.</h3>
       <div class="prose-wrap">
         <div class="prose">
           <p>There are some folks who diligently take notes on calls, and then there are others who are <em>engaged</em> in the call — gauging vocal inflections and reading between the lines of the often convoluted thoughts from the client's various contributors.</p>
@@ -961,12 +973,12 @@ body::after {
         <div class="tldr-ghost"><div class="tldr-inner"><span class="tldr-text">The highest-performing design work comes from listening beyond the brief — and investing in craft that may never appear on an invoice.</span></div></div>
       </div>
     </div>
-    <div class="split-img"><img class="par-img" src="https://i.ibb.co/tTDrvnhP/drop-SAinterpretationul-Cj-QNTXl-Ady.webp" alt="SA interpretation"></div>
+    <div class="split-img"><img class="par-img" src="https://i.ibb.co/tTDrvnhP/drop-SAinterpretationul-Cj-QNTXl-Ady.webp" alt="SA interpretation" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- closing image -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/4gm6DMTx/u-OAbexu-HHAVxwl-Xa-FPf-Fozvnw-Tf-HZa-ND.webp" alt="Contact / closer">
+    <img class="par-img" src="https://i.ibb.co/4gm6DMTx/u-OAbexu-HHAVxwl-Xa-FPf-Fozvnw-Tf-HZa-ND.webp" alt="Contact / closer" loading="lazy" decoding="async">
   </div>
 
 </section>
@@ -996,166 +1008,26 @@ body::after {
   </div>
 
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/jk49XvQS/braintypeface-AKfrx-EDNtd-Bq-BMCXDDw.webp" alt="Brain typeface">
+    <img class="par-img" src="https://i.ibb.co/jk49XvQS/braintypeface-AKfrx-EDNtd-Bq-BMCXDDw.webp" alt="Brain typeface" loading="lazy" decoding="async">
   </div>
 
   <!-- gif + logo pair -->
   <div class="img-pair reveal" >
     <div class="img-wrap gif-wrap has-contain" style="background:#050400;">
-      <img src="https://i.ibb.co/nMzjH9GD/ezgifcomoptimize-MRx-Gsfs-Wjr-Ymc-Pl-Z.gif" alt="Logo animation" style="width:100%;height:100%;object-fit:contain;">
+      <img data-src="https://i.ibb.co/nMzjH9GD/ezgifcomoptimize-MRx-Gsfs-Wjr-Ymc-Pl-Z.gif" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Logo animation" style="width:100%;height:100%;object-fit:contain;" loading="lazy" decoding="async" class="lazy-gif">
     </div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/20Ss0wSL/danalogol-MHEu-Swyrfu-BMYu-BPDs-SSPk-X.webp" alt="Dana logo"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/20Ss0wSL/danalogol-MHEu-Swyrfu-BMYu-BPDs-SSPk-X.webp" alt="Dana logo" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- dana + alliance pair -->
   <div class="img-pair reveal" >
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/gZv0GVqm/danaintrofs-TGo-Vhrtssz-PRCde-Nok-Ged.webp" alt="Dana intro"></div>
-    <div class="img-wrap"><img class="" src="https://i.ibb.co/Hph5RbXd/alliancelogo-AQBLFEe-Xt-GVg-WOyq-XHQz.webp" alt="Alliance logo"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/gZv0GVqm/danaintrofs-TGo-Vhrtssz-PRCde-Nok-Ged.webp" alt="Dana intro" loading="lazy" decoding="async"></div>
+    <div class="img-wrap"><img class="" src="https://i.ibb.co/Hph5RbXd/alliancelogo-AQBLFEe-Xt-GVg-WOyq-XHQz.webp" alt="Alliance logo" loading="lazy" decoding="async"></div>
   </div>
 
   <!-- closing pull quote -->
   <div class="pull-band reveal" style="text-align:center;">
     <blockquote style="margin:0 auto;">"I was an artist before I was a graphic designer — or UX designer. This may offer a look into how I approach design."</blockquote>
-  </div>
-
-</section>
-
-<!-- ═══════════════════════ CH 11: BNY MELLON ══════════════════ -->
-<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 11</div><div class="sep-line"></div></div>
-<section id="ch-bny" class="chapter-section">
-
-  <div class="section-intro reveal">
-    <div class="si-num">11</div>
-    <div class="left">
-      <span class="si-tag">No Artificial Intelligence Here</span>
-      <h2 class="si-title">BNY Mellon — Wove</h2>
-      <p class="si-client"><strong>BNY Mellon · Pershing X</strong> &nbsp;·&nbsp; Publicis Sapient · Fintech</p>
-    </div>
-    <div class="right">
-      <span class="si-label">The Brief</span>
-      <div class="prose-wrap">
-        <div class="si-prose">
-          <p>Advisors worked across many disconnected tools — context was lost, data had to be re-entered, and efficiency suffered. We sought to flatten the experience through a <strong>uniform and interconnected dashboard.</strong></p>
-          <p>The vision: build Wove, an industry-first platform that connects a client's full financial picture with the tools advisors actually use, so work moves across modules without reentry.</p>
-          <p>I led information architecture, task and flow mapping, cross-module navigation, and component patterns that <em>keep data alive across steps</em> — no reentry required.</p>
-        </div>
-        <div class="tldr-ghost"><div class="tldr-inner"><span class="tldr-text">An industry-first advisor platform — unified IA and cross-module UX so advisors never re-enter data or lose context mid-workflow.</span></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- hero full bleed -->
-  <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/XkM2hn8n/bny1.png" alt="BNY Wove hero">
-  </div>
-
-  <!-- pull quote — the "no AI" insight -->
-  <div class="pull-band reveal">
-    <blockquote>"This was only 2023 into 2024 — before the buzzword craze. AI had zero part in any of this. Human blood, sweat, and copious amounts of caffeine did the due diligence."</blockquote>
-    <p>Every legacy application analyzed. Every flow mapped. Socialized with the team. Shipped to one of the largest banking entities in the world.</p>
-  </div>
-
-  <!-- image pair -->
-  <div class="img-pair reveal">
-    <div class="img-wrap"><img src="https://i.ibb.co/vvMZmq94/bny2.png" alt="BNY Wove 2"></div>
-    <div class="img-wrap"><img src="https://i.ibb.co/xS49C07B/bny3.png" alt="BNY Wove 3"></div>
-  </div>
-
-  <!-- split: fourth screen + outcomes text -->
-  <div class="split" style="--split-cols: 55% 1fr;">
-    <div class="split-img">
-      <img class="par-img" src="https://i.ibb.co/wZY2bhKF/bny4.png" alt="BNY Wove 4">
-    </div>
-    <div class="split-text" style="background:#040810;">
-      <span class="eyebrow">Senior UX · Product Design Lead</span>
-      <h3 class="heading">One platform. Every advisor workflow. No reentry.</h3>
-      <div class="prose-wrap">
-        <div class="prose">
-          <p>Partnered with PM, Tech Lead, Data, Compliance, and designers to ship unified, cross-workflow journeys at the scale and security of BNY Mellon.</p>
-          <p>Wove launched helping advisors work faster and serve more clients — powered by human craft, not a chatbot.</p>
-        </div>
-        <div class="tldr-ghost"><div class="tldr-inner"><span class="tldr-text">Cross-functional delivery at enterprise scale — unified journeys that let advisors serve more clients, faster.</span></div></div>
-      </div>
-      <div class="mono-list" style="margin-top:2rem;">IA · Task + Flow Mapping<br>Cross-module Navigation<br>Component Patterns · No Reentry</div>
-    </div>
-  </div>
-
-  <!-- closing image -->
-  <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/Z1tjz0t9/14.webp" alt="BNY Wove overview">
-  </div>
-
-</section>
-
-<!-- ═══════════════════════ CH 12: GNC ════════════════════════ -->
-<div class="chapter-sep"><div class="sep-line"></div><div class="sep-text">CHAPTER 12</div><div class="sep-line"></div></div>
-<section id="ch-gnc" class="chapter-section">
-
-  <div class="section-intro reveal">
-    <div class="si-num">12</div>
-    <div class="left">
-      <span class="si-tag">This Is The Whey</span>
-      <h2 class="si-title">GNC — General Nutrition Centers</h2>
-      <p class="si-client"><strong>GNC</strong> &nbsp;·&nbsp; Elva Design Group · E-commerce Rebuild</p>
-    </div>
-    <div class="right">
-      <span class="si-label">The Brief</span>
-      <div class="prose-wrap">
-        <div class="si-prose">
-          <p>Coming off a recent bankruptcy, GNC had one ask: <strong>shake things up.</strong> A ground-up rebuild on Shopify — modern, modular, and built to keep pace with the most competitive shelf in retail.</p>
-          <p>We dove deep into GNC's e-commerce ecosystem. Market research, client-supplied user data, wireframe feature prototyping — and ultimately a component-based design system optimized for continued optimization.</p>
-          <p>12-week engagement. Tight cadence. Weekly exec reviews. <em>Fast on our feet.</em></p>
-        </div>
-        <div class="tldr-ghost"><div class="tldr-inner"><span class="tldr-text">A ground-up Shopify rebuild for a post-bankruptcy GNC — mobile-first, component-based, and built for continuous iteration.</span></div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- hero full bleed -->
-  <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/cSQCgNQY/work1.webp" alt="GNC hero">
-  </div>
-
-  <!-- pull quote -->
-  <div class="pull-band reveal">
-    <blockquote>"If the bar ain't bending, you're just pretending."</blockquote>
-    <p>The result helped GNC reclaim ~$500M in annual revenue.</p>
-  </div>
-
-  <!-- mobile screens pair -->
-  <div class="img-pair reveal">
-    <div class="img-wrap"><img src="https://i.ibb.co/pBMMxY1Z/11.webp" alt="GNC mobile overview"></div>
-    <div class="img-wrap"><img src="https://i.ibb.co/7N2rDqrN/8.webp" alt="GNC mobile closeup"></div>
-  </div>
-
-  <!-- split: desktop nav + taxonomy text -->
-  <div class="split reverse" style="--split-cols-rev: 1fr 55%;">
-    <div class="split-text" style="background:#0a0604;">
-      <span class="eyebrow">Navigation + Taxonomy Strategy</span>
-      <h3 class="heading">A retail taxonomy that separated GNC from all of e-retail.</h3>
-      <div class="prose-wrap">
-        <div class="prose">
-          <p>We introduced a modern mobile-first navigation schema and retail taxonomy strategy that didn't just beat GNC's competition — it set a new standard for the category.</p>
-          <p>Lead UX across IA, UI Prototypes, and Design Systems. Paired with PM, Dev Lead, design team, and client-side stakeholders for weekly exec reviews.</p>
-        </div>
-        <div class="tldr-ghost"><div class="tldr-inner"><span class="tldr-text">Mobile-first navigation and taxonomy that outpaced the category — shipped in 12 weeks with weekly executive reviews.</span></div></div>
-      </div>
-      <div class="mono-list" style="margin-top:2rem;">IA · Wireframes · Prototypes<br>Design Systems · Shopify<br>Mobile-first · 12-week sprint</div>
-    </div>
-    <div class="split-img">
-      <img class="par-img" src="https://i.ibb.co/vx76zjgf/10.webp" alt="GNC desktop navigation">
-    </div>
-  </div>
-
-  <!-- research + notes pair -->
-  <div class="img-pair reveal">
-    <div class="img-wrap"><img src="https://i.ibb.co/ynjWYqv8/2.webp" alt="GNC notes"></div>
-    <div class="img-wrap"><img src="https://i.ibb.co/spHgPH6N/1.webp" alt="GNC research"></div>
-  </div>
-
-  <!-- desktop homepage closing full bleed -->
-  <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/rft2bf0T/9.webp" alt="GNC desktop homepage">
   </div>
 
 </section>
@@ -1171,13 +1043,14 @@ body::after {
 </footer>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 /* ── CURSOR ── */
 const dot = document.getElementById('cursor-dot');
 const ring = document.getElementById('cursor-ring');
 let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; gsap.set(dot,{x:mx,y:my}); });
+document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; gsap.set(dot,{x:mx,y:my}); }, {passive:true});
 (function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; gsap.set(ring,{x:rx,y:ry}); requestAnimationFrame(loop); })();
 document.querySelectorAll('a,button,.chapter-card').forEach(el=>{
   el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-hover'));
@@ -1250,7 +1123,7 @@ document.addEventListener('click',e=>{
   const gl=canvas.getContext('webgl');
   if(!gl) return;
   function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; gl.viewport(0,0,canvas.width,canvas.height); }
-  resize(); window.addEventListener('resize',resize);
+  resize(); window.addEventListener('resize',resize,{passive:true});
   const vert=`attribute vec2 a_pos; void main(){ gl_Position=vec4(a_pos,0.,1.); }`;
   const frag=`precision mediump float;
   uniform float u_time; uniform vec2 u_res; uniform vec2 u_scroll;
@@ -1280,22 +1153,37 @@ document.addEventListener('click',e=>{
   gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
   const uT=gl.getUniformLocation(prog,'u_time'),uR=gl.getUniformLocation(prog,'u_res'),uS=gl.getUniformLocation(prog,'u_scroll');
   let scrollY=0;
-  window.addEventListener('scroll',()=>scrollY=window.scrollY);
-  let start=performance.now();
-  (function loop(){ const t=(performance.now()-start)/1000;
+  window.addEventListener('scroll',()=>scrollY=window.scrollY, {passive:true});
+  let start=performance.now(), glRaf;
+  function glLoop(){ if(document.hidden) return;
+    const t=(performance.now()-start)/1000;
     gl.uniform1f(uT,t); gl.uniform2f(uR,canvas.width,canvas.height); gl.uniform2f(uS,0,scrollY);
-    gl.drawArrays(gl.TRIANGLE_STRIP,0,4); requestAnimationFrame(loop); })();
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4); glRaf=requestAnimationFrame(glLoop); }
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) glLoop(); });
+  glLoop();
 })();
+
+
+/* ── GIF LAZY LOAD — only play when visible, saves bandwidth ── */
+(function(){
+  const gifs = document.querySelectorAll('img.lazy-gif[data-src]');
+  if (!gifs.length) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const img = e.target;
+        img.src = img.dataset.src;
+        obs.unobserve(img);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '200px' });
+  gifs.forEach(g => obs.observe(g));
+})();
+
+}); // end DOMContentLoaded
 
 /* ── PIXI LIQUID DISPLACEMENT — all image containers ── */
 (function(){
-  // Skip PIXI entirely on touch-primary devices (mobile/tablet).
-  // The effect relies on mousemove hover and creates blank-image glitches
-  // on fast-scroll mobile because PIXI hides the native img before its
-  // WebGL canvas is ready. Native images look great on mobile anyway.
-  const isTouchPrimary = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  if (isTouchPrimary) return;
-
   const PIXI_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js';
   const DISPLACE_SPRITE = 'https://i.ibb.co/KrVr51f/displace-circle.png';
 
@@ -1305,7 +1193,6 @@ document.addEventListener('click',e=>{
   document.head.appendChild(script);
 
   function initLiquid() {
-    // Target every image container — full heroes, pairs, splits — skip gif-wraps
     const selectors = [
       '.img-full:not(.gif-wrap)',
       '.img-wrap:not(.gif-wrap)',
@@ -1314,7 +1201,6 @@ document.addEventListener('click',e=>{
     const containers = [...document.querySelectorAll(selectors.join(','))];
     if (!containers.length) return;
 
-    // Ensure all containers are position:relative so absolute mount works
     containers.forEach(c => {
       const pos = getComputedStyle(c).position;
       if (pos === 'static') c.style.position = 'relative';
@@ -1322,13 +1208,12 @@ document.addEventListener('click',e=>{
     });
 
     let mx = window.innerWidth / 2, my = window.innerHeight / 2;
-    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, {passive:true});
 
-    // Pre-load displacement sprite once, share across all instances
     PIXI.Assets.load(DISPLACE_SPRITE).then(dispTex => {
       containers.forEach(container => {
         const imgEl = container.querySelector('img');
-        if (!imgEl || imgEl.src.endsWith('.gif')) return;
+        if (!imgEl || imgEl.src.endsWith('.gif') || imgEl.dataset.src && imgEl.dataset.src.endsWith('.gif')) return;
 
         const mount = document.createElement('div');
         mount.style.cssText = 'position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .8s ease;';
@@ -1349,18 +1234,13 @@ document.addEventListener('click',e=>{
             antialias: false,
             resolution: 1,
           });
-          // Start ticker paused; visibility observer will start/stop it
-          app.ticker.stop();
-
           mount.appendChild(app.view);
           app.view.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
 
-          // Use naturalWidth/Height for correct cover sizing
           const src = imgEl.currentSrc || imgEl.src;
           PIXI.Assets.load(src).then(imgTex => {
             imgSprite = new PIXI.Sprite(imgTex);
 
-            // Cover-fit: scale to fill container maintaining aspect ratio
             const iw = imgTex.width, ih = imgTex.height;
             const scale = Math.max(W / iw, H / ih);
             imgSprite.width  = iw * scale;
@@ -1369,7 +1249,6 @@ document.addEventListener('click',e=>{
             imgSprite.y = (H - imgSprite.height) / 2;
             app.stage.addChild(imgSprite);
 
-            // Clone disp texture per-instance (shared base texture is fine)
             dispSprite = new PIXI.Sprite(dispTex);
             dispSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
             dispSprite.scale.set(1.6);
@@ -1383,6 +1262,10 @@ document.addEventListener('click',e=>{
             const rgb = new PIXI.ColorMatrixFilter();
             rgb.saturate(0.18, true);
             imgSprite.filters = [dispFilter, rgb];
+
+            mount.style.opacity = '1';
+            imgEl.style.transition = 'opacity .8s ease';
+            imgEl.style.opacity = '0';
 
             app.ticker.add(() => {
               const rect = container.getBoundingClientRect();
@@ -1403,39 +1286,13 @@ document.addEventListener('click',e=>{
                 dispSprite.y += Math.cos(t * 0.00035) * 0.5;
               }
             });
-
-            // Only hide the native img AFTER the PIXI canvas is fully ready.
-            // This prevents the blank-image flash if textures load slowly.
-            mount.style.opacity = '1';
-            imgEl.style.transition = 'opacity .8s ease';
-            imgEl.style.opacity = '0';
-
-            // Resume ticker now that everything is ready; visibility
-            // observer below will pause/resume it as the user scrolls.
-            if (visibleNow) app.ticker.start();
           });
         }
 
-        // ── Lazy-boot: initialise PIXI only when container first enters view ──
-        let visibleNow = false;
-        const bootObs = new IntersectionObserver(entries => {
-          entries.forEach(e => {
-            if (e.isIntersecting) { boot(); bootObs.disconnect(); }
-          });
+        const obs = new IntersectionObserver(entries => {
+          entries.forEach(e => { if (e.isIntersecting) { boot(); obs.disconnect(); } });
         }, { threshold: 0.05 });
-        bootObs.observe(container);
-
-        // ── Visibility-based ticker pause/resume (fixes desktop perf leak) ──
-        // Each PIXI app only runs its RAF loop while the container is on screen.
-        const visObs = new IntersectionObserver(entries => {
-          entries.forEach(e => {
-            visibleNow = e.isIntersecting;
-            if (!app || !imgSprite) return; // not yet booted
-            if (visibleNow) { app.ticker.start(); }
-            else            { app.ticker.stop();  }
-          });
-        }, { threshold: 0 });
-        visObs.observe(container);
+        obs.observe(container);
 
         window.addEventListener('resize', () => {
           if (!app || !imgSprite) return;
@@ -1447,7 +1304,7 @@ document.addEventListener('click',e=>{
           imgSprite.height = ih * scale;
           imgSprite.x = (W - imgSprite.width)  / 2;
           imgSprite.y = (H - imgSprite.height) / 2;
-        });
+        }, {passive:true});
       });
     });
   }

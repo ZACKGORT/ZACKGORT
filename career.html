@@ -1145,6 +1145,13 @@ document.addEventListener('click',e=>{
 
 /* ── PIXI LIQUID DISPLACEMENT — all image containers ── */
 (function(){
+  // Skip PIXI entirely on touch-primary devices (mobile/tablet).
+  // The effect relies on mousemove hover and creates blank-image glitches
+  // on fast-scroll mobile because PIXI hides the native img before its
+  // WebGL canvas is ready. Native images look great on mobile anyway.
+  const isTouchPrimary = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+  if (isTouchPrimary) return;
+
   const PIXI_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js';
   const DISPLACE_SPRITE = 'https://i.ibb.co/KrVr51f/displace-circle.png';
 
@@ -1198,6 +1205,9 @@ document.addEventListener('click',e=>{
             antialias: false,
             resolution: 1,
           });
+          // Start ticker paused; visibility observer will start/stop it
+          app.ticker.stop();
+
           mount.appendChild(app.view);
           app.view.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
 
@@ -1230,10 +1240,6 @@ document.addEventListener('click',e=>{
             rgb.saturate(0.18, true);
             imgSprite.filters = [dispFilter, rgb];
 
-            mount.style.opacity = '1';
-            imgEl.style.transition = 'opacity .8s ease';
-            imgEl.style.opacity = '0';
-
             app.ticker.add(() => {
               const rect = container.getBoundingClientRect();
               const isHovered = mx >= rect.left && mx <= rect.right && my >= rect.top && my <= rect.bottom;
@@ -1253,13 +1259,39 @@ document.addEventListener('click',e=>{
                 dispSprite.y += Math.cos(t * 0.00035) * 0.5;
               }
             });
+
+            // Only hide the native img AFTER the PIXI canvas is fully ready.
+            // This prevents the blank-image flash if textures load slowly.
+            mount.style.opacity = '1';
+            imgEl.style.transition = 'opacity .8s ease';
+            imgEl.style.opacity = '0';
+
+            // Resume ticker now that everything is ready; visibility
+            // observer below will pause/resume it as the user scrolls.
+            if (visibleNow) app.ticker.start();
           });
         }
 
-        const obs = new IntersectionObserver(entries => {
-          entries.forEach(e => { if (e.isIntersecting) { boot(); obs.disconnect(); } });
+        // ── Lazy-boot: initialise PIXI only when container first enters view ──
+        let visibleNow = false;
+        const bootObs = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            if (e.isIntersecting) { boot(); bootObs.disconnect(); }
+          });
         }, { threshold: 0.05 });
-        obs.observe(container);
+        bootObs.observe(container);
+
+        // ── Visibility-based ticker pause/resume (fixes desktop perf leak) ──
+        // Each PIXI app only runs its RAF loop while the container is on screen.
+        const visObs = new IntersectionObserver(entries => {
+          entries.forEach(e => {
+            visibleNow = e.isIntersecting;
+            if (!app || !imgSprite) return; // not yet booted
+            if (visibleNow) { app.ticker.start(); }
+            else            { app.ticker.stop();  }
+          });
+        }, { threshold: 0 });
+        visObs.observe(container);
 
         window.addEventListener('resize', () => {
           if (!app || !imgSprite) return;

@@ -8,7 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ibb.co">
+<link rel="dns-prefetch" href="https://i.ibb.co">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <!-- Non-render-blocking font load -->
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"></noscript>
@@ -154,7 +156,7 @@ body::after {
 }
 .img-full img, .img-full .par-img {
   width: 100%; height: 115%; display: block;
-  object-fit: cover; will-change: transform;
+  object-fit: cover;
 }
 
 /* ── SPLIT: IMAGE LEFT / TEXT RIGHT (or reversed) ── */
@@ -174,7 +176,7 @@ body::after {
 }
 .split .split-img .par-img {
   width: 100%; height: 115%; object-fit: cover; display: block;
-  position: absolute; top: -7.5%; will-change: transform;
+  position: absolute; top: -7.5%;
 }
 .split .split-text {
   display: flex; flex-direction: column; justify-content: center;
@@ -450,7 +452,7 @@ body::after {
     <li><a href="#ch-pdp">PDP</a></li>
     <li><a href="#ch-logo">Logo</a></li>
   </ul>
-  <button class="nav-index-btn" onclick="gsap.to(window,{scrollTo:'#chapter-index',duration:.9,ease:'power3.inOut'})">Index</button>
+  <button class="nav-index-btn" onclick="if(!window._stReady){gsap.registerPlugin(ScrollToPlugin);window._stReady=true;}gsap.to(window,{scrollTo:'#chapter-index',duration:.9,ease:'power3.inOut'})">Index</button>
 </nav>
 
 <!-- ═══════════════════════ COVER ═══════════════════════ -->
@@ -498,7 +500,7 @@ body::after {
 
   <!-- hero: full bleed finger harp -->
   <div class="img-full reveal">
-    <img class="par-img" src="https://i.ibb.co/jZWQDhyy/African-Finger-Harpbyzackgort-As-Bv-Y.webp" alt="African Finger Harp" loading="eager" fetchpriority="high" decoding="async">
+    <img class="par-img" src="https://i.ibb.co/jZWQDhyy/African-Finger-Harpbyzackgort-As-Bv-Y.webp" alt="African Finger Harp" loading="eager" fetchpriority="high" decoding="sync">
   </div>
 
   <!-- split: sunflower left / mask right -->
@@ -1044,14 +1046,24 @@ body::after {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+gsap.registerPlugin(ScrollTrigger);
 
 /* ── CURSOR ── */
 const dot = document.getElementById('cursor-dot');
 const ring = document.getElementById('cursor-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove', e=>{ mx=e.clientX; my=e.clientY; gsap.set(dot,{x:mx,y:my}); }, {passive:true});
-(function loop(){ rx+=(mx-rx)*.12; ry+=(my-ry)*.12; gsap.set(ring,{x:rx,y:ry}); requestAnimationFrame(loop); })();
+let mx=0,my=0,rx=0,ry=0,cursorRafActive=false;
+function cursorLoop(){
+  const dx=mx-rx, dy=my-ry;
+  rx+=dx*.12; ry+=dy*.12;
+  gsap.set(ring,{x:rx,y:ry});
+  if(Math.abs(dx)>0.1||Math.abs(dy)>0.1){ requestAnimationFrame(cursorLoop); }
+  else { cursorRafActive=false; }
+}
+document.addEventListener('mousemove', e=>{
+  mx=e.clientX; my=e.clientY;
+  gsap.set(dot,{x:mx,y:my});
+  if(!cursorRafActive){ cursorRafActive=true; requestAnimationFrame(cursorLoop); }
+}, {passive:true});
 document.querySelectorAll('a,button,.chapter-card').forEach(el=>{
   el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-hover'));
   el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-hover'));
@@ -1073,38 +1085,63 @@ document.querySelectorAll('.chapter-section').forEach(sec=>{
 function setActive(id){ navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id)); }
 
 /* ── COVER ANIMATION ── */
-gsap.from('.index-title',{y:60,opacity:0,duration:1.2,ease:'power4.out',delay:.2});
-gsap.from('.index-eyebrow',{y:20,opacity:0,duration:.8,ease:'power3.out',delay:.1});
-gsap.from('.index-sub',{y:30,opacity:0,duration:.9,ease:'power3.out',delay:.5});
-gsap.from('.chapter-card',{y:40,opacity:0,duration:.7,ease:'power3.out',stagger:.06,delay:.7});
+const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!noMotion) {
+  gsap.from('.index-title',{y:60,opacity:0,duration:1.2,ease:'power4.out',delay:.2});
+  gsap.from('.index-eyebrow',{y:20,opacity:0,duration:.8,ease:'power3.out',delay:.1});
+  gsap.from('.index-sub',{y:30,opacity:0,duration:.9,ease:'power3.out',delay:.5});
+  gsap.from('.chapter-card',{y:40,opacity:0,duration:.7,ease:'power3.out',stagger:.06,delay:.7});
+} else {
+  // Instantly reveal everything for reduced-motion users
+  document.querySelectorAll('.index-title,.index-eyebrow,.index-sub,.chapter-card').forEach(el=>{ el.style.opacity='1'; });
+}
 
 /* ── SECTION REVEALS ── */
-document.querySelectorAll('.reveal').forEach((el,i)=>{
+document.querySelectorAll('.reveal').forEach((el)=>{
+  if (noMotion) { el.classList.add('in'); return; }
   ScrollTrigger.create({trigger:el,start:'top 88%',
     onEnter:()=>{ el.classList.add('in'); }});
 });
 
 /* ── PARALLAX ── */
-document.querySelectorAll('.par-img').forEach(img=>{
-  const wrap=img.closest('.img-full,.split-img,.img-wrap');
-  if(!wrap) return;
-  gsap.fromTo(img,{y:'0%'},{
-    y:'-15%', ease:'none',
-    scrollTrigger:{trigger:wrap,start:'top bottom',end:'bottom top',scrub:1.5}
+if (!noMotion) {
+  document.querySelectorAll('.par-img').forEach(img=>{
+    const wrap=img.closest('.img-full,.split-img,.img-wrap');
+    if(!wrap) return;
+    // Apply will-change only when the ScrollTrigger is active (near viewport)
+    ScrollTrigger.create({
+      trigger:wrap, start:'top bottom', end:'bottom top',
+      onEnter:()=>{ img.style.willChange='transform'; },
+      onLeave:()=>{ img.style.willChange='auto'; },
+      onEnterBack:()=>{ img.style.willChange='transform'; },
+      onLeaveBack:()=>{ img.style.willChange='auto'; }
+    });
+    gsap.fromTo(img,{y:'0%'},{
+      y:'-15%', ease:'none',
+      scrollTrigger:{trigger:wrap,start:'top bottom',end:'bottom top',scrub:1.5}
+    });
   });
-});
+}
 
 /* ── SEP ANIMATION ── */
-document.querySelectorAll('.chapter-sep').forEach(sep=>{
-  gsap.from(sep.querySelector('.sep-text'),{opacity:0,y:8,duration:.6,ease:'power2.out',
-    scrollTrigger:{trigger:sep,start:'top 88%'}});
-});
+if (!noMotion) {
+  document.querySelectorAll('.chapter-sep').forEach(sep=>{
+    gsap.from(sep.querySelector('.sep-text'),{opacity:0,y:8,duration:.6,ease:'power2.out',
+      scrollTrigger:{trigger:sep,start:'top 88%'}});
+  });
+}
 
-/* ── SMOOTH NAV SCROLL ── */
+/* ── SMOOTH NAV SCROLL — lazy-register ScrollToPlugin on first use ── */
+let scrollToReady = false;
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener('click',e=>{
     const t=document.querySelector(a.getAttribute('href'));
-    if(t){ e.preventDefault(); gsap.to(window,{scrollTo:{y:t,offsetY:70},duration:1.1,ease:'power3.inOut'}); }
+    if(!t) return;
+    e.preventDefault();
+    function doScroll(){ gsap.to(window,{scrollTo:{y:t,offsetY:70},duration:1.1,ease:'power3.inOut'}); }
+    if(scrollToReady){ doScroll(); }
+    else { gsap.registerPlugin(ScrollToPlugin); scrollToReady=true; doScroll(); }
   });
 });
 
@@ -1154,9 +1191,12 @@ document.addEventListener('click',e=>{
   const uT=gl.getUniformLocation(prog,'u_time'),uR=gl.getUniformLocation(prog,'u_res'),uS=gl.getUniformLocation(prog,'u_scroll');
   let scrollY=0;
   window.addEventListener('scroll',()=>scrollY=window.scrollY, {passive:true});
-  let start=performance.now(), glRaf;
-  function glLoop(){ if(document.hidden) return;
-    const t=(performance.now()-start)/1000;
+  let start=performance.now(), glRaf, lastGlFrame=0;
+  function glLoop(now){ 
+    if(document.hidden) return;
+    if(now - lastGlFrame < 33){ glRaf=requestAnimationFrame(glLoop); return; } // cap ~30fps
+    lastGlFrame=now;
+    const t=(now-start)/1000;
     gl.uniform1f(uT,t); gl.uniform2f(uR,canvas.width,canvas.height); gl.uniform2f(uS,0,scrollY);
     gl.drawArrays(gl.TRIANGLE_STRIP,0,4); glRaf=requestAnimationFrame(glLoop); }
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) glLoop(); });
@@ -1176,32 +1216,49 @@ document.addEventListener('click',e=>{
         obs.unobserve(img);
       }
     });
-  }, { threshold: 0.1, rootMargin: '200px' });
+  }, { threshold: 0.1, rootMargin: '100px' });
   gifs.forEach(g => obs.observe(g));
 })();
 
 }); // end DOMContentLoaded
 
-/* ── PIXI LIQUID DISPLACEMENT — all image containers ── */
+/* ── PIXI LIQUID DISPLACEMENT — desktop pointer devices only ── */
 (function(){
+  // Skip entirely on touch-only / no-hover devices (mobile, tablets)
+  // and for users who prefer reduced motion
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
   const PIXI_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js';
   const DISPLACE_SPRITE = 'https://i.ibb.co/KrVr51f/displace-circle.png';
 
-  const script = document.createElement('script');
-  script.src = PIXI_CDN;
-  script.onload = initLiquid;
-  document.head.appendChild(script);
+  // Lazy-load PixiJS only when the first image container enters the viewport
+  // Only apply to fixed-height containers — img-full and split-img.
+  // img-wrap uses height:auto (natural aspect ratio) — PixiJS would
+  // read offsetHeight as 0 before paint and produce a distorted sprite.
+  const selectors = ['.img-full:not(.gif-wrap)','.split-img'];
+  const allContainers = [...document.querySelectorAll(selectors.join(','))];
+  if (!allContainers.length) return;
+
+  let pixiLoaded = false;
+
+  function loadPixi() {
+    if (pixiLoaded) return;
+    pixiLoaded = true;
+    const script = document.createElement('script');
+    script.src = PIXI_CDN;
+    script.onload = initLiquid;
+    document.head.appendChild(script);
+  }
+
+  // Trigger script load only when first container is near viewport
+  const bootObs = new IntersectionObserver(entries => {
+    if (entries.some(e => e.isIntersecting)) { loadPixi(); bootObs.disconnect(); }
+  }, { rootMargin: '300px' });
+  allContainers.slice(0,3).forEach(c => bootObs.observe(c));
 
   function initLiquid() {
-    const selectors = [
-      '.img-full:not(.gif-wrap)',
-      '.img-wrap:not(.gif-wrap)',
-      '.split-img',
-    ];
-    const containers = [...document.querySelectorAll(selectors.join(','))];
-    if (!containers.length) return;
-
-    containers.forEach(c => {
+    allContainers.forEach(c => {
       const pos = getComputedStyle(c).position;
       if (pos === 'static') c.style.position = 'relative';
       c.style.overflow = 'hidden';
@@ -1210,16 +1267,40 @@ document.addEventListener('click',e=>{
     let mx = window.innerWidth / 2, my = window.innerHeight / 2;
     window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, {passive:true});
 
+    // Collect all booted instances for the single shared resize handler
+    const instances = [];
+
+    // Single debounced resize handler for ALL containers (not one per container)
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        instances.forEach(({ container, app, imgSprite }) => {
+          if (!app || !imgSprite) return;
+          const W = container.offsetWidth, H = container.offsetHeight;
+          app.renderer.resize(W, H);
+          const iw = imgSprite.texture.width, ih = imgSprite.texture.height;
+          const scale = Math.max(W / iw, H / ih);
+          imgSprite.width  = iw * scale;
+          imgSprite.height = ih * scale;
+          imgSprite.x = (W - imgSprite.width)  / 2;
+          imgSprite.y = (H - imgSprite.height) / 2;
+        });
+      }, 150);
+    }, {passive:true});
+
     PIXI.Assets.load(DISPLACE_SPRITE).then(dispTex => {
-      containers.forEach(container => {
+      allContainers.forEach(container => {
         const imgEl = container.querySelector('img');
-        if (!imgEl || imgEl.src.endsWith('.gif') || imgEl.dataset.src && imgEl.dataset.src.endsWith('.gif')) return;
+        if (!imgEl || imgEl.src.endsWith('.gif') || (imgEl.dataset.src && imgEl.dataset.src.endsWith('.gif'))) return;
 
         const mount = document.createElement('div');
         mount.style.cssText = 'position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .8s ease;';
         container.appendChild(mount);
 
         let app, dispSprite, dispFilter, imgSprite, loaded = false;
+        const instance = { container, app: null, imgSprite: null };
+        instances.push(instance);
 
         function boot() {
           if (loaded) return;
@@ -1234,12 +1315,14 @@ document.addEventListener('click',e=>{
             antialias: false,
             resolution: 1,
           });
+          instance.app = app;
           mount.appendChild(app.view);
           app.view.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
 
           const src = imgEl.currentSrc || imgEl.src;
           PIXI.Assets.load(src).then(imgTex => {
             imgSprite = new PIXI.Sprite(imgTex);
+            instance.imgSprite = imgSprite;
 
             const iw = imgTex.width, ih = imgTex.height;
             const scale = Math.max(W / iw, H / ih);
@@ -1293,18 +1376,6 @@ document.addEventListener('click',e=>{
           entries.forEach(e => { if (e.isIntersecting) { boot(); obs.disconnect(); } });
         }, { threshold: 0.05 });
         obs.observe(container);
-
-        window.addEventListener('resize', () => {
-          if (!app || !imgSprite) return;
-          const W = container.offsetWidth, H = container.offsetHeight;
-          app.renderer.resize(W, H);
-          const iw = imgSprite.texture.width, ih = imgSprite.texture.height;
-          const scale = Math.max(W / iw, H / ih);
-          imgSprite.width  = iw * scale;
-          imgSprite.height = ih * scale;
-          imgSprite.x = (W - imgSprite.width)  / 2;
-          imgSprite.y = (H - imgSprite.height) / 2;
-        }, {passive:true});
       });
     });
   }

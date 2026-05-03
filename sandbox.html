@@ -17,7 +17,6 @@
     color:rgba(255,255,255,0.14); pointer-events:none; z-index:20;
   }
 
-  /* top-center header: logo + info stacked */
   #top-header {
     position:fixed; top:22px; left:50%; transform:translateX(-50%);
     display:flex; flex-direction:column; align-items:center; gap:10px;
@@ -31,7 +30,6 @@
   }
   #logo-svg { width:100%; height:100%; fill:#fff; display:block; pointer-events:none; }
 
-  /* info button */
   #info-btn {
     width:22px; height:22px; border-radius:50%;
     border:1px solid rgba(255,255,255,0.22);
@@ -43,7 +41,6 @@
   }
   #info-btn:hover { color:rgba(255,255,255,0.8); border-color:rgba(255,255,255,0.5); }
 
-  /* info overlay */
   #info-overlay {
     position:fixed; inset:0; z-index:50;
     background:rgba(0,0,0,0.92);
@@ -59,7 +56,6 @@
   }
   #info-close:hover { color:rgba(255,255,255,0.8); }
 
-  /* FILTER WIDGETS */
   .filter-widget {
     position: fixed;
     background: rgba(0,0,0,0.8);
@@ -74,6 +70,12 @@
   
   #albums-widget { left: 28px; bottom: 28px; }
   #tags-widget { right: 28px; bottom: 28px; }
+
+  /* Mobile: thinner margins */
+  @media (max-width: 600px) {
+    #albums-widget { left: 10px; bottom: 10px; max-width: calc(50vw - 14px); }
+    #tags-widget { right: 10px; bottom: 10px; max-width: calc(50vw - 14px); }
+  }
 
   .widget-topbar {
     display: flex;
@@ -179,7 +181,6 @@
 </div>
 
 <script>
-// ── DATA ─────────────────────────────────────────────────────────────────────
 const TRACKS = [
   { id:1,  album:"Kill 'Em All",       year:1983, tags:['speed','aggression','metal'],        text:"Hit the Lights opens with a pure velocity statement — speed and volume elevated to a kind of manifesto for what thrash metal would become." },
   { id:2,  album:"Kill 'Em All",       year:1983, tags:['mythology','war','power'],           text:"The Four Horsemen reframes the biblical apocalypse as a vehicle for guitar interplay, with Hetfield's extended metaphor riding a relentless galloping rhythm." },
@@ -306,7 +307,8 @@ const ALL_ALBUMS = [...new Set(TRACKS.map(d => d.album))];
 const ALL_TAGS   = [...new Set(TRACKS.flatMap(d => d.tags))].sort();
 const SHORT = { "Kill 'Em All":'KEA', 'Ride the Lightning':'RTL', 'Master of Puppets':'MOP', 'And Justice for All':'AJFA', 'The Black Album':'TBA', 'Load':'Load', 'Reload':'Reload', 'St. Anger':'St.A', 'Death Magnetic':'DM', 'Hardwired':'HW2SD', '72 Seasons':'72S' };
 
-// ── CANVAS ────────────────────────────────────────
+const isMobile = () => window.innerWidth <= 600;
+
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
 const cursorCanvas = document.getElementById('cursor-canvas');
@@ -314,23 +316,40 @@ const cursorCtx    = cursorCanvas.getContext('2d');
 let W = canvas.width = cursorCanvas.width  = window.innerWidth;
 let H = canvas.height = cursorCanvas.height = window.innerHeight;
 
-const FONT_BASE = 11, FONT_LARGE = 20, SEP = ' — ';
+const FONT_BASE  = 11;
+const FONT_LARGE = 20;
+const SEP = ' — ';
 let fontT = 0, fontTgt = 0;
 const FONT_LERP = 0.07;
 
+// ── BLOOM SIZE: scrollwheel on desktop, fixed on mobile ──
+const BLOOM_MIN = 60, BLOOM_MAX = 400, BLOOM_DEFAULT = 160;
+let bloomRadius = BLOOM_DEFAULT;
+
+window.addEventListener('wheel', e => {
+  if (isMobile()) return;
+  bloomRadius = Math.min(BLOOM_MAX, Math.max(BLOOM_MIN, bloomRadius - e.deltaY * 0.4));
+}, { passive: true });
+
 function isFiltered() { return activeAlbum !== null || activeTags.size > 0; }
-function currentFontSize() { return FONT_BASE + (FONT_LARGE - FONT_BASE) * fontT; }
+function currentFontSize() {
+  const base = isMobile() ? 9 : FONT_BASE;
+  const large = isMobile() ? 16 : FONT_LARGE;
+  return base + (large - base) * fontT;
+}
 function currentCharW()    { return currentFontSize() * 0.602; }
 function currentLineH()    { return currentFontSize() * 1.64; }
-function currentPadX()     { return 80; }
+function currentPadX()     { return isMobile() ? 10 : 80; }
 function currentPadTop()   { return 220; }
 function currentFontFace() { return `300 ${currentFontSize().toFixed(2)}px "DM Mono", monospace`; }
 
+// ── Bottom safe area: fixed 120px clearance from bottom of viewport ──
+function getBottomSafeArea() { return 120; }
+
 const TETHER_K = 0.014, DAMP = 0.76, REPEL_R = 110, REPEL_S = 3.2, BLOB_LERP = 0.11, BLOB_RX = 28;
 
-// ── DRAG WIDGETS ──────────────────────────────────
 const topHeader = document.getElementById('top-header'), logoWidget = document.getElementById('logo-widget');
-const LOGO_SIZE = 180; 
+const LOGO_SIZE = 180;
 let activeDrag = null, dragDX = 0, dragDY = 0;
 let logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2), logoY = 22;
 
@@ -359,7 +378,6 @@ window.addEventListener('mousemove', e => {
   }
 });
 
-// ── COLLAPSE & PADDING ──────────────────────────
 document.querySelectorAll('.collapse-btn').forEach(btn => {
   btn.addEventListener('mousedown', e => e.stopPropagation());
   btn.addEventListener('click', e => {
@@ -367,24 +385,10 @@ document.querySelectorAll('.collapse-btn').forEach(btn => {
     widget.classList.toggle('collapsed');
     btn.textContent = widget.classList.contains('collapsed') ? '+' : '−';
     invalidateFilterRepel();
-    buildLayout(); // Recalculate layout to account for height change
+    buildLayout();
   });
 });
 
-function getBottomSafeArea() {
-  const widgets = [document.getElementById('albums-widget'), document.getElementById('tags-widget')];
-  let maxFootprint = 0;
-  widgets.forEach(w => {
-    const r = w.getBoundingClientRect();
-    // If widget is in the bottom half of the screen, treat it as a floor
-    if (r.bottom > H * 1.1) {
-      maxFootprint = Math.max(maxFootprint, H - r.top);
-    }
-  });
-  return maxFootprint + 1; 
-}
-
-// ── INFO ──────────────────────────────────────────
 const INFO_TEXT = "if i may be frank is a fan-made thought-experiment — a meditation on meaning as mass. one analytical sentence per track across metallica's studio discography. built to ask what it feels like to hold a body of work all at once.";
 const infoOverlay = document.getElementById('info-overlay'), infoCanvas = document.getElementById('info-canvas'), infoCtx = infoCanvas.getContext('2d'), infoBtn = document.getElementById('info-btn'), infoClose = document.getElementById('info-close');
 let infoOpen = false, infoChars = [], infoMX = 0, infoMY = 0, infoBX = 0, infoBY = 0;
@@ -419,10 +423,11 @@ infoBtn.addEventListener('click', () => { infoOpen = true; infoOverlay.classList
 infoClose.addEventListener('click', () => { infoOpen = false; infoOverlay.classList.remove('visible'); });
 infoOverlay.addEventListener('mousemove', e => { const r = infoCanvas.getBoundingClientRect(); infoMX = e.clientX - r.left; infoMY = e.clientY - r.top; });
 
-// ── FILTERING ─────────────────────────────────────
-let activeAlbum = null, activeTags = new Set(), domButtons = [], filterRepelZones = [], mX = W/2, mY = H/2, bX = W/2, bY = H/2, eX = W/2, eY = H/2, eVX = 0, eVY = 0;
+let activeAlbum = null, activeTags = new Set(), domButtons = [], filterRepelZones = [];
+let mX = W/2, mY = H/2, bX = W/2, bY = H/2, eX = W/2, eY = H/2, eVX = 0, eVY = 0;
 
 window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
+
 function initDOMFilters() {
   const albC = document.getElementById('albums-container'), tagC = document.getElementById('tags-container');
   ALL_ALBUMS.forEach(a => {
@@ -455,14 +460,20 @@ function invalidateFilterRepel() {
   });
 }
 
-// ── LAYOUT & LOOP ─────────────────────────────────
 let allChars = [];
+
 function computeLayout(charW, lineH, padX, padTop) {
   const visible = TRACKS.filter(d => (!activeAlbum || d.album === activeAlbum) && (activeTags.size === 0 || d.tags.some(t => activeTags.has(t))));
   if (!visible.length) return [];
   const tokens = [];
-  visible.forEach((d, i) => { d.text.split(' ').forEach(w => tokens.push({ text: w, trackId: d.id })); if (i < visible.length - 1) tokens.push({ text: SEP.trim(), trackId: d.id, isSep: true }); });
-  const maxW = W - padX * 2, maxH = H - getBottomSafeArea(), lines = [];
+  visible.forEach((d, i) => {
+    d.text.split(' ').forEach(w => tokens.push({ text: w, trackId: d.id }));
+    if (i < visible.length - 1) tokens.push({ text: SEP.trim(), trackId: d.id, isSep: true });
+  });
+  // Bottom boundary: viewport height minus fixed 120px safe area
+  const maxW = W - padX * 2;
+  const maxH = H - getBottomSafeArea();
+  const lines = [];
   let curL = [], curW = 0;
   tokens.forEach(tok => {
     const seg = (curL.length ? ' ' : '') + tok.text, sw = seg.length * charW;
@@ -472,7 +483,8 @@ function computeLayout(charW, lineH, padX, padTop) {
   if (curL.length) lines.push(curL);
   const chars = [];
   lines.forEach((line, li) => {
-    const ry = padTop + li * lineH; if (ry > maxH) return;
+    const ry = padTop + li * lineH;
+    if (ry > maxH) return; // skip lines that exceed safe area
     let rx = padX;
     line.forEach(tok => {
       for (let ci = 0; ci < tok.display.length; ci++) {
@@ -485,13 +497,16 @@ function computeLayout(charW, lineH, padX, padTop) {
 }
 
 function buildLayout() {
-  const tgtT = isFiltered() ? 1 : 0, tgtF = FONT_BASE + (FONT_LARGE - FONT_BASE) * tgtT;
-  const layout = computeLayout(tgtF * 0.602, tgtF * 1.64, currentPadX(), currentPadTop());
+  const tgtT = isFiltered() ? 1 : 0;
+  const tgtF = (isMobile() ? 9 : FONT_BASE) + ((isMobile() ? 16 : FONT_LARGE) - (isMobile() ? 9 : FONT_BASE)) * tgtT;
+  const tgtCW = tgtF * 0.602, tgtLH = tgtF * 1.64;
+  const layout = computeLayout(tgtCW, tgtLH, currentPadX(), currentPadTop());
   allChars = layout.map((def, i) => {
     const ex = allChars[i];
     return { ch: def.ch, restX: def.restX, restY: def.restY, x: ex ? ex.x : def.restX, y: ex ? ex.y : def.restY, vx: ex ? ex.vx : 0, vy: ex ? ex.vy : 0, baseOpacity: def.isSep ? 0.11 : 0.32 + def.seed * 0.38 };
   });
-  fontTgt = tgtT; document.getElementById('cnt').textContent = TRACKS.filter(d => (!activeAlbum || d.album === activeAlbum) && (activeTags.size === 0 || d.tags.some(t => activeTags.has(t)))).length;
+  fontTgt = tgtT;
+  document.getElementById('cnt').textContent = TRACKS.filter(d => (!activeAlbum || d.album === activeAlbum) && (activeTags.size === 0 || d.tags.some(t => activeTags.has(t)))).length;
   refreshFilterState();
 }
 
@@ -500,13 +515,16 @@ function loop() {
   bX += (mX - bX) * BLOB_LERP; bY += (mY - bY) * BLOB_LERP;
   eVX = (mX - eX) * 0.1; eVY = (mY - eY) * 0.1; eX += (eVX *= 0.68); eY += (eVY *= 0.68);
   fontT += (fontTgt - fontT) * FONT_LERP;
+
   if (Math.abs(fontT - fontTgt) > 0.001) {
     const l = computeLayout(currentCharW(), currentLineH(), currentPadX(), currentPadTop());
     l.forEach((def, i) => { if (allChars[i]) { allChars[i].restX = def.restX; allChars[i].restY = def.restY; } });
   }
+
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   ctx.font = currentFontFace(); ctx.textBaseline = 'top';
   const lcx = logoX + 90, lcy = logoY + 90;
+
   for (const p of allChars) {
     p.vx += (p.restX - p.x) * TETHER_K; p.vy += (p.restY - p.y) * TETHER_K;
     const dx = p.x - bX, dy = p.y - bY, d = Math.sqrt(dx*dx + dy*dy);
@@ -521,15 +539,39 @@ function loop() {
       }
     });
     p.vx *= DAMP; p.vy *= DAMP; p.x += p.vx; p.y += p.vy;
-    const alpha = p.baseOpacity * Math.min(1, Math.max(0, (d - 20) / 50));
+
+    // Fade chars based on distance to blob cursor
+    const fadeStart = 20, fadeEnd = 60;
+    const alpha = p.baseOpacity * Math.min(1, Math.max(0, (d - fadeStart) / (fadeEnd - fadeStart)));
     if (alpha > 0.01) { ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`; ctx.fillText(p.ch, p.x, p.y); }
   }
+
+  // ── Cursor: bloom radius controlled by scroll (desktop only) ──
   cursorCtx.clearRect(0,0,W,H);
-  cursorCtx.fillStyle = 'rgba(255,255,255,0.4)'; cursorCtx.beginPath(); cursorCtx.arc(eX, eY, 4, 0, Math.PI*2); cursorCtx.fill();
-  cursorCtx.fillStyle = '#fff'; cursorCtx.beginPath(); cursorCtx.arc(mX, mY, 1.5, 0, Math.PI*2); cursorCtx.fill();
+
+  if (!isMobile()) {
+    // Bloom glow
+    const grad = cursorCtx.createRadialGradient(bX, bY, 0, bX, bY, bloomRadius);
+    grad.addColorStop(0,   'rgba(255,255,255,0.055)');
+    grad.addColorStop(0.4, 'rgba(255,255,255,0.018)');
+    grad.addColorStop(1,   'rgba(255,255,255,0)');
+    cursorCtx.fillStyle = grad;
+    cursorCtx.beginPath();
+    cursorCtx.arc(bX, bY, bloomRadius, 0, Math.PI*2);
+    cursorCtx.fill();
+  }
+
+  // Lagging dot
+  cursorCtx.fillStyle = 'rgba(255,255,255,0.4)';
+  cursorCtx.beginPath(); cursorCtx.arc(eX, eY, 4, 0, Math.PI*2); cursorCtx.fill();
+  // Sharp dot at exact mouse pos
+  cursorCtx.fillStyle = '#fff';
+  cursorCtx.beginPath(); cursorCtx.arc(mX, mY, 1.5, 0, Math.PI*2); cursorCtx.fill();
+
   if (infoOpen) {
     infoBX += (infoMX - infoBX) * 0.11; infoBY += (infoMY - infoBY) * 0.11;
-    infoCtx.clearRect(0,0,infoCanvas.width, infoCanvas.height); infoCtx.font = `300 15px "DM Mono", monospace`;
+    infoCtx.clearRect(0,0,infoCanvas.width, infoCanvas.height);
+    infoCtx.font = `300 15px "DM Mono", monospace`;
     for (const p of infoChars) {
       p.vx += (p.restX - p.x) * 0.016; p.vy += (p.restY - p.y) * 0.016;
       const dx = p.x - infoBX, dy = p.y - infoBY, d = Math.sqrt(dx*dx + dy*dy);
@@ -540,7 +582,12 @@ function loop() {
   }
 }
 
-window.addEventListener('resize', () => { W = canvas.width = cursorCanvas.width = window.innerWidth; H = canvas.height = cursorCanvas.height = window.innerHeight; buildLayout(); invalidateFilterRepel(); });
+window.addEventListener('resize', () => {
+  W = canvas.width = cursorCanvas.width = window.innerWidth;
+  H = canvas.height = cursorCanvas.height = window.innerHeight;
+  buildLayout(); invalidateFilterRepel();
+});
+
 initDOMFilters(); invalidateFilterRepel(); buildLayout(); loop();
 </script>
 </body>

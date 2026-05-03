@@ -17,7 +17,6 @@
     color:rgba(255,255,255,0.14); pointer-events:none; z-index:20;
   }
 
-
   /* top-center header: logo + info stacked */
   #top-header {
     position:fixed; top:22px; left:50%; transform:translateX(-50%);
@@ -30,7 +29,7 @@
     cursor:none; user-select:none;
     background:#000;
   }
-  #logo-svg { width:100%; height:100%; fill:#fff; display:block; }
+  #logo-svg { width:100%; height:100%; fill:#fff; display:block; pointer-events:none; }
 
   /* info button */
   #info-btn {
@@ -51,7 +50,6 @@
     display:none; align-items:center; justify-content:center;
   }
   #info-overlay.visible { display:flex; }
-  #info-canvas { display:block; }
   #info-close {
     position:absolute; top:28px; right:30px;
     font-family:'DM Mono',monospace; font-weight:300;
@@ -60,13 +58,101 @@
     transition: color .2s;
   }
   #info-close:hover { color:rgba(255,255,255,0.8); }
+
+  /* FILTER WIDGETS */
+  .filter-widget {
+    position: fixed;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(4px);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(0 0 18px #000) drop-shadow(0 0 40px #000);
+    max-width: 420px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  
+  #albums-widget { left: 28px; bottom: 28px; }
+  #tags-widget { right: 28px; bottom: 28px; }
+
+  .widget-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    user-select: none;
+  }
+  .widget-topbar:hover { background: rgba(255,255,255,0.06); }
+
+  .filter-header {
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .collapse-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    line-height: 1;
+    color: rgba(255,255,255,0.3);
+    cursor: none;
+    padding: 0 4px;
+    transition: color 0.2s;
+  }
+  .collapse-btn:hover { color: #fff; }
+
+  .widget-content {
+    padding: 16px;
+    display: block;
+  }
+
+  .filter-widget.collapsed .widget-content { display: none; }
+  .filter-widget.collapsed .widget-topbar { border-bottom: none; }
+
+  .filter-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.22);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    cursor: none;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .filter-btn:hover {
+    color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0.3);
+  }
+  .filter-btn.related {
+    color: rgba(255,255,255,0.45);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .filter-btn.active {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <canvas id="cursor-canvas"></canvas>
 
-<!-- top-center: logo + info -->
 <div id="top-header">
   <div id="logo-widget">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.756 192.756" id="logo-svg">
@@ -76,17 +162,25 @@
   <div id="info-btn">i</div>
 </div>
 
+<div id="albums-widget" class="filter-widget">
+  <div class="widget-topbar"><div class="filter-header">Albums</div><div class="collapse-btn">−</div></div>
+  <div class="widget-content"><div class="filter-btn-group" id="albums-container"></div></div>
+</div>
+
+<div id="tags-widget" class="filter-widget">
+  <div class="widget-topbar"><div class="filter-header">Themes</div><div class="collapse-btn">−</div></div>
+  <div class="widget-content"><div class="filter-btn-group" id="tags-container"></div></div>
+</div>
+
 <div id="count"><span id="cnt">0</span> tracks</div>
 <div id="info-overlay">
   <div id="info-close">×</div>
   <canvas id="info-canvas"></canvas>
 </div>
 
-
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
 const TRACKS = [
-  // ── Kill 'Em All (1983) ───────────────────────────────────────────────────
   { id:1,  album:"Kill 'Em All",       year:1983, tags:['speed','aggression','metal'],        text:"Hit the Lights opens with a pure velocity statement — speed and volume elevated to a kind of manifesto for what thrash metal would become." },
   { id:2,  album:"Kill 'Em All",       year:1983, tags:['mythology','war','power'],           text:"The Four Horsemen reframes the biblical apocalypse as a vehicle for guitar interplay, with Hetfield's extended metaphor riding a relentless galloping rhythm." },
   { id:3,  album:"Kill 'Em All",       year:1983, tags:['speed','aggression','lifestyle'],    text:"Motorbreath is a brief, breathless celebration of living fast, treating exhaustion as a moral failing rather than a natural consequence." },
@@ -97,8 +191,6 @@ const TRACKS = [
   { id:8,  album:"Kill 'Em All",       year:1983, tags:['war','aggression','defiance'],       text:"No Remorse is an early example of Metallica's war-as-spectacle mode — the carnage described with such aesthetic relish that moral critique becomes genuinely ambiguous." },
   { id:9,  album:"Kill 'Em All",       year:1983, tags:['aggression','predator','metal'],     text:"Seek and Destroy remains a live staple four decades on, its central riff so perfectly calibrated that the song functions as both threat and anthem." },
   { id:10, album:"Kill 'Em All",       year:1983, tags:['metal','community','aggression'],    text:"Metal Militia closes the debut as collective declaration, the band explicitly positioning thrash as a unified movement rather than just a style." },
-
-  // ── Ride the Lightning (1984) ─────────────────────────────────────────────
   { id:11, album:'Ride the Lightning',  year:1984, tags:['death','fear','punishment'],         text:"Fight Fire with Fire opens with pastoral acoustic guitar before detonating into a nuclear-age parable about mutually assured destruction as the only available logic." },
   { id:12, album:'Ride the Lightning',  year:1984, tags:['death','punishment','justice'],      text:"Ride the Lightning takes the condemned prisoner's interiority seriously — fear, confusion, and rage in the moments before execution — making capital punishment viscerally personal." },
   { id:13, album:'Ride the Lightning',  year:1984, tags:['love','loss','grief'],               text:"For Whom the Bell Tolls draws on Hemingway's wartime meditation to craft a tolling, doom-laden portrait of soldiers dying for purposes they no longer understand." },
@@ -107,8 +199,6 @@ const TRACKS = [
   { id:16, album:'Ride the Lightning',  year:1984, tags:['defiance','speed','aggression'],     text:"Escape is often dismissed as the album's weakest link, but its blunt individualism — leave the herd, trust no one — anticipates the antisocial streak running through much of the band's later work." },
   { id:17, album:'Ride the Lightning',  year:1984, tags:['war','death','futility'],            text:"Creeping Death retells the Exodus plagues as thrash theater, the crowd's ritual chant of \"Die!\" transforming scripture into something communal and cathartic." },
   { id:18, album:'Ride the Lightning',  year:1984, tags:['instrumental','darkness','power'],   text:"The Call of Ktulu is an eight-minute Lovecraft adaptation that proved the band could sustain dread across an entire side of vinyl without a single vocal line." },
-
-  // ── Master of Puppets (1986) ──────────────────────────────────────────────
   { id:19, album:'Master of Puppets',   year:1986, tags:['war','corruption','power'],          text:"Battery opens with classical acoustic counterpoint that snaps instantly into thrash, a structural trick that defines the entire album's method: beauty weaponized." },
   { id:20, album:'Master of Puppets',   year:1986, tags:['addiction','control','despair'],     text:"Master of Puppets is addiction personified as a sadistic puppetmaster — the drug speaks in the second person, making the listener complicit in the narrator's self-destruction." },
   { id:21, album:'Master of Puppets',   year:1986, tags:['war','futility','trauma'],           text:"The Thing That Should Not Be pulls Lovecraftian imagery into a slow, crushing meditation on the human encounter with forces that cannot be named or defeated." },
@@ -117,8 +207,6 @@ const TRACKS = [
   { id:24, album:'Master of Puppets',   year:1986, tags:['corruption','power','religion'],     text:"Leper Messiah is a swaggering evisceration of televangelist culture, skewering the transactional relationship between faith and money with particular venom." },
   { id:25, album:'Master of Puppets',   year:1986, tags:['instrumental','grief','memory'],     text:"Orion is the album's still centre — an instrumental elegiac enough to have been played at Cliff Burton's funeral, its melodic development more emotionally articulate than most rock songs with words." },
   { id:26, album:'Master of Puppets',   year:1986, tags:['darkness','power','aggression'],     text:"Damage Inc. closes the album at maximum velocity, Hetfield's lyrics treating violence as a first language and the riff as the only grammar that matters." },
-
-  // ── …And Justice for All (1988) ───────────────────────────────────────────
   { id:27, album:'And Justice for All', year:1988, tags:['justice','corruption','power'],      text:"Blackened opens the Justice era with apocalyptic environmentalism — the earth personified as a dying body, poisoned by the same industrial systems that bankroll the justice the album title invokes." },
   { id:28, album:'And Justice for All', year:1988, tags:['justice','corruption','law'],        text:"…And Justice for All diagnoses a legal system so thoroughly captured by wealth that justice becomes a commodity — available to those who can afford it, rationed or withheld from those who cannot." },
   { id:29, album:'And Justice for All', year:1988, tags:['war','futility','trauma'],           text:"Eye of the Beholder turns the First Amendment into a paradox — freedom of speech described as simultaneously guaranteed and impossible, watched and revoked." },
@@ -128,8 +216,6 @@ const TRACKS = [
   { id:33, album:'And Justice for All', year:1988, tags:['fear','darkness','trauma'],          text:"The Frayed Ends of Sanity tracks a mind unraveling in real time, the music fragmenting alongside the narrator's grip on consensus reality." },
   { id:34, album:'And Justice for All', year:1988, tags:['instrumental','power','darkness'],   text:"To Live Is to Die is the band's memorial to Cliff Burton — a long, shifting instrumental built around a spoken poem Burton wrote, his voice absent but his presence structural." },
   { id:35, album:'And Justice for All', year:1988, tags:['corruption','media','power'],        text:"Dyers Eve closes the album as a furious letter from a stunted adult to the parents who sheltered him from reality — overprotection reframed as a form of violence." },
-
-  // ── Metallica / The Black Album (1991) ────────────────────────────────────
   { id:36, album:'The Black Album',     year:1991, tags:['control','trauma','darkness'],       text:"Enter Sandman distills childhood fear into an arena-sized lullaby — the monster under the bed given a wall of sound and a production budget, suddenly everyone's nightmare made universal." },
   { id:37, album:'The Black Album',     year:1991, tags:['justice','war','trauma'],            text:"Sad but True describes a shadow self — the darker impulse that narrates from inside, the part that controls the part that thinks it's in control." },
   { id:38, album:'The Black Album',     year:1991, tags:['death','grief','acceptance'],        text:"Holier Than Thou dismantles self-righteousness with economical aggression — the song's anger is righteous in the act of attacking righteousness, a paradox it earns through sheer momentum." },
@@ -142,8 +228,6 @@ const TRACKS = [
   { id:45, album:'The Black Album',     year:1991, tags:['trauma','control','darkness'],       text:"The God That Failed is Hetfield's most direct excavation of his Christian Science upbringing — faith weaponized against medicine, and the grief of a child who watched it fail." },
   { id:46, album:'The Black Album',     year:1991, tags:['isolation','identity','despair'],    text:"My Friend of Misery is a portrait of someone so deeply invested in suffering that the suffering has become a social identity — grief as personality." },
   { id:47, album:'The Black Album',     year:1991, tags:['darkness','mortality','fear'],       text:"The Struggle Within closes the album on a note of furious introspection — the enemy located not in any system or institution but in the narrator's own compulsive negativity." },
-
-  // ── Load (1996) ───────────────────────────────────────────────────────────
   { id:48, album:'Load',               year:1996, tags:['identity','change','darkness'],      text:"Ain't My Bitch opens the Load era as a declarative refusal — whatever burden is being handed to the narrator, he's not carrying it, a blunt reinvention after five years of stadium saturation." },
   { id:49, album:'Load',               year:1996, tags:['mortality','darkness','isolation'],  text:"2 x 4 is a grinding, mid-tempo threat with a blues chassis — the song is essentially a vehicle for Hetfield's ability to imply physical menace through syllable placement alone." },
   { id:50, album:'Load',               year:1996, tags:['mythology','power','darkness'],      text:"The House Jack Built is Load's most explicitly addiction-themed track, the house a metaphor for the body, the room for the mind, the dwelling dismantled by the substance living inside it." },
@@ -158,8 +242,6 @@ const TRACKS = [
   { id:59, album:'Load',               year:1996, tags:['corruption','power','justice'],      text:"Thorn Within is a guilt-drenched mid-tempo churn, the narrator's self-condemnation so thorough it becomes its own kind of pride." },
   { id:60, album:'Load',               year:1996, tags:['death','power','mythology'],         text:"Ronnie is a cinematic ballad about a school shooter before that was a genre, the biography rendered without sentimentality or explanation — the absence of motive more disturbing than any analysis." },
   { id:61, album:'Load',               year:1996, tags:['darkness','mortality','acceptance'], text:"The Outlaw Torn closes Load with an eleven-minute requiem for something lost that the song never quite names — the ambiguity feels intentional, grief too large for a single referent." },
-
-  // ── Reload (1997) ─────────────────────────────────────────────────────────
   { id:62, album:'Reload',             year:1997, tags:['speed','aggression','defiance'],     text:"Fuel distills Reload's arena ambitions into a single high-octane declaration — velocity as religion, the engine as the only god worth worshipping." },
   { id:63, album:'Reload',             year:1997, tags:['mortality','grief','acceptance'],    text:"The Memory Remains features Marianne Faithfull's spectral presence as a faded fame metaphor — celebrity decay observed with more compassion than cruelty." },
   { id:64, album:'Reload',             year:1997, tags:['isolation','identity','darkness'],   text:"Devil's Dance is a slow-burn seduction narrative, the tempter's voice low and patient, the melody doing the work of a raised eyebrow." },
@@ -173,8 +255,6 @@ const TRACKS = [
   { id:72, album:'Reload',             year:1997, tags:['isolation','darkness','despair'],    text:"Low Man's Lyric is among Metallica's most stripped-back moments — hurdy-gurdy and acoustic guitar under a self-excoriating lyric about shame and social invisibility." },
   { id:73, album:'Reload',             year:1997, tags:['aggression','defiance','speed'],     text:"Attitude is a minimalist hard-rock shrug — the kind of song that sounds effortless because it refuses to try, which is either honesty or laziness, depending on your generosity." },
   { id:74, album:'Reload',             year:1997, tags:['mortality','darkness','acceptance'], text:"Fixxxer closes Reload with a slow-moving, psychologically dense examination of cycles — the damage repeated across generations, the child becoming the parent becoming the wound." },
-
-  // ── St. Anger (2003) ──────────────────────────────────────────────────────
   { id:75, album:'St. Anger',          year:2003, tags:['trauma','aggression','recovery'],    text:"Frantic is a raw, barely-produced opening salvo — Hetfield's rehab-adjacent anxiety given musical form in a song that sounds like it was recorded mid-crisis because it essentially was." },
   { id:76, album:'St. Anger',          year:2003, tags:['aggression','trauma','identity'],    text:"St. Anger the title track arrives with its notorious snare sound as a kind of provocation — the anger is holy because it is honest, and the sloppiness is the sincerity." },
   { id:77, album:'St. Anger',          year:2003, tags:['recovery','identity','change'],      text:"Some Kind of Monster is the album's therapeutic centerpiece — the band literally narrating their own group therapy, the dysfunction examined from inside the room where it lived." },
@@ -186,8 +266,6 @@ const TRACKS = [
   { id:83, album:'St. Anger',          year:2003, tags:['recovery','trauma','change'],        text:"The Unnamed Feeling names the unnamed feeling extensively across eight minutes — the depression that resists diagnosis, the darkness without a referent." },
   { id:84, album:'St. Anger',          year:2003, tags:['aggression','defiance','power'],     text:"Purify is the album's most direct purge fantasy — burn it down, clear the site, start from what remains, the scorched-earth approach to the self." },
   { id:85, album:'St. Anger',          year:2003, tags:['isolation','darkness','grief'],      text:"All Within My Hands begins as a love song before spiraling into something more disturbing — the possessiveness of the narrator tipping from devotion into something the song knows is wrong." },
-
-  // ── Death Magnetic (2008) ─────────────────────────────────────────────────
   { id:86, album:'Death Magnetic',     year:2008, tags:['mortality','darkness','power'],      text:"That Was Just Your Life opens the return-to-form album with a clock ticking into a riff — the birth moment weaponized, the entry into consciousness framed as the first step toward death." },
   { id:87, album:'Death Magnetic',     year:2008, tags:['mortality','darkness','grief'],      text:"The End of the Line tracks a life reaching its terminus — the inventory of regrets delivered not with self-pity but with a kind of muscular accounting, the riff doing the emotional heavy lifting." },
   { id:88, album:'Death Magnetic',     year:2008, tags:['darkness','trauma','isolation'],     text:"Broken, Beat and Scarred is a survival anthem for people who don't believe in survival anthems — the philosophy of endurance stripped of any optimism about what you'll look like when you arrive." },
@@ -198,8 +276,6 @@ const TRACKS = [
   { id:93, album:'Death Magnetic',     year:2008, tags:['addiction','control','darkness'],    text:"The Judas Kiss frames betrayal as intimacy — the closer the friend, the deeper the blade, the theological register lending the personal wound a cosmic dimension." },
   { id:94, album:'Death Magnetic',     year:2008, tags:['speed','aggression','power'],        text:"Suicide and Redemption is an instrumental that earns its title — the dynamic arc from quiet ache to cathartic resolution covering the psychological distance implied by those two words." },
   { id:95, album:'Death Magnetic',     year:2008, tags:['mortality','darkness','power'],      text:"My Apocalypse closes the album in a blur of speed and obliteration — a personal end-of-days, the apocalypse scaled to a single consciousness rather than a civilization." },
-
-  // ── Hardwired… to Self-Destruct (2016) ───────────────────────────────────
   { id:96,  album:'Hardwired',         year:2016, tags:['aggression','speed','mortality'],    text:"Hardwired opens the double album in under three minutes of distilled nihilism — we're hardwired to self-destruct, the song argues, and the brevity of the argument is itself the point." },
   { id:97,  album:'Hardwired',         year:2016, tags:['mythology','darkness','power'],      text:"Atlas, Rise! maps the Sisyphean burden onto a modern exhaustion — the weight unnamed but universal, the demand to keep carrying it regardless offered with unexpected melodic generosity." },
   { id:98,  album:'Hardwired',         year:2016, tags:['mortality','fear','darkness'],       text:"Now That We're Dead plays with the posthumous perspective — the couple surveying their relationship from the other side of death, the love more visible in absence." },
@@ -212,8 +288,6 @@ const TRACKS = [
   { id:105, album:'Hardwired',         year:2016, tags:['darkness','isolation','despair'],    text:"Am I Savage? poses the question without answering it, the uncertainty more disturbing than a confession would be — the self unable to establish its own innocence." },
   { id:106, album:'Hardwired',         year:2016, tags:['mythology','power','darkness'],      text:"Murder One is an elegy for Lemmy Kilmister — the tribute band paying homage through the vocabulary of a man who taught them that volume was a form of honesty." },
   { id:107, album:'Hardwired',         year:2016, tags:['aggression','defiance','mortality'], text:"Spit Out the Bone closes the album as a transhumanist horror story — the machine replacing the human, the upgrade indistinguishable from the extinction, speed as the sound of replacement." },
-
-  // ── 72 Seasons (2023) ─────────────────────────────────────────────────────
   { id:108, album:'72 Seasons',        year:2023, tags:['identity','trauma','childhood'],     text:"72 Seasons opens with Hetfield's thesis — the first seventy-two seasons of a life, childhood through early adulthood, forming a self that the rest of existence merely decorates or destroys." },
   { id:109, album:'72 Seasons',        year:2023, tags:['aggression','speed','defiance'],     text:"Shadows Follow is a relentless thrash exercise that argues the past is not behind you but beside you, moving at exactly your pace, matching every acceleration." },
   { id:110, album:'72 Seasons',        year:2023, tags:['trauma','identity','darkness'],      text:"Screaming Suicide is the band's most direct engagement with suicidal ideation since Fade to Black — the inner voice personified with uncomfortable specificity, almost given a name." },
@@ -230,6 +304,7 @@ const TRACKS = [
 
 const ALL_ALBUMS = [...new Set(TRACKS.map(d => d.album))];
 const ALL_TAGS   = [...new Set(TRACKS.flatMap(d => d.tags))].sort();
+const SHORT = { "Kill 'Em All":'KEA', 'Ride the Lightning':'RTL', 'Master of Puppets':'MOP', 'And Justice for All':'AJFA', 'The Black Album':'TBA', 'Load':'Load', 'Reload':'Reload', 'St. Anger':'St.A', 'Death Magnetic':'DM', 'Hardwired':'HW2SD', '72 Seasons':'72S' };
 
 // ── CANVAS ────────────────────────────────────────
 const canvas = document.getElementById('c');
@@ -239,114 +314,100 @@ const cursorCtx    = cursorCanvas.getContext('2d');
 let W = canvas.width = cursorCanvas.width  = window.innerWidth;
 let H = canvas.height = cursorCanvas.height = window.innerHeight;
 
-// font sizing — lerps between base and filtered scale
-const FONT_BASE    = 11;
-const FONT_LARGE   = 20;
-const SEP          = ' — ';
-
-// current interpolated size (animates smoothly)
-let fontT    = 0;   // 0 = unfiltered, 1 = filtered
-let fontTgt  = 0;
+const FONT_BASE = 11, FONT_LARGE = 20, SEP = ' — ';
+let fontT = 0, fontTgt = 0;
 const FONT_LERP = 0.07;
 
 function isFiltered() { return activeAlbum !== null || activeTags.size > 0; }
-
 function currentFontSize() { return FONT_BASE + (FONT_LARGE - FONT_BASE) * fontT; }
 function currentCharW()    { return currentFontSize() * 0.602; }
 function currentLineH()    { return currentFontSize() * 1.64; }
 function currentPadX()     { return 80; }
-function currentPadTop()   { return 200; }
+function currentPadTop()   { return 220; }
 function currentFontFace() { return `300 ${currentFontSize().toFixed(2)}px "DM Mono", monospace`; }
 
-const TETHER_K  = 0.014;
-const DAMP      = 0.76;
-const REPEL_R   = 110;
-const REPEL_S   = 3.2;
-const BLOB_LERP = 0.11;
-const BLOB_RX   = 28;
+const TETHER_K = 0.014, DAMP = 0.76, REPEL_R = 110, REPEL_S = 3.2, BLOB_LERP = 0.11, BLOB_RX = 28;
 
-// ── LOGO DRAG ────────────────────────────────────
-const logoWidget  = document.getElementById('logo-widget');
-const topHeader   = document.getElementById('top-header');
-let logoDragging  = false, logoDX = 0, logoDY = 0;
-const LOGO_SIZE   = 180; // must match CSS width/height
-// initial position: centered top (matches CSS left:50% translateX(-50%))
-let logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2);
-let logoY = 22;
+// ── DRAG WIDGETS ──────────────────────────────────
+const topHeader = document.getElementById('top-header'), logoWidget = document.getElementById('logo-widget');
+const LOGO_SIZE = 180; 
+let activeDrag = null, dragDX = 0, dragDY = 0;
+let logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2), logoY = 22;
 
-logoWidget.addEventListener('mousedown', e => {
-  logoDragging = true;
-  logoDX = e.clientX - logoX;
-  logoDY = e.clientY - logoY;
-  e.preventDefault();
-});
-window.addEventListener('mouseup', () => { logoDragging = false; });
-window.addEventListener('mousemove', e => {
-  if (logoDragging) {
-    logoX = e.clientX - logoDX;
-    logoY = e.clientY - logoDY;
-    // override CSS centering with explicit position once dragged
-    topHeader.style.left      = logoX + 'px';
-    topHeader.style.top       = logoY + 'px';
-    topHeader.style.transform = 'none';
-  }
-});
-function logoRect() {
-  return { left: logoX, top: logoY, width: LOGO_SIZE, height: LOGO_SIZE };
+function bindDraggable(element, widgetContainer) {
+  element.addEventListener('mousedown', e => {
+    activeDrag = widgetContainer;
+    const rect = widgetContainer.getBoundingClientRect();
+    dragDX = e.clientX - rect.left; dragDY = e.clientY - rect.top;
+    e.preventDefault();
+  });
 }
 
-// ── INFO OVERLAY ──────────────────────────────────
-const INFO_TEXT = "if i may be frank is a hypothetical fan-made thought-experiment — a meditation on meaning as mass. one analytical sentence per track across metallica's eleven studio albums. the full discography rendered as a particle field: 119 critical observations, set in motion, waiting to be read. filter by album or theme and watch the text reorganize around what remains. built to ask what it feels like to hold a body of work all at once.";
+bindDraggable(logoWidget, topHeader);
+document.querySelectorAll('.widget-topbar').forEach(bar => bindDraggable(bar, bar.closest('.filter-widget')));
+window.addEventListener('mouseup', () => { activeDrag = null; });
+window.addEventListener('mousemove', e => {
+  if (!activeDrag) return;
+  const nx = e.clientX - dragDX, ny = e.clientY - dragDY;
+  if (activeDrag === topHeader) {
+    logoX = nx; logoY = ny;
+    topHeader.style.left = logoX + 'px'; topHeader.style.top = logoY + 'px'; topHeader.style.transform = 'none';
+  } else {
+    activeDrag.style.left = nx + 'px'; activeDrag.style.top = ny + 'px';
+    activeDrag.style.bottom = 'auto'; activeDrag.style.right = 'auto';
+    invalidateFilterRepel();
+  }
+});
 
-const infoOverlay  = document.getElementById('info-overlay');
-const infoCanvas   = document.getElementById('info-canvas');
-const infoCtx      = infoCanvas.getContext('2d');
-const infoBtn      = document.getElementById('info-btn');
-const infoClose    = document.getElementById('info-close');
-let   infoOpen     = false;
-let   infoChars    = [];
-let   infoMX = 0, infoMY = 0;
-let   infoBX = 0, infoBY = 0;
+// ── COLLAPSE & PADDING ──────────────────────────
+document.querySelectorAll('.collapse-btn').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.stopPropagation());
+  btn.addEventListener('click', e => {
+    const widget = btn.closest('.filter-widget');
+    widget.classList.toggle('collapsed');
+    btn.textContent = widget.classList.contains('collapsed') ? '+' : '−';
+    invalidateFilterRepel();
+    buildLayout(); // Recalculate layout to account for height change
+  });
+});
+
+function getBottomSafeArea() {
+  const widgets = [document.getElementById('albums-widget'), document.getElementById('tags-widget')];
+  let maxFootprint = 0;
+  widgets.forEach(w => {
+    const r = w.getBoundingClientRect();
+    // If widget is in the bottom half of the screen, treat it as a floor
+    if (r.bottom > H * 1.1) {
+      maxFootprint = Math.max(maxFootprint, H - r.top);
+    }
+  });
+  return maxFootprint + 1; 
+}
+
+// ── INFO ──────────────────────────────────────────
+const INFO_TEXT = "if i may be frank is a fan-made thought-experiment — a meditation on meaning as mass. one analytical sentence per track across metallica's studio discography. built to ask what it feels like to hold a body of work all at once.";
+const infoOverlay = document.getElementById('info-overlay'), infoCanvas = document.getElementById('info-canvas'), infoCtx = infoCanvas.getContext('2d'), infoBtn = document.getElementById('info-btn'), infoClose = document.getElementById('info-close');
+let infoOpen = false, infoChars = [], infoMX = 0, infoMY = 0, infoBX = 0, infoBY = 0;
 
 function buildInfoLayout() {
   infoChars = [];
-  const IW = Math.min(680, window.innerWidth - 80);
-  const IH = window.innerHeight;
-  infoCanvas.width  = IW;
-  infoCanvas.height = IH;
-  const FONT_SZ = 15;
-  const CW = FONT_SZ * 0.602;
-  const LH = FONT_SZ * 1.72;
-  const PAD = 48;
-  const maxW = IW - PAD * 2;
-  const words = INFO_TEXT.split(' ');
-  const lines = [];
+  const IW = Math.min(680, window.innerWidth - 80), IH = window.innerHeight;
+  infoCanvas.width = IW; infoCanvas.height = IH;
+  const FONT_SZ = 15, CW = FONT_SZ * 0.602, LH = FONT_SZ * 1.72, PAD = 48, maxW = IW - PAD * 2;
+  const words = INFO_TEXT.split(' '), lines = [];
   let cur = [], curW = 0;
   words.forEach(w => {
-    const seg = (cur.length ? ' ' : '') + w;
-    const sw  = seg.length * CW;
-    if (curW + sw > maxW && cur.length) {
-      lines.push(cur); cur = [w]; curW = w.length * CW;
-    } else { cur.push(seg); curW += sw; }
+    const seg = (cur.length ? ' ' : '') + w, sw = seg.length * CW;
+    if (curW + sw > maxW && cur.length) { lines.push(cur); cur = [w]; curW = w.length * CW; }
+    else { cur.push(seg); curW += sw; }
   });
   if (cur.length) lines.push(cur);
-  const totalH = lines.length * LH;
-  const startY = (IH - totalH) * 0.5;
+  const startY = (IH - lines.length * LH) * 0.5;
   lines.forEach((line, li) => {
     let rx = PAD;
     line.forEach(seg => {
       for (let ci = 0; ci < seg.length; ci++) {
-        const seed = (li * 200 + ci) % 100 / 100;
-        infoChars.push({
-          ch: seg[ci],
-          restX: rx + ci * CW,
-          restY: startY + li * LH,
-          x: rx + ci * CW + (Math.random()-.5)*3,
-          y: startY + li * LH + (Math.random()-.5)*3,
-          vx:0, vy:0,
-          op: 0.28 + seed * 0.52,
-          fontSize: FONT_SZ,
-        });
+        infoChars.push({ ch: seg[ci], restX: rx + ci * CW, restY: startY + li * LH, x: rx + ci * CW, y: startY + li * LH, vx:0, vy:0, op: 0.28 + Math.random() * 0.5 });
       }
       rx += seg.length * CW;
     });
@@ -354,493 +415,133 @@ function buildInfoLayout() {
   infoBX = IW / 2; infoBY = IH / 2;
 }
 
-infoBtn.addEventListener('click', () => {
-  infoOpen = true;
-  infoOverlay.classList.add('visible');
-  buildInfoLayout();
-});
-infoClose.addEventListener('click', () => {
-  infoOpen = false;
-  infoOverlay.classList.remove('visible');
-});
-infoOverlay.addEventListener('mousemove', e => {
-  const r = infoCanvas.getBoundingClientRect();
-  infoMX = e.clientX - r.left;
-  infoMY = e.clientY - r.top;
-});
+infoBtn.addEventListener('click', () => { infoOpen = true; infoOverlay.classList.add('visible'); buildInfoLayout(); });
+infoClose.addEventListener('click', () => { infoOpen = false; infoOverlay.classList.remove('visible'); });
+infoOverlay.addEventListener('mousemove', e => { const r = infoCanvas.getBoundingClientRect(); infoMX = e.clientX - r.left; infoMY = e.clientY - r.top; });
 
-function tickInfo() {
-  if (!infoOpen) return;
-  infoBX += (infoMX - infoBX) * 0.11;
-  infoBY += (infoMY - infoBY) * 0.11;
-  infoCtx.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
-  infoCtx.font = `300 15px "DM Mono", monospace`;
-  infoCtx.textBaseline = 'top';
-  for (const p of infoChars) {
-    p.vx += (p.restX - p.x) * 0.016;
-    p.vy += (p.restY - p.y) * 0.016;
-    const dx = p.x - infoBX, dy = p.y - infoBY;
-    const d  = Math.sqrt(dx*dx + dy*dy);
-    if (d < 110 && d > 0.5) {
-      const f = (1 - d/110);
-      p.vx += (dx/d) * f * f * 16;
-      p.vy += (dy/d) * f * f * 16;
-    }
-    p.vx *= 0.76; p.vy *= 0.76;
-    p.x  += p.vx; p.y  += p.vy;
-    const fade = Math.min(1, Math.max(0, (d - 20) / 50));
-    const alpha = p.op * fade;
-    if (alpha < 0.01) continue;
-    infoCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
-    infoCtx.fillText(p.ch, p.x, p.y);
-  }
-}
-
-let mX = W/2, mY = H/2;
-let bX = W/2, bY = H/2, bVX = 0, bVY = 0;
-let eX = W/2, eY = H/2, eVX = 0, eVY = 0;
+// ── FILTERING ─────────────────────────────────────
+let activeAlbum = null, activeTags = new Set(), domButtons = [], filterRepelZones = [], mX = W/2, mY = H/2, bX = W/2, bY = H/2, eX = W/2, eY = H/2, eVX = 0, eVY = 0;
 
 window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
-window.addEventListener('touchmove', e => {
-  mX = e.touches[0].clientX; mY = e.touches[0].clientY;
-}, {passive:true});
-
-// ── FILTER ────────────────────────────────────────
-let activeAlbum = null;
-let activeTags  = new Set();
-
-function visibleTracks() {
-  return TRACKS.filter(d => {
-    const aOk  = !activeAlbum || d.album === activeAlbum;
-    const tgOk = activeTags.size === 0 || d.tags.some(t => activeTags.has(t));
-    return aOk && tgOk;
+function initDOMFilters() {
+  const albC = document.getElementById('albums-container'), tagC = document.getElementById('tags-container');
+  ALL_ALBUMS.forEach(a => {
+    const btn = document.createElement('div'); btn.className = 'filter-btn'; btn.textContent = SHORT[a] || a;
+    btn.addEventListener('click', () => { activeAlbum = activeAlbum === a ? null : a; buildLayout(); });
+    albC.appendChild(btn); domButtons.push({ btn, key: a, type: 'album' });
+  });
+  ALL_TAGS.forEach(t => {
+    const btn = document.createElement('div'); btn.className = 'filter-btn'; btn.textContent = t;
+    btn.addEventListener('click', () => { activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t); buildLayout(); });
+    tagC.appendChild(btn); domButtons.push({ btn, key: t, type: 'tag' });
   });
 }
 
-// ── PARTICLES ─────────────────────────────────────
+function refreshFilterState() {
+  const visible = TRACKS.filter(d => (!activeAlbum || d.album === activeAlbum) && (activeTags.size === 0 || d.tags.some(t => activeTags.has(t))));
+  const vA = new Set(visible.map(d => d.album)), vT = new Set(visible.flatMap(d => d.tags));
+  domButtons.forEach(({ btn, key, type }) => {
+    const isActive = type === 'album' ? key === activeAlbum : activeTags.has(key);
+    const isRel = isActive ? false : (type === 'album' ? vA.has(key) : vT.has(key));
+    btn.classList.toggle('active', isActive); btn.classList.toggle('related', isRel);
+  });
+}
+
+function invalidateFilterRepel() {
+  filterRepelZones = [];
+  [document.getElementById('albums-widget'), document.getElementById('tags-widget')].forEach(w => {
+    const r = w.getBoundingClientRect();
+    filterRepelZones.push({ left: r.left - 28, top: r.top - 28, right: r.right + 28, bottom: r.bottom + 28, rx: r.left, ry: r.top, rw: r.width, rh: r.height, pad: 28 });
+  });
+}
+
+// ── LAYOUT & LOOP ─────────────────────────────────
 let allChars = [];
-
 function computeLayout(charW, lineH, padX, padTop) {
-  const visible = visibleTracks();
+  const visible = TRACKS.filter(d => (!activeAlbum || d.album === activeAlbum) && (activeTags.size === 0 || d.tags.some(t => activeTags.has(t))));
   if (!visible.length) return [];
-
   const tokens = [];
-  visible.forEach((d, i) => {
-    d.text.split(' ').forEach(w => {
-      tokens.push({ text: w, trackId: d.id, isSep: false });
-    });
-    if (i < visible.length - 1) {
-      tokens.push({ text: SEP.trim(), trackId: d.id, isSep: true });
-    }
-  });
-
-  const maxW  = W - padX * 2;
-  const lines = [];
-  let curLine = [], curW = 0;
-  const sw = s => s.length * charW;
-
+  visible.forEach((d, i) => { d.text.split(' ').forEach(w => tokens.push({ text: w, trackId: d.id })); if (i < visible.length - 1) tokens.push({ text: SEP.trim(), trackId: d.id, isSep: true }); });
+  const maxW = W - padX * 2, maxH = H - getBottomSafeArea(), lines = [];
+  let curL = [], curW = 0;
   tokens.forEach(tok => {
-    const prefix  = curLine.length === 0 ? '' : ' ';
-    const segment = prefix + tok.text;
-    const segW    = sw(segment);
-    if (curW + segW > maxW && curLine.length > 0) {
-      lines.push(curLine);
-      curLine = [{ ...tok, display: tok.text }];
-      curW    = sw(tok.text);
-    } else {
-      curLine.push({ ...tok, display: segment });
-      curW += segW;
-    }
+    const seg = (curL.length ? ' ' : '') + tok.text, sw = seg.length * charW;
+    if (curW + sw > maxW && curL.length) { lines.push(curL); curL = [{ ...tok, display: tok.text }]; curW = tok.text.length * charW; }
+    else { curL.push({ ...tok, display: seg }); curW += sw; }
   });
-  if (curLine.length) lines.push(curLine);
-
+  if (curL.length) lines.push(curL);
   const chars = [];
   lines.forEach((line, li) => {
-    const ry = padTop + li * lineH;
-    let rx   = padX;
+    const ry = padTop + li * lineH; if (ry > maxH) return;
+    let rx = padX;
     line.forEach(tok => {
-      const str = tok.display;
-      for (let ci = 0; ci < str.length; ci++) {
-        const seed = (tok.trackId * 137 + ci) % 100 / 100;
-        chars.push({
-          ch: str[ci],
-          restX: rx + ci * charW,
-          restY: ry,
-          seed,
-          trackId: tok.trackId,
-          isSep: tok.isSep,
-        });
+      for (let ci = 0; ci < tok.display.length; ci++) {
+        chars.push({ ch: tok.display[ci], restX: rx + ci * charW, restY: ry, seed: (tok.trackId * 137 + ci) % 100 / 100, isSep: tok.isSep });
       }
-      rx += str.length * charW;
+      rx += tok.display.length * charW;
     });
   });
   return chars;
 }
 
 function buildLayout() {
-  const visible = visibleTracks();
-  document.getElementById('cnt').textContent = visible.length;
-
-  // Compute target rest positions at the *target* font size
-  const tgtT    = isFiltered() ? 1 : 0;
-  const tgtFont = FONT_BASE + (FONT_LARGE - FONT_BASE) * tgtT;
-  const tgtCW   = tgtFont * 0.602;
-  const tgtLH   = tgtFont * 1.64;
-  const layout  = computeLayout(tgtCW, tgtLH, currentPadX(), currentPadTop());
-
-  // Match existing particles by index, or spawn new ones
-  const next = [];
-  layout.forEach((def, i) => {
-    const existing = allChars[i];
-    const seed = def.seed;
-    next.push({
-      ch: def.ch,
-      restX: def.restX,
-      restY: def.restY,
-      x: existing ? existing.x : def.restX + (Math.random()-.5)*4,
-      y: existing ? existing.y : def.restY + (Math.random()-.5)*4,
-      vx: existing ? existing.vx : 0,
-      vy: existing ? existing.vy : 0,
-      baseOpacity: def.isSep ? 0.11 : 0.32 + seed * 0.38,
-    });
+  const tgtT = isFiltered() ? 1 : 0, tgtF = FONT_BASE + (FONT_LARGE - FONT_BASE) * tgtT;
+  const layout = computeLayout(tgtF * 0.602, tgtF * 1.64, currentPadX(), currentPadTop());
+  allChars = layout.map((def, i) => {
+    const ex = allChars[i];
+    return { ch: def.ch, restX: def.restX, restY: def.restY, x: ex ? ex.x : def.restX, y: ex ? ex.y : def.restY, vx: ex ? ex.vx : 0, vy: ex ? ex.vy : 0, baseOpacity: def.isSep ? 0.11 : 0.32 + def.seed * 0.38 };
   });
-  allChars = next;
-
-  fontTgt = tgtT;
-  refreshRelated();
-}
-
-// ── CURSOR ────────────────────────────────────────
-function drawCursor() {
-  cursorCtx.clearRect(0, 0, W, H);
-
-  const speed     = Math.sqrt(eVX*eVX + eVY*eVY);
-  const angle     = speed > 0.1 ? Math.atan2(eVY, eVX) : 0;
-  const stretch   = Math.min(speed * 1.6, 20);
-  const semiMaj   = 3 + stretch;
-  const semiMin   = Math.max(1.4, 3 - stretch * 0.13);
-
-  cursorCtx.save();
-  cursorCtx.translate(eX, eY);
-  cursorCtx.rotate(angle);
-  cursorCtx.beginPath();
-  cursorCtx.ellipse(0, 0, semiMaj, semiMin, 0, 0, Math.PI * 2);
-  cursorCtx.fillStyle = 'rgba(255,255,255,0.45)';
-  cursorCtx.fill();
-  cursorCtx.restore();
-
-  cursorCtx.beginPath();
-  cursorCtx.arc(mX, mY, 1.8, 0, Math.PI * 2);
-  cursorCtx.fillStyle = 'rgba(255,255,255,0.88)';
-  cursorCtx.fill();
-}
-
-// ── LOOP ──────────────────────────────────────────
-function loop() {
-  requestAnimationFrame(loop);
-
-  const px = bX, py = bY;
-  bX += (mX - bX) * BLOB_LERP;
-  bY += (mY - bY) * BLOB_LERP;
-  bVX = bX - px; bVY = bY - py;
-
-  eVX += (mX - eX) * 0.1;
-  eVY += (mY - eY) * 0.1;
-  eVX *= 0.68; eVY *= 0.68;
-  eX  += eVX;  eY  += eVY;
-
-  // animate font size transition
-  const prevT = fontT;
-  fontT += (fontTgt - fontT) * FONT_LERP;
-  const isAnimating = Math.abs(fontT - fontTgt) > 0.001;
-
-  // if animating, recompute rest positions at current interpolated size
-  if (isAnimating) {
-    const cw = currentCharW();
-    const lh = currentLineH();
-    const layout = computeLayout(cw, lh, currentPadX(), currentPadTop());
-    layout.forEach((def, i) => {
-      if (allChars[i]) {
-        allChars[i].restX = def.restX;
-        allChars[i].restY = def.restY;
-      }
-    });
-  }
-
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.font = currentFontFace();
-  ctx.textBaseline = 'top';
-
-  // compute logo repel constants once per frame, not per particle
-  const lr  = logoRect();
-  const lcx = lr.left + lr.width  * 0.5;
-  const lcy = lr.top  + lr.height * 0.5;
-  const lR  = Math.max(lr.width, lr.height) * 0.72;
-  const lRR = lR + 40;
-
-  for (const p of allChars) {
-    p.vx += (p.restX - p.x) * TETHER_K;
-    p.vy += (p.restY - p.y) * TETHER_K;
-
-    const dx = p.x - bX, dy = p.y - bY;
-    const d  = Math.sqrt(dx*dx + dy*dy);
-    if (d < REPEL_R && d > 0.5) {
-      const f = (1 - d/REPEL_R);
-      p.vx += (dx/d) * f * f * REPEL_S * 5;
-      p.vy += (dy/d) * f * f * REPEL_S * 5;
-    }
-
-    // repel from logo widget
-    const ldx = p.x - lcx, ldy = p.y - lcy;
-    const ld  = Math.sqrt(ldx*ldx + ldy*ldy);
-    if (ld < lRR && ld > 0.5) {
-      const f = (1 - ld / lRR);
-      p.vx += (ldx/ld) * f * f * REPEL_S * 6;
-      p.vy += (ldy/ld) * f * f * REPEL_S * 6;
-    }
-
-    // repel from filter labels
-    applyFilterRepel(p);
-
-    p.vx *= DAMP; p.vy *= DAMP;
-    p.x  += p.vx; p.y  += p.vy;
-
-    const blobFade = Math.min(1, Math.max(0, (d - BLOB_RX * 0.7) / (REPEL_R * 0.45)));
-    const alpha    = p.baseOpacity * blobFade;
-    if (alpha < 0.01) continue;
-
-    ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
-    ctx.fillText(p.ch, p.x, p.y);
-  }
-
-  drawFilters();
-  drawCursor();
-  tickInfo();
-}
-
-window.addEventListener('resize', () => {
-  W = canvas.width = cursorCanvas.width  = window.innerWidth;
-  H = canvas.height = cursorCanvas.height = window.innerHeight;
-  // re-center logo if it hasn't been dragged off CSS centering
-  if (topHeader.style.transform !== 'none') {
-    logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2);
-  }
-  buildLayout();
-  buildFilterRects();
-  if (infoOpen) buildInfoLayout();
-});
-
-// ── CANVAS FILTERS ────────────────────────────────
-const SHORT = {
-  "Kill 'Em All":        'KEA',
-  'Ride the Lightning':  'RTL',
-  'Master of Puppets':   'MOP',
-  'And Justice for All': 'AJFA',
-  'The Black Album':     'TBA',
-  'Load':                'Load',
-  'Reload':              'Reload',
-  'St. Anger':           'St.A',
-  'Death Magnetic':      'DM',
-  'Hardwired':           'HW2SD',
-  '72 Seasons':          '72S'
-};
-
-const FILTER_FONT    = '300 9px "DM Mono", monospace';
-const FILTER_LS      = 0.18;   // em — letter-spacing (approx, canvas has no native LS)
-const FILTER_PAD_X   = 10;     // horizontal text padding inside hit rect
-const FILTER_PAD_Y   = 5;      // vertical
-const FILTER_ROW_GAP = 14;     // px between album row baseline and tag row baseline
-const FILTER_GAP     = 8;      // px gap between labels in a row
-const FILTER_MARGIN  = 28;     // px from bottom of screen to tag row bottom
-const FILTER_SEP_GAP = 20;     // extra gap between album row and tag row
-
-// each entry: { key, label, type:'album'|'tag', x, y, w, h, hovered, active, related }
-let filterRects = [];
-let hoveredFilter = null;
-
-// measure text width with letter-spacing approximation
-function measureLabel(label) {
-  ctx.font = FILTER_FONT;
-  const base = ctx.measureText(label.toUpperCase()).width;
-  return base + label.length * (9 * FILTER_LS); // 9px * ls per char
-}
-
-function buildFilterRects() {
-  ctx.font = FILTER_FONT;
-
-  const albumLabels = ALL_ALBUMS.map(a => ({ key: a, label: (SHORT[a] || a).toUpperCase(), type: 'album' }));
-  const tagLabels   = ALL_TAGS.map(t  => ({ key: t, label: t.toUpperCase(),                type: 'tag'   }));
-
-  const rowH = 9 + FILTER_PAD_Y * 2; // text height + padding
-
-  // measure total widths
-  function layoutRow(items) {
-    const widths = items.map(it => measureLabel(it.label) + FILTER_PAD_X * 2);
-    const totalW = widths.reduce((a, b) => a + b, 0) + FILTER_GAP * (items.length - 1);
-    let x = (W - totalW) / 2;
-    return items.map((it, i) => {
-      const w = widths[i];
-      const rect = { ...it, w, h: rowH, x };
-      x += w + FILTER_GAP;
-      return rect;
-    });
-  }
-
-  const tagRow   = layoutRow(tagLabels);
-  const albumRow = layoutRow(albumLabels);
-
-  // position rows from bottom up: tag row, then album row above it
-  const tagRowBottom   = H - FILTER_MARGIN;
-  const tagRowTop      = tagRowBottom - rowH;
-  const albumRowBottom = tagRowTop - FILTER_SEP_GAP;
-  const albumRowTop    = albumRowBottom - rowH;
-
-  tagRow.forEach(r   => { r.y = tagRowTop; });
-  albumRow.forEach(r => { r.y = albumRowTop; });
-
-  filterRects = [...albumRow, ...tagRow];
-  invalidateFilterRepel();
-}
-
-// cached repel obstacles for filter labels — rebuilt on layout change only
-let filterRepelZones = []; // { cx, cy, rr, rx, ry, rw, rh } pre-computed per rect
-const FILTER_REPEL_PAD = 28; // px halo around each label rect
-
-function invalidateFilterRepel() {
-  filterRepelZones = filterRects.map(r => ({
-    // AABB for early-out
-    left:   r.x - FILTER_REPEL_PAD,
-    top:    r.y - FILTER_REPEL_PAD,
-    right:  r.x + r.w + FILTER_REPEL_PAD,
-    bottom: r.y + r.h + FILTER_REPEL_PAD,
-    // closest-point-on-rect params
-    rx: r.x, ry: r.y, rw: r.w, rh: r.h,
-    pad: FILTER_REPEL_PAD,
-  }));
-}
-
-function refreshFilterState() {
-  const visible      = visibleTracks();
-  const visibleAlbums = new Set(visible.map(d => d.album));
-  const visibleTags   = new Set(visible.flatMap(d => d.tags));
-
-  filterRects.forEach(r => {
-    r.active  = r.type === 'album' ? r.key === activeAlbum : activeTags.has(r.key);
-    r.related = r.active ? false
-              : r.type === 'album' ? visibleAlbums.has(r.key) : visibleTags.has(r.key);
-  });
-}
-
-// draw all filter labels directly onto ctx each frame
-function drawFilters() {
-  if (!filterRects.length) return;
-  ctx.save();
-  ctx.font      = FILTER_FONT;
-  ctx.textBaseline = 'middle';
-
-  filterRects.forEach(r => {
-    const cy = r.y + r.h / 2;
-
-    if (r.active) {
-      // filled white box
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(r.x, r.y, r.w, r.h);
-      ctx.fillStyle = '#000';
-    } else {
-      // transparent bg with shadow bleed to kill particles behind
-      ctx.fillStyle = 'rgba(0,0,0,0.0)';
-      ctx.fillRect(r.x, r.y, r.w, r.h);
-
-      if (r.hovered)       ctx.fillStyle = 'rgba(255,255,255,0.70)';
-      else if (r.related)  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-      else                 ctx.fillStyle = 'rgba(255,255,255,0.22)';
-    }
-
-    // draw label centered in rect with letter-spacing via per-char rendering
-    const chars  = r.label.split('');
-    const charW  = measureLabel(r.label) / (chars.length || 1);
-    let cx = r.x + FILTER_PAD_X;
-    chars.forEach(ch => {
-      ctx.fillText(ch, cx, cy);
-      cx += charW;
-    });
-
-    // separator line between album and tag rows (draw once, after last album)
-    // handled below
-  });
-
-  // draw a faint hairline separating the two rows
-  const lastAlbum = filterRects.filter(r => r.type === 'album').slice(-1)[0];
-  const firstTag  = filterRects.filter(r => r.type === 'tag')[0];
-  if (lastAlbum && firstTag) {
-    const sepY = Math.round((lastAlbum.y + lastAlbum.h + firstTag.y) / 2) + 0.5;
-    ctx.beginPath();
-    ctx.moveTo(W * 0.2, sepY);
-    ctx.lineTo(W * 0.8, sepY);
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth   = 1;
-    ctx.stroke();
-  }
-
-  ctx.restore();
-}
-
-// repel particles from filter rects — closest point on rect approach
-function applyFilterRepel(p) {
-  for (const z of filterRepelZones) {
-    // AABB early-out — cheap, no sqrt
-    if (p.x < z.left || p.x > z.right || p.y < z.top || p.y > z.bottom) continue;
-
-    // closest point on rect to particle
-    const cpx = Math.max(z.rx, Math.min(p.x, z.rx + z.rw));
-    const cpy = Math.max(z.ry, Math.min(p.y, z.ry + z.rh));
-    const ddx = p.x - cpx, ddy = p.y - cpy;
-    const dd  = Math.sqrt(ddx * ddx + ddy * ddy);
-    if (dd < z.pad && dd > 0.5) {
-      const f = (1 - dd / z.pad);
-      p.vx += (ddx / dd) * f * f * REPEL_S * 5;
-      p.vy += (ddy / dd) * f * f * REPEL_S * 5;
-    }
-  }
-}
-
-// hit test mouse against filter rects
-function hitTestFilters(mx, my) {
-  for (const r of filterRects) {
-    if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return r;
-  }
-  return null;
-}
-
-canvas.addEventListener('click', e => {
-  const hit = hitTestFilters(e.clientX, e.clientY);
-  if (!hit) return;
-  if (hit.type === 'album') {
-    activeAlbum = activeAlbum === hit.key ? null : hit.key;
-  } else {
-    activeTags.has(hit.key) ? activeTags.delete(hit.key) : activeTags.add(hit.key);
-  }
-  buildLayout();
-});
-
-canvas.addEventListener('mousemove', e => {
-  const hit = hitTestFilters(e.clientX, e.clientY);
-  if (hit !== hoveredFilter) {
-    if (hoveredFilter) hoveredFilter.hovered = false;
-    hoveredFilter = hit;
-    if (hoveredFilter) hoveredFilter.hovered = true;
-  }
-});
-
-function refreshRelated() {
+  fontTgt = tgtT; document.getElementById('cnt').textContent = TRACKS.filter(d => (!activeAlbum || d.album === activeAlbum) && (activeTags.size === 0 || d.tags.some(t => activeTags.has(t)))).length;
   refreshFilterState();
 }
 
-buildLayout();
-buildFilterRects();
-loop();
+function loop() {
+  requestAnimationFrame(loop);
+  bX += (mX - bX) * BLOB_LERP; bY += (mY - bY) * BLOB_LERP;
+  eVX = (mX - eX) * 0.1; eVY = (mY - eY) * 0.1; eX += (eVX *= 0.68); eY += (eVY *= 0.68);
+  fontT += (fontTgt - fontT) * FONT_LERP;
+  if (Math.abs(fontT - fontTgt) > 0.001) {
+    const l = computeLayout(currentCharW(), currentLineH(), currentPadX(), currentPadTop());
+    l.forEach((def, i) => { if (allChars[i]) { allChars[i].restX = def.restX; allChars[i].restY = def.restY; } });
+  }
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  ctx.font = currentFontFace(); ctx.textBaseline = 'top';
+  const lcx = logoX + 90, lcy = logoY + 90;
+  for (const p of allChars) {
+    p.vx += (p.restX - p.x) * TETHER_K; p.vy += (p.restY - p.y) * TETHER_K;
+    const dx = p.x - bX, dy = p.y - bY, d = Math.sqrt(dx*dx + dy*dy);
+    if (d < REPEL_R && d > 0.5) { const f = (1 - d/REPEL_R); p.vx += (dx/d) * f * f * 16; p.vy += (dy/d) * f * f * 16; }
+    const ldx = p.x - lcx, ldy = p.y - lcy, ld = Math.sqrt(ldx*ldx + ldy*ldy);
+    if (ld < 130) { const f = (1 - ld/130); p.vx += (ldx/ld) * f * f * 20; p.vy += (ldy/ld) * f * f * 20; }
+    filterRepelZones.forEach(z => {
+      if (p.x > z.left && p.x < z.right && p.y > z.top && p.y < z.bottom) {
+        const cpx = Math.max(z.rx, Math.min(p.x, z.rx + z.rw)), cpy = Math.max(z.ry, Math.min(p.y, z.ry + z.rh));
+        const ddx = p.x - cpx, ddy = p.y - cpy, dd = Math.sqrt(ddx*ddx + ddy*ddy);
+        if (dd < z.pad && dd > 0.5) { const f = (1 - dd/z.pad); p.vx += (ddx/dd) * f * f * 16; p.vy += (ddy/dd) * f * f * 16; }
+      }
+    });
+    p.vx *= DAMP; p.vy *= DAMP; p.x += p.vx; p.y += p.vy;
+    const alpha = p.baseOpacity * Math.min(1, Math.max(0, (d - 20) / 50));
+    if (alpha > 0.01) { ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`; ctx.fillText(p.ch, p.x, p.y); }
+  }
+  cursorCtx.clearRect(0,0,W,H);
+  cursorCtx.fillStyle = 'rgba(255,255,255,0.4)'; cursorCtx.beginPath(); cursorCtx.arc(eX, eY, 4, 0, Math.PI*2); cursorCtx.fill();
+  cursorCtx.fillStyle = '#fff'; cursorCtx.beginPath(); cursorCtx.arc(mX, mY, 1.5, 0, Math.PI*2); cursorCtx.fill();
+  if (infoOpen) {
+    infoBX += (infoMX - infoBX) * 0.11; infoBY += (infoMY - infoBY) * 0.11;
+    infoCtx.clearRect(0,0,infoCanvas.width, infoCanvas.height); infoCtx.font = `300 15px "DM Mono", monospace`;
+    for (const p of infoChars) {
+      p.vx += (p.restX - p.x) * 0.016; p.vy += (p.restY - p.y) * 0.016;
+      const dx = p.x - infoBX, dy = p.y - infoBY, d = Math.sqrt(dx*dx + dy*dy);
+      if (d < 110) { const f = (1 - d/110); p.vx += (dx/d) * f * f * 16; p.vy += (dy/d) * f * f * 16; }
+      p.vx *= 0.76; p.vy *= 0.76; p.x += p.vx; p.y += p.vy;
+      infoCtx.fillStyle = `rgba(255,255,255,${(p.op * Math.min(1, d/50)).toFixed(2)})`; infoCtx.fillText(p.ch, p.x, p.y);
+    }
+  }
+}
+
+window.addEventListener('resize', () => { W = canvas.width = cursorCanvas.width = window.innerWidth; H = canvas.height = cursorCanvas.height = window.innerHeight; buildLayout(); invalidateFilterRepel(); });
+initDOMFilters(); invalidateFilterRepel(); buildLayout(); loop();
 </script>
 </body>
 </html>

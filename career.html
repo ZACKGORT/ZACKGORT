@@ -1313,8 +1313,7 @@ document.addEventListener('click',e=>{
           app = new PIXI.Application({
             backgroundAlpha: 0,
             antialias: false,
-            resolution: window.devicePixelRatio || 1,
-            autoDensity: true,
+            resolution: 1,
             resizeTo: container,
           });
           instance.app = app;
@@ -1327,14 +1326,12 @@ document.addEventListener('click',e=>{
             instance.imgSprite = imgSprite;
 
             function sizeSprite() {
-              // Use CSS pixel dimensions for cover math — app.screen returns
-              // physical pixels (2× on retina) which makes images appear zoomed
-              const W = container.clientWidth, H = container.clientHeight;
+              const W = app.screen.width, H = app.screen.height;
               const iw = imgTex.width, ih = imgTex.height;
               const scale = Math.max(W / iw, H / ih);
               imgSprite.width  = iw * scale;
               imgSprite.height = ih * scale;
-              imgSprite.x = (W - imgSprite.width)  / 2;
+              imgSprite.x = (W - imgSprite.width) / 2;
               imgSprite.y = (H - imgSprite.height) / 2;
             }
             instance.sizeSprite = sizeSprite;
@@ -1345,7 +1342,7 @@ document.addEventListener('click',e=>{
             dispSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
             dispSprite.scale.set(1.6);
             dispSprite.anchor.set(0.5);
-            dispSprite.position.set(container.clientWidth / 2, container.clientHeight / 2);
+            dispSprite.position.set(app.screen.width / 2, app.screen.height / 2);
             app.stage.addChild(dispSprite);
 
             dispFilter = new PIXI.DisplacementFilter(dispSprite);

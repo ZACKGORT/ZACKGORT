@@ -1109,17 +1109,16 @@ if (!noMotion) {
   document.querySelectorAll('.par-img').forEach(img=>{
     const wrap=img.closest('.img-full,.split-img,.img-wrap');
     if(!wrap) return;
-    // Apply will-change only when the ScrollTrigger is active (near viewport)
-    ScrollTrigger.create({
-      trigger:wrap, start:'top bottom', end:'bottom top',
-      onEnter:()=>{ img.style.willChange='transform'; },
-      onLeave:()=>{ img.style.willChange='auto'; },
-      onEnterBack:()=>{ img.style.willChange='transform'; },
-      onLeaveBack:()=>{ img.style.willChange='auto'; }
-    });
+    // Single ScrollTrigger handles both will-change lifecycle and the tween
     gsap.fromTo(img,{y:'0%'},{
       y:'-15%', ease:'none',
-      scrollTrigger:{trigger:wrap,start:'top bottom',end:'bottom top',scrub:1.5}
+      scrollTrigger:{
+        trigger:wrap, start:'top bottom', end:'bottom top', scrub:1.5,
+        onEnter:()=>{ img.style.willChange='transform'; },
+        onLeave:()=>{ img.style.willChange='auto'; },
+        onEnterBack:()=>{ img.style.willChange='transform'; },
+        onLeaveBack:()=>{ img.style.willChange='auto'; }
+      }
     });
   });
 }
@@ -1159,7 +1158,14 @@ document.addEventListener('click',e=>{
   const canvas=document.getElementById('gl-canvas');
   const gl=canvas.getContext('webgl');
   if(!gl) return;
-  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; gl.viewport(0,0,canvas.width,canvas.height); }
+  function resize(){
+    // Render at 50% resolution — halves fragment count with no perceptible quality loss
+    // on a fullscreen noise/grain shader
+    const scale = 0.5;
+    canvas.width  = Math.floor(window.innerWidth  * scale);
+    canvas.height = Math.floor(window.innerHeight * scale);
+    gl.viewport(0,0,canvas.width,canvas.height);
+  }
   resize(); window.addEventListener('resize',resize,{passive:true});
   const vert=`attribute vec2 a_pos; void main(){ gl_Position=vec4(a_pos,0.,1.); }`;
   const frag=`precision mediump float;
@@ -1270,21 +1276,19 @@ document.addEventListener('click',e=>{
     // Collect all booted instances for the single shared resize handler
     const instances = [];
 
+    // Invalidate cached rects on scroll/resize (cheap flag flip, not layout thrash)
+    let rectsValid = false;
+    window.addEventListener('scroll', () => { rectsValid = false; }, {passive:true});
+
     // Single debounced resize handler for ALL containers (not one per container)
     let resizeTimer;
     window.addEventListener('resize', () => {
+      rectsValid = false;
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        instances.forEach(({ container, app, imgSprite }) => {
-          if (!app || !imgSprite) return;
-          const W = container.offsetWidth, H = container.offsetHeight;
-          app.renderer.resize(W, H);
-          const iw = imgSprite.texture.width, ih = imgSprite.texture.height;
-          const scale = Math.max(W / iw, H / ih);
-          imgSprite.width  = iw * scale;
-          imgSprite.height = ih * scale;
-          imgSprite.x = (W - imgSprite.width)  / 2;
-          imgSprite.y = (H - imgSprite.height) / 2;
+        instances.forEach(({ app, sizeSprite }) => {
+          if (!app || !sizeSprite) return;
+          sizeSprite();
         });
       }, 150);
     }, {passive:true});
@@ -1299,44 +1303,49 @@ document.addEventListener('click',e=>{
         container.appendChild(mount);
 
         let app, dispSprite, dispFilter, imgSprite, loaded = false;
-        const instance = { container, app: null, imgSprite: null };
+        const instance = { container, app: null, imgSprite: null, sizeSprite: null, cachedRect: null };
         instances.push(instance);
 
         function boot() {
           if (loaded) return;
           loaded = true;
 
-          const W = container.offsetWidth  || 800;
-          const H = container.offsetHeight || 500;
-
           app = new PIXI.Application({
-            width: W, height: H,
             backgroundAlpha: 0,
             antialias: false,
-            resolution: 1,
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true,
+            resizeTo: container,
           });
           instance.app = app;
           mount.appendChild(app.view);
-          app.view.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+          app.view.style.cssText = 'position:absolute;inset:0;display:block;';
 
           const src = imgEl.currentSrc || imgEl.src;
           PIXI.Assets.load(src).then(imgTex => {
             imgSprite = new PIXI.Sprite(imgTex);
             instance.imgSprite = imgSprite;
 
-            const iw = imgTex.width, ih = imgTex.height;
-            const scale = Math.max(W / iw, H / ih);
-            imgSprite.width  = iw * scale;
-            imgSprite.height = ih * scale;
-            imgSprite.x = (W - imgSprite.width)  / 2;
-            imgSprite.y = (H - imgSprite.height) / 2;
+            function sizeSprite() {
+              // Use CSS pixel dimensions for cover math — app.screen returns
+              // physical pixels (2× on retina) which makes images appear zoomed
+              const W = container.clientWidth, H = container.clientHeight;
+              const iw = imgTex.width, ih = imgTex.height;
+              const scale = Math.max(W / iw, H / ih);
+              imgSprite.width  = iw * scale;
+              imgSprite.height = ih * scale;
+              imgSprite.x = (W - imgSprite.width)  / 2;
+              imgSprite.y = (H - imgSprite.height) / 2;
+            }
+            instance.sizeSprite = sizeSprite;
+            sizeSprite();
             app.stage.addChild(imgSprite);
 
             dispSprite = new PIXI.Sprite(dispTex);
             dispSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
             dispSprite.scale.set(1.6);
             dispSprite.anchor.set(0.5);
-            dispSprite.position.set(W / 2, H / 2);
+            dispSprite.position.set(container.clientWidth / 2, container.clientHeight / 2);
             app.stage.addChild(dispSprite);
 
             dispFilter = new PIXI.DisplacementFilter(dispSprite);
@@ -1350,8 +1359,22 @@ document.addEventListener('click',e=>{
             imgEl.style.transition = 'opacity .8s ease';
             imgEl.style.opacity = '0';
 
+            // Pause ticker when container is off-screen; resume when visible
+            app.ticker.stop();
+            const visObs = new IntersectionObserver(entries => {
+              entries.forEach(e => {
+                if (e.isIntersecting) { app.ticker.start(); }
+                else { app.ticker.stop(); }
+              });
+            }, { rootMargin: '100px' });
+            visObs.observe(container);
+
             app.ticker.add(() => {
-              const rect = container.getBoundingClientRect();
+              // Use cached rect; only recalculate when scroll/resize invalidated it
+              if (!rectsValid || !instance.cachedRect) {
+                instance.cachedRect = container.getBoundingClientRect();
+              }
+              const rect = instance.cachedRect;
               const isHovered = mx >= rect.left && mx <= rect.right && my >= rect.top && my <= rect.bottom;
               const rx = mx - rect.left;
               const ry = my - rect.top;
@@ -1369,6 +1392,9 @@ document.addEventListener('click',e=>{
                 dispSprite.y += Math.cos(t * 0.00035) * 0.5;
               }
             });
+
+            // Mark rects valid after the first batch is cached
+            rectsValid = true;
           });
         }
 

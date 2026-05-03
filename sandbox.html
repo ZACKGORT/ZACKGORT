@@ -16,22 +16,7 @@
     font-size:9px; letter-spacing:.2em; text-transform:uppercase;
     color:rgba(255,255,255,0.14); pointer-events:none; z-index:20;
   }
-  #ui {
-    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
-    display:flex; flex-direction:column; align-items:center; gap:7px; z-index:10;
-    filter: drop-shadow(0 0 18px #000) drop-shadow(0 0 40px #000) drop-shadow(0 0 60px #000);
-  }
-  .pill-row { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
-  .pill {
-    font-family:'DM Mono',monospace; font-weight:300;
-    font-size:9px; letter-spacing:.18em; text-transform:uppercase;
-    color:rgba(255,255,255,0.28); border:1px solid rgba(255,255,255,0.10);
-    border-radius:999px; padding:5px 12px; cursor:none; background:#000;
-    transition:color .2s, border-color .2s, background .2s;
-  }
-  .pill:hover { color:rgba(255,255,255,0.7); border-color:rgba(255,255,255,0.35); }
-  .pill.related { color:rgba(255,255,255,0.55); border-color:rgba(255,255,255,0.28); }
-  .pill.active { color:#000 !important; background:#fff; border-color:#fff; }
+
 
   /* top-center header: logo + info stacked */
   #top-header {
@@ -41,7 +26,7 @@
     filter: drop-shadow(0 0 18px #000) drop-shadow(0 0 40px #000) drop-shadow(0 0 60px #000);
   }
   #logo-widget {
-    width:140px; height:140px;
+    width:180px; height:180px;
     cursor:none; user-select:none;
     background:#000;
   }
@@ -91,17 +76,13 @@
   <div id="info-btn">i</div>
 </div>
 
-<!-- info overlay -->
+<div id="count"><span id="cnt">0</span> tracks</div>
 <div id="info-overlay">
   <div id="info-close">×</div>
   <canvas id="info-canvas"></canvas>
 </div>
 
-<div id="count"><span id="cnt">0</span> tracks</div>
-<div id="ui">
-  <div class="pill-row" id="album-pills"></div>
-  <div class="pill-row" id="tag-pills"></div>
-</div>
+
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
 const TRACKS = [
@@ -273,8 +254,8 @@ function isFiltered() { return activeAlbum !== null || activeTags.size > 0; }
 function currentFontSize() { return FONT_BASE + (FONT_LARGE - FONT_BASE) * fontT; }
 function currentCharW()    { return currentFontSize() * 0.602; }
 function currentLineH()    { return currentFontSize() * 1.64; }
-function currentPadX()     { return 52; }
-function currentPadTop()   { return 58; }
+function currentPadX()     { return 80; }
+function currentPadTop()   { return 200; }
 function currentFontFace() { return `300 ${currentFontSize().toFixed(2)}px "DM Mono", monospace`; }
 
 const TETHER_K  = 0.014;
@@ -288,7 +269,7 @@ const BLOB_RX   = 28;
 const logoWidget  = document.getElementById('logo-widget');
 const topHeader   = document.getElementById('top-header');
 let logoDragging  = false, logoDX = 0, logoDY = 0;
-const LOGO_SIZE   = 140; // must match CSS width/height
+const LOGO_SIZE   = 180; // must match CSS width/height
 // initial position: centered top (matches CSS left:50% translateX(-50%))
 let logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2);
 let logoY = 22;
@@ -505,7 +486,7 @@ function buildLayout() {
   const tgtFont = FONT_BASE + (FONT_LARGE - FONT_BASE) * tgtT;
   const tgtCW   = tgtFont * 0.602;
   const tgtLH   = tgtFont * 1.64;
-  const layout  = computeLayout(tgtCW, tgtLH, 52, 58);
+  const layout  = computeLayout(tgtCW, tgtLH, currentPadX(), currentPadTop());
 
   // Match existing particles by index, or spawn new ones
   const next = [];
@@ -577,7 +558,7 @@ function loop() {
   if (isAnimating) {
     const cw = currentCharW();
     const lh = currentLineH();
-    const layout = computeLayout(cw, lh, 52, 58);
+    const layout = computeLayout(cw, lh, currentPadX(), currentPadTop());
     layout.forEach((def, i) => {
       if (allChars[i]) {
         allChars[i].restX = def.restX;
@@ -620,6 +601,9 @@ function loop() {
       p.vy += (ldy/ld) * f * f * REPEL_S * 6;
     }
 
+    // repel from filter labels
+    applyFilterRepel(p);
+
     p.vx *= DAMP; p.vy *= DAMP;
     p.x  += p.vx; p.y  += p.vy;
 
@@ -631,6 +615,7 @@ function loop() {
     ctx.fillText(p.ch, p.x, p.y);
   }
 
+  drawFilters();
   drawCursor();
   tickInfo();
 }
@@ -643,10 +628,11 @@ window.addEventListener('resize', () => {
     logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2);
   }
   buildLayout();
+  buildFilterRects();
   if (infoOpen) buildInfoLayout();
 });
 
-// ── PILLS ─────────────────────────────────────────
+// ── CANVAS FILTERS ────────────────────────────────
 const SHORT = {
   "Kill 'Em All":        'KEA',
   'Ride the Lightning':  'RTL',
@@ -661,54 +647,199 @@ const SHORT = {
   '72 Seasons':          '72S'
 };
 
-const albumPillMap = new Map(); // album name → button
-const tagPillMap   = new Map(); // tag name → button
+const FILTER_FONT    = '300 9px "DM Mono", monospace';
+const FILTER_LS      = 0.18;   // em — letter-spacing (approx, canvas has no native LS)
+const FILTER_PAD_X   = 10;     // horizontal text padding inside hit rect
+const FILTER_PAD_Y   = 5;      // vertical
+const FILTER_ROW_GAP = 14;     // px between album row baseline and tag row baseline
+const FILTER_GAP     = 8;      // px gap between labels in a row
+const FILTER_MARGIN  = 28;     // px from bottom of screen to tag row bottom
+const FILTER_SEP_GAP = 20;     // extra gap between album row and tag row
 
-function refreshRelated() {
-  const visible = visibleTracks();
+// each entry: { key, label, type:'album'|'tag', x, y, w, h, hovered, active, related }
+let filterRects = [];
+let hoveredFilter = null;
+
+// measure text width with letter-spacing approximation
+function measureLabel(label) {
+  ctx.font = FILTER_FONT;
+  const base = ctx.measureText(label.toUpperCase()).width;
+  return base + label.length * (9 * FILTER_LS); // 9px * ls per char
+}
+
+function buildFilterRects() {
+  ctx.font = FILTER_FONT;
+
+  const albumLabels = ALL_ALBUMS.map(a => ({ key: a, label: (SHORT[a] || a).toUpperCase(), type: 'album' }));
+  const tagLabels   = ALL_TAGS.map(t  => ({ key: t, label: t.toUpperCase(),                type: 'tag'   }));
+
+  const rowH = 9 + FILTER_PAD_Y * 2; // text height + padding
+
+  // measure total widths
+  function layoutRow(items) {
+    const widths = items.map(it => measureLabel(it.label) + FILTER_PAD_X * 2);
+    const totalW = widths.reduce((a, b) => a + b, 0) + FILTER_GAP * (items.length - 1);
+    let x = (W - totalW) / 2;
+    return items.map((it, i) => {
+      const w = widths[i];
+      const rect = { ...it, w, h: rowH, x };
+      x += w + FILTER_GAP;
+      return rect;
+    });
+  }
+
+  const tagRow   = layoutRow(tagLabels);
+  const albumRow = layoutRow(albumLabels);
+
+  // position rows from bottom up: tag row, then album row above it
+  const tagRowBottom   = H - FILTER_MARGIN;
+  const tagRowTop      = tagRowBottom - rowH;
+  const albumRowBottom = tagRowTop - FILTER_SEP_GAP;
+  const albumRowTop    = albumRowBottom - rowH;
+
+  tagRow.forEach(r   => { r.y = tagRowTop; });
+  albumRow.forEach(r => { r.y = albumRowTop; });
+
+  filterRects = [...albumRow, ...tagRow];
+  invalidateFilterRepel();
+}
+
+// cached repel obstacles for filter labels — rebuilt on layout change only
+let filterRepelZones = []; // { cx, cy, rr, rx, ry, rw, rh } pre-computed per rect
+const FILTER_REPEL_PAD = 28; // px halo around each label rect
+
+function invalidateFilterRepel() {
+  filterRepelZones = filterRects.map(r => ({
+    // AABB for early-out
+    left:   r.x - FILTER_REPEL_PAD,
+    top:    r.y - FILTER_REPEL_PAD,
+    right:  r.x + r.w + FILTER_REPEL_PAD,
+    bottom: r.y + r.h + FILTER_REPEL_PAD,
+    // closest-point-on-rect params
+    rx: r.x, ry: r.y, rw: r.w, rh: r.h,
+    pad: FILTER_REPEL_PAD,
+  }));
+}
+
+function refreshFilterState() {
+  const visible      = visibleTracks();
   const visibleAlbums = new Set(visible.map(d => d.album));
   const visibleTags   = new Set(visible.flatMap(d => d.tags));
 
-  albumPillMap.forEach((btn, al) => {
-    if (btn.classList.contains('active')) return;
-    btn.classList.toggle('related', visibleAlbums.has(al));
-  });
-  tagPillMap.forEach((btn, t) => {
-    if (btn.classList.contains('active')) return;
-    btn.classList.toggle('related', visibleTags.has(t));
+  filterRects.forEach(r => {
+    r.active  = r.type === 'album' ? r.key === activeAlbum : activeTags.has(r.key);
+    r.related = r.active ? false
+              : r.type === 'album' ? visibleAlbums.has(r.key) : visibleTags.has(r.key);
   });
 }
 
-const aRow = document.getElementById('album-pills');
-ALL_ALBUMS.forEach(al => {
-  const b = document.createElement('button');
-  b.className = 'pill';
-  b.textContent = SHORT[al] || al;
-  b.title = al;
-  b.onclick = () => {
-    activeAlbum = activeAlbum === al ? null : al;
-    albumPillMap.forEach(p => p.classList.remove('active'));
-    if (activeAlbum) b.classList.add('active');
-    buildLayout();
-  };
-  aRow.appendChild(b);
-  albumPillMap.set(al, b);
+// draw all filter labels directly onto ctx each frame
+function drawFilters() {
+  if (!filterRects.length) return;
+  ctx.save();
+  ctx.font      = FILTER_FONT;
+  ctx.textBaseline = 'middle';
+
+  filterRects.forEach(r => {
+    const cy = r.y + r.h / 2;
+
+    if (r.active) {
+      // filled white box
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.fillStyle = '#000';
+    } else {
+      // transparent bg with shadow bleed to kill particles behind
+      ctx.fillStyle = 'rgba(0,0,0,0.0)';
+      ctx.fillRect(r.x, r.y, r.w, r.h);
+
+      if (r.hovered)       ctx.fillStyle = 'rgba(255,255,255,0.70)';
+      else if (r.related)  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      else                 ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    }
+
+    // draw label centered in rect with letter-spacing via per-char rendering
+    const chars  = r.label.split('');
+    const charW  = measureLabel(r.label) / (chars.length || 1);
+    let cx = r.x + FILTER_PAD_X;
+    chars.forEach(ch => {
+      ctx.fillText(ch, cx, cy);
+      cx += charW;
+    });
+
+    // separator line between album and tag rows (draw once, after last album)
+    // handled below
+  });
+
+  // draw a faint hairline separating the two rows
+  const lastAlbum = filterRects.filter(r => r.type === 'album').slice(-1)[0];
+  const firstTag  = filterRects.filter(r => r.type === 'tag')[0];
+  if (lastAlbum && firstTag) {
+    const sepY = Math.round((lastAlbum.y + lastAlbum.h + firstTag.y) / 2) + 0.5;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.2, sepY);
+    ctx.lineTo(W * 0.8, sepY);
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth   = 1;
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+// repel particles from filter rects — closest point on rect approach
+function applyFilterRepel(p) {
+  for (const z of filterRepelZones) {
+    // AABB early-out — cheap, no sqrt
+    if (p.x < z.left || p.x > z.right || p.y < z.top || p.y > z.bottom) continue;
+
+    // closest point on rect to particle
+    const cpx = Math.max(z.rx, Math.min(p.x, z.rx + z.rw));
+    const cpy = Math.max(z.ry, Math.min(p.y, z.ry + z.rh));
+    const ddx = p.x - cpx, ddy = p.y - cpy;
+    const dd  = Math.sqrt(ddx * ddx + ddy * ddy);
+    if (dd < z.pad && dd > 0.5) {
+      const f = (1 - dd / z.pad);
+      p.vx += (ddx / dd) * f * f * REPEL_S * 5;
+      p.vy += (ddy / dd) * f * f * REPEL_S * 5;
+    }
+  }
+}
+
+// hit test mouse against filter rects
+function hitTestFilters(mx, my) {
+  for (const r of filterRects) {
+    if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return r;
+  }
+  return null;
+}
+
+canvas.addEventListener('click', e => {
+  const hit = hitTestFilters(e.clientX, e.clientY);
+  if (!hit) return;
+  if (hit.type === 'album') {
+    activeAlbum = activeAlbum === hit.key ? null : hit.key;
+  } else {
+    activeTags.has(hit.key) ? activeTags.delete(hit.key) : activeTags.add(hit.key);
+  }
+  buildLayout();
 });
 
-const tRow = document.getElementById('tag-pills');
-ALL_TAGS.forEach(t => {
-  const b = document.createElement('button');
-  b.className = 'pill'; b.textContent = t;
-  b.onclick = () => {
-    activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t);
-    b.classList.toggle('active');
-    buildLayout();
-  };
-  tRow.appendChild(b);
-  tagPillMap.set(t, b);
+canvas.addEventListener('mousemove', e => {
+  const hit = hitTestFilters(e.clientX, e.clientY);
+  if (hit !== hoveredFilter) {
+    if (hoveredFilter) hoveredFilter.hovered = false;
+    hoveredFilter = hit;
+    if (hoveredFilter) hoveredFilter.hovered = true;
+  }
 });
+
+function refreshRelated() {
+  refreshFilterState();
+}
 
 buildLayout();
+buildFilterRects();
 loop();
 </script>
 </body>

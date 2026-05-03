@@ -2,2992 +2,714 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#f5f2ec" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0c0b09" media="(prefers-color-scheme: dark)">
-<title>Zack/Sandbox · by Zack Gort</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>metallica — if i may be frank</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-html {
-  height: 100%;
-  height: -webkit-fill-available;
-  overflow: hidden;
-  /* Prevent Safari rubber-band overscroll at root */
-  overscroll-behavior: none;
-}
-body {
-  height: 100%;
-  height: -webkit-fill-available;
-  height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
-  /* Prevent text size adjustment on orientation change */
-  -webkit-text-size-adjust: 100%;
-}
-
-/* ── Light theme (default) ── */
-:root {
-  --bg:        #f5f2ec;
-  --bg-2:      #ede9e1;
-  --bg-3:      #e6e1d8;
-  --bg-4:      #f9f7f3;
-  --ink:       #1a1815;
-  --ink-2:     #6a6660;
-  --ink-3:     #9a958e;
-  --accent:    #c05f38;
-  --accent-l:  rgba(192,95,56,0.08);
-  --border:    rgba(26,24,21,0.08);
-  --border-2:  rgba(26,24,21,0.13);
-  --border-3:  rgba(26,24,21,0.22);
-  --disp:      'DM Serif Display', serif;
-  --text:      'DM Serif Text', serif;
-  --mono:      'DM Mono', monospace;
-
-  --t-code:    #3d7a52;
-  --t-figma:   #7a52a8;
-  --t-note:    #9a7040;
-  --t-media:   #3a6ea0;
-  --t-sketch:  #a05030;
-  --t-live:    #c05f38;
-
-  --era-pre:   #7a7870;
-  --era-loss:  #9a6858;
-  --era-build: #5a7850;
-  --era-now:   #c05f38;
-
-  --sidebar-w: 240px;
-  --detail-w:  400px;
-}
-
-/* ── Dark theme ── */
-[data-theme="dark"] {
-  --bg:        #0c0b09;
-  --bg-2:      #111009;
-  --bg-3:      #161410;
-  --bg-4:      #090807;
-  --ink:       #ede9e0;
-  --ink-2:     #7a7870;
-  --ink-3:     #58544e;
-  --accent:    #d97757;
-  --accent-l:  rgba(217,119,87,0.09);
-  --border:    rgba(237,233,224,0.06);
-  --border-2:  rgba(237,233,224,0.11);
-  --border-3:  rgba(237,233,224,0.19);
-
-  --t-code:    #7a9e7e;
-  --t-figma:   #9b7cc0;
-  --t-note:    #c4a882;
-  --t-media:   #6a9bcc;
-  --t-sketch:  #c08060;
-  --t-live:    #d97757;
-
-  --era-pre:   #6a6860;
-  --era-loss:  #8a6858;
-  --era-build: #6a7858;
-  --era-now:   #d97757;
-}
-
-body {
-  font-family: var(--mono);
-  background: var(--bg);
-  color: var(--ink);
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  position: relative;
-  transition: background 0.4s ease, color 0.4s ease;
-}
-
-/* Grain */
-body::after {
-  content:'';
-  position:fixed; inset:0; z-index:9999;
-  pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0/200px;
-  opacity:.015;
-  transition: opacity 0.4s;
-}
-[data-theme="dark"] body::after { opacity:.025; }
-
-/* ═══════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════ */
-#layout {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-  height: -webkit-fill-available;
-  height: 100dvh;
-}
-}
-
-/* ═══════════════════════════════════════
-   LEFT SIDEBAR — timeline navigation
-═══════════════════════════════════════ */
-#sidebar {
-  width: var(--sidebar-w);
-  flex-shrink: 0;
-  height: 100vh;
-  height: -webkit-fill-available;
-  height: 100dvh;
-  border-right: 1px solid var(--border);
-  background: var(--bg-4);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 10;
-  transition: background 0.4s ease, border-color 0.4s ease;
-}
-
-.sidebar-brand {
-  padding: 20px 18px 15px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s;
-}
-.sidebar-brand:hover { background: rgba(0,0,0,0.03); }
-[data-theme="dark"] .sidebar-brand:hover { background: rgba(255,255,255,0.03); }
-.sidebar-brand-line1 {
-  font-family: var(--disp);
-  font-size: 17px;
-  color: var(--ink);
-  letter-spacing: -0.01em;
-}
-.sidebar-brand-line2 {
-  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink-3);
-  margin-top: 3px;
-}
-.sidebar-brand-line2 em { color: var(--accent); font-style: normal; }
-.sidebar-brand-theme {
-  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink-3);
-  margin-top: 5px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.sidebar-brand:hover .sidebar-brand-theme { opacity: 1; }
-
-/* ── Floating spine widget — appears on scroll, fixed left edge ── */
-#floating-spine {
-  position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%) translateX(100%);
-  z-index: 400;
-  display: flex;
-  flex-direction: column;
-  width: 28px;
-  height: 60vh;
-  background: var(--bg-4);
-  border-right: 1px solid var(--border-2);
-  border-radius: 0 4px 4px 0;
-  box-shadow: 2px 0 16px rgba(0,0,0,0.08);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, right 0.4s cubic-bezier(0.32,0.72,0,1);
-}
-#floating-spine.visible {
-  transform: translateY(-50%) translateX(0);
-  opacity: 1;
-  pointer-events: auto;
-}
-/* When detail panel is open, spine clamps to its left edge */
-body.detail-open #floating-spine {
-  right: var(--detail-w);
-}
-.fsp-seg {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  border-left: 3px solid transparent;
-  transition: border-color 0.2s, background 0.2s;
-}
-.fsp-seg.active {
-  border-left-color: currentColor;
-  background: rgba(128,128,128,0.05);
-}
-.fsp-seg-label {
-  font-family: var(--mono);
-  font-size: 6px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: currentColor;
-  opacity: 0.4;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  white-space: nowrap;
-  overflow: hidden;
-  transition: opacity 0.2s;
-  user-select: none;
-}
-.fsp-seg.active .fsp-seg-label,
-.fsp-seg:hover .fsp-seg-label { opacity: 1; }
-/* Tooltip */
-.fsp-seg::after {
-  content: attr(data-label);
-  position: absolute;
-  right: calc(100% + 8px);
-  left: auto;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--bg-4);
-  border: 1px solid var(--border-2);
-  border-radius: 3px;
-  padding: 4px 8px;
-  font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.1em;
-  color: var(--ink-2);
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s;
-  z-index: 100;
-}
-.fsp-seg:hover::after { opacity: 1; }
-
-/* ── Sidebar — unchanged original ── */
-.sidebar-section-label {
-  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--ink-3);
-  padding: 14px 18px 6px;
-  flex-shrink: 0;
-}
-
-.era-nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 18px;
-  cursor: pointer;
-  border-left: 2px solid transparent;
-  transition: all 0.15s;
-}
-.era-nav-item:hover { background: rgba(255,255,255,0.02); }
-.era-nav-item.active { border-left-color: currentColor; background: rgba(255,255,255,0.025); }
-.era-nav-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-  opacity: 0.6;
-  transition: opacity 0.15s;
-}
-.era-nav-item.active .era-nav-dot { opacity: 1; }
-.era-nav-text { flex: 1; }
-.era-nav-name {
-  font-family: var(--text);
-  font-size: 13px;
-  color: var(--ink);
-}
-.era-nav-period {
-  font-size: 8px; letter-spacing: 0.08em;
-  color: var(--ink-3);
-  margin-top: 1px;
-}
-
-/* Artifact type legend */
-.sidebar-section-label.legend-label { margin-top: 6px; }
-.type-legend-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 18px;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-.type-legend-item:hover { opacity: 1 !important; }
-.type-legend-dot {
-  width: 6px; height: 6px;
-  border-radius: 1px;
-  flex-shrink: 0;
-}
-.type-legend-label {
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-/* Timeline mini — vertical strata */
-#sidebar-timeline {
-  flex: 1;
-  min-height: 0;
-  border-top: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.timeline-axis {
-  position: absolute;
-  left: 50%; top: 8%; bottom: 8%;
-  width: 1px;
-  background: linear-gradient(to bottom, transparent, var(--border-2) 20%, var(--border-2) 80%, transparent);
-  pointer-events: none;
-}
-
-.timeline-era-marker {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex; align-items: center; gap: 0;
-}
-.timeline-era-tick {
-  width: 10px; height: 1px;
-  background: currentColor;
-  opacity: 0.4;
-}
-.timeline-era-name {
-  font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: currentColor;
-  opacity: 0.5;
-  position: absolute;
-  left: calc(50% + 10px);
-  white-space: nowrap;
-  font-family: var(--mono);
-}
-
-.timeline-artifact-dot {
-  position: absolute;
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0.35;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
-.timeline-bottom {
-  position: absolute; bottom: 10px; left: 0; right: 0;
-  text-align: center;
-  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink-3);
-  pointer-events: none;
-}
-
-/* Sidebar bottom */
-.sidebar-bottom {
-  border-top: 1px solid var(--border);
-  padding: 12px 18px;
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.sidebar-bottom-brand {
-  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink-3);
-}
-.sidebar-field-btn {
-  background: none; border: 1px solid var(--border-2);
-  color: var(--ink-2); font-size: 11px;
-  padding: 5px 10px; border-radius: 3px;
-  cursor: pointer; transition: all 0.15s;
-  font-family: var(--mono);
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-}
-.sidebar-field-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* ═══════════════════════════════════════
-   MAIN STREAM
-═══════════════════════════════════════ */
-#main {
-  flex: 1;
-  min-width: 0;
-  height: 100vh;
-  height: -webkit-fill-available;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-/* Progress */
-#progress {
-  position: absolute; top: 0; left: 0;
-  height: 1px; z-index: 100;
-  background: var(--accent);
-  width: 0%; transition: width 0.1s linear;
-  pointer-events: none;
-}
-
-/* HUD */
-#stream-hud {
-  padding: 10px 24px 10px 32px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 16px;
-  flex-shrink: 0;
-  height: 56px;
-}
-.hud-identity {
-  display: flex; flex-direction: column; gap: 2px;
-  flex-shrink: 0;
-}
-.hud-brand {
-  font-family: var(--mono);
-  font-size: 9px; letter-spacing: 0.1em;
-  color: var(--ink-2);
-}
-.hud-brand strong { color: var(--ink); font-weight: 500; }
-.hud-brand em { color: var(--accent); font-style: normal; }
-.hud-era-indicator {
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3);
-}
-.hud-era-indicator span { color: currentColor; transition: color 0.3s; }
-.hud-actions {
-  display: flex; align-items: center; gap: 8px;
-  flex-shrink: 0;
-}
-.hud-btn {
-  font-family: var(--mono);
-  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
-  background: none; border: 1px solid var(--border-2);
-  color: var(--ink-2); padding: 6px 12px;
-  cursor: pointer; border-radius: 3px;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.hud-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-/* Header scatter canvas */
-#hud-scatter {
-  flex: 1;
-  height: 36px;
-  position: relative;
-  cursor: crosshair;
-  border-radius: 3px;
-  overflow: visible;
-}
-#hud-scatter-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  border-radius: 3px;
-}
-/* Scatter node tooltip */
-#hud-scatter-tip {
-  position: fixed;
-  background: var(--bg-4);
-  border: 1px solid var(--border-2);
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-family: var(--mono);
-  font-size: 8px; letter-spacing: 0.1em;
-  color: var(--ink-2);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-  z-index: 9999;
-  white-space: nowrap;
-}
-
-/* Era strip */
-#era-strip {
-  display: flex;
-  height: 2px;
-  flex-shrink: 0;
-}
-.era-seg {
-  flex: 1;
-  background: var(--border);
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-}
-.era-seg::after {
-  content: attr(title);
-  position: absolute;
-  top: 6px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3);
-  white-space: nowrap;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.2s;
-}
-.era-seg:hover { background: var(--border-3); }
-.era-seg:hover::after { opacity: 1; }
-.era-seg.active { background: var(--accent); }
-
-/* Mobile scatter strip — hidden on desktop */
-#mobile-scatter-strip {
-  display: none;
-}
-
-/* Stream */
-#stream {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0 0 60px;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-}
-#stream::-webkit-scrollbar { width: 4px; }
-#stream::-webkit-scrollbar-track { background: transparent; }
-#stream::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
-#stream::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
-
-.stream-inner {
-  max-width: 620px;
-  margin: 0 auto;
-  padding: 0 32px;
-}
-
-/* Era block */
-.era-block {
-  padding: 52px 0 24px;
-  position: relative;
-}
-.era-block::before {
-  content:'';
-  display:block;
-  height:1px;
-  background: linear-gradient(to right, transparent, var(--border-2) 40%, transparent);
-  margin-bottom: 36px;
-}
-.era-eyebrow {
-  font-family: var(--mono);
-  font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
-  margin-bottom: 4px;
-  opacity: 0.8;
-}
-.era-num {
-  font-family: var(--disp);
-  font-size: 88px;
-  line-height: 1;
-  color: var(--ink-3);
-  letter-spacing: -0.03em;
-  -webkit-text-stroke: 1px rgba(237,233,224,0.04);
-  user-select: none;
-  opacity: 0.65;
-}
-.era-title {
-  font-family: var(--disp);
-  font-size: 26px;
-  color: var(--ink);
-  margin-top: -10px;
-  letter-spacing: 0.005em;
-}
-.era-period {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink-3);
-  margin-top: 8px;
-}
-.era-period span {
-  display: inline-block;
-  width: 16px; height: 1px;
-  border-radius: 1px;
-  opacity: 0.6;
-}
-
-/* Nodes */
-.node {
-  padding: 12px 0;
-  position: relative;
-}
-.node::before {
-  content:'';
-  position:absolute;
-  left:-32px; top:0; bottom:0;
-  width:2px;
-  background: transparent;
-  transition: background 0.2s;
-}
-.node.body { font-size: 15px; line-height: 1.8; color: var(--ink); font-weight: 300; }
-.node.pull {
-  font-family: var(--text);
-  font-style: italic;
-  font-size: 19px; line-height: 1.5;
-  color: var(--ink-2);
-  border-left: 2px solid var(--accent);
-  padding-left: 18px;
-  margin: 6px 0;
-}
-.node.break { pointer-events: none; padding: 16px 0; }
-.node.break::after {
-  content:''; display:block; height:1px;
-  background: linear-gradient(to right, var(--border-2), transparent 60%);
-}
-
-.ac { color:var(--accent); }
-.em { font-style:italic; }
-.dim { opacity:0.4; }
-
-/* Artifact card */
-.node.artifact {
-  padding: 14px 0;
-  cursor: pointer;
-}
-.node-type-tag {
-  font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase;
-  margin-bottom: 7px;
-  display: flex; align-items: center; gap: 5px;
-}
-.artifact-card {
-  border: 1px solid var(--border-2);
-  border-radius: 5px;
-  background: var(--bg-3);
-  overflow: hidden;
-  transition: border-color 0.2s, background 0.2s;
-  position: relative;
-}
-.node.artifact:hover .artifact-card { border-color: var(--border-3); background: var(--bg-2); }
-.artifact-type-stripe {
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 3px;
-}
-.artifact-card-top {
-  padding: 14px 16px 12px 20px;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.artifact-title {
-  font-family: var(--text);
-  font-size: 16px; color: var(--ink);
-  line-height: 1.25;
-}
-.artifact-sentence {
-  font-family: var(--text);
-  font-style: italic;
-  font-size: 12px; color: var(--ink-2);
-  line-height: 1.6; font-weight: 300;
-}
-.artifact-card-foot {
-  padding: 8px 16px 10px 20px;
-  display: flex; align-items: center; justify-content: space-between;
-  border-top: 1px solid var(--border);
-}
-.artifact-meta { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
-.artifact-open-hint {
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3);
-  display: flex; align-items: center; gap: 3px;
-  transition: color 0.15s;
-}
-.artifact-open-hint::after { content: '›'; font-size: 12px; }
-.node.artifact:hover .artifact-open-hint { color: var(--accent); }
-
-/* ═══════════════════════════════════════
-   FIELD OVERLAY — timeline topology
-═══════════════════════════════════════ */
-#field-overlay {
-  position: fixed; inset: 0; z-index: 500;
-  background: var(--bg);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.4s ease, background 0.4s ease;
-  display: flex; flex-direction: column;
-}
-body.field-open #field-overlay { opacity: 1; pointer-events: auto; }
-
-.field-overlay-hud {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 28px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.field-overlay-title {
-  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2);
-}
-.field-overlay-close {
-  font-family: var(--mono);
-  font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase;
-  background: none; border: 1px solid var(--border-2);
-  color: var(--ink-2); padding: 7px 14px;
-  cursor: pointer; border-radius: 3px;
-  transition: all 0.2s;
-}
-.field-overlay-close:hover { border-color: var(--accent); color: var(--accent); }
-
-.field-canvas-wrap {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  cursor: grab;
-}
-.field-canvas-wrap:active { cursor: grabbing; }
-
-.field-canvas-inner {
-  position: absolute;
-  width: 3000px; height: 3000px;
-  top: 50%; left: 50%;
-  transform-origin: center center;
-}
-
-/* Grid */
-.field-canvas-inner::before {
-  content:'';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, rgba(237,233,224,0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-[data-theme="dark"] .field-canvas-inner::before {
-  background-image: radial-gradient(circle, rgba(237,233,224,0.05) 1px, transparent 1px);
-}
-
-/* Subtle ambient water shimmer */
-.field-canvas-inner::after {
-  content:'';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse 60% 40% at 30% 55%, rgba(106,155,204,0.04) 0%, transparent 70%),
-              radial-gradient(ellipse 50% 60% at 70% 45%, rgba(120,137,93,0.03) 0%, transparent 70%);
-  animation: waterShimmer 12s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-@keyframes waterShimmer {
-  0%   { opacity: 0.6; transform: scale(1) translate(0, 0); }
-  33%  { opacity: 1; transform: scale(1.04) translate(1%, -0.5%); }
-  66%  { opacity: 0.7; transform: scale(0.98) translate(-1%, 0.5%); }
-  100% { opacity: 0.9; transform: scale(1.02) translate(0.5%, -0.3%); }
-}
-
-/* Timeline axis */
-.field-timeline-axis {
-  position: absolute;
-  left: 3%; right: 3%;
-  top: 50%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--border-2) 10%, var(--border-2) 90%, transparent);
-  pointer-events: none;
-}
-
-/* Era bands in field */
-.field-era-line {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 1px;
-  background: var(--border);
-  pointer-events: none;
-}
-.field-era-label {
-  position: absolute;
-  top: 14%;
-  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--ink-3);
-  pointer-events: none;
-  transform: translateX(-50%);
-}
-.field-era-year {
-  position: absolute;
-  bottom: 14%;
-  font-family: var(--disp);
-  font-size: 13px;
-  color: var(--ink-3);
-  pointer-events: none;
-  transform: translateX(-50%);
-  opacity: 0.5;
-}
-
-/* ── Lily pad nodes ── */
-.field-artifact-dot {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  display: flex; flex-direction: column; align-items: center;
-  cursor: pointer;
-  isolation: isolate;
-}
-
-/* Wrapper that anchors ripples to the pad center */
-.fad-wrap {
-  position: relative;
-  width: 18px; height: 18px;
-  flex-shrink: 0;
-}
-
-/* The pad itself */
-.fad-pad {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.55;
-  transition: opacity 0.3s, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  z-index: 2;
-}
-
-/* Ripple rings — anchored to center of fad-wrap */
-.fad-ripple {
-  position: absolute;
-  top: 50%; left: 50%;
-  border-radius: 50%;
-  border: 1px solid currentColor;
-  width: 18px; height: 18px;
-  margin-left: -9px; margin-top: -9px;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-.fad-ripple-1 { animation: ripple 3.2s ease-out infinite; }
-.fad-ripple-2 { animation: ripple 3.2s ease-out infinite; animation-delay: 0.9s; }
-.fad-ripple-3 { animation: ripple 3.2s ease-out infinite; animation-delay: 1.8s; }
-
-@keyframes ripple {
-  0%   { width: 18px;  height: 18px;  margin-left: -9px;  margin-top: -9px;  opacity: 0.5; }
-  100% { width: 100px; height: 100px; margin-left: -50px; margin-top: -50px; opacity: 0; }
-}
-
-.fad-label {
-  font-size: 8px; letter-spacing: 0.1em;
-  color: currentColor;
-  opacity: 0.6;
-  white-space: nowrap;
-  margin-top: 12px;
-  text-transform: uppercase;
-  font-family: var(--mono);
-  pointer-events: none;
-  transition: opacity 0.25s;
-  position: relative; z-index: 2;
-}
-
-/* Ghost tooltip — surfaces on hover */
-.fad-ghost {
-  position: absolute;
-  bottom: calc(100% + 14px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  width: 220px;
-  background: var(--bg-4);
-  border: 1px solid var(--border-2);
-  border-radius: 5px;
-  padding: 12px 14px;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.14);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s ease;
-  z-index: 100;
-}
-.fad-ghost::after {
-  content: '';
-  position: absolute;
-  top: 100%; left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: var(--border-2);
-}
-.fad-ghost-type {
-  font-size: 6px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: currentColor; opacity: 0.8;
-  margin-bottom: 6px;
-  font-family: var(--mono);
-}
-.fad-ghost-title {
-  font-family: var(--text);
-  font-size: 13px; color: var(--ink);
-  line-height: 1.3; margin-bottom: 7px;
-}
-.fad-ghost-sentence {
-  font-family: var(--text);
-  font-style: italic;
-  font-size: 11px; color: var(--ink-2);
-  line-height: 1.55;
-}
-
-/* Hover — pad blooms, label sharpens, ghost appears */
-.field-artifact-dot:hover .fad-pad { opacity: 1; transform: scale(1.3); }
-.field-artifact-dot:hover .fad-label { opacity: 1; }
-.field-artifact-dot:hover .fad-ghost {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Major nodes */
-.field-artifact-dot.major .fad-wrap { width: 26px; height: 26px; }
-.field-artifact-dot.major .fad-ripple {
-  width: 26px; height: 26px;
-  margin-left: -13px; margin-top: -13px;
-}
-.field-artifact-dot.major .fad-ripple-1 { animation: ripple-major 3.6s ease-out infinite; }
-.field-artifact-dot.major .fad-ripple-2 { animation: ripple-major 3.6s ease-out infinite; animation-delay: 1.0s; }
-.field-artifact-dot.major .fad-ripple-3 { animation: ripple-major 3.6s ease-out infinite; animation-delay: 2.0s; }
-
-@keyframes ripple-major {
-  0%   { width: 26px;  height: 26px;  margin-left: -13px; margin-top: -13px; opacity: 0.6; }
-  100% { width: 130px; height: 130px; margin-left: -65px; margin-top: -65px; opacity: 0; }
-}
-
-.field-artifact-dot.major .fad-pad { opacity: 0.7; }
-.field-artifact-dot.major .fad-label { font-size: 9px; }
-.field-artifact-dot.major:hover .fad-pad { opacity: 1; transform: scale(1.2); }
-
-/* ═══════════════════════════════════════
-   ARTIFACT GHOST — fixed overlay, mouse-tracked
-═══════════════════════════════════════ */
-/* Ghost lives as a single fixed element — never clips */
-#artifact-ghost-panel {
-  position: fixed;
-  z-index: 9000;
-  width: 340px;
-  background: var(--bg-4);
-  border: 1px solid var(--border-2);
-  border-radius: 7px;
-  overflow: hidden;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: translateY(6px);
-}
-#artifact-ghost-panel.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.agp-media {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  position: relative;
-  background: var(--bg-3);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.agp-media iframe {
-  position: absolute;
-  top: 0; left: 0;
-  width: 1280px;
-  height: 960px;
-  border: none;
-  pointer-events: none;
-  transform: scale(0.266);
-  transform-origin: top left;
-}
-.agp-media img, .agp-media video {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-.agp-load-overlay {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 7px;
-  background: var(--bg-3);
-  transition: opacity 0.35s ease;
-  pointer-events: none;
-}
-.agp-load-overlay.loaded { opacity: 0; }
-.agp-spinner {
-  width: 16px; height: 16px;
-  border: 1.5px solid var(--border-2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: agp-spin 0.9s linear infinite;
-}
-@keyframes agp-spin { to { transform: rotate(360deg); } }
-.agp-load-url {
-  font-family: var(--mono);
-  font-size: 7px; letter-spacing: 0.12em;
-  color: var(--ink-3);
-}
-/* No-URL fallback — sentence preview */
-.agp-sentence-preview {
-  padding: 20px 18px;
-}
-.agp-sentence-type {
-  font-family: var(--mono);
-  font-size: 6px; letter-spacing: 0.2em; text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.agp-sentence-text {
-  font-family: var(--text);
-  font-style: italic;
-  font-size: 14px; line-height: 1.65;
-  color: var(--ink-2);
-}
-.agp-cap {
-  padding: 9px 14px;
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  background: var(--bg-4);
-}
-.agp-cap-title {
-  font-family: var(--mono);
-  font-size: 8px; letter-spacing: 0.08em;
-  color: var(--ink-2);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 200px;
-}
-.agp-cap-link {
-  font-family: var(--mono);
-  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--accent);
-  text-decoration: none;
-  flex-shrink: 0;
-  transition: opacity 0.15s;
-}
-.agp-cap-link:hover { opacity: 0.75; }
-
-/* Zoom hint */
-.field-zoom-hint {
-  position: absolute; bottom: 18px; right: 24px;
-  font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--ink-3);
-  display: flex; gap: 12px;
-}
-.kbd {
-  display: inline-flex; align-items: center;
-  font-size: 7px; font-family: var(--mono);
-  background: var(--bg-3); border: 1px solid var(--border-2);
-  border-radius: 3px; padding: 1px 5px;
-  color: var(--ink-3);
-}
-
-/* ═══════════════════════════════════════
-   RIGHT DETAIL PANEL
-═══════════════════════════════════════ */
-#main {
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 10;
-  transition: padding-right 0.44s cubic-bezier(0.32,0.72,0,1);
-}
-/* When detail is open, shrink main's usable width to avoid content hiding under panel */
-body.detail-open #main {
-  padding-right: var(--detail-w);
-}
-
-#detail {
-  width: var(--detail-w);
-  flex-shrink: 0;
-  height: 100%;
-  display: flex; flex-direction: column;
-  border-left: 1px solid var(--border);
-  background: var(--bg-4);
-  position: absolute;
-  top: 0; right: 0;
-  transform: translateX(var(--detail-w));
-  transition: transform 0.44s cubic-bezier(0.32,0.72,0,1), background 0.4s ease, border-color 0.4s ease;
-  z-index: 20;
-}
-#detail.open { transform: translateX(0); }
-
-.detail-header {
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.detail-type-tag {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink-2);
-}
-.detail-type-stripe {
-  width: 14px; height: 2px; border-radius: 1px;
-}
-.detail-close {
-  background: none; border: 1px solid var(--border-2);
-  color: var(--ink-2); font-size: 11px;
-  width: 26px; height: 26px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.15s;
-}
-.detail-close:hover { border-color: var(--accent); color: var(--accent); }
-
-.detail-body {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.detail-body::-webkit-scrollbar { width: 3px; }
-.detail-body::-webkit-scrollbar-thumb { background: var(--border-2); }
-
-/* Hero types */
-.detail-hero {
-  width: 100%;
-  flex-shrink: 0;
-}
-.detail-hero-code {
-  background: var(--bg-4);
-  padding: 20px;
-  font-family: var(--mono);
-  font-size: 11px; line-height: 1.8;
-  color: var(--t-code);
-  border-bottom: 1px solid var(--border);
-  min-height: 140px;
-  transition: background 0.4s;
-}
-.code-line { display: block; }
-.code-comment { color: var(--ink-3); }
-.code-keyword { color: #9b7cc0; }
-.code-string { color: #c4a882; }
-.code-num { color: var(--t-code); }
-
-.detail-hero-figma {
-  background: var(--bg-3);
-  min-height: 130px;
-  display: flex; align-items: center; justify-content: center;
-  gap: 10px; padding: 20px;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.4s;
-}
-.figma-frame {
-  background: var(--bg-3);
-  border: 1px solid rgba(155,124,192,0.2);
-  border-radius: 2px;
-  flex: 1; max-width: 72px;
-  aspect-ratio: 3/4;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; opacity: 0.3;
-}
-.figma-frame.wide { aspect-ratio: 16/9; max-width: 130px; }
-
-.detail-hero-live {
-  width: 100%; aspect-ratio: 16/9;
-  background: #000; border-bottom: 1px solid var(--border);
-  position: relative; overflow: hidden;
-}
-.detail-hero-live iframe { width: 100%; height: 100%; border: none; }
-.detail-hero-live-load {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 10px;
-  background: var(--bg-3); cursor: pointer;
-  transition: background 0.2s;
-}
-.detail-hero-live-load:hover { background: var(--bg-2); }
-.detail-hero-live-load-icon { font-size: 20px; opacity: 0.3; }
-.detail-hero-live-load-hint {
-  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink-2);
-}
-
-.detail-hero-media {
-  width: 100%; aspect-ratio: 16/9;
-  background: #000814;
-  display: flex; align-items: center; justify-content: center;
-  border-bottom: 1px solid var(--border);
-  font-size: 32px; opacity: 0.15; color: var(--t-media);
-}
-.detail-hero-sketch {
-  background: var(--bg-3);
-  min-height: 110px;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px; gap: 14px;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.4s;
-}
-.sketch-mark { opacity: 0.18; font-size: 28px; color: var(--t-sketch); }
-
-.detail-hero-note {
-  padding: 22px 20px;
-  background: var(--bg-3);
-  border-bottom: 1px solid var(--border);
-}
-.detail-hero-note-text {
-  font-family: var(--text);
-  font-size: 15px; line-height: 1.65;
-  color: var(--ink-2); font-style: italic;
-}
-
-/* Artifact body in detail */
-.detail-artifact-body { padding: 22px 20px; }
-.detail-artifact-period {
-  font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--ink-3); margin-bottom: 7px;
-}
-.detail-artifact-title {
-  font-family: var(--disp);
-  font-size: 22px; color: var(--ink);
-  line-height: 1.2; margin-bottom: 12px;
-}
-.detail-artifact-sentence {
-  font-family: var(--text);
-  font-size: 14px; line-height: 1.7;
-  color: var(--ink-2); font-style: italic;
-  margin-bottom: 16px;
-  border-left: 2px solid var(--accent);
-  padding-left: 12px;
-}
-.detail-artifact-desc {
-  font-size: 12px; color: var(--ink-2);
-  line-height: 1.75; font-weight: 300;
-  margin-bottom: 20px;
-}
-.detail-artifact-specs {
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
-}
-.detail-spec-row {
-  display: flex; gap: 12px; padding: 5px 0;
-  border-bottom: 1px solid var(--border);
-}
-.detail-spec-row:last-child { border-bottom: none; }
-.detail-spec-k {
-  font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--ink-3); white-space: nowrap; flex-shrink: 0;
-  width: 80px;
-}
-.detail-spec-v {
-  font-size: 12px; color: var(--ink-2); font-weight: 300;
-}
-.detail-artifact-link {
-  display: inline-flex; align-items: center; gap: 6px;
-  margin-top: 18px;
-  font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--accent);
-  text-decoration: none;
-  border: 1px solid rgba(217,119,87,0.3);
-  padding: 7px 14px; border-radius: 3px;
-  transition: all 0.15s;
-}
-.detail-artifact-link:hover { border-color: var(--accent); background: var(--accent-l); }
-
-/* ═══════════════════════════════════════
-   INLINE GALLERY NODE — per-chapter 2-up grid / list
-═══════════════════════════════════════ */
-.node.gallery {
-  padding: 16px 0 8px;
-}
-
-.gallery-node-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
-}
-.gallery-node-label {
-  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--ink-3);
-  display: flex; align-items: center; gap: 6px;
-}
-.gallery-node-label::before {
-  content: '';
-  display: inline-block;
-  width: 12px; height: 1px;
-  background: var(--ink-3);
-  opacity: 0.4;
-}
-.gallery-toggle-group {
-  display: flex; gap: 2px;
-}
-.gallery-toggle {
-  background: none; border: 1px solid var(--border-2);
-  color: var(--ink-3); padding: 3px 7px;
-  cursor: pointer; border-radius: 2px;
-  font-size: 10px; line-height: 1;
-  transition: all 0.15s;
-  font-family: var(--mono);
-}
-.gallery-toggle.active { border-color: var(--accent); color: var(--accent); background: var(--accent-l); }
-.gallery-toggle:hover:not(.active) { border-color: var(--ink-3); color: var(--ink-2); }
-
-/* Grid */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-/* List */
-.gallery-list {
-  display: flex; flex-direction: column; gap: 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-/* Shared item */
-.gallery-item {
-  cursor: pointer;
-  position: relative;
-  transition: border-color 0.15s, background 0.15s;
-}
-.gallery-item.active-item .gallery-item-thumb { outline: 2px solid var(--accent); outline-offset: -2px; }
-
-/* Grid item */
-.gallery-grid .gallery-item {
-  border-radius: 3px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--bg-3);
-}
-.gallery-grid .gallery-item:hover { border-color: var(--border-3); }
-.gallery-grid .gallery-item-caption { display: none; } /* no caption in grid */
-
-/* List item */
-.gallery-list .gallery-item {
-  display: flex; gap: 10px;
-  align-items: center;
-  padding: 9px 4px;
-  border-bottom: 1px solid var(--border);
-}
-.gallery-list .gallery-item:last-child { border-bottom: none; }
-.gallery-list .gallery-item:hover { background: rgba(0,0,0,0.015); }
-[data-theme="dark"] .gallery-list .gallery-item:hover { background: rgba(255,255,255,0.02); }
-
-/* Thumb */
-.gallery-item-thumb {
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--bg-3);
-}
-.gallery-grid .gallery-item-thumb {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-}
-.gallery-list .gallery-item-thumb {
-  width: 52px; height: 52px;
-  border-radius: 3px;
-  aspect-ratio: 1;
-}
-.gallery-item-thumb img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.gallery-item-thumb-placeholder {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
-  opacity: 0.18;
-}
-.gallery-item-stripe {
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 2px; z-index: 2;
-}
-
-/* Caption — list only */
-.gallery-item-caption {
-  flex: 1; min-width: 0;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.gallery-item-caption-type {
-  font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase;
-  opacity: 0.7;
-}
-.gallery-item-caption-title {
-  font-family: var(--text);
-  font-size: 12px; color: var(--ink);
-  line-height: 1.3;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.gallery-item-caption-sentence {
-  font-family: var(--text);
-  font-style: italic;
-  font-size: 10px; color: var(--ink-3);
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ── Node preview icon — appears on hover ── */
-.artifact-preview-icon {
-  position: absolute;
-  top: 10px; right: 14px;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--bg-4);
-  border: 1px solid var(--border-2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px;
-  color: var(--ink-3);
-  opacity: 0;
-  transition: opacity 0.18s, border-color 0.18s, color 0.18s;
-  pointer-events: none; /* enabled on card hover below */
-  z-index: 2;
-}
-.node.artifact:hover .artifact-preview-icon {
-  opacity: 1;
-  pointer-events: auto;
-}
-/* Ghost is active — highlight the icon */
-.node.artifact.ghost-active .artifact-preview-icon {
-  opacity: 1;
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* ═══════════════════════════════════════
-   SAFE AREA + MOBILE
-═══════════════════════════════════════ */
-:root {
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
-}
-
-/* ── Mobile: ≤ 700px ── */
-@media (max-width: 700px) {
-  :root {
-    --sidebar-w: 0px;
-    --detail-w:  100vw;
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#000; overflow:hidden; width:100vw; height:100vh; cursor:none; }
+  canvas { display:block; position:fixed; inset:0; }
+  #cursor-canvas { display:block; position:fixed; inset:0; z-index:100; pointer-events:none; }
+  #count {
+    position:fixed; top:38px; right:60px;
+    font-family:'DM Mono',monospace; font-weight:300;
+    font-size:9px; letter-spacing:.2em; text-transform:uppercase;
+    color:rgba(255,255,255,0.14); pointer-events:none; z-index:20;
   }
-
-  body { display: block; }
-
-  #layout {
-    display: block;
-    height: 100vh;
-    overflow: hidden;
-    position: relative;
+  #ui {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:7px; z-index:10;
+    filter: drop-shadow(0 0 18px #000) drop-shadow(0 0 40px #000) drop-shadow(0 0 60px #000);
   }
+  .pill-row { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+  .pill {
+    font-family:'DM Mono',monospace; font-weight:300;
+    font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:rgba(255,255,255,0.28); border:1px solid rgba(255,255,255,0.10);
+    border-radius:999px; padding:5px 12px; cursor:none; background:#000;
+    transition:color .2s, border-color .2s, background .2s;
+  }
+  .pill:hover { color:rgba(255,255,255,0.7); border-color:rgba(255,255,255,0.35); }
+  .pill.related { color:rgba(255,255,255,0.55); border-color:rgba(255,255,255,0.28); }
+  .pill.active { color:#000 !important; background:#fff; border-color:#fff; }
 
-  /* Hide desktop sidebar — replaced by bottom era strip */
-  #sidebar { display: none; }
+  /* top-center header: logo + info stacked */
+  #top-header {
+    position:fixed; top:22px; left:50%; transform:translateX(-50%);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    z-index:20;
+    filter: drop-shadow(0 0 18px #000) drop-shadow(0 0 40px #000) drop-shadow(0 0 60px #000);
+  }
+  #logo-widget {
+    width:140px; height:140px;
+    cursor:none; user-select:none;
+    background:#000;
+  }
+  #logo-svg { width:100%; height:100%; fill:#fff; display:block; }
 
-  /* Kill the flex layout — main fills everything */
-  #layout {
-    display: block;
-    height: 100%;
+  /* info button */
+  #info-btn {
+    width:22px; height:22px; border-radius:50%;
+    border:1px solid rgba(255,255,255,0.22);
+    font-family:'DM Mono',monospace; font-weight:300;
+    font-size:11px; color:rgba(255,255,255,0.35);
+    display:flex; align-items:center; justify-content:center;
+    cursor:none;
+    transition: color .2s, border-color .2s;
   }
+  #info-btn:hover { color:rgba(255,255,255,0.8); border-color:rgba(255,255,255,0.5); }
 
-  /* Main takes full width */
-  #main {
-    width: 100%;
-    height: 100vh;
-    height: -webkit-fill-available;
-    height: 100dvh;
-    position: relative;
+  /* info overlay */
+  #info-overlay {
+    position:fixed; inset:0; z-index:50;
+    background:rgba(0,0,0,0.92);
+    display:none; align-items:center; justify-content:center;
   }
-
-  /* When detail open on mobile, DON'T push main — overlay instead */
-  body.detail-open #main { padding-right: 0; }
-
-  /* Detail sheet — full-screen bottom sheet on mobile */
-  #detail {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    transform: translateY(100%);
-    transition: transform 0.44s cubic-bezier(0.32,0.72,0,1);
-    z-index: 900;
-    border-left: none;
-    border-top: 1px solid var(--border);
+  #info-overlay.visible { display:flex; }
+  #info-canvas { display:block; }
+  #info-close {
+    position:absolute; top:28px; right:30px;
+    font-family:'DM Mono',monospace; font-weight:300;
+    font-size:18px; color:rgba(255,255,255,0.3);
+    cursor:none; line-height:1;
+    transition: color .2s;
   }
-  #detail.open { transform: translateY(0); }
-
-  /* Mobile scatter strip */
-  #mobile-scatter-strip {
-    display: block;
-    width: 100%;
-    height: 36px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-4);
-    flex-shrink: 0;
-    cursor: crosshair;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  #mobile-scatter-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  /* Hide the HUD scatter on mobile — strip replaces it */
-  #hud-scatter { display: none; }
-  .hud-actions { gap: 4px; }
-
-  /* Stream padding accounts for safe areas */
-  #stream { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px); }
-  #stream-hud {
-    padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
-    height: auto;
-    gap: 10px;
-  }
-  .hud-identity { flex: 1; min-width: 0; }
-  .hud-brand { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hud-era-indicator { display: none; }
-  .hud-actions { gap: 4px; flex-shrink: 0; }
-  .stream-inner { padding: 0 18px; }
-
-  /* Era nodes: smaller */
-  .era-num { font-size: 56px; }
-  .era-title { font-size: 20px; }
-
-  /* Ghost panel — hide on mobile (touch) */
-  #artifact-ghost-panel { display: none; }
-  /* Floating spine hidden on mobile — bottom bar handles nav */
-  #floating-spine { display: none; }
-
-  /* Mobile bottom bar */
-  #mobile-bar {
-    display: flex;
-    position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: 200;
-    padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px);
-    background: var(--bg-4);
-    border-top: 1px solid var(--border);
-    align-items: stretch;
-    gap: 0;
-  }
-  .mobile-spine-seg {
-    flex: 1;
-    display: flex; flex-direction: column;
-    cursor: pointer;
-    min-width: 0;
-    padding: 0 3px;
-    background: none; border: none;
-    position: relative;
-  }
-  .mobile-spine-seg + .mobile-spine-seg::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-    width: 1px; background: var(--border);
-  }
-  .mobile-spine-bar {
-    height: 4px; border-radius: 1px; margin-bottom: 5px;
-    opacity: 0.45; transition: height 0.2s, opacity 0.2s;
-  }
-  .mobile-spine-seg.active .mobile-spine-bar { height: 7px; opacity: 1; }
-  .mobile-spine-num {
-    font-family: var(--mono); font-size: 6px; letter-spacing: 0.14em;
-    color: var(--ink-3); white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; text-align: left; line-height: 1;
-    margin-bottom: 2px;
-    transition: color 0.2s;
-  }
-  .mobile-spine-title {
-    font-family: var(--serif); font-size: 9px; font-style: italic;
-    color: var(--ink-3); white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; text-align: left; line-height: 1.2;
-    transition: color 0.2s;
-  }
-  .mobile-spine-seg.active .mobile-spine-num,
-  .mobile-spine-seg.active .mobile-spine-title { color: var(--ink); }
-  /* Field button — compact, right-anchored */
-  .mobile-field-btn {
-    flex-shrink: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-    background: none; border: none; border-left: 1px solid var(--border);
-    padding: 0 0 0 10px; margin-left: 8px;
-    cursor: pointer; color: var(--ink-3);
-    font-family: var(--mono); font-size: 7px; letter-spacing: 0.12em;
-    gap: 4px; transition: color 0.15s;
-  }
-  .mobile-field-btn:active { color: var(--accent); }
-  .mobile-field-icon { font-size: 13px; line-height: 1; }
-}
-
-/* ── Landscape mobile ── */
-@media (max-width: 900px) and (orientation: landscape) {
-  #sidebar { display: none; }
-  #layout { display: block; }
-  #main {
-    width: 100%;
-    height: 100vh;
-    height: 100dvh;
-  }
-}
-
-@media (min-width: 701px) and (max-width: 1100px) {
-  :root { --detail-w: 320px; }
-  #mobile-bar { display: none; }
-}
-
-/* ── Desktop: > 1100px ── */
-@media (min-width: 1101px) {
-  #mobile-bar { display: none; }
-}
+  #info-close:hover { color:rgba(255,255,255,0.8); }
 </style>
 </head>
 <body>
+<canvas id="c"></canvas>
+<canvas id="cursor-canvas"></canvas>
 
-<!-- ═══ FIELD OVERLAY ═══ -->
-<div id="field-overlay">
-  <div class="field-overlay-hud">
-    <span class="field-overlay-title">Timeline Topology · 25 artifacts · 6 eras</span>
-    <button class="field-overlay-close" onclick="closeField()">✕ Return to Stream</button>
+<!-- top-center: logo + info -->
+<div id="top-header">
+  <div id="logo-widget">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.756 192.756" id="logo-svg">
+      <path d="M32.008 77.635c6.941-5.271 12.471-11.467 17.356-18.08l-8.076 17.96.81 1.956 7.627-6.657v19.044l-8.438 7.834 2.29-16.031-3.134 3.857-1.808-3.978-13.259 28.688c-.478 1.054.617 1.852 1.567 1.086l6.147-5.062-24.586 24.95 25.794-49.781 4.46-8.679c.101-.186 0-.739-.604-.556l-6.146 3.449zM92.469 72.778h5.844v13.63h7.291v5.324H92.469V72.778zM106.58 72.778h5.847v13.63h6.811v5.324h-12.656l-.002-18.954zM120.394 72.778h5.916v18.954h-5.916zM75.206 77.948v13.784h-6.259V77.948h-3.153v-5.17H82.37l-2.201 5.17zM51.201 72.778h13.274v5.17h-7.359v1.902h7.359v5.171h-7.359v1.54h7.359v5.171H51.201V72.778zM90.914 72.778l.073 18.955h-5.612V86.42h-.438l-2.624 5.313h-6.049l8.309-18.955h6.341zm-6.297 9.74l1.449.053v-2.684l-1.449 2.631zM137.489 71.662c2.568 0 4.916.964 6.701 2.547l-4.321 4.5a3.928 3.928 0 0 0-2.481-.878c-2.14 0-3.884 1.697-3.884 3.777s1.744 3.777 3.884 3.777c1.569 0 2.93-.917 3.539-2.229l5.354 3.447a10.102 10.102 0 0 1-8.791 5.129c-5.555 0-10.086-4.508-10.086-10.035-.001-5.527 4.533-10.035 10.085-10.035zM141.437 59.817c5.852 5.207 11.819 10.298 17.994 15.183l-6.187-3.615c-.685-.343-1.69 0-.964 1.393 10.66 20.009 21.535 39.936 31.972 60.061a1976.859 1976.859 0 0 1-26.269-24.982l8.836 5.463c1.056.442 1.734-.42.644-2.17l-10.685-22.171-1.848-3.695-2.49-.08 2.33 14.86-7.184-8.331-1.229-23.072-4.92-8.844zm10.08 20.255h1.414l-2.058-3.35.644 3.35z"/>
+    </svg>
   </div>
-  <div class="field-canvas-wrap" id="field-canvas-wrap">
-    <div class="field-canvas-inner" id="field-canvas-inner">
-      <!-- Timeline axis -->
-      <div class="field-timeline-axis"></div>
-
-      <!-- Era lines + labels -->
-      <div class="field-era-line" style="left:18%"></div>
-      <div class="field-era-line" style="left:38%"></div>
-      <div class="field-era-line" style="left:52%"></div>
-      <div class="field-era-line" style="left:77%"></div>
-      <div class="field-era-line" style="left:88%"></div>
-
-      <div class="field-era-label" style="left:9%">Origins · 2005–13</div>
-      <div class="field-era-label" style="left:28%">Suburbia · 2013–16</div>
-      <div class="field-era-label" style="left:45%">Agency · 2016–18</div>
-      <div class="field-era-label" style="left:64%">New York · 2018–21</div>
-      <div class="field-era-label" style="left:82%">Remote · 2021–23</div>
-      <div class="field-era-label" style="left:93%">Now · 2023–</div>
-
-      <div class="field-era-year" style="left:9%">2005</div>
-      <div class="field-era-year" style="left:28%">2013</div>
-      <div class="field-era-year" style="left:45%">2016</div>
-      <div class="field-era-year" style="left:64%">2018</div>
-      <div class="field-era-year" style="left:82%">2021</div>
-      <div class="field-era-year" style="left:93%">2023</div>
-
-      <!-- Artifact dots — distributed along timeline on 3000×3000 canvas -->
-      <div class="field-artifact-dot" style="left:7%;top:42%;color:var(--t-media)" onclick="jumpToArtifact('a1')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2005</div><div class="fad-ghost-title">First Build</div><div class="fad-ghost-sentence">I built my first computer circa 2005. I immediately installed pirated copies of Photoshop and Illustrator.</div></div>
-        <div class="fad-label">first build</div>
-      </div>
-      <div class="field-artifact-dot" style="left:10%;top:60%;color:var(--t-media)" onclick="jumpToArtifact('a2')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2006–2012</div><div class="fad-ghost-title">The Self-Curriculum</div><div class="fad-ghost-sentence">I read books, examined magazines, studied typography, and took on client work.</div></div>
-        <div class="fad-label">self-curriculum</div>
-      </div>
-      <div class="field-artifact-dot" style="left:14%;top:46%;color:var(--t-media)" onclick="jumpToArtifact('a3')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2012</div><div class="fad-ghost-title">The Craigslist Post</div><div class="fad-ghost-sentence">I responded to a Craigslist post that changed everything.</div></div>
-        <div class="fad-label">craigslist</div>
-      </div>
-      <div class="field-artifact-dot major" style="left:23%;top:40%;color:var(--t-media)" onclick="jumpToArtifact('a4')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2013</div><div class="fad-ghost-title">Turn5 · First Day</div><div class="fad-ghost-sentence">A garage startup that would become one of the largest automotive aftermarket e-commerce platforms in the country.</div></div>
-        <div class="fad-label">turn5</div>
-      </div>
-      <div class="field-artifact-dot" style="left:26%;top:60%;color:var(--t-media)" onclick="jumpToArtifact('a5')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2013–2014</div><div class="fad-ghost-title">Product Photography</div><div class="fad-ghost-sentence">I built a photography studio from scratch inside a warehouse.</div></div>
-        <div class="fad-label">photography</div>
-      </div>
-      <div class="field-artifact-dot" style="left:29%;top:38%;color:var(--t-media)" onclick="jumpToArtifact('a6')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2014–2015</div><div class="fad-ghost-title">Design by Data</div><div class="fad-ghost-sentence">I started using analytics to drive design decisions before it had a name.</div></div>
-        <div class="fad-label">design by data</div>
-      </div>
-      <div class="field-artifact-dot" style="left:32%;top:62%;color:var(--t-media)" onclick="jumpToArtifact('a7')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2015</div><div class="fad-ghost-title">Leadnomics</div><div class="fad-ghost-sentence">A brief but formative detour into performance marketing design.</div></div>
-        <div class="fad-label">leadnomics</div>
-      </div>
-      <div class="field-artifact-dot" style="left:35%;top:50%;color:var(--t-media)" onclick="jumpToArtifact('a8')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2015–2016</div><div class="fad-ghost-title">Clavicle / Haiku</div><div class="fad-ghost-sentence">A self-initiated side project: a minimal blogging platform with sentence-level typography.</div></div>
-        <div class="fad-label">clavicle</div>
-      </div>
-      <div class="field-artifact-dot" style="left:40%;top:40%;color:var(--t-media)" onclick="jumpToArtifact('a9')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2016–2017</div><div class="fad-ghost-title">160/90</div><div class="fad-ghost-sentence">My first agency. Brand and digital for Philadelphia institutions.</div></div>
-        <div class="fad-label">160/90</div>
-      </div>
-      <div class="field-artifact-dot" style="left:43%;top:62%;color:var(--t-media)" onclick="jumpToArtifact('a10')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2017</div><div class="fad-ghost-title">O3 World</div><div class="fad-ghost-sentence">A digital product agency. Where I learned to ship under pressure.</div></div>
-        <div class="fad-label">o3 world</div>
-      </div>
-      <div class="field-artifact-dot" style="left:47%;top:48%;color:var(--t-media)" onclick="jumpToArtifact('a11')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2017–2018</div><div class="fad-ghost-title">Workarea SaaS</div><div class="fad-ghost-sentence">I designed the UX for a B2B e-commerce SaaS platform from 0 to launch.</div></div>
-        <div class="fad-label">workarea</div>
-      </div>
-      <div class="field-artifact-dot major" style="left:55%;top:50%;color:var(--t-media)" onclick="jumpToArtifact('a12')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2018</div><div class="fad-ghost-title">The Commute</div><div class="fad-ghost-sentence">The PATH train. Every morning. The city arriving as a wall of light at the end of the tunnel.</div></div>
-        <div class="fad-label">the commute</div>
-      </div>
-      <div class="field-artifact-dot" style="left:58%;top:36%;color:var(--t-media)" onclick="jumpToArtifact('a13')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2018–2019</div><div class="fad-ghost-title">FlightPath</div><div class="fad-ghost-sentence">A digital agency embedded inside a media company. Complex clients, fast cycles.</div></div>
-        <div class="fad-label">flightpath</div>
-      </div>
-      <div class="field-artifact-dot" style="left:61%;top:62%;color:var(--t-media)" onclick="jumpToArtifact('a14')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2019–2020</div><div class="fad-ghost-title">LiveArea · IC to Manager</div><div class="fad-ghost-sentence">The transition from maker to multiplier. I started building the team, not just the work.</div></div>
-        <div class="fad-label">livearea</div>
-      </div>
-      <div class="field-artifact-dot" style="left:64%;top:42%;color:var(--t-media)" onclick="jumpToArtifact('a15')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2019</div><div class="fad-ghost-title">GNC Navigation System</div><div class="fad-ghost-sentence">A full navigation redesign for one of the largest health retail brands in the world.</div></div>
-        <div class="fad-label">gnc nav</div>
-      </div>
-      <div class="field-artifact-dot" style="left:67%;top:64%;color:var(--t-media)" onclick="jumpToArtifact('a16')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2020</div><div class="fad-ghost-title">Cards Against Bad UX</div><div class="fad-ghost-sentence">A side project that became a conversation piece. Dark patterns, exposed.</div></div>
-        <div class="fad-label">cards against</div>
-      </div>
-      <div class="field-artifact-dot" style="left:70%;top:48%;color:var(--t-media)" onclick="jumpToArtifact('a17')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2020–2021</div><div class="fad-ghost-title">Code &amp; Theory</div><div class="fad-ghost-sentence">Senior UX at one of the most respected digital agencies in the country.</div></div>
-        <div class="fad-label">code &amp; theory</div>
-      </div>
-      <div class="field-artifact-dot" style="left:73%;top:36%;color:var(--t-media)" onclick="jumpToArtifact('a18')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2021</div><div class="fad-ghost-title">BNY Mellon · Publicis</div><div class="fad-ghost-sentence">Enterprise UX at scale. A global banking redesign embedded in a holding company.</div></div>
-        <div class="fad-label">bny mellon</div>
-      </div>
-      <div class="field-artifact-dot" style="left:79%;top:44%;color:var(--t-media)" onclick="jumpToArtifact('a19')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2021–2022</div><div class="fad-ghost-title">Camera On</div><div class="fad-ghost-sentence">Remote work, pandemic year two. I kept the camera on.</div></div>
-        <div class="fad-label">camera on</div>
-      </div>
-      <div class="field-artifact-dot" style="left:82%;top:64%;color:var(--t-media)" onclick="jumpToArtifact('a20')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2022–2023</div><div class="fad-ghost-title">Low Voltage Contracting</div><div class="fad-ghost-sentence">I picked up a drill. Literally. A brief foray into physical work while the job market sorted itself.</div></div>
-        <div class="fad-label">low voltage</div>
-      </div>
-      <div class="field-artifact-dot" style="left:85%;top:50%;color:var(--t-media)" onclick="jumpToArtifact('a21')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2022–2023</div><div class="fad-ghost-title">Side Builds</div><div class="fad-ghost-sentence">I kept building. The gap in employment was not a gap in output.</div></div>
-        <div class="fad-label">side builds</div>
-      </div>
-      <div class="field-artifact-dot major" style="left:90%;top:38%;color:var(--t-media)" onclick="jumpToArtifact('a22')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2023–</div><div class="fad-ghost-title">What I Offer</div><div class="fad-ghost-sentence">Not just design. Not just code. The synthesis of twenty years of deliberate practice.</div></div>
-        <div class="fad-label">what i offer</div>
-      </div>
-      <div class="field-artifact-dot" style="left:92%;top:56%;color:var(--t-media)" onclick="jumpToArtifact('a23')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2024</div><div class="fad-ghost-title">zackgort.com</div><div class="fad-ghost-sentence">The site as argument. The work as evidence. The sentence as interface.</div></div>
-        <div class="fad-label">zackgort.com</div>
-      </div>
-      <div class="field-artifact-dot" style="left:94%;top:44%;color:var(--t-media)" onclick="jumpToArtifact('a24')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · 2024–</div><div class="fad-ghost-title">Beyond the Work</div><div class="fad-ghost-sentence">Wolfgang. Cooking. Running. The whole person behind the portfolio.</div></div>
-        <div class="fad-label">beyond the work</div>
-      </div>
-      <div class="field-artifact-dot" style="left:96%;top:60%;color:var(--t-media)" onclick="jumpToArtifact('a25')">
-        <div class="fad-wrap"><div class="fad-pad"></div><div class="fad-ripple fad-ripple-1"></div><div class="fad-ripple fad-ripple-2"></div><div class="fad-ripple fad-ripple-3"></div></div>
-        <div class="fad-ghost"><div class="fad-ghost-type">Photo · Always</div><div class="fad-ghost-title">Wolfgang</div><div class="fad-ghost-sentence">The dog who started everything. He still does.</div></div>
-        <div class="fad-label">wolfgang</div>
-      </div>
-    </div>
-    <div class="field-zoom-hint">
-      <span><kbd class="kbd">scroll</kbd> zoom</span>
-      <span><kbd class="kbd">drag</kbd> pan</span>
-    </div>
-  </div>
+  <div id="info-btn">i</div>
 </div>
 
-<!-- ═══ ARTIFACT GHOST PANEL — fixed, mouse-tracked ═══ -->
-<div id="artifact-ghost-panel">
-  <div class="agp-media" id="agp-media"></div>
-  <div class="agp-cap" id="agp-cap">
-    <span class="agp-cap-title" id="agp-cap-title"></span>
-    <a class="agp-cap-link" id="agp-cap-link" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ open</a>
-  </div>
+<!-- info overlay -->
+<div id="info-overlay">
+  <div id="info-close">×</div>
+  <canvas id="info-canvas"></canvas>
 </div>
 
-<!-- ═══ FLOATING SPINE WIDGET ═══ -->
-<div id="floating-spine">
-  <div class="fsp-seg active" data-era="0" data-label="Origins · 2005–13" style="color:var(--era-pre)" onclick="scrollToEra(0)">
-    <span class="fsp-seg-label">01</span>
-  </div>
-  <div class="fsp-seg" data-era="1" data-label="Suburbia · 2013–16" style="color:var(--era-loss)" onclick="scrollToEra(1)">
-    <span class="fsp-seg-label">02</span>
-  </div>
-  <div class="fsp-seg" data-era="2" data-label="Agency · 2016–18" style="color:var(--era-build)" onclick="scrollToEra(2)">
-    <span class="fsp-seg-label">03</span>
-  </div>
-  <div class="fsp-seg" data-era="3" data-label="New York · 2018–21" style="color:var(--era-now)" onclick="scrollToEra(3)">
-    <span class="fsp-seg-label">04</span>
-  </div>
-  <div class="fsp-seg" data-era="4" data-label="Remote · 2021–23" style="color:var(--t-live)" onclick="scrollToEra(4)">
-    <span class="fsp-seg-label">05</span>
-  </div>
-  <div class="fsp-seg" data-era="5" data-label="Now · 2023–" style="color:var(--t-figma)" onclick="scrollToEra(5)">
-    <span class="fsp-seg-label">06</span>
-  </div>
+<div id="count"><span id="cnt">0</span> tracks</div>
+<div id="ui">
+  <div class="pill-row" id="album-pills"></div>
+  <div class="pill-row" id="tag-pills"></div>
 </div>
-
-<!-- ═══ LAYOUT ═══ -->
-<div id="layout">
-
-  <!-- ── SIDEBAR ── -->
-  <div id="sidebar">
-    <div class="sidebar-brand" onclick="toggleTheme()" title="Toggle light / dark">
-      <div class="sidebar-brand-line1">zack/sandbox</div>
-      <div class="sidebar-brand-line2">zackgort.com · made with <em>wolfie.love*</em></div>
-      <div class="sidebar-brand-theme" id="theme-hint">◐ dark</div>
-    </div>
-
-    <div class="sidebar-section-label">Eras</div>
-
-    <div class="era-nav-item active" data-era="0" style="color:var(--era-pre)" onclick="scrollToEra(0)">
-      <div class="era-nav-dot"></div>
-      <div class="era-nav-text">
-        <div class="era-nav-name">Origins</div>
-        <div class="era-nav-period">2005 – 2013 · 3 artifacts</div>
-      </div>
-    </div>
-    <div class="era-nav-item" data-era="1" style="color:var(--era-loss)" onclick="scrollToEra(1)">
-      <div class="era-nav-dot"></div>
-      <div class="era-nav-text">
-        <div class="era-nav-name">Suburbia Startup</div>
-        <div class="era-nav-period">2013 – 2016 · 5 artifacts</div>
-      </div>
-    </div>
-    <div class="era-nav-item" data-era="2" style="color:var(--era-build)" onclick="scrollToEra(2)">
-      <div class="era-nav-dot"></div>
-      <div class="era-nav-text">
-        <div class="era-nav-name">Agency Life</div>
-        <div class="era-nav-period">2016 – 2018 · 3 artifacts</div>
-      </div>
-    </div>
-    <div class="era-nav-item" data-era="3" style="color:var(--era-now)" onclick="scrollToEra(3)">
-      <div class="era-nav-dot"></div>
-      <div class="era-nav-text">
-        <div class="era-nav-name">New York</div>
-        <div class="era-nav-period">2018 – 2021 · 7 artifacts</div>
-      </div>
-    </div>
-    <div class="era-nav-item" data-era="4" style="color:var(--t-live)" onclick="scrollToEra(4)">
-      <div class="era-nav-dot"></div>
-      <div class="era-nav-text">
-        <div class="era-nav-name">Remote, Not Removed</div>
-        <div class="era-nav-period">2021 – 2023 · 3 artifacts</div>
-      </div>
-    </div>
-    <div class="era-nav-item" data-era="5" style="color:var(--t-figma)" onclick="scrollToEra(5)">
-      <div class="era-nav-dot"></div>
-      <div class="era-nav-text">
-        <div class="era-nav-name">Seek &amp; Employ</div>
-        <div class="era-nav-period">2023 – Present · 4 artifacts</div>
-      </div>
-    </div>
-
-    <div class="sidebar-section-label legend-label">Types</div>
-    <div class="type-legend-item" style="opacity:0.7">
-      <div class="type-legend-dot" style="background:var(--t-figma)"></div>
-      <span class="type-legend-label" style="color:var(--t-figma)">Figma</span>
-    </div>
-    <div class="type-legend-item" style="opacity:0.7">
-      <div class="type-legend-dot" style="background:var(--t-code)"></div>
-      <span class="type-legend-label" style="color:var(--t-code)">Code</span>
-    </div>
-    <div class="type-legend-item" style="opacity:0.7">
-      <div class="type-legend-dot" style="background:var(--t-note)"></div>
-      <span class="type-legend-label" style="color:var(--t-note)">Note</span>
-    </div>
-    <div class="type-legend-item" style="opacity:0.7">
-      <div class="type-legend-dot" style="background:var(--t-media)"></div>
-      <span class="type-legend-label" style="color:var(--t-media)">Media</span>
-    </div>
-    <div class="type-legend-item" style="opacity:0.7">
-      <div class="type-legend-dot" style="background:var(--t-sketch)"></div>
-      <span class="type-legend-label" style="color:var(--t-sketch)">Sketch</span>
-    </div>
-    <div class="type-legend-item" style="opacity:0.7">
-      <div class="type-legend-dot" style="background:var(--t-live)"></div>
-      <span class="type-legend-label" style="color:var(--t-live)">Live</span>
-    </div>
-
-    <!-- Mini timeline REMOVED — scatter lives in header now -->
-
-    <div class="sidebar-bottom">
-      <span class="sidebar-bottom-brand">25 artifacts · 6 eras</span>
-    </div>
-  </div>
-
-  <!-- ── STREAM ── -->
-  <div id="main">
-    <div id="progress"></div>
-
-    <div id="stream-hud">
-      <div class="hud-identity">
-        <div class="hud-brand">zackgort.com / <strong>sandbox</strong> · <em>wolfie.love*</em></div>
-        <div class="hud-era-indicator" id="hud-era-indicator">
-          <span id="hud-era-text" style="color:var(--era-pre)">Origins · 2005–2013</span>
-        </div>
-      </div>
-
-      <!-- ── Header scatter strip ── -->
-      <div id="hud-scatter" title="Click any node to jump · or open full field view">
-        <canvas id="hud-scatter-canvas"></canvas>
-      </div>
-
-      <div class="hud-actions">
-        <button class="hud-btn" onclick="openField()">◈ Field</button>
-      </div>
-    </div>
-
-    <!-- Mobile-only scatter strip — sits below HUD, above era strip -->
-    <div id="mobile-scatter-strip">
-      <canvas id="mobile-scatter-canvas"></canvas>
-    </div>
-
-    <!-- Era progress strip -->
-    <div id="era-strip">
-      <div class="era-seg active" data-era="0" onclick="scrollToEra(0)" title="Origins"></div>
-      <div class="era-seg" data-era="1" onclick="scrollToEra(1)" title="Suburbia Startup"></div>
-      <div class="era-seg" data-era="2" onclick="scrollToEra(2)" title="Agency Life"></div>
-      <div class="era-seg" data-era="3" onclick="scrollToEra(3)" title="New York"></div>
-      <div class="era-seg" data-era="4" onclick="scrollToEra(4)" title="Remote"></div>
-      <div class="era-seg" data-era="5" onclick="scrollToEra(5)" title="Seek &amp; Employ"></div>
-    </div>
-
-    <div id="stream" onscroll="onStreamScroll()">
-      <div class="stream-inner" id="stream-inner"></div>
-    </div>
-
-    <!-- ── DETAIL ── -->
-    <div id="detail">
-      <div class="detail-header">
-        <div class="detail-type-tag">
-          <div class="detail-type-stripe" id="detail-stripe"></div>
-          <span id="detail-label">artifact</span>
-        </div>
-        <button class="detail-close" onclick="closeDetail()">✕</button>
-      </div>
-      <div class="detail-body" id="detail-body"></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Mobile bottom bar -->
-<div id="mobile-bar">
-  <button class="mobile-spine-seg active" data-era="0" onclick="scrollToEra(0)">
-    <div class="mobile-spine-bar" style="background:var(--era-pre)"></div>
-    <div class="mobile-spine-num">01</div>
-    <div class="mobile-spine-title">Origins</div>
-  </button>
-  <button class="mobile-spine-seg" data-era="1" onclick="scrollToEra(1)">
-    <div class="mobile-spine-bar" style="background:var(--era-loss)"></div>
-    <div class="mobile-spine-num">02</div>
-    <div class="mobile-spine-title">Suburbia</div>
-  </button>
-  <button class="mobile-spine-seg" data-era="2" onclick="scrollToEra(2)">
-    <div class="mobile-spine-bar" style="background:var(--era-build)"></div>
-    <div class="mobile-spine-num">03</div>
-    <div class="mobile-spine-title">Agency</div>
-  </button>
-  <button class="mobile-spine-seg" data-era="3" onclick="scrollToEra(3)">
-    <div class="mobile-spine-bar" style="background:var(--era-now)"></div>
-    <div class="mobile-spine-num">04</div>
-    <div class="mobile-spine-title">New York</div>
-  </button>
-  <button class="mobile-spine-seg" data-era="4" onclick="scrollToEra(4)">
-    <div class="mobile-spine-bar" style="background:var(--era-pre)"></div>
-    <div class="mobile-spine-num">05</div>
-    <div class="mobile-spine-title">Remote</div>
-  </button>
-  <button class="mobile-spine-seg" data-era="5" onclick="scrollToEra(5)">
-    <div class="mobile-spine-bar" style="background:var(--era-loss)"></div>
-    <div class="mobile-spine-num">06</div>
-    <div class="mobile-spine-title">Now</div>
-  </button>
-  <button class="mobile-field-btn" onclick="openField()">
-    <span class="mobile-field-icon">◈</span>
-    <span>Field</span>
-  </button>
-</div>
-
 <script>
-// ═══ TYPES ═══
-const TYPES = {
-  figma:  { label:'Figma',  color:'var(--t-figma)',  icon:'◈' },
-  code:   { label:'Code',   color:'var(--t-code)',   icon:'{ }' },
-  note:   { label:'Note',   color:'var(--t-note)',   icon:'✎' },
-  media:  { label:'Media',  color:'var(--t-media)',  icon:'▶' },
-  sketch: { label:'Sketch', color:'var(--t-sketch)', icon:'△' },
-  live:   { label:'Live',   color:'var(--t-live)',   icon:'◆' },
-  photo:  { label:'Photo',  color:'var(--t-media)',  icon:'◎' },
-  work:   { label:'Work',   color:'var(--t-figma)',  icon:'◧' },
-};
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const TRACKS = [
+  // ── Kill 'Em All (1983) ───────────────────────────────────────────────────
+  { id:1,  album:"Kill 'Em All",       year:1983, tags:['speed','aggression','metal'],        text:"Hit the Lights opens with a pure velocity statement — speed and volume elevated to a kind of manifesto for what thrash metal would become." },
+  { id:2,  album:"Kill 'Em All",       year:1983, tags:['mythology','war','power'],           text:"The Four Horsemen reframes the biblical apocalypse as a vehicle for guitar interplay, with Hetfield's extended metaphor riding a relentless galloping rhythm." },
+  { id:3,  album:"Kill 'Em All",       year:1983, tags:['speed','aggression','lifestyle'],    text:"Motorbreath is a brief, breathless celebration of living fast, treating exhaustion as a moral failing rather than a natural consequence." },
+  { id:4,  album:"Kill 'Em All",       year:1983, tags:['aggression','defiance','hell'],      text:"Jump in the Fire adapts an earlier Diamond Head-influenced demo into a lurching invitation from a demonic narrator, one of Hetfield's first experiments in writing from an antagonist's perspective." },
+  { id:5,  album:"Kill 'Em All",       year:1983, tags:['isolation','bass','trauma'],         text:"(Anesthesia) – Pulling Teeth is the album's anomaly — Cliff Burton's solo bass showcase, aching and strange, hinting at emotional depths the rest of the record barely acknowledged." },
+  { id:6,  album:"Kill 'Em All",       year:1983, tags:['aggression','metal','community'],    text:"Whiplash is essentially a love letter to the pit, collapsing the distance between performer and audience into a single thrashing body." },
+  { id:7,  album:"Kill 'Em All",       year:1983, tags:['power','mythology','darkness'],      text:"Phantom Lord builds a feudal fantasy villain with convincing menace, showing the band could sustain a dramatic narrative across a longer track without losing momentum." },
+  { id:8,  album:"Kill 'Em All",       year:1983, tags:['war','aggression','defiance'],       text:"No Remorse is an early example of Metallica's war-as-spectacle mode — the carnage described with such aesthetic relish that moral critique becomes genuinely ambiguous." },
+  { id:9,  album:"Kill 'Em All",       year:1983, tags:['aggression','predator','metal'],     text:"Seek and Destroy remains a live staple four decades on, its central riff so perfectly calibrated that the song functions as both threat and anthem." },
+  { id:10, album:"Kill 'Em All",       year:1983, tags:['metal','community','aggression'],    text:"Metal Militia closes the debut as collective declaration, the band explicitly positioning thrash as a unified movement rather than just a style." },
 
-const ERA_COLORS = ['var(--era-pre)','var(--era-loss)','var(--era-build)','var(--era-now)','var(--t-live)','var(--t-figma)'];
-const ERA_LABELS = ['Origins · 2005–2013','Suburbia Startup · 2013–2016','Agency Life · 2016–2018','New York · 2018–2021','Remote · 2021–2023','Seek & Employ · 2023–'];
+  // ── Ride the Lightning (1984) ─────────────────────────────────────────────
+  { id:11, album:'Ride the Lightning',  year:1984, tags:['death','fear','punishment'],         text:"Fight Fire with Fire opens with pastoral acoustic guitar before detonating into a nuclear-age parable about mutually assured destruction as the only available logic." },
+  { id:12, album:'Ride the Lightning',  year:1984, tags:['death','punishment','justice'],      text:"Ride the Lightning takes the condemned prisoner's interiority seriously — fear, confusion, and rage in the moments before execution — making capital punishment viscerally personal." },
+  { id:13, album:'Ride the Lightning',  year:1984, tags:['love','loss','grief'],               text:"For Whom the Bell Tolls draws on Hemingway's wartime meditation to craft a tolling, doom-laden portrait of soldiers dying for purposes they no longer understand." },
+  { id:14, album:'Ride the Lightning',  year:1984, tags:['despair','suicide','darkness'],      text:"Fade to Black was the band's first ballad and their most controversial — the gradual dimming of its arrangement mirrors the psychological logic of someone talking themselves toward the edge." },
+  { id:15, album:'Ride the Lightning',  year:1984, tags:['mythology','power','occult'],        text:"Trapped Under Ice channels claustrophobic cryogenic horror, an early sign of the band's interest in the body as something that can be imprisoned as much as the mind." },
+  { id:16, album:'Ride the Lightning',  year:1984, tags:['defiance','speed','aggression'],     text:"Escape is often dismissed as the album's weakest link, but its blunt individualism — leave the herd, trust no one — anticipates the antisocial streak running through much of the band's later work." },
+  { id:17, album:'Ride the Lightning',  year:1984, tags:['war','death','futility'],            text:"Creeping Death retells the Exodus plagues as thrash theater, the crowd's ritual chant of \"Die!\" transforming scripture into something communal and cathartic." },
+  { id:18, album:'Ride the Lightning',  year:1984, tags:['instrumental','darkness','power'],   text:"The Call of Ktulu is an eight-minute Lovecraft adaptation that proved the band could sustain dread across an entire side of vinyl without a single vocal line." },
 
-const STREAM = [
-  // ── ERA 0: BEFORE ──
-  { type:'era', id:'era-0', era:0, num:'01', title:'Okay, so this is different.', period:'2005 – 2013', color:'var(--era-pre)' },
-  { type:'body', text:'This is opinionated — these are not mere musings of my mind, but the manifestation of a thinker. A thinker & maker.' },
-  { type:'artifact', id:'a1', atype:'photo', era:0, period:'2005–2006', title:'First Build',
-    sentence:'I built my first computer circa 2005. I immediately installed pirated copies of Photoshop and Illustrator.',
-    desc:'Bootstrap roots. No formal instruction — just a machine, software I had no right to own, and a compulsion to make things look considered. The pirated copies of Adobe CS were my university. I did not know it at the time.',
-    specs:[{k:'Stack',v:'PC build · Adobe CS pirate'},{k:'What I had',v:'Curiosity and zero budget'},{k:'What it became',v:'A twenty-year career'}],
-    img:'https://i.ibb.co/fdxZdwwC/1-d-MG5-YE20sk-Uzo3z7-GIyf1w.webp',
-    url:'https://wolfie.love' },
-  { type:'body', text:'While I did not study at university long enough to graduate — stop-out, not drop-out — I studied what I saw around me. I observed, amalgamated, and carried my craft through conviction.' },
-  { type:'artifact', id:'a2', atype:'photo', era:0, period:'2006–2012', title:'The Self-Curriculum',
-    sentence:'I read books, examined magazines, studied typography, and took on client work. I built faux website concepts just to understand the medium.',
-    desc:'Every magazine was a masterclass. Every website was a wireframe waiting to be reversed. I studied typography the way others study mathematics — as a system with rules worth internalizing and eventually worth breaking.',
-    specs:[{k:'Method',v:'Observation · imitation · deviation'},{k:'Sources',v:'Books · magazines · client work · faux concepts'},{k:'Missing',v:'A diploma. Did not need it.'}],
-    img:'https://i.ibb.co/9mcrj9tg/1-h9lj-VOzz-RT-Irakga-DSWv-Q.webp',
-    url:'' },
-  { type:'pull', text:'Conviction counters convention. Strong belief resists being carried by the current.' },
-  { type:'artifact', id:'a3', atype:'photo', era:0, period:'2012', title:'The Craigslist Post',
-    sentence:'I responded to a Craigslist post that changed everything — a cover letter into the void, a garage startup that became my formal education.',
-    desc:'The kind of opportunity that only appears if you are already moving. It was not a prestigious offer. It was a door left slightly open — and I walked through it. That garage startup in the suburbs of Philadelphia became everything I needed.',
-    specs:[{k:'Channel',v:'Craigslist'},{k:'Role',v:'Unknown, undefined, unlimited'},{k:'Outcome',v:'Four years of real education'}],
-    img:'https://i.ibb.co/mg5GQc5/1-lm5-BUxr0d-Dq73b-Woi3vy4w.webp',
-    url:'' },
-  { type:'break' },
+  // ── Master of Puppets (1986) ──────────────────────────────────────────────
+  { id:19, album:'Master of Puppets',   year:1986, tags:['war','corruption','power'],          text:"Battery opens with classical acoustic counterpoint that snaps instantly into thrash, a structural trick that defines the entire album's method: beauty weaponized." },
+  { id:20, album:'Master of Puppets',   year:1986, tags:['addiction','control','despair'],     text:"Master of Puppets is addiction personified as a sadistic puppetmaster — the drug speaks in the second person, making the listener complicit in the narrator's self-destruction." },
+  { id:21, album:'Master of Puppets',   year:1986, tags:['war','futility','trauma'],           text:"The Thing That Should Not Be pulls Lovecraftian imagery into a slow, crushing meditation on the human encounter with forces that cannot be named or defeated." },
+  { id:22, album:'Master of Puppets',   year:1986, tags:['grief','loss','darkness'],           text:"Welcome Home (Sanitarium) uses the psychiatric ward as a metaphor for any system that pathologizes inconvenient minds, its dynamics shifting between paranoid quiet and explosive protest." },
+  { id:23, album:'Master of Puppets',   year:1986, tags:['war','futility','aggression'],       text:"Disposable Heroes is among the most damning anti-war statements in metal — the soldier reduced to an expendable unit, recycled until dead, the military machine indifferent to the body inside the uniform." },
+  { id:24, album:'Master of Puppets',   year:1986, tags:['corruption','power','religion'],     text:"Leper Messiah is a swaggering evisceration of televangelist culture, skewering the transactional relationship between faith and money with particular venom." },
+  { id:25, album:'Master of Puppets',   year:1986, tags:['instrumental','grief','memory'],     text:"Orion is the album's still centre — an instrumental elegiac enough to have been played at Cliff Burton's funeral, its melodic development more emotionally articulate than most rock songs with words." },
+  { id:26, album:'Master of Puppets',   year:1986, tags:['darkness','power','aggression'],     text:"Damage Inc. closes the album at maximum velocity, Hetfield's lyrics treating violence as a first language and the riff as the only grammar that matters." },
 
-  // ── ERA 1: SUBURBS ──
-  { type:'era', id:'era-1', era:1, num:'02', title:'Suburbia Startup', period:'2013 – 2016', color:'var(--era-loss)' },
-  { type:'body', text:'Turn5 Inc. The kind of place where you wear the hat you want. I was handed a brand new PC and a Canon Rebel DSLR and told, more or less, to figure it out.' },
-  { type:'artifact', id:'a4', atype:'photo', era:1, period:'2013', title:'Turn5 · First Days',
-    sentence:'Charged with designing for web properties, product packaging, printed catalogues, emails and ads — all across multiple brand systems.',
-    desc:'A multi-hat shop in the best possible sense. Design, photography, retouching, email marketing — all on the same day, in the same chair. The Canon Rebel became an extension of my hand. OEM quality product photography, thousands of parts, exacting color match standards.',
-    specs:[{k:'Disciplines',v:'Web · Print · Photo · Email'},{k:'Output',v:'Catalogues · ads · brand systems'},{k:'Camera',v:'Canon Rebel DSLR'}],
-    img:'https://i.ibb.co/fG0dXSr0/1-m7-Hfhu-QO4-Ugr1-Vte-Zf6it-A.webp',
-    url:'' },
-  { type:'artifact', id:'a5', atype:'photo', era:1, period:'2013–2015', title:'Product Photography at Scale',
-    sentence:'Photographing and retouching thousands of parts. Specializing in color match and OEM quality.',
-    desc:'There is a precision to product photography that teaches you things about craft no design school will. Color accuracy is not aesthetic — it is functional. A part that looks wrong does not sell. I retouched thousands of automotive components to exact factory standards.',
-    specs:[{k:'Volume',v:'Thousands of SKUs'},{k:'Standard',v:'OEM color match'},{k:'Skill built',v:'Precision at scale'}],
-    img:'https://i.ibb.co/C38FHDx9/1-FYt-Vic-HKj-LDPLW2rcn-J1u-A.webp',
-    url:'' },
-  { type:'artifact', id:'a6', atype:'work', era:1, period:'2014–2016', title:'Design By Data · Brand Growth',
-    sentence:'We designed everything from ground-up. A lifestyle brand that grew from ten to forty million per year during my time at Turn5.',
-    desc:'Pivot to web design, focusing on email marketing and bespoke feature design. We built a lifestyle brand from scratch — package design, catalogue design, email, ads, web. The brand grew from ten to forty million per year. I played my part. Then I wanted city life.',
-    specs:[{k:'Revenue growth',v:'$10M → $40M / year'},{k:'Disciplines',v:'Package · catalogue · web · email'},{k:'Approach',v:'Data-driven design decisions'}],
-    img:'https://i.ibb.co/KJsXgPv/1-dy-MNhi-XFPWPe9og0-dbv-Q.webp',
-    url:'' },
-  { type:'artifact', id:'a7', atype:'photo', era:1, period:'2015–2016', title:'Leadnomics · Lead de-Generation [sic]',
-    sentence:'My job was to make it easy for users to make catastrophic financial decisions. I achieved a 95.8% conversion rate — actually 98.5%, but ninety-five-point-eight sounds less evil.',
-    desc:'Paradigm shifty. Multiple verticals but the cash cow was payday loans — I did not know this until after I started. The pay and perks were great. Free lunches, flexible work, nice views. Seeing the city skyline from across the river behooved my next career move.',
-    specs:[{k:'Conversion rate',v:'95.8% (actually 98.5%)'},{k:'Method',v:'Responsive design · rigorous A/B testing'},{k:'Exit condition',v:'Broken clavicle · moral inventory'}],
-    img:'https://i.ibb.co/N3Sj82y/6463e2dfb2d84c89977adcf7-IMG-20200204-185021-01.jpg',
-    url:'' },
-  { type:'pull', text:'Business bides by imperative, not by idealism.' },
-  { type:'artifact', id:'a8', atype:'photo', era:1, period:'2016', title:'The Clavicle & The Haiku',
-    sentence:'A completely comminuted clavicle from a cycling slip along the Schuylkill. Karma? I think so. Rebuilding my bones, while rearchitecturing my future.',
-    desc:'It gave me a moment to pause, evaluate, and act. Recovery became curriculum. I spent the downtime learning to code — HTML, CSS, and JavaScript. I built an interactive haiku to test my skills. It was not profound, but it proved potential. Enter agency life.',
-    specs:[{k:'Injury',v:'Comminuted clavicle · Schuylkill River Trail'},{k:'Recovery output',v:'HTML · CSS · JS · interactive haiku'},{k:'Lesson',v:'Humility is a hell of a teacher'}],
-    img:'https://i.ibb.co/Z1NBn9Px/clavicle.webp',
-    url:'' },
-  { type:'gallery', id:'gallery-1', label:'Suburbia · Work', items:['a4','a5','a6','a7','a8'] },
-  { type:'break' },
+  // ── …And Justice for All (1988) ───────────────────────────────────────────
+  { id:27, album:'And Justice for All', year:1988, tags:['justice','corruption','power'],      text:"Blackened opens the Justice era with apocalyptic environmentalism — the earth personified as a dying body, poisoned by the same industrial systems that bankroll the justice the album title invokes." },
+  { id:28, album:'And Justice for All', year:1988, tags:['justice','corruption','law'],        text:"…And Justice for All diagnoses a legal system so thoroughly captured by wealth that justice becomes a commodity — available to those who can afford it, rationed or withheld from those who cannot." },
+  { id:29, album:'And Justice for All', year:1988, tags:['war','futility','trauma'],           text:"Eye of the Beholder turns the First Amendment into a paradox — freedom of speech described as simultaneously guaranteed and impossible, watched and revoked." },
+  { id:30, album:'And Justice for All', year:1988, tags:['war','trauma','mortality'],          text:"One is a masterclass in dynamic escalation, starting from the inside of a limbless veteran's consciousness and building to a mechanical firing-squad fury that turns the anti-war message inescapable." },
+  { id:31, album:'And Justice for All', year:1988, tags:['justice','defiance','aggression'],  text:"The Shortest Straw examines McCarthyite paranoia and blacklisting — the social machinery of accusation and exclusion rendered as thrash, with the accused's rage given structural form." },
+  { id:32, album:'And Justice for All', year:1988, tags:['mythology','darkness','fear'],       text:"Harvester of Sorrow turns domestic violence and generational trauma into a slow, suffocating groove — the monster is a father, and the horror is recognizable." },
+  { id:33, album:'And Justice for All', year:1988, tags:['fear','darkness','trauma'],          text:"The Frayed Ends of Sanity tracks a mind unraveling in real time, the music fragmenting alongside the narrator's grip on consensus reality." },
+  { id:34, album:'And Justice for All', year:1988, tags:['instrumental','power','darkness'],   text:"To Live Is to Die is the band's memorial to Cliff Burton — a long, shifting instrumental built around a spoken poem Burton wrote, his voice absent but his presence structural." },
+  { id:35, album:'And Justice for All', year:1988, tags:['corruption','media','power'],        text:"Dyers Eve closes the album as a furious letter from a stunted adult to the parents who sheltered him from reality — overprotection reframed as a form of violence." },
 
-  // ── ERA 2: AGENCY ──
-  { type:'era', id:'era-2', era:2, num:'03', title:'Agency Life', period:'2016 – 2018', color:'var(--era-build)' },
-  { type:'body', text:'One Sixty Over Ninety — my heartrate when offered a job as an Interaction Designer in Center City, Philadelphia. I took a pay cut to join their Interactive Department, but I was there to learn.' },
-  { type:'artifact', id:'a9', atype:'photo', era:2, period:'2016', title:'160/90 · Enter #AgencyLife',
-    sentence:'Clients included Comcast, Kent State, and the Philadelphia Eagles. Long days, longer nights, lots of weekends.',
-    desc:'The culture demanded we dare. The agency invited creatives to take risks. The work was not scientific. It was expressive. It was novel. It was considered. As an interactive designer, I had a hand in every aspect of the creative process. Grayscale wireframes to production.',
-    specs:[{k:'Clients',v:'Comcast · Kent State · Eagles'},{k:'Role',v:'Interaction Designer'},{k:'Mode',v:'Long days · longer nights · lots of weekends'}],
-    img:'https://i.ibb.co/5gGkM1yF/1-a-QOv-TWfv-Awf6m7-oy-Zy-Gy-A.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a10', atype:'work', era:2, period:'2016–2017', title:'Interactive Work · 160/90',
-    sentence:'The work was expressive, novel, considered. I had a hand in every aspect of the creative process.',
-    desc:'Every project moved through my hands at some stage. The agency model forced a breadth I had not previously experienced — pitch, concept, execution, delivery. The clients included some of Philadelphia\'s most prominent institutions.',
-    specs:[{k:'Process',v:'Pitch → wire → design → ship'},{k:'Output',v:'Interactive experiences across verticals'},{k:'Clients',v:'University · Sports · Telecom'}],
-    img:'https://i.ibb.co/fd8Ycjyv/1-pch6xh-Ep-Fo-Xxli-AGb-Nnr7-Q.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a11', atype:'photo', era:2, period:'2017', title:'O3 World · Agile Product Shop',
-    sentence:'O3 World — a digital product shop in Fishtown. Agile in nature, scrum led. Daily stand-ups, Lean UX, real products shipped.',
-    desc:'We workshopped with whiteboards, wireframed with Balsamiq, and shipped. Clients: La Colombe, Vertex, SEIC. E-commerce via Shopify, web apps for small business, enterprise financial products. We built things better, faster, smarter.',
-    specs:[{k:'Clients',v:'La Colombe · Vertex · SEIC'},{k:'Method',v:'Lean UX · certified scrum master'},{k:'Output',v:'E-commerce · web apps · enterprise product'}],
-    img:'https://i.ibb.co/Swf714Sd/o3.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a12', atype:'work', era:2, period:'2017–2018', title:'Workarea · Proprietary SaaS',
-    sentence:'Downtown from Fishtown was Workarea — proprietary SaaS. Napkin sketches over high-fidelity mockups. Direct developer collaboration.',
-    desc:'A dev-shop through and through. No mockup theater — just napkin sketches and real conversations with engineers. We built things better, faster, smarter. The company sold. I needed to reframe. I found my next opportunity pointing north — toward New York.',
-    specs:[{k:'Product',v:'Proprietary CMS / SaaS platform'},{k:'Process',v:'Sketch → dev collab → ship'},{k:'Outcome',v:'Company acquired · I moved on'}],
-    img:'https://i.ibb.co/ZzCTQbWf/1-e-SNZnvlr-UJAz-AL1-Jx-T0-ZHQ.webp',
-    url:'https://intoview.pro' },
-  { type:'pull', text:'The culture demanded we dare. The work was expressive. It was novel. It was considered.' },
-  { type:'gallery', id:'gallery-2', label:'Agency · Work', items:['a9','a10','a11','a12'] },
-  { type:'break' },
+  // ── Metallica / The Black Album (1991) ────────────────────────────────────
+  { id:36, album:'The Black Album',     year:1991, tags:['control','trauma','darkness'],       text:"Enter Sandman distills childhood fear into an arena-sized lullaby — the monster under the bed given a wall of sound and a production budget, suddenly everyone's nightmare made universal." },
+  { id:37, album:'The Black Album',     year:1991, tags:['justice','war','trauma'],            text:"Sad but True describes a shadow self — the darker impulse that narrates from inside, the part that controls the part that thinks it's in control." },
+  { id:38, album:'The Black Album',     year:1991, tags:['death','grief','acceptance'],        text:"Holier Than Thou dismantles self-righteousness with economical aggression — the song's anger is righteous in the act of attacking righteousness, a paradox it earns through sheer momentum." },
+  { id:39, album:'The Black Album',     year:1991, tags:['mortality','acceptance','grief'],    text:"The Unforgiven is a character study in accumulated bitterness — a life lived in reaction to external judgment, the resentment so old it has become the self." },
+  { id:40, album:'The Black Album',     year:1991, tags:['love','loss','isolation'],           text:"Wherever I May Roam romanticizes rootlessness with enough guitar swagger to make homelessness sound like philosophy — road life as spiritual condition." },
+  { id:41, album:'The Black Album',     year:1991, tags:['trauma','isolation','despair'],      text:"Don't Tread on Me is the album's most chest-puffed nationalist moment, more interesting as a document of early-90s American triumphalism than as music." },
+  { id:42, album:'The Black Album',     year:1991, tags:['mortality','acceptance','fear'],     text:"Through the Never packs an existential road-trip into three minutes, the narrator racing toward a horizon that keeps receding — movement as the only answer to the unanswerable." },
+  { id:43, album:'The Black Album',     year:1991, tags:['grief','loss','love'],               text:"Nothing Else Matters was written as a private love letter during a tour phone call and became Metallica's most covered song — intimacy at stadium scale, which should be a contradiction." },
+  { id:44, album:'The Black Album',     year:1991, tags:['control','defiance','darkness'],     text:"Of Wolf and Man pairs lycanthrope mythology with a surprisingly earnest ecological subtext — the wolf as a creature that belongs to nature, not to civilization's categories." },
+  { id:45, album:'The Black Album',     year:1991, tags:['trauma','control','darkness'],       text:"The God That Failed is Hetfield's most direct excavation of his Christian Science upbringing — faith weaponized against medicine, and the grief of a child who watched it fail." },
+  { id:46, album:'The Black Album',     year:1991, tags:['isolation','identity','despair'],    text:"My Friend of Misery is a portrait of someone so deeply invested in suffering that the suffering has become a social identity — grief as personality." },
+  { id:47, album:'The Black Album',     year:1991, tags:['darkness','mortality','fear'],       text:"The Struggle Within closes the album on a note of furious introspection — the enemy located not in any system or institution but in the narrator's own compulsive negativity." },
 
-  // ── ERA 3: NEW YORK ──
-  { type:'era', id:'era-3', era:3, num:'04', title:'New York', period:'2018 – 2021', color:'var(--era-now)' },
-  { type:'body', text:'Enter FlightPath. Hello, New York City. Emerging from bankruptcy, the agency served the pharmaceutical sector. They needed my help. This was my runway.' },
-  { type:'artifact', id:'a13', atype:'photo', era:3, period:'2018', title:'The Commute · Philly to Manhattan — and back',
-    sentence:'Commuting from Philly to Manhattan — and back — every business day for a full year. Up and out by five. Home by ten. Maybe.',
-    desc:'Through the tunnel, through Penn Station, up to Midtown. Two skylines, three hours apart. I saw both sunrise and sunset every day away from home. Worth it? Totally. The city was the brief.',
-    specs:[{k:'Route',v:'Philadelphia → Midtown Manhattan · daily'},{k:'Time',v:'~6 hours commute round trip'},{k:'Reward',v:'NYC as design school'}],
-    img:'https://i.ibb.co/23WVc0PW/tunnel-ANIMATION.gif',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a14', atype:'photo', era:3, period:'2018–2019', title:'FlightPath · Influence & Confidence',
-    sentence:'Here I had influence. With that came confidence. I had agency at this agency.',
-    desc:'WCAG compliance for pharma clients. Rigorous accessibility work for Merck, Vetsulin, plus Charter, Organic Girl, Goya, and several non-profits. The environment — signage, colors, wayfinding — became creative input. New York as a living design system.',
-    specs:[{k:'Specialty',v:'WCAG accessibility · pharma UX'},{k:'Clients',v:'Merck · Charter · Organic Girl · Goya'},{k:'Insight',v:'The city itself as design reference'}],
-    img:'https://i.ibb.co/HpnrrYMR/2269419019461331921-5144774570.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a15', atype:'work', era:3, period:'2019–2020', title:'LiveArea · IC to Manager',
-    sentence:'From Workarea to LiveArea. From IC to Manager. I owned the UX process for a gamut of B2B and B2C e-commerce brands.',
-    desc:'The most ownership I had held to date. I ran discovery. I directed and delegated. I socialized my solutions. The Salesforce Commerce Cloud platform across brands. I became someone who shapes process, not just executes it.',
-    specs:[{k:'Platform',v:'Salesforce Commerce Cloud'},{k:'Scope',v:'B2B & B2C e-commerce'},{k:'Shift',v:'IC → Manager · strategy + execution'}],
-    img:'https://i.ibb.co/XZymcJck/pinstripes.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a16', atype:'work', era:3, period:'2019', title:'GNC · Mobile-First Navigation',
-    sentence:'General Nutrition Centers. We modernized and optimized the entire experience — mobile-first navigation, fresh visual system, shake things up.',
-    desc:'A brand with enormous legacy weight and a digital presence that had not kept pace. We rebuilt navigation from the ground up — mobile-first, performance-conscious, customer-centered. One-point-two million reasons it mattered.',
-    specs:[{k:'Client',v:'General Nutrition Centers'},{k:'Scope',v:'Full navigation · mobile-first redesign'},{k:'Impact',v:'Modernized e-commerce at scale'}],
-    img:'https://i.ibb.co/pBMMxY1Z/11.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a17', atype:'work', era:3, period:'2019–2020', title:'Cards Against Bad UX',
-    sentence:'I crafted Cards Against Bad UX — a card game played in workshops to humanize the user and depoliticize the design conversation.',
-    desc:'Clients were overwhelmed with unfamiliar UX process. By shifting the conversation from features to feelings — from the guest user and content manager, not the executive stakeholder — we saved the contract. Clients always know how something makes them feel, even when they cannot say what they want.',
-    specs:[{k:'Format',v:'Card game · workshop tool'},{k:'Goal',v:'Empathy over politics'},{k:'Outcome',v:'Contract saved · alignment unlocked'}],
-    img:'https://i.ibb.co/jv7dC3hH/1-m-Zdgz7y-Elh7n-WKuu-S8-XZ2g.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a18', atype:'photo', era:3, period:'2020', title:'Code and Theory · TikTok For Business',
-    sentence:'Code and Theory — sixty-two floors up in One World Trade, working on TikTok For Business. Senior Designer to ACD.',
-    desc:'The logos were getting bigger — literally. Directly Responsible Individual on one of the fastest-growing advertising platforms in the world. Sixty-two floors above Manhattan.',
-    specs:[{k:'Client',v:'TikTok For Business'},{k:'Location',v:'One World Trade · 62nd floor'},{k:'Role',v:'Senior Designer → ACD → DRI'}],
-    img:'https://i.ibb.co/9qFzTQH/tiktok-proto-gif.gif',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a19', atype:'photo', era:3, period:'2020–21', title:'Publicis Sapient · BNY Mellon',
-    sentence:'Publicis Sapient — embedded in Digital Transformation for BNY Mellon. I became the de facto Team Lead because someone had to be.',
-    desc:'I was not hired as a lead. I became one. Exhaustive research, industry research, client workshops, consistent in-office presence when others were remote. Design systems at the data paradigm level. Global scale. Then the engagement ended.',
-    specs:[{k:'Client',v:'BNY Mellon'},{k:'Scope',v:'Digital Transformation · design systems'},{k:'Role',v:'De facto lead · not the title · the function'}],
-    img:'https://i.ibb.co/XkM2hn8n/bny1.png',
-    url:'https://intoview.pro' },
-  { type:'pull', text:'Worth it? Totally. Two skylines, three hours apart, every single day.' },
-  { type:'break' },
+  // ── Load (1996) ───────────────────────────────────────────────────────────
+  { id:48, album:'Load',               year:1996, tags:['identity','change','darkness'],      text:"Ain't My Bitch opens the Load era as a declarative refusal — whatever burden is being handed to the narrator, he's not carrying it, a blunt reinvention after five years of stadium saturation." },
+  { id:49, album:'Load',               year:1996, tags:['mortality','darkness','isolation'],  text:"2 x 4 is a grinding, mid-tempo threat with a blues chassis — the song is essentially a vehicle for Hetfield's ability to imply physical menace through syllable placement alone." },
+  { id:50, album:'Load',               year:1996, tags:['mythology','power','darkness'],      text:"The House Jack Built is Load's most explicitly addiction-themed track, the house a metaphor for the body, the room for the mind, the dwelling dismantled by the substance living inside it." },
+  { id:51, album:'Load',               year:1996, tags:['justice','defiance','corruption'],   text:"Until It Sleeps was the commercial lead single — deceptively simple, with Hetfield's cancer-as-internal-enemy metaphor landing harder than the arrangement initially suggests." },
+  { id:52, album:'Load',               year:1996, tags:['identity','isolation','despair'],    text:"King Nothing traces the collapse of ambition into emptiness — the throne achieved, the view from the top confirming that the throne was never the point." },
+  { id:53, album:'Load',               year:1996, tags:['identity','darkness','trauma'],      text:"Hero of the Day is a delicate, almost tender track about the parasitic nature of heroism — the rescuer needing the victim as much as the victim needs rescuing." },
+  { id:54, album:'Load',               year:1996, tags:['change','isolation','grief'],        text:"Bleeding Me is Load's emotional centerpiece, a nine-minute examination of self-destruction as a form of spiritual seeking — bleeding as purification, the wound as a door." },
+  { id:55, album:'Load',               year:1996, tags:['speed','aggression','defiance'],     text:"Cure is a charging mid-album breather, the frustration of trying to fix what cannot be fixed given a percussive, restless energy." },
+  { id:56, album:'Load',               year:1996, tags:['identity','power','mythology'],      text:"Poor Twisted Me is a self-lacerating blues shuffle — the narrator wallowing with enough self-awareness to be embarrassed about the wallowing but not enough to stop." },
+  { id:57, album:'Load',               year:1996, tags:['aggression','defiance','speed'],     text:"Wasting My Hate is a compact, economical burst of aggression — the song is almost over before the listener has registered it has started, which is musically appropriate for a track about futile anger." },
+  { id:58, album:'Load',               year:1996, tags:['love','loss','grief'],               text:"Mama Said is Hetfield's acoustic reckoning with his mother's death and the faith that caused it — country-inflected, disarmingly vulnerable, proof that the quietest song on the record often carries the most weight." },
+  { id:59, album:'Load',               year:1996, tags:['corruption','power','justice'],      text:"Thorn Within is a guilt-drenched mid-tempo churn, the narrator's self-condemnation so thorough it becomes its own kind of pride." },
+  { id:60, album:'Load',               year:1996, tags:['death','power','mythology'],         text:"Ronnie is a cinematic ballad about a school shooter before that was a genre, the biography rendered without sentimentality or explanation — the absence of motive more disturbing than any analysis." },
+  { id:61, album:'Load',               year:1996, tags:['darkness','mortality','acceptance'], text:"The Outlaw Torn closes Load with an eleven-minute requiem for something lost that the song never quite names — the ambiguity feels intentional, grief too large for a single referent." },
 
-  // ── ERA 4: REMOTE ──
-  { type:'era', id:'era-4', era:4, num:'05', title:'Remote, Not Removed', period:'2021 – 2023', color:'var(--t-live)' },
-  { type:'body', text:'Something shifted as the world worked through the COVID pandemic. Once familiar faces faded behind canceled cameras. Now shadows, muffled, or on mute.' },
-  { type:'artifact', id:'a20', atype:'photo', era:4, period:'2021–22', title:'Camera On · Remote Mode',
-    sentence:'Less time commuting, more time computing. Camera on. Game-face on. The show must go on.',
-    desc:'I had enjoyed WFH privileges since 2011 — this was not new. But the isolation of the broader moment was real. Bandwidth redirected. I built more. I shipped more. The show must go on, and it did.',
-    specs:[{k:'Mode',v:'Full remote · camera on'},{k:'Output',v:'More building · more shipping'},{k:'Disposition',v:'The show must go on'}],
-    img:'https://i.ibb.co/B6vFwH6/zoom-zack.gif',
-    url:'' },
-  { type:'artifact', id:'a21', atype:'photo', era:4, period:'2022–23', title:'Down But Not Out · Low Voltage',
-    sentence:'I pivoted to low voltage contracting. I learned to terminate an RJ45 in thirty to forty-five seconds. Different parts of my brain.',
-    desc:'When I said rock & roll, I did not mean oldies. I paid my dues and kept moving. RJ45 termination, cable runs, security systems, cable management — commercial and residential. Twist parity. Steady hand. The same brain that once wireframed enterprise banking platforms. Humility is a hell of a teacher. I still have mouths to feed.',
-    specs:[{k:'Skills',v:'RJ45 · cable runs · security install'},{k:'Standard',v:'Commercial & residential'},{k:'Why',v:'Keep moving · mouths to feed'}],
-    img:'https://i.ibb.co/sJkpkV9Q/1-l4jg-O1-4g-Ey-Wy-IBEQZho0g.webp',
-    url:'' },
-  { type:'artifact', id:'a22', atype:'work', era:4, period:'2023', title:'Building on the Side',
-    sentence:'I repurposed intoview.pro as a platform for creative exploration. I built a note-taking app and a kanban board to scratch my own itch.',
-    desc:'These are not portfolio pieces — they are functioning products that prove I can build, not just design. intoview.pro. emdash.click. A note-taking app. A kanban board. Each one a proof that the disposition never went dormant.',
-    specs:[{k:'Products',v:'intoview.pro · emdash.click · notes app · kanban'},{k:'Stack',v:'Vanilla JS · no frameworks'},{k:'Signal',v:'Builder mentality · always on'}],
-    img:'https://i.ibb.co/ym1z1pyb/DSC05994.webp',
-    url:'https://intoview.pro' },
-  { type:'pull', text:'I am not worried about AI taking our jobs. My talent is presenting ideas that uplift imagination.' },
-  { type:'break' },
+  // ── Reload (1997) ─────────────────────────────────────────────────────────
+  { id:62, album:'Reload',             year:1997, tags:['speed','aggression','defiance'],     text:"Fuel distills Reload's arena ambitions into a single high-octane declaration — velocity as religion, the engine as the only god worth worshipping." },
+  { id:63, album:'Reload',             year:1997, tags:['mortality','grief','acceptance'],    text:"The Memory Remains features Marianne Faithfull's spectral presence as a faded fame metaphor — celebrity decay observed with more compassion than cruelty." },
+  { id:64, album:'Reload',             year:1997, tags:['isolation','identity','darkness'],   text:"Devil's Dance is a slow-burn seduction narrative, the tempter's voice low and patient, the melody doing the work of a raised eyebrow." },
+  { id:65, album:'Reload',             year:1997, tags:['war','trauma','futility'],           text:"The Unforgiven II extends the original's character study into a second chapter — the bitterness has curdled differently with age, more aware of its own circularity." },
+  { id:66, album:'Reload',             year:1997, tags:['love','darkness','isolation'],       text:"Better Than You is a strutting challenge, the narrator's confidence performing the very arrogance the song claims to critique." },
+  { id:67, album:'Reload',             year:1997, tags:['trauma','control','darkness'],       text:"Slither is a slow, greasy blues that channels the manipulative partner with uncomfortable accuracy — the language of care deployed as a tool of domination." },
+  { id:68, album:'Reload',             year:1997, tags:['identity','isolation','change'],     text:"Carpe Diem Baby turns the classical imperative toward darkness — seize the day, yes, but the day being seized is explicitly doomed, the urgency tinged with nihilism." },
+  { id:69, album:'Reload',             year:1997, tags:['mythology','darkness','power'],      text:"Bad Seed is a character study in inherited malevolence — nature over nurture argued with a grinding, patient insistence." },
+  { id:70, album:'Reload',             year:1997, tags:['grief','loss','mortality'],          text:"Where the Wild Things Are is Load's more introspective cousin — the wilderness internalized, the beast domesticated but still restless inside the house." },
+  { id:71, album:'Reload',             year:1997, tags:['justice','corruption','power'],      text:"Prince Charming deconstructs the savior myth — the rescue narrative revealed as a transaction, the rescuer's need as great as the rescued's." },
+  { id:72, album:'Reload',             year:1997, tags:['isolation','darkness','despair'],    text:"Low Man's Lyric is among Metallica's most stripped-back moments — hurdy-gurdy and acoustic guitar under a self-excoriating lyric about shame and social invisibility." },
+  { id:73, album:'Reload',             year:1997, tags:['aggression','defiance','speed'],     text:"Attitude is a minimalist hard-rock shrug — the kind of song that sounds effortless because it refuses to try, which is either honesty or laziness, depending on your generosity." },
+  { id:74, album:'Reload',             year:1997, tags:['mortality','darkness','acceptance'], text:"Fixxxer closes Reload with a slow-moving, psychologically dense examination of cycles — the damage repeated across generations, the child becoming the parent becoming the wound." },
 
-  // ── ERA 5: NOW ──
-  { type:'era', id:'era-5', era:5, num:'06', title:'Seek & Employ', period:'2023 – Present', color:'var(--t-figma)' },
-  { type:'body', text:'Currently seeking my next full-time role. I want work that matters with people who care. I am not looking for a title. I am looking for a team.' },
-  { type:'artifact', id:'a23', atype:'photo', era:5, period:'2023–24', title:'What I Offer',
-    sentence:'Systems thinking and hands-on prototyping. I bridge design and development because I have lived on both sides of the handoff.',
-    desc:'I have been the designer who could not explain the spec — and I became the one who could build it. I think. I make. I ship. A-list brands at global scale and bootstrap startup thinking at midnight. Non-linear career journey. All of it counts.',
-    specs:[{k:'Offer',v:'Systems thinking · hands-on prototyping'},{k:'Bridge',v:'Design ↔ Development'},{k:'Range',v:'Enterprise scale → bootstrap startup'}],
-    img:'https://i.ibb.co/840YDJMT/1-6ft-VCi9-Pi-L1q47-Vskw-Mb-WA.webp',
-    url:'https://reasonably.cc' },
-  { type:'artifact', id:'a24', atype:'live', era:5, period:'2025', title:'intoview.pro',
-    sentence:'A portfolio that refuses to be a portfolio. Built with its own bespoke narrative engine as a receipt of concept and craft.',
-    desc:'Single-page narrative engine with right-rail resume panel, multi-theme toggle, ghost overlay system, dark chapter moments, and sentence-progressive navigation. The platform demonstrating itself.',
-    specs:[{k:'URL',v:'zackgort.com'},{k:'Engine',v:'intoview · custom narrative'},{k:'Status',v:'Live'}],
-    img:'https://i.ibb.co/ym4M89VT/1-sq-USg-c1x-GQx-Zd-QS4-L7f-Sw.webp',
-    url:'https://intoview.pro' },
-  { type:'artifact', id:'a25', atype:'media', era:5, period:'2025–26', title:'Beyond the Work',
-    sentence:'I am not waiting on the world to change.',
-    desc:'I think my approach is emotional before it is academic. My real-lived experiences inform how I communicate in a world that can only describe those moments. The work I do, in any medium, attempts to earn its place. It seeks to earn the moment in which it exists. What follows, I hope, is more of that spirit continuously re-energizing and re-invigorating its concept of itself.',
-    specs:[{k:'Instrument',v:'Six-String · Southpaw Stratocaster'},{k:'Photography',v:'New York · my street photography'},{k:'Dog',v:'Wolfgang · a very good boy'}],
-    url:'https://raw.githubusercontent.com/ZACKGORT/ZACKGORT/main/waitingontheworldtochange_zackgort_v1720p.mp4' },
+  // ── St. Anger (2003) ──────────────────────────────────────────────────────
+  { id:75, album:'St. Anger',          year:2003, tags:['trauma','aggression','recovery'],    text:"Frantic is a raw, barely-produced opening salvo — Hetfield's rehab-adjacent anxiety given musical form in a song that sounds like it was recorded mid-crisis because it essentially was." },
+  { id:76, album:'St. Anger',          year:2003, tags:['aggression','trauma','identity'],    text:"St. Anger the title track arrives with its notorious snare sound as a kind of provocation — the anger is holy because it is honest, and the sloppiness is the sincerity." },
+  { id:77, album:'St. Anger',          year:2003, tags:['recovery','identity','change'],      text:"Some Kind of Monster is the album's therapeutic centerpiece — the band literally narrating their own group therapy, the dysfunction examined from inside the room where it lived." },
+  { id:78, album:'St. Anger',          year:2003, tags:['darkness','control','trauma'],       text:"Dirty Window is about the gap between self-perception and reality — looking out through glass that distorts, unable to tell whether the problem is the world or the medium." },
+  { id:79, album:'St. Anger',          year:2003, tags:['isolation','despair','trauma'],      text:"Invisible Kid gives voice to the socially invisible teenager — the unremarkable, the overlooked, the kid who doesn't register and suffers precisely because of that erasure." },
+  { id:80, album:'St. Anger',          year:2003, tags:['change','identity','recovery'],      text:"My World is a territorial rage-claim — the anger of someone who has just drawn a boundary and is not certain they have the right to draw it." },
+  { id:81, album:'St. Anger',          year:2003, tags:['trauma','control','aggression'],     text:"Shoot Me Again is a masochistic taunt — keep pushing, keep hitting, the endurance itself becomes a form of victory in a song that understands suffering as identity." },
+  { id:82, album:'St. Anger',          year:2003, tags:['anger','aggression','darkness'],     text:"Sweet Amber is a relapse portrait — the substance cast as lover, the relationship described with the grammar of desire rather than addiction." },
+  { id:83, album:'St. Anger',          year:2003, tags:['recovery','trauma','change'],        text:"The Unnamed Feeling names the unnamed feeling extensively across eight minutes — the depression that resists diagnosis, the darkness without a referent." },
+  { id:84, album:'St. Anger',          year:2003, tags:['aggression','defiance','power'],     text:"Purify is the album's most direct purge fantasy — burn it down, clear the site, start from what remains, the scorched-earth approach to the self." },
+  { id:85, album:'St. Anger',          year:2003, tags:['isolation','darkness','grief'],      text:"All Within My Hands begins as a love song before spiraling into something more disturbing — the possessiveness of the narrator tipping from devotion into something the song knows is wrong." },
 
-  { type:'body', text:'[all em—dashes seen herein were sourced from <a href="https://emdash.click" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor">emdash.click</a>]' },
-  { type:'body', text:'Zack Gort, thinker & maker' },
+  // ── Death Magnetic (2008) ─────────────────────────────────────────────────
+  { id:86, album:'Death Magnetic',     year:2008, tags:['mortality','darkness','power'],      text:"That Was Just Your Life opens the return-to-form album with a clock ticking into a riff — the birth moment weaponized, the entry into consciousness framed as the first step toward death." },
+  { id:87, album:'Death Magnetic',     year:2008, tags:['mortality','darkness','grief'],      text:"The End of the Line tracks a life reaching its terminus — the inventory of regrets delivered not with self-pity but with a kind of muscular accounting, the riff doing the emotional heavy lifting." },
+  { id:88, album:'Death Magnetic',     year:2008, tags:['darkness','trauma','isolation'],     text:"Broken, Beat and Scarred is a survival anthem for people who don't believe in survival anthems — the philosophy of endurance stripped of any optimism about what you'll look like when you arrive." },
+  { id:89, album:'Death Magnetic',     year:2008, tags:['mythology','darkness','power'],      text:"The Day That Never Comes is Death Magnetic's ballad — a soldier waiting for orders that celebrate the peace that never materializes, the day of relief always deferred." },
+  { id:90, album:'Death Magnetic',     year:2008, tags:['aggression','speed','power'],        text:"All Nightmare Long is a Soviet-era bio-weapon horror concept built around a riff of implacable menace — sleep as a vector for contamination, dreams weaponized." },
+  { id:91, album:'Death Magnetic',     year:2008, tags:['darkness','mortality','fear'],       text:"Cyanide treats suicide with an almost clinical calm — the decision described as a pharmacological fact, the deadness of the tone more disturbing than any dramatic staging would be." },
+  { id:92, album:'Death Magnetic',     year:2008, tags:['mythology','power','darkness'],      text:"The Unforgiven III completes the trilogy with the narrator finally addressing whatever force has withheld forgiveness — the confrontation is operatic, the resolution still withheld." },
+  { id:93, album:'Death Magnetic',     year:2008, tags:['addiction','control','darkness'],    text:"The Judas Kiss frames betrayal as intimacy — the closer the friend, the deeper the blade, the theological register lending the personal wound a cosmic dimension." },
+  { id:94, album:'Death Magnetic',     year:2008, tags:['speed','aggression','power'],        text:"Suicide and Redemption is an instrumental that earns its title — the dynamic arc from quiet ache to cathartic resolution covering the psychological distance implied by those two words." },
+  { id:95, album:'Death Magnetic',     year:2008, tags:['mortality','darkness','power'],      text:"My Apocalypse closes the album in a blur of speed and obliteration — a personal end-of-days, the apocalypse scaled to a single consciousness rather than a civilization." },
 
-  { type:'pull', text:'—made with <a href="https://wolfie.love" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor">wolfie.love*</a>' },
+  // ── Hardwired… to Self-Destruct (2016) ───────────────────────────────────
+  { id:96,  album:'Hardwired',         year:2016, tags:['aggression','speed','mortality'],    text:"Hardwired opens the double album in under three minutes of distilled nihilism — we're hardwired to self-destruct, the song argues, and the brevity of the argument is itself the point." },
+  { id:97,  album:'Hardwired',         year:2016, tags:['mythology','darkness','power'],      text:"Atlas, Rise! maps the Sisyphean burden onto a modern exhaustion — the weight unnamed but universal, the demand to keep carrying it regardless offered with unexpected melodic generosity." },
+  { id:98,  album:'Hardwired',         year:2016, tags:['mortality','fear','darkness'],       text:"Now That We're Dead plays with the posthumous perspective — the couple surveying their relationship from the other side of death, the love more visible in absence." },
+  { id:99,  album:'Hardwired',         year:2016, tags:['aggression','war','trauma'],         text:"Moth into Flame is the album's most pointed cultural critique — celebrity self-destruction observed with the detachment of someone who has watched the mechanism long enough to map it." },
+  { id:100, album:'Hardwired',         year:2016, tags:['isolation','darkness','despair'],    text:"Dream No More returns to Lovecraft's Cthulhu, the dreaming god stirred from slumber — the horror of waking something ancient that was better left sleeping." },
+  { id:101, album:'Hardwired',         year:2016, tags:['war','trauma','futility'],           text:"Halo on Fire is the album's emotional fulcrum — a long, Hetfield-baring examination of the gap between the person others need you to be and the person you discover yourself to be." },
+  { id:102, album:'Hardwired',         year:2016, tags:['aggression','defiance','speed'],     text:"Confusion draws on the experience of veterans with PTSD — the war continuing inside the body long after the body has left the theater, the mind the last battlefield to demilitarize." },
+  { id:103, album:'Hardwired',         year:2016, tags:['mortality','darkness','power'],      text:"ManUNkind is the album's bleakest sociological statement — humanity observed at sufficient distance to lose the benefit of the doubt, the species indicted by its own behavior." },
+  { id:104, album:'Hardwired',         year:2016, tags:['identity','change','trauma'],        text:"Here Comes Revenge is a slow, patient violence fantasy — the revenge is its own comfort, whether or not it ever materializes, the planning a form of psychological survival." },
+  { id:105, album:'Hardwired',         year:2016, tags:['darkness','isolation','despair'],    text:"Am I Savage? poses the question without answering it, the uncertainty more disturbing than a confession would be — the self unable to establish its own innocence." },
+  { id:106, album:'Hardwired',         year:2016, tags:['mythology','power','darkness'],      text:"Murder One is an elegy for Lemmy Kilmister — the tribute band paying homage through the vocabulary of a man who taught them that volume was a form of honesty." },
+  { id:107, album:'Hardwired',         year:2016, tags:['aggression','defiance','mortality'], text:"Spit Out the Bone closes the album as a transhumanist horror story — the machine replacing the human, the upgrade indistinguishable from the extinction, speed as the sound of replacement." },
 
-  
+  // ── 72 Seasons (2023) ─────────────────────────────────────────────────────
+  { id:108, album:'72 Seasons',        year:2023, tags:['identity','trauma','childhood'],     text:"72 Seasons opens with Hetfield's thesis — the first seventy-two seasons of a life, childhood through early adulthood, forming a self that the rest of existence merely decorates or destroys." },
+  { id:109, album:'72 Seasons',        year:2023, tags:['aggression','speed','defiance'],     text:"Shadows Follow is a relentless thrash exercise that argues the past is not behind you but beside you, moving at exactly your pace, matching every acceleration." },
+  { id:110, album:'72 Seasons',        year:2023, tags:['trauma','identity','darkness'],      text:"Screaming Suicide is the band's most direct engagement with suicidal ideation since Fade to Black — the inner voice personified with uncomfortable specificity, almost given a name." },
+  { id:111, album:'72 Seasons',        year:2023, tags:['war','trauma','futility'],           text:"Sleepwalk My Life Away tracks the dissociation of someone moving through existence without fully inhabiting it — the automation of daily life as a coping strategy that slowly becomes the life itself." },
+  { id:112, album:'72 Seasons',        year:2023, tags:['aggression','power','defiance'],     text:"You Must Burn! is an inquisition metaphor for contemporary cancel culture, the certainty of the mob given a thrash soundtrack that suggests the band knows exactly which side they want to be on." },
+  { id:113, album:'72 Seasons',        year:2023, tags:['identity','isolation','darkness'],   text:"Lux Aeterna is the album's most immediate single — a sugar-rush of classic-era speed that works as both nostalgia and argument, the band proving they can still write a complete thought in four minutes." },
+  { id:114, album:'72 Seasons',        year:2023, tags:['mythology','darkness','power'],      text:"Crown of Barbed Wire uses the Christ-crown image to map a self-imposed suffering — the martyr who forged the instrument of their own torment and then kept wearing it after the nails healed." },
+  { id:115, album:'72 Seasons',        year:2023, tags:['trauma','control','identity'],       text:"Chasing Light is the album's most optimistic gesture — the pursuit of something better framed not as naive but as the only sane response to the darkness the rest of the record catalogs." },
+  { id:116, album:'72 Seasons',        year:2023, tags:['isolation','despair','darkness'],    text:"If Darkness Had a Son gives the destructive impulse a genealogy — the darkness as an inheritor, passed down through families and generations, the son who arrives already formed." },
+  { id:117, album:'72 Seasons',        year:2023, tags:['identity','trauma','mortality'],     text:"Too Far Gone? interrogates the point of no return — whether a self can be so thoroughly damaged that repair is no longer a meaningful category, the question mark doing significant structural work." },
+  { id:118, album:'72 Seasons',        year:2023, tags:['mythology','darkness','power'],      text:"Room of Mirrors is the album's psychological hall-of-fame nightmare — every reflection showing a different distortion of the self, none of them wrong, none of them right." },
+  { id:119, album:'72 Seasons',        year:2023, tags:['mortality','acceptance','darkness'], text:"Inamorata closes the album in nearly eleven minutes — the word for being in love used to describe the relationship with one's own destruction, the longest track on the record making the case for ambivalence as wisdom." },
 ];
 
+const ALL_ALBUMS = [...new Set(TRACKS.map(d => d.album))];
+const ALL_TAGS   = [...new Set(TRACKS.flatMap(d => d.tags))].sort();
 
-// ═══ INLINE ═══
-function applyInline(t) {
-  return t
-    .replace(/\*\*(.*?)\*\*/g,'<span class="ac">$1</span>')
-    .replace(/\*(.*?)\*/g,'<span class="em">$1</span>')
-    .replace(/~~(.*?)~~/g,'<span class="dim">$1</span>');
-}
+// ── CANVAS ────────────────────────────────────────
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const cursorCanvas = document.getElementById('cursor-canvas');
+const cursorCtx    = cursorCanvas.getContext('2d');
+let W = canvas.width = cursorCanvas.width  = window.innerWidth;
+let H = canvas.height = cursorCanvas.height = window.innerHeight;
 
-// ═══ RENDER ═══
-function renderStream() {
-  const inner = document.getElementById('stream-inner');
-  let html = '';
-  STREAM.forEach(node => {
-    if (node.type === 'era') {
-      html += `<div class="era-block" id="${node.id}" data-era="${node.era}">
-        <div class="era-eyebrow" style="color:${node.color}">${node.period}</div>
-        <div class="era-num">${node.num}</div>
-        <div class="era-title">${node.title}</div>
-        <div class="era-period"><span style="background:${node.color}"></span>${node.period}</div>
-      </div>`;
-    } else if (node.type === 'body') {
-      html += `<div class="node body">${applyInline(node.text)}</div>`;
-    } else if (node.type === 'pull') {
-      html += `<div class="node pull">${applyInline(node.text)}</div>`;
-    } else if (node.type === 'break') {
-      html += `<div class="node break"></div>`;
-    } else if (node.type === 'artifact') {
-      const t = TYPES[node.atype] || TYPES.note;
-      html += `<div class="node artifact" id="node-${node.id}"
-        data-artifact-id="${node.id}"
-        data-artifact-url="${node.url||''}"
-        data-artifact-title="${node.title.replace(/"/g,'&quot;')}"
-        data-artifact-sentence="${node.sentence.replace(/"/g,'&quot;')}"
-        data-artifact-type="${t.label}"
-        data-artifact-icon="${t.icon}"
-        data-artifact-period="${node.period}"
-        data-artifact-color="${t.color}"
-        onclick="openDetail('${node.id}')">
-        <div class="node-type-tag" style="color:${t.color}">${t.icon} ${t.label} · ${node.period}</div>
-        <div class="artifact-card" style="position:relative">
-          <div class="artifact-type-stripe" style="background:${t.color}"></div>
-          <div class="artifact-card-top">
-            <div class="artifact-title">${node.title}</div>
-            <div class="artifact-sentence">${node.sentence}</div>
-          </div>
-          <div class="artifact-card-foot">
-            <span class="artifact-meta">${node.period}</span>
-            <span class="artifact-open-hint">${node.url ? '↗ preview' : 'open'}</span>
-          </div>
-          <div class="artifact-preview-icon" title="Preview" onclick="event.stopPropagation()">◎</div>
-        </div>
-      </div>`;
-    } else if (node.type === 'gallery') {
-      // Inline gallery — items are artifact ids listed in node.items
-      const items = node.items.map(id => STREAM.find(n => n.id === id)).filter(Boolean);
-      const gid = node.id || ('gallery-' + Math.random().toString(36).slice(2));
-      const itemsHtml = items.map(art => {
-        const t = TYPES[art.atype] || TYPES.note;
-        const thumbInner = art.img
-          ? `<img src="${art.img}" alt="${art.title}" loading="lazy">`
-          : `<div class="gallery-item-thumb-placeholder">${t.icon}</div>`;
-        return `<div class="gallery-item" data-id="${art.id}" onclick="openDetail('${art.id}')" style="color:${t.color}">
-          <div class="gallery-item-thumb">
-            <div class="gallery-item-stripe" style="background:${t.color}"></div>
-            ${thumbInner}
-          </div>
-          <div class="gallery-item-caption">
-            <div class="gallery-item-caption-type">${t.icon} ${t.label}</div>
-            <div class="gallery-item-caption-title">${art.title}</div>
-            <div class="gallery-item-caption-sentence">${art.sentence}</div>
-          </div>
-        </div>`;
-      }).join('');
-      html += `<div class="node gallery" id="${gid}">
-        <div class="gallery-node-header">
-          <span class="gallery-node-label">${node.label || 'Gallery'} · ${items.length} items</span>
-          <div class="gallery-toggle-group">
-            <button class="gallery-toggle active" onclick="setInlineGalleryView('${gid}','grid')" title="Grid">⊞</button>
-            <button class="gallery-toggle" onclick="setInlineGalleryView('${gid}','list')" title="List">☰</button>
-          </div>
-        </div>
-        <div class="gallery-grid" id="${gid}-body">${itemsHtml}</div>
-      </div>`;
-    }
-  });
-  inner.innerHTML = html;
-  updateProgress();
-}
+// font sizing — lerps between base and filtered scale
+const FONT_BASE    = 11;
+const FONT_LARGE   = 20;
+const SEP          = ' — ';
 
-// ═══ INLINE GALLERY VIEW TOGGLE ═══
-function setInlineGalleryView(gid, view) {
-  const body = document.getElementById(gid + '-body');
-  if (!body) return;
-  if (view === 'grid') {
-    body.className = 'gallery-grid';
-  } else {
-    body.className = 'gallery-list';
+// current interpolated size (animates smoothly)
+let fontT    = 0;   // 0 = unfiltered, 1 = filtered
+let fontTgt  = 0;
+const FONT_LERP = 0.07;
+
+function isFiltered() { return activeAlbum !== null || activeTags.size > 0; }
+
+function currentFontSize() { return FONT_BASE + (FONT_LARGE - FONT_BASE) * fontT; }
+function currentCharW()    { return currentFontSize() * 0.602; }
+function currentLineH()    { return currentFontSize() * 1.64; }
+function currentPadX()     { return 52; }
+function currentPadTop()   { return 58; }
+function currentFontFace() { return `300 ${currentFontSize().toFixed(2)}px "DM Mono", monospace`; }
+
+const TETHER_K  = 0.014;
+const DAMP      = 0.76;
+const REPEL_R   = 110;
+const REPEL_S   = 3.2;
+const BLOB_LERP = 0.11;
+const BLOB_RX   = 28;
+
+// ── LOGO DRAG ────────────────────────────────────
+const logoWidget  = document.getElementById('logo-widget');
+const topHeader   = document.getElementById('top-header');
+let logoDragging  = false, logoDX = 0, logoDY = 0;
+const LOGO_SIZE   = 140; // must match CSS width/height
+// initial position: centered top (matches CSS left:50% translateX(-50%))
+let logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2);
+let logoY = 22;
+
+logoWidget.addEventListener('mousedown', e => {
+  logoDragging = true;
+  logoDX = e.clientX - logoX;
+  logoDY = e.clientY - logoY;
+  e.preventDefault();
+});
+window.addEventListener('mouseup', () => { logoDragging = false; });
+window.addEventListener('mousemove', e => {
+  if (logoDragging) {
+    logoX = e.clientX - logoDX;
+    logoY = e.clientY - logoDY;
+    // override CSS centering with explicit position once dragged
+    topHeader.style.left      = logoX + 'px';
+    topHeader.style.top       = logoY + 'px';
+    topHeader.style.transform = 'none';
   }
-  // Update toggle button states
-  const wrap = document.getElementById(gid);
-  if (!wrap) return;
-  wrap.querySelectorAll('.gallery-toggle').forEach((btn, i) => {
-    btn.classList.toggle('active', (i === 0 && view === 'grid') || (i === 1 && view === 'list'));
+});
+function logoRect() {
+  return { left: logoX, top: logoY, width: LOGO_SIZE, height: LOGO_SIZE };
+}
+
+// ── INFO OVERLAY ──────────────────────────────────
+const INFO_TEXT = "if i may be frank is a hypothetical fan-made thought-experiment — a meditation on meaning as mass. one analytical sentence per track across metallica's eleven studio albums. the full discography rendered as a particle field: 119 critical observations, set in motion, waiting to be read. filter by album or theme and watch the text reorganize around what remains. built to ask what it feels like to hold a body of work all at once.";
+
+const infoOverlay  = document.getElementById('info-overlay');
+const infoCanvas   = document.getElementById('info-canvas');
+const infoCtx      = infoCanvas.getContext('2d');
+const infoBtn      = document.getElementById('info-btn');
+const infoClose    = document.getElementById('info-close');
+let   infoOpen     = false;
+let   infoChars    = [];
+let   infoMX = 0, infoMY = 0;
+let   infoBX = 0, infoBY = 0;
+
+function buildInfoLayout() {
+  infoChars = [];
+  const IW = Math.min(680, window.innerWidth - 80);
+  const IH = window.innerHeight;
+  infoCanvas.width  = IW;
+  infoCanvas.height = IH;
+  const FONT_SZ = 15;
+  const CW = FONT_SZ * 0.602;
+  const LH = FONT_SZ * 1.72;
+  const PAD = 48;
+  const maxW = IW - PAD * 2;
+  const words = INFO_TEXT.split(' ');
+  const lines = [];
+  let cur = [], curW = 0;
+  words.forEach(w => {
+    const seg = (cur.length ? ' ' : '') + w;
+    const sw  = seg.length * CW;
+    if (curW + sw > maxW && cur.length) {
+      lines.push(cur); cur = [w]; curW = w.length * CW;
+    } else { cur.push(seg); curW += sw; }
   });
-}
-
-// ═══ SCROLL + PROGRESS ═══
-function updateProgress() {
-  const s = document.getElementById('stream');
-  const pct = s.scrollTop / (s.scrollHeight - s.clientHeight) * 100;
-  document.getElementById('progress').style.width = Math.min(100, pct||0) + '%';
-}
-
-const eraIds = ['era-0','era-1','era-2','era-3','era-4','era-5'];
-
-function onStreamScroll() {
-  updateProgress();
-  const stream = document.getElementById('stream');
-  const scrollTop = stream.scrollTop;
-
-  let activeEra = 0;
-  eraIds.forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (el && el.offsetTop - 80 <= scrollTop) activeEra = i;
+  if (cur.length) lines.push(cur);
+  const totalH = lines.length * LH;
+  const startY = (IH - totalH) * 0.5;
+  lines.forEach((line, li) => {
+    let rx = PAD;
+    line.forEach(seg => {
+      for (let ci = 0; ci < seg.length; ci++) {
+        const seed = (li * 200 + ci) % 100 / 100;
+        infoChars.push({
+          ch: seg[ci],
+          restX: rx + ci * CW,
+          restY: startY + li * LH,
+          x: rx + ci * CW + (Math.random()-.5)*3,
+          y: startY + li * LH + (Math.random()-.5)*3,
+          vx:0, vy:0,
+          op: 0.28 + seed * 0.52,
+          fontSize: FONT_SZ,
+        });
+      }
+      rx += seg.length * CW;
+    });
   });
-
-  document.querySelectorAll('.era-seg').forEach((s,i) => s.classList.toggle('active', i === activeEra));
-  document.querySelectorAll('.era-nav-item').forEach((el,i) => el.classList.toggle('active', i === activeEra));
-  document.querySelectorAll('.mobile-spine-seg').forEach((el,i) => el.classList.toggle('active', i === activeEra));
-  document.querySelectorAll('.fsp-seg').forEach((el,i) => el.classList.toggle('active', i === activeEra));
-
-  // Show floating spine after scrolling past the sidebar era nav
-  const floatingSpine = document.getElementById('floating-spine');
-  if (floatingSpine) floatingSpine.classList.toggle('visible', scrollTop > 120);
-
-  const hud = document.getElementById('hud-era-text');
-  hud.textContent = ERA_LABELS[activeEra];
-  hud.style.color = ERA_COLORS[activeEra];
+  infoBX = IW / 2; infoBY = IH / 2;
 }
 
-function scrollToEra(idx) {
-  const stream = document.getElementById('stream');
-  const el = document.getElementById('era-' + idx);
-  if (!el || !stream) return;
-  const top = el.offsetTop - 8;
-  stream.scrollTo({ top, behavior: 'smooth' });
-}
-
-// ═══ DETAIL ═══
-function openDetail(id) {
-  const node = STREAM.find(n => n.id === id);
-  if (!node || node.type !== 'artifact') return;
-
-  const t = TYPES[node.atype] || TYPES.note;
-  document.getElementById('detail-stripe').style.background = t.color;
-  document.getElementById('detail-label').textContent = t.label;
-
-  // Build hero
-  let heroHtml = '';
-  if (node.atype === 'code') {
-    heroHtml = `<div class="detail-hero detail-hero-code">
-      <span class="code-line"><span class="code-comment">// ${node.title}</span></span>
-      <span class="code-line"><span class="code-comment">// ${node.period}</span></span>
-      <span class="code-line"> </span>
-      <span class="code-line"><span class="code-keyword">const</span> engine = <span class="code-keyword">new</span> <span class="code-num">Narrative</span>({</span>
-      <span class="code-line">  primitive: <span class="code-string">'sentence'</span>,</span>
-      <span class="code-line">  render: <span class="code-string">'progressive'</span>,</span>
-      <span class="code-line">  dwell: <span class="code-num">true</span></span>
-      <span class="code-line">});</span>
-    </div>`;
-  } else if (node.atype === 'figma') {
-    heroHtml = `<div class="detail-hero detail-hero-figma">
-      <div class="figma-frame">⬜</div>
-      <div class="figma-frame wide">⬜</div>
-      <div class="figma-frame">⬜</div>
-    </div>`;
-  } else if (node.atype === 'live' && node.url) {
-    heroHtml = `<div class="detail-hero detail-hero-live">
-      <div class="detail-hero-live-load" id="hero-${id}" onclick="loadHeroIframe('${id}','${node.url}')">
-        <div class="detail-hero-live-load-icon">↗</div>
-        <div class="detail-hero-live-load-hint">Click to load · ${node.url.replace('https://','')}</div>
-      </div>
-    </div>`;
-  } else if (node.atype === 'media') {
-    const isVideo = node.url && ['mp4','webm','mov'].some(ext => node.url.includes('.' + ext));
-    heroHtml = isVideo
-      ? `<div class="detail-hero" style="background:#000;border-bottom:1px solid var(--border);padding:0">
-           <video src="${node.url}" autoplay muted loop playsinline controls style="width:100%;max-height:280px;display:block;object-fit:cover"></video>
-         </div>`
-      : `<div class="detail-hero detail-hero-media">▶</div>`;
-  } else if (node.atype === 'sketch') {
-    heroHtml = `<div class="detail-hero detail-hero-sketch">
-      <div class="sketch-mark">△</div>
-      <div class="sketch-mark" style="font-size:22px;margin-top:14px">◇</div>
-      <div class="sketch-mark" style="font-size:30px;margin-top:-6px">○</div>
-    </div>`;
-  } else if (node.atype === 'photo' || node.atype === 'work') {
-    heroHtml = node.img ? `<div class="detail-hero" style="background:#000;border-bottom:1px solid var(--border)"><img src="${node.img}" alt="${node.title}" style="width:100%;display:block;object-fit:cover;max-height:260px"></div>` : `<div class="detail-hero detail-hero-media">◎</div>`;
-  } else if (node.atype === 'note') {
-    heroHtml = `<div class="detail-hero detail-hero-note">
-      <div class="detail-hero-note-text">${node.sentence}</div>
-    </div>`;
-  }
-
-  // Build specs
-  const specsHtml = (node.specs||[]).map(s =>
-    `<div class="detail-spec-row">
-      <div class="detail-spec-k">${s.k}</div>
-      <div class="detail-spec-v">${s.v}</div>
-    </div>`
-  ).join('');
-
-  const linkHtml = node.url ? `<a class="detail-artifact-link" href="${node.url}" target="_blank" rel="noopener">↗ Open · ${node.url.replace('https://','')}</a>` : '';
-
-  document.getElementById('detail-body').innerHTML = `
-    ${heroHtml}
-    <div class="detail-artifact-body">
-      <div class="detail-artifact-period">${node.period} · ${t.label}</div>
-      <div class="detail-artifact-title">${node.title}</div>
-      <div class="detail-artifact-sentence">${node.sentence}</div>
-      <div class="detail-artifact-desc">${node.desc}</div>
-      <div class="detail-artifact-specs">${specsHtml}</div>
-      ${linkHtml}
-    </div>
-  `;
-
-  document.getElementById('detail').classList.add('open');
-  document.body.classList.add('detail-open');
-}
-
-function loadHeroIframe(id, url) {
-  const loader = document.getElementById('hero-' + id);
-  if (!loader) return;
-  loader.parentElement.innerHTML = `<iframe src="${url}" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>`;
-}
-
-function closeDetail() {
-  document.getElementById('detail').classList.remove('open');
-  document.body.classList.remove('detail-open');
-}
-
-function jumpToArtifact(id) {
-  closeField();
-  setTimeout(() => {
-    const stream = document.getElementById('stream');
-    const el = document.getElementById('node-' + id);
-    if (!el || !stream) return;
-    const top = el.offsetTop - (stream.offsetHeight / 2) + (el.offsetHeight / 2);
-    stream.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  }, 350);
-}
-
-// ═══ FIELD ═══
-function openField() {
-  window.needsFieldInit = true;
-  document.body.classList.add('field-open');
-  // Stagger each node's ripple phase so they feel independent — pond life
-  document.querySelectorAll('.field-artifact-dot').forEach((dot, i) => {
-    const offset = (i * 0.37) % 3.2;
-    dot.querySelectorAll('.fad-ripple-1').forEach(r => r.style.animationDelay = `${offset}s`);
-    dot.querySelectorAll('.fad-ripple-2').forEach(r => r.style.animationDelay = `${offset + 0.9}s`);
-    dot.querySelectorAll('.fad-ripple-3').forEach(r => r.style.animationDelay = `${offset + 1.8}s`);
-  });
-  // Fire initScale after overlay transition completes (~400ms)
-  setTimeout(() => {
-    document.getElementById('field-overlay').dispatchEvent(new Event('transitionend'));
-  }, 420);
-}
-function closeField() {
-  document.body.classList.remove('field-open');
-}
-
-// Pan + zoom — uniform scale so ripples stay circular
-(function initFieldPan() {
-  const wrap = document.getElementById('field-canvas-wrap');
-  const inner = document.getElementById('field-canvas-inner');
-  const CANVAS = 3000; // matches CSS width/height
-  let panX = 0, panY = 0, scale = 1;
-  let isPanning = false, startX = 0, startY = 0;
-
-  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
-
-  function getBounds() {
-    const ww = wrap.offsetWidth;
-    const wh = wrap.offsetHeight;
-    const scaledW = CANVAS * scale;
-    const scaledH = CANVAS * scale;
-    // panX: left edge can't go past right side of wrap, right edge can't go past left
-    const maxPanX = ww * 0.5;
-    const minPanX = ww - scaledW + ww * 0.5 - ww * 0.5;
-    // Y locked — always centered
-    const panYFixed = 0;
-    return { minPanX: ww / 2 - scaledW + ww * 0.1, maxPanX: ww * 0.9, panYFixed };
-  }
-
-  function applyTransform() {
-    const { minPanX, maxPanX, panYFixed } = getBounds();
-    panX = clamp(panX, minPanX, maxPanX);
-    panY = panYFixed; // Y always locked — horizontal scroll only
-    inner.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px)) scale(${scale})`;
-  }
-
-  // Era center positions on the 3000px canvas (matches field-era-label lefts)
-  const ERA_X = [0.09, 0.28, 0.45, 0.64, 0.82, 0.93];
-
-  function initScale(eraIdx) {
-    const ww = wrap.offsetWidth;
-    scale = (ww * 2.8) / CANVAS;
-    panY = 0;
-    const ex = ERA_X[eraIdx] !== undefined ? ERA_X[eraIdx] : 0.5;
-    // Center the era in the viewport
-    panX = ww / 2 - CANVAS * ex * scale;
-    applyTransform(); // clamp applied inside
-  }
-
-  // Wait for overlay to be visible before measuring — only run once per open
-  window.needsFieldInit = false;
-  document.getElementById('field-overlay').addEventListener('transitionend', () => {
-    if (window.needsFieldInit && document.body.classList.contains('field-open')) {
-      window.needsFieldInit = false;
-      const activeEra = parseInt(document.querySelector('.era-nav-item.active')?.dataset?.era || '0');
-      initScale(activeEra);
-    }
-  });
-
-  wrap.addEventListener('mousedown', e => {
-    if (e.target.closest('.field-artifact-dot')) return;
-    isPanning = true;
-    startX = e.clientX - panX;
-    startY = e.clientY - panY;
-    wrap.style.cursor = 'grabbing';
-    e.preventDefault();
-  });
-  document.addEventListener('mousemove', e => {
-    if (!isPanning) return;
-    panX = e.clientX - startX;
-    panY = e.clientY - startY;
-    applyTransform();
-  });
-  document.addEventListener('mouseup', () => { isPanning = false; wrap.style.cursor = 'grab'; });
-
-  // ── Touch: pan (1 finger) + pinch zoom (2 fingers) ──
-  let touchStartX = 0, touchStartY = 0;
-  let pinchStartDist = 0, pinchStartScale = 1;
-  let isTouching = false, isPinching = false;
-
-  function touchDist(touches) {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
-    return Math.hypot(dx, dy);
-  }
-
-  wrap.addEventListener('touchstart', e => {
-    if (e.touches.length === 1) {
-      if (e.target.closest('.field-artifact-dot')) return;
-      isTouching = true; isPinching = false;
-      touchStartX = e.touches[0].clientX - panX;
-      touchStartY = e.touches[0].clientY - panY;
-    } else if (e.touches.length === 2) {
-      isTouching = false; isPinching = true;
-      pinchStartDist = touchDist(e.touches);
-      pinchStartScale = scale;
-      // midpoint for zoom origin
-      touchStartX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-      touchStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    }
-    e.preventDefault();
-  }, { passive: false });
-
-  wrap.addEventListener('touchmove', e => {
-    if (isPinching && e.touches.length === 2) {
-      const dist = touchDist(e.touches);
-      const prev = scale;
-      scale = Math.min(5, Math.max(0.2, pinchStartScale * (dist / pinchStartDist)));
-      const rect = wrap.getBoundingClientRect();
-      const mx = touchStartX - rect.left - rect.width / 2;
-      const my = touchStartY - rect.top - rect.height / 2;
-      panX = mx - (mx - panX) * (scale / prev);
-      panY = my - (my - panY) * (scale / prev);
-      applyTransform();
-    } else if (isTouching && e.touches.length === 1) {
-      panX = e.touches[0].clientX - touchStartX;
-      panY = e.touches[0].clientY - touchStartY;
-      applyTransform();
-    }
-    e.preventDefault();
-  }, { passive: false });
-
-  wrap.addEventListener('touchend', e => {
-    if (e.touches.length === 0) { isTouching = false; isPinching = false; }
-    else if (e.touches.length === 1) {
-      // Dropped from pinch back to single finger — re-anchor pan
-      isPinching = false; isTouching = true;
-      touchStartX = e.touches[0].clientX - panX;
-      touchStartY = e.touches[0].clientY - panY;
-    }
-  }, { passive: true });
-
-  wrap.addEventListener('wheel', e => {
-    e.preventDefault();
-    const prev = scale;
-    scale = Math.min(2.5, Math.max(0.2, scale * (1 - e.deltaY * 0.001)));
-    // Zoom toward mouse position
-    const rect = wrap.getBoundingClientRect();
-    const mx = e.clientX - rect.left - rect.width / 2;
-    const my = e.clientY - rect.top - rect.height / 2;
-    panX = mx - (mx - panX) * (scale / prev);
-    panY = my - (my - panY) * (scale / prev);
-    applyTransform();
-  }, { passive: false });
-})();
-
-// ═══ KEYBOARD ═══
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeDetail(); closeField(); }
+infoBtn.addEventListener('click', () => {
+  infoOpen = true;
+  infoOverlay.classList.add('visible');
+  buildInfoLayout();
+});
+infoClose.addEventListener('click', () => {
+  infoOpen = false;
+  infoOverlay.classList.remove('visible');
+});
+infoOverlay.addEventListener('mousemove', e => {
+  const r = infoCanvas.getBoundingClientRect();
+  infoMX = e.clientX - r.left;
+  infoMY = e.clientY - r.top;
 });
 
-// ═══ THEME TOGGLE ═══
-function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    html.removeAttribute('data-theme');
-    document.getElementById('theme-hint').textContent = '◐ dark';
-  } else {
-    html.setAttribute('data-theme', 'dark');
-    document.getElementById('theme-hint').textContent = '◑ light';
+function tickInfo() {
+  if (!infoOpen) return;
+  infoBX += (infoMX - infoBX) * 0.11;
+  infoBY += (infoMY - infoBY) * 0.11;
+  infoCtx.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
+  infoCtx.font = `300 15px "DM Mono", monospace`;
+  infoCtx.textBaseline = 'top';
+  for (const p of infoChars) {
+    p.vx += (p.restX - p.x) * 0.016;
+    p.vy += (p.restY - p.y) * 0.016;
+    const dx = p.x - infoBX, dy = p.y - infoBY;
+    const d  = Math.sqrt(dx*dx + dy*dy);
+    if (d < 110 && d > 0.5) {
+      const f = (1 - d/110);
+      p.vx += (dx/d) * f * f * 16;
+      p.vy += (dy/d) * f * f * 16;
+    }
+    p.vx *= 0.76; p.vy *= 0.76;
+    p.x  += p.vx; p.y  += p.vy;
+    const fade = Math.min(1, Math.max(0, (d - 20) / 50));
+    const alpha = p.op * fade;
+    if (alpha < 0.01) continue;
+    infoCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+    infoCtx.fillText(p.ch, p.x, p.y);
   }
 }
 
-// ═══ GHOST PANEL — fixed, mouse-tracked ═══
-(function initGhostPanel() {
-  const panel     = document.getElementById('artifact-ghost-panel');
-  const mediaEl   = document.getElementById('agp-media');
-  const capTitle  = document.getElementById('agp-cap-title');
-  const capLink   = document.getElementById('agp-cap-link');
-  const capEl     = document.getElementById('agp-cap');
+let mX = W/2, mY = H/2;
+let bX = W/2, bY = H/2, bVX = 0, bVY = 0;
+let eX = W/2, eY = H/2, eVX = 0, eVY = 0;
 
-  const W = 340, OFFSET_X = 24, OFFSET_Y = -20;
-  let currentId = null, hideTimer = null;
-  let mouseX = 0, mouseY = 0;
-  // Track loaded iframes so we don't reload on re-hover
-  const loadedFrames = {};
+window.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
+window.addEventListener('touchmove', e => {
+  mX = e.touches[0].clientX; mY = e.touches[0].clientY;
+}, {passive:true});
 
-  function positionPanel() {
-    const vw = window.innerWidth, vh = window.innerHeight;
-    let x = mouseX + OFFSET_X;
-    let y = mouseY + OFFSET_Y;
-    const ph = panel.offsetHeight || 250;
-    // flip left if no room on right
-    if (x + W > vw - 12) x = mouseX - W - OFFSET_X;
-    // clamp vertically
-    if (y + ph > vh - 12) y = vh - ph - 12;
-    if (y < 8) y = 8;
-    panel.style.left = x + 'px';
-    panel.style.top  = y + 'px';
-  }
+// ── FILTER ────────────────────────────────────────
+let activeAlbum = null;
+let activeTags  = new Set();
 
-  function showGhost(node) {
-    clearTimeout(hideTimer);
-    const id      = node.dataset.artifactId;
-    const url     = node.dataset.artifactUrl;
-    const title   = node.dataset.artifactTitle;
-    const sentence= node.dataset.artifactSentence;
-    const type    = node.dataset.artifactType;
-    const icon    = node.dataset.artifactIcon;
-    const period  = node.dataset.artifactPeriod;
-    const color   = node.dataset.artifactColor;
+function visibleTracks() {
+  return TRACKS.filter(d => {
+    const aOk  = !activeAlbum || d.album === activeAlbum;
+    const tgOk = activeTags.size === 0 || d.tags.some(t => activeTags.has(t));
+    return aOk && tgOk;
+  });
+}
 
-    if (id === currentId) { positionPanel(); return; }
-    currentId = id;
+// ── PARTICLES ─────────────────────────────────────
+let allChars = [];
 
-    // Build media area
-    mediaEl.innerHTML = '';
+function computeLayout(charW, lineH, padX, padTop) {
+  const visible = visibleTracks();
+  if (!visible.length) return [];
 
-    if (url) {
-      // Determine media type from URL extension
-      const ext = url.split('?')[0].split('.').pop().toLowerCase();
-      let mediaHtml = '';
-
-      if (['mp4','webm','mov'].includes(ext)) {
-        mediaHtml = `<video src="${url}" autoplay muted loop playsinline></video>`;
-      } else if (['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)) {
-        mediaHtml = `<img src="${url}" alt="${title}">`;
-      } else {
-        // Website — iframe, lazy-loaded once per id
-        const frameId = 'agp-frame-' + id;
-        const overlayId = 'agp-overlay-' + id;
-        const frameSrc = loadedFrames[id] ? url : '';
-        mediaHtml = `
-          <div class="agp-load-overlay${loadedFrames[id] ? ' loaded' : ''}" id="${overlayId}">
-            <div class="agp-spinner"></div>
-            <div class="agp-load-url">${url.replace('https://','').replace(/\/$/,'')}</div>
-          </div>
-          <iframe id="${frameId}" src="${frameSrc}"
-            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-            loading="lazy"></iframe>`;
-        mediaEl.innerHTML = mediaHtml;
-
-        // Scale iframe to fill container like a viewport screenshot
-        requestAnimationFrame(() => {
-          const frame = document.getElementById(frameId);
-          if (frame) {
-            const cw = mediaEl.offsetWidth || W;
-            const scale = cw / 1280;
-            frame.style.transform = `scale(${scale})`;
-          }
-        });
-
-        // Fire iframe load if not already loaded
-        if (!loadedFrames[id]) {
-          requestAnimationFrame(() => {
-            const frame   = document.getElementById(frameId);
-            const overlay = document.getElementById(overlayId);
-            if (frame) {
-              frame.src = url;
-              loadedFrames[id] = true;
-              frame.addEventListener('load', () => {
-                if (overlay) overlay.classList.add('loaded');
-              }, { once: true });
-            }
-          });
-        }
-      }
-
-      if (!['mp4','webm','mov','jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)) {
-        // already set above via innerHTML
-      } else {
-        mediaEl.innerHTML = mediaHtml;
-      }
-
-      capTitle.textContent = title;
-      capLink.href = url;
-      capLink.style.display = '';
-      capEl.style.display = '';
-      panel.style.width = W + 'px';
-
-    } else {
-      // No URL — sentence preview, no media strip
-      mediaEl.innerHTML = `
-        <div class="agp-sentence-preview">
-          <div class="agp-sentence-type" style="color:${color}">${icon} ${type} · ${period}</div>
-          <div class="agp-sentence-text">${sentence}</div>
-        </div>`;
-      mediaEl.style.aspectRatio = 'unset';
-      mediaEl.style.minHeight = '80px';
-      capLink.style.display = 'none';
-      capTitle.textContent = title;
-      capEl.style.display = '';
-      panel.style.width = '300px';
+  const tokens = [];
+  visible.forEach((d, i) => {
+    d.text.split(' ').forEach(w => {
+      tokens.push({ text: w, trackId: d.id, isSep: false });
+    });
+    if (i < visible.length - 1) {
+      tokens.push({ text: SEP.trim(), trackId: d.id, isSep: true });
     }
-
-    positionPanel();
-    panel.classList.add('visible');
-    // Mark node element
-    document.querySelectorAll('.node.artifact').forEach(el =>
-      el.classList.toggle('ghost-active', el.dataset.artifactId === id));
-  }
-
-  function hideGhost(immediate) {
-    if (immediate) {
-      panel.classList.remove('visible');
-      currentId = null;
-      mediaEl.style.aspectRatio = '';
-      mediaEl.style.minHeight = '';
-      document.querySelectorAll('.node.artifact').forEach(el => el.classList.remove('ghost-active'));
-    } else {
-      hideTimer = setTimeout(() => {
-        panel.classList.remove('visible');
-        currentId = null;
-        mediaEl.style.aspectRatio = '';
-        mediaEl.style.minHeight = '';
-        document.querySelectorAll('.node.artifact').forEach(el => el.classList.remove('ghost-active'));
-      }, 120);
-    }
-  }
-
-  // Mouse tracking
-  document.addEventListener('mousemove', e => {
-    mouseX = e.clientX; mouseY = e.clientY;
-    if (panel.classList.contains('visible')) positionPanel();
-  }, { passive: true });
-
-  // Hover on artifact nodes
-  document.addEventListener('mouseover', e => {
-    const icon = e.target.closest('.artifact-preview-icon');
-    if (icon) {
-      const node = icon.closest('.node.artifact[data-artifact-id]');
-      if (node) { showGhost(node); return; }
-    }
-    if (e.target.closest('#artifact-ghost-panel')) { clearTimeout(hideTimer); return; }
-    hideGhost(false);
   });
 
-  document.addEventListener('mouseleave', () => hideGhost(true), { capture: true });
-  panel.addEventListener('mouseleave', () => hideGhost(false));
-})();
+  const maxW  = W - padX * 2;
+  const lines = [];
+  let curLine = [], curW = 0;
+  const sw = s => s.length * charW;
 
-// ═══ INIT ═══
-renderStream();
-
-// ═══ SCATTER DATA (shared) ═══
-const SCATTER_NODES = [
-  ['a1',  0.11, 0.35, '--t-figma',  'First Build'],
-  ['a2',  0.13, 0.65, '--t-note',   'Self-Curriculum'],
-  ['a3',  0.16, 0.40, '--t-figma',  'Craigslist Post'],
-  ['a4',  0.19, 0.62, '--t-sketch', 'Turn5'],
-  ['a5',  0.22, 0.44, '--t-media',  'Photography'],
-  ['a6',  0.25, 0.58, '--t-code',   'Design by Data'],
-  ['a7',  0.28, 0.38, '--t-figma',  'Leadnomics'],
-  ['a8',  0.31, 0.66, '--t-note',   'Clavicle'],
-  ['a9',  0.38, 0.42, '--t-figma',  '160/90'],
-  ['a10', 0.41, 0.60, '--t-media',  'Interactive Work'],
-  ['a11', 0.44, 0.38, '--t-code',   'O3 World'],
-  ['a12', 0.47, 0.62, '--t-figma',  'Workarea'],
-  ['a13', 0.54, 0.35, '--t-media',  'Commute', true],
-  ['a14', 0.57, 0.58, '--t-code',   'FlightPath'],
-  ['a15', 0.60, 0.42, '--t-figma',  'LiveArea'],
-  ['a16', 0.63, 0.65, '--t-figma',  'GNC Nav'],
-  ['a17', 0.66, 0.38, '--t-note',   'Cards Against Bad UX'],
-  ['a18', 0.69, 0.60, '--t-figma',  'Code & Theory'],
-  ['a19', 0.72, 0.44, '--t-code',   'BNY Mellon'],
-  ['a20', 0.79, 0.40, '--t-media',  'Camera On'],
-  ['a21', 0.82, 0.62, '--t-code',   'Low Voltage'],
-  ['a22', 0.85, 0.48, '--t-live',   'Side Builds'],
-  ['a23', 0.90, 0.38, '--t-figma',  'What I Offer', true],
-  ['a24', 0.93, 0.58, '--t-live',   'zackgort.com', true],
-  ['a25', 0.96, 0.44, '--t-live',   'Beyond the Work'],
-];
-const SCATTER_ERAS = [
-  { x0:0,    x1:0.17, color:'--era-pre',   label:'Origins' },
-  { x0:0.17, x1:0.35, color:'--era-loss',  label:'Suburbia' },
-  { x0:0.35, x1:0.52, color:'--era-build', label:'Agency' },
-  { x0:0.52, x1:0.76, color:'--era-now',   label:'New York' },
-  { x0:0.76, x1:0.88, color:'--era-pre',   label:'Remote' },
-  { x0:0.88, x1:1.00, color:'--era-loss',  label:'Now' },
-];
-
-// ═══ HEADER SCATTER MAP ═══
-(function initHeaderScatter() {
-  const NODES = SCATTER_NODES;
-  const ERAS  = SCATTER_ERAS;
-
-  function initCanvas(canvas, isMobile) {
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, hovered = -1, tipEl = null;
-
-    function resolveColor(cssVar) {
-      return getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+  tokens.forEach(tok => {
+    const prefix  = curLine.length === 0 ? '' : ' ';
+    const segment = prefix + tok.text;
+    const segW    = sw(segment);
+    if (curW + segW > maxW && curLine.length > 0) {
+      lines.push(curLine);
+      curLine = [{ ...tok, display: tok.text }];
+      curW    = sw(tok.text);
+    } else {
+      curLine.push({ ...tok, display: segment });
+      curW += segW;
     }
+  });
+  if (curLine.length) lines.push(curLine);
 
-    function px(x) { return x * W; }
-    function py(y) { return y * H; }
-
-    function draw() {
-      if (!ctx) return;
-      const dpr = window.devicePixelRatio || 1;
-      W = canvas.offsetWidth;
-      H = canvas.offsetHeight;
-      canvas.width  = W * dpr;
-      canvas.height = H * dpr;
-      ctx.scale(dpr, dpr);
-      ctx.clearRect(0, 0, W, H);
-
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const inkAlpha = isDark ? 'rgba(237,233,224,' : 'rgba(26,24,21,';
-
-      ERAS.forEach(era => {
-        const c = resolveColor(era.color);
-        ctx.fillStyle = c + (isDark ? '14' : '0a');
-        ctx.beginPath();
-        ctx.roundRect(px(era.x0) + 1, 0, px(era.x1 - era.x0) - 2, H, 2);
-        ctx.fill();
-      });
-
-      ctx.strokeStyle = inkAlpha + '0.08)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, H * 0.5);
-      ctx.lineTo(W, H * 0.5);
-      ctx.stroke();
-
-      [0.17, 0.35, 0.52, 0.76, 0.88].forEach(x => {
-        ctx.strokeStyle = inkAlpha + '0.1)';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([2, 3]);
-        ctx.beginPath();
-        ctx.moveTo(px(x), 4);
-        ctx.lineTo(px(x), H - 4);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      });
-
-      NODES.forEach((n, i) => {
-        const [id, nx, ny, colorVar, label, isMajor] = n;
-        const x = px(nx), y = py(ny);
-        const r = isMajor ? 5 : 3.5;
-        const color = resolveColor(colorVar);
-        const isHovered = i === hovered;
-
-        if (isHovered) {
-          ctx.beginPath();
-          ctx.arc(x, y, r + 5, 0, Math.PI * 2);
-          ctx.fillStyle = color + '28';
-          ctx.fill();
-        }
-
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.globalAlpha = isHovered ? 1 : (isMajor ? 0.75 : 0.55);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      });
-    }
-
-    function getTip() {
-      if (!tipEl) {
-        tipEl = document.createElement('div');
-        tipEl.className = 'scatter-tip';
-        tipEl.style.cssText = 'position:fixed;background:var(--bg-4);border:1px solid var(--border-2);border-radius:4px;padding:4px 8px;font-family:var(--mono);font-size:7px;letter-spacing:0.1em;color:var(--ink-2);pointer-events:none;z-index:9000;opacity:0;transition:opacity 0.15s;white-space:nowrap;';
-        document.body.appendChild(tipEl);
+  const chars = [];
+  lines.forEach((line, li) => {
+    const ry = padTop + li * lineH;
+    let rx   = padX;
+    line.forEach(tok => {
+      const str = tok.display;
+      for (let ci = 0; ci < str.length; ci++) {
+        const seed = (tok.trackId * 137 + ci) % 100 / 100;
+        chars.push({
+          ch: str[ci],
+          restX: rx + ci * charW,
+          restY: ry,
+          seed,
+          trackId: tok.trackId,
+          isSep: tok.isSep,
+        });
       }
-      return tipEl;
-    }
+      rx += str.length * charW;
+    });
+  });
+  return chars;
+}
 
-    function getNodeAt(mx, my) {
-      const hitR = isMobile ? 18 : 7;
-      return NODES.findIndex(n => {
-        const x = px(n[1]), y = py(n[2]);
-        return Math.hypot(mx - x, my - y) <= hitR;
-      });
-    }
+function buildLayout() {
+  const visible = visibleTracks();
+  document.getElementById('cnt').textContent = visible.length;
 
-    if (!isMobile) {
-      canvas.addEventListener('mousemove', e => {
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        const idx = getNodeAt(mx, my);
-        if (idx !== hovered) { hovered = idx; draw(); }
-        const tip = getTip();
-        if (idx >= 0) {
-          tip.textContent = NODES[idx][4];
-          tip.style.opacity = '1';
-          tip.style.left = (e.clientX + 12) + 'px';
-          tip.style.top  = (e.clientY - 28) + 'px';
-          canvas.style.cursor = 'pointer';
-        } else {
-          tip.style.opacity = '0';
-          canvas.style.cursor = 'crosshair';
-        }
-      });
-      canvas.addEventListener('mouseleave', () => {
-        hovered = -1; draw();
-        if (tipEl) tipEl.style.opacity = '0';
-        canvas.style.cursor = 'crosshair';
-      });
-      // Safety reset — if mouse leaves canvas fast, mouseleave can miss
-      document.addEventListener('mousemove', e => {
-        const rect = canvas.getBoundingClientRect();
-        const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
-                       e.clientY >= rect.top  && e.clientY <= rect.bottom;
-        if (!inside && hovered !== -1) { hovered = -1; draw(); if (tipEl) tipEl.style.opacity = '0'; }
-      }, { passive: true });
-      canvas.addEventListener('click', e => {
-        const rect = canvas.getBoundingClientRect();
-        const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
-        if (idx >= 0) jumpToArtifact(NODES[idx][0]);
-      });
-    }
+  // Compute target rest positions at the *target* font size
+  const tgtT    = isFiltered() ? 1 : 0;
+  const tgtFont = FONT_BASE + (FONT_LARGE - FONT_BASE) * tgtT;
+  const tgtCW   = tgtFont * 0.602;
+  const tgtLH   = tgtFont * 1.64;
+  const layout  = computeLayout(tgtCW, tgtLH, 52, 58);
 
-    if (isMobile) {
-      canvas.addEventListener('click', e => {
-        const rect = canvas.getBoundingClientRect();
-        const idx = getNodeAt(e.clientX - rect.left, e.clientY - rect.top);
-        if (idx >= 0) jumpToArtifact(NODES[idx][0]);
-      });
-    }
+  // Match existing particles by index, or spawn new ones
+  const next = [];
+  layout.forEach((def, i) => {
+    const existing = allChars[i];
+    const seed = def.seed;
+    next.push({
+      ch: def.ch,
+      restX: def.restX,
+      restY: def.restY,
+      x: existing ? existing.x : def.restX + (Math.random()-.5)*4,
+      y: existing ? existing.y : def.restY + (Math.random()-.5)*4,
+      vx: existing ? existing.vx : 0,
+      vy: existing ? existing.vy : 0,
+      baseOpacity: def.isSep ? 0.11 : 0.32 + seed * 0.38,
+    });
+  });
+  allChars = next;
 
-    const ro = new ResizeObserver(() => draw());
-    ro.observe(canvas);
-    requestAnimationFrame(draw);
+  fontTgt = tgtT;
+  refreshRelated();
+}
 
-    return draw;
+// ── CURSOR ────────────────────────────────────────
+function drawCursor() {
+  cursorCtx.clearRect(0, 0, W, H);
+
+  const speed     = Math.sqrt(eVX*eVX + eVY*eVY);
+  const angle     = speed > 0.1 ? Math.atan2(eVY, eVX) : 0;
+  const stretch   = Math.min(speed * 1.6, 20);
+  const semiMaj   = 3 + stretch;
+  const semiMin   = Math.max(1.4, 3 - stretch * 0.13);
+
+  cursorCtx.save();
+  cursorCtx.translate(eX, eY);
+  cursorCtx.rotate(angle);
+  cursorCtx.beginPath();
+  cursorCtx.ellipse(0, 0, semiMaj, semiMin, 0, 0, Math.PI * 2);
+  cursorCtx.fillStyle = 'rgba(255,255,255,0.45)';
+  cursorCtx.fill();
+  cursorCtx.restore();
+
+  cursorCtx.beginPath();
+  cursorCtx.arc(mX, mY, 1.8, 0, Math.PI * 2);
+  cursorCtx.fillStyle = 'rgba(255,255,255,0.88)';
+  cursorCtx.fill();
+}
+
+// ── LOOP ──────────────────────────────────────────
+function loop() {
+  requestAnimationFrame(loop);
+
+  const px = bX, py = bY;
+  bX += (mX - bX) * BLOB_LERP;
+  bY += (mY - bY) * BLOB_LERP;
+  bVX = bX - px; bVY = bY - py;
+
+  eVX += (mX - eX) * 0.1;
+  eVY += (mY - eY) * 0.1;
+  eVX *= 0.68; eVY *= 0.68;
+  eX  += eVX;  eY  += eVY;
+
+  // animate font size transition
+  const prevT = fontT;
+  fontT += (fontTgt - fontT) * FONT_LERP;
+  const isAnimating = Math.abs(fontT - fontTgt) > 0.001;
+
+  // if animating, recompute rest positions at current interpolated size
+  if (isAnimating) {
+    const cw = currentCharW();
+    const lh = currentLineH();
+    const layout = computeLayout(cw, lh, 52, 58);
+    layout.forEach((def, i) => {
+      if (allChars[i]) {
+        allChars[i].restX = def.restX;
+        allChars[i].restY = def.restY;
+      }
+    });
   }
 
-  const desktopDraw = initCanvas(document.getElementById('hud-scatter-canvas'), false);
-  const mobileDraw  = initCanvas(document.getElementById('mobile-scatter-canvas'), true);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
 
-  // Theme toggle redraws both
-  const origToggle = window.toggleTheme;
-  window.toggleTheme = function() {
-    if (origToggle) origToggle();
-    requestAnimationFrame(() => {
-      if (desktopDraw) desktopDraw();
-      if (mobileDraw)  mobileDraw();
-    });
+  ctx.font = currentFontFace();
+  ctx.textBaseline = 'top';
+
+  // compute logo repel constants once per frame, not per particle
+  const lr  = logoRect();
+  const lcx = lr.left + lr.width  * 0.5;
+  const lcy = lr.top  + lr.height * 0.5;
+  const lR  = Math.max(lr.width, lr.height) * 0.72;
+  const lRR = lR + 40;
+
+  for (const p of allChars) {
+    p.vx += (p.restX - p.x) * TETHER_K;
+    p.vy += (p.restY - p.y) * TETHER_K;
+
+    const dx = p.x - bX, dy = p.y - bY;
+    const d  = Math.sqrt(dx*dx + dy*dy);
+    if (d < REPEL_R && d > 0.5) {
+      const f = (1 - d/REPEL_R);
+      p.vx += (dx/d) * f * f * REPEL_S * 5;
+      p.vy += (dy/d) * f * f * REPEL_S * 5;
+    }
+
+    // repel from logo widget
+    const ldx = p.x - lcx, ldy = p.y - lcy;
+    const ld  = Math.sqrt(ldx*ldx + ldy*ldy);
+    if (ld < lRR && ld > 0.5) {
+      const f = (1 - ld / lRR);
+      p.vx += (ldx/ld) * f * f * REPEL_S * 6;
+      p.vy += (ldy/ld) * f * f * REPEL_S * 6;
+    }
+
+    p.vx *= DAMP; p.vy *= DAMP;
+    p.x  += p.vx; p.y  += p.vy;
+
+    const blobFade = Math.min(1, Math.max(0, (d - BLOB_RX * 0.7) / (REPEL_R * 0.45)));
+    const alpha    = p.baseOpacity * blobFade;
+    if (alpha < 0.01) continue;
+
+    ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+    ctx.fillText(p.ch, p.x, p.y);
+  }
+
+  drawCursor();
+  tickInfo();
+}
+
+window.addEventListener('resize', () => {
+  W = canvas.width = cursorCanvas.width  = window.innerWidth;
+  H = canvas.height = cursorCanvas.height = window.innerHeight;
+  // re-center logo if it hasn't been dragged off CSS centering
+  if (topHeader.style.transform !== 'none') {
+    logoX = Math.round(window.innerWidth / 2 - LOGO_SIZE / 2);
+  }
+  buildLayout();
+  if (infoOpen) buildInfoLayout();
+});
+
+// ── PILLS ─────────────────────────────────────────
+const SHORT = {
+  "Kill 'Em All":        'KEA',
+  'Ride the Lightning':  'RTL',
+  'Master of Puppets':   'MOP',
+  'And Justice for All': 'AJFA',
+  'The Black Album':     'TBA',
+  'Load':                'Load',
+  'Reload':              'Reload',
+  'St. Anger':           'St.A',
+  'Death Magnetic':      'DM',
+  'Hardwired':           'HW2SD',
+  '72 Seasons':          '72S'
+};
+
+const albumPillMap = new Map(); // album name → button
+const tagPillMap   = new Map(); // tag name → button
+
+function refreshRelated() {
+  const visible = visibleTracks();
+  const visibleAlbums = new Set(visible.map(d => d.album));
+  const visibleTags   = new Set(visible.flatMap(d => d.tags));
+
+  albumPillMap.forEach((btn, al) => {
+    if (btn.classList.contains('active')) return;
+    btn.classList.toggle('related', visibleAlbums.has(al));
+  });
+  tagPillMap.forEach((btn, t) => {
+    if (btn.classList.contains('active')) return;
+    btn.classList.toggle('related', visibleTags.has(t));
+  });
+}
+
+const aRow = document.getElementById('album-pills');
+ALL_ALBUMS.forEach(al => {
+  const b = document.createElement('button');
+  b.className = 'pill';
+  b.textContent = SHORT[al] || al;
+  b.title = al;
+  b.onclick = () => {
+    activeAlbum = activeAlbum === al ? null : al;
+    albumPillMap.forEach(p => p.classList.remove('active'));
+    if (activeAlbum) b.classList.add('active');
+    buildLayout();
   };
-})();
+  aRow.appendChild(b);
+  albumPillMap.set(al, b);
+});
+
+const tRow = document.getElementById('tag-pills');
+ALL_TAGS.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'pill'; b.textContent = t;
+  b.onclick = () => {
+    activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t);
+    b.classList.toggle('active');
+    buildLayout();
+  };
+  tRow.appendChild(b);
+  tagPillMap.set(t, b);
+});
+
+buildLayout();
+loop();
 </script>
 </body>
 </html>

@@ -71,6 +71,13 @@
     color:rgba(255,255,255,0.35); font-family:'DM Mono',monospace;
     font-size:11px; line-height:1; padding:4px 9px;
     cursor:none; transition:all 0.2s; user-select:none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  @media (pointer: coarse) {
+    .ctrl-btn { cursor: pointer; padding: 8px 14px; font-size:13px; }
+    .filter-btn { cursor: pointer; padding: 9px 12px; }
+    .collapse-btn { cursor: pointer; padding: 4px 10px; }
   }
   .ctrl-btn:hover { color:#fff; border-color:rgba(255,255,255,0.4); }
   .ctrl-btn.active { background:#fff; color:#000; border-color:#fff; }
@@ -440,12 +447,65 @@ function bindDraggable(element, widgetContainer) {
   });
 }
 
+// ── Edge-aware clamping with magnetic lerp resistance ──
+// MARGIN: how many px from the edge resistance starts building.
+// HARDSTOP: the outermost the widget can ever land (1px gap).
+const EDGE_MARGIN = 60;  // resistance begins this far from edge
+const EDGE_HARDSTOP = 1; // widget never goes past this
+
+function edgeResist(value, min, max) {
+  // Inside safe zone: no resistance
+  if (value >= min + EDGE_MARGIN && value <= max - EDGE_MARGIN) return value;
+  // Past hard stop: clamp
+  if (value < min + EDGE_HARDSTOP) return min + EDGE_HARDSTOP;
+  if (value > max - EDGE_HARDSTOP) return max - EDGE_HARDSTOP;
+  // In resistance zone: lerp toward edge with increasing force
+  if (value < min + EDGE_MARGIN) {
+    const t = 1 - (value - min) / EDGE_MARGIN; // 0→1 as approaching edge
+    const cushion = t * t * (EDGE_MARGIN - EDGE_HARDSTOP);
+    return min + EDGE_HARDSTOP + (EDGE_MARGIN - EDGE_HARDSTOP - cushion * 0.85);
+  } else {
+    const t = 1 - (max - value) / EDGE_MARGIN;
+    const cushion = t * t * (EDGE_MARGIN - EDGE_HARDSTOP);
+    return max - EDGE_HARDSTOP - (EDGE_MARGIN - EDGE_HARDSTOP - cushion * 0.85);
+  }
+}
+
 function clampToViewport(el, nx, ny) {
   const rect = el.getBoundingClientRect();
-  const W = window.innerWidth, H = window.innerHeight;
-  nx = Math.max(0, Math.min(nx, W - rect.width));
-  ny = Math.max(0, Math.min(ny, H - rect.height));
+  const vW = window.innerWidth, vH = window.innerHeight;
+  const elW = rect.width, elH = rect.height;
+  nx = edgeResist(nx, 0, vW - elW);
+  ny = edgeResist(ny, 0, vH - elH);
   return { nx, ny };
+}
+
+// After a widget expands (collapse toggled), re-clamp it so it doesn't overflow
+function reanchorWidget(widget) {
+  const rect = widget.getBoundingClientRect();
+  const vW = window.innerWidth, vH = window.innerHeight;
+  let nx = rect.left, ny = rect.top;
+  // Hard-clamp on expand (no resistance — just snap it back in)
+  if (nx + rect.width > vW - EDGE_HARDSTOP) nx = vW - rect.width - EDGE_HARDSTOP;
+  if (ny + rect.height > vH - EDGE_HARDSTOP) ny = vH - rect.height - EDGE_HARDSTOP;
+  if (nx < EDGE_HARDSTOP) nx = EDGE_HARDSTOP;
+  if (ny < EDGE_HARDSTOP) ny = EDGE_HARDSTOP;
+  // Only reposition if widget has been explicitly placed (left/top set)
+  if (widget.style.left || widget.style.top) {
+    widget.style.left = nx + 'px';
+    widget.style.top  = ny + 'px';
+    widget.style.bottom = 'auto';
+    widget.style.right  = 'auto';
+  } else {
+    // Widget is still in CSS-positioned default: check if it overflows and fix
+    if (rect.right > vW - EDGE_HARDSTOP || rect.bottom > vH - EDGE_HARDSTOP ||
+        rect.left < EDGE_HARDSTOP || rect.top < EDGE_HARDSTOP) {
+      widget.style.left = nx + 'px';
+      widget.style.top  = ny + 'px';
+      widget.style.bottom = 'auto';
+      widget.style.right  = 'auto';
+    }
+  }
 }
 
 function bindDraggable(element, widgetContainer) {
@@ -493,18 +553,44 @@ window.addEventListener('touchmove', e => {
 
 document.querySelectorAll('.collapse-btn').forEach(btn => {
   btn.addEventListener('mousedown', e => e.stopPropagation());
+  shimTouch(btn);
   btn.addEventListener('click', e => {
     const widget = btn.closest('.filter-widget');
     widget.classList.toggle('collapsed');
     btn.textContent = widget.classList.contains('collapsed') ? '+' : '−';
     invalidateFilterRepel();
     buildLayout();
+    // Re-clamp after expand so content doesn't overflow viewport
+    requestAnimationFrame(() => {
+      reanchorWidget(widget);
+      invalidateFilterRepel();
+    });
   });
 });
 
 // ── Controls widget ──
 const fontVal = document.getElementById('font-val');
 const cursorToggle = document.getElementById('cursor-toggle');
+
+// Mobile touch shim: iOS/Android sometimes swallow clicks on cursor:none divs.
+// Bind touchend → click for any interactive div that may be affected.
+function shimTouch(el) {
+  let tStart = null;
+  el.addEventListener('touchstart', e => { tStart = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    if (!tStart) return;
+    const dx = e.changedTouches[0].clientX - tStart.x;
+    const dy = e.changedTouches[0].clientY - tStart.y;
+    tStart = null;
+    // Only fire if finger barely moved (tap, not drag)
+    if (Math.sqrt(dx*dx + dy*dy) < 10) {
+      e.preventDefault();
+      el.click();
+    }
+  }, { passive: false });
+}
+
+['font-up','font-down','reset-btn','cursor-toggle'].forEach(id => shimTouch(document.getElementById(id)));
 
 document.getElementById('font-up').addEventListener('click', () => {
   userFontBase = Math.min(22, userFontBase + 1);
@@ -584,11 +670,13 @@ function initDOMFilters() {
   ALL_ALBUMS.forEach(a => {
     const btn = document.createElement('div'); btn.className = 'filter-btn'; btn.textContent = SHORT[a] || a;
     btn.addEventListener('click', () => { activeAlbum = activeAlbum === a ? null : a; buildLayout(); });
+    shimTouch(btn);
     albC.appendChild(btn); domButtons.push({ btn, key: a, type: 'album' });
   });
   ALL_TAGS.forEach(t => {
     const btn = document.createElement('div'); btn.className = 'filter-btn'; btn.textContent = t;
     btn.addEventListener('click', () => { activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t); buildLayout(); });
+    shimTouch(btn);
     tagC.appendChild(btn); domButtons.push({ btn, key: t, type: 'tag' });
   });
 }

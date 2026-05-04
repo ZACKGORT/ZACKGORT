@@ -188,6 +188,25 @@
     color: #000;
     border-color: #fff;
   }
+
+  .clear-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    line-height: 1;
+    color: rgba(255,255,255,0.15);
+    cursor: none;
+    padding: 0 4px;
+    transition: color 0.2s;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  .clear-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .clear-btn:hover { color: rgba(255,255,255,0.8); }
+  @media (pointer: coarse) { .clear-btn { cursor: pointer; } }
 </style>
 </head>
 <body>
@@ -231,12 +250,24 @@
 </div>
 
 <div id="albums-widget" class="filter-widget">
-  <div class="widget-topbar"><div class="filter-header">Albums</div><div class="collapse-btn">−</div></div>
+  <div class="widget-topbar">
+    <div class="filter-header">Albums</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="clear-btn" id="clear-album" title="Clear">×</div>
+      <div class="collapse-btn">−</div>
+    </div>
+  </div>
   <div class="widget-content"><div class="filter-btn-group" id="albums-container"></div></div>
 </div>
 
 <div id="tags-widget" class="filter-widget">
-  <div class="widget-topbar"><div class="filter-header">Themes</div><div class="collapse-btn">−</div></div>
+  <div class="widget-topbar">
+    <div class="filter-header">Themes</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="clear-btn" id="clear-tags" title="Clear">×</div>
+      <div class="collapse-btn">−</div>
+    </div>
+  </div>
   <div class="widget-content"><div class="filter-btn-group" id="tags-container"></div></div>
 </div>
 
@@ -689,7 +720,16 @@ function refreshFilterState() {
     const isRel = isActive ? false : (type === 'album' ? vA.has(key) : vT.has(key));
     btn.classList.toggle('active', isActive); btn.classList.toggle('related', isRel);
   });
+  // Show clear buttons only when something is active
+  document.getElementById('clear-album').classList.toggle('visible', activeAlbum !== null);
+  document.getElementById('clear-tags').classList.toggle('visible', activeTags.size > 0);
 }
+
+const clearAlbum = document.getElementById('clear-album');
+const clearTags  = document.getElementById('clear-tags');
+clearAlbum.addEventListener('click', e => { e.stopPropagation(); activeAlbum = null; buildLayout(); });
+clearTags.addEventListener('click',  e => { e.stopPropagation(); activeTags.clear(); buildLayout(); });
+shimTouch(clearAlbum); shimTouch(clearTags);
 
 function invalidateFilterRepel() {
   filterRepelZones = [];

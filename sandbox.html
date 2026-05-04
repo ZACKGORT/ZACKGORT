@@ -730,11 +730,7 @@ function loop() {
     p.vx *= DAMP; p.vy *= DAMP; p.x += p.vx; p.y += p.vy;
 
     if (magnifyMode && d < repelRadius) {
-      // Fade to black at event horizon (inner 15% of field)
-      const f = Math.max(0, 1 - d/repelRadius);
-      const eventHorizon = repelRadius * 0.15;
-      const consumed = Math.max(0, 1 - d/eventHorizon); // 1 = at center, 0 = outside horizon
-      const alpha = p.baseOpacity * (1 - consumed * consumed) * (0.6 + f * 0.6);
+      const alpha = p.baseOpacity;
       if (alpha > 0.01) { ctx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`; ctx.fillText(p.ch, p.x, p.y); }
     } else {
       // Repel mode: fade chars near cursor
@@ -744,14 +740,14 @@ function loop() {
     }
   }
 
-  // ── Animate ring in magnify mode ──
-  magnifyRadius += (repelRadius - magnifyRadius) * 0.12;
-  if (magnifyMode) {
-    magnifyRing.style.width  = magnifyRadius * 2 + 'px';
-    magnifyRing.style.height = magnifyRadius * 2 + 'px';
-    magnifyRing.style.left   = bX + 'px';
-    magnifyRing.style.top    = bY + 'px';
-  }
+  // ring hidden
+  // magnifyRadius += (repelRadius - magnifyRadius) * 0.12;
+  // if (magnifyMode) {
+  //   magnifyRing.style.width  = magnifyRadius * 2 + 'px';
+  //   magnifyRing.style.height = magnifyRadius * 2 + 'px';
+  //   magnifyRing.style.left   = bX + 'px';
+  //   magnifyRing.style.top    = bY + 'px';
+  // }
 
   // ── Cursor: bloom radius controlled by scroll (desktop only) ──
   cursorCtx.clearRect(0,0,W,H);

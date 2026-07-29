@@ -1,2009 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zack Gort — UX & Product Design</title>
-<link rel="icon" type="image/webp" href="https://github.com/ZACKGORT/ZACKGORT/blob/main/favicon.webp?raw=true">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>zackgort.com — moving to zack.cx</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --accent: #FF3C1F;
-    --black: #0D0D0D;
-    --white: #FFFFFF;
-    --off: #F2F0ED;
-    --mid: #888;
-    --rule: #D8D6D3;
-    --rule-dark: #2A2A2A;
-    --font: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  :root{
+    --bg: #0b0b0a;
+    --bg-raised: #131211;
+    --fg: #f2efe9;
+    --muted: #85807a;
+    --line: #26241f;
+    --accent: #f2c230;
+    --accent-dim: #6b5a1a;
   }
-  html { scroll-behavior: smooth; }
-  body { font-family: var(--font); background: var(--off); color: var(--black); overflow-x: hidden; cursor: none; }
 
-  /* CURSOR — fixed: no blend-mode, accent red, starts offscreen */
-  #cursor {
-    position: fixed;
-    width: 10px;
-    height: 10px;
-    background: var(--accent);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%,-50%);
-    transition: width .2s, height .2s, opacity .2s;
-    left: -20px;
-    top: -20px;
-    opacity: 0;
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
   }
-  #cursor.lg { width: 44px; height: 44px; opacity: 0.35; }
 
-  /* PAGE COVER */
-  #cover { position: fixed; inset: 0; background: var(--black); z-index: 8000; transform: translateY(100%); pointer-events: none; }
-  #cover.in  { transform: translateY(0);    transition: transform .5s cubic-bezier(.76,0,.24,1); }
-  #cover.out { transform: translateY(-100%); transition: transform .5s cubic-bezier(.76,0,.24,1) .1s; }
-
-  /* VIEWS */
-  .view { display: none; min-height: 100vh; }
-  .view.active { display: block; }
-
-  /* NAV */
-  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 18px 28px; display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none; }
-  nav.dk { color: var(--white); }
-  nav.lt { color: var(--black); }
-  .nl, .nc, .nr { pointer-events: all; }
-  .nl { font-size: 9px; font-weight: 500; line-height: 1.6; }
-  .nc { font-size: 9px; font-weight: 500; }
-  .nr { display: flex; align-items: center; gap: 20px; }
-  .nav-links { display: flex; gap: 20px; }
-  .nl a, .nav-links a { text-decoration: none; color: inherit; font-size: 9px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .45; transition: opacity .2s; cursor: none; }
-  .nl a:hover, .nav-links a:hover, .nav-links a.on { opacity: 1; }
-  .studio { font-weight: 800; opacity: 1 !important; cursor: none; }
-  .dot { width: 13px; height: 13px; border: 1.5px solid currentColor; border-radius: 50%; opacity: .4; position: relative; cursor: none; }
-  .dot::after { content: ''; position: absolute; inset: 3px; background: currentColor; border-radius: 50%; }
-  .dot:hover { opacity: 1; }
-
-  /* ── HERO ─────────────────────────── */
-  .hero { min-height: 100vh; background: var(--black); display: flex; flex-direction: column; justify-content: flex-end; padding: 28px; position: relative; overflow: hidden; }
-  .hero-bg-text { position: absolute; top: 50%; right: 20px; transform: translateY(-50%); font-size: clamp(100px,18vw,200px); font-weight: 900; color: rgba(255,255,255,.04); line-height: 1; user-select: none; letter-spacing: -.04em; }
-  .hero-eyebrow { font-size: 8px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 20px; }
-  .hero-title { font-size: clamp(56px,10vw,130px); font-weight: 900; color: var(--white); line-height: .92; letter-spacing: -.04em; margin-bottom: 12px; position: relative; z-index: 1; }
-  .hero-title em { font-style: normal; color: var(--accent); }
-  .hero-sub { font-size: clamp(20px,3.5vw,40px); font-weight: 300; color: rgba(255,255,255,.4); letter-spacing: -.02em; line-height: 1.1; margin-bottom: 60px; position: relative; z-index: 1; }
-  .hero-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 20px; position: relative; z-index: 1; }
-  .h-label { font-size: 7px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 8px; }
-  .h-text { font-size: 11px; color: rgba(255,255,255,.65); line-height: 1.7; max-width: 400px; }
-  .h-nav-list { display: flex; flex-direction: column; gap: 0; }
-  .h-nav-item { display: flex; align-items: center; gap: 16px; font-size: 11px; color: rgba(255,255,255,.5); padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.08); cursor: none; transition: color .2s; }
-  .h-nav-item:hover { color: white; }
-  .h-nav-num { color: rgba(255,255,255,.25); font-weight: 600; min-width: 24px; font-size: 9px; }
-
-  /* ── TICKER ───────────────────────── */
-  .ticker { background: var(--accent); overflow: hidden; padding: 11px 0; }
-  .ticker-inner { display: flex; gap: 48px; animation: tick 22s linear infinite; white-space: nowrap; }
-  @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-  .t-item { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--black); flex-shrink: 0; }
-  .t-item::before { content: '— '; }
-
-  /* ── ABOUT STRIP ──────────────────── */
-  .about-strip { background: var(--off); padding: 80px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
-  .about-name { font-size: clamp(48px,8vw,96px); font-weight: 900; letter-spacing: -.04em; line-height: .92; margin-bottom: 24px; }
-  .about-title-line { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); margin-bottom: 40px; }
-  .about-desc { font-size: 13px; line-height: 1.8; color: #444; margin-bottom: 32px; max-width: 480px; }
-  .about-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; border-top: 1px solid var(--rule); padding-top: 20px; }
-  .stat-n { font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -.03em; line-height: 1; }
-  .stat-l { font-size: 8px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--mid); margin-top: 4px; }
-  .about-right { padding-top: 8px; }
-  .expertise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
-  .ex-col-label { font-size: 7px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--mid); margin-bottom: 12px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; }
-  .ex-item { font-size: 11px; color: #555; line-height: 2; }
-  .co-list { display: flex; flex-direction: column; gap: 0; margin-top: 32px; border-top: 1px solid var(--rule); }
-  .co-item { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 11px; }
-  .co-name { font-weight: 600; }
-  .co-role { color: var(--mid); font-size: 10px; }
-  .co-year { color: var(--mid); font-size: 10px; }
-
-  /* ── SECTION LABEL ────────────────── */
-  .sec-hero { padding: 100px 28px 28px; }
-  .sec-hero.dk { background: var(--black); color: var(--white); }
-  .sec-hero.lt { background: var(--white); color: var(--black); }
-  .sec-hero.of { background: var(--off); color: var(--black); }
-  .sec-title { font-size: clamp(52px,9vw,110px); font-weight: 900; letter-spacing: -.04em; line-height: .92; margin-bottom: 20px; }
-  .sec-sub { font-size: 13px; color: var(--mid); max-width: 500px; line-height: 1.7; }
-
-  /* ── WORK GRID ────────────────────── */
-  .work-grid { background: var(--black); padding: 0 28px 60px; }
-  .wg { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; }
-  .wc { position: relative; aspect-ratio: 1; overflow: hidden; cursor: none; background: #111; }
-  .wc:hover .wc-img { transform: scale(1.05); }
-  .wc-img { width: 100%; height: 100%; transition: transform .6s cubic-bezier(.25,.46,.45,.94); display: flex; align-items: center; justify-content: center; }
-  .wc-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.25); opacity: 0; transition: opacity .3s; }
-  .wc:hover .wc-overlay { opacity: 1; }
-  .wc-meta { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 14px; background: linear-gradient(transparent,rgba(0,0,0,.85)); color: white; display: flex; justify-content: space-between; align-items: flex-end; }
-  .wc-name { font-size: 11px; font-weight: 700; }
-  .wc-type { font-size: 9px; color: rgba(255,255,255,.45); }
-  .wc-tag { font-size: 8px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
-
-  /* ── CASE STUDY LIST ──────────────── */
-  .cs-list { background: var(--white); padding: 0 28px; }
-  .cs-row { display: grid; grid-template-columns: 60px 1fr 1fr 80px; gap: 20px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--rule); cursor: none; transition: background .15s; position: relative; }
-  .cs-row:hover { background: rgba(0,0,0,.02); }
-  .cs-idx { font-size: 9px; color: var(--mid); font-weight: 600; }
-  .cs-client { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
-  .cs-type { font-size: 11px; color: var(--mid); line-height: 1.5; }
-  .cs-yr { font-size: 10px; color: var(--mid); text-align: right; }
-  .cs-arr { position: absolute; right: 0; opacity: 0; transition: opacity .2s, transform .2s; transform: translateX(-8px); font-size: 14px; }
-  .cs-row:hover .cs-arr { opacity: 1; transform: translateX(0); }
-
-  /* ── CASE STUDY PAGE ──────────────── */
-  .cs-page-header { padding: 100px 28px 28px; background: var(--white); border-bottom: 1px solid var(--rule); }
-  .cs-page-header.dk { background: var(--black); color: var(--white); border-bottom-color: var(--rule-dark); }
-  .cs-eyebrow { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 20px; }
-  .cs-label { font-size: 7px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--mid); margin-bottom: 4px; }
-  .cs-page-header.dk .cs-label { color: rgba(255,255,255,.3); }
-  .cs-val { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
-  .cs-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; }
-  .cs-body.dk { background: var(--black); color: var(--white); }
-  .cs-img-col { background: #ddd; overflow: hidden; position: relative; min-height: 520px; display: flex; align-items: center; justify-content: center; }
-  .cs-img-col.dk { background: #111; }
-  .cs-num-stamp { position: absolute; bottom: 24px; left: 24px; font-size: 72px; font-weight: 900; color: white; line-height: 1; mix-blend-mode: difference; }
-  .cs-info { padding: 40px 36px; display: flex; flex-direction: column; gap: 20px; border-left: 1px solid var(--rule); }
-  .cs-body.dk .cs-info { border-left-color: var(--rule-dark); }
-  .cs-block { padding-bottom: 18px; border-bottom: 1px solid var(--rule); }
-  .cs-body.dk .cs-block { border-bottom-color: var(--rule-dark); }
-  .cs-block:last-child { border-bottom: none; }
-  .cs-body-text { font-size: 12px; line-height: 1.8; color: #444; max-width: 420px; }
-  .cs-body.dk .cs-body-text { color: rgba(255,255,255,.6); }
-  .cs-service { font-size: 16px; font-weight: 700; padding: 5px 0; letter-spacing: -.01em; }
-  .cs-quote { font-size: 13px; line-height: 1.8; font-style: italic; color: #555; border-left: 3px solid var(--accent); padding-left: 16px; margin-top: 8px; }
-  .cs-body.dk .cs-quote { color: rgba(255,255,255,.5); }
-  .accent-block { width: 100%; aspect-ratio: 4/3; background: var(--accent); display: flex; align-items: flex-end; padding: 20px; margin-top: 8px; }
-  .accent-block-label { font-size: 18px; font-weight: 900; letter-spacing: -.02em; color: var(--black); }
-  .dark-block { width: 100%; aspect-ratio: 4/3; background: var(--black); display: flex; align-items: flex-end; padding: 20px; }
-  .dark-block-label { font-size: 18px; font-weight: 900; color: white; }
-
-  /* ── NARRATIVE STRIP ──────────────── */
-  .narrative-strip { background: var(--black); color: var(--white); padding: 60px 28px; }
-  .ns-header { display: flex; align-items: baseline; gap: 20px; margin-bottom: 32px; border-bottom: 1px solid var(--rule-dark); padding-bottom: 20px; }
-  .ns-idx { font-size: 9px; color: rgba(255,255,255,.25); font-weight: 600; min-width: 32px; }
-  .ns-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
-  .ns-body { font-size: 12px; line-height: 1.9; color: rgba(255,255,255,.6); max-width: 680px; }
-  .ns-body strong { color: white; font-weight: 600; }
-
-  /* ── ETHOS ────────────────────────── */
-  .ethos-section { background: var(--off); padding: 80px 28px; }
-  .ethos-title { font-size: clamp(52px,9vw,110px); font-weight: 900; letter-spacing: -.04em; line-height: .92; margin-bottom: 48px; }
-  .ethos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
-  .ethos-desc { font-size: 13px; line-height: 1.8; color: #444; margin-bottom: 32px; }
-  .principle { display: grid; grid-template-columns: 28px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #333; align-items: start; }
-  .p-num { color: var(--mid); font-weight: 400; padding-top: 1px; }
-
-  /* ── SELECTED ─────────────────────── */
-  .selected { background: var(--black); color: var(--white); padding: 80px 28px 60px; }
-  .sel-eyebrow { font-size: 8px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.25); margin-bottom: 12px; }
-  .sel-title { font-size: clamp(48px,9vw,110px); font-weight: 900; letter-spacing: -.04em; line-height: .92; }
-  .sel-year { font-size: clamp(48px,9vw,110px); font-weight: 900; letter-spacing: -.04em; line-height: .92; color: rgba(255,255,255,.18); margin-bottom: 40px; }
-  .sel-cats { display: flex; gap: 40px; border-top: 1px solid var(--rule-dark); padding-top: 20px; font-size: 10px; color: rgba(255,255,255,.4); }
-  .sel-cat { display: flex; gap: 12px; }
-  .sel-cat-n { color: rgba(255,255,255,.2); }
-
-  /* ── TESTIMONIALS ─────────────────── */
-  .testi-section { background: var(--off); padding: 80px 28px; }
-  .testi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; }
-  .testi-card { background: var(--white); padding: 28px 32px; }
-  .testi-quote { font-size: 14px; line-height: 1.8; color: #333; margin-bottom: 20px; font-style: italic; }
-  .testi-attr { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mid); }
-
-  /* ── CONTACT ──────────────────────── */
-  .contact-section { background: var(--accent); padding: 80px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: end; }
-  .contact-title { font-size: clamp(48px,8vw,100px); font-weight: 900; letter-spacing: -.04em; line-height: .92; color: var(--black); }
-  .contact-right { display: flex; flex-direction: column; gap: 16px; }
-  .contact-desc { font-size: 13px; line-height: 1.7; color: rgba(0,0,0,.65); max-width: 400px; }
-  .contact-link { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--black); text-decoration: none; border-bottom: 1px solid rgba(0,0,0,.3); padding-bottom: 2px; display: inline-block; cursor: none; }
-  .contact-link:hover { border-bottom-color: var(--black); }
-
-  /* ── FOOTER ───────────────────────── */
-  footer { background: var(--black); color: var(--white); padding: 48px 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; align-items: end; }
-  .foot-logo { font-size: 18px; font-weight: 900; letter-spacing: -.02em; }
-  .foot-note { font-size: 9px; color: rgba(255,255,255,.25); margin-top: 6px; line-height: 1.6; }
-  .foot-nav { display: flex; flex-direction: column; gap: 8px; }
-  .foot-nav a { font-size: 10px; color: rgba(255,255,255,.4); text-decoration: none; cursor: none; transition: color .2s; }
-  .foot-nav a:hover { color: white; }
-  .foot-copy { font-size: 8px; color: rgba(255,255,255,.2); text-align: right; line-height: 1.8; }
-
-  /* ── SCROLL REVEAL ────────────────── */
-  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .65s ease, transform .65s ease; }
-  .reveal.in { opacity: 1; transform: translateY(0); }
-
-  /* ── ANIMS ────────────────────────── */
-  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
-  .anim { opacity: 0; animation: fadeUp .7s cubic-bezier(.25,.46,.45,.94) forwards; }
-  .d1{animation-delay:.1s} .d2{animation-delay:.2s} .d3{animation-delay:.3s} .d4{animation-delay:.4s} .d5{animation-delay:.5s}
-
-  /* ── MISC ─────────────────────────── */
-  .sep { height: 1px; background: var(--rule); margin: 0 28px; }
-  .sep-dk { height: 1px; background: var(--rule-dark); }
-  .tag { display: inline-block; font-size: 7px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--black); color: white; padding: 3px 8px; margin-right: 6px; margin-bottom: 4px; }
-  .tag.ac { background: var(--accent); color: var(--black); }
-
-  .ph { display: flex; align-items: center; justify-content: center; }
-  .ph-dark { background: linear-gradient(135deg,#111 0%,#1e1e1e 100%); }
-  .ph-mid { background: linear-gradient(135deg,#ccc 0%,#bbb 100%); }
-  .ph-off { background: linear-gradient(135deg,#e0dcd6 0%,#ccc8c0 100%); }
-
-  .big-n { font-size: clamp(80px,15vw,160px); font-weight: 900; letter-spacing: -.04em; line-height: 1; color: rgba(0,0,0,.06); position: absolute; right: 28px; top: 50%; transform: translateY(-50%); user-select: none; }
-  .big-n.w { color: rgba(255,255,255,.05); }
-
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
-  .chip { font-size: 8px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; border: 1px solid var(--rule); padding: 4px 10px; color: var(--mid); }
-  .chip:hover { border-color: var(--black); color: var(--black); }
-  .dk-chip { border-color: var(--rule-dark); color: rgba(255,255,255,.35); }
-  .dk-chip:hover { border-color: white; color: white; }
-
-  /* ── BNY CASE STUDY IMAGES ────────── */
-  .bny-img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #0a0a0a; }
-  .bny-img-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-  .bny-img { width: 100%; display: block; object-fit: cover; }
-  .bny-img-full { width: 100%; display: block; object-fit: cover; }
-  .bny-img-caption { font-size: 8px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.25); padding: 8px 12px; background: #0a0a0a; }
-
-  /* ── GNC IMAGE GALLERY ────────────── */
-  .gnc-dive-frame { width: 100%; border: none; display: block; background: #f5f5f5; }
-  .gnc-img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--off); }
-  .gnc-img { width: 100%; display: block; object-fit: cover; }
-
-  a[data-nav], [data-nav] { cursor: none; }
-
-  /* ── FORM-STANDARD CASE STUDY LAYOUT ─────────────────────────── */
-  .fs-view { background: #fff; color: #0a0a0a; }
-
-  /* Top identity bar */
-  .fs-topbar {
-    display: grid;
-    grid-template-columns: 160px 1fr auto;
-    align-items: start;
-    padding: 18px 28px 16px;
-    border-bottom: 1px solid #d0ceca;
-    font-size: 8px;
-    font-weight: 500;
-    letter-spacing: .04em;
-    color: #999;
-  }
-  .fs-topbar-left { line-height: 1.7; }
-  .fs-topbar-mid { font-size: 8px; color: #bbb; }
-  .fs-topbar-dot { width: 10px; height: 10px; border: 1px solid #ccc; border-radius: 50%; margin-top: 1px; }
-
-  /* Case hero: number + client name */
-  .fs-hero {
-    padding: 40px 28px 0;
-    border-bottom: 1px solid #d0ceca;
-  }
-  .fs-hero-inner {
+  body {
     display: flex;
-    align-items: baseline;
-    gap: 24px;
-    margin-bottom: 36px;
-  }
-  .fs-num {
-    font-size: 22px;
-    font-weight: 300;
-    color: #bbb;
-    letter-spacing: -.01em;
-    min-width: 40px;
-  }
-  .fs-client-name {
-    font-size: clamp(32px, 6vw, 64px);
-    font-weight: 800;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    line-height: 1;
-    color: #0a0a0a;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
   }
 
-  /* 4-col metadata row */
-  .fs-meta {
-    display: grid;
-    grid-template-columns: 220px 1fr 160px 100px;
-    gap: 0;
-    border-top: 1px solid #d0ceca;
-    border-bottom: 1px solid #d0ceca;
-  }
-  .fs-meta-col {
-    padding: 10px 16px 10px 0;
-    border-right: 1px solid #d0ceca;
-  }
-  .fs-meta-col:first-child { padding-left: 0; }
-  .fs-meta-col:last-child { border-right: none; padding-left: 16px; }
-  .fs-meta-label {
-    font-size: 7px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #aaa;
-    margin-bottom: 5px;
-  }
-  .fs-meta-val {
-    font-size: 10px;
-    font-weight: 500;
-    color: #0a0a0a;
-    line-height: 1.5;
-  }
-
-  /* Body: text col + deliverables col + image */
-  .fs-body {
-    display: grid;
-    grid-template-columns: 220px 1fr 1fr;
-    gap: 0;
-    border-bottom: 1px solid #d0ceca;
-    padding: 28px 0 0;
-  }
-  .fs-desc-col {
-    padding: 0 24px 28px 0;
-    border-right: 1px solid #d0ceca;
-  }
-  .fs-desc-text {
-    font-size: 10.5px;
-    line-height: 1.85;
-    color: #333;
-  }
-  .fs-deliv-col {
-    padding: 0 24px 28px 24px;
-    border-right: 1px solid #d0ceca;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .fs-deliv-item {
-    padding: 10px 0;
-    border-bottom: 1px solid #e8e5e0;
-    font-size: 11px;
-    font-weight: 600;
-    color: #0a0a0a;
-  }
-  .fs-deliv-item:first-child { padding-top: 0; }
-  .fs-deliv-item:last-child { border-bottom: none; }
-  .fs-deliv-item-label {
-    font-size: 7px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #aaa;
-    margin-bottom: 3px;
-  }
-  .fs-img-col {
-    padding: 0 0 0 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .fs-img-col img {
+  .page {
     width: 100%;
-    display: block;
-    object-fit: cover;
+    max-width: 640px;
   }
 
-  /* Photo grid (Vanta-style) */
-  .fs-photo-grid {
-    padding: 0 28px 28px;
-    border-bottom: 1px solid #d0ceca;
-  }
-  .fs-photo-grid-label {
-    font-size: 7px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #aaa;
-    padding: 16px 0 12px;
-    border-top: 1px solid #d0ceca;
-    margin-bottom: 12px;
-  }
-  .fs-photo-row {
-    display: grid;
-    gap: 2px;
-    margin-bottom: 2px;
-  }
-  .fs-photo-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
-  .fs-photo-row.cols-7 { grid-template-columns: repeat(7, 1fr); }
-  .fs-photo-cell {
+  /* faint scan texture behind everything, like an old CRT departures board */
+  .board {
     position: relative;
-    aspect-ratio: 1;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    border-radius: 2px;
+    padding: 48px 40px 40px;
     overflow: hidden;
-    background: #e8e5e0;
   }
-  .fs-photo-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .fs-photo-cell-num {
+
+  .board::before {
+    content: "";
     position: absolute;
-    top: 4px;
-    left: 5px;
-    font-size: 6px;
-    font-weight: 700;
-    color: rgba(255,255,255,.5);
-    letter-spacing: .05em;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.015) 0px,
+      rgba(255,255,255,0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
   }
 
-  /* Full-bleed image strip (Fieldrun-style) */
-  .fs-fullbleed {
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .eyebrow .old-domain {
+    text-decoration: line-through;
+    text-decoration-color: var(--accent-dim);
+    color: var(--muted);
+  }
+
+  .eyebrow .arrow { color: var(--accent); }
+
+  .eyebrow .new-domain {
+    color: var(--fg);
+  }
+
+  h1 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(26px, 5vw, 38px);
+    line-height: 1.15;
+    margin: 18px 0 34px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  a {
+    color: var(--accent);
+  }
+
+  h1 a {
+    color: var(--fg);
+    text-decoration: none;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 2px;
+    padding-bottom: 2px;
+    transition: background-size 0.2s ease, color 0.2s ease;
+  }
+
+  h1 a:hover {
+    color: var(--accent);
+    background-size: 100% 100%;
+  }
+
+  .fine-print a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-dim);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  .fine-print a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  /* --- odometer countdown --- */
+  .odometer {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 28px 0;
+    margin-bottom: 28px;
+  }
+
+  .unit {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .digits {
+    display: flex;
+    gap: 3px;
+  }
+
+  .digit-window {
     position: relative;
+    width: 0.62em;
+    height: 1em;
     overflow: hidden;
-    border-bottom: 1px solid #d0ceca;
-  }
-  .fs-fullbleed img { width: 100%; display: block; max-height: 90vh; object-fit: contain; background: #f5f4f2; }
-  .fs-fullbleed-caption {
-    font-size: 7px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #aaa;
-    padding: 8px 28px;
-    border-top: 1px solid #d0ceca;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(32px, 8vw, 52px);
+    font-variant-numeric: tabular-nums;
+    background: #000;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 6px 4px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
   }
 
-  /* Figma live embed strip */
-  .fs-figma {
-    border-bottom: 1px solid #d0ceca;
-  }
-  .fs-figma-label {
-    font-size: 7px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #aaa;
-    padding: 16px 28px 12px;
-    border-top: 1px solid #d0ceca;
-    border-bottom: 1px solid #d0ceca;
-  }
-  .fs-figma iframe {
-    display: block;
+  .digit-strip {
+    position: absolute;
+    top: 6px;
+    left: 0;
     width: 100%;
-    height: 640px;
-    border: none;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.5s cubic-bezier(.36,.66,.4,1);
   }
 
-  /* Narrative strip — light version for fs pages */
-  .fs-narrative {
-    padding: 36px 28px;
-    border-bottom: 1px solid #d0ceca;
-    display: grid;
-    grid-template-columns: 160px 1fr;
-    gap: 40px;
-    align-items: start;
+  .digit-strip span {
+    height: 1em;
+    line-height: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg);
   }
-  .fs-narrative-label {
-    font-size: 7px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: #aaa;
-    padding-top: 3px;
-  }
-  .fs-narrative-body {
+
+  .unit-label {
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
-    line-height: 1.9;
-    color: #333;
-  }
-  .fs-narrative-body strong { color: #0a0a0a; font-weight: 700; }
-
-  /* Padding on fs-hero for interior body usage */
-  .fs-hero .fs-body { padding-top: 28px; }
-
-  /* Mobile safety */
-  @media (max-width: 700px) {
-    .fs-meta { grid-template-columns: 1fr 1fr; }
-    .fs-body { grid-template-columns: 1fr; }
-    .fs-desc-col, .fs-deliv-col { border-right: none; border-bottom: 1px solid #d0ceca; }
-    .fs-img-col { padding: 24px 0 0; }
-    .fs-photo-row.cols-6, .fs-photo-row.cols-7 { grid-template-columns: repeat(4, 1fr); }
-  }
-  /* Dark fs-view variant (Fieldrun-style band) */
-  .fs-view.dk { background: #0a0a0a; color: #fff; }
-  .fs-view.dk .fs-topbar { border-bottom-color: rgba(255,255,255,.1); color: rgba(255,255,255,.35); }
-  .fs-view.dk .fs-topbar-mid { color: rgba(255,255,255,.25); }
-  .fs-view.dk .fs-topbar-dot { border-color: rgba(255,255,255,.2); }
-  .fs-view.dk .fs-hero { border-bottom-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-num { color: rgba(255,255,255,.2); }
-  .fs-view.dk .fs-client-name { color: #fff; }
-  .fs-view.dk .fs-meta { border-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-meta-col { border-right-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-meta-label { color: rgba(255,255,255,.3); }
-  .fs-view.dk .fs-meta-val { color: #fff; }
-  .fs-view.dk .fs-body { border-bottom-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-desc-col { border-right-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-desc-text { color: rgba(255,255,255,.55); }
-  .fs-view.dk .fs-deliv-col { border-right-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-deliv-item { border-bottom-color: rgba(255,255,255,.08); color: #fff; }
-  .fs-view.dk .fs-deliv-item-label { color: rgba(255,255,255,.3); }
-  .fs-view.dk .fs-photo-grid { border-bottom-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-photo-grid-label { color: rgba(255,255,255,.3); border-top-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-photo-cell { background: #1a1a1a; }
-  .fs-view.dk .fs-photo-cell-num { color: rgba(255,255,255,.35); }
-  .fs-view.dk .fs-narrative { border-bottom-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-narrative-label { color: rgba(255,255,255,.3); }
-  .fs-view.dk .fs-narrative-body { color: rgba(255,255,255,.55); }
-  .fs-view.dk .fs-narrative-body strong { color: #fff; }
-  .fs-view.dk .fs-narrative-body .accent { color: var(--accent); }
-  .fs-view.dk .fs-fullbleed { border-bottom-color: rgba(255,255,255,.1); }
-  .fs-view.dk .fs-fullbleed-caption { color: rgba(255,255,255,.3); border-top-color: rgba(255,255,255,.1); }
-  .fs-quote-band {
-    padding: 48px 28px;
-    border-bottom: 1px solid #d0ceca;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
     text-align: center;
   }
-  .fs-quote-band blockquote {
-    margin: 0 auto;
-    max-width: 760px;
-    font-family: var(--ff-display, inherit);
-    font-size: clamp(1.3rem, 3vw, 2.1rem);
-    font-weight: 600;
-    line-height: 1.35;
-    letter-spacing: -.01em;
-  }
-  .fs-view.dk .fs-quote-band { border-bottom-color: rgba(255,255,255,.1); color: #fff; }
 
+  .colon {
+    align-self: center;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(24px, 6vw, 40px);
+    color: var(--accent-dim);
+    padding-bottom: 22px;
+  }
+
+  .fine-print {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .fine-print strong { color: var(--fg); font-weight: 500; }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #0b0b0a;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    padding: 15px 22px;
+    border-radius: 2px;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .cta:hover {
+    background: #ffd766;
+    transform: translateX(2px);
+  }
+
+  .cta svg { transition: transform 0.15s ease; }
+  .cta:hover svg { transform: translateX(3px); }
+
+  .footer-note {
+    margin-top: 22px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .expired h1 span { color: #5fbf7a; }
+  .expired .digit-window { border-color: #2a3a2c; }
+
+  @media (max-width: 420px) {
+    .board { padding: 34px 22px 28px; }
+    .odometer { gap: 10px; }
+    .colon { padding-bottom: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .digit-strip { transition: none; }
+  }
 </style>
 </head>
 <body>
 
-<div id="cursor"></div>
-<div id="cover"></div>
-
-<!-- NAV -->
-<nav id="nav" class="dk">
-  <div class="nl">
-    <span class="studio" data-nav="home" style="display:block;margin-bottom:2px;">Zack Gort</span>
-    <a data-nav="work">Work</a> &nbsp;·&nbsp;
-    <a data-nav="about">About</a>
-  </div>
-  <div class="nc">
-    <div class="nav-links">
-      <a data-nav="home">Index</a>
-      <a data-nav="work">Stories</a>
-      <a data-nav="about">CV</a>
-      <a href="mailto:hello@zack.cx">Contact</a>
-    </div>
-    <div style="font-size:8px;color:rgba(128,128,128,.6);margin-top:4px;">UX & Product Design · Philadelphia</div>
-  </div>
-  <div class="nr"><div class="dot"></div></div>
-</nav>
-
-
-<!-- ══════════════════════════════════ HOME ══ -->
-<div id="view-home" class="view active">
-
-  <section class="hero">
-    <div class="big-n w">think+make</div>
-    <div class="hero-eyebrow anim">User Experience by Design</div>
-    <div class="hero-title anim d1">Zack<br><em>Gort.</em></div>
-    <div class="hero-sub anim d2">Senior UX &amp; Product Designer</div>
-    <div class="hero-meta anim d3">
-      <div>
-        <div class="h-label">What I do</div>
-        <div class="h-text">I translate data points into pixels. Having worked with client teams of all types for 20+ years, I've developed a knack for translating hard requirements into conversation pieces that make the creative process actually creative. Navigation systems are my forté. Caring about the work is non-negotiable.</div>
-        <div class="chips" style="margin-top:16px;">
-          <span class="chip dk-chip">IA &amp; Navigation</span>
-          <span class="chip dk-chip">E-Commerce</span>
-          <span class="chip dk-chip">Design Systems</span>
-          <span class="chip dk-chip">B2B Platforms</span>
-          <span class="chip dk-chip">Mobile / iOS</span>
-          <span class="chip dk-chip">SAP Hybris</span>
-          <span class="chip dk-chip">Shopify</span>
-        </div>
-      </div>
-      <div>
-        <div class="h-label">↓ Selected Work</div>
-        <div class="h-nav-list">
-          <div class="h-nav-item" data-nav="cs-bny"><span class="h-nav-num">01</span>BNY Mellon / Pershing X</div>
-          <div class="h-nav-item" data-nav="cs-gnc"><span class="h-nav-num">02</span>GNC — Shopify Redesign</div>
-          <div class="h-nav-item" data-nav="cs-hardinge"><span class="h-nav-num">03</span>Hardinge — B2B SAP Hybris</div>
-          <div class="h-nav-item" data-nav="cs-kent"><span class="h-nav-num">04</span>Kent State .EDU</div>
-          <div class="h-nav-item" data-nav="cs-dana"><span class="h-nav-num">05</span>Dana Foundation</div>
-          <div class="h-nav-item" data-nav="work"><span class="h-nav-num">→</span>View all work</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="ticker">
-    <div class="ticker-inner">
-      <span class="t-item">Navigation Systems</span>
-      <span class="t-item">Information Architecture</span>
-      <span class="t-item">E-Commerce UX</span>
-      <span class="t-item">B2B Platforms</span>
-      <span class="t-item">Design Systems</span>
-      <span class="t-item">Client Workshops</span>
-      <span class="t-item">Figma Prototyping</span>
-      <span class="t-item">SAP Hybris</span>
-      <span class="t-item">Shopify</span>
-      <span class="t-item">Mobile-First</span>
-      <span class="t-item">Agile / Scrum</span>
-      <span class="t-item">Navigation Systems</span>
-      <span class="t-item">Information Architecture</span>
-      <span class="t-item">E-Commerce UX</span>
-      <span class="t-item">B2B Platforms</span>
-      <span class="t-item">Design Systems</span>
-      <span class="t-item">Client Workshops</span>
-      <span class="t-item">Figma Prototyping</span>
-      <span class="t-item">SAP Hybris</span>
-      <span class="t-item">Shopify</span>
-      <span class="t-item">Mobile-First</span>
-      <span class="t-item">Agile / Scrum</span>
-    </div>
-  </div>
-
-  <section class="about-strip reveal">
-    <div>
-      <div class="about-name">Zack<br>Gort</div>
-      <div class="about-title-line">UX &amp; Product Design · Philadelphia · ~20 years</div>
-      <div class="about-stats">
-        <div><div class="stat-n">20<span style="color:var(--accent)">+</span></div><div class="stat-l">Years</div></div>
-        <div><div class="stat-n">40<span style="color:var(--accent)">+</span></div><div class="stat-l">Clients</div></div>
-        <div><div class="stat-n">∞</div><div class="stat-l">Problems Solutioned [sic]</div></div>
-      </div>
-    </div>
-    <div class="about-right">
-      <div class="about-desc">I was an artist before I was a graphic designer — or a UX designer. I studied at Pratt Institute (briefly), built my own computer, taught myself Photoshop and Illustrator via piracy, and eventually landed at a startup in the suburbs of southeastern Pennsylvania shipping millions of dollars of automotive parts to a fanatical fanbase. That was my formal education.<br><br>Since then: agency life at 160over90, O3 World, WebLinc, FlightPath, LiveArea, Code &amp; Theory, and Publicis Sapient. Enterprise. Startup. B2B. B2C. .EDU. iOS. The common thread is navigation systems and a refusal to let the UX process be boring for the client.</div>
-      <div class="expertise-grid">
-        <div>
-          <div class="ex-col-label">Disciplines</div>
-          <div class="ex-item">Information Architecture<br>UX / UI Design<br>Navigation Systems<br>Design Systems<br>Prototyping &amp; Testing<br>Client Workshops<br>Product Strategy</div>
-        </div>
-        <div>
-          <div class="ex-col-label">Platforms &amp; Tools</div>
-          <div class="ex-item">Figma / Adobe CS <br>SAP Hybris / SFCC<br>Shopify (Plus)<br>Workarea (WebLinc)<br>iOS (native)<br>WCAG 2.0 AA<br>Agile / Scrum</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="selected reveal">
-    <div class="sel-eyebrow">↓ Selected Work</div>
-    <div class="sel-title">Selected<br>Case Studies</div>
-    <div class="sel-year">2007—Now</div>
-    <div class="sel-cats">
-      <div class="sel-cat"><span class="sel-cat-n">1.0</span> Enterprise</div>
-      <div class="sel-cat"><span class="sel-cat-n">2.0</span> E-Commerce</div>
-      <div class="sel-cat"><span class="sel-cat-n">3.0</span> .EDU</div>
-      <div class="sel-cat"><span class="sel-cat-n">4.0</span> Startup / iOS</div>
-    </div>
-  </section>
-
-  <div class="cs-list">
-    <div class="cs-row" data-nav="cs-bny">
-      <div class="cs-idx">1.1</div>
-      <div><div class="cs-client">BNY Mellon / Pershing X</div><div class="cs-type">Advisory Experience Platform</div></div>
-      <div class="cs-type">Principal UX Lead · Design Systems · Client Workshops<br><span class="tag ac" style="margin-top:4px">Publicis Sapient</span></div>
-      <div class="cs-yr">2023<div class="cs-arr">→</div></div>
-    </div>
-    <div class="cs-row" data-nav="cs-gnc">
-      <div class="cs-idx">2.1</div>
-      <div><div class="cs-client">GNC</div><div class="cs-type">Shopify Plus Redesign</div></div>
-      <div class="cs-type">Lead UX Designer · Mobile-First Navigation<br><span class="tag" style="margin-top:4px">Elva Design Group</span></div>
-      <div class="cs-yr">2022<div class="cs-arr">→</div></div>
-    </div>
-    <div class="cs-row" data-nav="cs-hardinge">
-      <div class="cs-idx">2.2</div>
-      <div><div class="cs-client">Hardinge Inc.</div><div class="cs-type">B2B SAP Hybris E-Commerce</div></div>
-      <div class="cs-type">Principal UX · Cards Against Bad UX<br><span class="tag" style="margin-top:4px">LiveArea</span></div>
-      <div class="cs-yr">2020<div class="cs-arr">→</div></div>
-    </div>
-    <div class="cs-row" data-nav="cs-kent">
-      <div class="cs-idx">3.1</div>
-      <div><div class="cs-client">Kent State University</div><div class="cs-type">.EDU Overhaul</div></div>
-      <div class="cs-type">IA Refactor · Navigation Design · Visual Design<br><span class="tag" style="margin-top:4px">160over90</span></div>
-      <div class="cs-yr">2016<div class="cs-arr">→</div></div>
-    </div>
-    <div class="cs-row" data-nav="cs-dana">
-      <div class="cs-idx">3.2</div>
-      <div><div class="cs-client">Dana Foundation</div><div class="cs-type">Mobile-First Redesign + Bespoke Logo</div></div>
-      <div class="cs-type">Full-spectrum redesign · Brand Identity<br><span class="tag" style="margin-top:4px">FlightPath</span></div>
-      <div class="cs-yr">2018<div class="cs-arr">→</div></div>
-    </div>
-    <div class="cs-row" data-nav="cs-power">
-      <div class="cs-idx">4.1</div>
-      <div><div class="cs-client">Power Home Remodeling</div><div class="cs-type">Campaign &amp; Digital Experience</div></div>
-      <div class="cs-type">Cross-dept. coordination · Video · Photography<br><span class="tag" style="margin-top:4px">160over90</span></div>
-      <div class="cs-yr">2015<div class="cs-arr">→</div></div>
-    </div>
-    <div class="cs-row" data-nav="cs-wovn">
-      <div class="cs-idx">7.1</div>
-      <div><div class="cs-client">AmericanMuscle.com</div><div class="cs-type">E-Commerce Platform · Full-Funnel UX</div></div>
-      <div class="cs-type">UI+UX · Photography · Brand Identity<br><span class="tag" style="margin-top:4px">Turn5 Inc.</span></div>
-      <div class="cs-yr">2011<div class="cs-arr">→</div></div>
-    </div>
-  </div>
-
-  <div class="sep"></div>
-  <section class="ethos-section reveal">
-    <div class="ethos-title">Ethos</div>
-    <div class="ethos-grid">
-      <div>
-        <div class="ethos-desc">Navigation systems are my forté and my favorite. But it's not just about drawing boxes and arrows — it's about maintaining full communication with the team, diving deep into a new platform and/or client ecosystem, putting in the hours (not all billed) to make everything right, being patient despite egos and exceptional deadlines. It's about caring about the work.</div>
-        <div class="ethos-desc">I was an artist before I was a designer. That means I observe. I read the room. I gauge vocal inflections on client calls when everyone has their camera off. And then I go make something that hits closer to the mark than anyone expected — usually on the first pass.</div>
-      </div>
-      <div>
-        <div class="principle"><span class="p-num">1</span>Translate data into conversation — then conversion.</div>
-        <div class="principle"><span class="p-num">2</span>Think as scenarios for surfaces, states, and situations. </div>
-        <div class="principle"><span class="p-num">3</span>Educate with efficacy; engage through candor.</div>
-        <div class="principle"><span class="p-num">4</span>'radical candor' can kindly fuck off</div>
-        <div class="principle"><span class="p-num">5</span>Read. Write. Do math. Design.</div>
-        <div class="principle"><span class="p-num">6</span>Could you imagine if Cy Twombly designed a website?</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="sep"></div>
-  <section class="testi-section reveal">
-    <div style="font-size:clamp(36px,6vw,72px);font-weight:900;letter-spacing:-.03em;line-height:.92;margin-bottom:8px;">What teammates say</div>
-    <div style="font-size:11px;color:var(--mid)">Unsolicited. From the people who worked alongside me.</div>
-    <div class="testi-grid">
-      <div class="testi-card">
-        <div class="testi-quote">"Zack has a deep connection to emotions, imagination, and sensitivity — the quintessential idealist. His greatest strength is his depth of sensitivity and empathy, which allows him to give voice to human connections in a way that works with people on a profound level. Zack brings fresh perspective to things when I felt in a rut — a great person to work with."</div>
-        <div class="testi-attr">Christopher Bayle — ACD UX, Publicis Sapient</div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-quote">"Zack is one of the most talented, hard working and knowledgeable individuals I have had the pleasure of working with. He has truly been excellent, trying to foster communication not only between us, but with the whole team; to set them up for success. He always gives his best and more."</div>
-        <div class="testi-attr">Andrés Moros, MPS — Sr. UX Designer, Publicis Sapient</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="contact-section reveal">
-    <div class="contact-title">Say<br>Hello.</div>
-    <div class="contact-right">
-      <div class="contact-desc">Works referenced herein are intended to provide perspective into a few of my favorite UI+UX experiences. For each of these projects, I served as the principal UI+UX designer.<br><br>©All works shown belong to their respective copyright owners.</div>
-      <a href="mailto:zack@reasonably.cc" class="contact-link">zack@reasonably.cc</a>
-      <a href="https://zack.cx" class="contact-link" target="_blank">zack.cx</a>
-      <a href="https://www.linkedin.com/in/zackgort/" class="contact-link" target="_blank">LinkedIn</a>
-      <a href="https://wolfie.love" class="contact-link" target="_blank">wolfie.love</a>
-    </div>
-  </section>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div><div class="foot-note">UX &amp; Product Design<br>Philadelphia · Available</div></div>
-    <div class="foot-nav">
-      <a data-nav="work">Work</a>
-      <a data-nav="about">About / CV</a>
-      <a href="mailto:hello@zack.cx">Contact</a>
-    </div>
-    <div class="foot-copy">© Zack Gort 2026<br>All works belong to their<br>respective copyright owners.</div>
-  </footer>
-
-</div><!-- /home -->
-
-
-<!-- ══════════════════════════════════ WORK ══ -->
-<div id="view-work" class="view">
-
-  <div class="sec-hero dk">
-    <div class="big-n w">07</div>
-    <div class="sec-title anim">UX<br>Stories.</div>
-    <div class="sec-sub anim d1" style="color:rgba(255,255,255,.45)">A non-linear but carefully curated career path, from homegrown startups to working with A-list brands at global scale. Navigation systems are my forté. Caring about the work is non-negotiable.</div>
-  </div>
-
-  <div class="work-grid">
-    <div class="wg">
-      <div class="wc" data-nav="cs-bny">
-        <div class="wc-img" style="background:#0a0a0a;overflow:hidden;">
-          <img src="https://i.ibb.co/0pXM90tz/bny4.webp" alt="BNY Pershing X" style="width:100%;height:100%;object-fit:cover;opacity:.85;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">Enterprise</div><div class="wc-name">BNY Mellon / Pershing X</div></div><div class="wc-type">2023</div></div>
-      </div>
-      <div class="wc" data-nav="cs-gnc">
-        <div class="wc-img" style="background:#f5f3f0;overflow:hidden;">
-          <img src="https://i.ibb.co/7J9gLTRy/mask-group-68c4867fc5153.webp" alt="GNC Shopify" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">E-Commerce</div><div class="wc-name">GNC</div></div><div class="wc-type">2022</div></div>
-      </div>
-      <div class="wc" data-nav="cs-hardinge">
-        <div class="wc-img" style="background:#111;overflow:hidden;">
-          <img src="https://i.ibb.co/4nLTQS02/danaheroa-Zcf-Ia-BQr-Rdkrtxo-THSyhar-T.webp" alt="Hardinge B2B SAP Hybris" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">B2B</div><div class="wc-name">Hardinge Inc.</div></div><div class="wc-type">2020</div></div>
-      </div>
-      <div class="wc" data-nav="cs-kent">
-        <div class="wc-img" style="background:#111;overflow:hidden;">
-          <img src="https://i.ibb.co/Nd7sYFdP/kentnav-PSz-NWCpx-DQoo-YFgrqs-WCz-Gx-ZU.webp" alt="Kent State .EDU" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">.EDU</div><div class="wc-name">Kent State University</div></div><div class="wc-type">2016</div></div>
-      </div>
-      <div class="wc" data-nav="cs-dana">
-        <div class="wc-img" style="background:#111;overflow:hidden;">
-          <img src="https://i.ibb.co/twFgPzmY/dana-ratios.png" alt="Dana Foundation" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">Non-Profit</div><div class="wc-name">Dana Foundation</div></div><div class="wc-type">2018</div></div>
-      </div>
-      <div class="wc" data-nav="cs-power">
-        <div class="wc-img" style="background:#111;overflow:hidden;">
-          <img src="https://i.ibb.co/7tkkDT7y/poweranimationloop-YFKh-XZGt-Pkc-UCZ.gif" alt="Power Home Remodeling" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">Campaign</div><div class="wc-name">Power HRG</div></div><div class="wc-type">2015</div></div>
-      </div>
-      <div class="wc" data-nav="cs-wovn">
-        <div class="wc-img" style="background:#111;overflow:hidden;">
-          <img src="https://i.ibb.co/YTKt6LcS/IMG-20210515-151006.webp" alt="AmericanMuscle.com" style="width:100%;height:100%;object-fit:cover;">
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta"><div><div class="wc-tag">E-Commerce</div><div class="wc-name">AmericanMuscle.com</div></div><div class="wc-type">2011</div></div>
-      </div>
-      <div class="wc" data-nav="about">
-        <div class="wc-img" style="background:var(--accent);flex-direction:column;align-items:flex-start;padding:20px;display:flex;">
-          <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,.6);margin-bottom:8px;">~20 years</div>
-          <div style="font-size:22px;font-weight:900;color:var(--black);line-height:1.1;letter-spacing:-.02em;">Full CV<br>&amp; Story</div>
-          <div style="font-size:18px;margin-top:auto;color:var(--black);">→</div>
-        </div>
-        <div class="wc-overlay"></div>
-        <div class="wc-meta" style="background:none;"><div></div></div>
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div><div class="foot-note">UX &amp; Product Design, 2007–Now</div></div>
-    <div class="foot-nav"><a data-nav="home">Home</a><a data-nav="about">About</a><a href="mailto:hello@zack.cx">Contact</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /work -->
-
-
-<!-- ══════════════════════════════════ ABOUT ══ -->
-<div id="view-about" class="view">
-
-  <div class="sec-hero of" style="padding-bottom:60px;position:relative;">
-    <div class="big-n" style="font-size:clamp(60px,12vw,130px);">Zack</div>
-    <div class="sec-title anim" style="max-width:700px;">The Story<br>Behind the Work.</div>
-    <div style="height:1px;background:var(--rule);margin:28px 0;" class="anim d2"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;" class="anim d3">
-      <div><div style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:6px;">Location</div><div style="font-size:13px;font-weight:600;">Flexible/Open</div></div>
-      <div><div style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:6px;">Studio</div><div style="font-size:13px;font-weight:600;">Wolfgang &amp; Co.</div></div>
-      <div><div style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:6px;">Background</div><div style="font-size:13px;font-weight:600;">Pratt Institute · Autodidact</div></div>
-    </div>
-  </div>
-
-  <div class="narrative-strip reveal">
-    <div class="ns-header"><span class="ns-idx">Ch.1</span><span class="ns-title">The non-linear origin story.</span></div>
-    <div class="ns-body">Before I was a "UX Designer", I was a "Web Designer". Before that, a "Graphic Designer". Before that, a teenager who could draw well and had a passion for animation. <strong>What is animation? It is the creation of something in motion; something that requires forethought into the next step, while maintaining a frame of reference for that which has occurred. What is UX? Exactly that.</strong><br><br>I didn't graduate from Pratt. I couldn't afford it. So I worked construction, the bowling alley, the hardware store, the grocery store, the gas station. Built my own computer. Installed pirated Adobe software. Studied typography by reading magazines on the train. Studied color theory from whatever I could find online. Landed a job via Craigslist at $16.50/hour, full benefits, a 401K, and my own cubicle. I had no idea how happy I was.</div>
-  </div>
-
-  <div class="sep-dk"></div>
-  <div class="narrative-strip reveal">
-    <div class="ns-header"><span class="ns-idx">Ch.4–5</span><span class="ns-title">Startup life — AmericanMuscle.com.</span></div>
-    <div class="ns-body">My formal education: Turn5 Inc., parent of AmericanMuscle.com, shipping millions of dollars of automotive parts to a fanatical fanbase out of a warehouse in southeastern Pennsylvania. I did everything — <strong>graphic design, product photography, email marketing, package design, catalog design, and eventually, web design with a specific focus on UX.</strong><br><br>95.8% conversion rate. 14.6% bounce rate. That wasn't magic. That was iterative testing, Sutton's Law, and an obsessive attention to the conversion funnel from homepage through checkout to your doorstep. Also: I took all the product photos. The Raxiom logo too.</div>
-  </div>
-
-  <div class="sep-dk"></div>
-  <div class="narrative-strip reveal">
-    <div class="ns-header"><span class="ns-idx">Ch.6</span><span class="ns-title">Enter #agencylife. Exit #worklifebalance.</span></div>
-    <div class="ns-body">160over90. Center City Philadelphia. Hired as one of two "Interaction Designers" to stand up a newly minted Interactive Department. $12K less than my previous job, zero regrets. <strong>Kent State .EDU. University of Wisconsin–Madison. Power Home Remodeling Group.</strong> Cross-department coordination with photographers, motion designers, video teams. The level of coordination with Power was significant — nay, tremendous. "Power is a ______ company." That was my idea. The team liked it. Power loved it.</div>
-  </div>
-
-  <div class="sep-dk"></div>
-  <div class="narrative-strip reveal">
-    <div class="ns-header"><span class="ns-idx">Ch.10–12</span><span class="ns-title">From PHI to NYC. Cards Against Bad UX.</span></div>
-    <div class="ns-body">LiveArea: UX Manager, contracts exceeding $1M in value, $235/hr billable. <strong>Hardinge Inc. — B2B SAP Hybris. Board-level visibility. Cards Against Bad UX</strong> — a presentation format I invented to shift client conversations away from jargon and toward user-centric thinking. It worked. Client approved on the first call with two modest adjustments.<br>Then GNC: Shopify Plus, mobile-first navigation, post-bankruptcy. The brief was to shake things up. We did.</div>
-  </div>
-
-  <div class="sep-dk"></div>
-  <div class="narrative-strip reveal">
-    <div class="ns-header"><span class="ns-idx">Ch.15</span><span class="ns-title">Pershing X. The most sophisticated work of my career.</span></div>
-    <div class="ns-body">Publicis Sapient. BNY Mellon / Pershing X Advisory Experience Platform. I became the de facto Team Lead and Product Owner. Led research and discovery. Led client workshops. Collaborated across multiple concurrent tracks while mentoring junior and associate designers. <strong>My efforts were directly responsible for securing a contract extension and influencing the overall direction of the now-live product.</strong><br><br>"Organizational Spaghetti" — a term I coined to describe the experience. But the work was real, and it showed. I was laid off. "Separated amicably," the exit contract said. C'est la vi, so they say.</div>
-  </div>
-
-  <section style="background:var(--off);padding:80px 28px 60px;" class="reveal">
-    <div style="font-size:clamp(36px,6vw,72px);font-weight:900;letter-spacing:-.03em;line-height:.92;margin-bottom:40px;">Career<br>Timeline.</div>
-    <table style="width:100%;border-collapse:collapse;font-size:11px;">
-      <thead>
-        <tr>
-          <th style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);text-align:left;padding:8px 0;border-bottom:1px solid var(--rule);">Period</th>
-          <th style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);text-align:left;padding:8px 0;border-bottom:1px solid var(--rule);">Company</th>
-          <th style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);text-align:left;padding:8px 0;border-bottom:1px solid var(--rule);">Role</th>
-          <th style="font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);text-align:left;padding:8px 0;border-bottom:1px solid var(--rule);">Notable</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2023</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">Publicis Sapient</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Senior / Staff UX Designer, Lead</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">BNY Mellon · Pershing X</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2022</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">Elva Design Group</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Lead UX Designer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">GNC · Shopify Plus post-bankruptcy</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2021</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">Code &amp; Theory</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Senior Designer / ACD responsibilities</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Top social media platform</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2020</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">LiveArea</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">UX Manager</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Hardinge · SAP Hybris · $1M+ contracts</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2019</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">Huge</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">UX Designer (Contract)</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Global enterprise</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--rule);">2018</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">FlightPath NYC</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Senior UX Designer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Dana Foundation · Merck · Zoetis</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2017</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">O3 World</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">UX Designer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">WOVN iOS · SEI · La Colombe</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2014–16</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">160over90</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Interaction Designer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Kent State · Wisc-Madison · Power HRG</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2013–14</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">WebLinc / Workarea</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Senior Visual &amp; UX Designer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Proprietary SaaS e-commerce platform</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2011–13</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">Leadnomics</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">UX Designer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">95.8% conversion rate · Bootstrap</td></tr>
-        <tr><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">2007–11</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);font-weight:700;">Turn5 / AmericanMuscle.com</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);">Web &amp; Graphic Designer, Photographer</td><td style="padding:11px 0;border-bottom:1px solid var(--rule);color:var(--mid);">Built the whole damn thing</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <div class="sep"></div>
-  <section class="testi-section reveal">
-    <div style="font-size:clamp(36px,6vw,72px);font-weight:900;letter-spacing:-.03em;line-height:.92;margin-bottom:8px;">What colleagues say.</div>
-    <div class="testi-grid">
-      <div class="testi-card">
-        <div class="testi-quote">"Zack has a deep connection to emotions, imagination, and sensitivity — the quintessential idealist. His greatest strength is his depth of sensitivity and empathy, which allows him to give voice to human connections in a way that works with people on a profound level."</div>
-        <div class="testi-attr">Christopher Bayle — ACD UX, Publicis Sapient</div>
-      </div>
-      <div class="testi-card">
-        <div class="testi-quote">"Zack is one of the most talented, hard working and knowledgeable individuals I have had the pleasure of working with. He always gives his best and more. I feel he should be recognized for his tremendous effort and for being such a great team player."</div>
-        <div class="testi-attr">Andrés Moros, MPS — Sr. UX Designer, Publicis Sapient</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- AmericanMuscle.com — Product Photography (full-width, native proportions) -->
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/fd8Ycjyv/1-pch6xh-Ep-Fo-Xxli-AGb-Nnr7-Q.webp" alt="AmericanMuscle.com — Product Photography 01"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 01</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/SwzHM3CZ/1-o-P6kr-DDq-Pp-Sg-F4-Ag-Fr-WClw.webp" alt="AmericanMuscle.com — Product Photography 02"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 02</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/zTKr9Dh9/1-7w-EKA8du-Scc-OZw-Im-A-6j-SQ.webp" alt="AmericanMuscle.com — Product Photography 03"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 03</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/v6fqJ9b9/1-I-n-HQKs7-BIXo-Y0onf-Nxn-Og.webp" alt="AmericanMuscle.com — Product Photography 04"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 04</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/mr7gnpTg/1-y-GJCqkzizxa-Uxk3-R5-DCD8g.webp" alt="AmericanMuscle.com — Product Photography 05"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 05</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/Y49DcPw2/1-KE8g-FA6w4wud1u-DAr-A4-Yv-Q.webp" alt="AmericanMuscle.com — Product Photography 06"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 06</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/mjt5Myw/1-l-EJetj-Ut85-CTbb24d-BTFk-A.webp" alt="AmericanMuscle.com — Product Photography 07"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 07</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/3YTzmTm1/1-XT2ea-L5pv1yb49r-o-Jq-Ao-A.webp" alt="AmericanMuscle.com — Product Photography 08"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 08</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/PRpwWXQ/1-a9to-Sr99x6-Nt-E5-YC7b-Gnzw.webp" alt="AmericanMuscle.com — Product Photography 09"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 09</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/XrxGt0D4/1-UATKEet6-Vtc-Lk-A8r-Yspj-FQ.webp" alt="AmericanMuscle.com — Product Photography 10"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 10</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/XfXGRWZ5/1-RTEI5a-Ccw31fj-Fzqj-Bg-FEg.webp" alt="AmericanMuscle.com — Product Photography 11"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 11</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/B2V4Skt5/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp" alt="AmericanMuscle.com — Product Photography 12"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 12</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/sJkpkV9Q/1-l4jg-O1-4g-Ey-Wy-IBEQZho0g.webp" alt="AmericanMuscle.com — Product Photography 13"><div class="fs-fullbleed-caption">↓ AmericanMuscle.com — Product Photography 13</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/bjK8FYHX/mydreamwastoownacafejustforwolfietohangoutin.webp" alt="Wolfgang 14"><div class="fs-fullbleed-caption">↓ Wolfgang 14</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/bRy3QhNL/tabletoppoodle.webp" alt="Wolfgang 15"><div class="fs-fullbleed-caption">↓ Wolfgang 15</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/vCYxMRbG/lookiftheysayanythingiamheretokeepyouontask.webp" alt="Wolfgang 16"><div class="fs-fullbleed-caption">↓ Wolfgang 16</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/DHFBm7HM/hisfavoritecafe.webp" alt="Wolfgang 17"><div class="fs-fullbleed-caption">↓ Wolfgang 17</div></div>
-
-  <section class="contact-section reveal">
-    <div class="contact-title">Let's<br>Work.</div>
-    <div class="contact-right">
-      <div class="contact-desc">Available for senior / staff UX roles, contract engagements, or anything interesting. Navigation systems, enterprise platforms, e-commerce, design systems — all day.</div>
-      <a href="mailto:zack@reasonably.cc" class="contact-link">zack@reasonably.cc</a>
-      <a href="https://zack.cx" class="contact-link" target="_blank">zack.cx</a>
-      <a href="https://www.linkedin.com/in/zackgort/" class="contact-link" target="_blank">LinkedIn</a>
-      <a href="https://wolfie.love" class="contact-link" target="_blank">wolfie.love</a>
-    </div>
-  </section>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div><div class="foot-note">Wolfgang &amp; Co.<br>Philadelphia · Available</div></div>
-    <div class="foot-nav"><a data-nav="home">Home</a><a data-nav="work">Work</a><a href="mailto:hello@zack.cx">Contact</a></div>
-    <div class="foot-copy">© Zack Gort 2026<br>All works belong to their<br>respective copyright owners.</div>
-  </footer>
-
-</div><!-- /about -->
-
-
-<!-- ══════════════════ CS: BNY MELLON ══ -->
-<div id="view-cs-bny" class="view fs-view">
-
-  <div class="fs-topbar">
-    <div class="fs-topbar-left">Zack Gort<br>Wolfgang &amp; Co.<br>2023</div>
-    <div class="fs-topbar-mid">↓ &nbsp; Case Study</div>
-    <div class="fs-topbar-dot"></div>
-  </div>
-
-  <div class="fs-hero" style="padding-left:28px;padding-right:28px;">
-    <div class="fs-hero-inner">
-      <span class="fs-num">1.1</span>
-      <span class="fs-client-name">BNY Mellon / Pershing X</span>
+<div class="page">
+  <div class="board" id="board">
+    <div class="eyebrow">
+      <span class="old-domain">zackgort.com</span>
+      <span class="arrow">→</span>
+      <span class="new-domain">zack.cx</span>
     </div>
 
-    <!-- 4-col metadata -->
-    <div class="fs-meta">
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Client Name</div>
-        <div class="fs-meta-val">BNY Mellon / Pershing X</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Title</div>
-        <div class="fs-meta-val">Advisory Experience Platform</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Type</div>
-        <div class="fs-meta-val">Enterprise UX</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Date Completed</div>
-        <div class="fs-meta-val">2023</div>
-      </div>
+    <h1>zackgort.com to be <span>decommissioned.</span><br><br>now, just <a href="https://www.zack.cx">zack.cx</a></h1>
+
+    <div class="odometer" id="odometer">
+      <!-- filled by JS -->
     </div>
 
-    <!-- Body: description | deliverables | hero image -->
-    <div class="fs-body">
-      <div class="fs-desc-col">
-        <div class="fs-desc-text">The most sophisticated work of my career. I became the de facto Team Lead and Product Owner on a platform that — two years prior — was only a thought. I led research and discovery, ran client workshops, collaborated across multiple concurrent tracks, and mentored junior and associate designers. My efforts were directly responsible for securing a contract extension leading into the next fiscal year and influencing the overall direction of the now-live product.</div>
-      </div>
-      <div class="fs-deliv-col">
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Primary Deliverable</div>
-          Extensive Industry Research
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Client Workshop Facilitation
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Design System Architecture
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Design Paradigm Refactoring
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Mentorship · Junior + Associate Designers
-        </div>
-      </div>
-      <div class="fs-img-col">
-        <img src="https://i.ibb.co/r2rQn4z4/1.png" alt="BNY Pershing X — Hero" style="opacity:.9;">
-      </div>
-    </div>
-  </div><!-- /fs-hero -->
-
-  <!-- Deliverables image grid (Vanta-style: numbered squares) -->
-  <!-- Deliverable Artifacts — full-width images, native proportions -->
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;border-bottom:1px solid #d0ceca;">
-    <div style="display:flex;flex-direction:column;">
-      <img src="https://i.ibb.co/XfXGRWZ5/1-RTEI5a-Ccw31fj-Fzqj-Bg-FEg.webp" alt="Org Structure" style="width:100%;display:block;flex:1;object-fit:cover;">
-      <div class="fs-fullbleed-caption">↓ Org Structure</div>
-    </div>
-    <div style="display:flex;flex-direction:column;">
-      <img src="https://i.ibb.co/B2V4Skt5/1-Oen-HCQm-Ga10wp-Cz-R8o9-Pt-A.webp" alt="Competency Framework" style="width:100%;display:block;flex:1;object-fit:cover;">
-      <div class="fs-fullbleed-caption">↓ Competency Framework</div>
-    </div>
-    <div style="display:flex;flex-direction:column;">
-      <img src="https://i.ibb.co/fdvw7XLN/1-PGk-VR2s-OAfc-Kk5kk-Trn-Qdw.webp" alt="Heuristic Analysis" style="width:100%;display:block;flex:1;object-fit:cover;">
-      <div class="fs-fullbleed-caption">↓ Heuristic Analysis</div>
-    </div>
-    <div style="display:flex;flex-direction:column;">
-      <img src="https://i.ibb.co/sJkpkV9Q/1-l4jg-O1-4g-Ey-Wy-IBEQZho0g.webp" alt="Research &amp; Support" style="width:100%;display:block;flex:1;object-fit:cover;">
-      <div class="fs-fullbleed-caption">↓ Research &amp; Support</div>
-    </div>
-    <div style="display:flex;flex-direction:column;">
-      <img src="https://i.ibb.co/ZR7Tb6YW/1-b-Q-s-X24b-Qk-Utx50-Q5j-MZNg.webp" alt="Use Case Flows" style="width:100%;display:block;flex:1;object-fit:cover;">
-      <div class="fs-fullbleed-caption">↓ Use Case Flows</div>
-    </div>
-  </div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/dwxhNntF/wove-advisory-landing-main.webp" alt="Terminology"><div class="fs-fullbleed-caption">↓ Terminology</div></div>
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/0pXM90tz/bny4.webp" alt="Holistic POC"><div class="fs-fullbleed-caption">↓ Holistic POC</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/4w2FbqCw/bny3.webp" alt="User Data Flows"><div class="fs-fullbleed-caption">↓ User Data Flows</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/xqz6QDPj/bny2.webp" alt="Design System"><div class="fs-fullbleed-caption">↓ Design System</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/k2n12jJP/bny1.webp" alt="Systems Design"><div class="fs-fullbleed-caption">↓ Systems Design</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/4R68K9d5/openingmanagedaccountpreview.png" alt="BNY — 18"><div class="fs-fullbleed-caption">↓ BNY — 18</div></div>
-  
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/99qwHHVD/15.webp" alt="BNY — 15"><div class="fs-fullbleed-caption">↓ BNY — 15</div></div>
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/CqjFGQV/17.webp" alt="BNY — 17"><div class="fs-fullbleed-caption">↓ BNY — 17</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/Kz2psprN/16.webp" alt="BNY — 16"><div class="fs-fullbleed-caption">↓ BNY — 16</div></div>
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/d0nbVjtx/13.webp" alt="BNY — 13"><div class="fs-fullbleed-caption">↓ BNY — 13</div></div>
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/Z1tjz0t9/14.webp" alt="BNY — 14"><div class="fs-fullbleed-caption">↓ BNY — 14</div></div>
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/ynwRR0fN/11.webp" alt="BNY — 11"><div class="fs-fullbleed-caption">↓ BNY — 11</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/gMQtwg56/12.webp" alt="BNY — 12"><div class="fs-fullbleed-caption">↓ BNY — 12</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/9H9JhCrn/10.webp" alt="BNY — 10"><div class="fs-fullbleed-caption">↓ BNY — 10</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/KckgFw70/9.webp" alt="BNY — 09"><div class="fs-fullbleed-caption">↓ BNY — 09</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/0y21698L/8.webp" alt="BNY — 08"><div class="fs-fullbleed-caption">↓ BNY — 08</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/1fMNf4nW/7.webp" alt="BNY — 07"><div class="fs-fullbleed-caption">↓ BNY — 07</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/5H2bRyT/3.webp" alt="BNY — 03"><div class="fs-fullbleed-caption">↓ BNY — 03</div></div>
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/6JWn14jj/4.webp" alt="BNY — 04"><div class="fs-fullbleed-caption">↓ BNY — 04</div></div>
-
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/PZ86fHv8/Frame-427322623.png" alt="Discovery Audit"><div class="fs-fullbleed-caption">↓ Discovery Audit</div></div>
-
-  <div class="fs-fullbleed"><img src="https://i.ibb.co/4nq29TYz/7.webp" alt="Duty &amp; Diligence"><div class="fs-fullbleed-caption">↓ Duty &amp; Diligence</div></div>
-
-  <!-- Figma live embed -->
-  <div class="fs-figma">
-    <div class="fs-figma-label">↓ Live Figma — Advisory Experience Platform · Sandbox</div>
-    <iframe
-      src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FjAoi6OG8SaV9Q1GvIjd9XA%2FZAX-SANDBOX%3Fnode-id%3D1380-1184"
-      allowfullscreen
-      loading="lazy"
-    ></iframe>
-  </div>
-
-  <div class="fs-narrative">
-    <div class="fs-narrative-label">↓ #BonCourage<br>SeizeTheSpace</div>
-    <div class="fs-narrative-body">I negotiated company-paid lunches for my in-office workshops. I was a remote employee who chose to be a consistent in-office presence. I coined the term <strong>"Organizational Spaghetti"</strong> to describe the operational reality. I was laid off. "Separated amicably." Happens. What doesn't happen is the level of care and output I put in — and that's evidenced by the product that launched.</div>
-  </div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="home">← Home</a><a data-nav="work">All Work</a><a data-nav="cs-gnc">Next: GNC →</a></div>
-    <div class="foot-copy">NDA-safe content only.<br>© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-bny -->
-
-
-
-
-<!-- ══════════════════ CS: GNC ══ -->
-<div id="view-cs-gnc" class="view fs-view">
-
-  <div class="fs-topbar">
-    <div class="fs-topbar-left">Zack Gort<br>Wolfgang &amp; Co.<br>2022</div>
-    <div class="fs-topbar-mid">↓ &nbsp; Case Study</div>
-    <div class="fs-topbar-dot"></div>
-  </div>
-
-  <div class="fs-hero" style="padding-left:28px;padding-right:28px;">
-    <div class="fs-hero-inner">
-      <span class="fs-num">2.1</span>
-      <span class="fs-client-name">GNC</span>
-    </div>
-
-    <div class="fs-meta">
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Client Name</div>
-        <div class="fs-meta-val">GNC</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Title</div>
-        <div class="fs-meta-val">Shopify Plus Redesign</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Type</div>
-        <div class="fs-meta-val">E-Commerce UX</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Date Completed</div>
-        <div class="fs-meta-val">2022</div>
-      </div>
-    </div>
-
-    <div class="fs-body">
-      <div class="fs-desc-col">
-        <div class="fs-desc-text">GNC leadership wanted to shake things up — a mobile-first navigation schema with conventional fallbacks. Post-bankruptcy, they needed to relaunch their brand and reinvigorate consumer interest. The directive: modernize, optimize, and make it feel like a real rebrand without blowing the budget.<br><br>I'm comfortable in not being comfortable. We made foolhardy decisions in favor of shaking things up, as directed.</div>
-      </div>
-      <div class="fs-deliv-col">
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Primary Deliverable</div>
-          Mobile-First Navigation System
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Discovery &amp; Requirements Gathering
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          E-Commerce UX Optimization
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Shopify Plus Architecture
-        </div>
-      </div>
-      <div class="fs-img-col">
-        <img src="https://i.ibb.co/SXPvx5q9/8.webp" alt="GNC — Shopify Plus Redesign" style="opacity:.9;">
-      </div>
-    </div>
-  </div><!-- /fs-hero -->
-
-  <!-- Large-format full-bleed image gallery — same structure as AmericanMuscle -->
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/Mx7fHWMk/gnc-case-A1.jpg" alt="GNC — Mobile Navigation System">
-    <div class="fs-fullbleed-caption">↓ Mobile-First Navigation — Global Nav System</div>
-  </div>
-
-  <!-- Quote band -->
-  <div class="fs-quote-band">
-    <blockquote>"Modernize, optimize, and make it feel like a real rebrand without blowing the budget."</blockquote>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/0pSDhFCY/gnc-case-B1.jpg" alt="GNC — E-Commerce UX">
-    <div class="fs-fullbleed-caption">↓ E-Commerce UX — Homepage Through Checkout</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/sdTzVgC7/gnc-case-B3.jpg" alt="GNC — Shopify Plus Architecture">
-    <div class="fs-fullbleed-caption">↓ Shopify Plus Architecture — Category &amp; Product Pages</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/PGgr4fd7/gnc-case-B2.jpg" alt="GNC — Navigation Schema">
-    <div class="fs-fullbleed-caption">↓ Navigation Schema — Mobile &amp; Desktop Fallbacks</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/d0pdvvD4/gnc-case-B5.jpg" alt="GNC — Discovery &amp; Requirements">
-    <div class="fs-fullbleed-caption">↓ Discovery &amp; Requirements Gathering</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/xKpVn59d/gnc-case-B4.jpg" alt="GNC — UX Optimization">
-    <div class="fs-fullbleed-caption">↓ UX Optimization — Conversion Funnel</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/r295QDbM/gnc-case-A3.jpg" alt="GNC — Mobile UX Flows">
-    <div class="fs-fullbleed-caption">↓ Mobile UX Flows — Post-Bankruptcy Rebrand</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/xqNy0qPJ/gnc-case-4.png" alt="GNC — Shopify Plus Redesign">
-    <div class="fs-fullbleed-caption">↓ Shopify Plus Redesign — Full System View</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/BH6q1n7z/gnc-case-A4.jpg" alt="GNC — Final Deliverables">
-    <div class="fs-fullbleed-caption">↓ Final Deliverables — Navigation &amp; E-Commerce System</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/spHgPH6N/1.webp" alt="GNC — 01">
-    <div class="fs-fullbleed-caption">↓ GNC — 01</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/ynjWYqv8/2.webp" alt="GNC — 02">
-    <div class="fs-fullbleed-caption">↓ GNC — 02</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/cXg5Phdc/3.webp" alt="GNC — 03">
-    <div class="fs-fullbleed-caption">↓ GNC — 03</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/gZ58PKyk/4.webp" alt="GNC — 04">
-    <div class="fs-fullbleed-caption">↓ GNC — 04</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/Y7pGqJ69/5.webp" alt="GNC — 05">
-    <div class="fs-fullbleed-caption">↓ GNC — 05</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/99h2bQMh/6.webp" alt="GNC — 06">
-    <div class="fs-fullbleed-caption">↓ GNC — 06</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/yB4RwkTf/7.webp" alt="GNC — 07">
-    <div class="fs-fullbleed-caption">↓ GNC — 07</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/7N2rDqrN/8.webp" alt="GNC — 08">
-    <div class="fs-fullbleed-caption">↓ GNC — 08</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/rft2bf0T/9.webp" alt="GNC — 09">
-    <div class="fs-fullbleed-caption">↓ GNC — 09</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/vx76zjgf/10.webp" alt="GNC — 10">
-    <div class="fs-fullbleed-caption">↓ GNC — 10</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/x8Jy9P1f/11.webp" alt="GNC — 11">
-    <div class="fs-fullbleed-caption">↓ GNC — 11</div>
-  </div>
-
-  <!-- Figma live embed -->
-  <div class="fs-figma">
-  <div class="fs-figma-label">↓ Live Figma — GNC Project Summary · E-Commerce</div>
-  <iframe
-    src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FXLGjXaZ7hdOUgz9pMtDnRA%2FGNC-PROJECT-SUMMARY--ECOMMERCE-%3Fnode-id%3D0-1"
-    allowfullscreen
-    loading="lazy"
-  ></iframe>
-</div>
-
-
-
-
-
-  <div class="fs-narrative">
-    <div class="fs-narrative-label">↓ Mobile-First<br>Navigation.</div>
-    <div class="fs-narrative-body">GNC relaunched, reinvigorated its consumer base, and modernized its online shopping experience — even in lieu of continued shuttering of physical retail locations. <strong>Post-bankruptcy, every UX decision carried real weight.</strong> We built a navigation system designed for mobile first, with thoughtful conventional fallbacks — bold enough to feel like a genuine rebrand, disciplined enough to actually ship.</div>
-  </div>
-
-
-
-  
-  <!-- GNC deep dive embed -->
-  <div style="border-top:1px solid #d0ceca;border-bottom:1px solid #d0ceca;">
-  <div style="padding:10px 28px;font-size:7px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#aaa;border-bottom:1px solid #d0ceca;">↓ Deep Dive — zackgort.com/dive</div>
-  <iframe
-    src="https://zackgort.com/dive"
-    style="width:100%;height:80vh;border:none;display:block;background:#f5f3f0;"
-    title="GNC — Shopify Plus Redesign Deep Dive"
-    loading="lazy"
-  ></iframe>
-</div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="cs-bny">← BNY Mellon</a><a data-nav="work">All Work</a><a data-nav="cs-hardinge">Next: Hardinge →</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-gnc -->
-
-
-
-
-<!-- ══════════════════ CS: HARDINGE ══ -->
-<div id="view-cs-hardinge" class="view">
-
-  <div class="cs-page-header">
-    <div class="cs-eyebrow">
-      <div><div class="cs-label">↓ Client</div><div class="cs-val">Hardinge Inc.</div></div>
-      <div><div class="cs-label">↓ Project</div><div class="cs-val">B2B SAP Hybris E-Commerce</div></div>
-      <div><div class="cs-label">↓ Agency</div><div class="cs-val">LiveArea · 2020</div></div>
-    </div>
-  </div>
-
-  <div class="cs-body">
-    <div class="cs-img-col" style="background:#1c1c1c;padding:0;overflow:hidden;position:relative;">
-      <img src="https://i.ibb.co/ynyPWk7k/herohardinge-Plbu-Hi-Swg-Qd-Ruqc-Ni-Ulf.webp" alt="Hardinge — SAP Hybris Wireframes &amp; Mockups" style="width:100%;height:100%;object-fit:cover;display:block;">
-      <div class="cs-num-stamp">2.2</div>
-    </div>
-    <div class="cs-info">
-      <div class="cs-block">
-        <div class="cs-label">↓ The Challenge</div>
-        <div class="cs-body-text">Board-level visibility. SAP Hybris. A client so unfamiliar with the design process that jargon-laden spreadsheets were causing frustration and near-contract abandonment. Navigation system slated as a Drop 1 deliverable despite the actual taxonomy review being months away. Oh — and what the heck is a 5C Collet?</div>
-      </div>
-      <div class="cs-block">
-        <div class="cs-label">↓ The Invention</div>
-        <div class="cs-service">Cards Against Bad UX™</div>
-        <div class="cs-body-text" style="margin-top:8px;">I shifted the conversation away from jargon and toward user-centric thinking. Simple visual cards — "As a shopper," "As a content manager," "As a guest user" — let stakeholders empathize with their end users. The client responded enthusiastically. <strong>Approved on the first call. Two modest feedback adjustments.</strong></div>
-      </div>
-      <div class="cs-block">
-        <div class="cs-label">↓ Drop 1 Scope (partial)</div>
-        <div class="cs-body-text" style="font-size:10px;line-height:2;">Style Guide · Header (Default / Guest / Authenticated) · Type Ahead / Search Suggestions · Tools (B2B) Menu · Category Navigation · My Account · Account Registration · Guest Order History Lookup · Cookies/Tracking Consent · Footer · Homepage</div>
-      </div>
-      <div class="cs-block">
-        <div class="cs-label">↓ The Override</div>
-        <div class="cs-quote">A ranking teammate insisted their version ship the night before the presentation. I stayed up all night and made both happen. We showed their version first. Client was pleased — but asked if we had anything else. Within minutes of showing my version: enthusiastic approval on the spot.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Hardinge deliverables gallery -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#0a0a0a;">
-    <div style="background:#0a0a0a;">
-      <img src="https://i.ibb.co/Jw5N5wP2/switchtodroppdpconceptsyrf-TSes-HS.webp" alt="Hardinge PDP — Desktop wireframe" style="width:100%;display:block;object-fit:cover;">
-      <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">PDP — Desktop, Single Purchase Item</div>
-    </div>
-    <div style="background:#0a0a0a;">
-      <img src="https://i.ibb.co/VW7qMV2D/dropmyinterpretationp-SXi-Ii-YKYBGt.webp" alt="Hardinge PDP — Mobile wireframe" style="width:100%;display:block;object-fit:cover;">
-      <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">PDP — Mobile, Variable &amp; Kit Items</div>
-    </div>
-    <div style="background:#0a0a0a;">
-      <img src="https://i.ibb.co/SX0gLsmK/dropnavigation-Oz-Dt-Hno-Ngy-Ckoww-Dg-K.webp" alt="Hardinge Navigation IA" style="width:100%;display:block;object-fit:cover;">
-      <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Drop 1 — Navigation, Header &amp; Search</div>
-    </div>
-    <div style="background:#0a0a0a;">
-      <img src="https://i.ibb.co/MyffyvQg/finalizednavigationfmb-YVOjfy-CHcf.webp" alt="ShopHardinge.com UI" style="width:100%;display:block;object-fit:cover;">
-      <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">ShopHardinge.com — High-Fidelity UI</div>
-    </div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/cK4MYYhF/stories-AZh-EPUSk-YDf-SRVVUp-Ro-Sl-Zp-SE.webp" alt="Hardinge user stories">
-  <div class="fs-fullbleed-caption">↓ Final Deliverables — Navigation &amp; E-Commerce System</div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/PZZ4K84X/stories-LLTzcdn-TOb-Jw-PYKdl-GSVx-YZWb.webp" alt="Hardinge user stories 2">
-  <div class="fs-fullbleed-caption">↓ Final Deliverables — Navigation &amp; E-Commerce System</div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/zhwZr9pZ/Tm-Bi-ALaojf-TNSBf-Df-Qmk-Qsy-RZPTk-Qq-NR.webp" alt="Hardinge user stories 3">
-  <div class="fs-fullbleed-caption">↓ Final Deliverables — Navigation &amp; E-Commerce System</div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/Rp4zfwWx/dropcontinuedplusvisualguide-SHo-W.webp" alt="Hardinge user stories 3">
-  <div class="fs-fullbleed-caption">↓ Final Deliverables — Navigation &amp; E-Commerce System</div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/cSdN1V0v/g-ZQm-IJGXkgk-Sgkyf-Xhlx-AJYEj-PMvq-HTg.webp" alt="Hardinge user stories 3">
-  <div class="fs-fullbleed-caption">↓ Final Deliverables — Navigation &amp; E-Commerce System</div>
-  </div>
-
-
-  <div class="narrative-strip">
-    <div class="ns-header"><span class="ns-idx">PDP</span><span class="ns-title">Perspective, Diligence &amp; Payoff.</span></div>
-    <div class="ns-body">I was given one week to produce a Product Detail Page accounting for single purchase items, variable purchase items, kit and bundled items — iterated in both desktop and mobile. That's normal fare. The quirk: the PM and Solutions Architect wanted to force it to dev sight-unseen. Obviously the client wanted to see it. We showed. They responded.<br><br><strong>There are some folks who diligently take notes on calls, and then there are others who are engaged in the call — gauging vocal inflections and reading between the lines. Well, I am a user experience designer.</strong></div>
-  </div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="cs-gnc">← GNC</a><a data-nav="work">All Work</a><a data-nav="cs-kent">Next: Kent State →</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-hardinge -->
-
-
-<!-- ══════════════════ CS: KENT STATE ══ -->
-<div id="view-cs-kent" class="view">
-
-  <div class="cs-page-header">
-    <div class="cs-eyebrow">
-      <div><div class="cs-label">↓ Client</div><div class="cs-val">Kent State University</div></div>
-      <div><div class="cs-label">↓ Project</div><div class="cs-val">.EDU Complete Overhaul</div></div>
-      <div><div class="cs-label">↓ Agency</div><div class="cs-val">160over90 · 2016</div></div>
-    </div>
-  </div>
-
-  <div class="cs-body">
-    <div class="cs-img-col" style="background:#002664;padding:0;overflow:hidden;position:relative;">
-      <img src="https://i.ibb.co/ZRzNg8sJ/Kj-EBo-DCXRUz-HHVRZBx-TQSEQu-Tv-Blfn-MT.webp" alt="Kent State .EDU Overhaul — IA &amp; Navigation" style="width:100%;height:100%;object-fit:cover;display:block;">
-      <div class="cs-num-stamp" style="color:rgba(234,170,0,.2)">3.1</div>
-    </div>
-    <div class="cs-info">
-      <div class="cs-block">
-        <div class="cs-label">↓ The Brief</div>
-        <div class="cs-body-text">A massive project covering the full gamut of a .EDU overhaul. Complete IA refactoring, infusion of a fresh brand identity, ground-up redesign — with a green light to "do it different." 8 regional campuses, dozens of international locations, and multiple internal entities with unique priorities.</div>
-      </div>
-      <div class="cs-block">
-        <div class="cs-label">↓ The Nav (my forté)</div>
-        <div class="cs-body-text">Navigation UX/UI for a .EDU with atypical infrastructure. I explored base-line options, mega menus, full-screen takeovers, pop-outs. Then I dared to seek our own solution — a proprietary navigation system designed from ground-up for Kent State's unique complexity. It didn't make it to fruition, but it served as an invaluable thought experiment.</div>
-        <div class="cs-quote">Psst... shout-out to my developer for that insane implementation.</div>
-      </div>
-      <div class="cs-block">
-        <div class="cs-label">↓ Contributions</div>
-        <div class="cs-service">IA Refactoring</div>
-        <div class="cs-service">Navigation System Design</div>
-        <div class="cs-service">Wireframe + Design Prototypes</div>
-        <div class="cs-service">User Flow Walkthroughs</div>
-        <div class="cs-service">Visual Design</div>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Kent State gallery -->
-  <div style="display:flex;flex-direction:column;gap:2px;background:#0a0a0a;">
-  <div style="background:#0a0a0a;">
-    <img src="https://i.ibb.co/tP2RtPRT/kentnav-Qw-Utq-Np-Zzdkc-TPjlcpo-PLSJlh.webp" alt="Kent State Homepage Desktop" style="width:100%;display:block;">
-    <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Homepage — Desktop</div>
-  </div>
-  <div style="background:#0a0a0a;">
-    <img src="https://i.ibb.co/Nd7sYFdP/kentnav-PSz-NWCpx-DQoo-YFgrqs-WCz-Gx-ZU.webp" alt="Kent State Brand System" style="width:100%;display:block;">
-    <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Brand Refresh — Feature Headlines &amp; Typography</div>
-  </div>
-  <div style="background:#0a0a0a;">
-  <img src="https://i.ibb.co/pBYP6wt8/1-HXIU3nxu-ZGq-Ne-Ef3-Wv-Lf-MQ.webp" alt="Kent State Navigation System" style="width:100%;display:block;">
-  <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Proprietary Nav System — Concept Exploration</div>
-</div>
-  <div style="background:#0a0a0a;">
-    <img src="https://i.ibb.co/VYS1xRzh/work2.webp" alt="Kent State Navigation System" style="width:100%;display:block;">
-    <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Proprietary Nav System — Concept Exploration</div>
-  </div>
-  <div style="background:#0a0a0a;">
-    <img src="https://i.ibb.co/MrFyzRt/work3.webp" alt="Kent State Mobile" style="width:100%;display:block;">
-    <div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Mobile-First — 8 Campuses, One System</div>
+    <p class="fine-print" id="finePrint">
+      <strong>zackgort.com</strong> stops renewing on <strong>Aug 10, 2026</strong>. Bookmarks, old links, and search results pointing here will eventually go dark — update them now.
+    </p>
+
+    <a class="cta" href="https://zack.cx" target="_blank" rel="noopener">
+      Go to zack.cx
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="#0b0b0a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+
+    <div class="footer-note">Zack Gort · Senior UX / Product Designer</div>
   </div>
 </div>
-
-  <!-- Quote band -->
-  <div class="fs-quote-band">
-  <blockquote>"What happens when the client hands you this..."</blockquote>
-</div>
-
-<div style="background:#0a0a0a;">
-<img src="https://i.ibb.co/DPCMqM15/wiscwirelofi-Hyu-LQUf-JZe-Lj-Hxhx-Nd-Xj.webp" alt="Kent State Mobile" style="width:100%;display:block;">
-<div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Mobile-First — 8 Campuses, One System</div>
-</div>
-
-<div style="background:#0a0a0a;">
-<img src="https://i.ibb.co/Q5DBrWJ/wiscstyledyh-Uw-Lz-Ci-GJb-Av-Oj-Iipa-VUF.webp" alt="Kent State Mobile" style="width:100%;display:block;">
-<div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Mobile-First — 8 Campuses, One System</div>
-</div>
-
-<div style="background:#0a0a0a;">
-<img src="https://i.ibb.co/h1KtxvB7/wiscmobiledcqqjkb-Gjo-Dg-Qi-AGk-Dt-DLi.webp" alt="Kent State Mobile" style="width:100%;display:block;">
-<div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Mobile-First — 8 Campuses, One System</div>
-</div>
-
-<div style="background:#0a0a0a;">
-<img src="https://i.ibb.co/Nn95Jbm3/dsxrh-YLBtn-Lf-Zvtpx-HLVHKSd-Lxw-FLEGF.webp" alt="Kent State Mobile" style="width:100%;display:block;">
-<div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Mobile-First — 8 Campuses, One System</div>
-</div>
-
-<div style="background:#0a0a0a;">
-<img src="https://i.ibb.co/wFVd0CWJ/wiscfullge-Rkig-CAEDv-IJQOqn-RLTy-Yw-A.webp" alt="Kent State Mobile" style="width:100%;display:block;">
-<div style="font-size:7px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:6px 12px;">Mobile-First — 8 Campuses, One System</div>
-</div>
-
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="cs-hardinge">← Hardinge</a><a data-nav="work">All Work</a><a data-nav="cs-dana">Next: Dana →</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-kent -->
-
-
-<!-- ══════════════════ CS: DANA ══ -->
-<div id="view-cs-dana" class="view fs-view">
-
-  <div class="fs-topbar">
-    <div class="fs-topbar-left">Zack Gort<br>Wolfgang &amp; Co.<br>2018</div>
-    <div class="fs-topbar-mid">↓ &nbsp; Case Study</div>
-    <div class="fs-topbar-dot"></div>
-  </div>
-
-  <div class="fs-hero" style="padding-left:28px;padding-right:28px;">
-    <div class="fs-hero-inner">
-      <span class="fs-num">5.1</span>
-      <span class="fs-client-name">Dana Foundation</span>
-    </div>
-
-    <!-- 4-col metadata -->
-    <div class="fs-meta">
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Client Name</div>
-        <div class="fs-meta-val">The Dana Foundation</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Title</div>
-        <div class="fs-meta-val">Mobile-First Redesign + Bespoke Logo</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Type</div>
-        <div class="fs-meta-val">Non-Profit · Neuroscience</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Date Completed</div>
-        <div class="fs-meta-val">2018</div>
-      </div>
-    </div>
-
-    <!-- Body: description | deliverables | hero image -->
-    <div class="fs-body">
-      <div class="fs-desc-col">
-        <div class="fs-desc-text">Full-spectrum mobile-first redesign: brand new identity, intuitive navigation structure, flexible layout for a comprehensive array of neuroscience content. The previous site hadn't seen a refresh in over a decade. I delivered a design system maintaining near 1:1 desktop-to-mobile experience while minding modern accessibility (WCAG 2.0). A traditional top-bar navigation was not going to work — my card-system interface accommodated both Dana.org and their Brain Awareness Week subsidiary with only modest CSS adjustments.</div>
-      </div>
-      <div class="fs-deliv-col">
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Primary Deliverable</div>
-          Sitemap &amp; Content Architecture
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Mobile-First UI System
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Card-Based Navigation
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Bespoke Logo Concept
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          WCAG 2.0 Accessibility
-        </div>
-      </div>
-      <div class="fs-img-col">
-        <img src="https://i.ibb.co/kgKd9xPY/navsec-YRQxt-Fy-Cpymu-Zdplk-TOWUpe-ELB.gif" alt="Dana Foundation — Sitemap &amp; IA" style="opacity:.9;">
-      </div>
-    </div>
-  </div><!-- /fs-hero -->
-
-  <!-- Deliverable Artifacts — full-width images, native proportions -->
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/hFkwLZv9/imageassetw-XMKOVHr-YCxydo-Jj-BBTd-Wp.webp" alt="Dana.org — Content Asset">
-    <div class="fs-fullbleed-caption">↓ Dana.org — Content Asset Module</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/qFR3ZBmW/danamobilemockupgtgxr-TPNy-NLPZg-PD.webp" alt="Dana.org — Mobile Mockup">
-    <div class="fs-fullbleed-caption">↓ Dana.org — Mobile Mockup</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/gFbDRSzz/dana-Dana-Mobile-Navt-Mvcc-Di-YYKxz-QYj.webp" alt="Dana.org — Mobile Navigation">
-    <div class="fs-fullbleed-caption">↓ Dana.org — Mobile Navigation</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/GGnPBGN/bawmobilemockupg-OENk-Us-NFq-Ck-JLl-TQ.webp" alt="Brain Awareness Week — Mobile Mockup">
-    <div class="fs-fullbleed-caption">↓ Brain Awareness Week — Mobile Mockup</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/ksTFbcm5/bawhero-Gha-St-Gjf-XDz-DZBv-URFWHFiw-Lj.webp" alt="Brain Awareness Week — Hero">
-    <div class="fs-fullbleed-caption">↓ Brain Awareness Week — Hero</div>
-  </div>
-  <div class="fs-fullbleed gif-wrap">
-    <img src="https://i.ibb.co/nMzjH9GD/ezgifcomoptimize-MRx-Gsfs-Wjr-Ymc-Pl-Z.gif" alt="Dana Foundation — Bespoke Logo Concept">
-    <div class="fs-fullbleed-caption">↓ Dana Foundation — Bespoke Logo Concept</div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/39Z3CCmg/dana-primitives.png" alt="Typeface Primitives — Core Shapes &amp; Stems">
-  <div class="fs-fullbleed-caption">↓ Typeface Primitives — Core Shapes &amp; Stems</div>
-</div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/XxsVsPRp/dana-geometry.png" alt="Construction Grid — Letterforms &amp; Circle Primitives">
-    <div class="fs-fullbleed-caption">↓ Construction Grid — Letterforms &amp; Circle Primitives</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/twFgPzmY/dana-ratios.png" alt="Construction Grid — Color Overlay &amp; Ratios">
-    <div class="fs-fullbleed-caption">↓ Construction Grid — Color Overlay &amp; Ratios</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/6921yLq/dana-brain-ratios.png" alt="Brain Awareness Week — Geometric Construction">
-    <div class="fs-fullbleed-caption">↓ Brain Awareness Week — Geometric Construction</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/840nYbvR/dana-optical-align.png" alt="Brain Awareness Week — Optical Alignment Grid">
-    <div class="fs-fullbleed-caption">↓ Brain Awareness Week — Optical Alignment Grid</div>
-  </div>
-
-  <div class="fs-fullbleed">
-  <img src="https://i.ibb.co/XT67Rx9/dana-foundation.png" alt="Dana Foundation — Final Lockup">
-  <div class="fs-fullbleed-caption">↓ Dana Foundation — Final Lockup</div>
-</div>
-<div class="fs-fullbleed">
-  <img src="https://i.ibb.co/GrLbKv0/dana-alliance.png" alt="The Dana Alliance — Final Lockup">
-  <div class="fs-fullbleed-caption">↓ The Dana Alliance — Final Lockup</div>
-</div>
-<div class="fs-fullbleed">
-  <img src="https://i.ibb.co/DgKxFrjz/dana-brain-awareness-week.png" alt="Brain Awareness Week — Final Lockup">
-  <div class="fs-fullbleed-caption">↓ Brain Awareness Week — Final Lockup</div>
-</div>
-
-  <div class="fs-narrative">
-    <div class="fs-narrative-label">↓ The Logo<br>That Didn't Win.</div>
-    <div class="fs-narrative-body">I proposed a bespoke logo system — dots (circles) as individuals, many as humankind, as a metaphor for the mind. Avoided cliché brain icons. Thought modularly. Used general geometry relative to circle proportions to create a custom typeface. It lost by a few votes. I'm told it was close. <strong>I was an artist before I was a graphic designer.</strong> So while this didn't make the cut, it may offer a look into how I approach design.</div>
-  </div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="cs-kent">← Kent State</a><a data-nav="work">All Work</a><a data-nav="cs-power">Next: Power HRG →</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-dana -->
-
-
-<!-- ══════════════════ CS: POWER HRG ══ -->
-<div id="view-cs-power" class="view fs-view dk">
-
-  <div class="fs-topbar">
-    <div class="fs-topbar-left">Zack Gort<br>160over90<br>2015</div>
-    <div class="fs-topbar-mid">↓ &nbsp; Case Study</div>
-    <div class="fs-topbar-dot"></div>
-  </div>
-
-  <div class="fs-hero" style="padding-left:28px;padding-right:28px;">
-    <div class="fs-hero-inner">
-      <span class="fs-num">4.1</span>
-      <span class="fs-client-name">Power Home Remodeling</span>
-    </div>
-
-    <!-- 4-col metadata -->
-    <div class="fs-meta">
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Client Name</div>
-        <div class="fs-meta-val">Power Home Remodeling Group</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Title</div>
-        <div class="fs-meta-val">Campaign &amp; Digital Experience</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Type</div>
-        <div class="fs-meta-val">Brand Campaign</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Date Completed</div>
-        <div class="fs-meta-val">2015</div>
-      </div>
-    </div>
-
-    <!-- Body: description | deliverables | hero image -->
-    <div class="fs-body">
-      <div class="fs-desc-col">
-        <div class="fs-desc-text">The cofounders had one requirement: unlike anything else in home remodeling. Not an inventory of services — showcase the lifestyle benefits of achieving your dream home. They wanted video, animation, lifestyle photography, and had the budget and enthusiasm to see it through.<br><br><strong>"Power is a _____ company."</strong> Rather than a singular brand statement, the blank becomes a canvas. Each visit fills it differently. A loaded sentence framework — "make every word count," as a copywriter once taught me. Since I'm not really a copywriter, I gave them a whole bunch of sentences.</div>
-      </div>
-      <div class="fs-deliv-col">
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Primary Deliverable</div>
-          Campaign Strategy
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Brand Voice &amp; Messaging
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Digital Experience Design
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Animation &amp; Video Integration
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Cross-Department Coordination
-        </div>
-      </div>
-      <div class="fs-img-col">
-        <img src="https://i.ibb.co/P79T6ft/powerhero-LTYm-Wh-GAv-Pyjom-OCDFp-EBRF.webp" alt="Power Home Remodeling — Campaign Digital Experience" style="opacity:.9;">
-      </div>
-    </div>
-  </div><!-- /fs-hero -->
-
-  <!-- Campaign image grid -->
-  <div class="fs-photo-grid" style="padding-left:28px;padding-right:28px;">
-    <div class="fs-photo-grid-label">↓ Campaign Artifacts — "Power Is A _____ Company"</div>
-    <div class="fs-photo-row cols-6">
-      <div class="fs-photo-cell" style="aspect-ratio:3/2;grid-column:span 3;"><img src="https://i.ibb.co/VcrQ8WkX/powerhomeloopoptimizedw-FIkl-UHPGV.gif" alt="Power HRG — Campaign Hero Page"><span class="fs-photo-cell-num">01</span></div>
-      <div class="fs-photo-cell" style="aspect-ratio:3/2;grid-column:span 3;"><img src="https://i.ibb.co/7tkkDT7y/poweranimationloop-YFKh-XZGt-Pkc-UCZ.gif" alt="Power HRG — Dream-Realization"><span class="fs-photo-cell-num">02</span></div>
-    </div>
-    <div class="fs-photo-row cols-6">
-      <div class="fs-photo-cell" style="aspect-ratio:3/2;grid-column:span 3;"><img src="https://i.ibb.co/sdvKR9t1/happymaqv-BLVCKUYIsiv-Tgu-KJQPEPMXl.webp" alt="Power HRG — Far More Than Just a Home Remodeling Company"><span class="fs-photo-cell-num">03</span></div>
-      <div class="fs-photo-cell" style="aspect-ratio:3/2;grid-column:span 3;"><img src="https://i.ibb.co/6Rh8NkVD/powertransitionloopsec-YQr-St-Ien-Xl.gif" alt="Power HRG — Animation &amp; Video Integration"><span class="fs-photo-cell-num">04</span></div>
-    </div>
-  </div>
-
-  <div class="fs-narrative">
-    <div class="fs-narrative-label">↓ Tremendous<br>Coordination.</div>
-    <div class="fs-narrative-body">Cross-department: brand designers, on-site photographers, motion designers, video team. The level of coordination was significant — nay, <strong>tremendous</strong>. Shout out to the dev team. (Okay, it was just Greg.)</div>
-  </div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="cs-dana">← Dana</a><a data-nav="work">All Work</a><a data-nav="cs-wovn">Next: AmericanMuscle →</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-power -->
-
-
-<!-- ══════════════════ CS: TURN5 (AmericanMuscle.com) ══ -->
-<div id="view-cs-wovn" class="view fs-view dk">
-
-  <div class="fs-topbar">
-    <div class="fs-topbar-left">Zack Gort<br>Turn5 Inc.<br>2011</div>
-    <div class="fs-topbar-mid">↓ &nbsp; Case Study</div>
-    <div class="fs-topbar-dot"></div>
-  </div>
-
-  <div class="fs-hero" style="padding-left:28px;padding-right:28px;">
-    <div class="fs-hero-inner">
-      <span class="fs-num">7.1</span>
-      <span class="fs-client-name">AmericanMuscle.com</span>
-    </div>
-
-    <!-- 4-col metadata -->
-    <div class="fs-meta">
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Client Name</div>
-        <div class="fs-meta-val">Turn5 Inc.</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Title</div>
-        <div class="fs-meta-val">AmericanMuscle.com — E-Commerce Platform</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Project Type</div>
-        <div class="fs-meta-val">E-Commerce · High-Volume Retail</div>
-      </div>
-      <div class="fs-meta-col">
-        <div class="fs-meta-label">↓ Date Completed</div>
-        <div class="fs-meta-val">2011</div>
-      </div>
-    </div>
-
-    <!-- Body: description | deliverables | hero image -->
-    <div class="fs-body">
-      <div class="fs-desc-col">
-        <div class="fs-desc-text">It's a ton of fun to focus your efforts on a single product, especially when that product is the face of an e-commerce platform shipping millions of dollars of merchandise to a fanatical fanbase — derr, userbase. With a need for a system that could accommodate thousands of uniquely complex online orders spanning a bevy of categories, I designed custom UI+UX solutions through iterative testing — everything from homepage through checkout, to your inbox. Or, in this case, your doorstep.<br><br><em>The site has changed since 2011, but the fundamental building blocks are still largely intact.</em></div>
-      </div>
-      <div class="fs-deliv-col">
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Primary Deliverable</div>
-          Full-Funnel E-Commerce UX
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Iterative A/B Testing
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Product Photography
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Brand &amp; Identity (Raxiom)
-        </div>
-        <div class="fs-deliv-item">
-          <div class="fs-deliv-item-label">↓ Secondary Deliverable</div>
-          Custom Checkout Flow
-        </div>
-      </div>
-      <div class="fs-img-col">
-        <img src="https://i.ibb.co/YTKt6LcS/IMG-20210515-151006.webp" alt="AmericanMuscle.com — Product Photography" style="opacity:.9;">
-      </div>
-    </div>
-  </div><!-- /fs-hero -->
-
-  <!-- Large-format full-bleed image: hero shot -->
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/xyz2BHf/mustangtom-BPa-YSw-BXft-NHQCVEkp-IGb-O.webp" alt="AmericanMuscle.com — Mustang Hero">
-    <div class="fs-fullbleed-caption">↓ Full Throttle — Homepage Hero, Mustang Lineup</div>
-  </div>
-
-  <!-- Quote band -->
-  <div class="fs-quote-band">
-    <blockquote>"Test. Sell. Optimize. Sell more. Rinse and repeat."</blockquote>
-  </div>
-
-  <!-- Large-format full-bleed: AM Z Pro -->
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/5XyTHpHy/AMZProe-ILmn-CKsiv-Dl-Kba-Gg-Sn-EZXj-GNY.webp" alt="AmericanMuscle.com — AM Z Pro Product Page">
-    <div class="fs-fullbleed-caption">↓ AM Z Pro — Product Detail &amp; Configuration</div>
-  </div>
-
-  <!-- Large-format full-bleed: Wireframes -->
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/N27sPZv5/AMwire-GYVHbp-RSo-KUCz-KGe-FVEzj-Lzjmg.webp" alt="AmericanMuscle.com — UX Wireframes">
-    <div class="fs-fullbleed-caption">↓ Iterative Wireframes — Homepage Through Checkout</div>
-  </div>
-
-  <!-- Large-format full-bleed: Mustang MM -->
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/KjFgH9Kk/mustangmm-YDg-XIj-JVi-Fvgyt-Js-Ynhvf-OX.webp" alt="AmericanMuscle.com — Mustang Product Photography">
-    <div class="fs-fullbleed-caption">↓ Holistic Ownership — UX, Photography &amp; Raxiom Brand</div>
-  </div>
-
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/KJsXgPv/1-dy-MNhi-XFPWPe9og0-dbv-Q.webp" alt="AmericanMuscle.com — 01">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 01</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/C38FHDx9/1-FYt-Vic-HKj-LDPLW2rcn-J1u-A.webp" alt="AmericanMuscle.com — 02">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 02</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/5WSx4J20/1-GFvd-yw-Ap-PELXmtr-Fbx-Vug.webp" alt="AmericanMuscle.com — 03">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 03</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/w581TnW/1-ktn-HKT8-Zg-IADpbe-Byv2bqg.webp" alt="AmericanMuscle.com — 04">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 04</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/RTWtsfgm/1-6-P6nlo-Usx-Jqv-WHG67-JAJv-A.webp" alt="AmericanMuscle.com — 05">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 05</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/YBC7JqBg/1-v-Vm5zfz2gh5g-PHlee-Wv-Kv-A.webp" alt="AmericanMuscle.com — 06">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 06</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/4w5mmGRp/1-a-NLx-Fbj-VHKc-GD9-Zcks-Rpx-Q.webp" alt="AmericanMuscle.com — 07">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 07</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/sv8nw0Dp/1-rqzz-Cscn-OIL96-Vm-Ln0v7d-A.webp" alt="AmericanMuscle.com — 08">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 08</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/NdwrPWfV/1-Na-ZV6rc-Ew-RT55p-R12-BY0jg.webp" alt="AmericanMuscle.com — 09">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 09</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/MxKZJ0hS/1-ljwaiez95-NFrl-Y-ua8-J5-LA.webp" alt="AmericanMuscle.com — 10">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 10</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/TMGkqSFt/1-0-Iydqh-Ls-CVQ-4-Kwv-Oovh-YA.webp" alt="AmericanMuscle.com — 11">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 11</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/xqVR22qF/1-6y6ra001c08hq-Iqwoauv9-Q.webp" alt="AmericanMuscle.com — 12">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 12</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/vCs4XwwY/1-H0-Ud-Exb-y-BPW1z-Fyi-C3bi-A.webp" alt="AmericanMuscle.com — 13">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 13</div>
-  </div>
-  <div class="fs-fullbleed">
-    <img src="https://i.ibb.co/fG0dXSr0/1-m7-Hfhu-QO4-Ugr1-Vte-Zf6it-A.webp" alt="AmericanMuscle.com — 14">
-    <div class="fs-fullbleed-caption">↓ AmericanMuscle.com — 14</div>
-  </div>
-
-  <div class="fs-narrative">
-    <div class="fs-narrative-label">↓ Holistic<br>Ownership.</div>
-    <div class="fs-narrative-body">Besides the UI+UX, I functioned as the product photographer. Having a holistic hand over photography, the website, and branding let me establish a <strong>cohesive design language</strong> throughout the site — essentially everything you see above, <strong>Raxiom logo included.</strong></div>
-  </div>
-
-  <footer>
-    <div><div class="foot-logo">Zack Gort</div></div>
-    <div class="foot-nav"><a data-nav="cs-power">← Power HRG</a><a data-nav="work">All Work</a><a data-nav="home">Home →</a></div>
-    <div class="foot-copy">© Zack Gort 2026</div>
-  </footer>
-
-</div><!-- /cs-wovn -->
-
 
 <script>
-  // CURSOR
-  const cur = document.getElementById('cursor');
-  document.addEventListener('mousemove', e => {
-    cur.style.left = e.clientX + 'px';
-    cur.style.top  = e.clientY + 'px';
-    cur.style.opacity = '1';
+  const TARGET = new Date('2026-08-10T00:00:00');
+
+  const units = [
+    { key: 'days',    label: 'Days',    digits: 3 },
+    { key: 'hours',   label: 'Hours',   digits: 2 },
+    { key: 'minutes', label: 'Mins',    digits: 2 },
+    { key: 'seconds', label: 'Secs',    digits: 2 },
+  ];
+
+  const odometer = document.getElementById('odometer');
+
+  function buildStrip(digit) {
+    const strip = document.createElement('div');
+    strip.className = 'digit-strip';
+    for (let i = 0; i < 10; i++) {
+      const s = document.createElement('span');
+      s.textContent = i;
+      strip.appendChild(s);
+    }
+    return strip;
+  }
+
+  const digitEls = {}; // key -> array of {window, strip}
+
+  units.forEach((u, idx) => {
+    const unitEl = document.createElement('div');
+    unitEl.className = 'unit';
+
+    const digitsEl = document.createElement('div');
+    digitsEl.className = 'digits';
+
+    digitEls[u.key] = [];
+
+    for (let d = 0; d < u.digits; d++) {
+      const win = document.createElement('div');
+      win.className = 'digit-window';
+      const strip = buildStrip();
+      win.appendChild(strip);
+      digitsEl.appendChild(win);
+      digitEls[u.key].push(strip);
+    }
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'unit-label';
+    labelEl.textContent = u.label;
+
+    unitEl.appendChild(digitsEl);
+    unitEl.appendChild(labelEl);
+    odometer.appendChild(unitEl);
+
+    if (idx < units.length - 1) {
+      const colon = document.createElement('div');
+      colon.className = 'colon';
+      colon.textContent = ':';
+      odometer.appendChild(colon);
+    }
   });
-  document.querySelectorAll('a, [data-nav], .wc, .cs-row, .h-nav-item').forEach(el => {
-    el.addEventListener('mouseenter', () => cur.classList.add('lg'));
-    el.addEventListener('mouseleave', () => cur.classList.remove('lg'));
-  });
 
-  // ROUTING
-  const cover = document.getElementById('cover');
-  const nav   = document.getElementById('nav');
-  let current = 'home';
+  function setDigit(strip, digit) {
+    strip.style.transform = `translateY(-${digit}em)`;
+  }
 
-  const navMode = {
-    home: 'dk', work: 'dk', about: 'lt',
-    'cs-bny': 'lt', 'cs-gnc': 'lt', 'cs-hardinge': 'lt',
-    'cs-kent': 'lt', 'cs-dana': 'lt', 'cs-power': 'dk', 'cs-wovn': 'dk'
-  };
+  function render() {
+    const now = new Date();
+    let diff = Math.max(0, TARGET - now);
 
-  function go(target) {
-    if (target === current) return;
-    const el = document.getElementById('view-' + target);
-    if (!el) return;
-    cover.style.transition = '';
-    cover.style.transform  = 'translateY(100%)';
-    cover.className = '';
-    void cover.offsetWidth;
-    cover.classList.add('in');
-    setTimeout(() => {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      el.classList.add('active');
-      window.scrollTo(0, 0);
-      nav.className = navMode[target] || 'lt';
-      document.querySelectorAll('.nav-links a').forEach(a => {
-        const t = a.getAttribute('data-nav');
-        a.classList.toggle('on', t === target || (target.startsWith('cs-') && t === 'work'));
+    if (diff <= 0) {
+      document.getElementById('board').classList.add('expired');
+      document.querySelector('h1').innerHTML = '<span>zackgort.com</span> has been retired.<br>Find everything at zack.cx now.';
+      document.getElementById('finePrint').innerHTML = 'This domain is no longer maintained. <strong>zack.cx</strong> is the current home for all work, writing, and contact info.';
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const values = { days, hours, minutes, seconds };
+
+    units.forEach(u => {
+      const str = String(values[u.key]).padStart(u.digits, '0');
+      digitEls[u.key].forEach((strip, i) => {
+        setDigit(strip, Number(str[i]));
       });
-      current = target;
-      el.querySelectorAll('.anim').forEach(a => { a.style.animation = 'none'; void a.offsetWidth; a.style.animation = ''; });
-      cover.classList.remove('in');
-      cover.classList.add('out');
-      setTimeout(() => {
-        cover.className = '';
-        cover.style.transform = 'translateY(100%)';
-        initReveal();
-      }, 650);
-    }, 520);
+    });
   }
 
-  document.addEventListener('click', e => {
-    const el = e.target.closest('[data-nav]');
-    if (el) { e.preventDefault(); const t = el.getAttribute('data-nav'); if (t) go(t); }
-  });
-
-  // SCROLL REVEAL
-  function initReveal() {
-    const els = document.querySelectorAll('.view.active .reveal');
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
-    }, { threshold: 0.08 });
-    els.forEach(el => { el.classList.remove('in'); obs.observe(el); });
-  }
-  initReveal();
-
-  // NAV SCROLL ADAPTATION
-  window.addEventListener('scroll', () => {
-    if (current === 'home') nav.className = window.scrollY > window.innerHeight * 0.85 ? 'lt' : 'dk';
-  });
+  render();
+  setInterval(render, 1000);
 </script>
+
 </body>
 </html>

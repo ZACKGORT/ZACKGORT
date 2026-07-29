@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>zackgort.com — moving to zack.cx</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,300;1,9..144,500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap');
 
   :root{
     --bg: #0b0b0a;
@@ -89,37 +90,59 @@
     color: var(--fg);
   }
 
-  h1 {
-    font-family: 'Archivo Black', sans-serif;
-    font-size: clamp(26px, 5vw, 38px);
-    line-height: 1.15;
-    margin: 18px 0 34px;
-    font-weight: 400;
-    letter-spacing: -0.01em;
+  .headline {
+    margin: 22px 0 36px;
   }
 
-  h1 span {
-    color: var(--accent);
-  }
-
-  a {
-    color: var(--accent);
-  }
-
-  h1 a {
+  .lead-line {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: clamp(19px, 3.2vw, 24px);
     color: var(--fg);
-    text-decoration: none;
-    background-image: linear-gradient(var(--accent), var(--accent));
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    background-size: 100% 2px;
-    padding-bottom: 2px;
-    transition: background-size 0.2s ease, color 0.2s ease;
+    letter-spacing: -0.005em;
   }
 
-  h1 a:hover {
+  .aside-line {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(17px, 2.8vw, 21px);
+    color: var(--muted);
+    margin: 6px 0 4px;
+  }
+
+  a { color: var(--accent); }
+
+  .pressure-link {
+    display: inline-block;
     color: var(--accent);
-    background-size: 100% 100%;
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent-dim);
+    padding-bottom: 4px;
+    transition: border-color 0.25s ease;
+    cursor: pointer;
+  }
+
+  .pressure-link:hover { border-color: var(--accent); }
+
+  .pressure-text {
+    font-family: 'Roboto Flex', sans-serif;
+    font-size: clamp(48px, 12vw, 92px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .pressure-text .px-char {
+    display: inline-block;
+    font-variation-settings: 'wght' 420, 'wdth' 90, 'opsz' 60;
+    transition: font-variation-settings 0.05s linear;
+  }
+
+  .pressure-arrow {
+    display: inline-block;
+    margin-left: 6px;
+    transform: translateY(-0.06em);
   }
 
   .fine-print a {
@@ -249,7 +272,7 @@
     font-family: 'IBM Plex Mono', monospace;
   }
 
-  .expired h1 span { color: #5fbf7a; }
+  .expired .pressure-link { color: #5fbf7a; border-color: #2f5a3c; }
   .expired .digit-window { border-color: #2a3a2c; }
 
   @media (max-width: 420px) {
@@ -273,7 +296,13 @@
       <span class="new-domain">zack.cx</span>
     </div>
 
-    <h1>zackgort.com to be <span>decommissioned.</span><br><br>now, just <a href="https://www.zack.cx">zack.cx</a></h1>
+    <div class="headline">
+      <div class="lead-line">zackgort.com is retiring.</div>
+      <div class="aside-line">everything moves to</div>
+      <a class="pressure-link" href="https://www.zack.cx" id="pressureLink" aria-label="Go to zack.cx">
+        <span class="pressure-text" id="pressureText"></span><span class="pressure-arrow">→</span>
+      </a>
+    </div>
 
     <div class="odometer" id="odometer">
       <!-- filled by JS -->
@@ -361,9 +390,10 @@
     const now = new Date();
     let diff = Math.max(0, TARGET - now);
 
-    if (diff <= 0) {
+    if (diff <= 0 && !document.getElementById('board').classList.contains('expired')) {
       document.getElementById('board').classList.add('expired');
-      document.querySelector('h1').innerHTML = '<span>zackgort.com</span> has been retired.<br>Find everything at zack.cx now.';
+      document.querySelector('.lead-line').textContent = 'zackgort.com has been retired.';
+      document.querySelector('.aside-line').textContent = 'everything now lives at';
       document.getElementById('finePrint').innerHTML = 'This domain is no longer maintained. <strong>zack.cx</strong> is the current home for all work, writing, and contact info.';
     }
 
@@ -385,6 +415,70 @@
 
   render();
   setInterval(render, 1000);
+
+  // --- pressure text: letters gain weight/width as a cursor (real or idle) nears them ---
+  (function initPressureText() {
+    const word = 'zack.cx';
+    const host = document.getElementById('pressureText');
+    const chars = [];
+
+    [...word].forEach(ch => {
+      const span = document.createElement('span');
+      span.className = 'px-char';
+      span.textContent = ch;
+      host.appendChild(span);
+      chars.push(span);
+    });
+
+    const MIN_WGHT = 380, MAX_WGHT = 900;
+    const MIN_WDTH = 88, MAX_WDTH = 145;
+    const RADIUS = 140;
+
+    let pointerX = null, pointerY = null;
+    let usingPointer = false;
+    let idleT = 0;
+
+    function apply(x, y) {
+      chars.forEach(c => {
+        const r = c.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dist = Math.hypot(x - cx, y - cy);
+        const t = Math.max(0, 1 - dist / RADIUS);
+        const wght = Math.round(MIN_WGHT + t * (MAX_WGHT - MIN_WGHT));
+        const wdth = Math.round(MIN_WDTH + t * (MAX_WDTH - MIN_WDTH));
+        c.style.fontVariationSettings = `'wght' ${wght}, 'wdth' ${wdth}, 'opsz' 60`;
+      });
+    }
+
+    function idleStep() {
+      if (!usingPointer && chars.length) {
+        const r = host.getBoundingClientRect();
+        idleT += 0.028;
+        const sweep = (Math.sin(idleT) + 1) / 2; // 0..1
+        const x = r.left + sweep * r.width;
+        const y = r.top + r.height / 2;
+        apply(x, y);
+      }
+      requestAnimationFrame(idleStep);
+    }
+
+    window.addEventListener('mousemove', e => {
+      usingPointer = true;
+      apply(e.clientX, e.clientY);
+    });
+
+    window.addEventListener('mouseleave', () => { usingPointer = false; });
+
+    // if there's no real pointer activity for a bit (e.g. touch devices), fall back to idle sweep
+    let idleTimer = setTimeout(() => { usingPointer = false; }, 1200);
+    window.addEventListener('mousemove', () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => { usingPointer = false; }, 1200);
+    });
+
+    requestAnimationFrame(idleStep);
+  })();
 </script>
 
 </body>
